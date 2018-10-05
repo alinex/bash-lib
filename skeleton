@@ -1,0 +1,23 @@
+#!/bin/bash
+
+# Script to....
+#
+# https://gitlab.ekz.de/divibib-betrieb/helper-lib/blob/master/doc/skeleton.md
+#
+# Usage: skeleton <params>
+#
+# The skeleton is used as a base to make your own scripts.
+
+### Setup
+
+# set default values
+
+# change into command directory
+cd "$( dirname "${BASH_SOURCE[0]}" )"
+# load libraries
+source ../helper-lib/locking
+
+### Argument checks
+
+
+### Running....

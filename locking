@@ -1,12 +1,17 @@
 #!/bin/bash
 
+# Library to serialize parallel tasks
+#
+# https://gitlab.ekz.de/divibib-betrieb/helper-lib/blob/master/doc/locking.md
+#
 # Usage:
 #
-# source ./locking  # load functions
-# lock <lockfile>   # create the lock
-# unlock <lockfile> # remove the lock
+# source ../helper-lib/locking  # load functions
+# lockfile=<file mostly in tmp folder>
+# lock $lockfile   # create the lock
+# unlock $lockfile # remove the lock
 #
-# The second script will wait till the lock is released.
+# The second process which want to set the lock will wait till the lock is released.
 
 function lock {
     if [ "$#" -ne 1 ]; then
