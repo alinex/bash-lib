@@ -10,21 +10,21 @@
 
 function lock {
     if [ "$#" -ne 1 ]; then
-        echo 'usage: lock [LOCKFILENAME]' 1>&2
+        echo 'lib:lock: incorrect library call use: lock [LOCKFILENAME]' 1>&2
         return 1
     fi
 
-    LOCKFILE="$1"
+    local lockfile="$1"
 
     # make a file with our PID
     # easy way to show who's waiting for a lock
-    if ! touch "$LOCKFILE.$$" ; then
-        echo "failed to create PID lockfile: $1" 1>&2
+    if ! touch "$lockfile.$$" ; then
+        echo "lib:lock: failed to create PID lockfile: $1" 1>&2
         return 1
     fi
 
     # try to symlink it
-    while ! ln "$LOCKFILE.$$" "$LOCKFILE" 2>/dev/null
+    while ! ln "$lockfile.$$" "$lockfile" 2>/dev/null
     do
         # if the symlink failed, wait for the current lock holder to exit
         sleep 1
@@ -33,7 +33,7 @@ function lock {
     # symlink was created successfully, lock acquired
 
     # if the locking process exits with unlocking, delete our lock
-    trap 'rm -f "$LOCKFILE" "$LOCKFILE.$$"' EXIT
+    trap 'rm -f "$lockfile" "$lockfile.$$"' EXIT
 
     return 0
 }
@@ -41,12 +41,12 @@ function lock {
 
 function unlock {
     if [ "$#" -ne 1 ]; then
-        echo 'usage: unlock [LOCKFILENAME]' 1>&2
+        echo 'lib:lock: incorrect library call use: unlock [LOCKFILENAME]' 1>&2
         return 2
     fi
 
-    rm -f "$LOCKFILE" # the symlink that locks are competing for
-    rm -f "$LOCKFILE.$$"
+    rm -f "$lockfile" # the symlink that locks are competing for
+    rm -f "$lockfile.$$"
 
     return 0
 }
