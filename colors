@@ -1,42 +1,48 @@
 #!/bin/bash
 
-# Library to setup color variables
+# Library for colorized output
 #
-# https://gitlab.ekz.de/divibib-betrieb/helper-lib/blob/master/doc/color.md
+# https://gitlab.ekz.de/divibib-betrieb/helper-lib/blob/master/doc/colors.md
 #
 # Usage:
 #
-# source ../helper-lib/colors  # load variables
-# echo -e "${RED}Failed${RESET}"
+# source ../helper-lib/colors  # load color methods
+# red "Failed"
+# echo "$(red)Failed$(reset)"
+# echo "$(red Failed)"
 
-# Escape sequence and resets
-ESC_SEQ="\x1b["
-RESET="${ESC_SEQ}0m"
+# Helper
+_color_text() {
+    [ $# -gt 0 ] || return
+    echo -n $@
+    tput sgr0;
+}
 
-# Colors
-BLACK="${ESC_SEQ}30m"
-RED="${ESC_SEQ}31m"
-GREEN="${ESC_SEQ}32m"
-YELLOW="${ESC_SEQ}33m"
-BLUE="${ESC_SEQ}34m"
-MAGENTA="${ESC_SEQ}35m"
-CYAN="${ESC_SEQ}36m"
-WHITE="${ESC_SEQ}37m"
+# Foreground color
+black() { tput setaf 0; _color_text $@; }
+red() { tput setaf 1; _color_text $@; }
+green() { tput setaf 2; _color_text $@; }
+yellow() { tput setaf 3; _color_text $@; }
+blue() { tput setaf 4; _color_text $@; }
+magenta() { tput setaf 5; _color_text $@; }
+cyan() { tput setaf 6; _color_text $@; }
+white() { tput setaf 7; _color_text $@; }
 
-# Background colors (optional)
-BG_BLACK="${ESC_SEQ}40m"
-BG_RED="${ESC_SEQ}41m"
-BG_GREEN="${ESC_SEQ}42m"
-BG_YELLOW="${ESC_SEQ}43m"
-BG_BLUE="${ESC_SEQ}44m"
-BG_MAGENTA="${ESC_SEQ}45m"
-BG_CYAN="${ESC_SEQ}46m"
-BG_WHITE="${ESC_SEQ}47m"
+# Background color
+bg_black() { tput setab 0; _color_text $@; }
+bg_red() { tput setab 1; _color_text $@; }
+bg_green() { tput setab 2; _color_text $@; }
+bg_yellow() { tput setab 3; _color_text $@; }
+bg_blue() { tput setab 4; _color_text $@; }
+bg_magenta() { tput setab 5; _color_text $@; }
+bg_cyan() { tput setab 6; _color_text $@; }
+bg_white() { tput setab 7; _color_text $@; }
 
-# Font styles
-BOLD="${ESC_SEQ}1m"
-NORMAL="${ESC_SEQ}2m"
-ITALIC="${ESC_SEQ}3m"
-UNDERLINE="${ESC_SEQ}4m"
-BLINK="${ESC_SEQ}5m"
-INVERT="${ESC_SEQ}7m"
+# Styles
+bold() { tput bold; _color_text $@; }
+underline() { tput smul; _color_text $@; }
+inverse() { tput rev; _color_text $@; }
+dim() { tput dim; _color_text $@; }
+
+# Reset
+reset() { tput sgr0; }

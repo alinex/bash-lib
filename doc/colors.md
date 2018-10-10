@@ -1,45 +1,58 @@
-# Color Variables
+# Color Output
 
 Setup color variables to be used in bash scripts for formatting.
 
 ## Usage
 
+First you have to load the library:
+
 ```bash
-source ../helper-lib/colors  # load variables
-echo -e "${RED}Failed${RESET}"
+source ../helper-lib/colors  # load color methods
 ```
 
-## List of Variables
+Now you can use colorized output in different ways:
 
-- `RESET` to end all formatting and fall back to default
+```bash
+red "Direct ouput without newline"
+echo "$(red 'output with newline')"
+x=$(red "load colorized into variable")
+x="manually switch $(red)on$(reset) and off"
+```
 
-Text colors:
+Above you see the different possibilities to use.
 
-- `BLACK`
-- `RED`
-- `GREEN`
-- `YELLOW`
-- `BLUE`
-- `MAGENTA`
-- `CYAN`
-- `WHITE`
+1. **Format text** if a text is given and end the style after it
+2. **Only start style** if called without arguments
 
-Background colors:
+## Foreground color
 
-- `BG_BLACK`
-- `BG_RED`
-- `BG_GREEN`
-- `BG_YELLOW`
-- `BG_BLUE`
-- `BG_MAGENTA`
-- `BG_CYAN`
-- `BG_WHITE`
+- `black`
+- `red`
+- `green`
+- `yellow`
+- `blue`
+- `magenta`
+- `cyan`
+- `white`
 
-Font styles:
+# Background color
 
-- `BOLD`
-- `NORMAL`
-- `ITALIC`
-- `UNDERLINE`
-- `BLINK`
-- `INVERT`
+- `bg_black`
+- `bg_red`
+- `bg_green`
+- `bg_yellow`
+- `bg_blue`
+- `bg_magenta`
+- `bg_cyan`
+- `bg_white`
+
+## Styles
+
+- `bold`
+- `underline`
+- `inverse`
+- `dim`
+
+## Reset
+
+- `reset`
