@@ -13,19 +13,18 @@
 #
 # The second process which want to set the lock will wait till the lock is released.
 
+source_dir=$(dirname "${BASH_SOURCE[0]}")
+source "$source_dir/errors" # load error handler
+
 function lock {
-    if [ "$#" -ne 1 ]; then
-        echo 'lib:lock: incorrect library call use: lock [LOCKFILENAME]' 1>&2
-        return 1
-    fi
+    [ "$#" -ne 1 ] && exit_message "lib:lock: incorrect library call use: lock [LOCKFILENAME]" 1>&2
 
     local lockfile="$1"
 
     # make a file with our PID
     # easy way to show who's waiting for a lock
     if ! touch "$lockfile.$$" ; then
-        echo "lib:lock: failed to create PID lockfile: $1" 1>&2
-        return 1
+        exit_message "lib:lock: failed to create PID lockfile: $lockfile.$$"
     fi
 
     # try to symlink it
@@ -43,12 +42,8 @@ function lock {
     return 0
 }
 
-
 function unlock {
-    if [ "$#" -ne 1 ]; then
-        echo 'lib:lock: incorrect library call use: unlock [LOCKFILENAME]' 1>&2
-        return 2
-    fi
+    [ "$#" -ne 1 ] && exit_message "lib:lock: incorrect library call use: unlock [LOCKFILENAME]" 1>&2
 
     rm -f "$lockfile" # the symlink that locks are competing for
     rm -f "$lockfile.$$"

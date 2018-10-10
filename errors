@@ -9,10 +9,15 @@
 # source ../helper-lib/errors  # load error handler
 # error_message "Invalid setup, stopping!", -1
 
-# Usage: error_message <string> <code>
-function error_message {
-    echo "$1" >&2   # Send message to stderr. Exclude >&2 if you don't want it that way.
-    code="${2:-1}"
-    [ $code = "0" ] || exit $code # don't exit on code == 0
-}
+source_dir=$(dirname "${BASH_SOURCE[0]}")
+source "$source_dir/colors" # load color methods
 
+# Usage: error_message <string> <code>
+error_message() {
+    echo "$(red)$(bold)$1$(reset)" >&2   # Send message to STDERR
+}
+exit_message() {
+    error_message $1
+    code="${2:-1}"
+    exit $code
+}
