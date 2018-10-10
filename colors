@@ -1,0 +1,42 @@
+#!/bin/bash
+
+# Library to setup color variables
+#
+# https://gitlab.ekz.de/divibib-betrieb/helper-lib/blob/master/doc/color.md
+#
+# Usage:
+#
+# source ../helper-lib/colors  # load variables
+# echo -e "${RED}Failed${RESET}"
+
+# Escape sequence and resets
+ESC_SEQ="\x1b["
+RESET="${ESC_SEQ}0m"
+
+# Colors
+BLACK="${ESC_SEQ}30m"
+RED="${ESC_SEQ}31m"
+GREEN="${ESC_SEQ}32m"
+YELLOW="${ESC_SEQ}33m"
+BLUE="${ESC_SEQ}34m"
+MAGENTA="${ESC_SEQ}35m"
+CYAN="${ESC_SEQ}36m"
+WHITE="${ESC_SEQ}37m"
+
+# Background colors (optional)
+BG_BLACK="${ESC_SEQ}40m"
+BG_RED="${ESC_SEQ}41m"
+BG_GREEN="${ESC_SEQ}42m"
+BG_YELLOW="${ESC_SEQ}43m"
+BG_BLUE="${ESC_SEQ}44m"
+BG_MAGENTA="${ESC_SEQ}45m"
+BG_CYAN="${ESC_SEQ}46m"
+BG_WHITE="${ESC_SEQ}47m"
+
+# Font styles
+BOLD="${ESC_SEQ}1m"
+NORMAL="${ESC_SEQ}2m"
+ITALIC="${ESC_SEQ}3m"
+UNDERLINE="${ESC_SEQ}4m"
+BLINK="${ESC_SEQ}5m"
+INVERT="${ESC_SEQ}7m"
