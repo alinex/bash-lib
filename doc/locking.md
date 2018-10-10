@@ -3,7 +3,7 @@
 This methods will help you to lock a special process that it can't run in parallel.
 If the same lock is used another time in another process or sub process it will wait till the first one releases the flag. You have to give a lock file path to be used as flag.
 
-# Usage
+## Usage
 
 First you have to include this helper in your bash script:
 

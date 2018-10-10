@@ -2,14 +2,14 @@
 
 Setup color variables to be used in bash scripts for formatting.
 
-# Usage
+## Usage
 
 ```bash
 source ../helper-lib/colors  # load variables
 echo -e "${RED}Failed${RESET}"
 ```
 
-# List of Variables
+## List of Variables
 
 - `RESET` to end all formatting and fall back to default
 
