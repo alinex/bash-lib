@@ -7,3 +7,4 @@ The following helper libraries are contained:
 - [skeleton](skeleton.md) is used as template to create new scripts
 - [locking](locking.md) to serialize parallel tasks
 - [colors](colors.md) predefined color variables
+- [errors](errors.md) error handler
