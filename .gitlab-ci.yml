@@ -4,8 +4,16 @@ test:
     - npm install -g bats
     - bats test -t
 
+#lint1:
+#  image: koalaman/shellcheck:stable
+#  script:
+#    - echo include/*
+#    - shellcheck include/colors.bash
+
 lint:
-  image: koalaman/shellcheck:stable
+  image: debian/latest
+  before_script:
+    - apt-get update
+    - apt-get -y install shellcheck
   script:
-    - echo include/*
     - shellcheck include/colors.bash
