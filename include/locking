@@ -16,7 +16,7 @@
 source_dir=$(dirname "${BASH_SOURCE[0]}")
 source "$source_dir/errors" # load error handler
 
-function lock {
+lock() {
     [ "$#" -ne 1 ] && exit_message "lib:lock: incorrect library call use: lock [LOCKFILENAME]" 1>&2
 
     local lockfile="$1"
@@ -37,12 +37,13 @@ function lock {
     # symlink was created successfully, lock acquired
 
     # if the locking process exits with unlocking, delete our lock
-    trap 'rm -f "$lockfile" "$lockfile.$$"' EXIT
+    #trap 'rm -f "$lockfile" "$lockfile.$$"' EXIT
+    trap 'unlock $lockfile' EXIT
 
     return 0
 }
 
-function unlock {
+unlock() {
     [ "$#" -ne 1 ] && exit_message "lib:unlock: incorrect library call use: unlock [LOCKFILENAME]" 1>&2
 
     rm -f "$lockfile" || exit_message "lib:unlock: failed to remove lockfile: $lockfile"

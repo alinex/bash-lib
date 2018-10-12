@@ -20,3 +20,15 @@ source "$source_dir/bash-lib/include/colors"
 To use them from out of a git repository you have to copy the code to the machine. This will often be in `/opt` or `/opt/divibib/` and included from your scripts with it's absolute path.
 
 To easily call the contained programs you may add `/opt/bash-lib` to the search path.
+
+## Programs
+
+- [sendmail](sendmail.md) is a simple SMTP mailer
+- [ts](ts.md) is a filter to add timestamp to the output
+
+## Libraries
+
+- [skeleton](skeleton.md) is used as template to create new scripts
+- [locking](locking.md) to serialize parallel tasks
+- [colors](colors.md) predefined color variables
+- [errors](errors.md) error handler
