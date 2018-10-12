@@ -4,7 +4,7 @@ To use this libraries best practice is to checkout them into a parallel director
 
 Programs:
 
-- [sendmail](sendmail.md) is a simple smtp mailer
+- [sendmail](sendmail.md) is a simple SMTP mailer
 - [ts](ts.md) is a filter to add timestamp to the output
 
 Libraries:

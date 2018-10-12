@@ -43,10 +43,10 @@ function lock {
 }
 
 function unlock {
-    [ "$#" -ne 1 ] && exit_message "lib:lock: incorrect library call use: unlock [LOCKFILENAME]" 1>&2
+    [ "$#" -ne 1 ] && exit_message "lib:unlock: incorrect library call use: unlock [LOCKFILENAME]" 1>&2
 
-    rm -f "$lockfile" # the symlink that locks are competing for
-    rm -f "$lockfile.$$"
+    rm -f "$lockfile" || exit_message "lib:unlock: failed to remove lockfile: $lockfile"
+    rm -f "$lockfile.$$" || exit_message "lib:unlock: failed to remove PID lockfile: $lockfile.$$"
 
     return 0
 }
