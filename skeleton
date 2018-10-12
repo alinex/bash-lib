@@ -15,7 +15,7 @@
 # change into command directory
 cd "$( dirname "${BASH_SOURCE[0]}" )"
 # load libraries
-source ../bash-lib/include/locking
+source ../bash-lib/include/log
 
 ### Argument checks
 

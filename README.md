@@ -30,5 +30,5 @@ To easily call the contained programs you may add `/opt/bash-lib` to the search 
 
 - [skeleton](doc/skeleton.md) is used as template to create new scripts
 - [locking](doc/locking.md) to serialize parallel tasks
+- [log](doc/log.md) log handler to write to file, STDERR or syslog
 - [colors](doc/colors.md) predefined color variables
-- [errors](doc/errors.md) error handler

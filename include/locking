@@ -21,17 +21,17 @@ source "$source_dir/errors" # load error handler
 # parameter:
 # - lockfile path
 lock() {
-    [ "$#" -ne 1 ] && exit_message "lock: incorrect library call use: lock <lockfile>"
+    [ "$#" -ne 1 ] && log_exit ALERT "incorrect library call use: lock <lockfile>"
 
     local lockfile="$1"
 
     # make a file with our PID
-    echo $$ > "$lockfile.$$" 2>/dev/null || exit_message "lock: failed to create PID lockfile: $lockfile.$$"
+    echo $$ > "$lockfile.$$" 2>/dev/null || log_exit ALERT "failed to create PID lockfile: $lockfile.$$"
 
     # remove old locks for non existing processes
     if [ -e "$lockfile" ] ; then
-        pid=$(cat $lockfile || exit_message "exit_lock: could not read lockfile $lockfile")
-        kill -0 $pid 2>/dev/null || rm -f "$lockfile" || exit_message "unlock: failed to remove lockfile: $lockfile"
+        pid=$(cat $lockfile || log_exit ALERT "could not read lockfile $lockfile")
+        kill -0 $pid 2>/dev/null || rm -f "$lockfile" || log_exit ALERT "failed to remove lockfile: $lockfile"
     fi
 
     # try to symlink it
@@ -55,7 +55,7 @@ lock() {
 # - error-message (optional)
 # - error-code (optional)
 exit_lock() {
-    [ "$#" -lt 1 ] && exit_message "exit_lock: incorrect library call use: exit_lock <lockfile> [<error message>] [<exit code>]"
+    [ "$#" -lt 1 ] && log_exit ALERT "incorrect library call use: exit_lock <lockfile> [<error message>] [<exit code>]"
 
     local lockfile="$1"
     local default="Stop processing because this is locked in $lockfile by $pid"
@@ -64,8 +64,8 @@ exit_lock() {
 
     # check for existing lock
     if [ -e "$lockfile" ] ; then
-        pid=$(cat $lockfile || exit_message "exit_lock: could not read lockfile $lockfile" $exit_code)
-        exit_message $message
+        pid=$(cat $lockfile || log_exit ALERT "could not read lockfile $lockfile" $exit_code)
+        log_exit NOTICE $message
     fi
 
     lock $lockfile
@@ -76,7 +76,7 @@ exit_lock() {
 # parameter:
 # - lockfile path
 unlock() {
-    [ "$#" -ne 1 ] && exit_message "unlock: incorrect library call use: unlock <lockfile>"
+    [ "$#" -ne 1 ] && log_exit ALERT "incorrect library call use: unlock <lockfile>"
 
     local lockfile="$1"
 
@@ -84,13 +84,13 @@ unlock() {
     trap - EXIT
 
     # remove the lock files
-    rm -f "$lockfile.$$" || exit_message "unlock: failed to remove PID lockfile: $lockfile.$$"
+    rm -f "$lockfile.$$" || log_exit ALERT "failed to remove PID lockfile: $lockfile.$$"
     if [ -e "$lockfile" ] ; then
-        pid=$(cat $lockfile || exit_message "unlock: could not read lockfile $lockfile")
+        pid=$(cat $lockfile || log_exit ALERT "could not read lockfile $lockfile")
         if [ "$pid" -eq "$$" ]; then
-            rm -f "$lockfile" || exit_message "unlock: failed to remove lockfile: $lockfile"
+            rm -f "$lockfile" || log_exit ALERT "failed to remove lockfile: $lockfile"
         else
-            exit_message "unlock: could not remove lockfile because it is set from another process"
+            log_exit ALERT "could not remove lockfile because it is set from another process"
         fi
     fi
 

@@ -1,0 +1,166 @@
+#!/bin/bash
+
+# Log library
+#
+# https://gitlab.ekz.de/divibib-betrieb/bash-lib/blob/master/doc/log.md
+#
+# Usage:
+#
+# source ../bash-lib/include/log  # load functions
+# log $message $file
+
+source_dir=$(dirname "${BASH_SOURCE[0]}")
+source "$source_dir/colors" # load color methods
+
+# Log levels are taken from python and RFC 5424.
+declare -A _log_level
+# These are the python numeric log levels, with the addition
+# of RFC 5424 levels. The RFC 5424 levels have been given
+# numbers to sequence them with the python levels.
+_log_level[DEBUG]=10
+_log_level[INFO]=20
+_log_level[NOTICE]=25 # RFC 5424 specific
+_log_level[WARN]=30
+_log_level[WARNING]=30
+_log_level[ERR]=40
+_log_level[ERROR]=40
+_log_level[CRIT]=50
+_log_level[CRITICAL]=50
+_log_level[ALERT]=60 # RFC 5424 specific
+_log_level[EMERG]=70 # RFC 5424 specific
+_log_level[EMERGENCY]=70 # RFC 5424 specific
+declare -r _log_level
+
+declare -A _log_color
+# These are the python numeric log levels, with the addition
+# of RFC 5424 levels. The RFC 5424 levels have been given
+# numbers to sequence them with the python levels.
+_log_color[DEBUG]="$(dim)"
+_log_color[INFO]=""
+_log_color[NOTICE]="$(green)" # RFC 5424 specific
+_log_color[WARN]="$(yellow)"
+_log_color[WARNING]="$(yellow)"
+_log_color[ERR]="$(red)"
+_log_color[ERROR]="$(red)"
+_log_color[CRIT]="$(red)$(bold)"
+_log_color[CRITICAL]="$(red)$(bold)"
+_log_color[ALERT]="$(red)$(bold)$(inverse)" # RFC 5424 specific
+_log_color[EMERG]="$(red)$(bold)$(inverse)" # RFC 5424 specific
+_log_color[EMERGENCY]="$(red)$(bold)$(inverse)" # RFC 5424 specific
+declare -r _log_color
+
+# These are the RFC 5424 numeric severity levels.
+declare -A _syslog_severity
+_syslog_severity[DEBUG]=7
+_syslog_severity[INFO]=6
+_syslog_severity[NOTICE]=5
+_syslog_severity[WARN]=4
+_syslog_severity[WARNING]=4
+_syslog_severity[ERR]=3
+_syslog_severity[ERROR]=3
+_syslog_severity[CRIT]=2
+_syslog_severity[CRITICAL]=2
+_syslog_severity[ALERT]=1
+_syslog_severity[EMERG]=0
+_syslog_severity[EMERGENCY]=0
+declare -r bl_syslog_severity
+
+# close descriptor#7 used for output
+trap '7>&-' EXIT
+
+# Set defaults if variables have not been specified
+LOG_TAG=${LOG_TAG:-$(basename $0)}
+LOG_DATE_FORMAT=${LOG_DATE_FORMAT:-"+%Y-%m-%d %H:%M"}
+LOG_LEVEL=${LOG_LEVEL:-INFO}
+
+# check for valid log level
+if [ -z "${_log_level[$LOG_LEVEL]}" ]; then
+    red "\"$LOG_LEVEL\" is not a valid LOG_LEVEL at line ${BASH_LINENO[0]}. Defaulting to \"INFO\"." >&2
+    LOG_LEVEL="INFO"
+fi
+declare -r LOG_LEVEL
+
+# check destination setting
+if [ -z "$LOG_FILE" ] && [ -z "$SYSLOG_FACILITY" ]; then
+#    echo red "You must specify a LOG_FILE path or SYSLOG_FACILITY name." >&2
+#    echo "Logging to STDERR by default." >&2
+    LOG_FILE='STDERR'
+fi
+if [ -n "$LOG_FILE" ] && [ -n "$SYSLOG_FACILITY" ]; then
+    red "You must specify a LOG_FILE path or SYSLOG_FACILITY name, but not both." >&2
+    red "Logging to STDERR by default." >&2
+    LOG_FILE='STDERR'
+fi
+
+if [ -n "$LOG_FILE" ]; then
+    # check if file logging is possible
+    if [ "$LOG_FILE" != "STDERR" ]; then
+        touch "$LOG_FILE" 2>&1
+        if [ $? -ne 0 ]; then
+            red "Could not create $LOG_FILE." >&2
+            red "Logging to STDERR by default." >&2
+            LOG_FILE="STDERR"
+        fi
+    fi
+    # set output handle
+    if [ "$LOG_FILE" != "STDERR" ]; then
+        exec 7>> $LOG_FILE
+    else
+        exec 7>&2
+    fi
+else
+    # setup syslog
+    if [[ "$SYSLOG_FACILITY" != local[0-7] ]]; then
+        red "Only facilities local0 through local7 are supported for syslog." >&2
+        red "Logging to local0 by default." >&2
+        SYSLOG_FACILITY='local0'
+    fi
+    SYSLOG_FACILITY=$SYSLOG_FACILITY
+fi
+declare -r LOG_FILE
+declare -r SYSLOG_FACILITY
+
+# log <level> <message>
+log () {
+
+    IFS=$'\n'
+
+    # check message level
+    declare -u message_level=$1
+    if [ -z "${_log_level[$message_level]}" ]; then
+        red "\"${message_level}\" is not a valid MESSAGE_LOG_LEVEL at line ${BASH_LINENO[0]}. Defaulting to \"INFO\"." >&2
+        message_level="INFO"
+    fi
+
+    local message=$2
+    local message_date=$(date "${LOG_DATE_FORMAT}")
+
+    local max_log_level=${_log_level[$LOG_LEVEL]}
+    if [ ${_log_level[$message_level]} -ge $max_log_level ]; then
+        if [ -n "$SYSLOG_FACILITY" ]; then
+            for line in $message; do
+                logger -i \
+                    -t "$LOG_TAG" \
+                    -p "${SYSLOG_FACILITY}.${_syslog_severity[$message_level]}" \
+                    "$message_level: $line"
+            done
+        else
+            for line in $message; do
+                printf -v output "${_log_color[$message_level]}%s %s[%s] %s: %s$(reset)" \
+                    "$message_date" \
+                    "$LOG_TAG" \
+                    "$$" \
+                    "$message_level" \
+                    "$line"
+                echo "$output" >&7
+            done
+        fi
+    fi
+
+}
+
+log_exit() {
+    log $1 $2
+    local code="${3:-1}"
+    exit $code
+}
