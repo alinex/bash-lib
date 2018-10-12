@@ -10,7 +10,6 @@
 # log $message $file
 
 source_dir=$(dirname "${BASH_SOURCE[0]}")
-# shellcheck source=/dev/null
 source "$source_dir/colors.bash" # load color methods
 
 # Log levels are taken from python and RFC 5424.
@@ -20,15 +19,15 @@ declare -A _log_level
 # numbers to sequence them with the python levels.
 _log_level[DEBUG]=10
 _log_level[INFO]=20
-_log_level[NOTICE]=25 # RFC 5424 specific
+_log_level[NOTICE]=25   # RFC 5424 specific
 _log_level[WARN]=30
 _log_level[WARNING]=30
 _log_level[ERR]=40
 _log_level[ERROR]=40
 _log_level[CRIT]=50
 _log_level[CRITICAL]=50
-_log_level[ALERT]=60 # RFC 5424 specific
-_log_level[EMERG]=70 # RFC 5424 specific
+_log_level[ALERT]=60    # RFC 5424 specific
+_log_level[EMERG]=70    # RFC 5424 specific
 _log_level[EMERGENCY]=70 # RFC 5424 specific
 declare -r _log_level
 

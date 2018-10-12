@@ -15,7 +15,6 @@
 # The second process which want to set the lock will wait till the lock is released.
 
 source_dir=$(dirname "${BASH_SOURCE[0]}")
-# shellcheck source=/dev/null
 source "$source_dir/errors.bash" # load error handler
 
 # set a lock or wait till it can be set
