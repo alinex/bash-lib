@@ -11,7 +11,7 @@ test:
 #    - shellcheck include/colors.bash
 
 lint:
-  image: debian/latest
+  image: debian:stretch
   before_script:
     - apt-get update
     - apt-get -y install shellcheck
