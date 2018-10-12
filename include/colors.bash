@@ -13,7 +13,7 @@
 
 # Helper
 _color_text() {
-    [ $# -gt 0 ] || return
+    [ -z "$1" ] && return
     echo -n "$1"
     tput sgr0;
 }

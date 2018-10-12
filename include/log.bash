@@ -10,7 +10,7 @@
 # log $message $file
 
 source_dir=$(dirname "${BASH_SOURCE[0]}")
-# shellcheck source=include/colors.bash
+# shellcheck source=/dev/null
 source "$source_dir/colors.bash" # load color methods
 
 # Log levels are taken from python and RFC 5424.
