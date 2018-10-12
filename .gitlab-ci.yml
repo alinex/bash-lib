@@ -1,4 +1,4 @@
-image: bats:latest
+image: bats/bats:latest
 
 test:
   script:
