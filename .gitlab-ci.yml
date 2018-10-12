@@ -2,5 +2,5 @@ image: node:latest
 
 test:
   script:
-    - npm -g bats
+    - npm install -g bats
     - bats test -t
