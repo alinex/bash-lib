@@ -9,6 +9,7 @@
 # source ../bash-lib/include/locking  # load functions
 # lockfile=<file mostly in tmp folder>
 # lock $lockfile   # create the lock
+# exit_lock $lockfile   # ... and exit if already locked
 # unlock $lockfile # remove the lock
 #
 # The second process which want to set the lock will wait till the lock is released.
@@ -16,15 +17,21 @@
 source_dir=$(dirname "${BASH_SOURCE[0]}")
 source "$source_dir/errors" # load error handler
 
+# set a lock or wait till it can be set
+# parameter:
+# - lockfile path
 lock() {
-    [ "$#" -ne 1 ] && exit_message "lib:lock: incorrect library call use: lock [LOCKFILENAME]" 1>&2
+    [ "$#" -ne 1 ] && exit_message "lock: incorrect library call use: lock <lockfile>"
 
     local lockfile="$1"
 
     # make a file with our PID
-    # easy way to show who's waiting for a lock
-    if ! touch "$lockfile.$$" ; then
-        exit_message "lib:lock: failed to create PID lockfile: $lockfile.$$"
+    echo $$ > "$lockfile.$$" 2>/dev/null || exit_message "lock: failed to create PID lockfile: $lockfile.$$"
+
+    # remove old locks for non existing processes
+    if [ -e "$lockfile" ] ; then
+        pid=$(cat $lockfile || exit_message "exit_lock: could not read lockfile $lockfile")
+        kill -0 $pid 2>/dev/null || rm -f "$lockfile" || exit_message "unlock: failed to remove lockfile: $lockfile"
     fi
 
     # try to symlink it
@@ -33,21 +40,59 @@ lock() {
         # if the symlink failed, wait for the current lock holder to exit
         sleep 1
     done
-
     # symlink was created successfully, lock acquired
 
-    # if the locking process exits with unlocking, delete our lock
+    # if the locking process exits without unlocking, delete our lock
     #trap 'rm -f "$lockfile" "$lockfile.$$"' EXIT
     trap 'unlock $lockfile' EXIT
 
     return 0
 }
 
-unlock() {
-    [ "$#" -ne 1 ] && exit_message "lib:unlock: incorrect library call use: unlock [LOCKFILENAME]" 1>&2
+# set the lock or exit with optional error message
+# parameter:
+# - lockfile path
+# - error-message (optional)
+# - error-code (optional)
+exit_lock() {
+    [ "$#" -lt 1 ] && exit_message "exit_lock: incorrect library call use: exit_lock <lockfile> [<error message>] [<exit code>]"
 
-    rm -f "$lockfile" || exit_message "lib:unlock: failed to remove lockfile: $lockfile"
-    rm -f "$lockfile.$$" || exit_message "lib:unlock: failed to remove PID lockfile: $lockfile.$$"
+    local lockfile="$1"
+    local default="Stop processing because this is locked in $lockfile by $pid"
+    local message="${2:-$default}"
+    local exit_code="$3"
+
+    # check for existing lock
+    if [ -e "$lockfile" ] ; then
+        pid=$(cat $lockfile || exit_message "exit_lock: could not read lockfile $lockfile" $exit_code)
+        exit_message $message
+    fi
+
+    lock $lockfile
+    return $?
+}
+
+# remove the lock
+# parameter:
+# - lockfile path
+unlock() {
+    [ "$#" -ne 1 ] && exit_message "unlock: incorrect library call use: unlock <lockfile>"
+
+    local lockfile="$1"
+
+    # remove the trap
+    trap - EXIT
+
+    # remove the lock files
+    rm -f "$lockfile.$$" || exit_message "unlock: failed to remove PID lockfile: $lockfile.$$"
+    if [ -e "$lockfile" ] ; then
+        pid=$(cat $lockfile || exit_message "unlock: could not read lockfile $lockfile")
+        if [ "$pid" -eq "$$" ]; then
+            rm -f "$lockfile" || exit_message "unlock: failed to remove lockfile: $lockfile"
+        else
+            exit_message "unlock: could not remove lockfile because it is set from another process"
+        fi
+    fi
 
     return 0
 }

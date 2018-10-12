@@ -23,12 +23,12 @@ To easily call the contained programs you may add `/opt/bash-lib` to the search 
 
 ## Programs
 
-- [sendmail](sendmail.md) is a simple SMTP mailer
-- [ts](ts.md) is a filter to add timestamp to the output
+- [sendmail](doc/sendmail.md) is a simple SMTP mailer
+- [ts](doc/ts.md) is a filter to add timestamp to the output
 
 ## Libraries
 
-- [skeleton](skeleton.md) is used as template to create new scripts
-- [locking](locking.md) to serialize parallel tasks
-- [colors](colors.md) predefined color variables
-- [errors](errors.md) error handler
+- [skeleton](doc/skeleton.md) is used as template to create new scripts
+- [locking](doc/locking.md) to serialize parallel tasks
+- [colors](doc/colors.md) predefined color variables
+- [errors](doc/errors.md) error handler

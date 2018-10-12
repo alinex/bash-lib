@@ -21,9 +21,15 @@ lock $lockfile   # create the lock
 unlock $lockfile # remove the lock
 ```
 
+An alternative is to use the `exit_lock` method which won't wait till it can get the lock but exit immediately:
+
+```bash
+exit_lock $lockfile $message $code  # ... and exit if already locked
+```
+
 ## How it works
 
-1. The `lock` is set by making an empty file containing the filename with the PID as file extension. This indicates, that this PID is waiting to retrieve the lock like `/tmp/my-program-lock.1587`
+1. The `lock` is set by making a file containing the filename with the PID as file extension and content. This indicates, that this PID is waiting to retrieve the lock like `/tmp/my-program-lock.1587`
 2. Create a softlink without extension for it `/tmp/my-program-lock -> /tmp/my-program-lock.1587` if there is already such an softlink, try again every second.
 3. Remove the softlink and the lock with the PID on `unlock`
 
