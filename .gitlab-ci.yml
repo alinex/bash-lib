@@ -5,9 +5,14 @@ test:
     - bats test -t
 
 lint:
-  image: debian:stretch
-  before_script:
-    - apt-get update
-    - apt-get -y install shellcheck
+  image: koalaman/shellcheck-alpine
   script:
     - shellcheck include/*.bash
+
+#lint:
+#  image: debian:stretch
+#  before_script:
+#    - apt-get update
+#    - apt-get -y install shellcheck
+#  script:
+#    - shellcheck include/*.bash
