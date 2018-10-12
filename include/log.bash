@@ -6,11 +6,11 @@
 #
 # Usage:
 #
-# source ../bash-lib/include/log  # load functions
+# source ../bash-lib/include/log.bash  # load functions
 # log $message $file
 
 source_dir=$(dirname "${BASH_SOURCE[0]}")
-source "$source_dir/colors" # load color methods
+source "$source_dir/colors.bash" # load color methods
 
 # Log levels are taken from python and RFC 5424.
 declare -A _log_level

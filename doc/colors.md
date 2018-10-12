@@ -7,7 +7,7 @@ Setup color variables to be used in bash scripts for formatting.
 First you have to load the library:
 
 ```bash
-source ../bash-lib/colors  # load color methods
+source ../bash-lib/colors.bash  # load color methods
 ```
 
 Now you can use colorized output in different ways:

@@ -6,7 +6,7 @@
 #
 # Usage:
 #
-# source ../bash-lib/include/colors  # load color methods
+# source ../bash-lib/include/colors.bash  # load color methods
 # red "Failed"
 # echo "$(red)Failed$(reset)"
 # echo "$(red Failed)"

@@ -6,7 +6,7 @@
 #
 # Usage:
 #
-# source ../bash-lib/include/locking  # load functions
+# source ../bash-lib/include/locking.bash  # load functions
 # lockfile=<file mostly in tmp folder>
 # lock $lockfile   # create the lock
 # exit_lock $lockfile   # ... and exit if already locked
@@ -15,7 +15,7 @@
 # The second process which want to set the lock will wait till the lock is released.
 
 source_dir=$(dirname "${BASH_SOURCE[0]}")
-source "$source_dir/errors" # load error handler
+source "$source_dir/errors.bash" # load error handler
 
 # set a lock or wait till it can be set
 # parameter:

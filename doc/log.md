@@ -20,7 +20,7 @@ LOG_DATE_FORMAT="+%Y-%m-%d %H:%M"
 Now include this library which will also include the colors library:
 
 ```bash
-source ../bash-lib/log  # log handler
+source ../bash-lib/log.bash  # log handler
 ```
 
 After that messages may be invoked easily using:
