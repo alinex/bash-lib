@@ -1,6 +1,6 @@
-image: bats/bats:latest
+image: node:latest
 
 test:
   script:
+    - npm -g bats
     - bats test -t
-    - ls -al
