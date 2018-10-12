@@ -1,0 +1,5 @@
+image: bats:latest
+
+test:
+  script:
+    - bats test -t
