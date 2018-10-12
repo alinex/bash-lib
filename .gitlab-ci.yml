@@ -7,4 +7,5 @@ test:
 lint:
   image: koalaman/shellcheck:stable
   script:
-    - shellcheck bin/* include/*
+    - echo include/*
+    - shellcheck include/colors.bash
