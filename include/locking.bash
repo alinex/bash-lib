@@ -30,8 +30,8 @@ lock() {
 
     # remove old locks for non existing processes
     if [ -e "$lockfile" ] ; then
-        pid=$(cat $lockfile || log_exit ALERT "could not read lockfile $lockfile")
-        kill -0 $pid 2>/dev/null || rm -f "$lockfile" || log_exit ALERT "failed to remove lockfile: $lockfile"
+        pid=$(cat "$lockfile" || log_exit ALERT "could not read lockfile $lockfile")
+        kill -0 "$pid" 2>/dev/null || rm -f "$lockfile" || log_exit ALERT "failed to remove lockfile: $lockfile"
     fi
 
     # try to symlink it
@@ -64,11 +64,11 @@ exit_lock() {
 
     # check for existing lock
     if [ -e "$lockfile" ] ; then
-        pid=$(cat $lockfile || log_exit ALERT "could not read lockfile $lockfile" $exit_code)
-        log_exit NOTICE $message
+        pid=$(cat "$lockfile" || log_exit ALERT "could not read lockfile $lockfile" "$exit_code")
+        log_exit NOTICE "$message"
     fi
 
-    lock $lockfile
+    lock "$lockfile"
     return $?
 }
 
@@ -86,7 +86,7 @@ unlock() {
     # remove the lock files
     rm -f "$lockfile.$$" || log_exit ALERT "failed to remove PID lockfile: $lockfile.$$"
     if [ -e "$lockfile" ] ; then
-        pid=$(cat $lockfile || log_exit ALERT "could not read lockfile $lockfile")
+        pid=$(cat "$lockfile" || log_exit ALERT "could not read lockfile $lockfile")
         if [ "$pid" -eq "$$" ]; then
             rm -f "$lockfile" || log_exit ALERT "failed to remove lockfile: $lockfile"
         else

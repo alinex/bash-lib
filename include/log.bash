@@ -63,13 +63,13 @@ _syslog_severity[CRITICAL]=2
 _syslog_severity[ALERT]=1
 _syslog_severity[EMERG]=0
 _syslog_severity[EMERGENCY]=0
-declare -r bl_syslog_severity
+declare -r _syslog_severity
 
 # close descriptor#7 used for output
 trap '7>&-' EXIT
 
 # Set defaults if variables have not been specified
-LOG_TAG=${LOG_TAG:-$(basename $0)}
+LOG_TAG=${LOG_TAG:-$(basename "$0")}
 LOG_DATE_FORMAT=${LOG_DATE_FORMAT:-"+%Y-%m-%d %H:%M"}
 LOG_LEVEL=${LOG_LEVEL:-INFO}
 
@@ -133,7 +133,8 @@ log () {
     fi
 
     local message=$2
-    local message_date=$(date "${LOG_DATE_FORMAT}")
+    local message_date
+    message_date=$(date "${LOG_DATE_FORMAT}")
 
     local max_log_level=${_log_level[$LOG_LEVEL]}
     if [ ${_log_level[$message_level]} -ge $max_log_level ]; then
@@ -160,7 +161,7 @@ log () {
 }
 
 log_exit() {
-    log $1 $2
+    log "$1" "$2"
     local code="${3:-1}"
-    exit $code
+    exit "$code"
 }
