@@ -14,35 +14,35 @@
 # Helper
 _color_text() {
     [ $# -gt 0 ] || return
-    echo -n $@
+    echo -n "$1"
     tput sgr0;
 }
 
 # Foreground color
-black() { tput setaf 0; _color_text $@; }
-red() { tput setaf 1; _color_text $@; }
-green() { tput setaf 2; _color_text $@; }
-yellow() { tput setaf 3; _color_text $@; }
-blue() { tput setaf 4; _color_text $@; }
-magenta() { tput setaf 5; _color_text $@; }
-cyan() { tput setaf 6; _color_text $@; }
-white() { tput setaf 7; _color_text $@; }
+black() { tput setaf 0; _color_text "$@"; }
+red() { tput setaf 1; _color_text "$@"; }
+green() { tput setaf 2; _color_text "$@"; }
+yellow() { tput setaf 3; _color_text "$@"; }
+blue() { tput setaf 4; _color_text "$@"; }
+magenta() { tput setaf 5; _color_text "$@"; }
+cyan() { tput setaf 6; _color_text "$@"; }
+white() { tput setaf 7; _color_text "$@"; }
 
 # Background color
-bg_black() { tput setab 0; _color_text $@; }
-bg_red() { tput setab 1; _color_text $@; }
-bg_green() { tput setab 2; _color_text $@; }
-bg_yellow() { tput setab 3; _color_text $@; }
-bg_blue() { tput setab 4; _color_text $@; }
-bg_magenta() { tput setab 5; _color_text $@; }
-bg_cyan() { tput setab 6; _color_text $@; }
-bg_white() { tput setab 7; _color_text $@; }
+bg_black() { tput setab 0; _color_text "$@"; }
+bg_red() { tput setab 1; _color_text "$@"; }
+bg_green() { tput setab 2; _color_text "$@"; }
+bg_yellow() { tput setab 3; _color_text "$@"; }
+bg_blue() { tput setab 4; _color_text "$@"; }
+bg_magenta() { tput setab 5; _color_text "$@"; }
+bg_cyan() { tput setab 6; _color_text "$@"; }
+bg_white() { tput setab 7; _color_text "$@"; }
 
 # Styles
-bold() { tput bold; _color_text $@; }
-underline() { tput smul; _color_text $@; }
-inverse() { tput rev; _color_text $@; }
-dim() { tput dim; _color_text $@; }
+bold() { tput bold; _color_text "$@"; }
+underline() { tput smul; _color_text "$@"; }
+inverse() { tput rev; _color_text "$@"; }
+dim() { tput dim; _color_text "$@"; }
 
 # Reset
 reset() { tput sgr0; }

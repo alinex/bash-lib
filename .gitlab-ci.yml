@@ -1,6 +1,10 @@
-image: node:latest
-
 test:
+  image: node:latest
   script:
     - npm install -g bats
     - bats test -t
+
+lint:
+  image: koalaman/shellcheck:stable
+  script:
+    - shellcheck bin/* include/*
