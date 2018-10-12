@@ -1,18 +1,22 @@
-# Helper Libraries
+# Bash Helper
 
-> Helper libraries for administration tool development (mostly in bash).
+> Helper programs and libraries for administration tool development (mostly in bash).
 
-This libraries may not be used stand-alone but are often needed within other scripts to make them work.
+A short help is always included in the files but the [documentation section](doc/README.md) may have further information with usage examples for each library.
 
-A short help is always included in the files but the [documentation](doc/README.md) section may have further information with usage examples for each library.
+## Installation
 
-## Usage
+### Within Repository
 
-If used in other git projects, it should be added as git submodule and included in the scripts uding relative paths. But don't forget to make it relative from the current script directory becausse the working directory may change depending from where the script is called. 
+If used in other git projects, it should be added as git submodule and included in the scripts using relative paths. But don't forget to make it relative from the current script directory because the working directory may change depending from where the script is called.
 
 ```bash
 source_dir=$(dirname "${BASH_SOURCE[0]}")
-source "$source_dir/bash-lib/colors"
+source "$source_dir/bash-lib/include/colors"
 ```
 
-But it can also be installed directly under `/opt` and included from your scripts with it's absolute path.
+### Standalone
+
+To use them from out of a git repository you have to copy the code to the machine. This will often be in `/opt` or `/opt/divibib/` and included from your scripts with it's absolute path.
+
+To easily call the contained programs you may add `/opt/bash-lib` to the search path.

@@ -2,11 +2,11 @@
 
 # Error handlers
 #
-# https://gitlab.ekz.de/divibib-betrieb/helper-lib/blob/master/doc/errors.md
+# https://gitlab.ekz.de/divibib-betrieb/bash-lib/blob/master/doc/errors.md
 #
 # Usage:
 #
-# source ../helper-lib/errors  # load error handler
+# source ../bash-lib/include/errors  # load error handler
 # error_message "Invalid setup, stopping!", -1
 
 source_dir=$(dirname "${BASH_SOURCE[0]}")

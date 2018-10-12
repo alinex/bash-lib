@@ -2,11 +2,11 @@
 
 # Library to serialize parallel tasks
 #
-# https://gitlab.ekz.de/divibib-betrieb/helper-lib/blob/master/doc/locking.md
+# https://gitlab.ekz.de/divibib-betrieb/bash-lib/blob/master/doc/locking.md
 #
 # Usage:
 #
-# source ../helper-lib/locking  # load functions
+# source ../bash-lib/include/locking  # load functions
 # lockfile=<file mostly in tmp folder>
 # lock $lockfile   # create the lock
 # unlock $lockfile # remove the lock

@@ -1,8 +1,13 @@
-# Library Documentation
+# Documentation
 
 To use this libraries best practice is to checkout them into a parallel directory to your application.
 
-The following helper libraries are contained:
+Programs:
+
+- [sendmail](sendmail.md) is a simple smtp mailer
+- [ts](ts.md) is a filter to add timestamp to the output
+
+Libraries:
 
 - [skeleton](skeleton.md) is used as template to create new scripts
 - [locking](locking.md) to serialize parallel tasks
