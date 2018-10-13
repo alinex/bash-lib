@@ -45,8 +45,8 @@ _log_color[ERROR]="$(red)"
 _log_color[CRIT]="$(red)$(bold)"
 _log_color[CRITICAL]="$(red)$(bold)"
 _log_color[ALERT]="$(red)$(bold)$(inverse)" # RFC 5424 specific
-_log_color[EMERG]="$(red)$(bold)$(inverse)" # RFC 5424 specific
-_log_color[EMERGENCY]="$(red)$(bold)$(inverse)" # RFC 5424 specific
+_log_color[EMERG]="$(red)$(inverse)" # RFC 5424 specific
+_log_color[EMERGENCY]="$(red)$(inverse)" # RFC 5424 specific
 declare -r _log_color
 
 # These are the RFC 5424 numeric severity levels.
@@ -71,14 +71,7 @@ trap '7>&-' EXIT
 # Set defaults if variables have not been specified
 LOG_TAG=${LOG_TAG:-$(basename "$0")}
 LOG_DATE_FORMAT=${LOG_DATE_FORMAT:-"+%Y-%m-%d %H:%M"}
-LOG_LEVEL=${LOG_LEVEL:-INFO}
-
-# check for valid log level
-if [ -z "${_log_level[$LOG_LEVEL]}" ]; then
-    red "\"$LOG_LEVEL\" is not a valid LOG_LEVEL at line ${BASH_LINENO[0]}. Defaulting to \"INFO\"." >&2
-    LOG_LEVEL="INFO"
-fi
-declare -r LOG_LEVEL
+declare -u LOG_LEVEL=${LOG_LEVEL:-INFO}
 
 # check destination setting
 if [ -z "$LOG_FILE" ] && [ -z "$SYSLOG_FACILITY" ]; then
@@ -125,10 +118,15 @@ log () {
 
     IFS=$'\n'
 
+    # check for valid log level
+    if [ -z "${_log_level[$LOG_LEVEL]}" ]; then
+        red "\"$LOG_LEVEL\" is not a valid LOG_LEVEL at line ${BASH_LINENO[0]}. Defaulting to \"INFO\"." >&2
+        LOG_LEVEL="INFO"
+    fi
     # check message level
     declare -u message_level=$1
     if [ -z "${_log_level[$message_level]}" ]; then
-        red "\"${message_level}\" is not a valid MESSAGE_LOG_LEVEL at line ${BASH_LINENO[0]}. Defaulting to \"INFO\"." >&2
+        red "\"${message_level}\" is not a valid message log level at line ${BASH_LINENO[0]}. Defaulting to \"INFO\"." >&2
         message_level="INFO"
     fi
 

@@ -2,7 +2,9 @@ test:
   image: node:latest
   script:
     - npm install -g bats
-    - bats test -t
+    - bats test
+    - test/colors
+    - test/log
 
 # lint:
 #   image: koalaman/shellcheck-alpine

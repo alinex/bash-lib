@@ -48,3 +48,5 @@ Eight logging levels are supported, combining the levels from the Python logging
 | EMERG or EMERGENCY | 70            | 0                     | RFC 5424 specific   |
 
 Setting the `LOG_LEVEL` in the script will log subsequent log messages at that value or higher only.
+
+The `LOG_LEVEL` may be changed anytime within the script.
