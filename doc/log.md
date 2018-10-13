@@ -32,6 +32,18 @@ log_exit EMERG "preprocessing not done, stopping" 16
 
 While the first call will only output the log message, the second call also exits the running program with the additionally given exit code.
 
+But you can also pipe output from other commands directly to the log:
+
+```bash
+run-process | log INFO # log stdin
+run-process 2>&1 >/dev/null | log ERROR # log stderr
+run-process |& log INFO # log stdin + stderr
+( run-process | log INFO ) 3>&1 1>&2 2>&3 | log ERROR # log both differently
+( run-process 3>&1 1>&2 2>&3 | log ERROR ) 3>&1 1>&2 2>&3 | log INFO # priorize INFO
+```
+
+The last lines shows how to flip `STDOUT` and `STDERR` as pipe works on file descriptor one only.
+
 ## Log Levels
 
 Eight logging levels are supported, combining the levels from the Python logging module and RFC 5424.

@@ -113,8 +113,23 @@ fi
 declare -r LOG_FILE
 declare -r SYSLOG_FACILITY
 
-# log <level> <message>
+# log <level> <message> or | log <level>
 log () {
+
+    if [ -n "$2" ]; then
+        # direct input
+        _log "$1" "$2"
+    else
+        # read from pipe
+        while read line
+        do
+            _log "$1" "$line"
+        done < /dev/stdin
+    fi
+}
+
+# _log <level> <message>
+_log() {
 
     IFS=$'\n'
 
