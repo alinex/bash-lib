@@ -44,6 +44,16 @@ run-process |& log INFO # log stdin + stderr
 
 The last lines shows how to flip `STDOUT` and `STDERR` as pipe works on file descriptor one only.
 
+Often useful in pipes but also usable in other log messages is the special `AUTO` log setting:
+
+```bash
+run-process |& log AUTO
+```
+
+This will auto detect the concrete log level for each line. Currently `DEBUG`, `INFO`, `NOTICE`, `WARN`, `WARNING`, `ERR`, `ERROR`, `CRIT`, `CRITICAL`, `ALERT`, `EMERG` and `EMERGENCY` will trigger the specified log type. All other lines are output as `INFO` type.
+
+The concrete rules for auto detection may be further optimized in the future...
+
 ## Log Levels
 
 Eight logging levels are supported, combining the levels from the Python logging module and RFC 5424.
@@ -60,5 +70,4 @@ Eight logging levels are supported, combining the levels from the Python logging
 | EMERG or EMERGENCY | 70            | 0                     | RFC 5424 specific   |
 
 Setting the `LOG_LEVEL` in the script will log subsequent log messages at that value or higher only.
-
 The `LOG_LEVEL` may be changed anytime within the script.

@@ -133,6 +133,10 @@ _log() {
 
     IFS=$'\n'
 
+    local message=$2
+    local message_date
+    message_date=$(date "${LOG_DATE_FORMAT}")
+
     # check for valid log level
     if [ -z "${_log_level[$LOG_LEVEL]}" ]; then
         red "\"$LOG_LEVEL\" is not a valid LOG_LEVEL at line ${BASH_LINENO[0]}. Defaulting to \"INFO\"." >&2
@@ -140,14 +144,17 @@ _log() {
     fi
     # check message level
     declare -u message_level=$1
+    if [ "$message_level" = "AUTO" ]; then
+        if [[ "$message" =~ \b(DEBUG|INFO|NOTICE|WARN(ING)?|ERR(OR)?|CRIT(ICAL)?|ALERT|EMERG(ENCY)?)\b ]]; then
+            message_level="${BASH_REMATCH[1]}"
+        else
+            message_level="INFO"
+        fi
+    fi
     if [ -z "${_log_level[$message_level]}" ]; then
         red "\"${message_level}\" is not a valid message log level at line ${BASH_LINENO[0]}. Defaulting to \"INFO\"." >&2
         message_level="INFO"
     fi
-
-    local message=$2
-    local message_date
-    message_date=$(date "${LOG_DATE_FORMAT}")
 
     local max_log_level=${_log_level[$LOG_LEVEL]}
     if [ ${_log_level[$message_level]} -ge $max_log_level ]; then
