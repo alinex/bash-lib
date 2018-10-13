@@ -14,7 +14,7 @@ LOG_FILE='STDERR'                   # output to STDERR
 LOG_FILE='/var/log/myscript.log'    # output in file
 SYSLOG_FACILITY='local7'            # output to syslog
 # optional
-LOG_DATE_FORMAT="+%Y-%m-%d %H:%M"
+LOG_DATE_FORMAT="+%Y-%m-%d %H:%M:%S"
 ```
 
 Now include this library which will also include the colors library:

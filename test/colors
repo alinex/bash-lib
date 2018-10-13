@@ -5,7 +5,7 @@ source "$source_dir/../include/colors.bash"
 
 set -e # exit on any error
 
-# output each color or style
+echo $(cyan "$(bold)Output each color or style:")
 echo $(black "This is a black line.")
 echo $(red "This is a red line.")
 echo $(green "This is a green line.")
@@ -27,5 +27,5 @@ echo $(inverse "This is a inverse line.")
 echo $(dim "This is a dim line.")
 echo
 
-# output a mixed line
+echo $(cyan "$(bold)Output mixed line:")
 echo "this $(bold)is a $(red)mixed$(reset) text."

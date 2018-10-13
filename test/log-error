@@ -5,7 +5,7 @@ source "$source_dir/../include/log.bash"
 
 set -e # exit on any error
 
-# all log levels
+echo $(cyan "$(bold)All log levels:")
 LOG_LEVEL=DEBUG
 log DEBUG "text with DEBUG level"
 log INFO "text with INFO level"
@@ -21,7 +21,7 @@ log EMERG "text with EMERG level"
 log EMERGENCY "text with EMERGENCY level"
 echo
 
-# only EMERGENCY level
+echo $(cyan "$(bold)Only EMERGENCY level output:")
 LOG_LEVEL=EMERGENCY
 log DEBUG "text with DEBUG level"
 log INFO "text with INFO level"
@@ -35,3 +35,11 @@ log CRITICAL "text with CRITICAL level"
 log ALERT "text with ALERT level"
 log EMERG "text with EMERG level"
 log EMERGENCY "text with EMERGENCY level"
+echo
+
+echo $(cyan "$(bold)Different dateformat and tags:")
+LOG_LEVEL=INFO
+LOG_DATE_FORMAT="+%Y-%m-%d"
+LOG_TAG=test
+log INFO "text with INFO level"
+echo

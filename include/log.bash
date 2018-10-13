@@ -70,7 +70,7 @@ trap '7>&-' EXIT
 
 # Set defaults if variables have not been specified
 LOG_TAG=${LOG_TAG:-$(basename "$0")}
-LOG_DATE_FORMAT=${LOG_DATE_FORMAT:-"+%Y-%m-%d %H:%M"}
+LOG_DATE_FORMAT=${LOG_DATE_FORMAT:-"+%Y-%m-%d %H:%M:%S"}
 declare -u LOG_LEVEL=${LOG_LEVEL:-INFO}
 
 # check destination setting
