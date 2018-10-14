@@ -15,7 +15,7 @@
 # change into command directory
 cd "$( dirname "${BASH_SOURCE[0]}" )"
 # load libraries
-source ../bash-lib/include/log
+source ../bash-lib/include/log.bash
 
 ### Argument checks
 
