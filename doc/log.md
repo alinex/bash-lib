@@ -3,7 +3,7 @@
 A handler to write logs with an easy to use logging library that can be sourced from scripts.
 It allows logging to an arbitrary file, to `STDERR`, or to a syslog facility. It supports eight logging levels.
 
-## Usage
+## Basic Usage
 
 First you should setup the logging process using:
 
@@ -31,6 +31,8 @@ log_exit EMERG "preprocessing not done, stopping" 16
 ```
 
 While the first call will only output the log message, the second call also exits the running program with the additionally given exit code.
+
+## Piping messages
 
 But you can also pipe output from other commands directly to the log:
 
@@ -71,3 +73,30 @@ Eight logging levels are supported, combining the levels from the Python logging
 
 Setting the `LOG_LEVEL` in the script will log subsequent log messages at that value or higher only.
 The `LOG_LEVEL` may be changed anytime within the script.
+
+## File rotation
+
+This can be established using `logrotate` but you may also use the included mechanism by setting it up before you include the library. If you go with logrotate you don't need to restart or change anything because no filehandle is kept open.
+
+### Rotate by date
+
+```bash
+LOG_ROTATE_TIME=DAILY   # date as YYYY-MM-DD
+LOG_ROTATE_TIME=WEEKLY  # date as YYYY_week_WW
+LOG_ROTATE_TIME=MONTHLY # date as YYYY-MM
+```
+
+If this is set the current logs will go in the normal log file but on a new day the old file will be renamed with it's date pattern appended.
+
+The rotated files may also be compressed by setting the `LOG_ROTATE_GZP` flag.
+
+### Rotate by size
+
+To rotate on fixed file size use:
+
+```bash
+LOG_ROTATE_SIZE=<bytes>
+LOG_ROTATE_NUM=<max number of files>
+```
+
+But you can't combine the two rotation methods, currently.

@@ -65,13 +65,19 @@ _syslog_severity[EMERG]=0
 _syslog_severity[EMERGENCY]=0
 declare -r _syslog_severity
 
-# close descriptor#7 used for output
-trap '7>&-' EXIT
+declare -A _log_rotate_time
+_log_rotate_time[DAILY]="+%Y-%m-%d"
+_log_rotate_time[WEEKLY]="+%Y_week_%W"
+_log_rotate_time[MONTHLY]="+%Y-%m"
+declare -r _log_rotate_time
 
 # Set defaults if variables have not been specified
 LOG_TAG=${LOG_TAG:-$(basename "$0")}
 LOG_DATE_FORMAT=${LOG_DATE_FORMAT:-"+%Y-%m-%d %H:%M:%S"}
 declare -u LOG_LEVEL=${LOG_LEVEL:-INFO}
+
+# close descriptor#7 used for output
+trap '7>&-' EXIT
 
 # check destination setting
 if [ -z "$LOG_FILE" ] && [ -z "$SYSLOG_FACILITY" ]; then
@@ -113,8 +119,52 @@ fi
 declare -r LOG_FILE
 declare -r SYSLOG_FACILITY
 
+# check for valid log rotation time
+if [ -n "$LOG_ROTATE_TIME" ]; then
+    declare -u LOG_ROTATE_TIME
+    if [ -z "${_log_rotate_time[$LOG_ROTATE_TIME]}" ]; then
+        red "\"$LOG_ROTATE_TIME\" is not a valid LOG_ROTATE_TIME value at line ${BASH_LINENO[0]}. Defaulting to \"DAILY\"." >&2
+        LOG_ROTATE_TIME="DAILY"
+    fi
+    declare -r LOG_ROTATE_TIME
+fi
+
+declare -i LOG_ROTATE_SIZE
+declare -i LOG_ROTATE_NUM
+
 # log <level> <message> or | log <level>
 log () {
+
+    # $LOG_ROTATE_TIME=DAILY
+    # $LOG_ROTATE_GZIP=1
+
+    # check for valid log level
+    if [ -z "${_log_level[$LOG_LEVEL]}" ]; then
+        red "\"$LOG_LEVEL\" is not a valid LOG_LEVEL at line ${BASH_LINENO[0]}. Defaulting to \"INFO\"." >&2
+        LOG_LEVEL="INFO"
+    fi
+
+    # rotate log files
+    if [ -n "$LOG_FILE" ] && [ "$LOG_FILE" != "STDERR" ] && [ -e "$LOG_FILE" ]; then
+        if [ -n "$LOG_ROTATE_TIME" ]; then
+            local file_date=$(date -d $(stat -c %y locking.bash ) $LOG_ROTATE_TIME)
+            local today=$(date $LOG_ROTATE_TIME)
+            if [ "$file_date" != "$today" ]; then
+                mv "$LOG_FILE" "$LOG_FILE.$file_date"
+                [ -n "$LOG_ROTATE_GZIP" ] && gzip -q --best "$LOG_FILE.$file_date"
+            fi
+        elif [ -n "$LOG_ROTATE_SIZE" ]; then
+            local file_size=$(du -b /script_logs/test.log | tr -s '\t' ' ' | cut -d' ' -f1)
+            if [ $file_size -ge $LOG_ROTATE_SIZE ]; then
+                for i in `seq $((LOG_ROTATE_NUM-1)) -1 1`; do
+                    mv "$LOG_FILE.$i" "$LOG_FILE.$((i+1))" 2>/dev/null
+                    mv "$LOG_FILE.$i.gz" "$LOG_FILE.$((i+1)).gz" 2>/dev/null
+                done
+                mv "$LOG_FILE" "$LOG_FILE.1"
+                [ -n "$LOG_ROTATE_GZIP" ] && gzip -q --best "$LOG_FILE.1"
+            fi
+        fi
+    fi
 
     if [ -n "$2" ]; then
         # direct input
@@ -137,11 +187,6 @@ _log() {
     local message_date
     message_date=$(date "${LOG_DATE_FORMAT}")
 
-    # check for valid log level
-    if [ -z "${_log_level[$LOG_LEVEL]}" ]; then
-        red "\"$LOG_LEVEL\" is not a valid LOG_LEVEL at line ${BASH_LINENO[0]}. Defaulting to \"INFO\"." >&2
-        LOG_LEVEL="INFO"
-    fi
     # check message level
     declare -u message_level=$1
     if [ "$message_level" = "AUTO" ]; then
