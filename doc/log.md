@@ -52,6 +52,7 @@ Often useful in pipes but also usable in other log messages is the special `AUTO
 
 ```bash
 run-process |& log AUTO
+( run-process 3>&1 1>&2 2>&3 | log ERROR ) 3>&1 1>&2 2>&3 | log AUTO # STDERR always as ERROR
 ```
 
 This will auto detect the concrete log level for each line. Currently `DEBUG`, `INFO`, `NOTICE`, `WARN`, `WARNING`, `ERR`, `ERROR`, `CRIT`, `CRITICAL`, `ALERT`, `EMERG` and `EMERGENCY` will trigger the specified log type. All other lines are output as `INFO` type.
