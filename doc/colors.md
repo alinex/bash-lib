@@ -2,6 +2,8 @@
 
 Setup color variables to be used in bash scripts for formatting.
 
+![example](lcolors.png)
+
 ## Usage
 
 First you have to load the library:

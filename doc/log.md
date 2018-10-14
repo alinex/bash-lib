@@ -3,6 +3,8 @@
 A handler to write logs with an easy to use logging library that can be sourced from scripts.
 It allows logging to an arbitrary file, to `STDERR`, or to a syslog facility. It supports eight logging levels.
 
+![example](log-levels.png)
+
 ## Basic Usage
 
 First you should setup the logging process using:
