@@ -5,7 +5,10 @@ test:
     - bats test
     - test/colors
     - test/log-stderr
+    - test/log-auto
     - test/log-file
+    - test/log-rotate-size
+    - test/log-rotate-file
 
 # lint:
 #   image: koalaman/shellcheck-alpine

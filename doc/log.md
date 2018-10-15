@@ -79,7 +79,7 @@ The `LOG_LEVEL` may be changed anytime within the script.
 
 ## File rotation
 
-This can be established using `logrotate` but you may also use the included mechanism by setting it up before you include the library. If you go with logrotate you don't need to restart or change anything because no filehandle is kept open.
+While the library keeps the log file opened for better performance you can't rotate it using external tools. But the integrated rotation will do perfectly fine.
 
 ### Rotate by date
 

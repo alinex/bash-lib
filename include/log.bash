@@ -145,7 +145,9 @@ if [ -n "$LOG_ROTATE_TIME" ]; then
 fi
 
 declare -i LOG_ROTATE_SIZE
-declare -i LOG_ROTATE_NUM
+declare -r LOG_ROTATE_SIZE
+declare -i LOG_ROTATE_NUM=${LOG_ROTATE_NUM:-9}
+declare -r LOG_ROTATE_NUM
 
 # log <level> <message> or | log <level>
 log () {
@@ -164,16 +166,24 @@ log () {
             if [ "$file_date" != "$today" ]; then
                 mv "$LOG_FILE" "$LOG_FILE.$file_date"
                 [ -n "$LOG_ROTATE_COMPRESS" ] && gzip -q --best "$LOG_FILE.$file_date"
+                # reopen file handle
+                exec 7>&2
+                exec 7>> $LOG_FILE
             fi
         elif [ -n "$LOG_ROTATE_SIZE" ]; then
-            local file_size=$(du -b /script_logs/test.log | tr -s '\t' ' ' | cut -d' ' -f1)
+            local file_size=$(du -b "$LOG_FILE" | tr -s '\t' ' ' | cut -d' ' -f1)
+            ls -al
+            echo "$file_size <=> $LOG_ROTATE_SIZE"
             if [ $file_size -ge $LOG_ROTATE_SIZE ]; then
                 for i in `seq $((LOG_ROTATE_NUM-1)) -1 1`; do
-                    mv "$LOG_FILE.$i" "$LOG_FILE.$((i+1))" 2>/dev/null
-                    mv "$LOG_FILE.$i.gz" "$LOG_FILE.$((i+1)).gz" 2>/dev/null
+                    [ -e "$LOG_FILE.$i" ] && mv "$LOG_FILE.$i" "$LOG_FILE.$((i+1))"
+                    [ -e "$LOG_FILE.$i.gz" ] &&  mv "$LOG_FILE.$i.gz" "$LOG_FILE.$((i+1)).gz"
                 done
                 mv "$LOG_FILE" "$LOG_FILE.1"
                 [ -n "$LOG_ROTATE_COMPRESS" ] && gzip -q --best "$LOG_FILE.1"
+                # reopen file handle
+                exec 7>&2
+                exec 7>> $LOG_FILE
             fi
         fi
     fi
