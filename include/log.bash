@@ -135,9 +135,6 @@ declare -i LOG_ROTATE_NUM
 # log <level> <message> or | log <level>
 log () {
 
-    # $LOG_ROTATE_TIME=DAILY
-    # $LOG_ROTATE_GZIP=1
-
     # check for valid log level
     if [ -z "${_log_level[$LOG_LEVEL]}" ]; then
         red "\"$LOG_LEVEL\" is not a valid LOG_LEVEL at line ${BASH_LINENO[0]}. Defaulting to \"INFO\"." >&2
@@ -147,11 +144,11 @@ log () {
     # rotate log files
     if [ -n "$LOG_FILE" ] && [ "$LOG_FILE" != "STDERR" ] && [ -e "$LOG_FILE" ]; then
         if [ -n "$LOG_ROTATE_TIME" ]; then
-            local file_date=$(date -d $(stat -c %y locking.bash ) $LOG_ROTATE_TIME)
-            local today=$(date $LOG_ROTATE_TIME)
+            local file_date=$(date -d $(stat -c %y "$LOG_FILE" ) $_log_rotate_time[$LOG_ROTATE_TIME])
+            local today=$(date $_log_rotate_time[$LOG_ROTATE_TIME])
             if [ "$file_date" != "$today" ]; then
                 mv "$LOG_FILE" "$LOG_FILE.$file_date"
-                [ -n "$LOG_ROTATE_GZIP" ] && gzip -q --best "$LOG_FILE.$file_date"
+                [ -n "$LOG_ROTATE_COMPRESS" ] && gzip -q --best "$LOG_FILE.$file_date"
             fi
         elif [ -n "$LOG_ROTATE_SIZE" ]; then
             local file_size=$(du -b /script_logs/test.log | tr -s '\t' ' ' | cut -d' ' -f1)
@@ -161,7 +158,7 @@ log () {
                     mv "$LOG_FILE.$i.gz" "$LOG_FILE.$((i+1)).gz" 2>/dev/null
                 done
                 mv "$LOG_FILE" "$LOG_FILE.1"
-                [ -n "$LOG_ROTATE_GZIP" ] && gzip -q --best "$LOG_FILE.1"
+                [ -n "$LOG_ROTATE_COMPRESS" ] && gzip -q --best "$LOG_FILE.1"
             fi
         fi
     fi

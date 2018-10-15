@@ -91,7 +91,7 @@ LOG_ROTATE_TIME=MONTHLY # date as YYYY-MM
 
 If this is set the current logs will go in the normal log file but on a new day the old file will be renamed with it's date pattern appended.
 
-The rotated files may also be compressed by setting the `LOG_ROTATE_GZP` flag.
+The rotated files may also be compressed by setting the `LOG_ROTATE_COMPRESS` flag.
 
 ### Rotate by size
 
@@ -102,4 +102,6 @@ LOG_ROTATE_SIZE=<bytes>
 LOG_ROTATE_NUM=<max number of files>
 ```
 
-But you can't combine the two rotation methods, currently.
+The rotated files may also be compressed by setting the `LOG_ROTATE_COMPRESS` flag.
+
+> But you can't combine the two rotation methods by date and by size, currently.
