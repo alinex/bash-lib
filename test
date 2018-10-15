@@ -1,6 +1,0 @@
-#!/bin/bash
-
-source_dir=$(dirname "${BASH_SOURCE[0]}")
-source "$source_dir/include/log" # load color methods
-
-log ALERT test

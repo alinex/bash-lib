@@ -1,0 +1,51 @@
+#!/bin/bash
+
+source_dir=$(dirname "${BASH_SOURCE[0]}")
+source "$source_dir/../include/log.bash"
+
+set -e # exit on any error
+
+echo $(cyan "$(bold)All log levels:")
+LOG_LEVEL=DEBUG
+log DEBUG "text with DEBUG level"
+log INFO "text with INFO level"
+log NOTICE "text with NOTICE level"
+log WARN "text with WARN level"
+log WARNING "text with WARNING level"
+log ERR "text with ERR level"
+log ERROR "text with ERROR level"
+log CRIT "text with CRIT level"
+log CRITICAL "text with CRITICAL level"
+log ALERT "text with ALERT level"
+log EMERG "text with EMERG level"
+log EMERGENCY "text with EMERGENCY level"
+echo
+
+echo $(cyan "$(bold)Only EMERGENCY level output:")
+LOG_LEVEL=EMERGENCY
+log DEBUG "text with DEBUG level"
+log INFO "text with INFO level"
+log NOTICE "text with NOTICE level"
+log WARN "text with WARN level"
+log WARNING "text with WARNING level"
+log ERR "text with ERR level"
+log ERROR "text with ERROR level"
+log CRIT "text with CRIT level"
+log CRITICAL "text with CRITICAL level"
+log ALERT "text with ALERT level"
+log EMERG "text with EMERG level"
+log EMERGENCY "text with EMERGENCY level"
+echo
+
+echo $(cyan "$(bold)Different dateformat and tags:")
+LOG_LEVEL=INFO
+LOG_DATE_FORMAT="+%Y-%m-%d"
+LOG_TAG=test
+log INFO "text with INFO level"
+echo
+
+echo $(cyan "$(bold)Use pipe as input:")
+echo "text with INFO level" | log INFO
+source_dir=$(dirname "${BASH_SOURCE[0]}")
+log INFO <$source_dir/../README.md
+echo

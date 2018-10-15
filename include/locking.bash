@@ -6,7 +6,7 @@
 #
 # Usage:
 #
-# source ../bash-lib/include/locking  # load functions
+# source ../bash-lib/include/locking.bash  # load functions
 # lockfile=<file mostly in tmp folder>
 # lock $lockfile   # create the lock
 # exit_lock $lockfile   # ... and exit if already locked
@@ -15,7 +15,7 @@
 # The second process which want to set the lock will wait till the lock is released.
 
 source_dir=$(dirname "${BASH_SOURCE[0]}")
-source "$source_dir/errors" # load error handler
+source "$source_dir/log.bash" # load log handler
 
 # set a lock or wait till it can be set
 # parameter:
@@ -30,8 +30,8 @@ lock() {
 
     # remove old locks for non existing processes
     if [ -e "$lockfile" ] ; then
-        pid=$(cat $lockfile || log_exit ALERT "could not read lockfile $lockfile")
-        kill -0 $pid 2>/dev/null || rm -f "$lockfile" || log_exit ALERT "failed to remove lockfile: $lockfile"
+        pid=$(cat "$lockfile" || log_exit ALERT "could not read lockfile $lockfile")
+        kill -0 "$pid" 2>/dev/null || rm -f "$lockfile" || log_exit ALERT "failed to remove lockfile: $lockfile"
     fi
 
     # try to symlink it
@@ -65,11 +65,11 @@ exit_lock() {
 
     # check for existing lock
     if [ -e "$lockfile" ] ; then
-        pid=$(cat $lockfile || log_exit ALERT "could not read lockfile $lockfile" $exit_code)
-        log_exit NOTICE $message
+        pid=$(cat "$lockfile" || log_exit ALERT "could not read lockfile $lockfile" "$exit_code")
+        log_exit NOTICE "$message"
     fi
 
-    lock $lockfile
+    lock "$lockfile"
     return $?
 }
 
@@ -87,7 +87,7 @@ unlock() {
     # remove the lock files
     rm -f "$lockfile.$$" || log_exit ALERT "failed to remove PID lockfile: $lockfile.$$"
     if [ -e "$lockfile" ] ; then
-        pid=$(cat $lockfile || log_exit ALERT "could not read lockfile $lockfile")
+        pid=$(cat "$lockfile" || log_exit ALERT "could not read lockfile $lockfile")
         if [ "$pid" -eq "$$" ]; then
             rm -f "$lockfile" || log_exit ALERT "failed to remove lockfile: $lockfile"
         else

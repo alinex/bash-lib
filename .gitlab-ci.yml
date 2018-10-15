@@ -1,0 +1,13 @@
+test:
+  image: node:latest
+  script:
+    - npm install -g bats
+    - bats test
+    - test/colors
+    - test/log-stderr
+    - test/log-file
+
+# lint:
+#   image: koalaman/shellcheck-alpine
+#   script:
+#     - shellcheck include/*.bash

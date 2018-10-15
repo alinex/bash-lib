@@ -8,7 +8,7 @@ If the same lock is used another time in another process or sub process it will 
 First you have to include this helper in your bash script:
 
 ```bash
-source ../bash-lib/locking # load functions
+source ../bash-lib/locking.bash # load functions
 ```
 
 Now, in any part of your script you can surround a block with `lock` and `unlock` statements:

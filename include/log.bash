@@ -6,11 +6,11 @@
 #
 # Usage:
 #
-# source ../bash-lib/include/log  # load functions
+# source ../bash-lib/include/log.bash  # load functions
 # log $message $file
 
 source_dir=$(dirname "${BASH_SOURCE[0]}")
-source "$source_dir/colors" # load color methods
+source "$source_dir/colors.bash" # load color methods
 
 # Log levels are taken from python and RFC 5424.
 declare -A _log_level
@@ -19,15 +19,15 @@ declare -A _log_level
 # numbers to sequence them with the python levels.
 _log_level[DEBUG]=10
 _log_level[INFO]=20
-_log_level[NOTICE]=25 # RFC 5424 specific
+_log_level[NOTICE]=25   # RFC 5424 specific
 _log_level[WARN]=30
 _log_level[WARNING]=30
 _log_level[ERR]=40
 _log_level[ERROR]=40
 _log_level[CRIT]=50
 _log_level[CRITICAL]=50
-_log_level[ALERT]=60 # RFC 5424 specific
-_log_level[EMERG]=70 # RFC 5424 specific
+_log_level[ALERT]=60    # RFC 5424 specific
+_log_level[EMERG]=70    # RFC 5424 specific
 _log_level[EMERGENCY]=70 # RFC 5424 specific
 declare -r _log_level
 
@@ -45,8 +45,8 @@ _log_color[ERROR]="$(red)"
 _log_color[CRIT]="$(red)$(bold)"
 _log_color[CRITICAL]="$(red)$(bold)"
 _log_color[ALERT]="$(red)$(bold)$(inverse)" # RFC 5424 specific
-_log_color[EMERG]="$(red)$(bold)$(inverse)" # RFC 5424 specific
-_log_color[EMERGENCY]="$(red)$(bold)$(inverse)" # RFC 5424 specific
+_log_color[EMERG]="$(red)$(inverse)" # RFC 5424 specific
+_log_color[EMERGENCY]="$(red)$(inverse)" # RFC 5424 specific
 declare -r _log_color
 
 # These are the RFC 5424 numeric severity levels.
@@ -63,22 +63,21 @@ _syslog_severity[CRITICAL]=2
 _syslog_severity[ALERT]=1
 _syslog_severity[EMERG]=0
 _syslog_severity[EMERGENCY]=0
-declare -r bl_syslog_severity
+declare -r _syslog_severity
+
+declare -A _log_rotate_time
+_log_rotate_time[DAILY]="+%Y-%m-%d"
+_log_rotate_time[WEEKLY]="+%Y_week_%W"
+_log_rotate_time[MONTHLY]="+%Y-%m"
+declare -r _log_rotate_time
+
+# Set defaults if variables have not been specified
+LOG_TAG=${LOG_TAG:-$(basename "$0")}
+LOG_DATE_FORMAT=${LOG_DATE_FORMAT:-"+%Y-%m-%d %H:%M:%S"}
+declare -u LOG_LEVEL=${LOG_LEVEL:-INFO}
 
 # close descriptor#7 used for output
 trap '7>&-' EXIT
-
-# Set defaults if variables have not been specified
-LOG_TAG=${LOG_TAG:-$(basename $0)}
-LOG_DATE_FORMAT=${LOG_DATE_FORMAT:-"+%Y-%m-%d %H:%M"}
-LOG_LEVEL=${LOG_LEVEL:-INFO}
-
-# check for valid log level
-if [ -z "${_log_level[$LOG_LEVEL]}" ]; then
-    red "\"$LOG_LEVEL\" is not a valid LOG_LEVEL at line ${BASH_LINENO[0]}. Defaulting to \"INFO\"." >&2
-    LOG_LEVEL="INFO"
-fi
-declare -r LOG_LEVEL
 
 # check destination setting
 if [ -z "$LOG_FILE" ] && [ -z "$SYSLOG_FACILITY" ]; then
@@ -120,20 +119,87 @@ fi
 declare -r LOG_FILE
 declare -r SYSLOG_FACILITY
 
-# log <level> <message>
+# check for valid log rotation time
+if [ -n "$LOG_ROTATE_TIME" ]; then
+    declare -u LOG_ROTATE_TIME
+    if [ -z "${_log_rotate_time[$LOG_ROTATE_TIME]}" ]; then
+        red "\"$LOG_ROTATE_TIME\" is not a valid LOG_ROTATE_TIME value at line ${BASH_LINENO[0]}. Defaulting to \"DAILY\"." >&2
+        LOG_ROTATE_TIME="DAILY"
+    fi
+    declare -r LOG_ROTATE_TIME
+fi
+
+declare -i LOG_ROTATE_SIZE
+declare -i LOG_ROTATE_NUM
+
+# log <level> <message> or | log <level>
 log () {
+
+    # $LOG_ROTATE_TIME=DAILY
+    # $LOG_ROTATE_GZIP=1
+
+    # check for valid log level
+    if [ -z "${_log_level[$LOG_LEVEL]}" ]; then
+        red "\"$LOG_LEVEL\" is not a valid LOG_LEVEL at line ${BASH_LINENO[0]}. Defaulting to \"INFO\"." >&2
+        LOG_LEVEL="INFO"
+    fi
+
+    # rotate log files
+    if [ -n "$LOG_FILE" ] && [ "$LOG_FILE" != "STDERR" ] && [ -e "$LOG_FILE" ]; then
+        if [ -n "$LOG_ROTATE_TIME" ]; then
+            local file_date=$(date -d $(stat -c %y locking.bash ) $LOG_ROTATE_TIME)
+            local today=$(date $LOG_ROTATE_TIME)
+            if [ "$file_date" != "$today" ]; then
+                mv "$LOG_FILE" "$LOG_FILE.$file_date"
+                [ -n "$LOG_ROTATE_GZIP" ] && gzip -q --best "$LOG_FILE.$file_date"
+            fi
+        elif [ -n "$LOG_ROTATE_SIZE" ]; then
+            local file_size=$(du -b /script_logs/test.log | tr -s '\t' ' ' | cut -d' ' -f1)
+            if [ $file_size -ge $LOG_ROTATE_SIZE ]; then
+                for i in `seq $((LOG_ROTATE_NUM-1)) -1 1`; do
+                    mv "$LOG_FILE.$i" "$LOG_FILE.$((i+1))" 2>/dev/null
+                    mv "$LOG_FILE.$i.gz" "$LOG_FILE.$((i+1)).gz" 2>/dev/null
+                done
+                mv "$LOG_FILE" "$LOG_FILE.1"
+                [ -n "$LOG_ROTATE_GZIP" ] && gzip -q --best "$LOG_FILE.1"
+            fi
+        fi
+    fi
+
+    if [ -n "$2" ]; then
+        # direct input
+        _log "$1" "$2"
+    else
+        # read from pipe
+        while read line
+        do
+            _log "$1" "$line"
+        done < /dev/stdin
+    fi
+}
+
+# _log <level> <message>
+_log() {
 
     IFS=$'\n'
 
+    local message=$2
+    local message_date
+    message_date=$(date "${LOG_DATE_FORMAT}")
+
     # check message level
     declare -u message_level=$1
+    if [ "$message_level" = "AUTO" ]; then
+        if [[ "$message" =~ \b(DEBUG|INFO|NOTICE|WARN(ING)?|ERR(OR)?|CRIT(ICAL)?|ALERT|EMERG(ENCY)?)\b ]]; then
+            message_level="${BASH_REMATCH[1]}"
+        else
+            message_level="INFO"
+        fi
+    fi
     if [ -z "${_log_level[$message_level]}" ]; then
-        red "\"${message_level}\" is not a valid MESSAGE_LOG_LEVEL at line ${BASH_LINENO[0]}. Defaulting to \"INFO\"." >&2
+        red "\"${message_level}\" is not a valid message log level at line ${BASH_LINENO[0]}. Defaulting to \"INFO\"." >&2
         message_level="INFO"
     fi
-
-    local message=$2
-    local message_date=$(date "${LOG_DATE_FORMAT}")
 
     local max_log_level=${_log_level[$LOG_LEVEL]}
     if [ ${_log_level[$message_level]} -ge $max_log_level ]; then
@@ -160,7 +226,7 @@ log () {
 }
 
 log_exit() {
-    log $1 $2
+    log "$1" "$2"
     local code="${3:-1}"
-    exit $code
+    exit "$code"
 }
