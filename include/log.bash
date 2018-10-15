@@ -144,8 +144,8 @@ log () {
     # rotate log files
     if [ -n "$LOG_FILE" ] && [ "$LOG_FILE" != "STDERR" ] && [ -e "$LOG_FILE" ]; then
         if [ -n "$LOG_ROTATE_TIME" ]; then
-            local file_date=$(date -d $(stat -c %y "$LOG_FILE" ) "$_log_rotate_time[$LOG_ROTATE_TIME]")
-            local today=$(date "$_log_rotate_time[$LOG_ROTATE_TIME]")
+            local file_date=$(date -d "$(stat -c %y $LOG_FILE)" ${_log_rotate_time[$LOG_ROTATE_TIME]})
+            local today=$(date ${_log_rotate_time[$LOG_ROTATE_TIME]})
             if [ "$file_date" != "$today" ]; then
                 mv "$LOG_FILE" "$LOG_FILE.$file_date"
                 [ -n "$LOG_ROTATE_COMPRESS" ] && gzip -q --best "$LOG_FILE.$file_date"
@@ -187,8 +187,11 @@ _log() {
     # check message level
     declare -u message_level=$1
     if [ "$message_level" = "AUTO" ]; then
-        if [[ "$message" =~ \b(DEBUG|INFO|NOTICE|WARN(ING)?|ERR(OR)?|CRIT(ICAL)?|ALERT|EMERG(ENCY)?)\b ]]; then
+        declare -u message_check=$message
+        if [[ "$message_check" =~ \b(DEBUG|INFO|NOTICE|WARN(ING)?|ERR(OR)?|CRIT(ICAL)?|ALERT|EMERG(ENCY)?)\b ]]; then
             message_level="${BASH_REMATCH[1]}"
+        elif [[ "$message_check" =~ \b(COPYRIGHT|WARRANTY)\b ]]; then
+            message_level="DEBUG"
         else
             message_level="INFO"
         fi
