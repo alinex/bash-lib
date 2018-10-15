@@ -10,7 +10,6 @@
 # log $message $file
 
 source_dir=$(dirname "${BASH_SOURCE[0]}")
-echo "load $source_dir/colors.bash"
 source "$source_dir/colors.bash" # load color methods
 
 # Log levels are taken from python and RFC 5424.
@@ -73,7 +72,7 @@ _log_rotate_time[MONTHLY]="+%Y-%m"
 declare -r _log_rotate_time
 
 # Set defaults if variables have not been specified
-LOG_TAG=${LOG_TAG:-$(basename "$0")}
+LOG_TAG=${LOG_TAG:-$(basename -- "$0")}
 LOG_DATE_FORMAT=${LOG_DATE_FORMAT:-"+%Y-%m-%d %H:%M:%S"}
 declare -u LOG_LEVEL=${LOG_LEVEL:-INFO}
 
