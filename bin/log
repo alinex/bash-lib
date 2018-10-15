@@ -1,0 +1,22 @@
+#!/bin/bash
+
+# Log command
+#
+# https://gitlab.ekz.de/divibib-betrieb/bash-lib/blob/master/doc/log.md
+#
+# Usage:
+#
+# log <type> <message>  # log to file
+# xxx | log             # pipe to log
+# xxx | log <type>      # pipe with specific log type
+
+type=${1:-AUTO}
+
+source_dir=$(dirname "${BASH_SOURCE[0]}")
+source "$source_dir/../include/log.bash" # load log handler
+
+if [ -n "$2" ]; then
+  log $type $2
+else
+  log $type
+fi

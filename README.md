@@ -23,8 +23,8 @@ To easily call the contained programs you may add `/opt/bash-lib` to the search 
 
 ## Programs
 
+- [log](doc/log.md) log command to write to file, STDERR or syslog
 - [sendmail](doc/sendmail.md) is a simple SMTP mailer
-- [ts](doc/ts.md) is a filter to add timestamp to the output
 
 ## Libraries
 

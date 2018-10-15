@@ -5,21 +5,44 @@ It allows logging to an arbitrary file, to `STDERR`, or to a syslog facility. It
 
 ![example](log-levels.png)
 
-## Basic Usage
+The log handler can be used as program or library.
 
-First you should setup the logging process using:
+## Usage
+
+### Setup
+
+For usage as command or library the configuration is the same and fully optional:
 
 ```bash
-LOG_LEVEL='INFO'                    # minimum log level
 # use one of the following
-LOG_FILE='STDERR'                   # output to STDERR
+LOG_FILE='STDERR'                   # output to STDERR (default)
 LOG_FILE='/var/log/myscript.log'    # output in file
 SYSLOG_FACILITY='local7'            # output to syslog
-# optional
+# specify logging
+LOG_LEVEL='INFO'                    # minimum log level
 LOG_DATE_FORMAT="+%Y-%m-%d %H:%M:%S"
+# file rotation
+LOG_ROTATE_TIME=[DAILY|WEEKLY|MONTHLY]
+LOG_ROTATE_SIZE=<bytes>
+LOG_ROTATE_NUM=<max number of files>
+LOG_ROTATE_COMPRESS=1
 ```
 
-Now include this library which will also include the colors library:
+### Command
+
+To use it within the shell you can use the binary under `bin/log`. For easier use you may also
+add it to the path like used in the following example:
+
+```bash
+log <type> <message>      # log to file
+cat xxx | log             # pipe to log
+cat xxx | log <type>      # pipe with specific log type
+```
+
+### Library
+
+If you use it within another bash file you can also include the library and use it directly,
+which will also include the colors library:
 
 ```bash
 source ../bash-lib/log.bash  # log handler
