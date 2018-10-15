@@ -65,6 +65,21 @@ _syslog_severity[EMERG]=0
 _syslog_severity[EMERGENCY]=0
 declare -r _syslog_severity
 
+declare -A _log_auto
+_log_auto[DEBUG]="\b(DEBUG|COPYRIGHT|WARRANTY)\b|^\s*(AT|AFTER) "
+_log_auto[INFO]="\b(INFO)\b"
+_log_auto[NOTICE]="\b(NOTICE)\b"
+_log_auto[WARN]="\b(WARN)\b"
+_log_auto[WARNING]="\b(WARNING)\b"
+_log_auto[ERR]="\b(ERR)\b"
+_log_auto[ERROR]="\b(ERROR)\b"
+_log_auto[CRIT]="\b(CRIT)\b"
+_log_auto[CRITICAL]="\b(CRITICAL|FATAL)\b"
+_log_auto[ALERT]="\b(ALERT|EXCEPTION)\b"
+_log_auto[EMERG]="\b(EMERG)\b"
+_log_auto[EMERGENCY]="\b(EMERGENCY)\b"
+declare -r _log_auto
+
 declare -A _log_rotate_time
 _log_rotate_time[DAILY]="+%Y-%m-%d"
 _log_rotate_time[WEEKLY]="+%Y_week_%W"
@@ -188,11 +203,14 @@ _log() {
     declare -u message_level=$1
     if [ "$message_level" = "AUTO" ]; then
         declare -u message_check=$message
-        if [[ "$message_check" =~ \b(DEBUG|INFO|NOTICE|WARN(ING)?|ERR(OR)?|CRIT(ICAL)?|ALERT|EMERG(ENCY)?)\b ]]; then
-            message_level="${BASH_REMATCH[1]}"
-        elif [[ "$message_check" =~ \b(COPYRIGHT|WARRANTY)\b ]]; then
-            message_level="DEBUG"
-        else
+        for i in "${!_log_auto[@]}"
+        do
+            if [[ "$message_check" =~ ${_log_auto[$i]} ]]; then
+                message_level=$i
+            fi
+        done
+        # set default if not matched
+        if [ $message_level = "AUTO" ]; then
             message_level="INFO"
         fi
     fi
