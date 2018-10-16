@@ -254,8 +254,10 @@ _log() {
                     "$line"
                 [ -n "$LOG_FILE" ] && echo "$output" >&7
                 if [ -n "$LOG_CONSOLE" ]; then
-                    [ "$LOG_CONSOLE" = "STDOUT" ] && echo "$output"
                     [ "$LOG_CONSOLE" = "STDERR" ] && echo "$output" >&2
+                    if [ "$LOG_CONSOLE" = "STDOUT" ]; then
+                        echo "${_log_color[$message_level]}$line$(reset)"
+                    fi
                 fi
             done
         fi

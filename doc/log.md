@@ -7,6 +7,10 @@ It allows logging to an arbitrary file, to `STDERR`, or to a syslog facility. It
 
 The log handler can be used as program or library.
 
+![example](log-stdout.png)
+
+With the simplified output for `STDOUT` it can also be used as colorization toolkit.
+
 ## Usage
 
 ### Setup
@@ -16,7 +20,7 @@ For usage as command or library the configuration is the same and fully optional
 ```bash
 # basic output selection
 LOG_CONSOLE='STDERR'                # output to STDERR (default)
-LOG_CONSOLE='STDOUT'                # output to STDOUT
+LOG_CONSOLE='STDOUT'                # output to STDOUT without date, tag, pid and type
 # alternatively or additionally use one of the following
 LOG_FILE='/var/log/myscript.log'    # output in file
 SYSLOG_FACILITY='local7'            # output to syslog
@@ -73,6 +77,8 @@ run-process |& log INFO # log stdin + stderr
 
 The last lines shows how to flip `STDOUT` and `STDERR` as pipe works on file descriptor one only.
 
+## Auto detect Level
+
 Often useful in pipes but also usable in other log messages is the special `AUTO` log setting:
 
 ```bash
@@ -80,9 +86,7 @@ run-process |& log AUTO
 ( run-process 3>&1 1>&2 2>&3 | log ERROR ) 3>&1 1>&2 2>&3 | log AUTO # STDERR always as ERROR
 ```
 
-This will auto detect the concrete log level for each line. Currently `DEBUG`, `INFO`, `NOTICE`, `WARN`, `WARNING`, `ERR`, `ERROR`, `CRIT`, `CRITICAL`, `ALERT`, `EMERG` and `EMERGENCY` will trigger the specified log type. All other lines are output as `INFO` type.
-
-The concrete rules for auto detection may be further optimized in the future...
+This will auto detect the concrete log level for each line. Currently `DEBUG`, `INFO`, `NOTICE`, `WARN`, `WARNING`, `ERR`, `ERROR`, `CRIT`, `CRITICAL`, `ALERT`, `EMERG` and `EMERGENCY` will trigger the specified log type. Some other keywords are also interpreted and all other lines are output as `INFO` type.
 
 ## Log Levels
 
@@ -94,6 +98,7 @@ Eight logging levels are supported, combining the levels from the Python logging
 | INFO               | 20            | 6                     | Python and RFC 5424 |
 | NOTICE             | 25            | 5                     | RFC 5424 specific   |
 | WARN or WARNING    | 30            | 4                     | Python and RFC 5424 |
+| HEADING            | 35            | 4                     | own extension       |
 | ERR or ERROR       | 40            | 3                     | Python and RFC 5424 |
 | CRIT or CRITICAL   | 50            | 2                     | Python and RFC 5424 |
 | ALERT              | 60            | 1                     | RFC 5424 specific   |

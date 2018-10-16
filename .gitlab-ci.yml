@@ -4,6 +4,7 @@ test:
     - npm install -g bats
     - bats test
     - test/colors
+    - test/log-stdout
     - test/log-stderr
     - test/log-auto
     - test/log-file
