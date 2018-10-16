@@ -172,8 +172,6 @@ log () {
             fi
         elif [ -n "$LOG_ROTATE_SIZE" ]; then
             local file_size=$(du -b "$LOG_FILE" | tr -s '\t' ' ' | cut -d' ' -f1)
-            ls -al
-            echo "$file_size <=> $LOG_ROTATE_SIZE"
             if [ $file_size -ge $LOG_ROTATE_SIZE ]; then
                 for i in `seq $((LOG_ROTATE_NUM-1)) -1 1`; do
                     [ -e "$LOG_FILE.$i" ] && mv "$LOG_FILE.$i" "$LOG_FILE.$((i+1))"
