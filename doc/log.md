@@ -14,8 +14,10 @@ The log handler can be used as program or library.
 For usage as command or library the configuration is the same and fully optional:
 
 ```bash
-# use one of the following
-LOG_FILE='STDERR'                   # output to STDERR (default)
+# basic output selection
+LOG_CONSOLE='STDERR'                # output to STDERR (default)
+LOG_CONSOLE='STDOUT'                # output to STDOUT
+# alternatively or additionally use one of the following
 LOG_FILE='/var/log/myscript.log'    # output in file
 SYSLOG_FACILITY='local7'            # output to syslog
 # specify logging

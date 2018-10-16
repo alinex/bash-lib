@@ -95,37 +95,39 @@ LOG_TAG=${LOG_TAG:-$(basename -- "$0")}
 LOG_DATE_FORMAT=${LOG_DATE_FORMAT:-"+%Y-%m-%d %H:%M:%S"}
 declare -u LOG_LEVEL=${LOG_LEVEL:-INFO}
 
-# close descriptor#7 used for output
-trap '7>&-' EXIT
+# close descriptor #6 and #7 used for output
+trap '6>&- 7>&-' EXIT
 
 # check destination setting
-if [ -z "$LOG_FILE" ] && [ -z "$SYSLOG_FACILITY" ]; then
+if [ -z "$LOG_CONSOLE" ] && [ -z "$LOG_FILE" ] && [ -z "$SYSLOG_FACILITY" ]; then
 #    echo red "You must specify a LOG_FILE path or SYSLOG_FACILITY name." >&2
 #    echo "Logging to STDERR by default." >&2
-    LOG_FILE='STDERR'
+    LOG_CONSOLE='STDERR'
+fi
+if [ -n "$LOG_CONSOLE" ] &&[ "$LOG_CONSOLE" != "STDOUT" ] && [ "$LOG_CONSOLE" != "STDERR" ]; then
+    echo $(red "Console output to $LOG_CONSOLE undefined, only STDOUT or STDERR are allowed.") >&2
+    echo "Logging to STDERR by default." >&2
+    LOG_CONSOLE='STDERR'
 fi
 if [ -n "$LOG_FILE" ] && [ -n "$SYSLOG_FACILITY" ]; then
-    red "You must specify a LOG_FILE path or SYSLOG_FACILITY name, but not both." >&2
-    red "Logging to STDERR by default." >&2
-    LOG_FILE='STDERR'
+    echo $(red "You must specify a LOG_FILE path or SYSLOG_FACILITY name, but not both.") >&2
+    echo "Logging to STDERR by default." >&2
+    unset LOG_FILE
+    unset SYSLOG_FACILITY
+    LOG_CONSOLE='STDERR'
 fi
 
+# check if file logging is possible
 if [ -n "$LOG_FILE" ]; then
-    # check if file logging is possible
-    if [ "$LOG_FILE" != "STDERR" ]; then
-        touch "$LOG_FILE" 2>&1
-        if [ $? -ne 0 ]; then
-            red "Could not create $LOG_FILE." >&2
-            red "Logging to STDERR by default." >&2
-            LOG_FILE="STDERR"
-        fi
+    touch "$LOG_FILE" 2>&1
+    if [ $? -ne 0 ]; then
+        echo $(red "Could not create $LOG_FILE.") >&2
+        echo "Logging to STDERR by default." >&2
+        unset LOG_FILE
+        LOG_CONSOLE='STDERR'
     fi
     # set output handle
-    if [ "$LOG_FILE" != "STDERR" ]; then
-        exec 7>> $LOG_FILE
-    else
-        exec 7>&2
-    fi
+    exec 7>> $LOG_FILE
 else
     # setup syslog
     if [[ "$SYSLOG_FACILITY" != local[0-7] ]]; then
@@ -135,6 +137,15 @@ else
     fi
     SYSLOG_FACILITY=$SYSLOG_FACILITY
 fi
+if [ -n "$LOG_CONSOLE" ]; then
+    if [ "$LOG_CONSOLE" = "STDOUT" ]; then
+        exec 6>&1
+    else
+        exec 6>&2
+    fi
+fi
+
+declare -r LOG_CONSOLE
 declare -r LOG_FILE
 declare -r SYSLOG_FACILITY
 
@@ -163,7 +174,7 @@ log () {
     fi
 
     # rotate log files
-    if [ -n "$LOG_FILE" ] && [ "$LOG_FILE" != "STDERR" ] && [ -e "$LOG_FILE" ]; then
+    if [ -e "$LOG_FILE" ]; then
         if [ -n "$LOG_ROTATE_TIME" ]; then
             local file_date=$(date -d "$(stat -c %y $LOG_FILE)" ${_log_rotate_time[$LOG_ROTATE_TIME]})
             local today=$(date ${_log_rotate_time[$LOG_ROTATE_TIME]})
@@ -248,7 +259,8 @@ _log() {
                     "$$" \
                     "$message_level" \
                     "$line"
-                echo "$output" >&7
+                [ -n "$LOG_CONSOLE" ] && echo "$output" >&6
+                [ -n "$LOG_FILE" ] && echo "$output" >&7
             done
         fi
     fi
