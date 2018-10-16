@@ -8,7 +8,7 @@ test:
     - test/log-auto
     - test/log-file
     - test/log-rotate-size
-    - test/log-rotate-file
+    - test/log-rotate-time
 
 # lint:
 #   image: koalaman/shellcheck-alpine
