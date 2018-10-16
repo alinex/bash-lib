@@ -128,7 +128,7 @@ if [ -n "$LOG_FILE" ]; then
     fi
     # set output handle
     exec 7>> $LOG_FILE
-else
+elif [ -n "$SYSLOG_FACILITY" ]; then
     # setup syslog
     if [[ "$SYSLOG_FACILITY" != local[0-7] ]]; then
         red "Only facilities local0 through local7 are supported for syslog." >&2
