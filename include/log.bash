@@ -96,7 +96,7 @@ LOG_DATE_FORMAT=${LOG_DATE_FORMAT:-"+%Y-%m-%d %H:%M:%S"}
 declare -u LOG_LEVEL=${LOG_LEVEL:-INFO}
 
 # close descriptor #6 and #7 used for output
-trap '6>&- 7>&-' EXIT
+trap '7>&-' EXIT
 
 # check destination setting
 if [ -z "$LOG_CONSOLE" ] && [ -z "$LOG_FILE" ] && [ -z "$SYSLOG_FACILITY" ]; then
@@ -136,13 +136,6 @@ elif [ -n "$SYSLOG_FACILITY" ]; then
         SYSLOG_FACILITY='local0'
     fi
     SYSLOG_FACILITY=$SYSLOG_FACILITY
-fi
-if [ -n "$LOG_CONSOLE" ]; then
-    if [ "$LOG_CONSOLE" = "STDOUT" ]; then
-        exec 6>&1
-    else
-        exec 6>&2
-    fi
 fi
 
 declare -r LOG_CONSOLE
@@ -259,8 +252,11 @@ _log() {
                     "$$" \
                     "$message_level" \
                     "$line"
-                [ -n "$LOG_CONSOLE" ] && echo "$output" >&6
                 [ -n "$LOG_FILE" ] && echo "$output" >&7
+                if [ -n "$LOG_CONSOLE" ]; then
+                    [ "$LOG_CONSOLE" = "STDOUT" ] && echo "$output"
+                    [ "$LOG_CONSOLE" = "STDERR" ] && echo "$output" >&2
+                fi
             done
         fi
     fi
