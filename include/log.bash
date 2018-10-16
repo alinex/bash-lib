@@ -12,6 +12,8 @@
 source_dir=$(dirname "${BASH_SOURCE[0]}")
 source "$source_dir/colors.bash" # load color methods
 
+declare -ar _log_detect=(DEBUG NOTICE WARN WARNING HEADING ERR ERROR CRIT CRITICAL ALERT EMERG EMERGENCY)
+
 # Log levels are taken from python and RFC 5424.
 declare -A _log_level
 # These are the python numeric log levels, with the addition
@@ -71,12 +73,12 @@ declare -r _syslog_severity
 declare -A _log_auto
 _log_auto[DEBUG]="\b(DEBUG|COPYRIGHT|WARRANTY)\b|^\s*(AT|AFTER) "
 _log_auto[INFO]="\b(INFO)\b"
-_log_auto[NOTICE]="\b(NOTICE|ERFOLGREICH)\b"
+_log_auto[NOTICE]="\b(NOTICE|ERFOLGREICH|SUCCEEDED|FINISHED)\b"
 _log_auto[WARN]="\b(WARN)\b"
 _log_auto[WARNING]="\b(WARNING|MISSING)\b"
-_log_auto[HEADING]="\b(HEADING|STARTING)\b"
+_log_auto[HEADING]="\b(HEADING)\b"
 _log_auto[ERR]="\b(ERR)\b"
-_log_auto[ERROR]="\b(ERROR|FEHLERHAFT)\b"
+_log_auto[ERROR]="\b(ERROR|FEHLERHAFT|FAILED)\b"
 _log_auto[CRIT]="\b(CRIT)\b"
 _log_auto[CRITICAL]="\b(CRITICAL|FATAL)\b"
 _log_auto[ALERT]="\b(ALERT|EXCEPTION)\b"
@@ -219,7 +221,7 @@ _log() {
     declare -u message_level=$1
     if [ "$message_level" = "AUTO" ]; then
         declare -u message_check=$message
-        for i in "${!_log_auto[@]}"
+        for i in "${_log_detect[@]}"
         do
             if [[ "$message_check" =~ ${_log_auto[$i]} ]]; then
                 message_level=$i
