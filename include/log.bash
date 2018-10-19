@@ -9,7 +9,7 @@
 # source ../bash-lib/include/log.bash  # load functions
 # log $message $file
 
-[ -n "$_log_level"  ] && exit 0 # library already loaded
+[ -n "$_log_level[DEBUG]" ] && return 0 # library already loaded
 
 source_dir=$(dirname "${BASH_SOURCE[0]}")
 source "$source_dir/colors.bash" # load color methods
