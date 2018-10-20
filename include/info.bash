@@ -9,9 +9,12 @@
 # source ../bash-lib/include/info.bash  # load methods
 # data=$(info_debian)
 
+#[ -n "$_log_level[DEBUG]" ] && return 0 # library already loaded
+
 source_dir=$(dirname "${BASH_SOURCE[0]}")
 source "$source_dir/log.bash" # load log handler
 
+# output base os type
 os_type() {
   if [ -f /etc/debian_version ]; then
     echo debian
@@ -19,11 +22,11 @@ os_type() {
 }
 
 # output debian major number
-os() {
-  type=$(os_type)
+os_version() {
+  local type=$(os_type)
   case $type in
   debian)
-    file=/etc/debian_version
+    local file=/etc/debian_version
     [ -f $file ] || return 1
     case $(cat $file) in
     7*|wheezy*) echo 7;;
@@ -41,18 +44,41 @@ os() {
   esac
 }
 
+# lookup for real names
+declare -A _package_debian
+_package_debian[apache]="apache2"
+_package_debian[tomcat]="tomcat7 tomcat8"
+_package_debian[jdk]="openjdk-11-jdk openjdk-10-jdk openjdk-9-jdk  openjdk-8-jdk  openjdk-7-jdk  openjdk-6-jdk"
+_package_debian[jre]="openjdk-11-jre openjdk-10-jre openjdk-9-jre  openjdk-8-jre  openjdk-7-jre  openjdk-6-jre"
+_package_debian[postgresql]="postgresql-10 postgresql-9.6 postgresql-9.4 postgresql-9.3"
+#declare -r _package_debian
+
 # usage: info_package <name>
 # output: version number
 package() {
   [ "$#" -ne 1 ] && log_exit ALERT "parameter missing call: info_package <name>"
 
-  type=$(os_type)
+  local type=$(os_type)
   case $type in
   debian)
-    data=$(dpkg -s $1 2>/dev/null)
-    [ $? -eq 0 ] || return 1
-    echo $data | grep Version | sed "s/Version: //"
-    return 0
+    alt=${_package_debian[$1]}
+    if [ -n "$alt" ]; then
+      for check in $alt
+      do
+        # check package
+        local found=$(dpkg -s $check 2>/dev/null)
+        if [ -n "$found" ]; then
+          echo -e "$found" | grep Version | sed "s/Version: //"
+          return 0
+        fi
+      done
+    else
+      local found=$(dpkg -s $1 2>/dev/null)
+      [ $? -eq 0 ] || return 1
+      echo -e "$found" | grep Version | sed "s/Version: //"
+      return 0
+    fi
+    return 1
     ;;
   *)
     log_exit ALERT "unknown operating system $type not supported"

@@ -32,3 +32,4 @@ To easily call the contained programs you may add `/opt/bash-lib` to the search 
 - [locking](doc/locking.md) to serialize parallel tasks
 - [log](doc/log.md) log handler to write to file, STDERR or syslog
 - [colors](doc/colors.md) predefined color variables
+- [info](doc/info.md) is a collection of system information methods
