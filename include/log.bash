@@ -281,7 +281,6 @@ log_exit() {
     exit "$code"
 }
 
-
 # Usage: log_cmd <cmd> [<args>...]
 # Result: command output
 # Code: from command, too
