@@ -81,7 +81,7 @@ run-process 2>&1 >/dev/null | log ERROR # log stderr
 run-process |& log INFO # log stdin + stderr
 ( run-process | log INFO ) 3>&1 1>&2 2>&3 | log ERROR # log both differently
 ( run-process 3>&1 1>&2 2>&3 | log ERROR ) 3>&1 1>&2 2>&3 | log INFO # priorize INFO
-result=$(run-process |& tee >(log AUTO) | cat) # log output and store it in variable
+result=$(run-process |& tee >(log) | cat) # log output and store it in variable
 ```
 
 The lines four and five shows how to flip `STDOUT` and `STDERR` as pipe works on file descriptor one only.
@@ -91,8 +91,8 @@ The lines four and five shows how to flip `STDOUT` and `STDERR` as pipe works on
 Often useful in pipes but also usable in other log messages is the special `AUTO` log setting:
 
 ```bash
-run-process |& log AUTO
-( run-process 3>&1 1>&2 2>&3 | log ERROR ) 3>&1 1>&2 2>&3 | log AUTO # STDERR always as ERROR
+run-process |& log
+( run-process 3>&1 1>&2 2>&3 | log ERROR ) 3>&1 1>&2 2>&3 | log # STDERR always as ERROR
 ```
 
 This will auto detect the concrete log level for each line. Currently `DEBUG`, `INFO`, `NOTICE`, `WARN`, `WARNING`, `ERR`, `ERROR`, `CRIT`, `CRITICAL`, `ALERT`, `EMERG` and `EMERGENCY` will trigger the specified log type. Some other keywords are also interpreted and all other lines are output as `DEBUG` type.

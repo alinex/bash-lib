@@ -9,7 +9,7 @@
 # source ../bash-lib/include/log.bash  # load functions
 # log $message $file
 
-[ -n "$_log_level[DEBUG]" ] && return 0 # library already loaded
+#[ -n "$_log_level[DEBUG]" ] && return 0 # library already loaded
 
 source_dir=$(dirname "${BASH_SOURCE[0]}")
 source "$source_dir/colors.bash" # load color methods
@@ -221,7 +221,7 @@ _log() {
     message_date=$(date "${LOG_DATE_FORMAT}")
 
     # check message level
-    declare -u message_level=$1
+    declare -u message_level=${1:-AUTO}
     if [ "$message_level" = "AUTO" ]; then
         declare -u message_check=$message
         for i in "${_log_detect[@]}"
@@ -231,7 +231,7 @@ _log() {
             fi
         done
         # set default if not matched
-        if [ $message_level = "AUTO" ]; then
+        if [ "$message_level" = "AUTO" ]; then
             message_level="DEBUG"
         fi
     fi
@@ -272,23 +272,27 @@ _log() {
 
 # Usage: log_exit <level> <message> [<code>]
 log_exit() {
-    [ "$#" -le 2 ] && log_exit ALERT "parameter missing. Usage: log_exit <level> <message> [<code>]"
+    if [ "$#" -lt 2 ]; then
+        log ALERT "parameter missing. Usage: log_exit <level> <message> [<code>]"
+        exit 1
+    fi
     log "$1" "$2"
     local code="${3:-1}"
     exit "$code"
 }
 
+
 # Usage: log_cmd <cmd> [<args>...]
 # Result: command output
 # Code: from command, too
 log_cmd() {
-    [ "$#" -ne 1 ] && log_exit ALERT "parameter missing. Usage: log_cmd <cmd> [<args>...]"
+    [ "$#" -lt 1 ] && log_exit ALERT "parameter missing. Usage: log_cmd <cmd> [<args>...]"
 
     local cmd=$1
     log INFO "calling: $@"
-    result=$(eval $(printf "%q " "$@") |& tee >(log AUTO) | cat)
+    result=$(eval $(printf "%q " "$@") |& tee >(log) | cat)
     if [ $? -eq 0 ]; then
-        log NOTICE "$cmd call succeeded"
+        log INFO "$cmd call succeeded"
     else
         log ERROR "$cmd exited with return code $?"
     fi

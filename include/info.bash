@@ -14,34 +14,36 @@
 source_dir=$(dirname "${BASH_SOURCE[0]}")
 source "$source_dir/log.bash" # load log handler
 
-# Output: base os type
+# Result: base os type
 os_type() {
   if [ -f /etc/debian_version ]; then
-    echo debian
+    result="debian"
   fi
 }
 
-# Output: debian major number
+# Result: debian major number
 os_version() {
-  local type=$(os_type)
+  os_type
+  local type=$result
   case $type in
   debian)
     local file=/etc/debian_version
     [ -f $file ] || return 1
     case $(cat $file) in
-    7*|wheezy*) echo 7;;
-    8*|jessie*) echo 8;;
-    9*|stretch*) echo 9;;
-    1ß*|buster*) echo 10;;
-    11*|bullseye*) echo 11;;
-    12*|bookworm*) echo 12;;
-    *) cat $file;;
+    7*|wheezy*) result=7;;
+    8*|jessie*) result=8;;
+    9*|stretch*) result=9;;
+    1ß*|buster*) result=10;;
+    11*|bullseye*) result=11;;
+    12*|bookworm*) result=12;;
+    *) result=$(cat $file);;
     esac
     ;;
   *)
     log_exit ALERT "unknown operating system $type not supported"
     ;;
   esac
+  log INFO "detected $type version $result"
 }
 
 # lookup for real names
@@ -54,11 +56,12 @@ _package_debian[postgresql]="postgresql-10 postgresql-9.6 postgresql-9.4 postgre
 #declare -r _package_debian
 
 # Usage: info_package <name>
-# Output: version number
+# Result: version number
 package() {
   [ "$#" -ne 1 ] && log_exit ALERT "parameter missing. Usage: info_package <name>"
 
-  local type=$(os_type)
+  os_type
+  local type=$result
   case $type in
   debian)
     alt=${_package_debian[$1]}
@@ -68,14 +71,16 @@ package() {
         # check package
         local found=$(dpkg -s $check 2>/dev/null)
         if [ -n "$found" ]; then
-          echo -e "$found" | grep Version | sed "s/Version: //"
+          result=$(echo -e "$found" | grep Version | sed "s/Version: //")
+          log DEBUG "package $1 is installed with version $result"
           return 0
         fi
       done
     else
       local found=$(dpkg -s $1 2>/dev/null)
       [ $? -eq 0 ] || return 1
-      echo -e "$found" | grep Version | sed "s/Version: //"
+      result=$(echo -e "$found" | grep Version | sed "s/Version: //")
+      log DEBUG "package $1 is installed with version $result"
       return 0
     fi
     return 1
