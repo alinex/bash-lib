@@ -74,7 +74,7 @@ declare -r _syslog_severity
 
 declare -A _log_auto
 _log_auto[DEBUG]="\b(DEBUG|COPYRIGHT|WARRANTY)\b|^\s*(AT|AFTER) "
-_log_auto[INFO]="\b(INFO)\b"
+_log_auto[INFO]="\b(INFO|START(ING)?)\b"
 _log_auto[NOTICE]="\b(NOTICE|ERFOLGREICH|SUCCEEDED|FINISHED)\b"
 _log_auto[WARN]="\b(WARN)\b"
 _log_auto[WARNING]="\b(WARNING|MISSING)\b"
@@ -231,7 +231,7 @@ _log() {
         done
         # set default if not matched
         if [ $message_level = "AUTO" ]; then
-            message_level="INFO"
+            message_level="DEBUG"
         fi
     fi
     if [ -z "${_log_level[$message_level]}" ]; then
