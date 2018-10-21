@@ -23,13 +23,23 @@ To easily call the contained programs you may add `/opt/bash-lib` to the search 
 
 ## Programs
 
-- [log](doc/log.md) log command to write to file, STDERR or syslog
+- [log](doc/log.md) log command to write to file, `STDERR` or syslog
 - [sendmail](doc/sendmail.md) is a simple SMTP mailer
 
 ## Libraries
 
-- [skeleton](doc/skeleton.md) is used as template to create new scripts
+Methods may return three different parts:
+
+- `$?` exit code which is 0 on success
+- `$result` from the called method if possible
+- direct console output which may be captured or be piped
+  (internal commands will directly call the log module so no need to do this here)
+
+The following modules are available:
+
 - [locking](doc/locking.md) to serialize parallel tasks
-- [log](doc/log.md) log handler to write to file, STDERR or syslog
+- [log](doc/log.md) log handler to write to file, `STDERR` or syslog
 - [colors](doc/colors.md) predefined color variables
 - [info](doc/info.md) is a collection of system information methods
+
+Additionally a [skeleton](doc/skeleton.md) is used as template to create new scripts.

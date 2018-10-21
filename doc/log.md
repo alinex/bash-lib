@@ -63,6 +63,14 @@ log_exit EMERG "preprocessing not done, stopping" 16
 
 While the first call will only output the log message, the second call also exits the running program with the additionally given exit code.
 
+To log the call of some other routines use:
+
+```bash
+log_cmd date +%Y-%m-%d
+```
+
+This will use the auto detection logger and give you the result of the command in variable `$result`.
+
 ## Piping messages
 
 But you can also pipe output from other commands directly to the log:
@@ -73,9 +81,10 @@ run-process 2>&1 >/dev/null | log ERROR # log stderr
 run-process |& log INFO # log stdin + stderr
 ( run-process | log INFO ) 3>&1 1>&2 2>&3 | log ERROR # log both differently
 ( run-process 3>&1 1>&2 2>&3 | log ERROR ) 3>&1 1>&2 2>&3 | log INFO # priorize INFO
+result=$(run-process |& tee >(log AUTO) | cat) # log output and store it in variable
 ```
 
-The last lines shows how to flip `STDOUT` and `STDERR` as pipe works on file descriptor one only.
+The lines four and five shows how to flip `STDOUT` and `STDERR` as pipe works on file descriptor one only.
 
 ## Auto detect Level
 
@@ -86,7 +95,7 @@ run-process |& log AUTO
 ( run-process 3>&1 1>&2 2>&3 | log ERROR ) 3>&1 1>&2 2>&3 | log AUTO # STDERR always as ERROR
 ```
 
-This will auto detect the concrete log level for each line. Currently `DEBUG`, `INFO`, `NOTICE`, `WARN`, `WARNING`, `ERR`, `ERROR`, `CRIT`, `CRITICAL`, `ALERT`, `EMERG` and `EMERGENCY` will trigger the specified log type. Some other keywords are also interpreted and all other lines are output as `INFO` type.
+This will auto detect the concrete log level for each line. Currently `DEBUG`, `INFO`, `NOTICE`, `WARN`, `WARNING`, `ERR`, `ERROR`, `CRIT`, `CRITICAL`, `ALERT`, `EMERG` and `EMERGENCY` will trigger the specified log type. Some other keywords are also interpreted and all other lines are output as `DEBUG` type.
 
 ## Log Levels
 

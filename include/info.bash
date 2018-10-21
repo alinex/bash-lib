@@ -14,14 +14,14 @@
 source_dir=$(dirname "${BASH_SOURCE[0]}")
 source "$source_dir/log.bash" # load log handler
 
-# output base os type
+# Output: base os type
 os_type() {
   if [ -f /etc/debian_version ]; then
     echo debian
   fi
 }
 
-# output debian major number
+# Output: debian major number
 os_version() {
   local type=$(os_type)
   case $type in
@@ -48,15 +48,15 @@ os_version() {
 declare -A _package_debian
 _package_debian[apache]="apache2"
 _package_debian[tomcat]="tomcat7 tomcat8"
-_package_debian[jdk]="openjdk-11-jdk openjdk-10-jdk openjdk-9-jdk  openjdk-8-jdk  openjdk-7-jdk  openjdk-6-jdk"
-_package_debian[jre]="openjdk-11-jre openjdk-10-jre openjdk-9-jre  openjdk-8-jre  openjdk-7-jre  openjdk-6-jre"
+_package_debian[jdk]="openjdk-11-jdk openjdk-10-jdk openjdk-9-jdk openjdk-8-jdk openjdk-7-jdk openjdk-6-jdk"
+_package_debian[jre]="openjdk-11-jre openjdk-10-jre openjdk-9-jre openjdk-8-jre openjdk-7-jre openjdk-6-jre"
 _package_debian[postgresql]="postgresql-10 postgresql-9.6 postgresql-9.4 postgresql-9.3"
 #declare -r _package_debian
 
-# usage: info_package <name>
-# output: version number
+# Usage: info_package <name>
+# Output: version number
 package() {
-  [ "$#" -ne 1 ] && log_exit ALERT "parameter missing call: info_package <name>"
+  [ "$#" -ne 1 ] && log_exit ALERT "parameter missing. Usage: info_package <name>"
 
   local type=$(os_type)
   case $type in

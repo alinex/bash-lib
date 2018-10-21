@@ -161,7 +161,8 @@ declare -r LOG_ROTATE_SIZE
 declare -i LOG_ROTATE_NUM=${LOG_ROTATE_NUM:-9}
 declare -r LOG_ROTATE_NUM
 
-# log <level> <message> or | log <level>
+# Usage: log <level> <message>
+# With input pipe: log <level>
 log () {
 
     # check for valid log level
@@ -269,8 +270,27 @@ _log() {
 
 }
 
+# Usage: log_exit <level> <message> [<code>]
 log_exit() {
+    [ "$#" -le 2 ] && log_exit ALERT "parameter missing. Usage: log_exit <level> <message> [<code>]"
     log "$1" "$2"
     local code="${3:-1}"
     exit "$code"
+}
+
+# Usage: log_cmd <cmd> [<args>...]
+# Result: command output
+# Code: from command, too
+log_cmd() {
+    [ "$#" -ne 1 ] && log_exit ALERT "parameter missing. Usage: log_cmd <cmd> [<args>...]"
+
+    local cmd=$1
+    log INFO "calling: $@"
+    result=$(eval $(printf "%q " "$@") |& tee >(log AUTO) | cat)
+    if [ $? -eq 0 ]; then
+        log NOTICE "$cmd call succeeded"
+    else
+        log ERROR "$cmd exited with return code $?"
+    fi
+    return $?
 }
