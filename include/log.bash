@@ -104,7 +104,7 @@ trap '7>&-' EXIT
 
 # check destination setting
 if [ -z "$LOG_CONSOLE" ] && [ -z "$LOG_FILE" ] && [ -z "$SYSLOG_FACILITY" ]; then
-#    echo red "You must specify a LOG_FILE path or SYSLOG_FACILITY name." >&2
+#    echo $(red "You must specify a LOG_FILE path or SYSLOG_FACILITY name.") >&2
 #    echo "Logging to STDERR by default." >&2
     LOG_CONSOLE='STDERR'
 fi
@@ -135,7 +135,7 @@ if [ -n "$LOG_FILE" ]; then
 elif [ -n "$SYSLOG_FACILITY" ]; then
     # setup syslog
     if [[ "$SYSLOG_FACILITY" != local[0-7] ]]; then
-        red "Only facilities local0 through local7 are supported for syslog." >&2
+        red "Only facilities local0 through local7 are supported for syslog. " >&2
         red "Logging to local0 by default." >&2
         SYSLOG_FACILITY='local0'
     fi
@@ -150,7 +150,7 @@ declare -r SYSLOG_FACILITY
 if [ -n "$LOG_ROTATE_TIME" ]; then
     declare -u LOG_ROTATE_TIME
     if [ -z "${_log_rotate_time[$LOG_ROTATE_TIME]}" ]; then
-        red "\"$LOG_ROTATE_TIME\" is not a valid LOG_ROTATE_TIME value at line ${BASH_LINENO[0]}. Defaulting to \"DAILY\"." >&2
+        echo $(red "\"$LOG_ROTATE_TIME\" is not a valid LOG_ROTATE_TIME value at $LOG_TAG line ${BASH_LINENO[0]}. Defaulting to \"DAILY\".") >&2
         LOG_ROTATE_TIME="DAILY"
     fi
     declare -r LOG_ROTATE_TIME
@@ -167,7 +167,8 @@ log () {
 
     # check for valid log level
     if [ -z "${_log_level[$LOG_LEVEL]}" ]; then
-        red "\"$LOG_LEVEL\" is not a valid LOG_LEVEL at line ${BASH_LINENO[0]}. Defaulting to \"INFO\"." >&2
+
+        echo $(red "\"$LOG_LEVEL\" is not a valid LOG_LEVEL at $LOG_TAG line ${BASH_LINENO[0]}. Defaulting to \"INFO\".") >&2
         LOG_LEVEL="INFO"
     fi
 
@@ -199,6 +200,12 @@ log () {
         fi
     fi
 
+    declare -u message_level=${1:-AUTO}
+    if [ ! "$message_level" = "AUTO" ] && [ -z "${_log_level[$1]}" ]; then
+        echo $(red "\"${message_level}\" is not a valid message log level at $LOG_TAG line ${BASH_LINENO[0]}. ") >&2
+        exit 1
+    fi
+
     if [ -n "$2" ]; then
         # direct input
         _log "$1" "$2"
@@ -215,7 +222,6 @@ log () {
 _log() {
 
     IFS=$'\n'
-
     local message=$2
     local message_date
     message_date=$(date "${LOG_DATE_FORMAT}")
@@ -234,10 +240,6 @@ _log() {
         if [ "$message_level" = "AUTO" ]; then
             message_level="DEBUG"
         fi
-    fi
-    if [ -z "${_log_level[$message_level]}" ]; then
-        red "\"${message_level}\" is not a valid message log level at line ${BASH_LINENO[0]}. Defaulting to \"INFO\"." >&2
-        message_level="INFO"
     fi
 
     local max_log_level=${_log_level[$LOG_LEVEL]}
