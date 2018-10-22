@@ -123,12 +123,17 @@ fi
 
 # check if file logging is possible
 if [ -n "$LOG_FILE" ]; then
-    touch "$LOG_FILE" 2>&1
-    if [ $? -ne 0 ]; then
-        echo $(red "Could not create $LOG_FILE.") >&2
-        echo "Logging to STDERR by default." >&2
-        unset LOG_FILE
-        LOG_CONSOLE='STDERR'
+    if [ ! -e "$LOG_FILE" ]; then
+        touch "$LOG_FILE" 2>&1
+        if [ $? -ne 0 ]; then
+            echo $(red "Could not create $LOG_FILE.") >&2
+            echo "Logging to STDERR by default." >&2
+            unset LOG_FILE
+            LOG_CONSOLE='STDERR'
+        fi
+    elif [ ! -w "$LOG_FILE" ]; then
+        echo $(red "Could not write to $LOG_FILE.") >&2
+        exit 1
     fi
     # set output handle
     exec 7>> $LOG_FILE
