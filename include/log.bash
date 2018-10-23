@@ -209,12 +209,12 @@ log () {
 
     if [ -n "$2" ]; then
         # direct input
-        _log "$message" "$2"
+        _log "$1" "$2"
     else
         # read from pipe
         while read line
         do
-            _log "$message" "$line"
+            _log "$1" "$line"
         done < /dev/stdin
     fi
 }
