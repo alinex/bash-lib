@@ -14,7 +14,7 @@
 source_dir=$(dirname "${BASH_SOURCE[0]}")
 source "$source_dir/colors.bash" # load color methods
 
-declare -ar _log_detect=(DEBUG NOTICE WARN WARNING HEADING ERR ERROR CRIT CRITICAL ALERT EMERG EMERGENCY)
+declare -ar _log_detect=(DEBUG INFO NOTICE WARN WARNING HEADING ERR ERROR CRIT CRITICAL ALERT EMERG EMERGENCY)
 
 # Log levels are taken from python and RFC 5424.
 declare -A _log_level
