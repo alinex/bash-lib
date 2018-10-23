@@ -149,9 +149,6 @@ if [ -z "$LOG_FILE" ] && [ -n "$SYSLOG_FACILITY" ]; then
     SYSLOG_FACILITY=$SYSLOG_FACILITY
 fi
 
-declare -r LOG_CONSOLE
-declare -r SYSLOG_FACILITY
-
 # check for valid log rotation time
 if [ -n "$LOG_ROTATE_TIME" ]; then
     declare -u LOG_ROTATE_TIME
