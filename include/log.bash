@@ -209,12 +209,12 @@ log () {
 
     if [ -n "$2" ]; then
         # direct input
-        _log "$1" "$2"
+        _log "$message" "$2"
     else
         # read from pipe
         while read line
         do
-            _log "$1" "$line"
+            _log "$message" "$line"
         done < /dev/stdin
     fi
 }
@@ -247,6 +247,7 @@ _log() {
     if [ ${_log_level[$message_level]} -ge $max_log_level ]; then
         if [ -n "$SYSLOG_FACILITY" ]; then
             for line in $message; do
+                line=$(echo "$line" | tr '\r' '\n')
                 logger -i \
                     -t "$LOG_TAG" \
                     -p "${SYSLOG_FACILITY}.${_syslog_severity[$message_level]}" \
@@ -254,6 +255,7 @@ _log() {
             done
         else
             for line in $message; do
+                line=$(echo "$line" | tr '\r' '\n')
                 printf -v output "${_log_color[$message_level]}%s %s[%s] %s: %s$(reset)" \
                     "$message_date" \
                     "$LOG_TAG" \
