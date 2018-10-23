@@ -121,9 +121,10 @@ if [ -n "$LOG_FILE" ] && [ -n "$SYSLOG_FACILITY" ]; then
     LOG_CONSOLE='STDERR'
 fi
 
-# check if file logging is possible
-if [ -n "$LOG_FILE" ]; then
-    if [ ! -e "$LOG_FILE" ]; then
+# reinitialize logging (if file is changed)
+log_init() {
+    # check if file logging is possible
+    if [ -n "$LOG_FILE" ]; then
         touch "$LOG_FILE" 2>&1
         if [ $? -ne 0 ]; then
             echo $(red "Could not create $LOG_FILE.") >&2
@@ -131,16 +132,17 @@ if [ -n "$LOG_FILE" ]; then
             unset LOG_FILE
             LOG_CONSOLE='STDERR'
         fi
-    elif [ ! -w "$LOG_FILE" ]; then
-        echo $(red "Could not write to $LOG_FILE.") >&2
-        exit 1
+        # set output handle
+#        exec 7>&-
+        exec 7>> $LOG_FILE
     fi
-    # set output handle
-    exec 7>> $LOG_FILE
-elif [ -n "$SYSLOG_FACILITY" ]; then
-    # setup syslog
+}
+log_init
+
+# setup syslog
+if [ -z "$LOG_FILE" ] && [ -n "$SYSLOG_FACILITY" ]; then
     if [[ "$SYSLOG_FACILITY" != local[0-7] ]]; then
-        red "Only facilities local0 through local7 are supported for syslog. " >&2
+        red "Only facilities local0 through local7 are supported for syslog." >&2
         red "Logging to local0 by default." >&2
         SYSLOG_FACILITY='local0'
     fi
@@ -148,7 +150,6 @@ elif [ -n "$SYSLOG_FACILITY" ]; then
 fi
 
 declare -r LOG_CONSOLE
-declare -r LOG_FILE
 declare -r SYSLOG_FACILITY
 
 # check for valid log rotation time
@@ -186,8 +187,7 @@ log () {
                 mv "$LOG_FILE" "$LOG_FILE.$file_date"
                 [ -n "$LOG_ROTATE_COMPRESS" ] && gzip -q --best "$LOG_FILE.$file_date"
                 # reopen file handle
-                exec 7>&2
-                exec 7>> $LOG_FILE
+                log_init
             fi
         elif [ -n "$LOG_ROTATE_SIZE" ]; then
             local file_size=$(du -b "$LOG_FILE" | tr -s '\t' ' ' | cut -d' ' -f1)
@@ -199,8 +199,7 @@ log () {
                 mv "$LOG_FILE" "$LOG_FILE.1"
                 [ -n "$LOG_ROTATE_COMPRESS" ] && gzip -q --best "$LOG_FILE.1"
                 # reopen file handle
-                exec 7>&2
-                exec 7>> $LOG_FILE
+                log_init
             fi
         fi
     fi

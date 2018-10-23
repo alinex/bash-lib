@@ -144,3 +144,7 @@ LOG_ROTATE_NUM=<max number of files>
 The rotated files may also be compressed by setting the `LOG_ROTATE_COMPRESS` flag.
 
 > But you can't combine the two rotation methods by date and by size, currently.
+
+## Switching log file
+
+If really neccessary, it is possible to switch log file by changing the setting of `LOG_FILE` and calling `log_init` without parameters.
