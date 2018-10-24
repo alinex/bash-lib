@@ -11,7 +11,7 @@
 
 #[ -n "$_log_level[DEBUG]" ] && return 0 # library already loaded
 
-source_dir=$(dirname "${BASH_SOURCE[0]}")
+source_dir=$(dirname $(readlink -f "${BASH_SOURCE[0]}"))
 source "$source_dir/log.bash" # load log handler
 
 # Result: base os type
