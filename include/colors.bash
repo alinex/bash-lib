@@ -48,3 +48,9 @@ dim() { tput -T$term dim; _color_text "$@"; }
 
 # Reset
 reset() { tput -T$term sgr0; }
+
+# remove color codes from text
+# Usage: result=$(uncolor "$result")
+uncolor() {
+  sed -r "s/\x1b\[([0-9]{1,2}(;[0-9]{1,2})?)?m//g" <<< $1
+}

@@ -74,9 +74,9 @@ declare -r _syslog_severity
 
 declare -A _log_auto
 _log_auto[DEBUG]="\b(DEBUG|COPYRIGHT|WARRANTY)\b|^\s*(AT|AFTER) "
-_log_auto[INFO]="\b(INFO|START(ING)?)\b"
+_log_auto[INFO]="\b(INFO|(START|CALL)(ING)?)\b"
 _log_auto[NOTICE]="\b(NOTICE|ERFOLGREICH|SUCCEEDED|FINISHED)\b"
-_log_auto[WARN]="\b(WARN)\b"
+_log_auto[WARN]="\b(WARN|TRANSMITTED)\b"
 _log_auto[WARNING]="\b(WARNING|MISSING)\b"
 _log_auto[HEADING]="\b(HEADING)\b"
 _log_auto[ERR]="\b(ERR)\b"
@@ -288,14 +288,15 @@ log_exit() {
 }
 
 # Usage: log_cmd <cmd> [<args>...]
-# Result: command output
 # Code: from command, too
 log_cmd() {
     [ "$#" -lt 1 ] && log_exit ALERT "parameter missing. Usage: log_cmd <cmd> [<args>...]"
 
     local cmd=$1
     log INFO "calling: $@"
-    result=$(eval $(printf "%q " "$@") |& tee >(log) | cat)
+    exec 5>&1
+    result=$(eval $(printf "%q " "$@") |& tee >/dev/fd/5 >(log) )
+    exec 5>&-
     if [ $? -eq 0 ]; then
         log INFO "$cmd call succeeded"
     else
