@@ -43,5 +43,3 @@ The following modules are available:
 - [info](doc/info.md) is a collection of system information methods
 
 Additionally a [skeleton](doc/skeleton.md) is used as template to create new scripts.
-
-OK

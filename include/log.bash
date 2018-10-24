@@ -125,15 +125,16 @@ fi
 log_init() {
     # check if file logging is possible
     if [ -n "$LOG_FILE" ]; then
-        touch "$LOG_FILE" 2>&1
-        if [ $? -ne 0 ]; then
-            echo $(red "Could not create $LOG_FILE.") >&2
-            echo "Logging to STDERR by default." >&2
-            unset LOG_FILE
-            LOG_CONSOLE='STDERR'
+        if [ ! -r "$LOG_FILE" ]; then
+            touch "$LOG_FILE" 2>&1
+            if [ $? -ne 0 ]; then
+                echo $(red "Could not create $LOG_FILE.") >&2
+                echo "Logging to STDERR by default." >&2
+                unset LOG_FILE
+                LOG_CONSOLE='STDERR'
+            fi
         fi
         # set output handle
-#        exec 7>&-
         exec 7>> $LOG_FILE
     fi
 }
