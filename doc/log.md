@@ -147,4 +147,4 @@ The rotated files may also be compressed by setting the `LOG_ROTATE_COMPRESS` fl
 
 ## Switching log file
 
-If really neccessary, it is possible to switch log file by changing the setting of `LOG_FILE` and calling `log_init` without parameters.
+If really necessary, it is possible to switch log file by changing the setting of `LOG_FILE` and calling `log_init` without parameters.

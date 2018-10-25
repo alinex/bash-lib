@@ -43,3 +43,18 @@ The following modules are available:
 - [info](doc/info.md) is a collection of system information methods
 
 Additionally a [skeleton](doc/skeleton.md) is used as template to create new scripts.
+
+## Minified lib
+
+A combined and minified lib to include is provided under `/lib.bash` which contains all of the above libraries.
+
+## Inclusion
+
+Best way to include the libraries is to use a relative path:
+
+```bash
+source_dir=$(dirname $(readlink -f "${BASH_SOURCE[0]:-./}"))
+source "$source_dir/lib.bash"
+```
+
+If you need the `$source_dir` path after this again, better set it because it may be changed while including.

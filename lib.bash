@@ -31,7 +31,7 @@ reset() { tput -T$term sgr0; }
 uncolor() {
   sed -r "s/\x1b\[([0-9]{1,2}(;[0-9]{1,2})?)?m//g" <<< $1
 }
-[ -n "$_log_level[DEBUG]" ] && return 0
+[ -n "${_log_level[DEBUG]}" ] && return 0
 source_dir=$(dirname $(readlink -f "${BASH_SOURCE[0]}"))
 declare -ar _log_detect=(DEBUG INFO NOTICE WARN WARNING HEADING ERR ERROR CRIT CRITICAL ALERT EMERG EMERGENCY)
 declare -A _log_level
@@ -309,91 +309,4 @@ unlock() {
         fi
     fi
     return 0
-}
-source_dir=$(dirname "${BASH_SOURCE[0]}")
-OS=$(uname | tr '[:upper:]' '[:lower:]')
-KERNEL=$(uname -r)
-MACH=$(uname -m)
-if [ "{$OS}" == "windowsnt" ]; then
-    OS=Windows
-elif [ "{$OS}" == "darwin" ]; then
-    OS=Mac
-else
-    OS=$(uname)
-    if [ "${OS}" = "SunOS" ] ; then
-        OS=Solaris
-        MACH=$(uname -p)
-    elif [ "${OS}" = "Linux" ] ; then
-        if [ -f /etc/redhat-release ] ; then
-            DIST_BASE='RedHat'
-            DIST=$(cat /etc/redhat-release | sed s/\ release.*//)
-            REV_NAME=$(cat /etc/redhat-release | sed s/.*\(// | sed s/\)//)
-            REV=$(cat /etc/redhat-release | sed s/.*release\ // | sed s/\ .*//)
-        elif [ -f /etc/SuSE-release ] ; then
-            DIST_BASE='SuSe'
-            REV_NAME=$(cat /etc/SuSE-release | tr "\n" ' '| sed s/VERSION.*//)
-            REV=$(cat /etc/SuSE-release | tr "\n" ' ' | sed s/.*=\ //)
-        elif [ -f /etc/mandrake-release ] ; then
-            DIST_BASE='Mandrake'
-            REV_NAME=$(cat /etc/mandrake-release | sed s/.*\(// | sed s/\)//)
-            REV=$(cat /etc/mandrake-release | sed s/.*release\ // | sed s/\ .*//)
-        elif [ -f /etc/debian_version ] ; then
-            DIST_BASE='Debian'
-            DIST=$(grep '^DISTRIB_ID' /etc/lsb-release | awk -F=  '{ print $2 }')
-            REV_NAME=$(grep '^DISTRIB_CODENAME' /etc/lsb-release | awk -F=  '{ print $2 }')
-            REV=$(grep '^DISTRIB_RELEASE' /etc/lsb-release | awk -F=  '{ print $2 }')
-        fi
-        if [ -f /etc/UnitedLinux-release ] ; then
-            DIST="${DIST}[$(cat /etc/UnitedLinux-release | tr "\n" ' ' | sed s/VERSION.*//)]"
-        fi
-        declare -r OS
-        declare -r KERNEL
-        declare -r MACH
-        declare -r DIST
-        declare -r DIST_BASE
-        declare -r REV_NAME
-        declare -r REV
-    fi
-fi
-system_info() {
-  local dist_base
-  local rev
-  [ -n "$DIST_BASE" ] && dist_base=" based on $DIST_BASE"
-  [ -n "$REV" ] && rev=" $REV $REV_NAME"
-  echo "$OS system with kernel $KERNEL $MACH ($DIST$rev$dist_base)"
-}
-declare -A _package_debian
-_package_debian[apache]="apache2"
-_package_debian[tomcat]="tomcat7 tomcat8"
-_package_debian[jdk]="openjdk-11-jdk openjdk-10-jdk openjdk-9-jdk openjdk-8-jdk openjdk-7-jdk openjdk-6-jdk"
-_package_debian[jre]="openjdk-11-jre openjdk-10-jre openjdk-9-jre openjdk-8-jre openjdk-7-jre openjdk-6-jre"
-_package_debian[postgresql]="postgresql-10 postgresql-9.6 postgresql-9.4 postgresql-9.3"
-package() {
-  [ "$#" -ne 1 ] && log_exit ALERT "parameter missing. Usage: info_package <name>"
-  case $DIST_BASE in
-  Debian)
-    alt=${_package_debian[$1]}
-    if [ -n "$alt" ]; then
-      for check in $alt
-      do
-        local found=$(dpkg -s $check 2>/dev/null)
-        if [ -n "$found" ]; then
-          result=$(echo -e "$found" | grep Version | sed "s/Version: //")
-          log DEBUG "package $1 is installed with version $result"
-          return 0
-        fi
-      done
-    else
-      local found=$(dpkg -s $1 2>/dev/null)
-      [ $? -eq 0 ] || return 1
-      result=$(echo -e "$found" | grep Version | sed "s/Version: //")
-      log DEBUG "package $1 is installed with version $result"
-      return 0
-    fi
-    return 1
-    ;;
-  *)
-    log_exit ALERT "operating system not supported: $(system_info)"
-    ;;
-  esac
 }
