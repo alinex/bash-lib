@@ -2,7 +2,7 @@
 
 # Library for colorized output
 #
-# https://gitlab.ekz.de/divibib-betrieb/helper-lib/blob/master/doc/colors.md
+# http://172.17.101.90/ivibib-betrieb/helper-lib/blob/master/doc/colors.md
 #
 # Usage:
 #

@@ -2,7 +2,7 @@
 
 # Script to easily send email from command line
 #
-# https://gitlab.ekz.de/divibib-betrieb/server-utils/blob/master/doc/sendmail.md
+# http://172.17.101.90/divibib-betrieb/server-utils/blob/master/doc/sendmail.md
 #
 # Usage: sendmail <params>
 #

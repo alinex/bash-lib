@@ -2,48 +2,83 @@
 
 # Library for colorized output
 #
-# https://gitlab.ekz.de/divibib-betrieb/helper-lib/blob/master/doc/info.md
+# http://172.17.101.90/ivibib-betrieb/helper-lib/blob/master/doc/info.md
 #
 # Usage:
 #
 # source ../bash-lib/include/info.bash  # load methods
 # data=$(info_debian)
 
-#[ -n "$_log_level[DEBUG]" ] && return 0 # library already loaded
+#[ -n "$OS" ] && return 0 # library already loaded
 
-source_dir=$(dirname $(readlink -f "${BASH_SOURCE[0]}"))
+source_dir=$(dirname "${BASH_SOURCE[0]}")
 source "$source_dir/log.bash" # load log handler
 
-# Result: base os type
-os_type() {
-  if [ -f /etc/debian_version ]; then
-    result="debian"
-  fi
-}
+# OS - type of OS like: Linux, windows, mac, Solaris, AIX
+# KERNERL - version number like: 4.4.0-135-generic
+# MACH - machine type like: x86_64
+# DIST_BASE - distribution (for Linux): RedHat, SuSe, Mandrake, Debian
+# DIST - distribution like: LinuxMint, Ubuntu
+# REV - revision number of distribution
+# REV_NAME - code name of this revision
 
-# Result: debian major number
-os_version() {
-  os_type
-  local type=$result
-  case $type in
-  debian)
-    local file=/etc/debian_version
-    [ -f $file ] || return 1
-    case $(cat $file) in
-    7*|wheezy*) result=7;;
-    8*|jessie*) result=8;;
-    9*|stretch*) result=9;;
-    1ß*|buster*) result=10;;
-    11*|bullseye*) result=11;;
-    12*|bookworm*) result=12;;
-    *) result=$(cat $file);;
-    esac
-    ;;
-  *)
-    log_exit ALERT "unknown operating system $type not supported"
-    ;;
-  esac
-  log INFO "detected $type version $result"
+# start basic analyzation
+OS=$(uname | tr '[:upper:]' '[:lower:]')
+KERNEL=$(uname -r)
+MACH=$(uname -m)
+
+if [ "{$OS}" == "windowsnt" ]; then
+    OS=Windows
+elif [ "{$OS}" == "darwin" ]; then
+    OS=Mac
+else
+    OS=$(uname)
+    if [ "${OS}" = "SunOS" ] ; then
+        OS=Solaris
+        MACH=$(uname -p)
+        #OS_STRING="${OS} ${REV}(${ARCH} $(uname -v))"
+    #elif [ "${OS}" = "AIX" ] ; then
+        #OS_STRING="${OS} $(oslevel) ($(oslevel -r))"
+    elif [ "${OS}" = "Linux" ] ; then
+        if [ -f /etc/redhat-release ] ; then
+            DIST_BASE='RedHat'
+            DIST=$(cat /etc/redhat-release | sed s/\ release.*//)
+            REV_NAME=$(cat /etc/redhat-release | sed s/.*\(// | sed s/\)//)
+            REV=$(cat /etc/redhat-release | sed s/.*release\ // | sed s/\ .*//)
+        elif [ -f /etc/SuSE-release ] ; then
+            DIST_BASE='SuSe'
+            REV_NAME=$(cat /etc/SuSE-release | tr "\n" ' '| sed s/VERSION.*//)
+            REV=$(cat /etc/SuSE-release | tr "\n" ' ' | sed s/.*=\ //)
+        elif [ -f /etc/mandrake-release ] ; then
+            DIST_BASE='Mandrake'
+            REV_NAME=$(cat /etc/mandrake-release | sed s/.*\(// | sed s/\)//)
+            REV=$(cat /etc/mandrake-release | sed s/.*release\ // | sed s/\ .*//)
+        elif [ -f /etc/debian_version ] ; then
+            DIST_BASE='Debian'
+            DIST=$(grep '^DISTRIB_ID' /etc/lsb-release | awk -F=  '{ print $2 }')
+            REV_NAME=$(grep '^DISTRIB_CODENAME' /etc/lsb-release | awk -F=  '{ print $2 }')
+            REV=$(grep '^DISTRIB_RELEASE' /etc/lsb-release | awk -F=  '{ print $2 }')
+        fi
+        if [ -f /etc/UnitedLinux-release ] ; then
+            DIST="${DIST}[$(cat /etc/UnitedLinux-release | tr "\n" ' ' | sed s/VERSION.*//)]"
+        fi
+        declare -r OS
+        declare -r KERNEL
+        declare -r MACH
+        declare -r DIST
+        declare -r DIST_BASE
+        declare -r REV_NAME
+        declare -r REV
+    fi
+fi
+
+# Output: human readable system information line
+system_info() {
+  local dist_base
+  local rev
+  [ -n "$DIST_BASE" ] && dist_base=" based on $DIST_BASE"
+  [ -n "$REV" ] && rev=" $REV $REV_NAME"
+  echo "$OS system with kernel $KERNEL $MACH ($DIST$rev$dist_base)"
 }
 
 # lookup for real names
@@ -60,10 +95,8 @@ _package_debian[postgresql]="postgresql-10 postgresql-9.6 postgresql-9.4 postgre
 package() {
   [ "$#" -ne 1 ] && log_exit ALERT "parameter missing. Usage: info_package <name>"
 
-  os_type
-  local type=$result
-  case $type in
-  debian)
+  case $DIST_BASE in
+  Debian)
     alt=${_package_debian[$1]}
     if [ -n "$alt" ]; then
       for check in $alt
@@ -86,7 +119,7 @@ package() {
     return 1
     ;;
   *)
-    log_exit ALERT "unknown operating system $type not supported"
+    log_exit ALERT "operating system not supported: $(system_info)"
     ;;
   esac
 }

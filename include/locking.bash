@@ -2,7 +2,7 @@
 
 # Library to serialize parallel tasks
 #
-# https://gitlab.ekz.de/divibib-betrieb/bash-lib/blob/master/doc/locking.md
+# http://172.17.101.90/ivibib-betrieb/bash-lib/blob/master/doc/locking.md
 #
 # Usage:
 #

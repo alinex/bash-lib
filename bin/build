@@ -1,0 +1,28 @@
+#!/bin/bash
+
+# Build combined bash-lib
+#
+# http://172.17.101.90/divibib-betrieb/ssh-control/blob/master/README.md
+
+# Setup
+source_dir=$(dirname $(readlink -f "${BASH_SOURCE[0]}"))
+cd "$source_dir/../include"
+
+dest="$source_dir/../lib.bash"
+echo "Building combined file"
+
+# Header
+echo "#!/bin/bash" > $dest
+echo "# Automatically combined bash-lib, see http://172.17.101.90/divibib-betrieb/ssh-control" >> $dest
+echo >> $dest
+
+# Concatenate libs
+grep -hv "source \"\$source_dir/" \
+    ./colors.bash \
+    ./log.bash \
+    ./locking.bash \
+    ./info.bash \
+    | sed -e '/^\s*#/d;s/\s\s*#\s.*//g;/^$/d' \
+    >> $dest
+
+echo "DONE."
