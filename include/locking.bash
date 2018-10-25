@@ -14,7 +14,7 @@
 #
 # The second process which want to set the lock will wait till the lock is released.
 
-source_dir=$(dirname $(readlink -f "${BASH_SOURCE[0]}"))
+source_dir=$(dirname $(readlink -f "${BASH_SOURCE[0]:-./}"))
 source "$source_dir/log.bash" # load log handler
 
 # set a lock or wait till it can be set

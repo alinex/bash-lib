@@ -11,7 +11,7 @@
 
 [ -n "${_log_level[DEBUG]}" ] && return 0 # library already loaded
 
-source_dir=$(dirname $(readlink -f "${BASH_SOURCE[0]}"))
+source_dir=$(dirname $(readlink -f "${BASH_SOURCE[0]:-./}"))
 source "$source_dir/colors.bash" # load color methods
 
 declare -ar _log_detect=(DEBUG INFO NOTICE WARN WARNING HEADING ERR ERROR CRIT CRITICAL ALERT EMERG EMERGENCY)

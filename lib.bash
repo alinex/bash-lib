@@ -32,7 +32,7 @@ uncolor() {
   sed -r "s/\x1b\[([0-9]{1,2}(;[0-9]{1,2})?)?m//g" <<< $1
 }
 [ -n "${_log_level[DEBUG]}" ] && return 0
-source_dir=$(dirname $(readlink -f "${BASH_SOURCE[0]}"))
+source_dir=$(dirname $(readlink -f "${BASH_SOURCE[0]:-./}"))
 declare -ar _log_detect=(DEBUG INFO NOTICE WARN WARNING HEADING ERR ERROR CRIT CRITICAL ALERT EMERG EMERGENCY)
 declare -A _log_level
 _log_level[DEBUG]=10
@@ -265,7 +265,7 @@ log_cmd() {
     fi
     return $?
 }
-source_dir=$(dirname $(readlink -f "${BASH_SOURCE[0]}"))
+source_dir=$(dirname $(readlink -f "${BASH_SOURCE[0]:-./}"))
 lock() {
     [ "$#" -ne 1 ] && log_exit ALERT "incorrect library call use: lock <lockfile>"
     local lockfile="$1"
