@@ -2,7 +2,7 @@
 
 Setup color variables to be used in bash scripts for formatting.
 
-![example](lcolors.png)
+![example](colors.png)
 
 ## Usage
 

@@ -24,6 +24,7 @@ declare -A _log_level
 _log_level[DEBUG]=10
 _log_level[INFO]=20
 _log_level[NOTICE]=25   # RFC 5424 specific
+_log_level[MARK]=25     # own extension
 _log_level[WARN]=30
 _log_level[WARNING]=30
 _log_level[HEADING]=35  # own extension
@@ -43,6 +44,7 @@ declare -A _log_color
 _log_color[DEBUG]="$(dim)"
 _log_color[INFO]=""
 _log_color[NOTICE]="$(green)" # RFC 5424 specific
+_log_color[MARK]="$(bg_yellow)$(black)$(bold)"
 _log_color[WARN]="$(yellow)"
 _log_color[WARNING]="$(yellow)"
 _log_color[HEADING]="$(cyan)$(inverse)"
@@ -60,6 +62,7 @@ declare -A _syslog_severity
 _syslog_severity[DEBUG]=7
 _syslog_severity[INFO]=6
 _syslog_severity[NOTICE]=5
+_syslog_severity[MARK]=5
 _syslog_severity[WARN]=4
 _syslog_severity[WARNING]=4
 _syslog_severity[HEADING]=4
@@ -76,6 +79,7 @@ declare -A _log_auto
 _log_auto[DEBUG]="\b(DEBUG|COPYRIGHT|WARRANTY)\b|^\s*(AT|AFTER) "
 _log_auto[INFO]="\b(INFO|(START|CALL)(ING)?|TRANSMITTED)\b"
 _log_auto[NOTICE]="\b(NOTICE|ERFOLGREICH|SUCCEEDED|FINISHED)\b"
+_log_auto[MARK]="!!!"
 _log_auto[WARN]="\b(WARN)\b"
 _log_auto[WARNING]="\b(WARNING|MISSING)\b"
 _log_auto[HEADING]="\b(HEADING)\b"
@@ -248,7 +252,7 @@ _log() {
     if [ ${_log_level[$message_level]} -ge $max_log_level ]; then
         if [ -n "$SYSLOG_FACILITY" ]; then
             for line in $message; do
-                line=$(echo "$line" | tr '\r' '\n')
+#                line=$(echo "$line" | tr '\r' '\n')
                 logger -i \
                     -t "$LOG_TAG" \
                     -p "${SYSLOG_FACILITY}.${_syslog_severity[$message_level]}" \
@@ -256,7 +260,7 @@ _log() {
             done
         else
             for line in $message; do
-                line=$(echo "$line" | tr '\r' '\n')
+#                line=$(echo "$line" | tr '\r' '\n')
                 printf -v output "${_log_color[$message_level]}%s %s[%s] %s: %s$(reset)" \
                     "$message_date" \
                     "$LOG_TAG" \

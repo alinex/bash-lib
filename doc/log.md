@@ -106,6 +106,7 @@ Eight logging levels are supported, combining the levels from the Python logging
 | DEBUG              | 10            | 7                     | Python and RFC 5424 |
 | INFO               | 20            | 6                     | Python and RFC 5424 |
 | NOTICE             | 25            | 5                     | RFC 5424 specific   |
+| MARK               | 25            | 5                     | own extension       |
 | WARN or WARNING    | 30            | 4                     | Python and RFC 5424 |
 | HEADING            | 35            | 4                     | own extension       |
 | ERR or ERROR       | 40            | 3                     | Python and RFC 5424 |
@@ -115,6 +116,8 @@ Eight logging levels are supported, combining the levels from the Python logging
 
 Setting the `LOG_LEVEL` in the script will log subsequent log messages at that value or higher only.
 The `LOG_LEVEL` may be changed anytime within the script.
+
+> While the most log levels are from the error levels, we also added `MARK` and `HEADING` as report levels which don't have an real error case. This allows to also use the log library to send informational higher prioritized output.
 
 ## File rotation
 
