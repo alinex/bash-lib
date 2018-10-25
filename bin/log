@@ -12,7 +12,7 @@
 
 type=${1:-AUTO}
 
-source_dir=$(dirname $(readlink -f "${BASH_SOURCE[0]:-./}"))
+source_dir=$(dirname $(readlink -f "${BASH_SOURCE[0]:-$(pwd)/x}"))
 source "$source_dir/../include/log.bash" # load log handler
 
 if [ -n "$2" ]; then

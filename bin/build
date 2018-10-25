@@ -5,7 +5,7 @@
 # http://172.17.101.90/divibib-betrieb/ssh-control/blob/master/README.md
 
 # Setup
-source_dir=$(dirname $(readlink -f "${BASH_SOURCE[0]:-./}"))
+source_dir=$(dirname $(readlink -f "${BASH_SOURCE[0]:-$(pwd)/x}"))
 cd "$source_dir/../include"
 
 dest="$source_dir/../lib.bash"

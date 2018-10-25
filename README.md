@@ -53,7 +53,7 @@ A combined and minified lib to include is provided under `/lib.bash` which conta
 Best way to include the libraries is to use a relative path:
 
 ```bash
-source_dir=$(dirname $(readlink -f "${BASH_SOURCE[0]:-./}"))
+source_dir=$(dirname $(readlink -f "${BASH_SOURCE[0]:-$(pwd)/x}"))
 source "$source_dir/lib.bash"
 ```
 
