@@ -261,6 +261,7 @@ _log() {
         else
             for line in $message; do
 #                line=$(echo "$line" | tr '\r' '\n')
+                [ "$message_level" = "HEADING" ] && printf -v line "%-80s" $line # fixed length of bg color
                 printf -v output "${_log_color[$message_level]}%s %s[%s] %s: %s$(reset)" \
                     "$message_date" \
                     "$LOG_TAG" \
