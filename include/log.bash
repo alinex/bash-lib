@@ -228,7 +228,7 @@ log () {
 _log() {
 
     IFS=$'\n'
-    local message=$2
+    local message=$( sed 's/^\[[[:upper:]]*\] //' <<< $2)
     local message_date
     message_date=$(date "${LOG_DATE_FORMAT}")
 
@@ -272,7 +272,7 @@ _log() {
                 if [ -n "$LOG_CONSOLE" ]; then
                     [ "$LOG_CONSOLE" = "STDERR" ] && echo "$output" >&2
                     if [ "$LOG_CONSOLE" = "STDOUT" ]; then
-                        echo "${_log_color[$message_level]}$line$(reset)"
+                        printf "$(black)[%-7s]$(reset) %s\n" "$message_level" "${_log_color[$message_level]}$line$(reset)"
                     fi
                 fi
             done

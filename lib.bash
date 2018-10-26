@@ -200,7 +200,7 @@ log () {
 }
 _log() {
     IFS=$'\n'
-    local message=$2
+    local message=$( sed 's/^[A-Z*] //' <<< $2)
     local message_date
     message_date=$(date "${LOG_DATE_FORMAT}")
     declare -u message_level=${1:-AUTO}
@@ -227,6 +227,7 @@ _log() {
             done
         else
             for line in $message; do
+                [ "$message_level" = "HEADING" ] && printf -v line "%-80s" $line
                 printf -v output "${_log_color[$message_level]}%s %s[%s] %s: %s$(reset)" \
                     "$message_date" \
                     "$LOG_TAG" \
@@ -237,7 +238,7 @@ _log() {
                 if [ -n "$LOG_CONSOLE" ]; then
                     [ "$LOG_CONSOLE" = "STDERR" ] && echo "$output" >&2
                     if [ "$LOG_CONSOLE" = "STDOUT" ]; then
-                        echo "${_log_color[$message_level]}$line$(reset)"
+                        printf "[%3s] %s\n" "$message_level" "${_log_color[$message_level]}$line$(reset)"
                     fi
                 fi
             done
