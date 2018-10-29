@@ -301,14 +301,18 @@ log_cmd() {
     args=("$@")
     IFS=" "
     log INFO "calling: ${args[*]}"
-    exec 5>/dev/null
-    [ -n $LOG_CMD_INTERACTIVE ] && exec 5>&1 # interactive
-    result=$(eval $(printf "%q " "$@") |& tee >/dev/fd/5 >(log) )
+    #exec 5>/dev/null
+    exec 5>&1
+    # [ -n $LOG_CMD_INTERACTIVE ] && exec 5>&1 # interactive
+    # result=$(eval $(printf "%q " "$@") |& tee >/dev/fd/5 >(log) )
+    result=$(eval $(printf "%q " "$@") |& tee >/dev/fd/5 >(log))
+    echo 111 $result
     exec 5>&-
     if [ $? -eq 0 ]; then
         log INFO "$cmd call succeeded"
     else
         log ERROR "$cmd exited with return code $?"
     fi
+    echo 222 $result
     return $?
 }

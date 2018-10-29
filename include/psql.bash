@@ -33,6 +33,7 @@ psql_exit() {
 psql_field() {
     [ $# -ne 1 ] && log_exit ALERT "The SQL command parameter is needed in call to psql_field"
     log_cmd psql -Atc "$1"
+    echo $result
 }
 
 # result=''; stderr=''; stderr=$( { result=$(psql -Atc "SLECT 1"); } 2>&1); echo ---- $stderr +++ $result
