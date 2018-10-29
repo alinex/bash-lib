@@ -41,6 +41,7 @@ The following modules are available:
 - [log](doc/log.md) log handler to write to file, `STDERR` or syslog
 - [colors](doc/colors.md) predefined color variables
 - [info](doc/info.md) is a collection of system information methods
+- [psql](doc/psql.md) to access PostgreSQL Database
 
 Additionally a [skeleton](doc/skeleton.md) is used as template to create new scripts.
 

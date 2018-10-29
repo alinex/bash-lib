@@ -298,8 +298,11 @@ log_cmd() {
     [ "$#" -lt 1 ] && log_exit ALERT "parameter missing. Usage: log_cmd <cmd> [<args>...]"
 
     local cmd=$1
-    log INFO "calling: $@"
-    exec 5>&1
+    args=("$@")
+    IFS=" "
+    log INFO "calling: ${args[*]}"
+    exec 5>/dev/null
+    [ -n $LOG_CMD_INTERACTIVE ] && exec 5>&1 # interactive
     result=$(eval $(printf "%q " "$@") |& tee >/dev/fd/5 >(log) )
     exec 5>&-
     if [ $? -eq 0 ]; then
