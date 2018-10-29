@@ -79,12 +79,19 @@ But you can also pipe output from other commands directly to the log:
 run-process | log INFO # log stdin
 run-process 2>&1 >/dev/null | log ERROR # log stderr
 run-process |& log INFO # log stdin + stderr
-( run-process | log INFO ) 3>&1 1>&2 2>&3 | log ERROR # log both differently
-( run-process 3>&1 1>&2 2>&3 | log ERROR ) 3>&1 1>&2 2>&3 | log INFO # priorize INFO
 result=$(run-process |& tee >(log) | cat) # log output and store it in variable
 ```
 
-The lines four and five shows how to flip `STDOUT` and `STDERR` as pipe works on file descriptor one only.
+The following lines show how to use different settings for `STDOUT` and `STDERR`.
+
+```bash
+( run-process | log INFO ) 3>&1 1>&2 2>&3 | log ERROR # log both differently
+( run-process 3>&1 1>&2 2>&3 | log ERROR ) 3>&1 1>&2 2>&3 | log INFO # priorize INFO
+```
+
+> But keep in mind that this may lead to double logging if `LOG_CONSOLE` is used.
+
+You can also use `tee` to duplicate output streams.
 
 ## Auto detect Level
 
@@ -92,10 +99,19 @@ Often useful in pipes but also usable in other log messages is the special `AUTO
 
 ```bash
 run-process |& log
-( run-process 3>&1 1>&2 2>&3 | log ERROR ) 3>&1 1>&2 2>&3 | log # STDERR always as ERROR
+run-process |& log AUTO
 ```
 
 This will auto detect the concrete log level for each line. Currently `DEBUG`, `INFO`, `NOTICE`, `WARN`, `WARNING`, `ERR`, `ERROR`, `CRIT`, `CRITICAL`, `ALERT`, `EMERG` and `EMERGENCY` will trigger the specified log type. Some other keywords are also interpreted and all other lines are output as `DEBUG` type.
+
+You can also specify the minimum level using:
+
+```bash
+run-process |& log AUTO_INFO
+run-process |& log AUTO_WARN
+```
+
+If this is set the minimum level be the given one but it will be increased by autodetection.
 
 ## Log Levels
 

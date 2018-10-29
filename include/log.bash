@@ -9,7 +9,7 @@
 # source ../bash-lib/include/log.bash  # load functions
 # log $message $file
 
-[ -n "${_log_level[DEBUG]}" ] && return 0 # library already loaded
+# [ -n "${_log_level[DEBUG]}" ] && return 0 # library already loaded
 
 source_dir=$(dirname $(readlink -f "${BASH_SOURCE[0]:-$(pwd)/x}"))
 source "$source_dir/colors.bash" # load color methods
@@ -81,7 +81,7 @@ _log_auto[INFO]="\b(INFO|(START|CALL)(ING)?|TRANSMITTED)\b"
 _log_auto[NOTICE]="\b(NOTICE|ERFOLGREICH|SUCCEEDED|FINISHED)\b"
 _log_auto[MARK]="!!!"
 _log_auto[WARN]="\b(WARN)\b"
-_log_auto[WARNING]="\b(WARNING|MISSING)\b"
+_log_auto[WARNING]="\b(WARNING|MISSING|UNKNOWN)\b"
 _log_auto[HEADING]="\b(HEADING)\b"
 _log_auto[ERR]="\b(ERR)\b"
 _log_auto[ERROR]="\b(ERROR|FEHLERHAFT|FAILED)\b"
@@ -129,6 +129,7 @@ fi
 log_init() {
     # check if file logging is possible
     if [ -n "$LOG_FILE" ]; then
+        echo setup log file
         if [ ! -r "$LOG_FILE" ]; then
             touch "$LOG_FILE" 2>&1
             if [ $? -ne 0 ]; then
@@ -207,7 +208,11 @@ log () {
     fi
 
     declare -u message_level=${1:-AUTO}
-    if [ ! "$message_level" = "AUTO" ] && [ -z "${_log_level[$1]}" ]; then
+    if [ ! "${message_level:0:4}" = "AUTO" ] && [ -z "${_log_level[$1]}" ]; then
+        echo $(red "\"${message_level}\" is not a valid message log level at $LOG_TAG line ${BASH_LINENO[0]}. ") >&2
+        exit 1
+    fi
+    if [ "${message_level:0:4}" = "AUTO" ] && [ "${message_level:4:1}" = "_" ] && [ -z "${_log_level[${message_level:5:10}]}" ]; then
         echo $(red "\"${message_level}\" is not a valid message log level at $LOG_TAG line ${BASH_LINENO[0]}. ") >&2
         exit 1
     fi
@@ -234,17 +239,25 @@ _log() {
 
     # check message level
     declare -u message_level=${1:-AUTO}
-    if [ "$message_level" = "AUTO" ]; then
+    if [ "${message_level:0:4}" = "AUTO" ]; then
         declare -u message_check=$message
+        min=${_log_level[DEBUG]}
+        if [ "${message_level:4:1}" = "_" ]; then
+            min=${_log_level[${message_level:5:10}]}
+        fi
         for i in "${_log_detect[@]}"
         do
-            if [[ "$message_check" =~ ${_log_auto[$i]} ]]; then
+            if [[ "$message_check" =~ ${_log_auto[$i]} ]] && [ ${_log_level[$i]} -gt $min ] ; then
                 message_level=$i
             fi
         done
         # set default if not matched
-        if [ "$message_level" = "AUTO" ]; then
-            message_level="DEBUG"
+        if [ "${message_level:0:4}" = "AUTO" ]; then
+            if  [ "${message_level:4:1}" = "_" ]; then
+                message_level="${message_level:5:10}"
+            else
+                message_level="DEBUG"
+            fi
         fi
     fi
 
@@ -298,21 +311,24 @@ log_cmd() {
     [ "$#" -lt 1 ] && log_exit ALERT "parameter missing. Usage: log_cmd <cmd> [<args>...]"
 
     local cmd=$1
-    args=("$@")
-    IFS=" "
-    log INFO "calling: ${args[*]}"
-    #exec 5>/dev/null
-    exec 5>&1
-    # [ -n $LOG_CMD_INTERACTIVE ] && exec 5>&1 # interactive
+    local call=$(printf "%q " "$@")
+    log INFO "calling: $call"
     # result=$(eval $(printf "%q " "$@") |& tee >/dev/fd/5 >(log) )
-    result=$(eval $(printf "%q " "$@") |& tee >/dev/fd/5 >(log))
-    echo 111 $result
-    exec 5>&-
-    if [ $? -eq 0 ]; then
-        log INFO "$cmd call succeeded"
+
+    exec 5>&1 # fd to write to real output
+    set -o pipefail
+    eval "stdbuf -o0 -e0 $call" |& tee >&5 >(log AUTO_INFO)
+#    ( eval "stdbuf -o0 -e0 $call" 3>&1 1>&2 2>&3 | tee >&5 >(log) ) 3>&1 1>&2 2>&3 | tee >&5 >(log)
+#    ( eval "stdbuf -o0 -e0 $call" 3>&1 1>&2 2>&3 | tee >&5 >(log AUTO_WARN) ) 3>&1 1>&2 2>&3 | tee >&5 >(log)
+    code=$?
+    #code=${PIPESTATUS[0]}
+    exec 5>&- # close
+    sleep 0.1 # wait for output
+
+    if [ $code -eq 0 ]; then
+        log NOTICE "$cmd call succeeded"
     else
-        log ERROR "$cmd exited with return code $?"
+        log ERROR "$cmd exited with return code $code"
     fi
-    echo 222 $result
-    return $?
+    return $code
 }
