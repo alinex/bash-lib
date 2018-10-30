@@ -31,7 +31,6 @@ reset() { tput -T$term sgr0; }
 uncolor() {
   sed -r "s/\x1b\[([0-9]{1,2}(;[0-9]{1,2})?)?m//g" <<< $1
 }
-[ -n "${_log_level[DEBUG]}" ] && return 0
 source_dir=$(dirname $(readlink -f "${BASH_SOURCE[0]:-$(pwd)/x}"))
 declare -ar _log_detect=(DEBUG INFO NOTICE WARN WARNING HEADING ERR ERROR CRIT CRITICAL ALERT EMERG EMERGENCY)
 declare -A _log_level
@@ -204,7 +203,7 @@ log () {
 }
 _log() {
     IFS=$'\n'
-    local message=$( sed 's/^\[[[:upper:]]*\] //' <<< $2)
+    local message=$( sed 's/\x1B\[[0-9;]*[a-zA-Z]\[[A-Z][æ-Z]* *\][^ ]* //' <<< $2 )
     local message_date
     message_date=$(date "${LOG_DATE_FORMAT}")
     declare -u message_level=${1:-AUTO}

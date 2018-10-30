@@ -9,7 +9,7 @@
 # source ../bash-lib/include/log.bash  # load functions
 # log $message $file
 
-[ -n "${_log_level[DEBUG]}" ] && return 0 # library already loaded
+#[ -n "${_log_level[DEBUG]}" ] && return 0 # library already loaded
 
 source_dir=$(dirname $(readlink -f "${BASH_SOURCE[0]:-$(pwd)/x}"))
 source "$source_dir/colors.bash" # load color methods
@@ -236,7 +236,7 @@ log () {
 _log() {
 
     IFS=$'\n'
-    local message=$( sed 's/^\[[[:upper:]]*\] //' <<< $2)
+    local message=$( sed 's/\x1B\[[0-9;]*[a-zA-Z]\[[A-Z][æ-Z]* *\][^ ]* //' <<< $2 )
     local message_date
     message_date=$(date "${LOG_DATE_FORMAT}")
 
