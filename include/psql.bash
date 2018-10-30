@@ -35,16 +35,10 @@ psql_field() {
     log_cmd psql -E -Atc "$1"
 }
 
-# result=''; stderr=''; stderr=$( { result=$(psql -Atc "SLECT 1"); } 2>&1); echo ---- $stderr +++ $result
-
-# Commands
-
-# psql_field <query>
-
-# psql_record <query>
-# psql_records <query>
-# psql_exec <query>
-
+psql_exec() {
+    [ $# -ne 1 ] && log_exit ALERT "The SQL command parameter is needed in call to psql_exec"
+    log_cmd psql -E -Atc "$1"
+}
 
 # vartest=`psql -X -A -d $dbname -U $username -h localhost -p 5432 -t -c "SELECT gid FROM testtable WHERE aid='1'"`
 #
