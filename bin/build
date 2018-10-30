@@ -21,6 +21,7 @@ grep -hv "source \"\$source_dir/" \
     ./colors.bash \
     ./log.bash \
     ./locking.bash \
+    ./info.bash \
     | sed -e '/^\s*#/d;s/\s\s*#\s.*//g;/^$/d' \
     >> $dest
 #    ./info.bash \

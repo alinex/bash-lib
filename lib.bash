@@ -31,7 +31,6 @@ reset() { tput -T$term sgr0; }
 uncolor() {
   sed -r "s/\x1b\[([0-9]{1,2}(;[0-9]{1,2})?)?m//g" <<< $1
 }
-[ -n "${_log_level[DEBUG]}" ] && return 0
 source_dir=$(dirname $(readlink -f "${BASH_SOURCE[0]:-$(pwd)/x}"))
 declare -ar _log_detect=(DEBUG INFO NOTICE WARN WARNING HEADING ERR ERROR CRIT CRITICAL ALERT EMERG EMERGENCY)
 declare -A _log_level
@@ -88,7 +87,7 @@ _log_auto[INFO]="\b(INFO|(START|CALL)(ING)?|TRANSMITTED)\b"
 _log_auto[NOTICE]="\b(NOTICE|ERFOLGREICH|SUCCEEDED|FINISHED)\b"
 _log_auto[MARK]="!!!"
 _log_auto[WARN]="\b(WARN)\b"
-_log_auto[WARNING]="\b(WARNING|MISSING)\b"
+_log_auto[WARNING]="\b(WARNING|MISSING|UNKNOWN)\b"
 _log_auto[HEADING]="\b(HEADING)\b"
 _log_auto[ERR]="\b(ERR)\b"
 _log_auto[ERROR]="\b(ERROR|FEHLERHAFT|FAILED)\b"
@@ -103,6 +102,7 @@ _log_rotate_time[DAILY]="+%Y-%m-%d"
 _log_rotate_time[WEEKLY]="+%Y_week_%W"
 _log_rotate_time[MONTHLY]="+%Y-%m"
 declare -r _log_rotate_time
+LOG_LEVEL_DEFAULT=${LOG_LEVEL_DEFAULT:-AUTO}
 LOG_TAG=${LOG_TAG:-$(basename -- "$0")}
 LOG_DATE_FORMAT=${LOG_DATE_FORMAT:-"+%Y-%m-%d %H:%M:%S"}
 declare -u LOG_LEVEL=${LOG_LEVEL:-INFO}
@@ -124,6 +124,7 @@ if [ -n "$LOG_FILE" ] && [ -n "$SYSLOG_FACILITY" ]; then
 fi
 log_init() {
     if [ -n "$LOG_FILE" ]; then
+        echo setup log file
         if [ ! -r "$LOG_FILE" ]; then
             touch "$LOG_FILE" 2>&1
             if [ $? -ne 0 ]; then
@@ -184,9 +185,13 @@ log () {
             fi
         fi
     fi
-    declare -u message_level=${1:-AUTO}
-    if [ ! "$message_level" = "AUTO" ] && [ -z "${_log_level[$1]}" ]; then
+    declare -u message_level=${1:-$LOG_LEVEL_DEFAULT}
+    if [ ! "${message_level:0:4}" = "AUTO" ] && [ -z "${_log_level[$message_level]}" ]; then
         echo $(red "\"${message_level}\" is not a valid message log level at $LOG_TAG line ${BASH_LINENO[0]}. ") >&2
+        exit 1
+    fi
+    if [ "${message_level:0:4}" = "AUTO" ] && [ "${message_level:4:1}" = "_" ] && [ -z "${_log_level[${message_level:5:10}]}" ]; then
+        echo $(red "\"${message_level}\" is not a valid auto message log level at $LOG_TAG line ${BASH_LINENO[0]}. ") >&2
         exit 1
     fi
     if [ -n "$2" ]; then
@@ -200,20 +205,28 @@ log () {
 }
 _log() {
     IFS=$'\n'
-    local message=$( sed 's/^[A-Z*] //' <<< $2)
+    local message=$( sed 's/^\[[[:upper:]]*\] //' <<< $2)
     local message_date
     message_date=$(date "${LOG_DATE_FORMAT}")
     declare -u message_level=${1:-AUTO}
-    if [ "$message_level" = "AUTO" ]; then
+    if [ "${message_level:0:4}" = "AUTO" ]; then
         declare -u message_check=$message
+        min=${_log_level[DEBUG]}
+        if [ "${message_level:4:1}" = "_" ]; then
+            min=${_log_level[${message_level:5:10}]}
+        fi
         for i in "${_log_detect[@]}"
         do
-            if [[ "$message_check" =~ ${_log_auto[$i]} ]]; then
+            if [[ "$message_check" =~ ${_log_auto[$i]} ]] && [ ${_log_level[$i]} -gt $min ] ; then
                 message_level=$i
             fi
         done
-        if [ "$message_level" = "AUTO" ]; then
-            message_level="DEBUG"
+        if [ "${message_level:0:4}" = "AUTO" ]; then
+            if  [ "${message_level:4:1}" = "_" ]; then
+                message_level="${message_level:5:10}"
+            else
+                message_level="DEBUG"
+            fi
         fi
     fi
     local max_log_level=${_log_level[$LOG_LEVEL]}
@@ -238,7 +251,7 @@ _log() {
                 if [ -n "$LOG_CONSOLE" ]; then
                     [ "$LOG_CONSOLE" = "STDERR" ] && echo "$output" >&2
                     if [ "$LOG_CONSOLE" = "STDOUT" ]; then
-                        printf "[%3s] %s\n" "$message_level" "${_log_color[$message_level]}$line$(reset)"
+                        printf "$(black)[%-7s]$(reset) %s\n" "$message_level" "${_log_color[$message_level]}$line$(reset)"
                     fi
                 fi
             done
@@ -257,16 +270,20 @@ log_exit() {
 log_cmd() {
     [ "$#" -lt 1 ] && log_exit ALERT "parameter missing. Usage: log_cmd <cmd> [<args>...]"
     local cmd=$1
-    log INFO "calling: $@"
+    local call=$(printf "%q " "$@")
+    log INFO "calling: $call"
     exec 5>&1
-    result=$(eval $(printf "%q " "$@") |& tee >/dev/fd/5 >(log) )
+    set -o pipefail
+    eval "stdbuf -o0 -e0 $call" |& tee >&5 >(log)
+    code=$?
     exec 5>&-
-    if [ $? -eq 0 ]; then
-        log INFO "$cmd call succeeded"
+    sleep 0.1
+    if [ $code -eq 0 ]; then
+        log NOTICE "$cmd call succeeded"
     else
-        log ERROR "$cmd exited with return code $?"
+        log ERROR "$cmd exited with return code $code"
     fi
-    return $?
+    return $code
 }
 source_dir=$(dirname $(readlink -f "${BASH_SOURCE[0]:-$(pwd)/x}"))
 lock() {
@@ -312,4 +329,91 @@ unlock() {
         fi
     fi
     return 0
+}
+source_dir=$(dirname "${BASH_SOURCE[0]}")
+OS=$(uname | tr '[:upper:]' '[:lower:]')
+KERNEL=$(uname -r)
+MACH=$(uname -m)
+if [ "{$OS}" == "windowsnt" ]; then
+    OS=Windows
+elif [ "{$OS}" == "darwin" ]; then
+    OS=Mac
+else
+    OS=$(uname)
+    if [ "${OS}" = "SunOS" ] ; then
+        OS=Solaris
+        MACH=$(uname -p)
+    elif [ "${OS}" = "Linux" ] ; then
+        if [ -f /etc/redhat-release ] ; then
+            DIST_BASE='RedHat'
+            DIST=$(cat /etc/redhat-release | sed s/\ release.*//)
+            REV_NAME=$(cat /etc/redhat-release | sed s/.*\(// | sed s/\)//)
+            REV=$(cat /etc/redhat-release | sed s/.*release\ // | sed s/\ .*//)
+        elif [ -f /etc/SuSE-release ] ; then
+            DIST_BASE='SuSe'
+            REV_NAME=$(cat /etc/SuSE-release | tr "\n" ' '| sed s/VERSION.*//)
+            REV=$(cat /etc/SuSE-release | tr "\n" ' ' | sed s/.*=\ //)
+        elif [ -f /etc/mandrake-release ] ; then
+            DIST_BASE='Mandrake'
+            REV_NAME=$(cat /etc/mandrake-release | sed s/.*\(// | sed s/\)//)
+            REV=$(cat /etc/mandrake-release | sed s/.*release\ // | sed s/\ .*//)
+        elif [ -f /etc/debian_version ] ; then
+            DIST_BASE='Debian'
+            DIST=$(grep '^DISTRIB_ID' /etc/lsb-release | awk -F=  '{ print $2 }')
+            REV_NAME=$(grep '^DISTRIB_CODENAME' /etc/lsb-release | awk -F=  '{ print $2 }')
+            REV=$(grep '^DISTRIB_RELEASE' /etc/lsb-release | awk -F=  '{ print $2 }')
+        fi
+        if [ -f /etc/UnitedLinux-release ] ; then
+            DIST="${DIST}[$(cat /etc/UnitedLinux-release | tr "\n" ' ' | sed s/VERSION.*//)]"
+        fi
+        declare -r OS
+        declare -r KERNEL
+        declare -r MACH
+        declare -r DIST
+        declare -r DIST_BASE
+        declare -r REV_NAME
+        declare -r REV
+    fi
+fi
+system_info() {
+  local dist_base
+  local rev
+  [ -n "$DIST_BASE" ] && dist_base=" based on $DIST_BASE"
+  [ -n "$REV" ] && rev=" $REV $REV_NAME"
+  echo "$OS system with kernel $KERNEL $MACH ($DIST$rev$dist_base)"
+}
+declare -A _package_debian
+_package_debian[apache]="apache2"
+_package_debian[tomcat]="tomcat7 tomcat8"
+_package_debian[jdk]="openjdk-11-jdk openjdk-10-jdk openjdk-9-jdk openjdk-8-jdk openjdk-7-jdk openjdk-6-jdk"
+_package_debian[jre]="openjdk-11-jre openjdk-10-jre openjdk-9-jre openjdk-8-jre openjdk-7-jre openjdk-6-jre"
+_package_debian[postgresql]="postgresql-10 postgresql-9.6 postgresql-9.4 postgresql-9.3"
+package() {
+  [ "$#" -ne 1 ] && log_exit ALERT "parameter missing. Usage: info_package <name>"
+  case $DIST_BASE in
+  Debian)
+    alt=${_package_debian[$1]}
+    if [ -n "$alt" ]; then
+      for check in $alt
+      do
+        local found=$(dpkg -s $check 2>/dev/null)
+        if [ -n "$found" ]; then
+          result=$(echo -e "$found" | grep Version | sed "s/Version: //")
+          log DEBUG "package $1 is installed with version $result"
+          return 0
+        fi
+      done
+    else
+      local found=$(dpkg -s $1 2>/dev/null)
+      [ $? -eq 0 ] || return 1
+      result=$(echo -e "$found" | grep Version | sed "s/Version: //")
+      log DEBUG "package $1 is installed with version $result"
+      return 0
+    fi
+    return 1
+    ;;
+  *)
+    log_exit ALERT "operating system not supported: $(system_info)"
+    ;;
+  esac
 }
