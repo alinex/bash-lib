@@ -217,15 +217,16 @@ log () {
     # open filehandle
     log_init
 
-    if [ -n "$2" ]; then
-        # direct input
-        _log "$1" "$2"
-    else
+    if readlink /proc/$$/fd/0; then
         # read from pipe
         while read line
         do
             _log "$1" "$line"
-        done < /dev/stdin
+        done </dev/stdin
+    else
+        [ -n "$2" ] || log_exit CRITICAL "No message given in call to log!"
+        # direct input
+        _log "$1" "$2"
     fi
 
     # close filehandle
@@ -311,7 +312,6 @@ log_exit() {
 # Code: from command, too
 log_cmd() {
     [ "$#" -lt 1 ] && log_exit ALERT "parameter missing. Usage: log_cmd <cmd> [<args>...]"
-
     local cmd=$1
     local call=$(printf "%q " "$@")
     log INFO "calling: $call"
@@ -319,7 +319,13 @@ log_cmd() {
 
     exec 5>&1 # fd to write to real output
     set -o pipefail
-    eval "stdbuf -o0 -e0 $call" |& tee >&5 >(log)
+    if readlink /proc/$$/fd/0; then
+        # stream input
+        eval "tee >(log) | stdbuf -o0 -e0 $call" </dev/stdin |& tee >&5 >(log)
+    else
+        # parameter only
+        eval "stdbuf -o0 -e0 $call" |& tee >&5 >(log)
+    fi
 #    ( eval "stdbuf -o0 -e0 $call" 3>&1 1>&2 2>&3 | tee >&5 >(log) ) 3>&1 1>&2 2>&3 | tee >&5 >(log)
 #    ( eval "stdbuf -o0 -e0 $call" 3>&1 1>&2 2>&3 | tee >&5 >(log AUTO_WARN) ) 3>&1 1>&2 2>&3 | tee >&5 >(log)
     code=$?

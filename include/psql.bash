@@ -31,7 +31,22 @@ psql_exit() {
 # Usage: psql_field <sql>
 # Output: field from database
 psql_field() {
-    [ $# -ne 1 ] && log_exit ALERT "The SQL command parameter is needed in call to psql_field"
+    if readlink /proc/$$/fd/0; then
+        # input stream
+        log_cmd psql -E -At --set ON_ERROR_STOP=on </dev/stdin
+    else
+        # use parameters
+        [ $# -ne 1 ] && log_exit ALERT "The SQL command parameter is needed in call to psql_field"
+        log_cmd psql -E -Atc "$1"
+    fi
+}
+
+# declare -a ROW=($(psql))
+# psql | while read -a Record ; do
+# done
+psql_record() {
+    [ $# -ne 1 ] && log_exit ALERT "The SQL command parameter is needed in call to psql_exec"
+    declare -a record
     log_cmd psql -E -Atc "$1"
 }
 
