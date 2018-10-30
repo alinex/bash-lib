@@ -107,28 +107,27 @@ declare -u LOG_LEVEL=${LOG_LEVEL:-INFO}
 # close descriptor #6 and #7 used for output
 trap '7>&-' EXIT
 
-# check destination setting
-if [ -z "$LOG_CONSOLE" ] && [ -z "$LOG_FILE" ] && [ -z "$SYSLOG_FACILITY" ]; then
-    LOG_CONSOLE='SIMPLE' # default setting
-fi
-if [ -n "$LOG_CONSOLE" ] &&[ "$LOG_CONSOLE" != "SIMPLE" ] && [ "$LOG_CONSOLE" != "FULL" ]; then
-    echo $(red "Console output to $LOG_CONSOLE undefined, only SIMPLE or FULL are allowed.") >&2
-    echo "Logging in SIMPLE format by default." >&2
-    LOG_CONSOLE='SIMPLE'
-fi
-if [ -n "$LOG_FILE" ] && [ -n "$SYSLOG_FACILITY" ]; then
-    echo $(red "You must specify a LOG_FILE path or SYSLOG_FACILITY name, but not both.") >&2
-    echo "Logging to console by default." >&2
-    unset LOG_FILE
-    unset SYSLOG_FACILITY
-    LOG_CONSOLE='SIMPLE'
-fi
-
-# reinitialize logging (if file is changed)
+# initialize logging channel
 log_init() {
+    # check destination setting
+    if [ -z "$LOG_CONSOLE" ] && [ -z "$LOG_FILE" ] && [ -z "$SYSLOG_FACILITY" ]; then
+        LOG_CONSOLE='SIMPLE' # default setting
+    fi
+    if [ -n "$LOG_CONSOLE" ] &&[ "$LOG_CONSOLE" != "SIMPLE" ] && [ "$LOG_CONSOLE" != "FULL" ]; then
+        echo $(red "Console output to $LOG_CONSOLE undefined, only SIMPLE or FULL are allowed.") >&2
+        echo "Logging in SIMPLE format by default." >&2
+        LOG_CONSOLE='SIMPLE'
+    fi
+    if [ -n "$LOG_FILE" ] && [ -n "$SYSLOG_FACILITY" ]; then
+        echo $(red "You must specify a LOG_FILE path or SYSLOG_FACILITY name, but not both.") >&2
+        echo "Logging to console by default." >&2
+        unset LOG_FILE
+        unset SYSLOG_FACILITY
+        LOG_CONSOLE='SIMPLE'
+    fi
+
     # check if file logging is possible
     if [ -n "$LOG_FILE" ]; then
-        echo setup log file
         if [ ! -r "$LOG_FILE" ]; then
             touch "$LOG_FILE" 2>&1
             if [ $? -ne 0 ]; then
