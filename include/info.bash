@@ -14,14 +14,6 @@
 source_dir=$(dirname "${BASH_SOURCE[0]}")
 source "$source_dir/log.bash" # load log handler
 
-# OS - type of OS like: Linux, windows, mac, Solaris, AIX
-# KERNERL - version number like: 4.4.0-135-generic
-# MACH - machine type like: x86_64
-# DIST_BASE - distribution (for Linux): RedHat, SuSe, Mandrake, Debian
-# DIST - distribution like: LinuxMint, Ubuntu
-# REV - revision number of distribution
-# REV_NAME - code name of this revision
-
 # start basic analyzation
 OS=$(uname | tr '[:upper:]' '[:lower:]')
 KERNEL=$(uname -r)
@@ -91,35 +83,38 @@ _package_debian[postgresql]="postgresql-10 postgresql-9.6 postgresql-9.4 postgre
 #declare -r _package_debian
 
 # Usage: info_package <name>
-# Result: version number
+# Output: version number
 package() {
-  [ "$#" -ne 1 ] && log_exit ALERT "parameter missing. Usage: info_package <name>"
+    [ "$#" -ne 1 ] && log_exit ALERT "parameter missing. Usage: info_package <name>"
+    unset IFS # in case it is not the default
 
-  case $DIST_BASE in
-  Debian)
-    alt=${_package_debian[$1]}
-    if [ -n "$alt" ]; then
-      for check in $alt
-      do
-        # check package
-        local found=$(dpkg -s $check 2>/dev/null)
-        if [ -n "$found" ]; then
-          result=$(echo -e "$found" | grep Version | sed "s/Version: //")
-          log DEBUG "package $1 is installed with version $result"
-          return 0
+    case $DIST_BASE in
+    Debian)
+        alt=${_package_debian[$1]}
+        if [ -n "$alt" ]; then
+            for check in $alt
+            do
+                # check package
+                local found=$(dpkg -s $check 2>/dev/null)
+                if [ -n "$found" ]; then
+                    result=$(echo -e "$found" | grep Version | sed "s/Version: //")
+                    log DEBUG "package $1 is installed with version $result"
+                    echo $result
+                return 0
+                fi
+            done
+        else
+            local found=$(dpkg -s $1 2>/dev/null)
+            [ $? -eq 0 ] || return 1
+            result=$(echo -e "$found" | grep Version | sed "s/Version: //")
+            log DEBUG "package $1 is installed with version $result"
+            echo $result
+            return 0
         fi
-      done
-    else
-      local found=$(dpkg -s $1 2>/dev/null)
-      [ $? -eq 0 ] || return 1
-      result=$(echo -e "$found" | grep Version | sed "s/Version: //")
-      log DEBUG "package $1 is installed with version $result"
-      return 0
-    fi
-    return 1
-    ;;
-  *)
-    log_exit ALERT "operating system not supported: $(system_info)"
-    ;;
-  esac
+        return 1
+        ;;
+    *)
+        log_exit ALERT "operating system not supported: $(system_info)"
+        ;;
+    esac
 }

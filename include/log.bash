@@ -53,8 +53,8 @@ _log_color[ERROR]="$(red)"
 _log_color[CRIT]="$(red)$(bold)"
 _log_color[CRITICAL]="$(red)$(bold)"
 _log_color[ALERT]="$(red)$(bold)$(inverse)" # RFC 5424 specific
-_log_color[EMERG]="$(red)$(inverse)" # RFC 5424 specific
-_log_color[EMERGENCY]="$(red)$(inverse)" # RFC 5424 specific
+_log_color[EMERG]="$(bg_red)$(bold)$(white)" # RFC 5424 specific
+_log_color[EMERGENCY]="$(bg_red)$(bold)$(white)" # RFC 5424 specific
 declare -r _log_color
 
 # These are the RFC 5424 numeric severity levels.
@@ -288,7 +288,7 @@ _log() {
                 [ -n "$LOG_FILE" ] && echo "$output" >&7
                 if [ -n "$LOG_CONSOLE" ]; then
                     if [ "$LOG_CONSOLE" = "SIMPLE" ]; then
-                        printf -v output "$(black)[%-7s]$(reset) %s" "$message_level" "${_log_color[$message_level]}$line$(reset)"
+                        printf -v output "$(black)[%-9s]$(reset) %s" "$message_level" "${_log_color[$message_level]}$line$(reset)"
                     fi
                     echo "$output" >&2
                 fi
