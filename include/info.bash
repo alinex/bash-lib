@@ -47,9 +47,9 @@ else
             REV=$(cat /etc/mandrake-release | sed s/.*release\ // | sed s/\ .*//)
         elif [ -f /etc/debian_version ] ; then
             DIST_BASE='Debian'
-            DIST=$(grep '^DISTRIB_ID' /etc/lsb-release | awk -F=  '{ print $2 }')
-            REV_NAME=$(grep '^DISTRIB_CODENAME' /etc/lsb-release | awk -F=  '{ print $2 }')
-            REV=$(grep '^DISTRIB_RELEASE' /etc/lsb-release | awk -F=  '{ print $2 }')
+            DIST=$(grep '^DISTRIB_ID' /etc/lsb-release /etc/os-release 2>/dev/null | head -n 1 | awk -F=  '{ print $2 }')
+            REV_NAME=$(grep '^DISTRIB_CODENAME' /etc/lsb-release /etc/os-release 2>/dev/null | head -n 1 | awk -F=  '{ print $2 }')
+            REV=$(grep '^DISTRIB_RELEASE' /etc/lsb-release /etc/os-release 2>/dev/null | head -n 1 | awk -F=  '{ print $2 }')
         fi
         if [ -f /etc/UnitedLinux-release ] ; then
             DIST="${DIST}[$(cat /etc/UnitedLinux-release | tr "\n" ' ' | sed s/VERSION.*//)]"

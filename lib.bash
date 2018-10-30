@@ -108,24 +108,23 @@ LOG_TAG=${LOG_TAG:-$(basename -- "$0")}
 LOG_DATE_FORMAT=${LOG_DATE_FORMAT:-"+%Y-%m-%d %H:%M:%S"}
 declare -u LOG_LEVEL=${LOG_LEVEL:-INFO}
 trap '7>&-' EXIT
-if [ -z "$LOG_CONSOLE" ] && [ -z "$LOG_FILE" ] && [ -z "$SYSLOG_FACILITY" ]; then
-    LOG_CONSOLE='SIMPLE'
-fi
-if [ -n "$LOG_CONSOLE" ] &&[ "$LOG_CONSOLE" != "SIMPLE" ] && [ "$LOG_CONSOLE" != "FULL" ]; then
-    echo $(red "Console output to $LOG_CONSOLE undefined, only SIMPLE or FULL are allowed.") >&2
-    echo "Logging in SIMPLE format by default." >&2
-    LOG_CONSOLE='SIMPLE'
-fi
-if [ -n "$LOG_FILE" ] && [ -n "$SYSLOG_FACILITY" ]; then
-    echo $(red "You must specify a LOG_FILE path or SYSLOG_FACILITY name, but not both.") >&2
-    echo "Logging to console by default." >&2
-    unset LOG_FILE
-    unset SYSLOG_FACILITY
-    LOG_CONSOLE='SIMPLE'
-fi
 log_init() {
+    if [ -z "$LOG_CONSOLE" ] && [ -z "$LOG_FILE" ] && [ -z "$SYSLOG_FACILITY" ]; then
+        LOG_CONSOLE='SIMPLE'
+    fi
+    if [ -n "$LOG_CONSOLE" ] &&[ "$LOG_CONSOLE" != "SIMPLE" ] && [ "$LOG_CONSOLE" != "FULL" ]; then
+        echo $(red "Console output to $LOG_CONSOLE undefined, only SIMPLE or FULL are allowed.") >&2
+        echo "Logging in SIMPLE format by default." >&2
+        LOG_CONSOLE='SIMPLE'
+    fi
+    if [ -n "$LOG_FILE" ] && [ -n "$SYSLOG_FACILITY" ]; then
+        echo $(red "You must specify a LOG_FILE path or SYSLOG_FACILITY name, but not both.") >&2
+        echo "Logging to console by default." >&2
+        unset LOG_FILE
+        unset SYSLOG_FACILITY
+        LOG_CONSOLE='SIMPLE'
+    fi
     if [ -n "$LOG_FILE" ]; then
-        echo setup log file
         if [ ! -r "$LOG_FILE" ]; then
             touch "$LOG_FILE" 2>&1
             if [ $? -ne 0 ]; then
@@ -360,9 +359,9 @@ else
             REV=$(cat /etc/mandrake-release | sed s/.*release\ // | sed s/\ .*//)
         elif [ -f /etc/debian_version ] ; then
             DIST_BASE='Debian'
-            DIST=$(grep '^DISTRIB_ID' /etc/lsb-release | awk -F=  '{ print $2 }')
-            REV_NAME=$(grep '^DISTRIB_CODENAME' /etc/lsb-release | awk -F=  '{ print $2 }')
-            REV=$(grep '^DISTRIB_RELEASE' /etc/lsb-release | awk -F=  '{ print $2 }')
+            DIST=$(grep '^DISTRIB_ID' /etc/lsb-release /etc/os-release 2>/dev/null | head -n 1 | awk -F=  '{ print $2 }')
+            REV_NAME=$(grep '^DISTRIB_CODENAME' /etc/lsb-release /etc/os-release 2>/dev/null | head -n 1 | awk -F=  '{ print $2 }')
+            REV=$(grep '^DISTRIB_RELEASE' /etc/lsb-release /etc/os-release 2>/dev/null | head -n 1 | awk -F=  '{ print $2 }')
         fi
         if [ -f /etc/UnitedLinux-release ] ; then
             DIST="${DIST}[$(cat /etc/UnitedLinux-release | tr "\n" ' ' | sed s/VERSION.*//)]"
