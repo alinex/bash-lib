@@ -209,12 +209,12 @@ log () {
     fi
 
     declare -u message_level=${1:-$LOG_LEVEL_DEFAULT}
-    if [ ! "${message_level:0:4}" = "AUTO" ] && [ -z "${_log_level[$1]}" ]; then
+    if [ ! "${message_level:0:4}" = "AUTO" ] && [ -z "${_log_level[$message_level]}" ]; then
         echo $(red "\"${message_level}\" is not a valid message log level at $LOG_TAG line ${BASH_LINENO[0]}. ") >&2
         exit 1
     fi
     if [ "${message_level:0:4}" = "AUTO" ] && [ "${message_level:4:1}" = "_" ] && [ -z "${_log_level[${message_level:5:10}]}" ]; then
-        echo $(red "\"${message_level}\" is not a valid message log level at $LOG_TAG line ${BASH_LINENO[0]}. ") >&2
+        echo $(red "\"${message_level}\" is not a valid auto message log level at $LOG_TAG line ${BASH_LINENO[0]}. ") >&2
         exit 1
     fi
 

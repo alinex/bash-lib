@@ -23,8 +23,7 @@ Check that the database connection is configured and exit with error message if 
 Read one field from database into variable:
 
 ```bash
-psql_field <query>
-data="$result"
+result=$(psql_field <query>) || log_exit ALERT "Failed to to run DB call"
 ```
 
 # psql_record <query>
