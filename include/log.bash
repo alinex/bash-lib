@@ -9,7 +9,7 @@
 # source ../bash-lib/include/log.bash  # load functions
 # log $message $file
 
-# [ -n "${_log_level[DEBUG]}" ] && return 0 # library already loaded
+#[ -n "${_log_level[DEBUG]}" ] && return 0 # library already loaded
 
 source_dir=$(dirname $(readlink -f "${BASH_SOURCE[0]:-$(pwd)/x}"))
 source "$source_dir/colors.bash" # load color methods
@@ -109,21 +109,19 @@ trap '7>&-' EXIT
 
 # check destination setting
 if [ -z "$LOG_CONSOLE" ] && [ -z "$LOG_FILE" ] && [ -z "$SYSLOG_FACILITY" ]; then
-#    echo $(red "You must specify a LOG_FILE path or SYSLOG_FACILITY name.") >&2
-#    echo "Logging to STDERR by default." >&2
-    LOG_CONSOLE='STDERR'
+    LOG_CONSOLE='SIMPLE' # default setting
 fi
-if [ -n "$LOG_CONSOLE" ] &&[ "$LOG_CONSOLE" != "STDOUT" ] && [ "$LOG_CONSOLE" != "STDERR" ]; then
-    echo $(red "Console output to $LOG_CONSOLE undefined, only STDOUT or STDERR are allowed.") >&2
-    echo "Logging to STDERR by default." >&2
-    LOG_CONSOLE='STDERR'
+if [ -n "$LOG_CONSOLE" ] &&[ "$LOG_CONSOLE" != "SIMPLE" ] && [ "$LOG_CONSOLE" != "FULL" ]; then
+    echo $(red "Console output to $LOG_CONSOLE undefined, only SIMPLE or FULL are allowed.") >&2
+    echo "Logging in SIMPLE format by default." >&2
+    LOG_CONSOLE='SIMPLE'
 fi
 if [ -n "$LOG_FILE" ] && [ -n "$SYSLOG_FACILITY" ]; then
     echo $(red "You must specify a LOG_FILE path or SYSLOG_FACILITY name, but not both.") >&2
-    echo "Logging to STDERR by default." >&2
+    echo "Logging to console by default." >&2
     unset LOG_FILE
     unset SYSLOG_FACILITY
-    LOG_CONSOLE='STDERR'
+    LOG_CONSOLE='SIMPLE'
 fi
 
 # reinitialize logging (if file is changed)
@@ -135,16 +133,15 @@ log_init() {
             touch "$LOG_FILE" 2>&1
             if [ $? -ne 0 ]; then
                 echo $(red "Could not create $LOG_FILE.") >&2
-                echo "Logging to STDERR by default." >&2
+                echo "Logging to console by default." >&2
                 unset LOG_FILE
-                LOG_CONSOLE='STDERR'
+                LOG_CONSOLE='SIMPLE'
             fi
         fi
         # set output handle
         exec 7>> $LOG_FILE
     fi
 }
-log_init
 
 # setup syslog
 if [ -z "$LOG_FILE" ] && [ -n "$SYSLOG_FACILITY" ]; then
@@ -191,7 +188,7 @@ log () {
                 mv "$LOG_FILE" "$LOG_FILE.$file_date"
                 [ -n "$LOG_ROTATE_COMPRESS" ] && gzip -q --best "$LOG_FILE.$file_date"
                 # reopen file handle
-                log_init
+                #log_init
             fi
         elif [ -n "$LOG_ROTATE_SIZE" ]; then
             local file_size=$(du -b "$LOG_FILE" | tr -s '\t' ' ' | cut -d' ' -f1)
@@ -203,7 +200,7 @@ log () {
                 mv "$LOG_FILE" "$LOG_FILE.1"
                 [ -n "$LOG_ROTATE_COMPRESS" ] && gzip -q --best "$LOG_FILE.1"
                 # reopen file handle
-                log_init
+                #log_init
             fi
         fi
     fi
@@ -218,6 +215,9 @@ log () {
         exit 1
     fi
 
+    # open filehandle
+    log_init
+
     if [ -n "$2" ]; then
         # direct input
         _log "$1" "$2"
@@ -228,6 +228,9 @@ log () {
             _log "$1" "$line"
         done < /dev/stdin
     fi
+
+    # close filehandle
+    exec 7>&-
 }
 
 # _log <level> <message>
@@ -284,15 +287,14 @@ _log() {
                     "$line"
                 [ -n "$LOG_FILE" ] && echo "$output" >&7
                 if [ -n "$LOG_CONSOLE" ]; then
-                    [ "$LOG_CONSOLE" = "STDERR" ] && echo "$output" >&2
-                    if [ "$LOG_CONSOLE" = "STDOUT" ]; then
-                        printf "$(black)[%-7s]$(reset) %s\n" "$message_level" "${_log_color[$message_level]}$line$(reset)"
+                    if [ "$LOG_CONSOLE" = "SIMPLE" ]; then
+                        printf -v output "$(black)[%-7s]$(reset) %s" "$message_level" "${_log_color[$message_level]}$line$(reset)"
                     fi
+                    echo "$output" >&2
                 fi
             done
         fi
     fi
-
 }
 
 # Usage: log_exit <level> <message> [<code>]

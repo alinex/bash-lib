@@ -7,9 +7,9 @@ It allows logging to an arbitrary file, to `STDERR`, or to a syslog facility. It
 
 The log handler can be used as program or library.
 
-![example](log-stdout.png)
+![example](log-simple.png)
 
-With the simplified output for `STDOUT` it can also be used as colorization toolkit.
+With the `SIMPLE` console output for `STDERR` it can also be used as colorization toolkit. `STDOUT` is not supported here because it may become problematic with functions doing both, sending results through `STDOUT` and logging to `STDOUT`.
 
 ## Usage
 
@@ -19,14 +19,14 @@ For usage as command or library the configuration is the same and fully optional
 
 ```bash
 # basic output selection
-LOG_CONSOLE='STDERR'                # output to STDERR (default)
-LOG_CONSOLE='STDOUT'                # output to STDOUT without date, tag, pid and type
+LOG_CONSOLE='SIMPLE'                # output to STDERR (default)
+LOG_CONSOLE='FULL'                  # output to STDERR without date, tag, pid and type
 # alternatively or additionally use one of the following
 LOG_FILE='/var/log/myscript.log'    # output in file
 SYSLOG_FACILITY='local7'            # output to syslog
 # specify logging
 LOG_LEVEL='INFO'                    # minimum log level
-LOG_LEVEL_DEFAULT='AUTO_INFO'       # default log level to use if none given
+LOG_LEVEL_DEFAULT='AUTO_INFO'       # default log level to use if none
 LOG_DATE_FORMAT="+%Y-%m-%d %H:%M:%S"
 # file rotation
 LOG_ROTATE_TIME=[DAILY|WEEKLY|MONTHLY]
@@ -139,6 +139,8 @@ The `LOG_LEVEL` may be changed anytime within the script.
 ## File rotation
 
 While the library keeps the log file opened for better performance you can't rotate it using external tools. But the integrated rotation will do perfectly fine.
+
+> But you are also free to do this on your own.
 
 ### Rotate by date
 
