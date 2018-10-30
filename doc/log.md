@@ -26,6 +26,7 @@ LOG_FILE='/var/log/myscript.log'    # output in file
 SYSLOG_FACILITY='local7'            # output to syslog
 # specify logging
 LOG_LEVEL='INFO'                    # minimum log level
+LOG_LEVEL_DEFAULT='AUTO_INFO'       # default log level to use if none given
 LOG_DATE_FORMAT="+%Y-%m-%d %H:%M:%S"
 # file rotation
 LOG_ROTATE_TIME=[DAILY|WEEKLY|MONTHLY]

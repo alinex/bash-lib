@@ -99,6 +99,7 @@ _log_rotate_time[MONTHLY]="+%Y-%m"
 declare -r _log_rotate_time
 
 # Set defaults if variables have not been specified
+LOG_LEVEL_DEFAULT=${LOG_LEVEL_DEFAULT:-AUTO}
 LOG_TAG=${LOG_TAG:-$(basename -- "$0")}
 LOG_DATE_FORMAT=${LOG_DATE_FORMAT:-"+%Y-%m-%d %H:%M:%S"}
 declare -u LOG_LEVEL=${LOG_LEVEL:-INFO}
@@ -207,7 +208,7 @@ log () {
         fi
     fi
 
-    declare -u message_level=${1:-AUTO}
+    declare -u message_level=${1:-$LOG_LEVEL_DEFAULT}
     if [ ! "${message_level:0:4}" = "AUTO" ] && [ -z "${_log_level[$1]}" ]; then
         echo $(red "\"${message_level}\" is not a valid message log level at $LOG_TAG line ${BASH_LINENO[0]}. ") >&2
         exit 1
@@ -317,7 +318,7 @@ log_cmd() {
 
     exec 5>&1 # fd to write to real output
     set -o pipefail
-    eval "stdbuf -o0 -e0 $call" |& tee >&5 >(log AUTO_INFO)
+    eval "stdbuf -o0 -e0 $call" |& tee >&5 >(log)
 #    ( eval "stdbuf -o0 -e0 $call" 3>&1 1>&2 2>&3 | tee >&5 >(log) ) 3>&1 1>&2 2>&3 | tee >&5 >(log)
 #    ( eval "stdbuf -o0 -e0 $call" 3>&1 1>&2 2>&3 | tee >&5 >(log AUTO_WARN) ) 3>&1 1>&2 2>&3 | tee >&5 >(log)
     code=$?
