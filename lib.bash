@@ -31,6 +31,7 @@ reset() { tput -T$term sgr0; }
 uncolor() {
   sed -r "s/\x1b\[([0-9]{1,2}(;[0-9]{1,2})?)?m//g" <<< $1
 }
+[ -n "${_log_level[DEBUG]}" ] && return 0
 source_dir=$(dirname $(readlink -f "${BASH_SOURCE[0]:-$(pwd)/x}"))
 declare -ar _log_detect=(DEBUG INFO NOTICE WARN WARNING HEADING ERR ERROR CRIT CRITICAL ALERT EMERG EMERGENCY)
 declare -A _log_level
@@ -62,8 +63,8 @@ _log_color[ERROR]="$(red)"
 _log_color[CRIT]="$(red)$(bold)"
 _log_color[CRITICAL]="$(red)$(bold)"
 _log_color[ALERT]="$(red)$(bold)$(inverse)"
-_log_color[EMERG]="$(red)$(inverse)"
-_log_color[EMERGENCY]="$(red)$(inverse)"
+_log_color[EMERG]="$(bg_red)$(bold)$(white)"
+_log_color[EMERGENCY]="$(bg_red)$(bold)$(white)"
 declare -r _log_color
 declare -A _syslog_severity
 _syslog_severity[DEBUG]=7
@@ -108,19 +109,19 @@ LOG_DATE_FORMAT=${LOG_DATE_FORMAT:-"+%Y-%m-%d %H:%M:%S"}
 declare -u LOG_LEVEL=${LOG_LEVEL:-INFO}
 trap '7>&-' EXIT
 if [ -z "$LOG_CONSOLE" ] && [ -z "$LOG_FILE" ] && [ -z "$SYSLOG_FACILITY" ]; then
-    LOG_CONSOLE='STDERR'
+    LOG_CONSOLE='SIMPLE'
 fi
-if [ -n "$LOG_CONSOLE" ] &&[ "$LOG_CONSOLE" != "STDOUT" ] && [ "$LOG_CONSOLE" != "STDERR" ]; then
-    echo $(red "Console output to $LOG_CONSOLE undefined, only STDOUT or STDERR are allowed.") >&2
-    echo "Logging to STDERR by default." >&2
-    LOG_CONSOLE='STDERR'
+if [ -n "$LOG_CONSOLE" ] &&[ "$LOG_CONSOLE" != "SIMPLE" ] && [ "$LOG_CONSOLE" != "FULL" ]; then
+    echo $(red "Console output to $LOG_CONSOLE undefined, only SIMPLE or FULL are allowed.") >&2
+    echo "Logging in SIMPLE format by default." >&2
+    LOG_CONSOLE='SIMPLE'
 fi
 if [ -n "$LOG_FILE" ] && [ -n "$SYSLOG_FACILITY" ]; then
     echo $(red "You must specify a LOG_FILE path or SYSLOG_FACILITY name, but not both.") >&2
-    echo "Logging to STDERR by default." >&2
+    echo "Logging to console by default." >&2
     unset LOG_FILE
     unset SYSLOG_FACILITY
-    LOG_CONSOLE='STDERR'
+    LOG_CONSOLE='SIMPLE'
 fi
 log_init() {
     if [ -n "$LOG_FILE" ]; then
@@ -129,15 +130,14 @@ log_init() {
             touch "$LOG_FILE" 2>&1
             if [ $? -ne 0 ]; then
                 echo $(red "Could not create $LOG_FILE.") >&2
-                echo "Logging to STDERR by default." >&2
+                echo "Logging to console by default." >&2
                 unset LOG_FILE
-                LOG_CONSOLE='STDERR'
+                LOG_CONSOLE='SIMPLE'
             fi
         fi
         exec 7>> $LOG_FILE
     fi
 }
-log_init
 if [ -z "$LOG_FILE" ] && [ -n "$SYSLOG_FACILITY" ]; then
     if [[ "$SYSLOG_FACILITY" != local[0-7] ]]; then
         red "Only facilities local0 through local7 are supported for syslog." >&2
@@ -170,7 +170,6 @@ log () {
             if [ "$file_date" != "$today" ]; then
                 mv "$LOG_FILE" "$LOG_FILE.$file_date"
                 [ -n "$LOG_ROTATE_COMPRESS" ] && gzip -q --best "$LOG_FILE.$file_date"
-                log_init
             fi
         elif [ -n "$LOG_ROTATE_SIZE" ]; then
             local file_size=$(du -b "$LOG_FILE" | tr -s '\t' ' ' | cut -d' ' -f1)
@@ -181,7 +180,6 @@ log () {
                 done
                 mv "$LOG_FILE" "$LOG_FILE.1"
                 [ -n "$LOG_ROTATE_COMPRESS" ] && gzip -q --best "$LOG_FILE.1"
-                log_init
             fi
         fi
     fi
@@ -194,6 +192,7 @@ log () {
         echo $(red "\"${message_level}\" is not a valid auto message log level at $LOG_TAG line ${BASH_LINENO[0]}. ") >&2
         exit 1
     fi
+    log_init
     if [ -n "$2" ]; then
         _log "$1" "$2"
     else
@@ -202,6 +201,7 @@ log () {
             _log "$1" "$line"
         done < /dev/stdin
     fi
+    exec 7>&-
 }
 _log() {
     IFS=$'\n'
@@ -249,10 +249,10 @@ _log() {
                     "$line"
                 [ -n "$LOG_FILE" ] && echo "$output" >&7
                 if [ -n "$LOG_CONSOLE" ]; then
-                    [ "$LOG_CONSOLE" = "STDERR" ] && echo "$output" >&2
-                    if [ "$LOG_CONSOLE" = "STDOUT" ]; then
-                        printf "$(black)[%-7s]$(reset) %s\n" "$message_level" "${_log_color[$message_level]}$line$(reset)"
+                    if [ "$LOG_CONSOLE" = "SIMPLE" ]; then
+                        printf -v output "$(black)[%-9s]$(reset) %s" "$message_level" "${_log_color[$message_level]}$line$(reset)"
                     fi
+                    echo "$output" >&2
                 fi
             done
         fi
@@ -330,6 +330,7 @@ unlock() {
     fi
     return 0
 }
+[ -n "$OS" ] && return 0
 source_dir=$(dirname "${BASH_SOURCE[0]}")
 OS=$(uname | tr '[:upper:]' '[:lower:]')
 KERNEL=$(uname -r)
@@ -389,31 +390,34 @@ _package_debian[jdk]="openjdk-11-jdk openjdk-10-jdk openjdk-9-jdk openjdk-8-jdk 
 _package_debian[jre]="openjdk-11-jre openjdk-10-jre openjdk-9-jre openjdk-8-jre openjdk-7-jre openjdk-6-jre"
 _package_debian[postgresql]="postgresql-10 postgresql-9.6 postgresql-9.4 postgresql-9.3"
 package() {
-  [ "$#" -ne 1 ] && log_exit ALERT "parameter missing. Usage: info_package <name>"
-  case $DIST_BASE in
-  Debian)
-    alt=${_package_debian[$1]}
-    if [ -n "$alt" ]; then
-      for check in $alt
-      do
-        local found=$(dpkg -s $check 2>/dev/null)
-        if [ -n "$found" ]; then
-          result=$(echo -e "$found" | grep Version | sed "s/Version: //")
-          log DEBUG "package $1 is installed with version $result"
-          return 0
+    [ "$#" -ne 1 ] && log_exit ALERT "parameter missing. Usage: info_package <name>"
+    unset IFS
+    case $DIST_BASE in
+    Debian)
+        alt=${_package_debian[$1]}
+        if [ -n "$alt" ]; then
+            for check in $alt
+            do
+                local found=$(dpkg -s $check 2>/dev/null)
+                if [ -n "$found" ]; then
+                    result=$(echo -e "$found" | grep Version | sed "s/Version: //")
+                    log DEBUG "package $1 is installed with version $result"
+                    echo $result
+                return 0
+                fi
+            done
+        else
+            local found=$(dpkg -s $1 2>/dev/null)
+            [ $? -eq 0 ] || return 1
+            result=$(echo -e "$found" | grep Version | sed "s/Version: //")
+            log DEBUG "package $1 is installed with version $result"
+            echo $result
+            return 0
         fi
-      done
-    else
-      local found=$(dpkg -s $1 2>/dev/null)
-      [ $? -eq 0 ] || return 1
-      result=$(echo -e "$found" | grep Version | sed "s/Version: //")
-      log DEBUG "package $1 is installed with version $result"
-      return 0
-    fi
-    return 1
-    ;;
-  *)
-    log_exit ALERT "operating system not supported: $(system_info)"
-    ;;
-  esac
+        return 1
+        ;;
+    *)
+        log_exit ALERT "operating system not supported: $(system_info)"
+        ;;
+    esac
 }

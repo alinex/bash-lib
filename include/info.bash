@@ -9,7 +9,7 @@
 # source ../bash-lib/include/info.bash  # load methods
 # data=$(info_debian)
 
-#[ -n "$OS" ] && return 0 # library already loaded
+[ -n "$OS" ] && return 0 # library already loaded
 
 source_dir=$(dirname "${BASH_SOURCE[0]}")
 source "$source_dir/log.bash" # load log handler
