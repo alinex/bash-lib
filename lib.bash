@@ -381,6 +381,14 @@ system_info() {
   [ -n "$REV" ] && rev=" $REV $REV_NAME"
   echo "$OS system with kernel $KERNEL $MACH ($DIST$rev$dist_base)"
 }
+hw_cores() { grep -c ^processor /proc/cpuinfo; }
+hw_processor() { grep 'model name' /proc/cpuinfo | head -n 1 | sed 's/^.*: //'; }
+hw_memory_mb() { free -m | grep -oP '\d+' | head -n 1; }
+hw_disks() {
+    df -lBG | grep ^/dev/ | awk '{print $2, $5, $6}'
+}
+ip_main() { ip route get 1 | awk '{print $NF;exit}'; }
+ip_list() { LANG=C /sbin/ifconfig | grep inet | egrep -v "127.0.0.1|::1/128" | sed 's/: /:/;s/^.*addr:\(.*\)/\1/;s/ .*$//'; }
 declare -A _package_debian
 _package_debian[apache]="apache2"
 _package_debian[tomcat]="tomcat7 tomcat8"

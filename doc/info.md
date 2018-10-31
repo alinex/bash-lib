@@ -7,7 +7,7 @@ This is a collection of methods to gain system information.
 The general information is stored within variables on load:
 
 - `OS` - type of OS like: Linux, windows, mac, Solaris, AIX
-- `KERNERL` - version number like: 4.4.0-135-generic
+- `KERNEL` - version number like: 4.4.0-135-generic
 - `MACH` - machine type like: x86_64
 - `DIST_BASE` - distribution (for Linux): RedHat, SuSe, Mandrake, Debian
 - `DIST` - distribution like: LinuxMint, Ubuntu
