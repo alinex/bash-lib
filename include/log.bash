@@ -44,7 +44,7 @@ declare -A _log_color
 _log_color[DEBUG]="$(dim)"
 _log_color[INFO]=""
 _log_color[NOTICE]="$(green)" # RFC 5424 specific
-_log_color[MARK]="$(bg_yellow)$(black)$(bold)"
+_log_color[MARK]="$(yellow)$(inverse)"
 _log_color[WARN]="$(yellow)"
 _log_color[WARNING]="$(yellow)"
 _log_color[HEADING]="$(cyan)$(inverse)"
@@ -129,7 +129,7 @@ log_init() {
     # check if file logging is possible
     if [ -n "$LOG_FILE" ]; then
         if [ ! -r "$LOG_FILE" ]; then
-            touch "$LOG_FILE" 2>&1
+            mkdir -p $(dirname $LOG_FILE) && touch "$LOG_FILE" 2>&1
             if [ $? -ne 0 ]; then
                 echo $(red "Could not create $LOG_FILE.") >&2
                 echo "Logging to console by default." >&2
@@ -170,6 +170,7 @@ declare -r LOG_ROTATE_NUM
 # Usage: log <level> <message>
 # With input pipe: log <level>
 log () {
+    [ -n "$LOG_FILE" ] && LOG_FILE=$(readlink -m "$LOG_FILE")
 
     # check for valid log level
     if [ -z "${_log_level[$LOG_LEVEL]}" ]; then
@@ -219,11 +220,11 @@ log () {
 
     if [ -n "$2" ]; then
         # direct input
-        _log "$1" "$2"
+        _log $1 "${@:2}"
     else
         # read from pipe
-        while read line
-        do
+        while IFS='' read -r line || [[ -n "$line" ]]; do
+        #while read line; do
             _log "$1" "$line"
         done </dev/stdin
     fi
@@ -236,7 +237,7 @@ log () {
 _log() {
 
     IFS=$'\n'
-    local message=$( sed 's/\x1B\[[0-9;]*[a-zA-Z]\[[A-Z][æ-Z]* *\][^ ]* //' <<< $2 )
+    local message=$( sed 's/\x1B\[[0-9;]*[a-zA-Z]\[[A-Z][æ-Z]* *\][^ ]* //' <<< "${@:2}" )
     local message_date
     message_date=$(date "${LOG_DATE_FORMAT}")
 
