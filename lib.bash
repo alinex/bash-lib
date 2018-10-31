@@ -197,7 +197,7 @@ log () {
         while read line
         do
             _log "$1" "$line"
-        done < /dev/stdin
+        done </dev/stdin
     fi
     exec 7>&-
 }
@@ -272,7 +272,7 @@ log_cmd() {
     log INFO "calling: $call"
     exec 5>&1
     set -o pipefail
-    eval "stdbuf -o0 -e0 $call" |& tee >&5 >(log)
+    eval "tee >(log) | stdbuf -o0 -e0 $call" </dev/stdin |& tee >&5 >(log)
     code=$?
     exec 5>&-
     sleep 0.1
