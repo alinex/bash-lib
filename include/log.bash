@@ -106,7 +106,7 @@ LOG_DATE_FORMAT=${LOG_DATE_FORMAT:-"+%Y-%m-%d %H:%M:%S"}
 declare -u LOG_LEVEL=${LOG_LEVEL:-INFO}
 declare -u LOG_CONSOLE
 
-# close descriptor #6 and #7 used for output
+# close descriptor #7 used for output
 trap '7>&-' EXIT
 
 # initialize logging channel
@@ -219,15 +219,15 @@ log () {
     # open filehandle
     log_init
 
-    if [ -n "$2" ]; then
-        # direct input
-        _log $1 "${@:2}"
-    else
+    if [ ! -t 0 ]; then
         # read from pipe
         while IFS='' read -r line || [[ -n "$line" ]]; do
         #while read line; do
             _log "$1" "$line"
         done </dev/stdin
+    else
+        # parameter input
+        _log $1 "${@:2}"
     fi
 
     # close filehandle
@@ -254,8 +254,7 @@ _log() {
         else
             message_level="DEBUG" # use as min level
         fi
-        for i in "${_log_detect[@]}"
-        do
+        for i in "${_log_detect[@]}"; do
             if [[ "$message_check" =~ ${_log_auto[$i]} ]] && [ ${_log_level[$i]} -gt $min ] ; then
                 message_level=$i
             fi

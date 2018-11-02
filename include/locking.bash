@@ -35,8 +35,7 @@ lock() {
     fi
 
     # try to symlink it
-    while ! ln "$lockfile.$$" "$lockfile" 2>/dev/null
-    do
+    while ! ln "$lockfile.$$" "$lockfile" 2>/dev/null; do
         log INFO "...waiting for lock $lockfile"
         # if the symlink failed, wait for the current lock holder to exit
         sleep 10
