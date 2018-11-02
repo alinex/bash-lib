@@ -47,6 +47,7 @@ add it to the path like used in the following example:
 log <type> <message>      # log to file
 cat xxx | log             # pipe to log
 cat xxx | log <type>      # pipe with specific log type
+log INFO <../list.txt     # output file contents
 ```
 
 ### Library
