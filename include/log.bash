@@ -91,7 +91,7 @@ _log_auto[ALERT]="\b(ALERT|EXCEPTION)\b"
 _log_auto[EMERG]="\b(EMERG)\b"
 _log_auto[EMERGENCY]="\b(EMERGENCY)\b"
 declare -r _log_auto
-declare -Au LOG_AUTO
+declare -A LOG_AUTO
 
 declare -A _log_rotate_time
 _log_rotate_time[DAILY]="+%Y-%m-%d"
@@ -220,25 +220,16 @@ log () {
     log_init
 
     if [ ! -t 0 ]; then
-        while IFS='' read -r line || [[ -n "$line" ]]; do
-        #while read line; do
+        while read line; do
             _log "$1" "$line" </dev/null
         done </dev/stdin
     else
-        # direct input
-        _log $1 "${@:2}"
-    fi
+        echo "${@:2}" |
+        while read -r line; do
+            _log "$1" "$line" </dev/null
+        done
 
-#    if [ -n "$2" ]; then
-#        # direct input
-#        _log $1 "${@:2}"
-#    else
-#        # read from pipe
-#        while IFS='' read -r line || [[ -n "$line" ]]; do
-#        #while read line; do
-#            _log "$1" "$line"
-#        done </dev/stdin
-#    fi
+    fi
 
     # close filehandle
     exec 7>&-
@@ -268,8 +259,11 @@ _log() {
             if [[ "$message_check" =~ ${_log_auto[$i]} ]] && [ ${_log_level[$i]} -gt $min ] ; then
                 message_level=$i
             fi
-            if [ -n "${LOG_AUTO[$i]}" ] && [[ "$message_check" =~ ${LOG_AUTO[$i]} ]] && [ ${_log_level[$i]} -gt $min ] ; then
-                message_level=$i
+            if [ -n "${LOG_AUTO[$i]}" ]; then
+                LOG_AUTO[$i]=$( echo ${LOG_AUTO[$i]} | perl -pe 's/(\\[bsSdDwW])|([a-z])/\1\U\2\E/g')
+                if [[ "$message_check" =~ ${LOG_AUTO[$i]} ]] && [ ${_log_level[$i]} -gt $min ] ; then
+                    message_level=$i
+                fi
             fi
         done
     fi
