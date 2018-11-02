@@ -52,5 +52,6 @@ reset() { tput -T$term sgr0; }
 # remove color codes from text
 # Usage: result=$(uncolor "$result")
 uncolor() {
-  sed -r "s/\x1b\[([0-9]{1,2}(;[0-9]{1,2})?)?m//g" <<< $1
+  sed 's/\x1B\[[0-9;]*[a-zA-Z]//g;s/\x1B\x28\x42//g' <<< $1
+  # use hexdump -C ore cat -A to debug output
 }

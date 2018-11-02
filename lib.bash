@@ -29,10 +29,11 @@ inverse() { tput -T$term rev; _color_text "$@"; }
 dim() { tput -T$term dim; _color_text "$@"; }
 reset() { tput -T$term sgr0; }
 uncolor() {
-  sed -r "s/\x1b\[([0-9]{1,2}(;[0-9]{1,2})?)?m//g" <<< $1
+  sed 's/\x1B\[[0-9;]*[a-zA-Z]//g;s/\x1B\x28\x42//g' <<< $1
 }
+[ -n "${_log_level[DEBUG]}" ] && return 0
 source_dir=$(dirname $(readlink -f "${BASH_SOURCE[0]:-$(pwd)/x}"))
-declare -ar _log_detect=(DEBUG INFO NOTICE WARN WARNING HEADING ERR ERROR CRIT CRITICAL ALERT EMERG EMERGENCY)
+declare -ar _log_detect=(DEBUG INFO NOTICE WARN MARK WARNING HEADING ERR ERROR CRIT CRITICAL ALERT EMERG EMERGENCY)
 declare -A _log_level
 _log_level[DEBUG]=10
 _log_level[INFO]=20
@@ -85,7 +86,7 @@ declare -A _log_auto
 _log_auto[DEBUG]="\b(DEBUG|COPYRIGHT|WARRANTY)\b|^\s*(AT|AFTER) "
 _log_auto[INFO]="\b(INFO|(START|CALL)(ING)?|TRANSMITTED)\b"
 _log_auto[NOTICE]="\b(NOTICE|ERFOLGREICH|SUCCEEDED|FINISHED)\b"
-_log_auto[MARK]="!!!"
+_log_auto[MARK]="\b(MARK)\b|!!!"
 _log_auto[WARN]="\b(WARN)\b"
 _log_auto[WARNING]="\b(WARNING|MISSING|UNKNOWN)\b"
 _log_auto[HEADING]="\b(HEADING)\b"
@@ -97,15 +98,17 @@ _log_auto[ALERT]="\b(ALERT|EXCEPTION)\b"
 _log_auto[EMERG]="\b(EMERG)\b"
 _log_auto[EMERGENCY]="\b(EMERGENCY)\b"
 declare -r _log_auto
+declare -Au LOG_AUTO
 declare -A _log_rotate_time
 _log_rotate_time[DAILY]="+%Y-%m-%d"
 _log_rotate_time[WEEKLY]="+%Y_week_%W"
 _log_rotate_time[MONTHLY]="+%Y-%m"
 declare -r _log_rotate_time
-LOG_LEVEL_DEFAULT=${LOG_LEVEL_DEFAULT:-AUTO}
+declare -u LOG_LEVEL_DEFAULT=${LOG_LEVEL_DEFAULT:-AUTO}
 LOG_TAG=${LOG_TAG:-$(basename -- "$0")}
 LOG_DATE_FORMAT=${LOG_DATE_FORMAT:-"+%Y-%m-%d %H:%M:%S"}
 declare -u LOG_LEVEL=${LOG_LEVEL:-INFO}
+declare -u LOG_CONSOLE
 trap '7>&-' EXIT
 log_init() {
     if [ -z "$LOG_CONSOLE" ] && [ -z "$LOG_FILE" ] && [ -z "$SYSLOG_FACILITY" ]; then
@@ -203,29 +206,29 @@ log () {
 }
 _log() {
     IFS=$'\n'
-    local message=$( sed 's/\x1B\[[0-9;]*[a-zA-Z]\[[A-Z][æ-Z]* *\][^ ]* //' <<< "${@:2}" )
+    local message=$(uncolor "${@:2}")
+    declare -u message_check=$message
+    message=$( sed 's/^\[[A-Z][A-Z]* *\] //' <<< "$message" )
     local message_date
     message_date=$(date "${LOG_DATE_FORMAT}")
     declare -u message_level=${1:-AUTO}
     if [ "${message_level:0:4}" = "AUTO" ]; then
-        declare -u message_check=$message
         min=${_log_level[DEBUG]}
         if [ "${message_level:4:1}" = "_" ]; then
             min=${_log_level[${message_level:5:10}]}
+            message_level="${message_level:5:10}"
+        else
+            message_level="DEBUG"
         fi
         for i in "${_log_detect[@]}"
         do
             if [[ "$message_check" =~ ${_log_auto[$i]} ]] && [ ${_log_level[$i]} -gt $min ] ; then
                 message_level=$i
             fi
-        done
-        if [ "${message_level:0:4}" = "AUTO" ]; then
-            if  [ "${message_level:4:1}" = "_" ]; then
-                message_level="${message_level:5:10}"
-            else
-                message_level="DEBUG"
+            if [ -n "${LOG_AUTO[$i]}" ] && [[ "$message_check" =~ ${LOG_AUTO[$i]} ]] && [ ${_log_level[$i]} -gt $min ] ; then
+                message_level=$i
             fi
-        fi
+        done
     fi
     local max_log_level=${_log_level[$LOG_LEVEL]}
     if [ ${_log_level[$message_level]} -ge $max_log_level ]; then

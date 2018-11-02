@@ -79,7 +79,7 @@ declare -A _log_auto
 _log_auto[DEBUG]="\b(DEBUG|COPYRIGHT|WARRANTY)\b|^\s*(AT|AFTER) "
 _log_auto[INFO]="\b(INFO|(START|CALL)(ING)?|TRANSMITTED)\b"
 _log_auto[NOTICE]="\b(NOTICE|ERFOLGREICH|SUCCEEDED|FINISHED)\b"
-_log_auto[MARK]="!!!"
+_log_auto[MARK]="\b(MARK)\b|!!!"
 _log_auto[WARN]="\b(WARN)\b"
 _log_auto[WARNING]="\b(WARNING|MISSING|UNKNOWN)\b"
 _log_auto[HEADING]="\b(HEADING)\b"
@@ -238,14 +238,15 @@ log () {
 _log() {
 
     IFS=$'\n'
-    local message=$( sed 's/\x1B\[[0-9;]*[a-zA-Z]\[[A-Z][æ-Z]* *\][^ ]* //' <<< "${@:2}" )
+    local message=$(uncolor "${@:2}")
+    declare -u message_check=$message
+    message=$( sed 's/^\[[A-Z][A-Z]* *\] //' <<< "$message" ) # remove possible SIMPLE format
     local message_date
     message_date=$(date "${LOG_DATE_FORMAT}")
 
     # check message level
     declare -u message_level=${1:-AUTO}
     if [ "${message_level:0:4}" = "AUTO" ]; then
-        declare -u message_check=$message
         min=${_log_level[DEBUG]}
         if [ "${message_level:4:1}" = "_" ]; then
             min=${_log_level[${message_level:5:10}]}
