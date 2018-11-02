@@ -120,6 +120,7 @@ If this is set the minimum level be the given one but it will be increased by au
 To add more rules for the autodetection you may add a regular expression per each log level:
 
 ```bash
+declare -A LOG_AUTO # only needed if defined before loading the liubrary
 LOG_AUTO[OK]="\b(done|transferred)\b"
 LOG_AUTO[MARK]="!!!"
 ```

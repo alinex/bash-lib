@@ -9,7 +9,7 @@
 # source ../bash-lib/include/log.bash  # load functions
 # log $message $file
 
-#[ -n "${_log_level[DEBUG]}" ] && return 0 # library already loaded
+[ -n "${_log_level[DEBUG]}" ] && return 0 # library already loaded
 
 source_dir=$(dirname $(readlink -f "${BASH_SOURCE[0]:-$(pwd)/x}"))
 source "$source_dir/colors.bash" # load color methods
@@ -176,7 +176,6 @@ log () {
 
     # check for valid log level
     if [ -z "${_log_level[$LOG_LEVEL]}" ]; then
-
         echo $(red "\"$LOG_LEVEL\" is not a valid LOG_LEVEL at $LOG_TAG line ${BASH_LINENO[0]}. Defaulting to \"INFO\".") >&2
         LOG_LEVEL="INFO"
     fi
@@ -250,24 +249,19 @@ _log() {
         min=${_log_level[DEBUG]}
         if [ "${message_level:4:1}" = "_" ]; then
             min=${_log_level[${message_level:5:10}]}
+            message_level="${message_level:5:10}" # set to min level
+        else
+            message_level="DEBUG" # use as min level
         fi
         for i in "${_log_detect[@]}"
         do
-            if [[ "$message_check" =~ ${_log_auto[$i]} ]] && [ "${_log_level[$i]}" -gt $min ] ; then
+            if [[ "$message_check" =~ ${_log_auto[$i]} ]] && [ ${_log_level[$i]} -gt $min ] ; then
                 message_level=$i
             fi
-            if [ -n "${LOG_AUTO[$i]}" ] && [[ "$message_check" =~ "${LOG_AUTO[$i]}" ]] && [ ${_log_level[$i]} -gt $min ] ; then
+            if [ -n "${LOG_AUTO[$i]}" ] && [[ "$message_check" =~ ${LOG_AUTO[$i]} ]] && [ ${_log_level[$i]} -gt $min ] ; then
                 message_level=$i
             fi
         done
-        # set default if not matched
-        if [ "${message_level:0:4}" = "AUTO" ]; then
-            if  [ "${message_level:4:1}" = "_" ]; then
-                message_level="${message_level:5:10}"
-            else
-                message_level="DEBUG"
-            fi
-        fi
     fi
 
     local max_log_level=${_log_level[$LOG_LEVEL]}
