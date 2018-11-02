@@ -16,11 +16,11 @@ term=${TERM:-xterm-256color} # use xterm as default if no terminal set
 
 # Helper
 _color_text() {
-    if [ ! -t 0 ]; then
+    if [ -z "$1" ] && [ ! -t 0 ]; then
       # no terminal so use STDIN pipe
       cat </dev/stdin
       tput -T$term sgr0;
-    elif [ -n "$1" ]; then
+    elif [ -n "$1" ] && [ ! "$1" = "+" ]; then
       # use given text
       echo -n "$@"
       tput -T$term sgr0;
@@ -60,8 +60,8 @@ reset() { tput -T$term sgr0; }
 # remove color codes from text
 # Usage: result=$(uncolor "$result")
 uncolor() {
-  if [ ! -t 0 ]; then
-    # no terminal at STDIN so a pipe is given
+  if [ -z "$1" ] && [ ! -t 0 ]; then
+    # no parameters but STDIN pipe is given
     sed 's/\x1B\[[0-9;]*[a-zA-Z]//g;s/\x1B\x28\x42//g' </dev/stdin
   else
     # use parameters

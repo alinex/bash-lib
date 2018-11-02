@@ -41,15 +41,15 @@ log EMERG "text with EMERG level"
 log EMERGENCY "text with EMERGENCY level"
 echo
 
-echo $(cyan "$(bold)Different dateformat and tags:")
-LOG_LEVEL=INFO
-LOG_DATE_FORMAT="+%Y-%m-%d"
-LOG_TAG=test
-log INFO "text with INFO level"
+LOG_LEVEL=DEBUG
+source_dir=$(dirname "${BASH_SOURCE[0]}")
+
+echo $(cyan "$(bold)Multi line input:")
+log INFO "$(cat $source_dir/../README.md)"
 echo
 
 echo $(cyan "$(bold)Use pipe as input:")
 echo "text with INFO level" | log INFO
-source_dir=$(dirname "${BASH_SOURCE[0]}")
+cat $source_dir/../README.md | log INFO
 log INFO <$source_dir/../README.md
 echo

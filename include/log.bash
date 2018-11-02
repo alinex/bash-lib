@@ -41,20 +41,20 @@ declare -A _log_color
 # These are the python numeric log levels, with the addition
 # of RFC 5424 levels. The RFC 5424 levels have been given
 # numbers to sequence them with the python levels.
-_log_color[DEBUG]="$(dim)"
+_log_color[DEBUG]="$(dim +)"
 _log_color[INFO]=""
-_log_color[NOTICE]="$(green)" # RFC 5424 specific
-_log_color[MARK]="$(yellow)$(inverse)"
-_log_color[WARN]="$(yellow)"
-_log_color[WARNING]="$(yellow)"
-_log_color[HEADING]="$(cyan)$(inverse)"
-_log_color[ERR]="$(red)"
-_log_color[ERROR]="$(red)"
-_log_color[CRIT]="$(red)$(bold)"
-_log_color[CRITICAL]="$(red)$(bold)"
-_log_color[ALERT]="$(red)$(bold)$(inverse)" # RFC 5424 specific
-_log_color[EMERG]="$(bg_red)$(bold)$(white)" # RFC 5424 specific
-_log_color[EMERGENCY]="$(bg_red)$(bold)$(white)" # RFC 5424 specific
+_log_color[NOTICE]="$(green +)" # RFC 5424 specific
+_log_color[MARK]="$(yellow +)$(inverse +)"
+_log_color[WARN]="$(yellow +)"
+_log_color[WARNING]="$(yellow +)"
+_log_color[HEADING]="$(cyan +)$(inverse +)"
+_log_color[ERR]="$(red +)"
+_log_color[ERROR]="$(red +)"
+_log_color[CRIT]="$(red +)$(bold +)"
+_log_color[CRITICAL]="$(red +)$(bold +)"
+_log_color[ALERT]="$(red +)$(bold +)$(inverse +)" # RFC 5424 specific
+_log_color[EMERG]="$(bg_red +)$(bold +)$(white +)" # RFC 5424 specific
+_log_color[EMERGENCY]="$(bg_red +)$(bold +)$(white +)" # RFC 5424 specific
 declare -r _log_color
 
 # These are the RFC 5424 numeric severity levels.
@@ -220,15 +220,25 @@ log () {
     log_init
 
     if [ ! -t 0 ]; then
-        # read from pipe
         while IFS='' read -r line || [[ -n "$line" ]]; do
         #while read line; do
-            _log "$1" "$line"
+            _log "$1" "$line" </dev/null
         done </dev/stdin
     else
-        # parameter input
+        # direct input
         _log $1 "${@:2}"
     fi
+
+#    if [ -n "$2" ]; then
+#        # direct input
+#        _log $1 "${@:2}"
+#    else
+#        # read from pipe
+#        while IFS='' read -r line || [[ -n "$line" ]]; do
+#        #while read line; do
+#            _log "$1" "$line"
+#        done </dev/stdin
+#    fi
 
     # close filehandle
     exec 7>&-
@@ -243,7 +253,6 @@ _log() {
     message=$( sed 's/^\[[A-Z][A-Z]* *\] //' <<< "$message" ) # remove possible SIMPLE format
     local message_date
     message_date=$(date "${LOG_DATE_FORMAT}")
-
     # check message level
     declare -u message_level=${1:-AUTO}
     if [ "${message_level:0:4}" = "AUTO" ]; then
@@ -254,7 +263,8 @@ _log() {
         else
             message_level="DEBUG" # use as min level
         fi
-        for i in "${_log_detect[@]}"; do
+        for i in "${_log_detect[@]}"
+        do
             if [[ "$message_check" =~ ${_log_auto[$i]} ]] && [ ${_log_level[$i]} -gt $min ] ; then
                 message_level=$i
             fi
@@ -287,7 +297,7 @@ _log() {
                 [ -n "$LOG_FILE" ] && echo "$output" >&7
                 if [ -n "$LOG_CONSOLE" ]; then
                     if [ "$LOG_CONSOLE" = "SIMPLE" ]; then
-                        printf -v output "$(black)[%-9s]$(reset) %s" "$message_level" "${_log_color[$message_level]}$line$(reset)"
+                        printf -v output "$(black +)[%-9s]$(reset) %s" "$message_level" "${_log_color[$message_level]}$line$(reset)"
                     fi
                     echo "$output" >&2
                 fi

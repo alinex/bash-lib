@@ -23,15 +23,15 @@ red "Direct ouput without newline"
 echo "$(red 'output with newline')"
 echo "$(red multiple parameters are joined by spaces)"
 x=$(red "load colorized into variable")
-x="manually switch $(red)on$(reset) and off"
+x="manually switch $(red +)on$(reset) and off"
 echo "This text is colored using pipe" | cyan
 ```
 
 Above you see the different possibilities to use.
 
-1. **Format text** if a text is given and end the style after it
-2. **Only start style** if called without arguments
-3. **Text given as pipe** instead of parameters
+1. **Format text** if a text is given, use style only for this
+2. **Text given as pipe** instead of parameters
+3. **Only start style** if called with `+` or without arguments and pipe
 
 And if you want to remove the coloring later again:
 
