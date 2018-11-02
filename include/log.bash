@@ -253,10 +253,10 @@ _log() {
         fi
         for i in "${_log_detect[@]}"
         do
-            if [[ "$message_check" =~ ${_log_auto[$i]} ]] && [ ${_log_level[$i]} -gt $min ] ; then
+            if [[ "$message_check" =~ ${_log_auto[$i]} ]] && [ "${_log_level[$i]}" -gt $min ] ; then
                 message_level=$i
             fi
-            if [ -n "${LOG_AUTO[$i]}" ] && [[ "$message_check" =~ ${LOG_AUTO[$i]} ]] && [ ${_log_level[$i]} -gt $min ] ; then
+            if [ -n "${LOG_AUTO[$i]}" ] && [[ "$message_check" =~ "${LOG_AUTO[$i]}" ]] && [ ${_log_level[$i]} -gt $min ] ; then
                 message_level=$i
             fi
         done
