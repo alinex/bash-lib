@@ -27,5 +27,14 @@ echo $(inverse "This is a inverse line.")
 echo $(dim "This is a dim line.")
 echo
 
-echo $(cyan "$(bold)Output mixed line:")
+echo $(cyan "$(bold)Output methods:")
+echo "$(red multiple parameters are joined by spaces)"
 echo "this $(bold)is a $(red)mixed$(reset) text."
+echo "This text is colored using pipe" | cyan
+echo
+
+ctext=$(bg_red "This text with red background")
+echo $(cyan "$(bold)Remove colors:")
+echo "original: $ctext"
+echo "uncolor using parameters: $(uncolor $ctext)"
+echo "uncolor using pipe: $ctext" | uncolor

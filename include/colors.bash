@@ -10,14 +10,22 @@
 # red "Failed"
 # echo "$(red)Failed$(reset)"
 # echo "$(red Failed)"
+# echo "$colored" | uncolor
 
 term=${TERM:-xterm-256color} # use xterm as default if no terminal set
 
 # Helper
 _color_text() {
-    [ -z "$1" ] && return
-    echo -n "$1"
-    tput -T$term sgr0;
+    if [ ! -t 0 ]; then
+      # no terminal so use STDIN pipe
+      cat </dev/stdin
+      tput -T$term sgr0;
+    elif [ -n "$1" ]; then
+      # use given text
+      echo -n "$@"
+      tput -T$term sgr0;
+    fi
+    # else only keep it open
 }
 
 # Foreground color
@@ -52,6 +60,12 @@ reset() { tput -T$term sgr0; }
 # remove color codes from text
 # Usage: result=$(uncolor "$result")
 uncolor() {
-  sed 's/\x1B\[[0-9;]*[a-zA-Z]//g;s/\x1B\x28\x42//g' <<< $1
-  # use hexdump -C ore cat -A to debug output
+  if [ ! -t 0 ]; then
+    # no terminal at STDIN so a pipe is given
+    sed 's/\x1B\[[0-9;]*[a-zA-Z]//g;s/\x1B\x28\x42//g' </dev/stdin
+  else
+    # use parameters
+    sed 's/\x1B\[[0-9;]*[a-zA-Z]//g;s/\x1B\x28\x42//g' <<< "$@"
+    # use hexdump -C ore cat -A to debug output
+  fi
 }

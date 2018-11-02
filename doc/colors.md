@@ -17,14 +17,26 @@ Now you can use colorized output in different ways:
 ```bash
 red "Direct ouput without newline"
 echo "$(red 'output with newline')"
+echo "$(red multiple parameters are joined by spaces)"
 x=$(red "load colorized into variable")
 x="manually switch $(red)on$(reset) and off"
+echo "This text is colored using pipe" | cyan
 ```
 
 Above you see the different possibilities to use.
 
 1. **Format text** if a text is given and end the style after it
 2. **Only start style** if called without arguments
+3. **Text given as pipe** instead of parameters
+
+And if you want to remove the coloring later again:
+
+```bash
+ctext=$(bg_red "This text with red background")
+echo "original: $ctext"
+echo "uncolor using parameters: $(uncolor $ctext)"
+echo "uncolor using pipe: $ctext" | uncolor
+```
 
 ## Foreground color
 
