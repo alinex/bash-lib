@@ -1,8 +1,12 @@
 # Color Output
 
-Setup color variables to be used in bash scripts for formatting.
+Setup color variables to be used in bash scripts for formatting. It will output ANSI color codes.
 
 ![example](colors.png)
+
+The terminal will automatically interpret this but to also see them in other programs use:
+
+- `alias less='less -R'` enables ANSI color support
 
 ## Usage
 
