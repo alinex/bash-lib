@@ -3,9 +3,13 @@
 
 term=${TERM:-xterm-256color}
 _color_text() {
-    [ -z "$1" ] && return
-    echo -n "$1"
-    tput -T$term sgr0;
+    if [ -z "$1" ] && [ ! -t 0 ]; then
+      cat </dev/stdin
+      tput -T$term sgr0;
+    elif [ -n "$1" ] && [ ! "$1" = "+" ]; then
+      echo -n "$@"
+      tput -T$term sgr0;
+    fi
 }
 black() { tput -T$term setaf 0; _color_text "$@"; }
 red() { tput -T$term setaf 1; _color_text "$@"; }
@@ -29,7 +33,11 @@ inverse() { tput -T$term rev; _color_text "$@"; }
 dim() { tput -T$term dim; _color_text "$@"; }
 reset() { tput -T$term sgr0; }
 uncolor() {
-  sed 's/\x1B\[[0-9;]*[a-zA-Z]//g;s/\x1B\x28\x42//g' <<< $1
+  if [ -z "$1" ] && [ ! -t 0 ]; then
+    sed 's/\x1B\[[0-9;]*[a-zA-Z]//g;s/\x1B\x28\x42//g' </dev/stdin
+  else
+    sed 's/\x1B\[[0-9;]*[a-zA-Z]//g;s/\x1B\x28\x42//g' <<< "$@"
+  fi
 }
 [ -n "${_log_level[DEBUG]}" ] && return 0
 source_dir=$(dirname $(readlink -f "${BASH_SOURCE[0]:-$(pwd)/x}"))
@@ -51,20 +59,20 @@ _log_level[EMERG]=70
 _log_level[EMERGENCY]=70
 declare -r _log_level
 declare -A _log_color
-_log_color[DEBUG]="$(dim)"
+_log_color[DEBUG]="$(dim +)"
 _log_color[INFO]=""
-_log_color[NOTICE]="$(green)"
-_log_color[MARK]="$(yellow)$(inverse)"
-_log_color[WARN]="$(yellow)"
-_log_color[WARNING]="$(yellow)"
-_log_color[HEADING]="$(cyan)$(inverse)"
-_log_color[ERR]="$(red)"
-_log_color[ERROR]="$(red)"
-_log_color[CRIT]="$(red)$(bold)"
-_log_color[CRITICAL]="$(red)$(bold)"
-_log_color[ALERT]="$(red)$(bold)$(inverse)"
-_log_color[EMERG]="$(bg_red)$(bold)$(white)"
-_log_color[EMERGENCY]="$(bg_red)$(bold)$(white)"
+_log_color[NOTICE]="$(green +)"
+_log_color[MARK]="$(yellow +)$(inverse +)"
+_log_color[WARN]="$(yellow +)"
+_log_color[WARNING]="$(yellow +)"
+_log_color[HEADING]="$(cyan +)$(inverse +)"
+_log_color[ERR]="$(red +)"
+_log_color[ERROR]="$(red +)"
+_log_color[CRIT]="$(red +)$(bold +)"
+_log_color[CRITICAL]="$(red +)$(bold +)"
+_log_color[ALERT]="$(red +)$(bold +)$(inverse +)"
+_log_color[EMERG]="$(bg_red +)$(bold +)$(white +)"
+_log_color[EMERGENCY]="$(bg_red +)$(bold +)$(white +)"
 declare -r _log_color
 declare -A _syslog_severity
 _syslog_severity[DEBUG]=7
@@ -195,12 +203,12 @@ log () {
         exit 1
     fi
     log_init
-    if [ -n "$2" ]; then
-        _log $1 "${@:2}"
-    else
+    if [ ! -t 0 ]; then
         while IFS='' read -r line || [[ -n "$line" ]]; do
-            _log "$1" "$line"
+            _log "$1" "$line" </dev/null
         done </dev/stdin
+    else
+        _log $1 "${@:2}"
     fi
     exec 7>&-
 }
@@ -251,7 +259,7 @@ _log() {
                 [ -n "$LOG_FILE" ] && echo "$output" >&7
                 if [ -n "$LOG_CONSOLE" ]; then
                     if [ "$LOG_CONSOLE" = "SIMPLE" ]; then
-                        printf -v output "$(black)[%-9s]$(reset) %s" "$message_level" "${_log_color[$message_level]}$line$(reset)"
+                        printf -v output "$(black +)[%-9s]$(reset) %s" "$message_level" "${_log_color[$message_level]}$line$(reset)"
                     fi
                     echo "$output" >&2
                 fi
@@ -295,8 +303,7 @@ lock() {
         pid=$(cat "$lockfile" || log_exit ALERT "could not read lockfile $lockfile")
         kill -0 "$pid" 2>/dev/null || rm -f "$lockfile" || log_exit ALERT "failed to remove lockfile: $lockfile"
     fi
-    while ! ln "$lockfile.$$" "$lockfile" 2>/dev/null
-    do
+    while ! ln "$lockfile.$$" "$lockfile" 2>/dev/null; do
         log INFO "...waiting for lock $lockfile"
         sleep 10
     done
