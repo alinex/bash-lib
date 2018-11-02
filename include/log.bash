@@ -14,7 +14,7 @@
 source_dir=$(dirname $(readlink -f "${BASH_SOURCE[0]:-$(pwd)/x}"))
 source "$source_dir/colors.bash" # load color methods
 
-declare -ar _log_detect=(DEBUG INFO NOTICE WARN WARNING HEADING ERR ERROR CRIT CRITICAL ALERT EMERG EMERGENCY)
+declare -ar _log_detect=(DEBUG INFO NOTICE WARN MARK WARNING HEADING ERR ERROR CRIT CRITICAL ALERT EMERG EMERGENCY)
 
 # Log levels are taken from python and RFC 5424.
 declare -A _log_level
@@ -91,6 +91,7 @@ _log_auto[ALERT]="\b(ALERT|EXCEPTION)\b"
 _log_auto[EMERG]="\b(EMERG)\b"
 _log_auto[EMERGENCY]="\b(EMERGENCY)\b"
 declare -r _log_auto
+declare -Au LOG_AUTO
 
 declare -A _log_rotate_time
 _log_rotate_time[DAILY]="+%Y-%m-%d"
@@ -99,10 +100,11 @@ _log_rotate_time[MONTHLY]="+%Y-%m"
 declare -r _log_rotate_time
 
 # Set defaults if variables have not been specified
-LOG_LEVEL_DEFAULT=${LOG_LEVEL_DEFAULT:-AUTO}
+declare -u LOG_LEVEL_DEFAULT=${LOG_LEVEL_DEFAULT:-AUTO}
 LOG_TAG=${LOG_TAG:-$(basename -- "$0")}
 LOG_DATE_FORMAT=${LOG_DATE_FORMAT:-"+%Y-%m-%d %H:%M:%S"}
 declare -u LOG_LEVEL=${LOG_LEVEL:-INFO}
+declare -u LOG_CONSOLE
 
 # close descriptor #6 and #7 used for output
 trap '7>&-' EXIT
@@ -252,6 +254,9 @@ _log() {
         for i in "${_log_detect[@]}"
         do
             if [[ "$message_check" =~ ${_log_auto[$i]} ]] && [ ${_log_level[$i]} -gt $min ] ; then
+                message_level=$i
+            fi
+            if [ -n "${LOG_AUTO[$i]}" ] && [[ "$message_check" =~ ${LOG_AUTO[$i]} ]] && [ ${_log_level[$i]} -gt $min ] ; then
                 message_level=$i
             fi
         done

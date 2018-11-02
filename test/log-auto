@@ -26,3 +26,9 @@ echo $(cyan "$(bold)Exceptions:")
 log AUTO "Exception in thread "main" java.lang.NullPointerException"
 log AUTO "        at com.example.myproject.Book.getTitle(Book.java:16)"
 echo
+
+echo $(cyan "$(bold)User defined auto detection:")
+LOG_AUTO[MARK]="alex"
+log AUTO "This is a normal line"
+log AUTO "while this is special for alex"
+echo

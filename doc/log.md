@@ -33,6 +33,9 @@ LOG_ROTATE_TIME=[DAILY|WEEKLY|MONTHLY]
 LOG_ROTATE_SIZE=<bytes>
 LOG_ROTATE_NUM=<max number of files>
 LOG_ROTATE_COMPRESS=1
+# user defined aut detection and coloring (regexp)
+LOG_AUTO[OK]="\b(done|transferred)\b"
+LOG_AUTO[MARK]="!!!"
 ```
 
 ### Command
@@ -103,9 +106,9 @@ run-process |& log
 run-process |& log AUTO
 ```
 
-This will auto detect the concrete log level for each line. Currently `DEBUG`, `INFO`, `NOTICE`, `WARN`, `WARNING`, `ERR`, `ERROR`, `CRIT`, `CRITICAL`, `ALERT`, `EMERG` and `EMERGENCY` will trigger the specified log type. Some other keywords are also interpreted and all other lines are output as `DEBUG` type.
+This will auto detect the concrete log level for each line. Currently `DEBUG`, `INFO`, `NOTICE`, `WARN`, `WARNING`, `ERR`, `ERROR`, `CRIT`, `CRITICAL`, `ALERT`, `EMERG` and `EMERGENCY` will trigger the specified log type. Some other keywords are also interpreted and all other lines are output using the minimum level.
 
-You can also specify the minimum level using:
+You can also specify a higher minimum level as `DEBUG` by using:
 
 ```bash
 run-process |& log AUTO_INFO
@@ -113,6 +116,15 @@ run-process |& log AUTO_WARN
 ```
 
 If this is set the minimum level be the given one but it will be increased by autodetection.
+
+To add more rules for the autodetection you may add a regular expression per each log level:
+
+```bash
+LOG_AUTO[OK]="\b(done|transferred)\b"
+LOG_AUTO[MARK]="!!!"
+```
+
+It is always case insensitive and will be used additionaly to the default detection.
 
 ## Log Levels
 
