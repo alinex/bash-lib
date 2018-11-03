@@ -132,18 +132,18 @@ It is always case insensitive and will be used additionaly to the default detect
 
 Eight logging levels are supported, combining the levels from the Python logging module and RFC 5424.
 
-| Level              | Numeric value | Syslog numerical code | Origin              |
-| ------------------ | ------------- | --------------------- | ------------------- |
-| DEBUG              | 10            | 7                     | Python and RFC 5424 |
-| INFO               | 20            | 6                     | Python and RFC 5424 |
-| NOTICE             | 25            | 5                     | RFC 5424 specific   |
-| MARK               | 25            | 5                     | own extension       |
-| WARN or WARNING    | 30            | 4                     | Python and RFC 5424 |
-| HEADING            | 35            | 4                     | own extension       |
-| ERR or ERROR       | 40            | 3                     | Python and RFC 5424 |
-| CRIT or CRITICAL   | 50            | 2                     | Python and RFC 5424 |
-| ALERT              | 60            | 1                     | RFC 5424 specific   |
-| EMERG or EMERGENCY | 70            | 0                     | RFC 5424 specific   |
+| Level              | Numeric | Syslog | Origin        | Usage                                     |
+| ------------------ | ------- | ------ | ------------- | ----------------------------------------- |
+| DEBUG              | 10      | 7      | RFC 5424      | Everything not specified                  |
+| INFO               | 20      | 6      | RFC 5424      | Something which may be useful to know     |
+| NOTICE             | 25      | 5      | RFC 5424      | Success message or step done              |
+| MARK               | 25      | 5      | own extension | Special marked like information asked for |
+| WARN or WARNING    | 30      | 4      | RFC 5424      | Warning which may be ok                   |
+| HEADING            | 35      | 4      | own extension | Start of new bigger Part                  |
+| ERR or ERROR       | 40      | 3      | RFC 5424      | An error which can occure                 |
+| CRIT or CRITICAL   | 50      | 2      | RFC 5424      | An error which should not occure          |
+| ALERT              | 60      | 1      | RFC 5424      | Very critical like incorrect method call  |
+| EMERG or EMERGENCY | 70      | 0      | RFC 5424      | Something which should never happen       |
 
 Setting the `LOG_LEVEL` in the script will log subsequent log messages at that value or higher only.
 The `LOG_LEVEL` may be changed anytime within the script.
