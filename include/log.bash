@@ -219,7 +219,7 @@ log () {
     # open filehandle
     log_init
 
-    if [ ! -t 0 ]; then
+    if [ -z "$2" ] && [ ! -t 0 ]; then
         while read line; do
             _log "$1" "$line" </dev/null
         done </dev/stdin

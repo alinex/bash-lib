@@ -203,7 +203,7 @@ log () {
         exit 1
     fi
     log_init
-    if [ ! -t 0 ]; then
+    if [ -z "$2" ] && [ ! -t 0 ]; then
         while read line; do
             _log "$1" "$line" </dev/null
         done </dev/stdin
@@ -301,6 +301,7 @@ log_cmd() {
     return $code
 }
 source_dir=$(dirname $(readlink -f "${BASH_SOURCE[0]:-$(pwd)/x}"))
+declare -i LOCK_SLEEP=${LOCK_SLEEP:-10}
 lock() {
     [ "$#" -ne 1 ] && log_exit ALERT "incorrect library call use: lock <lockfile>"
     local lockfile="$1"
@@ -311,7 +312,7 @@ lock() {
     fi
     while ! ln "$lockfile.$$" "$lockfile" 2>/dev/null; do
         log INFO "...waiting for lock $lockfile"
-        sleep 10
+        sleep $LOCK_SLEEP
     done
     trap 'unlock $lockfile' EXIT
     return 0
