@@ -17,6 +17,8 @@
 source_dir=$(dirname $(readlink -f "${BASH_SOURCE[0]:-$(pwd)/x}"))
 source "$source_dir/log.bash" # load log handler
 
+declare -i LOCK_SLEEP=${LOCK_SLEEP:-10}
+
 # set a lock or wait till it can be set
 # parameter:
 # - lockfile path
@@ -38,7 +40,7 @@ lock() {
     while ! ln "$lockfile.$$" "$lockfile" 2>/dev/null; do
         log INFO "...waiting for lock $lockfile"
         # if the symlink failed, wait for the current lock holder to exit
-        sleep 10
+        sleep $LOCK_SLEEP
     done
     # symlink was created successfully, lock acquired
 

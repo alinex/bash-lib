@@ -27,6 +27,14 @@ An alternative is to use the `exit_lock` method which won't wait till it can get
 exit_lock $lockfile $message $code  # ... and exit if already locked
 ```
 
+## Configuration
+
+The only possible configuration is:
+
+```bash
+LOCK_SLEEP=10 # time to wait before rechecking for the lock
+```
+
 ## How it works
 
 1. The `lock` is set by making a file containing the filename with the PID as file extension and content. This indicates, that this PID is waiting to retrieve the lock like `/tmp/my-program-lock.1587`
