@@ -80,10 +80,10 @@ _log_auto[DEBUG]="\b(DEBUG|COPYRIGHT|WARRANTY)\b|^\s*(AT|AFTER) "
 _log_auto[INFO]="\b(INFO|(START|CALL)(ING)?|TRANSMITTED)\b"
 _log_auto[NOTICE]="\b(NOTICE|ERFOLGREICH|SUCCEEDED|FINISHED)\b"
 _log_auto[MARK]="\b(MARK)\b|!!!"
-_log_auto[WARN]="\b(WARN)\b"
+_log_auto[WARN]="\b(WARN)\b|\bW:"
 _log_auto[WARNING]="\b(WARNING|MISSING|UNKNOWN)\b"
 _log_auto[HEADING]="\b(HEADING)\b"
-_log_auto[ERR]="\b(ERR)\b"
+_log_auto[ERR]="\b(ERR)\b|\bE:"
 _log_auto[ERROR]="\b(ERROR|FEHLERHAFT|FAILED)\b"
 _log_auto[CRIT]="\b(CRIT)\b"
 _log_auto[CRITICAL]="\b(CRITICAL|FATAL)\b"
@@ -314,6 +314,7 @@ log_exit() {
 # Usage: log_cmd <cmd> [<args>...]
 # Code: from command, too
 log_cmd() {
+    #exit
     [ "$#" -lt 1 ] && log_exit ALERT "parameter missing. Usage: log_cmd <cmd> [<args>...]"
     local cmd=$1
     local call=$(printf "%q " "$@")
@@ -323,9 +324,11 @@ log_cmd() {
     exec 5>&1 # fd to write to real output
     set -o pipefail
     # eval "stdbuf -o0 -e0 $call" |& tee >&5 >(log)
-    eval "tee >(log) | stdbuf -o0 -e0 $call" </dev/stdin |& tee >&5 >(log)
+#    eval "tee >(log) | stdbuf -o0 -e0 $call" </dev/stdin |& tee >&5 >(log)
 #    ( eval "stdbuf -o0 -e0 $call" 3>&1 1>&2 2>&3 | tee >&5 >(log) ) 3>&1 1>&2 2>&3 | tee >&5 >(log)
 #    ( eval "stdbuf -o0 -e0 $call" 3>&1 1>&2 2>&3 | tee >&5 >(log AUTO_WARN) ) 3>&1 1>&2 2>&3 | tee >&5 >(log)
+    #tee >(log) | stdbuf -o0 -e0 $call |& tee >&5 >(log)
+    LANG=C stdbuf -o0 -e0 $call </dev/stdin |& tee >&5 >(log)
     code=$?
     #code=${PIPESTATUS[0]}
     exec 5>&- # close

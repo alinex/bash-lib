@@ -95,10 +95,10 @@ _log_auto[DEBUG]="\b(DEBUG|COPYRIGHT|WARRANTY)\b|^\s*(AT|AFTER) "
 _log_auto[INFO]="\b(INFO|(START|CALL)(ING)?|TRANSMITTED)\b"
 _log_auto[NOTICE]="\b(NOTICE|ERFOLGREICH|SUCCEEDED|FINISHED)\b"
 _log_auto[MARK]="\b(MARK)\b|!!!"
-_log_auto[WARN]="\b(WARN)\b"
+_log_auto[WARN]="\b(WARN)\b|\bW:"
 _log_auto[WARNING]="\b(WARNING|MISSING|UNKNOWN)\b"
 _log_auto[HEADING]="\b(HEADING)\b"
-_log_auto[ERR]="\b(ERR)\b"
+_log_auto[ERR]="\b(ERR)\b|\bE:"
 _log_auto[ERROR]="\b(ERROR|FEHLERHAFT|FAILED)\b"
 _log_auto[CRIT]="\b(CRIT)\b"
 _log_auto[CRITICAL]="\b(CRITICAL|FATAL)\b"
@@ -289,7 +289,7 @@ local call=$(printf "%q " "$@")
 log INFO "calling: $call"
 exec 5>&1
 set -o pipefail
-eval "tee >(log) | stdbuf -o0 -e0 $call" </dev/stdin |& tee >&5 >(log)
+LANG=C stdbuf -o0 -e0 $call </dev/stdin |& tee >&5 >(log)
 code=$?
 exec 5>&-
 sleep 0.1
