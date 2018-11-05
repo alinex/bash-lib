@@ -32,7 +32,7 @@ underline() { tput -T$term smul; _color_text "$@"; }
 inverse() { tput -T$term rev; _color_text "$@"; }
 dim() { tput -T$term dim; _color_text "$@"; }
 reset() { tput -T$term sgr0; }
-uncolor() {
+decolor() {
 if [ -z "$1" ] && [ ! -t 0 ]; then
 sed 's/\x1B\[[0-9;]*[a-zA-Z]//g;s/\x1B\x28\x42//g' </dev/stdin
 else
@@ -217,7 +217,7 @@ exec 7>&-
 }
 _log() {
 IFS=$'\n'
-local message=$(uncolor "${@:2}")
+local message=$(decolor $2)
 declare -u message_check=$message
 message=$( sed 's/^\[[A-Z][A-Z]* *\] //' <<< "$message" )
 local message_date
