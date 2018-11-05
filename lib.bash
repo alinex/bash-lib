@@ -284,15 +284,15 @@ exit "$code"
 }
 log_cmd() {
 [ "$#" -lt 1 ] && log_exit ALERT "parameter missing. Usage: log_cmd <cmd> [<args>...]"
-local cmd=$1
+local cmd="$1"
 local call=$(printf "%q " "$@")
 log INFO "calling: $call"
 exec 5>&1
 set -o pipefail
-LANG=C stdbuf -o0 -e0 $call </dev/stdin |& tee >&5 >(log)
+eval "LANG=C stdbuf -o0 -e0 $call </dev/stdin |& tee >&5 >(log)"
 code=$?
 exec 5>&-
-sleep 0.1
+sleep 1
 if [ $code -eq 0 ]; then
 log NOTICE "$cmd call succeeded"
 else
@@ -443,4 +443,32 @@ return 1
 log_exit ALERT "operating system not supported: $(system_info)"
 ;;
 esac
+}
+source_dir=$(dirname $(readlink -f "${BASH_SOURCE[0]:-$(pwd)/x}"))
+export PGCONNECT_TIMEOUT=${PGCONNECT_TIMEOUT:-5}
+psql_exit() {
+log INFO "Testing..."
+result=$(pg_isready)
+if [ $? -eq 0 ]; then
+log NOTICE "PostgreSQL database $result"
+else
+log_exit ALERT "PostgreSQL database $result"
+fi
+}
+psql_field() {
+if readlink /proc/$$/fd/0; then
+log_cmd psql -E -At --set ON_ERROR_STOP=on </dev/stdin
+else
+[ $# -ne 1 ] && log_exit ALERT "The SQL command parameter is needed in call to psql_field"
+log_cmd psql -E -Atc "$1"
+fi
+}
+psql_record() {
+[ $# -ne 1 ] && log_exit ALERT "The SQL command parameter is needed in call to psql_exec"
+declare -a record
+log_cmd psql -E -Atc "$1"
+}
+psql_exec() {
+[ $# -ne 1 ] && log_exit ALERT "The SQL command parameter is needed in call to psql_exec"
+log_cmd psql -E -Atc "$1"
 }

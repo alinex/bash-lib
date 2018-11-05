@@ -14,7 +14,7 @@
 source_dir=$(dirname $(readlink -f "${BASH_SOURCE[0]:-$(pwd)/x}"))
 source "$source_dir/log.bash" # load color methods
 
-PGCONNECT_TIMEOUT=${PGCONNECT_TIMEOUT:-5}
+export PGCONNECT_TIMEOUT=${PGCONNECT_TIMEOUT:-5}
 
 # exit if database not accessible
 psql_exit() {
@@ -53,6 +53,7 @@ psql_record() {
 psql_exec() {
     [ $# -ne 1 ] && log_exit ALERT "The SQL command parameter is needed in call to psql_exec"
     log_cmd psql -E -Atc "$1"
+    #psql -E -Atc "$1"
 }
 
 # vartest=`psql -X -A -d $dbname -U $username -h localhost -p 5432 -t -c "SELECT gid FROM testtable WHERE aid='1'"`

@@ -22,6 +22,7 @@ grep -hv "source \"\$source_dir/" \
     ./log.bash \
     ./locking.bash \
     ./info.bash \
+    ./psql.bash \
     | sed -e '/^\s*#/d;s/\s\s*#\s.*//g;s/^[[:space:]]*//;/^$/d' \
     >> $dest
 

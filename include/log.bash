@@ -316,7 +316,7 @@ log_exit() {
 log_cmd() {
     #exit
     [ "$#" -lt 1 ] && log_exit ALERT "parameter missing. Usage: log_cmd <cmd> [<args>...]"
-    local cmd=$1
+    local cmd="$1"
     local call=$(printf "%q " "$@")
     log INFO "calling: $call"
     # result=$(eval $(printf "%q " "$@") |& tee >/dev/fd/5 >(log) )
@@ -328,11 +328,12 @@ log_cmd() {
 #    ( eval "stdbuf -o0 -e0 $call" 3>&1 1>&2 2>&3 | tee >&5 >(log) ) 3>&1 1>&2 2>&3 | tee >&5 >(log)
 #    ( eval "stdbuf -o0 -e0 $call" 3>&1 1>&2 2>&3 | tee >&5 >(log AUTO_WARN) ) 3>&1 1>&2 2>&3 | tee >&5 >(log)
     #tee >(log) | stdbuf -o0 -e0 $call |& tee >&5 >(log)
-    LANG=C stdbuf -o0 -e0 $call </dev/stdin |& tee >&5 >(log)
+    #LANG=C stdbuf -o0 -e0 $call </dev/stdin |& tee >&5 >(log)
+    eval "LANG=C stdbuf -o0 -e0 $call </dev/stdin |& tee >&5 >(log)"
     code=$?
     #code=${PIPESTATUS[0]}
     exec 5>&- # close
-    sleep 0.1 # wait for output
+    sleep 1 # wait for output
 
     if [ $code -eq 0 ]; then
         log NOTICE "$cmd call succeeded"
