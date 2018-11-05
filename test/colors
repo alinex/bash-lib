@@ -3,7 +3,7 @@
 source_dir=$(dirname "${BASH_SOURCE[0]}")
 source "$source_dir/../include/colors.bash"
 
-set -e # exit on any error
+#set -e # exit on any error
 
 echo $(cyan "$(bold)Output each color or style:")
 echo $(black "This is a black line.")
