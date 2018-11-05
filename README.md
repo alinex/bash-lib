@@ -8,7 +8,7 @@ A short help is always included in the files but the [documentation section](doc
 
 ### Within Repository
 
-If used in other git projects, it should be added as git submodule and included in the scripts using relative paths. But don't forget to make it relative from the current script directory because the working directory may change depending from where the script is called.
+If used in other git projects, it can be added as git submodule and included in the scripts using relative paths. But don't forget to make it relative from the current script directory because the working directory may change depending from where the script is called.
 
 ```bash
 source_dir=$(dirname "${BASH_SOURCE[0]}")

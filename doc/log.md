@@ -74,7 +74,7 @@ To log the call of some other routines use:
 log_cmd date +%Y-%m-%d
 ```
 
-This will use the auto detection logger and give you the result of the command in variable `$result`.
+This will use the auto detection logger and give you the result of the command in variable `$result` while also piping the output together with errors to the log module.
 
 ## Piping messages
 

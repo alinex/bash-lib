@@ -240,7 +240,7 @@ log () {
 _log() {
 
     IFS=$'\n'
-    local message=$2 #(decolor "$2")
+    local message=$2
     declare -u message_check=$message
     message=$( sed 's/^\[[A-Z][A-Z]* *\] //' <<< "$message" ) # remove possible SIMPLE format
     local message_date
