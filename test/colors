@@ -36,5 +36,5 @@ echo
 ctext=$(bg_red "This text with red background")
 echo $(cyan "$(bold)Remove colors:")
 echo "original: $ctext"
-echo "uncolor using parameters: $(uncolor $ctext)"
-echo "uncolor using pipe: $ctext" | uncolor
+echo "decolor using parameters: $(decolor $ctext)"
+echo "decolor using pipe: $ctext" | decolor

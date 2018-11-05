@@ -122,3 +122,27 @@
 [33m2018-11-04 16:45:59 log-cmd[17850] WARN: W: Problem unlinking the file /var/cache/apt/srcpkgcache.bin - RemoveCaches (13: Permission denied)(B[m
 [31m2018-11-04 16:45:59 log-cmd[17850] ERROR: apt-get exited with return code 100(B[m
 [31m[1m[7m2018-11-04 16:45:59 log-cmd[17850] ALERT: Could not...(B[m
+2018-11-05 17:49:51 log-cmd[3548] INFO: calling: apt-get update(B[m
+[31m2018-11-05 17:49:51 log-cmd[3548] ERROR: W: chmod 0700 of directory /var/lib/apt/lists/partial failed - SetupAPTPartialDirectory (1: Operation not permitted)(B[m
+[31m2018-11-05 17:49:51 log-cmd[3548] ERR: E: Could not open lock file /var/lib/apt/lists/lock - open (13: Permission denied)(B[m
+[31m2018-11-05 17:49:51 log-cmd[3548] ERR: E: Unable to lock directory /var/lib/apt/lists/(B[m
+[33m2018-11-05 17:49:51 log-cmd[3548] WARN: W: Problem unlinking the file /var/cache/apt/pkgcache.bin - RemoveCaches (13: Permission denied)(B[m
+[33m2018-11-05 17:49:51 log-cmd[3548] WARN: W: Problem unlinking the file /var/cache/apt/srcpkgcache.bin - RemoveCaches (13: Permission denied)(B[m
+[31m2018-11-05 17:49:52 log-cmd[3548] ERROR: apt-get exited with return code 100(B[m
+[31m[1m[7m2018-11-05 17:49:53 log-cmd[3548] ALERT: Could not...(B[m
+2018-11-05 17:54:22 log-cmd[4326] INFO: calling: apt-get update(B[m
+[31m2018-11-05 17:54:22 log-cmd[4326] ERROR: W: chmod 0700 of directory /var/lib/apt/lists/partial failed - SetupAPTPartialDirectory (1: Operation not permitted)(B[m
+[31m2018-11-05 17:54:22 log-cmd[4326] ERR: E: Could not open lock file /var/lib/apt/lists/lock - open (13: Permission denied)(B[m
+[31m2018-11-05 17:54:22 log-cmd[4326] ERR: E: Unable to lock directory /var/lib/apt/lists/(B[m
+[33m2018-11-05 17:54:22 log-cmd[4326] WARN: W: Problem unlinking the file /var/cache/apt/pkgcache.bin - RemoveCaches (13: Permission denied)(B[m
+[33m2018-11-05 17:54:22 log-cmd[4326] WARN: W: Problem unlinking the file /var/cache/apt/srcpkgcache.bin - RemoveCaches (13: Permission denied)(B[m
+[31m2018-11-05 17:54:24 log-cmd[4326] ERROR: apt-get exited with return code 100(B[m
+[31m[1m[7m2018-11-05 17:54:25 log-cmd[4326] ALERT: Could not...(B[m
+2018-11-05 17:57:21 log-cmd[4660] INFO: calling: apt-get update(B[m
+[31m2018-11-05 17:57:21 log-cmd[4660] ERROR: W: chmod 0700 of directory /var/lib/apt/lists/partial failed - SetupAPTPartialDirectory (1: Operation not permitted)(B[m
+[31m2018-11-05 17:57:21 log-cmd[4660] ERR: E: Could not open lock file /var/lib/apt/lists/lock - open (13: Permission denied)(B[m
+[31m2018-11-05 17:57:21 log-cmd[4660] ERR: E: Unable to lock directory /var/lib/apt/lists/(B[m
+[33m2018-11-05 17:57:21 log-cmd[4660] WARN: W: Problem unlinking the file /var/cache/apt/pkgcache.bin - RemoveCaches (13: Permission denied)(B[m
+[33m2018-11-05 17:57:21 log-cmd[4660] WARN: W: Problem unlinking the file /var/cache/apt/srcpkgcache.bin - RemoveCaches (13: Permission denied)(B[m
+[31m2018-11-05 17:57:22 log-cmd[4660] ERROR: apt-get exited with return code 100(B[m
+[31m[1m[7m2018-11-05 17:57:22 log-cmd[4660] ALERT: Could not...(B[m

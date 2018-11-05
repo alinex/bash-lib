@@ -59,7 +59,7 @@ reset() { tput -T$term sgr0; }
 
 # remove color codes from text
 # Usage: result=$(uncolor "$result")
-uncolor() {
+decolor() {
   if [ -z "$1" ] && [ ! -t 0 ]; then
     # no parameters but STDIN pipe is given
     sed 's/\x1B\[[0-9;]*[a-zA-Z]//g;s/\x1B\x28\x42//g' </dev/stdin

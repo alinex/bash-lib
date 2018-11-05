@@ -38,8 +38,8 @@ And if you want to remove the coloring later again:
 ```bash
 ctext=$(bg_red "This text with red background")
 echo "original: $ctext"
-echo "uncolor using parameters: $(uncolor $ctext)"
-echo "uncolor using pipe: $ctext" | uncolor
+echo "decolor using parameters: $(decolor $ctext)"
+echo "decolor using pipe: $ctext" | decolor
 ```
 
 ## Foreground color

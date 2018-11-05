@@ -220,11 +220,12 @@ log () {
     log_init
 
     if [ -z "$2" ] && [ ! -t 0 ]; then
+        decolor </dev/stdin |
         while read line; do
             _log "$1" "$line" </dev/null
-        done </dev/stdin
+        done
     else
-        echo "${@:2}" |
+        echo "${@:2}" | decolor |
         while read -r line; do
             _log "$1" "$line" </dev/null
         done
@@ -239,7 +240,7 @@ log () {
 _log() {
 
     IFS=$'\n'
-    local message=$(uncolor "${@:2}")
+    local message=$2 #(decolor "$2")
     declare -u message_check=$message
     message=$( sed 's/^\[[A-Z][A-Z]* *\] //' <<< "$message" ) # remove possible SIMPLE format
     local message_date
