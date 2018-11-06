@@ -146,3 +146,63 @@
 [33m2018-11-05 17:57:21 log-cmd[4660] WARN: W: Problem unlinking the file /var/cache/apt/srcpkgcache.bin - RemoveCaches (13: Permission denied)(B[m
 [31m2018-11-05 17:57:22 log-cmd[4660] ERROR: apt-get exited with return code 100(B[m
 [31m[1m[7m2018-11-05 17:57:22 log-cmd[4660] ALERT: Could not...(B[m
+2018-11-06 10:57:35 log-cmd[21668] INFO: calling: apt-get update(B[m
+[31m2018-11-06 10:57:35 log-cmd[21668] ERR: E: Could not open lock file /var/lib/apt/lists/lock - open (13: Permission denied)(B[m
+[31m2018-11-06 10:57:35 log-cmd[21668] ERR: E: Unable to lock directory /var/lib/apt/lists/(B[m
+[33m2018-11-06 10:57:35 log-cmd[21668] WARN: W: Problem unlinking the file /var/cache/apt/pkgcache.bin - RemoveCaches (13: Permission denied)(B[m
+[33m2018-11-06 10:57:35 log-cmd[21668] WARN: W: Problem unlinking the file /var/cache/apt/srcpkgcache.bin - RemoveCaches (13: Permission denied)(B[m
+[31m2018-11-06 10:57:36 log-cmd[21668] ERROR: apt-get exited with return code 100(B[m
+[31m[1m[7m2018-11-06 10:57:36 log-cmd[21668] ALERT: Could not...(B[m
+2018-11-06 10:58:17 log-cmd[21989] INFO: calling: apt-get update(B[m
+[31m2018-11-06 10:58:18 log-cmd[21989] ERR: E: Could not open lock file /var/lib/apt/lists/lock - open (13: Permission denied)(B[m
+[31m2018-11-06 10:58:18 log-cmd[21989] ERR: E: Unable to lock directory /var/lib/apt/lists/(B[m
+[33m2018-11-06 10:58:18 log-cmd[21989] WARN: W: Problem unlinking the file /var/cache/apt/pkgcache.bin - RemoveCaches (13: Permission denied)(B[m
+[33m2018-11-06 10:58:18 log-cmd[21989] WARN: W: Problem unlinking the file /var/cache/apt/srcpkgcache.bin - RemoveCaches (13: Permission denied)(B[m
+[31m2018-11-06 10:58:19 log-cmd[21989] ERROR: apt-get exited with return code 100(B[m
+[31m[1m[7m2018-11-06 10:58:19 log-cmd[21989] ALERT: Could not...(B[m
+2018-11-06 10:58:45 log-cmd[22193] INFO: calling: apt-get update(B[m
+[31m2018-11-06 10:58:45 log-cmd[22193] ERR: E: Could not open lock file /var/lib/apt/lists/lock - open (13: Permission denied)(B[m
+[31m2018-11-06 10:58:45 log-cmd[22193] ERR: E: Unable to lock directory /var/lib/apt/lists/(B[m
+[33m2018-11-06 10:58:45 log-cmd[22193] WARN: W: Problem unlinking the file /var/cache/apt/pkgcache.bin - RemoveCaches (13: Permission denied)(B[m
+[33m2018-11-06 10:58:45 log-cmd[22193] WARN: W: Problem unlinking the file /var/cache/apt/srcpkgcache.bin - RemoveCaches (13: Permission denied)(B[m
+[31m2018-11-06 10:58:46 log-cmd[22193] ERROR: apt-get exited with return code 100(B[m
+[31m[1m[7m2018-11-06 10:58:46 log-cmd[22193] ALERT: Could not...(B[m
+2018-11-06 10:59:13 log-cmd[22423] INFO: calling: apt-get update(B[m
+[31m2018-11-06 10:59:13 log-cmd[22423] ERR: E: Could not open lock file /var/lib/apt/lists/lock - open (13: Permission denied)(B[m
+[31m2018-11-06 10:59:13 log-cmd[22423] ERR: E: Unable to lock directory /var/lib/apt/lists/(B[m
+[33m2018-11-06 10:59:13 log-cmd[22423] WARN: W: Problem unlinking the file /var/cache/apt/pkgcache.bin - RemoveCaches (13: Permission denied)(B[m
+[33m2018-11-06 10:59:13 log-cmd[22423] WARN: W: Problem unlinking the file /var/cache/apt/srcpkgcache.bin - RemoveCaches (13: Permission denied)(B[m
+[31m2018-11-06 10:59:14 log-cmd[22423] ERROR: apt-get exited with return code 100(B[m
+[31m[1m[7m2018-11-06 10:59:14 log-cmd[22423] ALERT: Could not...(B[m
+2018-11-06 10:59:36 log-cmd[22615] INFO: calling: apt-get update(B[m
+[31m2018-11-06 10:59:37 log-cmd[22615] ERR: E: Could not open lock file /var/lib/apt/lists/lock - open (13: Permission denied)(B[m
+[31m2018-11-06 10:59:37 log-cmd[22615] ERR: E: Unable to lock directory /var/lib/apt/lists/(B[m
+[33m2018-11-06 10:59:37 log-cmd[22615] WARN: W: Problem unlinking the file /var/cache/apt/pkgcache.bin - RemoveCaches (13: Permission denied)(B[m
+[33m2018-11-06 10:59:37 log-cmd[22615] WARN: W: Problem unlinking the file /var/cache/apt/srcpkgcache.bin - RemoveCaches (13: Permission denied)(B[m
+[31m2018-11-06 10:59:38 log-cmd[22615] ERROR: apt-get exited with return code 100(B[m
+[31m[1m[7m2018-11-06 10:59:38 log-cmd[22615] ALERT: Could not...(B[m
+2018-11-06 11:07:27 log-cmd[24139] INFO: calling: apt-get update(B[m
+[31m2018-11-06 11:07:28 log-cmd[24139] ERR: E: Could not open lock file /var/lib/apt/lists/lock - open (13: Permission denied)(B[m
+[31m2018-11-06 11:07:28 log-cmd[24139] ERR: E: Unable to lock directory /var/lib/apt/lists/(B[m
+[33m2018-11-06 11:07:28 log-cmd[24139] WARN: W: Problem unlinking the file /var/cache/apt/pkgcache.bin - RemoveCaches (13: Permission denied)(B[m
+[33m2018-11-06 11:07:28 log-cmd[24139] WARN: W: Problem unlinking the file /var/cache/apt/srcpkgcache.bin - RemoveCaches (13: Permission denied)(B[m
+[31m2018-11-06 11:07:29 log-cmd[24139] ERROR: apt-get exited with return code 100(B[m
+[31m[1m[7m2018-11-06 11:07:29 log-cmd[24139] ALERT: Could not...(B[m
+[2m2018-11-06 11:07:49 log-cmd[24364] DEBUG: test(B[m
+2018-11-06 11:07:49 log-cmd[24364] INFO: calling: apt-get update(B[m
+[2m2018-11-06 11:07:49 log-cmd[24364] DEBUG: Reading package lists...(B[m
+[31m2018-11-06 11:07:49 log-cmd[24364] ERR: E: Could not open lock file /var/lib/apt/lists/lock - open (13: Permission denied)(B[m
+[31m2018-11-06 11:07:49 log-cmd[24364] ERR: E: Unable to lock directory /var/lib/apt/lists/(B[m
+[33m2018-11-06 11:07:49 log-cmd[24364] WARN: W: Problem unlinking the file /var/cache/apt/pkgcache.bin - RemoveCaches (13: Permission denied)(B[m
+[33m2018-11-06 11:07:50 log-cmd[24364] WARN: W: Problem unlinking the file /var/cache/apt/srcpkgcache.bin - RemoveCaches (13: Permission denied)(B[m
+[31m2018-11-06 11:07:50 log-cmd[24364] ERROR: apt-get exited with return code 100(B[m
+[31m[1m[7m2018-11-06 11:07:50 log-cmd[24364] ALERT: Could not...(B[m
+2018-11-06 11:08:20 log-cmd[24693] INFO: calling: apt-get update(B[m
+[2m2018-11-06 11:08:20 log-cmd[24693] DEBUG: Reading package lists...(B[m
+[31m2018-11-06 11:08:20 log-cmd[24693] ERR: E: Could not open lock file /var/lib/apt/lists/lock - open (13: Permission denied)(B[m
+[31m2018-11-06 11:08:21 log-cmd[24693] ERR: E: Unable to lock directory /var/lib/apt/lists/(B[m
+[33m2018-11-06 11:08:21 log-cmd[24693] WARN: W: Problem unlinking the file /var/cache/apt/pkgcache.bin - RemoveCaches (13: Permission denied)(B[m
+[33m2018-11-06 11:08:21 log-cmd[24693] WARN: W: Problem unlinking the file /var/cache/apt/srcpkgcache.bin - RemoveCaches (13: Permission denied)(B[m
+[31m2018-11-06 11:08:21 log-cmd[24693] ERROR: apt-get exited with return code 100(B[m
+[31m[1m[7m2018-11-06 11:08:22 log-cmd[24693] ALERT: Could not...(B[m
+[2m2018-11-06 11:08:22 log-cmd[24693] DEBUG: Tue Nov  6 11:08:22 CET 2018(B[m

@@ -318,7 +318,7 @@ log_cmd() {
     [ "$#" -lt 1 ] && log_exit ALERT "parameter missing. Usage: log_cmd <cmd> [<args>...]"
     local cmd="$1"
     local call=$(printf "%q " "$@")
-    log INFO "calling: $call"
+    [ -n "$LOG_CMD_QUIET" ] || log INFO "calling: $call"
     # result=$(eval $(printf "%q " "$@") |& tee >/dev/fd/5 >(log) )
 
     exec 5>&1 # fd to write to real output
@@ -336,7 +336,7 @@ log_cmd() {
     sleep 1 # wait for output
 
     if [ $code -eq 0 ]; then
-        log NOTICE "$cmd call succeeded"
+        [ -n "$LOG_CMD_QUIET" ] || log NOTICE "$cmd call succeeded"
     else
         log ERROR "$cmd exited with return code $code"
     fi

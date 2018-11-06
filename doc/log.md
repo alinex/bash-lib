@@ -33,9 +33,11 @@ LOG_ROTATE_TIME=[DAILY|WEEKLY|MONTHLY]
 LOG_ROTATE_SIZE=<bytes>
 LOG_ROTATE_NUM=<max number of files>
 LOG_ROTATE_COMPRESS=1
-# user defined aut detection and coloring (regexp)
+# user defined auto detection and coloring (regexp)
 LOG_AUTO[OK]="\b(done|transferred)\b"
 LOG_AUTO[MARK]="!!!"
+# more
+LOG_CMD_QUIET=1                     # will prevent call and success messages
 ```
 
 ### Command

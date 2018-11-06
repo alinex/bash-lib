@@ -1,11 +1,18 @@
 #!/bin/bash
 
+LOG_LEVEL=DEBUG
+LOG_CONSOLE=SIMPLE
+
 source_dir=$(dirname "${BASH_SOURCE[0]}")
 LOG_FILE="$source_dir/test.log"
 source "$source_dir/../include/log.bash"
 
-set -e # exit on any error
+#set -e # exit on any error
 
 echo $(cyan "$(bold)Simple commands:")
-log_cmd apt-get update || log_exit ALERT "Could not..."
+log_cmd apt-get update >/dev/null || log ALERT "Could not..."
+
+echo $(cyan "$(bold)Quiet commands:")
+LOG_CMD_QUIET=1
+log_cmd date >/dev/null
 echo "Done"
