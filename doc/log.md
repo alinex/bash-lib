@@ -36,8 +36,9 @@ LOG_ROTATE_COMPRESS=1
 # user defined auto detection and coloring (regexp)
 LOG_AUTO[OK]="\b(done|transferred)\b"
 LOG_AUTO[MARK]="!!!"
-# more
+# command log calls
 LOG_CMD_QUIET=1                     # will prevent call and success messages
+LOG_CMD_LEVEL=AUTO_INFO             # the log level used for command output
 ```
 
 ### Command

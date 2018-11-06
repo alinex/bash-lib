@@ -314,8 +314,8 @@ log_exit() {
 # Usage: log_cmd <cmd> [<args>...]
 # Code: from command, too
 log_cmd() {
-    #exit
     [ "$#" -lt 1 ] && log_exit ALERT "parameter missing. Usage: log_cmd <cmd> [<args>...]"
+    LOG_CMD_LEVEL=${LOG_CMD_LEVEL:-AUTO}
     local cmd="$1"
     local call=$(printf "%q " "$@")
     [ -n "$LOG_CMD_QUIET" ] || log INFO "calling: $call"
@@ -329,7 +329,7 @@ log_cmd() {
 #    ( eval "stdbuf -o0 -e0 $call" 3>&1 1>&2 2>&3 | tee >&5 >(log AUTO_WARN) ) 3>&1 1>&2 2>&3 | tee >&5 >(log)
     #tee >(log) | stdbuf -o0 -e0 $call |& tee >&5 >(log)
     #LANG=C stdbuf -o0 -e0 $call </dev/stdin |& tee >&5 >(log)
-    eval "LANG=C stdbuf -o0 -e0 $call </dev/stdin |& tee >&5 >(log)"
+    eval "LANG=C stdbuf -o0 -e0 $call </dev/stdin |& tee >&5 >(log $LOG_CMD_LEVEL)"
     code=$?
     #code=${PIPESTATUS[0]}
     exec 5>&- # close

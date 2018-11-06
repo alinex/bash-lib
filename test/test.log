@@ -206,3 +206,12 @@
 [31m2018-11-06 11:08:21 log-cmd[24693] ERROR: apt-get exited with return code 100(B[m
 [31m[1m[7m2018-11-06 11:08:22 log-cmd[24693] ALERT: Could not...(B[m
 [2m2018-11-06 11:08:22 log-cmd[24693] DEBUG: Tue Nov  6 11:08:22 CET 2018(B[m
+2018-11-06 11:16:32 log-cmd[28015] INFO: calling: apt-get update(B[m
+[2m2018-11-06 11:16:33 log-cmd[28015] DEBUG: Reading package lists...(B[m
+[31m2018-11-06 11:16:33 log-cmd[28015] ERROR: E: Could not open lock file /var/lib/apt/lists/lock - open (13: Permission denied)(B[m
+[31m2018-11-06 11:16:33 log-cmd[28015] ERR: E: Unable to lock directory /var/lib/apt/lists/(B[m
+[31m2018-11-06 11:16:33 log-cmd[28015] ERROR: W: Problem unlinking the file /var/cache/apt/pkgcache.bin - RemoveCaches (13: Permission denied)(B[m
+[31m2018-11-06 11:16:33 log-cmd[28015] ERROR: W: Problem unlinking the file /var/cache/apt/srcpkgcache.bin - RemoveCaches (13: Permission denied)(B[m
+[31m2018-11-06 11:16:34 log-cmd[28015] ERROR: apt-get exited with return code 100(B[m
+[31m[1m[7m2018-11-06 11:16:34 log-cmd[28015] ALERT: Could not...(B[m
+[2m2018-11-06 11:16:34 log-cmd[28015] DEBUG: Tue Nov  6 11:16:34 CET 2018(B[m
