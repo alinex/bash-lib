@@ -6,18 +6,18 @@
 
 # Setup
 source_dir=$(dirname $(readlink -f "${BASH_SOURCE[0]:-$(pwd)/x}"))
-cd "$source_dir/../include"
+cd "$source_dir/include"
 
-dest=$(readlink -m "$source_dir/../lib.bash")
+dest=$(readlink -m "$source_dir/lib.bash")
 echo "Building combined file"
 
 # Header
 echo "#!/bin/bash" > $dest
-echo "# Automatically combined bash-lib, see http://172.17.101.90/divibib-betrieb/ssh-control" >> $dest
+echo "# Automatically combined bash-lib, see http://172.17.101.90/divibib-betrieb/bash-lib" >> $dest
 echo >> $dest
 
 # Concatenate libs
-grep -hv "source \"\$source_dir/" \
+egrep -hv "source \"\\\$source_dir/|source_dir=" \
     ./colors.bash \
     ./log.bash \
     ./locking.bash \

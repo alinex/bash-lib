@@ -1,5 +1,5 @@
 #!/bin/bash
-# Automatically combined bash-lib, see http://172.17.101.90/divibib-betrieb/ssh-control
+# Automatically combined bash-lib, see http://172.17.101.90/divibib-betrieb/bash-lib
 
 term=${TERM:-xterm-256color}
 _color_text() {
@@ -40,7 +40,6 @@ sed 's/\x1B\[[0-9;]*[a-zA-Z]//g;s/\x1B\x28\x42//g' <<< "$@"
 fi
 }
 [ -n "${_log_level[DEBUG]}" ] && return 0
-source_dir=$(dirname $(readlink -f "${BASH_SOURCE[0]:-$(pwd)/x}"))
 declare -ar _log_detect=(DEBUG INFO NOTICE WARN MARK WARNING HEADING ERR ERROR CRIT CRITICAL ALERT EMERG EMERGENCY)
 declare -A _log_level
 _log_level[DEBUG]=10
@@ -301,7 +300,6 @@ log ERROR "$cmd exited with return code $code"
 fi
 return $code
 }
-source_dir=$(dirname $(readlink -f "${BASH_SOURCE[0]:-$(pwd)/x}"))
 declare -i LOCK_SLEEP=${LOCK_SLEEP:-10}
 lock() {
 [ "$#" -ne 1 ] && log_exit ALERT "incorrect library call use: lock <lockfile>"
@@ -347,7 +345,6 @@ fi
 return 0
 }
 [ -n "$OS" ] && return 0
-source_dir=$(dirname "${BASH_SOURCE[0]}")
 OS=$(uname | tr '[:upper:]' '[:lower:]')
 KERNEL=$(uname -r)
 MACH=$(uname -m)
@@ -445,7 +442,6 @@ log_exit ALERT "operating system not supported: $(system_info)"
 ;;
 esac
 }
-source_dir=$(dirname $(readlink -f "${BASH_SOURCE[0]:-$(pwd)/x}"))
 export PGCONNECT_TIMEOUT=${PGCONNECT_TIMEOUT:-5}
 psql_exit() {
 log INFO "Testing..."
