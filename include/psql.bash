@@ -33,11 +33,19 @@ psql_exit() {
 psql_field() {
     if readlink /proc/$$/fd/0; then
         # input stream
-        log_cmd psql -E -At --set ON_ERROR_STOP=on </dev/stdin
+        if [ -n "$PGLOG" ]; then
+            log_cmd psql -E -At --set ON_ERROR_STOP=on </dev/stdin
+        else
+            psql -E -At --set ON_ERROR_STOP=on </dev/stdin
+        fi
     else
         # use parameters
         [ $# -ne 1 ] && log_exit ALERT "The SQL command parameter is needed in call to psql_field"
-        log_cmd psql -E -Atc "$1"
+        if [ -n "$PGLOG" ]; then
+            log_cmd psql -E -Atc "$1"
+        else
+            psql -E -Atc "$1"
+        fi
     fi
 }
 
@@ -47,13 +55,20 @@ psql_field() {
 psql_record() {
     [ $# -ne 1 ] && log_exit ALERT "The SQL command parameter is needed in call to psql_exec"
     declare -a record
-    log_cmd psql -E -Atc "$1"
+    if [ -n "$PGLOG" ]; then
+        log_cmd psql -E -Atc "$1"
+    else
+        psql -E -Atc "$1"
+    fi
 }
 
 psql_exec() {
     [ $# -ne 1 ] && log_exit ALERT "The SQL command parameter is needed in call to psql_exec"
-    log_cmd psql -E -Atc "$1"
-    #psql -E -Atc "$1"
+    if [ -n "$PGLOG" ]; then
+        log_cmd psql -E -Atc "$1"
+    else
+        psql -E -Atc "$1"
+    fi
 }
 
 # vartest=`psql -X -A -d $dbname -U $username -h localhost -p 5432 -t -c "SELECT gid FROM testtable WHERE aid='1'"`

@@ -458,18 +458,34 @@ fi
 }
 psql_field() {
 if readlink /proc/$$/fd/0; then
+if [ -n "$PGLOG" ]; then
 log_cmd psql -E -At --set ON_ERROR_STOP=on </dev/stdin
 else
+psql -E -At --set ON_ERROR_STOP=on </dev/stdin
+fi
+else
 [ $# -ne 1 ] && log_exit ALERT "The SQL command parameter is needed in call to psql_field"
+if [ -n "$PGLOG" ]; then
 log_cmd psql -E -Atc "$1"
+else
+psql -E -Atc "$1"
+fi
 fi
 }
 psql_record() {
 [ $# -ne 1 ] && log_exit ALERT "The SQL command parameter is needed in call to psql_exec"
 declare -a record
+if [ -n "$PGLOG" ]; then
 log_cmd psql -E -Atc "$1"
+else
+psql -E -Atc "$1"
+fi
 }
 psql_exec() {
 [ $# -ne 1 ] && log_exit ALERT "The SQL command parameter is needed in call to psql_exec"
+if [ -n "$PGLOG" ]; then
 log_cmd psql -E -Atc "$1"
+else
+psql -E -Atc "$1"
+fi
 }

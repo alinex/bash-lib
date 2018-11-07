@@ -11,6 +11,7 @@ The following environment settings should be used:
 - `PGHOST` specifies the name of host to connect to
 - `PGPORT` port number to connect to at the server host (if not default port 5432)
 - `PGDATABASE` is the database name
+- `PGLOG` set this flag to log the calls to postgreSQL
 
 ## Methods
 
