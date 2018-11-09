@@ -5,12 +5,12 @@
 # http://172.17.101.90/divibib-betrieb/bash-lib/blob/master/README.md
 
 # Setup
-declare -A build
-build[base]="colors, log"
-build[locking]="colors, log, locking"
-build[info]="colors, log, info"
-build[psql]="colors, log, psql"
-build[all]="colors, log, locking, info, psql"
+declare -A lib
+lib[base]="colors, log"
+lib[locking]="colors, log, locking"
+lib[info]="colors, log, info"
+lib[psql]="colors, log, psql"
+lib[all]="colors, log, locking, info, psql"
 
 # Load libraries
 source_dir=$(dirname $(readlink -f "${BASH_SOURCE[0]:-$(pwd)/x}"))
@@ -29,8 +29,8 @@ gitlab=$(git config --get remote.origin.url | sed 's/\.git$//')
 
 log HEADING "Building libraries..."
 mkdir -p dist |& log || log_exit ALERT "Could not create distribution directory"
-for pack in "${!build[@]}"; do
-    parts="${build[$pack]}"
+for pack in "${!lib[@]}"; do
+    parts="${lib[$pack]}"
     dest="dist/$pack.bash"
     log INFO "Generation dist/$pack.bash including $parts"
     # Header
@@ -45,6 +45,35 @@ for pack in "${!build[@]}"; do
         src/include/{$parts}.bash \
         | sed -e '/^\s*#/d;s/\s\s*#\s.*//g;s/^[[:space:]]*//;/^$/d' \
         " >> $dest
+done
+
+log HEADING "Building commands..."
+for file in src/bin/*; do
+    dest="dist/$(basename $file)"
+    if [ "$(head -n 1 $file)" = "#!/bin/bash" ]; then
+        used_lib=$(grep "DIST include" $file | awk '{ print $4 }')
+        log INFO "Building $dest using $used_lib"
+        [ -e "dist/$used_lib" ] || log_exit ALERT "Library $used_lib not existing, referenced in $file"
+        # Header
+        echo "#!/bin/bash" > $dest
+        echo "# Bash helper library and tools by A.Schilling:" >> $dest
+        echo "# $gitlab/blob/$revision/README.md" >> $dest
+        # Add library
+        if [ -n "$used_lib" ]; then
+            egrep -v '^#' "dist/$used_lib" >> $dest
+        else
+            echo >> $dest
+        fi
+        # Compress
+        egrep -hv 'source \"\$source_dir/|source_dir=' \
+            $file \
+            | sed -e '/^\s*#/d;s/\s\s*#\s.*//g;s/^[[:space:]]*//;/^$/d' \
+            >> $dest
+    else
+        log INFO "Copying to $dest"
+        cp "$file" dist |& log
+    fi
+    chmod a+rx "$dest" |& log
 done
 
 log HEADING "DONE."

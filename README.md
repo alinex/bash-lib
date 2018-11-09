@@ -6,56 +6,74 @@ A short help is always included in the files but the [documentation section](doc
 
 ## Installation
 
-### Within Repository
+### Build
 
-If used in other git projects, it can be added as git submodule and included in the scripts using relative paths. But don't forget to make it relative from the current script directory because the working directory may change depending from where the script is called.
+This library contains a build script under `bin/build` which should be called to create the distribution folder.
 
-```bash
-source_dir=$(dirname "${BASH_SOURCE[0]}")
-source "$source_dir/bash-lib/include/colors"
-```
+After that you will find different combined libraries in the `dist` folder:
 
-### Standalone
+        -rw-rw-r-- 1 alex alex  9994 Nov  9 08:11 base.bash
+        -rw-rw-r-- 1 alex alex 10970 Nov  9 08:11 psql.bash
+        -rw-rw-r-- 1 alex alex 11603 Nov  9 08:11 locking.bash
+        -rw-rw-r-- 1 alex alex 13350 Nov  9 08:11 info.bash
+        -rw-rw-r-- 1 alex alex 15935 Nov  9 08:11 all.bash
 
-To use them from out of a git repository you have to copy the code to the machine. This will often be in `/opt` or `/opt/divibib/` and included from your scripts with it's absolute path.
+And also some commands:
 
-To easily call the contained programs you may add `/opt/bash-lib` to the search path.
+        -rwxrwxr-x 1 alex alex   549 Nov  9 08:23 log
+        -rwxrwxr-x 1 alex alex 79640 Nov  9 08:23 sendmail
 
-## Programs
+> All files are self contained, so you only pick the ones you need.
 
-- [log](doc/log.md) log command to write to file, `STDERR` or syslog
-- [sendmail](doc/sendmail.md) is a simple SMTP mailer
+### Including libraries
 
-## Libraries
+The most common way is to include the needed library from the `dist` folder within the destination code. That ensures that changes to the bash-lib repository or a central installation won't change the running code.
 
-Methods may return three different parts:
-
-- `$?` exit code which is 0 on success
-- `$result` from the called method if possible
-- direct console output which may be captured or be piped
-  (internal commands will directly call the log module so no need to do this here)
-
-The following modules are available:
-
-- [locking](doc/locking.md) to serialize parallel tasks
-- [log](doc/log.md) log handler to write to file, `STDERR` or syslog
-- [colors](doc/colors.md) predefined color variables
-- [info](doc/info.md) is a collection of system information methods
-- [psql](doc/psql.md) to access PostgreSQL Database
-
-Additionally a [skeleton](doc/skeleton.md) is used as template to create new scripts.
-
-## Minified lib
-
-A combined and minified lib to include is provided under `/lib.bash` which contains all of the above libraries.
-
-## Inclusion
-
-Best way to include the libraries is to use a relative path:
+As already said, all files are self contained without further references. So copy the needed library as `lib.bash` to your project and include it relatively.
 
 ```bash
 source_dir=$(dirname $(readlink -f "${BASH_SOURCE[0]:-$(pwd)/x}"))
 source "$source_dir/lib.bash"
 ```
 
-If you need the `$source_dir` path after this again, better set it because it may be changed while including.
+### Standalone Commands
+
+To use them on a machine, copy the `dist` folder to a central position and use it from there. This will often be in `/opt` or `/opt/divibib/` and included in the path:
+
+    cp dist /opt/bash-lib
+    echo "PATH=\"$PATH:/opt/bash-lib\"" >> ~/.bashrc
+
+But you can also always copy the command directly to any other folder and use it from there.
+
+## Programs
+
+- [log](src/bin/log.md) log command to write to file, `STDERR` or syslog
+- [sendmail](src/bin/sendmail.md) is a simple SMTP mailer
+
+## Libraries
+
+Methods may return two different parts:
+
+- `$?` exit code which is 0 on success
+- direct console output which may be captured or be piped
+  (internal commands will directly call the log module so no need to do this here)
+
+The following modules are available:
+
+- [locking](src/include/locking.md) to serialize parallel tasks
+- [log](src/include/log.md) log handler to write to file, `STDERR` or syslog
+- [colors](src/include/colors.md) predefined color variables
+- [info](src/include/info.md) is a collection of system information methods
+- [psql](src/include/psql.md) to access PostgreSQL Database
+
+Additionally a [skeleton](src/skeleton.md) is used as template to create new scripts.
+
+## Minified libs
+
+This all is packaged in the following distribution libraries (see install above):
+
+- `base` including colors, log
+- `psql` including colors, log, psql
+- `all` including colors, log, locking, info, psql
+- `locking` including colors, log, locking
+- `info` including colors, log, info

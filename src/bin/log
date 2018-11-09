@@ -12,6 +12,7 @@
 
 type=${1:-AUTO}
 
+# DIST include base.bash
 source_dir=$(dirname $(readlink -f "${BASH_SOURCE[0]:-$(pwd)/x}"))
 source "$source_dir/../include/log.bash" # load log handler
 
