@@ -2,30 +2,49 @@
 
 # Build combined bash-lib
 #
-# http://172.17.101.90/divibib-betrieb/ssh-control/blob/master/README.md
+# http://172.17.101.90/divibib-betrieb/bash-lib/blob/master/README.md
 
 # Setup
+declare -A build
+build[base]="colors, log"
+build[locking]="colors, log, locking"
+build[info]="colors, log, info"
+build[psql]="colors, log, psql"
+build[all]="colors, log, locking, info, psql"
+
+# Load libraries
 source_dir=$(dirname $(readlink -f "${BASH_SOURCE[0]:-$(pwd)/x}"))
-cd "$source_dir/include"
+source "$source_dir/../src/include/log.bash"
+source_dir=$(dirname $(readlink -f "${BASH_SOURCE[0]:-$(pwd)/x}"))
 
-dest=$(readlink -m "$source_dir/lib.bash")
-echo "Building combined file"
+# check that everything is up to date
+cd "$source_dir/.."
+(git diff --exit-code && git diff --cached --exit-code) >/dev/null 2>/dev/null
+[ $? -eq 0 ] || \
+    log WARN "Not everything is checked in to the local git repository!"
+revision=$(git rev-parse --verify master)
+[ "$revision" = $(git rev-parse --verify origin/master) ] || \
+    log WARN "Local changes are not pushed to master!"
+gitlab=$(git config --get remote.origin.url | sed 's/\.git$//')
 
-# Header
-echo "#!/bin/bash" > $dest
-echo "# Automatically combined bash-lib, see http://172.17.101.90/divibib-betrieb/bash-lib" >> $dest
-echo >> $dest
+log HEADING "Building libraries..."
+mkdir -p dist |& log || log_exit ALERT "Could not create distribution directory"
+for pack in "${!build[@]}"; do
+    parts="${build[$pack]}"
+    dest="dist/$pack.bash"
+    log INFO "Generation dist/$pack.bash including $parts"
+    # Header
+    echo "#!/bin/bash" > $dest
+    echo "# Bash helper library and tools by A.Schilling:" >> $dest
+    echo "# $gitlab/blob/$revision/README.md" >> $dest
+    echo "# Automatically combined bash-lib including: $parts" >> $dest
+    echo >> $dest
+    # Concatenate libs
+    parts=$(echo "$parts" | sed 's/ //g')
+    bash -c "egrep -hv 'source \"\\\$source_dir/|source_dir=' \
+        src/include/{$parts}.bash \
+        | sed -e '/^\s*#/d;s/\s\s*#\s.*//g;s/^[[:space:]]*//;/^$/d' \
+        " >> $dest
+done
 
-# Concatenate libs
-egrep -hv "source \"\\\$source_dir/|source_dir=" \
-    ./colors.bash \
-    ./log.bash \
-    ./locking.bash \
-    ./info.bash \
-    ./psql.bash \
-    | sed -e '/^\s*#/d;s/\s\s*#\s.*//g;s/^[[:space:]]*//;/^$/d' \
-    >> $dest
-
-du -h $dest
-
-echo "DONE."
+log HEADING "DONE."
