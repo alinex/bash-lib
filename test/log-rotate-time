@@ -4,7 +4,7 @@ source_dir=$(dirname "${BASH_SOURCE[0]}")
 LOG_FILE="$source_dir/test.log"
 LOG_ROTATE_TIME=DAILY
 LOG_ROTATE_COMPRESS=1
-source "$source_dir/../include/log.bash"
+source "$source_dir/../src/include/log.bash"
 
 set -e # exit on any error
 
