@@ -3,7 +3,7 @@
 LOG_CONSOLE=FULL
 
 source_dir=$(dirname "${BASH_SOURCE[0]}")
-source "$source_dir/../include/log.bash"
+source "$source_dir/../src/include/log.bash"
 
 set -e # exit on any error
 
