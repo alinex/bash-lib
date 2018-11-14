@@ -7,15 +7,15 @@
 source_dir=$(dirname $(readlink -f "${BASH_SOURCE[0]:-$(pwd)/x}"))
 source "$source_dir/log.bash" # load log handler
 
+
 declare -i LOCK_SLEEP=${LOCK_SLEEP:-10}
+declare LOCKFILE="${LOCKFILE:-/tmp/$(basename $0)-lock}"
 
 # set a lock or wait till it can be set
 # parameter:
 # - lockfile path
 lock() {
-    [ "$#" -ne 1 ] && log_exit ALERT "incorrect library call use: lock <lockfile>"
-
-    local lockfile="$1"
+    local lockfile="${1:-$LOCKFILE}"
 
     # make a file with our PID
     echo $$ > "$lockfile.$$" 2>/dev/null || log_exit ALERT "failed to create PID lockfile: $lockfile.$$"
@@ -46,10 +46,8 @@ lock() {
 # - lockfile path
 # - error-message (optional)
 # - error-code (optional)
-exit_lock() {
-    [ "$#" -lt 1 ] && log_exit ALERT "incorrect library call use: exit_lock <lockfile> [<error message>] [<exit code>]"
-
-    local lockfile="$1"
+lock_exit() {
+    local lockfile="${1:-$LOCKFILE}"
     local default="Stop processing because this is locked in $lockfile by $pid"
     local message="${2:-$default}"
     local exit_code="$3"
@@ -57,7 +55,7 @@ exit_lock() {
     # check for existing lock
     if [ -e "$lockfile" ] ; then
         pid=$(cat "$lockfile" || log_exit ALERT "could not read lockfile $lockfile" "$exit_code")
-        log_exit NOTICE "$message"
+        log_exit WARN "$message"
     fi
 
     lock "$lockfile"
@@ -68,9 +66,7 @@ exit_lock() {
 # parameter:
 # - lockfile path
 unlock() {
-    [ "$#" -ne 1 ] && log_exit ALERT "incorrect library call use: unlock <lockfile>"
-
-    local lockfile="$1"
+    local lockfile="${1:-$LOCKFILE}"
 
     # remove the trap
     trap - EXIT

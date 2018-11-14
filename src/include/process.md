@@ -28,7 +28,7 @@ unlock $lockfile # remove the lock
 An alternative is to use the `exit_lock` method which won't wait till it can get the lock but exit immediately:
 
 ```bash
-exit_lock $lockfile $message $code  # ... and exit if already locked
+lock_exit $lockfile $message $code  # ... and exit if already locked
 ```
 
 ### Async
@@ -69,6 +69,9 @@ LOCK_SLEEP=10 # time to wait before rechecking for the lock
 ```
 
 ## How locking works
+
+The locking is done by local files whose name part is given or used from the current running
+script. so `mx-program` will work like:
 
 1. The `lock` is set by making a file containing the filename with the PID as file extension and content. This indicates, that this PID is waiting to retrieve the lock like `/tmp/my-program-lock.1587`
 2. Create a softlink without extension for it `/tmp/my-program-lock -> /tmp/my-program-lock.1587` if there is already such an softlink, try again every second.

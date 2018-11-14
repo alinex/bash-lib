@@ -3,6 +3,8 @@
 source_dir=$(dirname "${BASH_SOURCE[0]}")
 source "$source_dir/../src/include/process.bash"
 
+# Tasks
+
 f1 () {
   sleep 3
   echo "f1"
@@ -16,11 +18,17 @@ f3 () {
   echo "f3"
 }
 
+# Processing
+
+lock_exit # exit if same process is already running
+
 async f1 help
 async f2
 async_wait f1
 async_wait f2
 async f3
 async_wait f3
+
+unlock # free the file lock
 
 echo done
