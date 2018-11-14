@@ -270,11 +270,13 @@ _log() {
 
     local max_log_level=${_log_level[$LOG_LEVEL]}
     if [ ${_log_level[$message_level]} -ge $max_log_level ]; then
+        fn=${FUNCNAME[2]}
+        [ "$fn" = "log_cmd" ] && fn=${FUNCNAME[3]}
         if [ -n "$SYSLOG_FACILITY" ]; then
             for line in $message; do
 #                line=$(echo "$line" | tr '\r' '\n')
                 logger -i \
-                    -t "$LOG_TAG:${FUNCNAME[2]}" \
+                    -t "$LOG_TAG:$fn" \
                     -p "${SYSLOG_FACILITY}.${_syslog_severity[$message_level]}" \
                     "$message_level: $line"
             done
@@ -284,7 +286,7 @@ _log() {
                 [ "$message_level" = "HEADING" ] && printf -v line "%-80s" $line # fixed length of bg color
                 printf -v output "${_log_color[$message_level]}%s %s[%s] %s: %s$(reset)" \
                     "$message_date" \
-                    "$LOG_TAG:${FUNCNAME[2]}" \
+                    "$LOG_TAG:$fn" \
                     "$$" \
                     "$message_level" \
                     "$line"

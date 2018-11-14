@@ -14,22 +14,15 @@ LOG_CONSOLE=FULL
 # Tasks
 
 f1 () {
-  log HEADING "Start f1"
-  sleep 3
-  log NOTICE "Done f1"
+  log_cmd sleep 3
 }
 f2 () {
-  log HEADING "Start f2"
-  sleep 1
-  log NOTICE "Done f2"
+  log_cmd sleep 1
 }
 f3 () {
-  log HEADING "Start f3"
-  sleep 1
-  log NOTICE "Done f3"
+  log_cmd sleep 1
 }
 
-  echo ${FUNCNAME[0]}
 # Processing
 
 lock_exit # exit if same process is already running
