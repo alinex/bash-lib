@@ -274,7 +274,7 @@ _log() {
             for line in $message; do
 #                line=$(echo "$line" | tr '\r' '\n')
                 logger -i \
-                    -t "$LOG_TAG" \
+                    -t "$LOG_TAG:${FUNCNAME[2]}" \
                     -p "${SYSLOG_FACILITY}.${_syslog_severity[$message_level]}" \
                     "$message_level: $line"
             done
@@ -284,7 +284,7 @@ _log() {
                 [ "$message_level" = "HEADING" ] && printf -v line "%-80s" $line # fixed length of bg color
                 printf -v output "${_log_color[$message_level]}%s %s[%s] %s: %s$(reset)" \
                     "$message_date" \
-                    "$LOG_TAG" \
+                    "$LOG_TAG:${FUNCNAME[2]}" \
                     "$$" \
                     "$message_level" \
                     "$line"

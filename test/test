@@ -29,6 +29,7 @@ f3 () {
   log NOTICE "Done f3"
 }
 
+  echo ${FUNCNAME[0]}
 # Processing
 
 lock_exit # exit if same process is already running
