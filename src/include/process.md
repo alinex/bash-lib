@@ -1,15 +1,19 @@
-# Locking Process
+# Process Serialize/Parallelize
 
-This methods will help you to lock a special process that it can't run in parallel.
+This methods will help you to lock a special process that it can't run in parallel using file based locks.
 If the same lock is used another time in another process or sub process it will wait till the first one releases the flag. You have to give a lock file path to be used as flag.
+
+Another part allows to simplify parallel tasks which may be subroutines or commands.
 
 ## Usage
 
 First you have to include this helper in your bash script:
 
 ```bash
-source ../bash-lib/locking.bash # load functions
+source ../bash-lib/process.bash # load functions
 ```
+
+### Locking
 
 Now, in any part of your script you can surround a block with `lock` and `unlock` statements:
 
@@ -27,6 +31,35 @@ An alternative is to use the `exit_lock` method which won't wait till it can get
 exit_lock $lockfile $message $code  # ... and exit if already locked
 ```
 
+### Async
+
+Running some tasks in parallel can save time but may be problematic to manage. This methods
+help to simplify this tasks.
+
+```bash
+f1() {
+  sleep 5
+  echo "done f1 with value $1 (=155)"
+}
+
+async f1 155
+echo "comes first"
+async_wait f1
+echo "done"
+```
+
+The function `f1` is called asynchronously and while this runs the following echo statement will be called. `async_wait`
+
+If the same command or function is used multiple times in parallel use `async_name` which
+let`s you also define an individual identifier:
+
+```bash
+async_name f1_1 f1 155
+async_wait f1_1
+```
+
+To wait for all async processes to end use `wait`, but then you won't get the individual return codes.
+
 ## Configuration
 
 The only possible configuration is:
@@ -35,7 +68,7 @@ The only possible configuration is:
 LOCK_SLEEP=10 # time to wait before rechecking for the lock
 ```
 
-## How it works
+## How locking works
 
 1. The `lock` is set by making a file containing the filename with the PID as file extension and content. This indicates, that this PID is waiting to retrieve the lock like `/tmp/my-program-lock.1587`
 2. Create a softlink without extension for it `/tmp/my-program-lock -> /tmp/my-program-lock.1587` if there is already such an softlink, try again every second.

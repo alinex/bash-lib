@@ -7,10 +7,10 @@
 # Setup
 declare -A lib
 lib[base]="colors, log"
-lib[locking]="colors, log, locking"
+lib[process]="colors, log, process"
 lib[info]="colors, log, info"
 lib[psql]="colors, log, psql"
-lib[all]="colors, log, locking, info, psql"
+lib[all]="colors, log, process, info, psql"
 
 # Load libraries
 source_dir=$(dirname $(readlink -f "${BASH_SOURCE[0]:-$(pwd)/x}"))

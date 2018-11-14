@@ -1,0 +1,26 @@
+#!/bin/bash
+
+source_dir=$(dirname "${BASH_SOURCE[0]}")
+source "$source_dir/../src/include/process.bash"
+
+f1 () {
+  sleep 3
+  echo "f1"
+}
+f2 () {
+  sleep 1
+  echo "f2"
+}
+f3 () {
+  sleep 1
+  echo "f3"
+}
+
+async f1 help
+async f2
+async_wait f1
+async_wait f2
+async f3
+async_wait f3
+
+echo done

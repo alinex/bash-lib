@@ -60,7 +60,7 @@ Methods may return two different parts:
 
 The following modules are available:
 
-- [locking](src/include/locking.md) to serialize parallel tasks
+- [process](src/include/process.md) serialize or parallelize tasks
 - [log](src/include/log.md) log handler to write to file, `STDERR` or syslog
 - [colors](src/include/colors.md) predefined color variables
 - [info](src/include/info.md) is a collection of system information methods
@@ -75,5 +75,5 @@ This all is packaged in the following distribution libraries (see install above)
 - `base` including colors, log
 - `psql` including colors, log, psql
 - `all` including colors, log, locking, info, psql
-- `locking` including colors, log, locking
+- `process` including colors, log, process
 - `info` including colors, log, info

@@ -2,17 +2,7 @@
 
 # Library to serialize parallel tasks
 #
-# http://172.17.101.90/ivibib-betrieb/bash-lib/blob/master/doc/locking.md
-#
-# Usage:
-#
-# source ../bash-lib/include/locking.bash  # load functions
-# lockfile=<file mostly in tmp folder>
-# lock $lockfile   # create the lock
-# exit_lock $lockfile   # ... and exit if already locked
-# unlock $lockfile # remove the lock
-#
-# The second process which want to set the lock will wait till the lock is released.
+# http://172.17.101.90/ivibib-betrieb/bash-lib/blob/master/doc/process.md
 
 source_dir=$(dirname $(readlink -f "${BASH_SOURCE[0]:-$(pwd)/x}"))
 source "$source_dir/log.bash" # load log handler
@@ -97,4 +87,35 @@ unlock() {
     fi
 
     return 0
+}
+
+declare -A _async
+
+# parameter:
+# - command
+# - arguments...
+async() {
+    [ "$#" -lt 1 ] && log_exit ALERT "parameter missing. Usage: async <command> [<args>...]"
+    local name="$1"
+    local call=$(printf "%q " "$@")
+    eval "$call" &
+    _async[$name]=$! # store pid
+}
+
+# parameter:
+# - identifier
+# - command
+# - arguments...
+async_name() {
+    [ "$#" -lt 2 ] && log_exit ALERT "parameter missing. Usage: async <name> <command> [<args>...]"
+    local name="$1"
+    local call=$(printf "%q " "${@:2}")
+    eval "$call" &
+    _async[$name]=$! # store pid
+}
+
+# parameter:
+# - identifier or command
+async_wait() {
+    wait "${_async["$1"]}"
 }
