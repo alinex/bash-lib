@@ -28,6 +28,7 @@ revision=$(git rev-parse --verify master)
 gitlab=$(git config --get remote.origin.url | sed 's/\.git$//')
 
 log HEADING "Building libraries..."
+rm -rf dist 2>/dev/null
 mkdir -p dist |& log || log_exit ALERT "Could not create distribution directory"
 for pack in "${!lib[@]}"; do
     parts="${lib[$pack]}"
