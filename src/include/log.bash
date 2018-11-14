@@ -271,7 +271,7 @@ _log() {
     local max_log_level=${_log_level[$LOG_LEVEL]}
     if [ ${_log_level[$message_level]} -ge $max_log_level ]; then
         fn=${FUNCNAME[2]}
-        [ "$fn" = "log_cmd" ] && fn=${FUNCNAME[3]}
+        [ "${fn:0:4}" = "log_" ] && fn=${FUNCNAME[3]}
         if [ -n "$SYSLOG_FACILITY" ]; then
             for line in $message; do
 #                line=$(echo "$line" | tr '\r' '\n')
