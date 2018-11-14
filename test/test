@@ -3,32 +3,55 @@
 source_dir=$(dirname "${BASH_SOURCE[0]}")
 source "$source_dir/../src/include/process.bash"
 
+# Configuration
+
+STEPFILE=${STEPFILE:-/tmp/$(basename $0)-step}
+LIMIT_TIME=${LIMIT_TIME:-3600}        # max. 1 hour to collect versions
+LIMIT_NUM=${LIMIT_NUM:-10000}         # max. 10.000 versions
+LIMIT_SIZE=${LIMIT_SIZE:-1000000000}  # max. 1GB
+LOG_CONSOLE=FULL
+
 # Tasks
 
 f1 () {
+  log HEADING "Start f1"
   sleep 3
-  echo "f1"
+  log NOTICE "Done f1"
 }
 f2 () {
+  log HEADING "Start f2"
   sleep 1
-  echo "f2"
+  log NOTICE "Done f2"
 }
 f3 () {
+  log HEADING "Start f3"
   sleep 1
-  echo "f3"
+  log NOTICE "Done f3"
 }
 
 # Processing
 
 lock_exit # exit if same process is already running
+# use last step as start if from current day
+start=0
+[ -e $STEPFILE ] \
+  && [ "$(date -d "$(stat -c %y $STEPFILE)" +%Y-%m-%d)" = "$(date +%Y-%m-%d)" ] \
+  && start=$(cat $STEPFILE)
+# big steps
+if [ "$start" -lt 1 ]; then
+  async f1 help
+  async f2
+  async_wait f1 || log_exit ALERT "Failed in call to f1"
+  async_wait f2 || log_exit ALERT "Failed in call to f2"
+  echo 1 >$STEPFILE # store step as done
+fi
+if [ "$start" -lt 2 ]; then
+  async f3
+  async_wait f3 || log_exit ALERT "Failed in call to f3"
+  echo 2 >$STEPFILE # store step as done
+fi
 
-async f1 help
-async f2
-async_wait f1
-async_wait f2
-async f3
-async_wait f3
-
+rm $STEPFILE # clear steps
 unlock # free the file lock
 
-echo done
+log NOTICE Done
