@@ -38,7 +38,7 @@ $(cat $STEPFILE 2>/dev/null)
 Betriebsteam" \
     | $source_dir/../bin/sendmail -q $EMAIL_RECIPIENTS -u "Full Publication Error" \
     |& log
-  log_INFO "Email was send to: $EMAIL_RECIPIENTS"
+  log INFO "Email was send to: $EMAIL_RECIPIENTS"
   log_exit ALERT "$1"
 }
 
@@ -53,10 +53,10 @@ lock_exit # exit if same process is already running
 
 async f1 help
 async f2
-async_wait f1 || failed "In call to f1 with code $?"
-async_wait f2 || failed "In call to f2 with code $?"
+async_wait f1 failed
+async_wait f2 failed
 async f3
-async_wait f3 || failed "In call to f3 with code $?"
+async_wait f3 failed
 
 rm $STEPFILE # clear steps
 unlock # free the file lock

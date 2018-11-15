@@ -114,11 +114,16 @@ async_name() {
 
 # parameter:
 # - identifier or command
+# - method to process failures
 async_wait() {
     [ -z "${_async["$1"]}" ] && return
     wait "${_async["$1"]}"
     code=$?
-    [ "$code" -eq 0 ] && [ -n "$STEPFILE" ] \
-        && echo "step $1 finished at $(date '+%Y-%m-%d %H:%M')" >>$STEPFILE
+    if [ "$code" -eq 0 ]; then
+        [ -n "$STEPFILE" ] \
+            && echo "step $1 finished at $(date '+%Y-%m-%d %H:%M')" >>$STEPFILE
+    else
+        [ -n "$2" ] && $2 "Call to $1 failed with code $code"
+    fi
     return $code
 }
