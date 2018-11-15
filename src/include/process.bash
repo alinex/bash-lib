@@ -118,6 +118,7 @@ async_wait() {
     [ -z "${_async["$1"]}" ] && return
     wait "${_async["$1"]}"
     code=$?
-    [ -n "$STEPFILE" ] && echo "step $1 finished at $(date '+%Y-%m-%d %H:%M')" >>$STEPFILE
+    [ "$code" -eq 0 ] && [ -n "$STEPFILE" ] \
+        && echo "step $1 finished at $(date '+%Y-%m-%d %H:%M')" >>$STEPFILE
     return $code
 }

@@ -33,7 +33,7 @@ failed() {
   echo "Publication failed: $1
 
 The following parts are already done:
-$(cat $STEPFILE)
+$(cat $STEPFILE 2>/dev/null)
 
 Betriebsteam" \
     | $source_dir/../bin/sendmail -q $EMAIL_RECIPIENTS -u "Full Publication Error" \
