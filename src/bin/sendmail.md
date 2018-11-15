@@ -4,19 +4,19 @@ This `sendmail` command can be called from command line.
 
 ## Usage
 
-    sendmail -f ADDRESS [options]
+    sendmail [options]
 
 Required arguments are:
 
-- `-f ADDRESS` from (sender) email address
+- `-f ADDRESS` from (sender) email address (default: `SMTP_USERNAME`)
 - At least one recipient required via `-t`, `-cc`, or `-bcc`
 - Message body required via `-m`, `STDIN`, or `-o message-file=FILE`
 
 ### Server
 
-- `-s SERVER[:PORT]` SMTP mail relay, default is `localhost:25`
-- `-xu USERNAME` username for SMTP authentication
-- `-xp PASSWORD` password for SMTP authentication
+- `-s SERVER[:PORT]` SMTP mail relay (default: `SMTP_SERVER:SMTP_PORT` or `localhost:25`)
+- `-xu USERNAME` username for SMTP authentication (default: `SMTP_USERNAME`)
+- `-xp PASSWORD` password for SMTP authentication (default: `SMTP_PASSWORD`)
 - `-o tls=<auto|yes|no>`
 - `-o timeout=SECONDS`
 - `-o fqdn=FQDN` if you need to change the server name used in SMTP greeting
@@ -30,6 +30,8 @@ Alternatively this settings can be given as environment variables:
 - `SMTP_PORT`
 - `SMTP_USERNAME`
 - `SMTP_PASSWORD`
+
+The `SMTP_USERNAME` is also used as from address if no other option given.
 
 They may be set in `.bashrc` or elsewhere.
 
