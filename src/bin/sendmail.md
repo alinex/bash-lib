@@ -53,9 +53,9 @@ This may look like: `-t "jane.doe@yahoo.com" -t "John Doe <john.doe@gmail.com>"`
 
 - `-u SUBJECT` message subject
 - `-m MESSAGE` message body
+- `-o message-content-type=<auto|text|html>`
 - `-o message-file=FILE` use the files content as message
 - `-a FILE [FILE ...]` file attachment(s)
-- `-o message-content-type=<auto|text|html>`
 - `-o message-format=raw`
 - `-o message-header=HEADER`
 - `-o message-charset=CHARSET`

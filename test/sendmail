@@ -3,9 +3,30 @@
 source_dir=$(dirname "${BASH_SOURCE[0]}")
 source "$source_dir/../src/include/process.bash"
 
+SMTP_SERVER=
+SMTP_PORT=
+SMTP_USERNAME=
+SMTP_PASSWORD=
+
+HTML_HEADER=""
+HTML_FOOTER=""
+
+echo "Test Email" \
+  | $source_dir/../src/bin/sendmail -t alexander.schilling@divibib.com -u Bash-Mail
+
+exit
 
 
-$source_dir/../src/bin/sendmail
+# temp_dir=$(mktemp -d)
+# COPY (SELECT * FROM dvb_manage.mng_value) TO '$temp_dir/data.csv' DELIMITER ',' CSV;
 
+echo "$HTML_HEADER
+<h1>Test HTML</h1><p>Email with this script as attachement.</p>
+$HTML_FOOTER" \
+  | $source_dir/../src/bin/sendmail -t alexander.schilling@divibib.com -u Bash-Mail \
+    -o message-content-type=html \
+    -a $temp_dir/data.csv
+
+# rm -rf $temp_dir
 
 echo Done
