@@ -9,6 +9,8 @@ LIMIT_TIME=${LIMIT_TIME:-3600}        # max. 1 hour to collect versions
 LIMIT_NUM=${LIMIT_NUM:-10000}         # max. 10.000 versions
 LIMIT_SIZE=${LIMIT_SIZE:-1000000000}  # max. 1GB
 
+EMAIL_RECIPIENTS="-t alexander.schilling@divibib.com"
+
 STEPFILE=${STEPFILE:-/tmp/$(basename $0)-steps}
 LOG_CONSOLE=FULL
 
@@ -16,12 +18,28 @@ LOG_CONSOLE=FULL
 
 f1 () {
   log_cmd sleep 3
+  exit -5
 }
 f2 () {
   log_cmd sleep 1
 }
 f3 () {
   log_cmd sleep 1
+}
+
+# Error handling
+
+failed() {
+  echo "Publication failed: $1
+
+The following parts are already done:
+$(cat $STEPFILE 2>/dev/null)
+
+Betriebsteam" \
+    | $source_dir/../bin/sendmail -q $EMAIL_RECIPIENTS -u "Full Publication Error" \
+    |& log
+  log INFO "Email was send to: $EMAIL_RECIPIENTS"
+  log_exit ALERT "$1"
 }
 
 # Processing
@@ -35,10 +53,10 @@ lock_exit # exit if same process is already running
 
 async f1 help
 async f2
-async_wait f1 || log_exit ALERT "Failed in call to f1"
-async_wait f2 || log_exit ALERT "Failed in call to f2"
+async_wait f1 failed
+async_wait f2 failed
 async f3
-async_wait f3 || log_exit ALERT "Failed in call to f3"
+async_wait f3 failed
 
 rm $STEPFILE # clear steps
 unlock # free the file lock

@@ -79,7 +79,7 @@ my $CRLF        = "\015\012";
 my $subject     = '';
 my $header      = '';
 my $message     = '';
-my $from        = '';
+my $from        = $ENV{'SMTP_USERNAME'};
 my @to          = ();
 my @cc          = ();
 my @bcc         = ();
@@ -1772,13 +1772,14 @@ if (!($message)) {
     ## Read message body from STDIN
     else {
         alarm($conf{'alarm'}) if ($^O !~ /win/i);  ## alarm() doesn't work in win32
-        if ($conf{'stdout'}) {
-            print "Reading message body from STDIN because the '-m' option was not used.\n";
-            print "If you are manually typing in a message:\n";
-            print "  - First line must be received within $conf{'alarm'} seconds.\n" if ($^O !~ /win/i);
-            print "  - End manual input with a CTRL-D on its own line.\n\n" if ($^O !~ /win/i);
-            print "  - End manual input with a CTRL-Z on its own line.\n\n" if ($^O =~ /win/i);
-        }
+# aschi removed comment
+#        if ($conf{'stdout'}) {
+#            print "Reading message body from STDIN because the '-m' option was not used.\n";
+#            print "If you are manually typing in a message:\n";
+#            print "  - First line must be received within $conf{'alarm'} seconds.\n" if ($^O !~ /win/i);
+#            print "  - End manual input with a CTRL-D on its own line.\n\n" if ($^O !~ /win/i);
+#            print "  - End manual input with a CTRL-Z on its own line.\n\n" if ($^O =~ /win/i);
+#        }
         while (<STDIN>) {                 ## Read STDIN into $message
             $message .= $_;
             alarm(0) if ($^O !~ /win/i);  ## Disable the alarm since at least one line was received

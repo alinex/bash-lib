@@ -80,7 +80,14 @@ script. so `mx-program` will work like:
 
 If the program is terminated in between some old files may be present. The code also contains a `trap` to prevent such problems by removing them also on breaks. But if something abnormally happens, you should remove all the lock files by hand if the PID is no longer running.
 
-## Async Steps
+## Async Step Control
 
 If a `STEPFILE` is defined each step will be checked if is already done (entry in the file).
 Only if not done it will be started. So a process which is canceled within can be processed further on.
+
+The stepfile will look like:
+
+    step f1 finished at 2018-11-15 09:54
+    step f2 finished at 2018-11-15 09:56
+
+But if the process is finished, the file will be removed.

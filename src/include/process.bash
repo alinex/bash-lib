@@ -93,7 +93,7 @@ declare -A _async
 async() {
     [ "$#" -lt 1 ] && log_exit ALERT "parameter missing. Usage: async <command> [<args>...]"
     local name="$1"
-    [ -n "$STEPFILE" ] && [ -e "$STEPFILE" ] && grep -q "$name" $STEPFILE && return
+    [ -n "$STEPFILE" ] && [ -e "$STEPFILE" ] && grep -q "step $name" $STEPFILE && return
     local call=$(printf "%q " "$@")
     eval "$call" &
     _async[$name]=$! # store pid
@@ -106,7 +106,7 @@ async() {
 async_name() {
     [ "$#" -lt 2 ] && log_exit ALERT "parameter missing. Usage: async <name> <command> [<args>...]"
     local name="$1"
-    [ -n "$STEPFILE" ] && [ -e "$STEPFILE" ] && grep -q "$name" $STEPFILE && return
+    [ -n "$STEPFILE" ] && [ -e "$STEPFILE" ] && grep -q "step $name" $STEPFILE && return
     local call=$(printf "%q " "${@:2}")
     eval "$call" &
     _async[$name]=$! # store pid
@@ -114,8 +114,16 @@ async_name() {
 
 # parameter:
 # - identifier or command
+# - method to process failures
 async_wait() {
     [ -z "${_async["$1"]}" ] && return
     wait "${_async["$1"]}"
-    [ -n "$STEPFILE" ] && echo "$1" >>$STEPFILE
+    code=$?
+    if [ "$code" -eq 0 ]; then
+        [ -n "$STEPFILE" ] \
+            && echo "step $1 finished at $(date '+%Y-%m-%d %H:%M')" >>$STEPFILE
+    else
+        [ -n "$2" ] && $2 "Call to $1 failed with code $code"
+    fi
+    return $code
 }
