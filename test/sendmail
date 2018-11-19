@@ -1,0 +1,11 @@
+#!/bin/bash
+
+source_dir=$(dirname "${BASH_SOURCE[0]}")
+source "$source_dir/../src/include/process.bash"
+
+
+
+$source_dir/../src/bin/sendmail
+
+
+echo Done
