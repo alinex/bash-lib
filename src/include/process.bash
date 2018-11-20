@@ -11,6 +11,15 @@ source "$source_dir/log.bash" # load log handler
 declare -i LOCK_SLEEP=${LOCK_SLEEP:-10}
 declare LOCKFILE="${LOCKFILE:-/tmp/$(basename $0)-lock}"
 
+_lock_remove() {
+    local lockfile="${1:-$LOCKFILE}"
+    # remove old locks for non existing processes
+    if [ -e "$lockfile" ] ; then
+        pid=$(cat "$lockfile" || log_exit ALERT "could not read lockfile $lockfile")
+        kill -0 "$pid" 2>/dev/null || rm -f "$lockfile" || log_exit ALERT "failed to remove lockfile: $lockfile"
+    fi
+}
+
 # set a lock or wait till it can be set
 # parameter:
 # - lockfile path
@@ -20,11 +29,7 @@ lock() {
     # make a file with our PID
     echo $$ > "$lockfile.$$" 2>/dev/null || log_exit ALERT "failed to create PID lockfile: $lockfile.$$"
 
-    # remove old locks for non existing processes
-    if [ -e "$lockfile" ] ; then
-        pid=$(cat "$lockfile" || log_exit ALERT "could not read lockfile $lockfile")
-        kill -0 "$pid" 2>/dev/null || rm -f "$lockfile" || log_exit ALERT "failed to remove lockfile: $lockfile"
-    fi
+    _lock_remove
 
     # try to symlink it
     while ! ln "$lockfile.$$" "$lockfile" 2>/dev/null; do
@@ -51,6 +56,8 @@ lock_exit() {
     local default="Stop processing because this is locked in $lockfile by $pid"
     local message="${2:-$default}"
     local exit_code="$3"
+
+    _lock_remove
 
     # check for existing lock
     if [ -e "$lockfile" ] ; then
