@@ -11,12 +11,14 @@ source "$source_dir/log.bash" # load log handler
 declare -i LOCK_SLEEP=${LOCK_SLEEP:-10}
 declare LOCKFILE="${LOCKFILE:-/tmp/$(basename $0)-lock}"
 
+# remove lockfile if the process isn't running any more
+# parameter:
+# - lockfile path
 _lock_remove() {
-    local lockfile="${1:-$LOCKFILE}"
     # remove old locks for non existing processes
-    if [ -e "$lockfile" ] ; then
-        pid=$(cat "$lockfile" || log_exit ALERT "could not read lockfile $lockfile")
-        kill -0 "$pid" 2>/dev/null || rm -f "$lockfile" || log_exit ALERT "failed to remove lockfile: $lockfile"
+    if [ -e "$1" ] ; then
+        pid=$(cat "$1" || log_exit ALERT "could not read lockfile $1")
+        kill -0 "$pid" 2>/dev/null || rm -f "$1" || log_exit ALERT "failed to remove lockfile: $1"
     fi
 }
 
@@ -29,7 +31,7 @@ lock() {
     # make a file with our PID
     echo $$ > "$lockfile.$$" 2>/dev/null || log_exit ALERT "failed to create PID lockfile: $lockfile.$$"
 
-    _lock_remove
+    _lock_remove "$lockfile"
 
     # try to symlink it
     while ! ln "$lockfile.$$" "$lockfile" 2>/dev/null; do
@@ -57,7 +59,7 @@ lock_exit() {
     local message="${2:-$default}"
     local exit_code="$3"
 
-    _lock_remove
+    _lock_remove "$lockfile"
 
     # check for existing lock
     if [ -e "$lockfile" ] ; then
@@ -128,7 +130,7 @@ async_wait() {
     code=$?
     if [ "$code" -eq 0 ]; then
         [ -n "$STEPFILE" ] \
-            && echo "step $1 finished at $(date '+%Y-%m-%d %H:%M')" >>$STEPFILE
+            && echo "step $1 finished at $(date '+%Y-%m-%d %H:%M:%S')" >>$STEPFILE
     else
         [ -n "$2" ] && $2 "Call to $1 failed with code $code"
     fi
