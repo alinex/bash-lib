@@ -17,14 +17,14 @@ LOG_CONSOLE=FULL
 # Tasks
 
 f1 () {
-  log_cmd sleep 3
+  log_cmd sleep 30
   exit -5
 }
 f2 () {
-  log_cmd sleep 1
+  log_cmd sleep 10
 }
 f3 () {
-  log_cmd sleep 1
+  log_cmd sleep 10
 }
 
 # Error handling

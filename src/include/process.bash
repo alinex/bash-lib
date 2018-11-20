@@ -19,6 +19,7 @@ _lock_remove() {
     if [ -e "$1" ] ; then
         pid=$(cat "$1" || log_exit ALERT "could not read lockfile $1")
         kill -0 "$pid" 2>/dev/null || rm -f "$1" || log_exit ALERT "failed to remove lockfile: $1"
+        sleep 3
     fi
 }
 
