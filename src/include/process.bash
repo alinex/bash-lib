@@ -102,11 +102,7 @@ declare -A _async
 # - arguments...
 async() {
     [ "$#" -lt 1 ] && log_exit ALERT "parameter missing. Usage: async <command> [<args>...]"
-    local name="$1"
-    [ -n "$STEPFILE" ] && [ -e "$STEPFILE" ] && grep -q "step $name" $STEPFILE && return
-    local call=$(printf "%q " "$@")
-    eval "$call" &
-    _async[$name]=$! # store pid
+    async_name $1 $@
 }
 
 # parameter:
@@ -116,7 +112,10 @@ async() {
 async_name() {
     [ "$#" -lt 2 ] && log_exit ALERT "parameter missing. Usage: async <name> <command> [<args>...]"
     local name="$1"
-    [ -n "$STEPFILE" ] && [ -e "$STEPFILE" ] && grep -q "step $name" $STEPFILE && return
+    if [ -n "$STEPFILE" ] && [ -e "$STEPFILE" ] && grep -q "step $name" $STEPFILE; then
+        log INFO "Job $name already done in this run, skipping"
+        return
+    fi
     local call=$(printf "%q " "${@:2}")
     eval "$call" &
     _async[$name]=$! # store pid
