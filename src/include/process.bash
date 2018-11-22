@@ -56,7 +56,7 @@ lock() {
 # - error-code (optional)
 lock_exit() {
     local lockfile="${1:-$LOCKFILE}"
-    local default="Stop processing because this is locked in $lockfile by $pid"
+    local default="Stop processing because this is locked in $lockfile by $(cat $lockfile)"
     local message="${2:-$default}"
     local exit_code="$3"
 
@@ -86,7 +86,7 @@ unlock() {
     if [ -e "$lockfile" ] ; then
         pid=$(cat "$lockfile" || log_exit ALERT "could not read lockfile $lockfile")
         if [ "$pid" -eq "$$" ]; then
-            rm -f "$lockfile" || log_exit ALERT "failed to remove lockfile: $lockfile"
+            rm -f $lockfile* || log_exit ALERT "failed to remove lockfile: $lockfile"
         else
             log_exit ALERT "could not remove lockfile because it is set from another process"
         fi
