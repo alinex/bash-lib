@@ -112,7 +112,7 @@ async() {
 async_name() {
     [ "$#" -lt 2 ] && log_exit ALERT "parameter missing. Usage: async <name> <command> [<args>...]"
     local name="$1"
-    if [ -n "$STEPFILE" ] && [ -e "$STEPFILE" ] && grep -q "step $name" $STEPFILE; then
+    if [ -n "$STEPFILE" ] && [ -e "$STEPFILE" ] && grep -q "Finished: step $name" $STEPFILE; then
         log INFO "Job $name already done in this run, skipping"
         return
     fi
@@ -130,9 +130,11 @@ async_wait() {
     code=$?
     if [ "$code" -eq 0 ]; then
         [ -n "$STEPFILE" ] \
-            && echo "step $1 finished at $(date '+%Y-%m-%d %H:%M:%S')" >>$STEPFILE
+            && echo "Finished: step $1 at $(date '+%Y-%m-%d %H:%M:%S')" >>$STEPFILE
     else
         [ -n "$2" ] && $2 "Call to $1 failed with code $code"
+        [ -n "$STEPFILE" ] \
+            && echo "Failed: step $1 at $(date '+%Y-%m-%d %H:%M:%S')" >>$STEPFILE
     fi
     return $code
 }

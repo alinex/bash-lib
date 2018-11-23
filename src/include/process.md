@@ -87,7 +87,7 @@ Only if not done it will be started. So a process which is canceled within can b
 
 The stepfile will look like:
 
-    step f1 finished at 2018-11-15 09:54
-    step f2 finished at 2018-11-15 09:56
+    Finished: step f1 at 2018-11-15 09:54
+    Finished: step f2 at 2018-11-15 09:56
 
 But if the process is finished, the file will be removed.
