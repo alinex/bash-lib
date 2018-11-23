@@ -91,3 +91,41 @@ The stepfile will look like:
     Finished: step f2 at 2018-11-15 09:56
 
 But if the process is finished, the file will be removed.
+
+A complete integration may look like:
+
+```bash
+# Configuration
+STEPFILE=${STEPFILE:-/tmp/$(basename $0)-steps}
+WORK_DATE=${WORK_DATE:-$(date +%Y-%m-%d)}
+
+lock_exit # exit if same process is already running
+
+# Remove old stepfile (not from the current running date)
+[ -e $STEPFILE ] \
+&& [ "$(date -d "$(stat -c %y $STEPFILE)" +%Y-%m-%d)" != "$WORK_DATE" ] \
+&& rm $STEPFILE
+
+# Log message if continue of old run
+if [ -e $STEPFILE ]; then
+  log WARN "A previously aborted process for $WORK_DATE is found, trying to continue after:"
+  cat $STEPFILE | log INFO
+fi
+
+# If process is stopped, also stop subprocesses
+trap "trap - SIGTERM && kill -- -$$" SIGINT SIGTERM EXIT
+
+# Write start to stepfile
+echo "Starting process at $(date '+%Y-%m-%d %H:%M:%S')" >>$STEPFILE
+
+# Call the steps
+async f1
+async f2
+async_wait f1 failed
+async_wait f2 failed
+
+# Cleanup
+rm $STEPFILE # clear steps
+trap - SIGINT SIGTERM EXIT # remove trap
+unlock # free the file lock
+```
