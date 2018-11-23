@@ -75,3 +75,16 @@ csv2html() {
     fi
     echo "</table>"
 }
+
+csv2xls() {
+    csvfile=$(mktemp)
+    if [ -z "$1" ] && [ ! -t 0 ]; then
+        cat /dev/stdin >$csvfile
+    else
+        echo "$@" >$csvfile
+    fi
+    xlsfile=$(mktemp)
+    $source_dir/test2xls -i $csvfile -o $xlsfile
+    cat $xlsfile
+    rm $csvfile $xlsfile
+}

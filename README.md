@@ -27,7 +27,7 @@ And also some commands:
 
 ### Including libraries
 
-The most common way is to include the needed library from the `dist` folder within the destination code. That ensures that changes to the bash-lib repository or a central installation won't change the running code.
+The most common way is to include the needed library from the `dist` folder above within the destination code. That ensures that changes to the bash-lib repository or a central installation won't change the running code.
 
 As already said, all files are self contained without further references. So copy the needed library as `lib.bash` to your project and include it relatively.
 
@@ -63,8 +63,8 @@ The following modules are available:
 - [process](src/include/process.md) serialize or parallelize tasks
 - [log](src/include/log.md) log handler to write to file, `STDERR` or syslog
 - [colors](src/include/colors.md) predefined color variables
-- [info](src/include/info.md) is a collection of system information methods
 - [psql](src/include/psql.md) to access PostgreSQL Database
+- [info](src/include/info.md) is a collection of system information methods
 
 Additionally a [skeleton](src/skeleton.md) is used as template to create new scripts.
 
@@ -72,8 +72,8 @@ Additionally a [skeleton](src/skeleton.md) is used as template to create new scr
 
 This all is packaged in the following distribution libraries (see install above):
 
+- `all` including colors, log, locking, info, psql
 - `base` including colors, log
 - `psql` including colors, log, psql
-- `all` including colors, log, locking, info, psql
 - `process` including colors, log, process
 - `info` including colors, log, info

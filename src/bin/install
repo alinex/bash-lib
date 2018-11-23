@@ -1,0 +1,22 @@
+#!/bin/bash
+
+# DIST include base.bash
+source_dir=$(dirname $(readlink -f "${BASH_SOURCE[0]:-$(pwd)/x}"))
+source "$source_dir/../include/log.bash" # load log handler
+
+# Configuration
+
+LOG_LEVEL=DEBUG
+
+# Checking
+
+[ $(id -u) -eq 0 ] || log_exit ALERT "You need root privileges to run this script"
+
+# Installing debian tools
+
+log HEADING "Install neccessary tools for bash-lib"
+
+# used by text2xls command
+apt-get install -y libtext-csv-xs-perl | log
+
+log NOTICE "Done"

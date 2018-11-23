@@ -1,0 +1,131 @@
+#!/usr/bin/perl -w
+
+# Install: sudo apt-get install libtext-csv-xs-perl
+# Usage: bin/text2xls -i test.csv -o test.xls
+
+# text2xls.pl
+
+use strict;
+use Spreadsheet::WriteExcel;
+use Getopt::Long;
+use Text::CSV_XS;
+use IO::File;
+use Data::Dumper;
+
+# Crank it up
+print("\nStarting $0\n");
+
+# Get command line switches and arguments
+my %option = ('defaultdelim' => ',', 'defaultbinary' => 0);
+GetOptions(
+    'infile=s'  => \$option{csvin},
+    'outfile=s' => \$option{xlsout},
+    'delim=s'   => \$option{delim},
+    'header!'   => \$option{header},
+    'binary!'   => \$option{binary},
+    );
+unless (defined ($option{csvin} && $option{xlsout})) {
+    &USAGE();
+    exit;
+    }
+unless (defined $option{delim}) {
+    $option{delim} = $option{defaultdelim};
+    }
+unless (defined $option{header}) {
+    $option{header} = 0;
+    }
+unless (defined $option{binary}) {
+    $option{binary} = 1;
+    }
+
+# Do the dirty work
+my $fh = new IO::File;
+if (! $fh->open("< " . $option{csvin})) {
+  die "Error opening $option{csvin}";
+}
+
+# "binary" is necessary to process
+my $csv = Text::CSV_XS->new({"sep_char" => $option{delim}, "binary" => $option{binary}});
+
+my $workbook  = Spreadsheet::WriteExcel -> new($option{xlsout});
+my $worksheet = $workbook -> addworksheet();
+my $row       = 0;
+
+my $refarray_datos;
+
+
+# $csv->getline($fh) returns a reference to array that results to separate
+# in fields the row read from file. If any field in the row contains \n, and
+# the binary option is on, $csv->getline($fh) will read the right number of
+# lines from the .csv file
+my $status; # to check errors
+my $error_input; # to check errors
+
+while ( ! $fh->eof() )
+{
+    if ($refarray_datos = $csv->getline($fh))
+    {
+        #$status      = $csv->status();
+        #$error_input = $csv->error_input();
+        #print Dumper($refarray_datos, $status, $error_input);
+        my @field = @{$refarray_datos};
+        my $column = 0;
+        foreach my $token (@field)
+        {
+            $worksheet -> write($row, $column, $token);
+            $column++;
+        }
+    $row++;
+    }
+    else
+    {
+        $status      = $csv->status();
+        $error_input = $csv->error_input();
+        die "Fatal error !!! Incorrect line (delimited by []):\n[$error_input]\n(If any field contains LF (\\n), check if --binary can solve the error)\n\n";
+    }
+}
+
+
+# Prettify row as header
+if($option{header} == 1)
+{
+    my $header = $workbook -> addformat();
+    $header -> set_bold();
+    $header -> set_align('center');
+    $header -> set_bg_color('tan');
+    $header -> set_border();
+    $worksheet -> set_row(0, undef, $header);
+}
+
+# Optional, unless doing some external action against xls file
+$workbook  -> close() or die "Error closing $workbook: $!";
+
+# Go tell it on the mountain
+print("  infile  = $option{csvin}\n");
+print("  outfile = $option{xlsout}\n");
+print("Finished $0\n\n");
+
+########################################################
+sub USAGE {
+print <<EOF
+
+Required switches:
+  -i or --infile csv_infilename
+  -o or --output xls_outfilename
+
+Optional switches:
+-d or --delim alt_delimiter
+  default delimiter is ';'
+-h or --header
+  Accepts no arguments.
+  Bolds and background colors contents of topmost row.
+-b or --binary
+  default mode is binary (permits LF inside a field).
+  Use --nobinary do disable binary mode
+
+Example:
+  csv2xls.pl -i file1.csv -o file2.xls -d [--[no]binary]] * -h
+
+EOF
+;
+}

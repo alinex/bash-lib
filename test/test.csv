@@ -1,0 +1,19 @@
+id,status,changetime,description,reporter,story_priority,resolution,time,component,remaining_time,summary,priority,keywords,drp_resources,milestone,owner,rd_points,sprint,type
+34,accepted,2014-10-09 15:44:50.550308+00:00,,user,,,2014-10-01 16:54:17.745176+00:00,UT-Editor,4,some text,Alpha,,,Scrum Startup,user,,2nd Try,task
+38,new,2014-10-09 15:44:50.585637+00:00,,user,,,2014-10-01 17:13:03.278705+00:00,Transcoding Service,9,some text,Alpha,,,Scrum Startup,user,,2nd Try,task
+39,new,2014-10-09 18:58:44.694814+00:00,"""hello""",user,,,2014-10-01 17:15:45.326223+00:00,Document Management,4,"""integration, test for DocumentService""",Alpha,,,Scrum Startup,user,,2nd Try,task
+41,accepted,2014-10-09 18:58:57.895579+00:00,,user,,,2014-10-01 17:17:24.808172+00:00,MeetingAdmin Service,1.5,some text,Alpha,,,Scrum Startup,user,,2nd Try,task
+43,new,2014-10-09 21:08:34.888938+00:00,"Content:
+#NAME?
+#NAME?
+
+Todo:
+#NAME?
+- Finally test on Beta",user,,,2014-10-02 15:34:05.008107+00:00,,,new Booking Process 1.1: Test on BetaServer,,,,Scrum Startup,user,5,2nd Try,story
+44,new,2014-10-09 21:08:27.502059+00:00,"Content:
+#NAME?
+#NAME?
+
+Todo:
+#NAME?
+- Finally test on Productive Server",user,,,2014-10-02 15:35:05.683927+00:00,,,new Booking Process 1.1: Deployment on productive server,,,,Scrum Startup,user,5,2nd Try,story
