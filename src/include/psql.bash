@@ -36,16 +36,12 @@ psql_exec() {
     fi
 }
 
-# vartest=`psql -X -A -d $dbname -U $username -h localhost -p 5432 -t -c "SELECT gid FROM testtable WHERE aid='1'"`
-#
-# # ------
-#
-# DB_NAME=$1
-# psql -d ${DB_NAME} -At -c "select rno, studname, studclass from tbl_students" \
-#     | while read -a Record ; do
-#     rno=${Record[0]}
-#     studname=${Record[1]}
-#     studclass=${Record[2]}
-#
-#     echo "${rno} ${studname} ${studclass}"
-# done
+psql_csv() {
+    [ $# -ne 1 ] && log_exit ALERT "The SQL command parameter is needed in call to psql_exec"
+    sql="COPY ($1) TO STDOUT DELIMITER ',' CSV"
+    if [ -n "$PGLOG" ]; then
+        log_cmd psql -Ac "$1"
+    else
+        psql -Ac "$1"
+    fi
+}
