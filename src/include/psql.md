@@ -62,12 +62,12 @@ psql_csv <query> | csv2html >>result.html || log_exit ALERT "Failed to export fr
 echo "</body></html>" >>result.html
 ```
 
-### csv2xls <csv> or | csv2xls
+### csv2xls <output-file> <csv> or | csv2xls <output-file>
 
 Because opening CSV in Microsoft Excel correctly is not an easy task, better create the binary format:
 
 ```bash
-psql_csv <query> | csv2xls >result.xls || log_exit ALERT "Failed to export from DB"
+psql_csv <query> | csv2xls result.xls || log_exit ALERT "Failed to export from DB"
 ```
 
 > Keep in mind that the `install` command of the bash-lib have to be run to make this work.

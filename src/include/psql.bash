@@ -77,14 +77,18 @@ csv2html() {
 }
 
 csv2xls() {
+    [ $# -lt 1 ] && log_exit ALERT "This only writes to file, so a file has to be given in csv2xls"
+    xlsfile=$1
     csvfile=$(mktemp)
-    if [ -z "$1" ] && [ ! -t 0 ]; then
+    if [ -z "$2" ] && [ ! -t 0 ]; then
         cat /dev/stdin >$csvfile
     else
-        echo "$@" >$csvfile
+        echo "${@:2}" >$csvfile
     fi
-    xlsfile=$(mktemp)
-    $source_dir/test2xls -i $csvfile -o $xlsfile
-    cat $xlsfile
-    rm $csvfile $xlsfile
+    if [ -e $source_dir/text2xls ]; then
+        $source_dir/text2xls -i $csvfile -o $xlsfile -h
+    else
+        $source_dir/../bin/text2xls -i $csvfile -o $xlsfile -h
+    fi
+    rm $csvfile
 }

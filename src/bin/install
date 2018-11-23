@@ -17,6 +17,6 @@ LOG_LEVEL=DEBUG
 log HEADING "Install neccessary tools for bash-lib"
 
 # used by text2xls command
-apt-get install -y libtext-csv-xs-perl | log
+apt-get install -y libspreadsheet-writeexcel-perl libtext-csv-xs-perl | log
 
 log NOTICE "Done"
