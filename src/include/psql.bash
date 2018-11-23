@@ -29,7 +29,7 @@ psql_exit() {
 
 psql_exec() {
     [ $# -ne 1 ] && log_exit ALERT "The SQL command parameter is needed in call to psql_exec"
-    if [ -n "$PGLOG" ]; then
+    if [ -n "$PGLOG" ] && [ "$PGLOG" != 0 ] ; then
         log_cmd psql -Atc "$1"
     else
         psql -Atc "$1"
@@ -39,9 +39,39 @@ psql_exec() {
 psql_csv() {
     [ $# -ne 1 ] && log_exit ALERT "The SQL command parameter is needed in call to psql_exec"
     sql="COPY ($1) TO STDOUT DELIMITER ',' CSV HEADER"
-    if [ -n "$PGLOG" ]; then
+    if [ -n "$PGLOG" ] && [ "$PGLOG" != 0 ]; then
         log_cmd psql -Ac "$sql"
     else
         psql -Ac "$sql"
     fi
+}
+
+csv2html() {
+    local header=true
+    local cell=th
+    echo "<table>"
+    if [ -z "$1" ] && [ ! -t 0 ]; then
+        cat /dev/stdin \
+        | gawk -v RS='"' 'NR % 2 == 0 { gsub(/\n/, "<br/>") } { printf("%s%s", $0, RT) }' \
+        | while read line; do
+            echo "<tr><$cell>${line}</$cell></tr>" \
+            | sed -r "s/\"?,\"?/<\/$cell><$cell>/g;s/\"\"/\"/g"
+            if $header; then
+                cell=td
+                header=false
+            fi
+        done
+    else
+        echo "$@" \
+        | gawk -v RS='"' 'NR % 2 == 0 { gsub(/\n/, "<br/>") } { printf("%s%s", $0, RT) }' \
+        | while read -r line; do
+            echo "<tr><$cell>${line}</$cell></tr>" \
+            | sed -r "s/\"?,\"?/<\/$cell><$cell>/g;s/\"\"/\"/g"
+            if $header; then
+                cell=td
+                header=false
+            fi
+        done
+    fi
+    echo "</table>"
 }
