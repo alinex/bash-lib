@@ -38,10 +38,10 @@ psql_exec() {
 
 psql_csv() {
     [ $# -ne 1 ] && log_exit ALERT "The SQL command parameter is needed in call to psql_exec"
-    sql="COPY ($1) TO STDOUT DELIMITER ',' CSV"
+    sql="COPY ($1) TO STDOUT DELIMITER ',' CSV HEADER"
     if [ -n "$PGLOG" ]; then
-        log_cmd psql -Ac "$1"
+        log_cmd psql -Ac "$sql"
     else
-        psql -Ac "$1"
+        psql -Ac "$sql"
     fi
 }
