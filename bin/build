@@ -64,6 +64,8 @@ revision=$(git rev-parse --verify master)
     log WARN "Local changes are not pushed to master!"
 gitlab=$(git config --get remote.origin.url | sed 's/\.git$//')
 
+info_comment="# Bash helper library and tools by A.Schilling:\n# $gitlab/blob/$revision/README.md\n"
+
 log HEADING "Building libraries..."
 rm -rf dist 2>/dev/null
 mkdir -p dist |& log || log_exit ALERT "Could not create distribution directory"
@@ -73,8 +75,7 @@ for pack in "${!lib[@]}"; do
     log INFO "Generation dist/$pack.bash including $parts"
     # Header
     echo "#!/bin/bash" > $dest
-    echo "# Bash helper library and tools by A.Schilling:" >> $dest
-    echo "# $gitlab/blob/$revision/README.md" >> $dest
+    echo -e "$info_comment" >> $dest
     echo "# Automatically combined bash-lib including: $parts" >> $dest
     echo >> $dest
     # Concatenate libs
@@ -116,6 +117,7 @@ for file in src/bin/*; do
             perltidy -i=0 -act=2 -pt=2 -ci=0 -tso -nsfs -dsm -dws \
                 -nwls="= + - / *" -nwrs="= + - / *" -tqw -dnl -kbl=0 \
                 --delete-all-comments "$file" -o "$dest" |& log
+            sed -i "2i$info_comment" "$dest"
             ;;
         *)
             log INFO "Copying to $dest"
