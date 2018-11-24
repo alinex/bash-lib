@@ -120,6 +120,7 @@ for file in src/bin/*; do
             sed -i "2i$info_comment" "$dest"
             ;;
         *)
+            [[ "$file" = *.md ]] && continue
             log INFO "Copying to $dest"
             cp "$file" dist |& log
             ;;
