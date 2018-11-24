@@ -12,10 +12,47 @@ lib[info]="colors, log, info"
 lib[psql]="colors, log, psql"
 lib[all]="colors, log, process, info, psql"
 
+LOG_LEVEL=DEBUG
+
 # Load libraries
 source_dir=$(dirname $(readlink -f "${BASH_SOURCE[0]:-$(pwd)/x}"))
 source "$source_dir/../src/include/log.bash"
 source_dir=$(dirname $(readlink -f "${BASH_SOURCE[0]:-$(pwd)/x}"))
+
+# Parameter checking
+usage() {
+    LOG_LEVEL=INFO
+    log MARK "Usage: $0"
+    log INFO "Call it without any parameter to build the combined libraries"
+    log INFO "within the dist folder."
+}
+parsed=$(getopt --options=:Vh --longoptions=version,help --name "$0" -- "$@")
+[ ${PIPESTATUS[0]} -eq 0 ] || log_exit "Could not parse parameters!"
+eval set -- "$parsed"
+while true; do
+    case "$1" in
+        -V|--version) # show version number
+            version=$(git describe --abbrev=0 --tags)
+            echo "$(basename $0) from bash-lib version $version"
+            exit 0
+            ;;
+        -h|--help) # display help
+            usage
+            exit 0
+            ;;
+        --) shift; break ;;
+        *) break ;;
+    esac
+done
+[ $# -gt 0 ] && log WARN "No parameters are supported, only -h to show help - ignoring them"
+
+# check if tools are installed or install them
+command -v perltidy >/dev/null
+if [ $? -ne 0 ]; then
+    log WARN "Command pertidy will be installed"
+    log_cmd sudo apt-get install perltidy -y >/dev/null \
+    || log_exit ALERT "Could not install perltidy"
+fi
 
 # check that everything is up to date
 cd "$source_dir/.."
@@ -45,35 +82,46 @@ for pack in "${!lib[@]}"; do
     bash -c "egrep -hv 'source \"\\\$source_dir/|source_dir=' \
         src/include/{$parts}.bash \
         | sed -e '/^\s*#/d;s/\s\s*#\s.*//g;s/^[[:space:]]*//;/^$/d' \
+        | sed 's/\$(git describe --abbrev=0 --tags)/$(git describe --abbrev=0 --tags)/g' \
         " >> $dest
 done
 
 log HEADING "Building commands..."
 for file in src/bin/*; do
     dest="dist/$(basename $file)"
-    if [ "$(head -n 1 $file)" = "#!/bin/bash" ]; then
-        used_lib=$(grep "DIST include" $file | awk '{ print $4 }')
-        log INFO "Building $dest using $used_lib"
-        [ -e "dist/$used_lib" ] || log_exit ALERT "Library $used_lib not existing, referenced in $file"
-        # Header
-        echo "#!/bin/bash" > $dest
-        echo "# Bash helper library and tools by A.Schilling:" >> $dest
-        echo "# $gitlab/blob/$revision/README.md" >> $dest
-        # Add library
-        if [ -n "$used_lib" ]; then
-            egrep -v '^#' "dist/$used_lib" >> $dest
-        else
-            echo >> $dest
-        fi
-        # Compress
-        egrep -hv 'source \"\$source_dir/|source_dir=' \
-            $file \
-            | sed -e '/^\s*#/d;s/\s\s*#\s.*//g;s/^[[:space:]]*//;/^$/d' \
-            >> $dest
-    else
-        log INFO "Copying to $dest"
-        cp "$file" dist |& log
-    fi
+    case $(head -n 1 $file) in
+        \#!/bin/bash)
+            used_lib=$(grep "DIST include" $file | awk '{ print $4 }')
+            log INFO "Building $dest using $used_lib"
+            [ -e "dist/$used_lib" ] || log_exit ALERT "Library $used_lib not existing, referenced in $file"
+            # Header
+            echo "#!/bin/bash" > $dest
+            echo "# Bash helper library and tools by A.Schilling:" >> $dest
+            echo "# $gitlab/blob/$revision/README.md" >> $dest
+            # Add library
+            if [ -n "$used_lib" ]; then
+                egrep -v '^#' "dist/$used_lib" >> $dest
+            else
+                echo >> $dest
+            fi
+            # Compress
+            egrep -hv 'source \"\$source_dir/|source_dir=' \
+                $file \
+                | sed "s/\$(git describe --abbrev=0 --tags)/$(git describe --abbrev=0 --tags)/g" \
+                | sed -e '/^\s*#/d;s/\s\s*#\s.*//g;s/^[[:space:]]*//;/^$/d' \
+                >> $dest
+            ;;
+        \#!/usr/bin/perl*)
+            log INFO "Compress $dest"
+            perltidy -i=0 -act=2 -pt=2 -ci=0 -tso -nsfs -dsm -dws \
+                -nwls="= + - / *" -nwrs="= + - / *" -tqw -dnl -kbl=0 \
+                --delete-all-comments "$file" -o "$dest" |& log
+            ;;
+        *)
+            log INFO "Copying to $dest"
+            cp "$file" dist |& log
+            ;;
+    esac
     chmod a+rx "$dest" |& log
 done
 
