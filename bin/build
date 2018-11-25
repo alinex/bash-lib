@@ -14,26 +14,24 @@ lib[all]="colors, log, process, info, psql"
 
 LOG_LEVEL=DEBUG
 
+VERSION=$(git describe --abbrev=0 --tags)
+GITLAB=$(git config --get remote.origin.url | sed 's/\.git$//')
+REVISION=$(git rev-parse --verify master)
+
 # Load libraries
 source_dir=$(dirname $(readlink -f "${BASH_SOURCE[0]:-$(pwd)/x}"))
 source "$source_dir/../src/include/log.bash"
 source_dir=$(dirname $(readlink -f "${BASH_SOURCE[0]:-$(pwd)/x}"))
 
 # Parameter checking
-usage() {
-    LOG_LEVEL=INFO
-    log MARK "Usage: $0"
-    log INFO "Call it without any parameter to build the combined libraries"
-    log INFO "within the dist folder."
-}
+usage() { source $source_dir/$(basename $0).help 2>/dev/null; }
 parsed=$(getopt --options=:Vh --longoptions=version,help --name "$0" -- "$@")
 [ ${PIPESTATUS[0]} -eq 0 ] || log_exit "Could not parse parameters!"
 eval set -- "$parsed"
 while true; do
     case "$1" in
         -V|--version) # show version number
-            version=$(git describe --abbrev=0 --tags)
-            echo "$(basename $0) from bash-lib version $version"
+            echo "$(basename $0) from bash-lib version $VERSION"
             exit 0
             ;;
         -h|--help) # display help
@@ -59,12 +57,11 @@ cd "$source_dir/.."
 (git diff --exit-code && git diff --cached --exit-code) >/dev/null 2>/dev/null
 [ $? -eq 0 ] || \
     log WARN "Not everything is checked in to the local git repository!"
-revision=$(git rev-parse --verify master)
-[ "$revision" = $(git rev-parse --verify origin/master) ] || \
+[ "$REVISION" = $(git rev-parse --verify origin/master) ] || \
     log WARN "Local changes are not pushed to master!"
-gitlab=$(git config --get remote.origin.url | sed 's/\.git$//')
 
-info_comment="# Bash helper library and tools by A.Schilling:\n# $gitlab/blob/$revision/README.md\n"
+info_comment="# Bash helper library and tools by A.Schilling:\n# $GITLAB/blob/$REVISION/README.md\n"
+sed_gitlab=$(echo "$GITLAB" | sed -e 's/[\/&]/\\&/g')
 
 log HEADING "Building libraries..."
 rm -rf dist 2>/dev/null
@@ -83,7 +80,9 @@ for pack in "${!lib[@]}"; do
     bash -c "egrep -hv 'source \"\\\$source_dir/|source_dir=' \
         src/include/{$parts}.bash \
         | sed -e '/^\s*#/d;s/\s\s*#\s.*//g;s/^[[:space:]]*//;/^$/d' \
-        | sed 's/\$(git describe --abbrev=0 --tags)/$(git describe --abbrev=0 --tags)/g' \
+        | sed 's/^VERSION=.*$/VERSION=$VERSION/g' \
+        | sed 's/^GITLAB=.*$/GITLAB=$sed_gitlab/g' \
+        | sed 's/^REVISION=.*$/REVISION=$REVISION/g' \
         " >> $dest
 done
 
@@ -97,8 +96,7 @@ for file in src/bin/*; do
             [ -e "dist/$used_lib" ] || log_exit ALERT "Library $used_lib not existing, referenced in $file"
             # Header
             echo "#!/bin/bash" > $dest
-            echo "# Bash helper library and tools by A.Schilling:" >> $dest
-            echo "# $gitlab/blob/$revision/README.md" >> $dest
+            echo -e "$info_comment" >> $dest
             # Add library
             if [ -n "$used_lib" ]; then
                 egrep -v '^#' "dist/$used_lib" >> $dest
@@ -108,7 +106,9 @@ for file in src/bin/*; do
             # Compress
             egrep -hv 'source \"\$source_dir/|source_dir=' \
                 $file \
-                | sed "s/\$(git describe --abbrev=0 --tags)/$(git describe --abbrev=0 --tags)/g" \
+                | sed "s/^VERSION=.*$/VERSION=$VERSION/g" \
+                | sed "s/^GITLAB=.*$/GITLAB=$sed_gitlab/g" \
+                | sed "s/^REVISION=.*$/REVISION=$REVISION/g" \
                 | sed -e '/^\s*#/d;s/\s\s*#\s.*//g;s/^[[:space:]]*//;/^$/d' \
                 >> $dest
             ;;
@@ -118,6 +118,9 @@ for file in src/bin/*; do
                 -nwls="= + - / *" -nwrs="= + - / *" -tqw -dnl -kbl=0 \
                 --delete-all-comments "$file" -o "$dest" |& log
             sed -i "2i$info_comment" "$dest"
+            sed -i "s/###VERSION###/$VERSION/g" "$dest"
+            sed -i "s/###GITLAB###/$sed_gitlab/g" "$dest"
+            sed -i "s/###REVISION###/$REVISION/g" "$dest"
             ;;
         *)
             [[ "$file" = *.md ]] && continue
