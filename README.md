@@ -23,7 +23,8 @@ And also some commands:
         -rwxrwxr-x 1 alex alex   549 Nov  9 08:23 log
         -rwxrwxr-x 1 alex alex 79640 Nov  9 08:23 sendmail
 
-> All files are self contained, so you only pick the ones you need.
+> All files are self contained, so you only pick the ones you need. They are also slightly
+> compressed for better load time.
 
 ### Including libraries
 
@@ -77,3 +78,43 @@ This all is packaged in the following distribution libraries (see install above)
 - `psql` including colors, log, psql
 - `process` including colors, log, process
 - `info` including colors, log, info
+
+## Internal processing
+
+The internal `bin/build` command will make the distribution files by:
+
+- combining the bash libs
+- removing comments and whitespace
+- replacing some variables
+
+The result can be found in the `dist` folder.
+
+Which libraries to build and what is included is configured within the [build script](bin/build).
+
+### Library inclusion
+
+To include a library within a command put a comment exactly like below in the code:
+
+```bash
+# DIST include base.bash
+source_dir=$(dirname $(readlink -f "${BASH_SOURCE[0]:-$(pwd)/x}"))
+source "$source_dir/../include/log.bash" # load log handler
+```
+
+That will directly include the `base.bash` at the top of the command. The `source` line will be removed.
+
+### Variable replacement
+
+The following variables will be replaced by their values:
+
+In bash:
+
+- `VERSION=...`
+- `REVISION=...`
+- `GITLAB=...`
+
+In perl:
+
+- `###VERSION###`
+- `###REVISION###`
+- `###GITLAB###`
