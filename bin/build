@@ -4,7 +4,7 @@
 #
 # http://172.17.101.90/divibib-betrieb/bash-lib/blob/master/README.md
 
-# Setup
+# Configuration
 declare -A lib
 lib[base]="colors, log"
 lib[process]="colors, log, process"
@@ -30,14 +30,8 @@ parsed=$(getopt --options=:Vh --longoptions=version,help --name "$0" -- "$@")
 eval set -- "$parsed"
 while true; do
     case "$1" in
-        -V|--version) # show version number
-            echo "$(basename $0) from bash-lib version $VERSION"
-            exit 0
-            ;;
-        -h|--help) # display help
-            usage
-            exit 0
-            ;;
+        -V|--version) echo "$(basename $0) from bash-lib version $VERSION"; exit 0 ;;
+        -h|--help) usage; exit 0 ;;
         --) shift; break ;;
         *) break ;;
     esac

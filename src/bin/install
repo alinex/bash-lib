@@ -5,18 +5,31 @@ source_dir=$(dirname $(readlink -f "${BASH_SOURCE[0]:-$(pwd)/x}"))
 source "$source_dir/../include/log.bash" # load log handler
 
 # Configuration
-
 LOG_LEVEL=DEBUG
 
-# Checking
+VERSION=$(git describe --abbrev=0 --tags)
+GITLAB=$(git config --get remote.origin.url | sed 's/\.git$//')
+REVISION=$(git rev-parse --verify master)
 
-[ $(id -u) -eq 0 ] || log_exit ALERT "You need root privileges to run this script"
+# Parameter checking
+usage() { source $source_dir/$(basename $0).help 2>/dev/null; }
+parsed=$(getopt --options=:Vh --longoptions=version,help --name "$0" -- "$@")
+[ ${PIPESTATUS[0]} -eq 0 ] || log_exit "Could not parse parameters!"
+eval set -- "$parsed"
+while true; do
+    case "$1" in
+        -V|--version) echo "$(basename $0) from bash-lib version $VERSION"; exit 0 ;;
+        -h|--help) usage; exit 0 ;;
+        --) shift; break ;;
+        *) break ;;
+    esac
+done
+[ $# -gt 0 ] && log WARN "No parameters are supported, only -h to show help - ignoring them"
 
 # Installing debian tools
-
 log HEADING "Install neccessary tools for bash-lib"
-
-# used by text2xls command
-apt-get install -y libspreadsheet-writeexcel-perl libtext-csv-xs-perl | log
+log INFO "text2xls needs the perl binaries: spreadsheet-writeexcel text-csv-xs"
+log_cmd sudo apt-get install -y libspreadsheet-writeexcel-perl libtext-csv-xs-perl >/dev/null \
+|| log ALERT "Not possible automatically install"
 
 log NOTICE "Done"
