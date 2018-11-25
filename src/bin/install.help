@@ -6,8 +6,10 @@ echo "Install necessary tools to use bash-lib"
 echo
 echo -e "$(yellow)$(bold)Usage: $0$(reset)"
 echo
+echo "-------------------------------------------------------------------------"
+echo
 echo "Call it without any parameter to install all necessary tools to work with"
-echo "the bash-lib and all it's libraries. This needs root privileges through sudo.
+echo "the bash-lib and all it's libraries. This needs root privileges through sudo."
 echo
 echo "Also consider reading the complete documentation under:"
 echo "$GITLAB//blob/$REVISION/README.md"

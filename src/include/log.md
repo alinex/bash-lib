@@ -110,7 +110,7 @@ run-process |& log
 run-process |& log AUTO
 ```
 
-This will auto detect the concrete log level for each line. Currently `DEBUG`, `INFO`, `NOTICE`, `WARN`, `WARNING`, `ERR`, `ERROR`, `CRIT`, `CRITICAL`, `ALERT`, `EMERG` and `EMERGENCY` will trigger the specified log type. Some other keywords are also interpreted and all other lines are output using the minimum level.
+This will auto detect the concrete log level for each line. Currently `DEBUG`, `INFO`, `NOTICE`, `MARK`, `WARN`, `WARNING`, `HEADING`, `ERR`, `ERROR`, `CRIT`, `CRITICAL`, `ALERT`, `EMERG` and `EMERGENCY` will trigger the specified log type. Some other keywords are also interpreted and all other lines are output using the minimum level.
 
 You can also specify a higher minimum level as `DEBUG` by using:
 

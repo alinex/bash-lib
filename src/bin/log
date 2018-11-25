@@ -10,8 +10,7 @@
 # xxx | log             # pipe to log
 # xxx | log <type>      # pipe with specific log type
 
-type=${1:-AUTO}
-
+# Configuration
 VERSION=$(git describe --abbrev=0 --tags)
 GITLAB=$(git config --get remote.origin.url | sed 's/\.git$//')
 REVISION=$(git rev-parse --verify master)
@@ -20,6 +19,22 @@ REVISION=$(git rev-parse --verify master)
 source_dir=$(dirname $(readlink -f "${BASH_SOURCE[0]:-$(pwd)/x}"))
 source "$source_dir/../include/log.bash" # load log handler
 
+# Parameter checking
+usage() { source $(dirname $(readlink -f "${BASH_SOURCE[0]:-$(pwd)/x}"))/$(basename $0).help; }
+parsed=$(getopt --options=:Vh --longoptions=version,help --name "$0" -- "$@")
+[ ${PIPESTATUS[0]} -eq 0 ] || log_exit "Could not parse parameters!"
+eval set -- "$parsed"
+while true; do
+    case "$1" in
+        -V|--version) echo "$(basename $0) from bash-lib version $VERSION"; exit 0 ;;
+        -h|--help) usage; exit 0 ;;
+        --) shift; break ;;
+        *) break ;;
+    esac
+done
+type=${1:-AUTO}
+
+# calling log library
 if [ -n "$2" ]; then
   log $type $2
 else

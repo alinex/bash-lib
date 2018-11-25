@@ -24,7 +24,7 @@ source "$source_dir/../src/include/log.bash"
 source_dir=$(dirname $(readlink -f "${BASH_SOURCE[0]:-$(pwd)/x}"))
 
 # Parameter checking
-usage() { source $source_dir/$(basename $0).help 2>/dev/null; }
+usage() { source $source_dir/$(basename $0).help; }
 parsed=$(getopt --options=:Vh --longoptions=version,help --name "$0" -- "$@")
 [ ${PIPESTATUS[0]} -eq 0 ] || log_exit "Could not parse parameters!"
 eval set -- "$parsed"
@@ -98,8 +98,7 @@ for file in src/bin/*; do
                 echo >> $dest
             fi
             # Compress
-            egrep -hv 'source \"\$source_dir/|source_dir=' \
-                $file \
+            egrep -hv 'source \"\$source_dir/|source_dir=' $file \
                 | sed "s/^VERSION=.*$/VERSION=$VERSION/g" \
                 | sed "s/^GITLAB=.*$/GITLAB=$sed_gitlab/g" \
                 | sed "s/^REVISION=.*$/REVISION=$REVISION/g" \
