@@ -55,7 +55,7 @@ csv2html() {
         | gawk -v RS='"' 'NR % 2 == 0 { gsub(/\n/, "<br/>") } { printf("%s%s", $0, RT) }' \
         | while read line; do
             echo "<tr><$cell>${line}</$cell></tr>" \
-            | sed -r "s/\"?,\"?/<\/$cell><$cell>/g;s/\"\"/\"/g"
+            | sed -r "s/>\"/>/;s/\"?,\"?/<\/$cell><$cell>/g;s/\"\"/\"/g"
             if $header; then
                 cell=td
                 header=false
@@ -66,7 +66,7 @@ csv2html() {
         | gawk -v RS='"' 'NR % 2 == 0 { gsub(/\n/, "<br/>") } { printf("%s%s", $0, RT) }' \
         | while read -r line; do
             echo "<tr><$cell>${line}</$cell></tr>" \
-            | sed -r "s/\"?,\"?/<\/$cell><$cell>/g;s/\"\"/\"/g"
+            | sed -r "s/>\"/>/;s/\"?,\"?/<\/$cell><$cell>/g;s/\"\"/\"/g"
             if $header; then
                 cell=td
                 header=false
