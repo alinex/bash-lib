@@ -2,7 +2,7 @@
 
 > Helper programs and libraries for administration tool development (mostly in bash).
 
-A short help is always included in the files but the [documentation section](doc/README.md) may have further information with usage examples for each library.
+A short help is always included in the files but this documentation contains further information with usage examples for each library.
 
 ## Installation
 
@@ -85,7 +85,7 @@ This all is packaged in the following distribution libraries (see install above)
 The internal `bin/build` command will make the distribution files by:
 
 - combining the bash libs
-- removing comments and whitespace
+- removing comments and white-space
 - replacing some variables
 
 The result can be found in the `dist` folder.
@@ -114,7 +114,7 @@ In bash:
 - `REVISION=...`
 - `GITLAB=...`
 
-In perl:
+In Perl:
 
 - `###VERSION###`
 - `###REVISION###`

@@ -12,5 +12,5 @@ echo "Call it without any parameter to build the combined libraries within the d
 echo "folder. And use them in other commands."
 echo
 echo "Also consider reading the complete documentation under:"
-echo "$GITLAB//blob/$REVISION/README.md"
+echo "$GITLAB//blob/$VERSION/README.md"
 echo

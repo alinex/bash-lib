@@ -46,5 +46,5 @@ echo "To user the full power better include any of the bash libraries and direct
 echo "the log methods included there."
 echo
 echo "Also consider reading the complete documentation under:"
-echo "$GITLAB//blob/$REVISION/README.md"
+echo "$GITLAB//blob/$VERSION/README.md"
 echo
