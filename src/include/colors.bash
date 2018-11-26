@@ -14,6 +14,9 @@
 
 term=${TERM:-xterm-256color} # use xterm as default if no terminal set
 
+source_dir=$(dirname $(readlink -f "${BASH_SOURCE[0]:-$(pwd)/x}"))
+source "$source_dir/core.bash" # load color methods
+
 # Helper
 _color_text() {
     if [ -z "$1" ] && [ ! -t 0 ]; then

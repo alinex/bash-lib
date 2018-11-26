@@ -6,11 +6,11 @@
 
 # Configuration
 declare -A lib
-lib[base]="colors, log"
-lib[process]="colors, log, process"
-lib[info]="colors, log, info"
-lib[psql]="colors, log, psql"
-lib[all]="colors, log, process, info, psql"
+lib[base]="core, colors, log"
+lib[process]="core, colors, log, process"
+lib[info]="core, colors, log, info"
+lib[psql]="core, colors, log, psql"
+lib[all]="core, colors, log, process, info, psql"
 
 LOG_LEVEL=DEBUG
 
@@ -21,17 +21,15 @@ REVISION=$(git rev-parse --verify master)
 # Load libraries
 source_dir=$(dirname $(readlink -f "${BASH_SOURCE[0]:-$(pwd)/x}"))
 source "$source_dir/../src/include/log.bash"
-source_dir=$(dirname $(readlink -f "${BASH_SOURCE[0]:-$(pwd)/x}"))
 
 # Parameter checking
-usage() { source $source_dir/$(basename $0).help; }
 parsed=$(getopt --options=:Vh --longoptions=version,help --name "$0" -- "$@")
 [ ${PIPESTATUS[0]} -eq 0 ] || log_exit "Could not parse parameters!"
 eval set -- "$parsed"
 while true; do
     case "$1" in
         -V|--version) echo "$(basename $0) from bash-lib version $VERSION"; exit 0 ;;
-        -h|--help) usage; exit 0 ;;
+        -h|--help) source "$(path)/$(basename $0).help"; exit 0 ;;
         --) shift; break ;;
         *) break ;;
     esac
@@ -41,13 +39,13 @@ done
 # check if tools are installed or install them
 command -v perltidy >/dev/null
 if [ $? -ne 0 ]; then
-    log WARN "Command pertidy will be installed"
+    log WARN "Command perltidy will be installed"
     log_cmd sudo apt-get install perltidy -y >/dev/null \
     || log_exit ALERT "Could not install perltidy"
 fi
 
 # check that everything is up to date
-cd "$source_dir/.."
+cd "$(path)/.."
 (git diff --exit-code && git diff --cached --exit-code) >/dev/null 2>/dev/null
 [ $? -eq 0 ] || \
     log WARN "Not everything is checked in to the local git repository!"

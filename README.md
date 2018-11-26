@@ -61,9 +61,10 @@ Methods may return two different parts:
 
 The following modules are available:
 
-- [process](src/include/process.md) serialize or parallelize tasks
+- [core](src/include/core.md) general small helpers
+- [colors](src/include/colors.md) colorization methods
 - [log](src/include/log.md) log handler to write to file, `STDERR` or syslog
-- [colors](src/include/colors.md) predefined color variables
+- [process](src/include/process.md) serialize or parallelize tasks
 - [psql](src/include/psql.md) to access PostgreSQL Database
 - [info](src/include/info.md) is a collection of system information methods
 

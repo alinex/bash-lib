@@ -12,14 +12,13 @@ GITLAB=$(git config --get remote.origin.url | sed 's/\.git$//')
 REVISION=$(git rev-parse --verify master)
 
 # Parameter checking
-usage() { source $(dirname $(readlink -f "${BASH_SOURCE[0]:-$(pwd)/x}"))/$(basename $0).help; }
 parsed=$(getopt --options=:Vh --longoptions=version,help --name "$0" -- "$@")
 [ ${PIPESTATUS[0]} -eq 0 ] || log_exit "Could not parse parameters!"
 eval set -- "$parsed"
 while true; do
     case "$1" in
         -V|--version) echo "$(basename $0) from bash-lib version $VERSION"; exit 0 ;;
-        -h|--help) usage; exit 0 ;;
+        -h|--help) source "$(path)/$(basename $0).help"; exit 0 ;;
         --) shift; break ;;
         *) break ;;
     esac

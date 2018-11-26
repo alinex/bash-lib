@@ -1,6 +1,6 @@
 # Color Output
 
-Setup color variables to be used in bash scripts for formatting. It will output ANSI color codes.
+Setup color methods to be used in bash scripts for formatting. It will output ANSI color codes.
 
 ![example](colors.png)
 
