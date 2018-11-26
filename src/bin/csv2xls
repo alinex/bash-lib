@@ -12,9 +12,6 @@ use Text::CSV_XS;
 use IO::File;
 use Data::Dumper;
 
-# Crank it up
-print("\nStarting $0\n");
-
 # Get command line switches and arguments
 my %option = ('defaultdelim' => ',', 'defaultbinary' => 0);
 GetOptions(
@@ -24,7 +21,7 @@ GetOptions(
     'header!'   => \$option{header},
     'binary!'   => \$option{binary},
     );
-unless (defined ($option{csvin} && $option{xlsout})) {
+unless (defined $option{xlsout}) {
     &USAGE();
     exit;
     }
@@ -38,10 +35,14 @@ unless (defined $option{binary}) {
     $option{binary} = 1;
     }
 
-# Do the dirty work
+# Open input stream
 my $fh = new IO::File;
-if (! $fh->open("< " . $option{csvin})) {
-  die "Error opening $option{csvin}";
+if ($option{csvin}) {
+    if (! $fh->open("< " . $option{csvin})) {
+        die "Error opening $option{csvin}";
+    }
+} else {
+    $fh = *STDIN;
 }
 
 # "binary" is necessary to process
@@ -65,9 +66,6 @@ while ( ! $fh->eof() )
 {
     if ($refarray_datos = $csv->getline($fh))
     {
-        #$status      = $csv->status();
-        #$error_input = $csv->error_input();
-        #print Dumper($refarray_datos, $status, $error_input);
         my @field = @{$refarray_datos};
         my $column = 0;
         foreach my $token (@field)
@@ -85,7 +83,6 @@ while ( ! $fh->eof() )
     }
 }
 
-
 # Prettify row as header
 if($option{header} == 1)
 {
@@ -101,19 +98,17 @@ if($option{header} == 1)
 $workbook  -> close() or die "Error closing $workbook: $!";
 
 # Go tell it on the mountain
-print("  infile  = $option{csvin}\n");
-print("  outfile = $option{xlsout}\n");
-print("Finished $0\n\n");
+print("Convert csv to $option{xlsout}\n");
 
 ########################################################
 sub USAGE {
 print <<EOF
 
 Required switches:
-  -i or --infile csv_infilename
-  -o or --output xls_outfilename
+-o or --output xls_outfilename
 
 Optional switches:
+-i or --infile csv_infilename
 -d or --delim alt_delimiter
   default delimiter is ';'
 -h or --header

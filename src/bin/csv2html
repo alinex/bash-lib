@@ -80,10 +80,10 @@ sub USAGE {
 print <<EOF
 
 Required switches:
-  -i or --infile csv_infilename
-  -o or --output xls_outfilename
+-o or --output xls_outfilename
 
 Optional switches:
+-i or --infile csv_infilename
 -d or --delim alt_delimiter
   default delimiter is ';'
 -b or --binary
@@ -91,7 +91,7 @@ Optional switches:
   Use --nobinary do disable binary mode
 
 Example:
-  csv2xls.pl -i file1.csv -o file2.xls -d [--[no]binary]] * -h
+  csv2html -i file1.csv -o file2.xls -d [--[no]binary]]
 
 EOF
 ;
