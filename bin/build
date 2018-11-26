@@ -14,7 +14,7 @@ lib[all]="core, colors, log, process, info, psql"
 
 LOG_LEVEL=DEBUG
 
-VERSION=$(git describe --abbrev=0 --tags)
+VERSION=$(git describe --abbrev=0 --tags 2>/dev/null); VERSION=${VERSION:-master}
 REVISION=$(git rev-parse --verify master)
 GITLAB=$(git config --get remote.origin.url | sed 's/\.git$//')
 
