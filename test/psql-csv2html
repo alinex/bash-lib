@@ -40,4 +40,7 @@ echo
 echo $(cyan "$(bold)Using pipes")
 echo "$COMPLEX" | csv2html
 
+echo $(cyan "$(bold)Containing comma")
+echo "\"one,two\",1" | csv2html
+
 csv2xls ~/Downloads/test.xls "$COMPLEX"

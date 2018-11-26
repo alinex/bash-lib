@@ -1,0 +1,98 @@
+#!/usr/bin/perl -w
+
+# Install: sudo apt-get install libtext-csv-xs-perl
+# Usage: bin/csv2html [-i test.csv]
+
+use strict;
+use Getopt::Long;
+use Text::CSV_XS;
+use IO::File;
+use Data::Dumper;
+
+# Get command line switches and arguments
+my %option = ('defaultdelim' => ',', 'defaultbinary' => 0);
+GetOptions(
+    'infile=s'  => \$option{csvin},
+    'outfile=s' => \$option{xlsout},
+    'delim=s'   => \$option{delim},
+    'binary!'   => \$option{binary},
+    );
+unless (defined $option{delim}) {
+    $option{delim} = $option{defaultdelim};
+}
+unless (defined $option{header}) {
+    $option{header} = 0;
+}
+unless (defined $option{binary}) {
+    $option{binary} = 1;
+}
+
+# Open input stream
+my $fh = new IO::File;
+if ($option{csvin}) {
+    if (! $fh->open("< " . $option{csvin})) {
+        die "Error opening $option{csvin}";
+    }
+} else {
+    $fh = *STDIN;
+}
+
+# "binary" is necessary to process
+my $csv = Text::CSV_XS->new({"sep_char" => $option{delim}, "binary" => $option{binary}});
+my $refarray_datos;
+
+# $csv->getline($fh) returns a reference to array that results to separate
+# in fields the row read from file. If any field in the row contains \n, and
+# the binary option is on, $csv->getline($fh) will read the right number of
+# lines from the .csv file
+my $status; # to check errors
+my $error_input; # to check errors
+my $row       = 0;
+
+print("<table>\n");
+while ( ! $fh->eof() )
+{
+    my $cell = $row ? "td" : "th";
+    if ($refarray_datos = $csv->getline($fh))
+    {
+        my @field = @{$refarray_datos};
+        my $column = 0;
+        print("<tr>");
+        foreach my $token (@field)
+        {
+            $token =~ s/\n/<br\/>/g;
+            print("<$cell>$token</$cell>");
+        }
+        print("</tr>\n");
+    $row++;
+    }
+    else
+    {
+        $status      = $csv->status();
+        $error_input = $csv->error_input();
+        die "Fatal error !!! Incorrect line (delimited by []):\n[$error_input]\n(If any field contains LF (\\n), check if --binary can solve the error)\n\n";
+    }
+}
+print("</table>\n");
+
+########################################################
+sub USAGE {
+print <<EOF
+
+Required switches:
+  -i or --infile csv_infilename
+  -o or --output xls_outfilename
+
+Optional switches:
+-d or --delim alt_delimiter
+  default delimiter is ';'
+-b or --binary
+  default mode is binary (permits LF inside a field).
+  Use --nobinary do disable binary mode
+
+Example:
+  csv2xls.pl -i file1.csv -o file2.xls -d [--[no]binary]] * -h
+
+EOF
+;
+}

@@ -47,38 +47,34 @@ psql_csv() {
 }
 
 csv2html() {
-    local header=true
-    local cell=th
-    echo "<table>"
-    if [ -z "$1" ] && [ ! -t 0 ]; then
-        cat /dev/stdin \
-        | gawk -v RS='"' 'NR % 2 == 0 { gsub(/\n/, "<br/>") } { printf("%s%s", $0, RT) }' \
-        | while read line; do
-            echo "<tr><$cell>${line}</$cell></tr>" \
-            | sed -r "s/>\"/>/;s/\"?,\"?/<\/$cell><$cell>/g;s/\"\"/\"/g"
-            if $header; then
-                cell=td
-                header=false
-            fi
-        done
+    lib_dir=$(dirname $(readlink -f "${BASH_SOURCE[0]:-$(pwd)/x}"))
+    conv=""
+    if [ -e $lib_dir/csv2html ]; then
+        conv="$lib_dir/csv2html"
+    elif [ -e $lib_dir/../bin/csv2html ]; then
+        conv="$lib_dir/../bin/csv2html"
     else
-        echo "$@" \
-        | gawk -v RS='"' 'NR % 2 == 0 { gsub(/\n/, "<br/>") } { printf("%s%s", $0, RT) }' \
-        | while read -r line; do
-            echo "<tr><$cell>${line}</$cell></tr>" \
-            | sed -r "s/>\"/>/;s/\"?,\"?/<\/$cell><$cell>/g;s/\"\"/\"/g"
-            if $header; then
-                cell=td
-                header=false
-            fi
-        done
+        log_exit ALERT "Could not find csv2xls, please include it from the bash-lib"
     fi
-    echo "</table>"
+    if [ -z "$1" ] && [ ! -t 0 ]; then
+        cat /dev/stdin | $conv
+    else
+        echo "$@" | $conv
+    fi
 }
 
 csv2xls() {
     [ $# -lt 1 ] && log_exit ALERT "This only writes to file, so a file has to be given in csv2xls"
     perl -e 'use Spreadsheet::WriteExcel;' 2>/dev/null || log_exit ALERT "Please use install to get the required bash-lib tools like Spreadsheet::WriteExcel"
+    lib_dir=$(dirname $(readlink -f "${BASH_SOURCE[0]:-$(pwd)/x}"))
+    conv=""
+    if [ -e $lib_dir/csv2xls ]; then
+        conv="$lib_dir/csv2xls"
+    elif [ -e $lib_dir/../bin/csv2xls ]; then
+        conv="$lib_dir/../bin/csv2xls"
+    else
+        log_exit ALERT "Could not find csv2xls, please include it from the bash-lib"
+    fi
     xlsfile=$1
     csvfile=$(mktemp)
     if [ -z "$2" ] && [ ! -t 0 ]; then
@@ -86,13 +82,6 @@ csv2xls() {
     else
         echo "${@:2}" >$csvfile
     fi
-    lib_dir=$(dirname $(readlink -f "${BASH_SOURCE[0]:-$(pwd)/x}"))
-    if [ -e $lib_dir/text2xls ]; then
-        $lib_dir/text2xls -i $csvfile -o $xlsfile -h
-    elif [ -e $lib_dir/../bin/text2xls ]; then
-        $lib_dir/../bin/text2xls -i $csvfile -o $xlsfile -h
-    else
-        log_exit ALERT "Could not find text2xls, please include it from the bash-lib"
-    fi
+    $conv -i $csvfile -o $xlsfile -h
     rm $csvfile
 }
