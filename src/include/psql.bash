@@ -78,6 +78,7 @@ csv2html() {
 
 csv2xls() {
     [ $# -lt 1 ] && log_exit ALERT "This only writes to file, so a file has to be given in csv2xls"
+    perl -e 'use Spreadsheet::WriteExcel;' 2>/dev/null || log_exit ALERT "Please use install to get the required bash-lib tools like Spreadsheet::WriteExcel"
     xlsfile=$1
     csvfile=$(mktemp)
     if [ -z "$2" ] && [ ! -t 0 ]; then
@@ -85,10 +86,13 @@ csv2xls() {
     else
         echo "${@:2}" >$csvfile
     fi
-    if [ -e $source_dir/text2xls ]; then
-        $source_dir/text2xls -i $csvfile -o $xlsfile -h
+    lib_dir=$(dirname $(readlink -f "${BASH_SOURCE[0]:-$(pwd)/x}"))
+    if [ -e $lib_dir/text2xls ]; then
+        $lib_dir/text2xls -i $csvfile -o $xlsfile -h
+    elif [ -e $lib_dir/../bin/text2xls ]; then
+        $lib_dir/../bin/text2xls -i $csvfile -o $xlsfile -h
     else
-        $source_dir/../bin/text2xls -i $csvfile -o $xlsfile -h
+        log_exit ALERT "Could not find text2xls, please include it from the bash-lib"
     fi
     rm $csvfile
 }
