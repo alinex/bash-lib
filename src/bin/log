@@ -12,8 +12,8 @@
 
 # Configuration
 VERSION=$(git describe --abbrev=0 --tags)
-GITLAB=$(git config --get remote.origin.url | sed 's/\.git$//')
 REVISION=$(git rev-parse --verify master)
+GITLAB=$(git config --get remote.origin.url | sed 's/\.git$//')
 
 # DIST include base.bash
 source_dir=$(dirname $(readlink -f "${BASH_SOURCE[0]:-$(pwd)/x}"))

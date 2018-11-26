@@ -15,8 +15,8 @@ lib[all]="core, colors, log, process, info, psql"
 LOG_LEVEL=DEBUG
 
 VERSION=$(git describe --abbrev=0 --tags)
-GITLAB=$(git config --get remote.origin.url | sed 's/\.git$//')
 REVISION=$(git rev-parse --verify master)
+GITLAB=$(git config --get remote.origin.url | sed 's/\.git$//')
 
 # Load libraries
 source_dir=$(dirname $(readlink -f "${BASH_SOURCE[0]:-$(pwd)/x}"))
@@ -28,7 +28,7 @@ parsed=$(getopt --options=:Vh --longoptions=version,help --name "$0" -- "$@")
 eval set -- "$parsed"
 while true; do
     case "$1" in
-        -V|--version) echo "$(basename $0) from bash-lib version $VERSION"; exit 0 ;;
+        -V|--version) echo "$(basename $0) from bash-lib version $VERSION ($REVISION)"; exit 0 ;;
         -h|--help) source "$(path)/$(basename $0).help"; exit 0 ;;
         --) shift; break ;;
         *) break ;;
@@ -52,7 +52,7 @@ cd "$(path)/.."
 [ "$REVISION" = $(git rev-parse --verify origin/master) ] || \
     log WARN "Local changes are not pushed to master!"
 
-info_comment="# Bash helper library and tools by A.Schilling:\n# $GITLAB/blob/$REVISION/README.md\n"
+info_comment="# Bash helper library and tools by A.Schilling:\n# $GITLAB/blob/$VERSION/README.md\n"
 sed_gitlab=$(echo "$GITLAB" | sed -e 's/[\/&]/\\&/g')
 
 log HEADING "Building libraries..."
@@ -73,8 +73,8 @@ for pack in "${!lib[@]}"; do
         src/include/{$parts}.bash \
         | sed -e '/^\s*#/d;s/\s\s*#\s.*//g;s/^[[:space:]]*//;/^$/d' \
         | sed 's/^VERSION=.*$/VERSION=$VERSION/g' \
-        | sed 's/^GITLAB=.*$/GITLAB=$sed_gitlab/g' \
         | sed 's/^REVISION=.*$/REVISION=$REVISION/g' \
+        | sed 's/^GITLAB=.*$/GITLAB=$sed_gitlab/g' \
         " >> $dest
 done
 
@@ -98,8 +98,8 @@ for file in src/bin/*; do
             # Compress
             egrep -hv 'source \"\$source_dir/|source_dir=' $file \
                 | sed "s/^VERSION=.*$/VERSION=$VERSION/g" \
-                | sed "s/^GITLAB=.*$/GITLAB=$sed_gitlab/g" \
                 | sed "s/^REVISION=.*$/REVISION=$REVISION/g" \
+                | sed "s/^GITLAB=.*$/GITLAB=$sed_gitlab/g" \
                 | sed -e '/^\s*#/d;s/\s\s*#\s.*//g;s/^[[:space:]]*//;/^$/d' \
                 >> $dest
             ;;
@@ -110,8 +110,8 @@ for file in src/bin/*; do
                 --delete-all-comments "$file" -o "$dest" |& log
             sed -i "2i$info_comment" "$dest"
             sed -i "s/###VERSION###/$VERSION/g" "$dest"
-            sed -i "s/###GITLAB###/$sed_gitlab/g" "$dest"
             sed -i "s/###REVISION###/$REVISION/g" "$dest"
+            sed -i "s/###GITLAB###/$sed_gitlab/g" "$dest"
             ;;
         *)
             [[ "$file" = *.md ]] && continue
