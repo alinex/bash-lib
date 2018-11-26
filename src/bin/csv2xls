@@ -119,7 +119,7 @@ Optional switches:
   Use --nobinary do disable binary mode
 
 Example:
-  csv2xls.pl -i file1.csv -o file2.xls -d [--[no]binary]] * -h
+  csv2xls -i file1.csv -o file2.xls -d [--[no]binary]] * -h
 
 EOF
 ;
