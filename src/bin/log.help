@@ -1,50 +1,59 @@
 #!/bin/bash
 # Integrated help to be called using -h or --help flag.
 
-echo
-echo "Log messages"
-echo
-echo -e "$(yellow)$(bold)Usage: $0 [<type>] <message>"
-echo -e "       echo <message> | $0 [<type>]$(reset)"
-echo
-echo "Parameters:"
-echo " - <type>: a log level for this message like INFO, NOTICE, WARN, ERROR..."
-echo " - <message>: the message text to be logged"
-echo
-echo "Environment Settings:"
-echo " - LOG_CONSOLE='SIMPLE'                # output to STDERR (default)"
-echo " - LOG_CONSOLE='FULL'                  # output to STDERR without date, tag, pid and type"
-echo " - LOG_FILE='/var/log/myscript.log'    # output in file"
-echo " - SYSLOG_FACILITY='local7'            # output to syslog"
-echo " - LOG_LEVEL='INFO'                    # minimum log level"
-echo " - LOG_LEVEL_DEFAULT='AUTO_INFO'       # default log level to use if none"
-echo " - LOG_DATE_FORMAT=\"+%Y-%m-%d %H:%M:%S\""
-echo " - LOG_ROTATE_TIME=[DAILY|WEEKLY|MONTHLY]"
-echo " - LOG_ROTATE_SIZE=<bytes>"
-echo " - LOG_ROTATE_NUM=<max number of files>"
-echo " - LOG_ROTATE_COMPRESS=1"
-echo " - LOG_AUTO[OK]=\"\b(done|transferred)\b\""
-echo " - LOG_AUTO[MARK]=\"!!!\""
-echo " - LOG_CMD_QUIET=1                     # will prevent call and success messages"
-echo " - LOG_CMD_LEVEL=AUTO_INFO             # the log level used for command output"
-echo
-echo "-------------------------------------------------------------------------"
-echo
-echo "Supported log levels are:"
-echo " - DEBUG"
-echo " - INFO"
-echo " - NOTICE"
-echo " - MARK"
-echo " - WARN or WARNING"
-echo " - HEADING"
-echo " - ERR or ERROR"
-echo " - CRIT or CRITICAL"
-echo " - ALERT"
-echo " - EMERG or EMERGENCY"
-echo
-echo "To user the full power better include any of the bash libraries and directly call"
-echo "the log methods included there."
-echo
-echo "Also consider reading the complete documentation under:"
-echo "$GITLAB//blob/$VERSION/README.md"
-echo
+echo -e "
+Log messages
+$(yellow)$(bold)
+Usage:            $0 <type> <message>
+                  $0 [<type>] < STDIN
+                  $0 [<option>]
+$(reset)
+Parameters:
+
+    <type>: a log level for this message like INFO, NOTICE, WARN, ERROR...
+    <message>: the message text to be logged
+
+Environment Settings:
+
+    LOG_CONSOLE='SIMPLE'                # output to STDERR (default)
+    LOG_CONSOLE='FULL'                  # output to STDERR without date, tag, pid and type
+    LOG_FILE='/var/log/myscript.log'    # output in file
+    SYSLOG_FACILITY='local7'            # output to syslog
+    LOG_LEVEL='INFO'                    # minimum log level
+    LOG_LEVEL_DEFAULT='AUTO_INFO'       # default log level to use if none
+    LOG_DATE_FORMAT=\"+%Y-%m-%d %H:%M:%S\"
+    LOG_ROTATE_TIME=[DAILY|WEEKLY|MONTHLY]
+    LOG_ROTATE_SIZE=<bytes>
+    LOG_ROTATE_NUM=<max number of files>
+    LOG_ROTATE_COMPRESS=1
+    LOG_AUTO[OK]=\"\b(done|transferred)\b\"
+    LOG_AUTO[MARK]=\"!!!\"
+    LOG_CMD_QUIET=1                     # will prevent call and success messages
+    LOG_CMD_LEVEL=AUTO_INFO             # the log level used for command output
+
+Options:
+
+    -h --help     to show a short help integrated page
+    -V --version  displays the version of this program
+
+-------------------------------------------------------------------------
+
+Supported log levels are:
+
+ - DEBUG
+ - INFO
+ - NOTICE
+ - MARK
+ - WARN or WARNING
+ - HEADING
+ - ERR or ERROR
+ - CRIT or CRITICAL
+ - ALERT
+ - EMERG or EMERGENCY
+
+To user the full power better include any of the bash libraries and directly call
+the log methods included there.
+
+Also consider reading the complete documentation under:
+$GITLAB//blob/$VERSION/README.md
+

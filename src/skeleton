@@ -8,16 +8,39 @@
 #
 # The skeleton is used as a base to make your own scripts.
 
-### Setup
+# Include bash-lib
+source_dir=$(dirname $(readlink -f "${BASH_SOURCE[0]:-$(pwd)/x}"))
+source "$source_dir/../lib/base.bash"
 
-# set default values
+# Configuration
+LOG_LEVEL=DEBUG
+LOG_FILE=${LOG_FILE:-$source_dir/../log/$(basename $0).log}
+
+VERSION=$(git describe --abbrev=0 --tags 2>/dev/null); VERSION=${VERSION:-master}
+REVISION=$(git rev-parse --verify master)
+GITLAB=$(git config --get remote.origin.url | sed 's/\.git$//')
+
+# Parameter checking
+parsed=$(getopt --options=:Vh --longoptions=version,help --name "$0" -- "$@")
+[ ${PIPESTATUS[0]} -eq 0 ] || log_exit "Could not parse parameters!"
+eval set -- "$parsed"
+while true; do
+    case "$1" in
+        -V|--version) echo "$(basename $0) from bash-lib version $VERSION"; exit 0 ;;
+        -h|--help) source "$(path)/$(basename $0).help"; exit 0 ;;
+        --) shift; break ;;
+        *) break ;;
+    esac
+done
+[ $# -gt 0 ] && log WARN "No parameters are supported, only -h to show help - ignoring them"
 
 # change into command directory
-cd "$( dirname "${BASH_SOURCE[0]}" )"
-# load libraries
-source ../bash-lib/include/log.bash
+cd "$(path)"
 
-### Argument checks
+# Processing
 
 
-### Running....
+
+
+
+log NOTICE Done.

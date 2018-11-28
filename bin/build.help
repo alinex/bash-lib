@@ -1,16 +1,21 @@
 #!/bin/bash
 # Integrated help to be called using -h or --help flag.
 
-echo
-echo "Build combined bash-lib"
-echo
-echo -e "$(yellow)$(bold)Usage: $0$(reset)"
-echo
-echo "-------------------------------------------------------------------------"
-echo
-echo "Call it without any parameter to build the combined libraries within the dist"
-echo "folder. And use them in other commands."
-echo
-echo "Also consider reading the complete documentation under:"
-echo "$GITLAB//blob/$VERSION/README.md"
-echo
+echo -e "
+Build combined bash-lib
+$(yellow)$(bold)
+Usage:            $0 [<option>]
+$(reset)
+Options:
+
+    -h --help     to show a short help integrated page
+    -V --version  displays the version of this program
+
+-------------------------------------------------------------------------
+
+Call it without any parameter to build the combined libraries within the dist
+folder. And use them in other commands.
+
+Also consider reading the complete documentation under:
+$GITLAB//blob/$VERSION/README.md
+"

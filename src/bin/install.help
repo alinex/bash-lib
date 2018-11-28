@@ -1,16 +1,21 @@
 #!/bin/bash
 # Integrated help to be called using -h or --help flag.
 
-echo
-echo "Install necessary tools to use bash-lib"
-echo
-echo -e "$(yellow)$(bold)Usage: $0$(reset)"
-echo
-echo "-------------------------------------------------------------------------"
-echo
-echo "Call it without any parameter to install all necessary tools to work with"
-echo "the bash-lib and all it's libraries. This needs root privileges through sudo."
-echo
-echo "Also consider reading the complete documentation under:"
-echo "$GITLAB//blob/$VERSION/README.md"
-echo
+echo -e "
+Install necessary tools to use bash-lib
+$(yellow)$(bold)
+Usage:            $0 [<option>]
+$(reset)
+Options:
+
+    -h --help     to show a short help integrated page
+    -V --version  displays the version of this program
+
+-------------------------------------------------------------------------
+
+Call it without any parameter to install all necessary tools to work with
+the bash-lib and all it's libraries. This needs root privileges through sudo.
+
+Also consider reading the complete documentation under:
+$GITLAB//blob/$VERSION/README.md
+"

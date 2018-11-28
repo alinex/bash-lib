@@ -48,8 +48,20 @@ But you can also always copy the command directly to any other folder and use it
 
 ## Programs
 
-- [log](src/bin/log.md) log command to write to file, `STDERR` or syslog
-- [sendmail](src/bin/sendmail.md) is a simple SMTP mailer
+- `log` command to write to file, `STDERR` or syslog
+- `sendmail` is a simple SMTP mailer
+- `csv2html` convert CSV data into a simple HTML table
+- `csv2xls` convert CSV data into an binary XLS file
+- `install` to initially setup (see above)
+
+### Default options
+
+All commands supports some default options:
+
+- `-h --help` to show a short help integrated page
+- `-V --version` displays the version of this program
+
+To separate parameters to the command from options a double `--` can be used.
 
 ## Libraries
 
@@ -74,11 +86,11 @@ Additionally a [skeleton](src/skeleton.md) is used as template to create new scr
 
 This all is packaged in the following distribution libraries (see install above):
 
-- `all` including colors, log, locking, info, psql
-- `base` including colors, log
-- `psql` including colors, log, psql
-- `process` including colors, log, process
-- `info` including colors, log, info
+- `all` including core, colors, log, locking, info, psql
+- `base` including core, colors, log
+- `psql` including core, colors, log, psql
+- `process` including core, colors, log, process
+- `info` including core, colors, log, info
 
 ## Internal processing
 
