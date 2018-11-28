@@ -47,9 +47,13 @@ else
             REV=$(cat /etc/mandrake-release | sed s/.*release\ // | sed s/\ .*//)
         elif [ -f /etc/debian_version ] ; then
             DIST_BASE='Debian'
-            DIST=$(grep '^DISTRIB_ID' /etc/lsb-release /etc/os-release 2>/dev/null | head -n 1 | awk -F=  '{ print $2 }')
-            REV_NAME=$(grep '^DISTRIB_CODENAME' /etc/lsb-release /etc/os-release 2>/dev/null | head -n 1 | awk -F=  '{ print $2 }')
-            REV=$(grep '^DISTRIB_RELEASE' /etc/lsb-release /etc/os-release 2>/dev/null | head -n 1 | awk -F=  '{ print $2 }')
+            DIST_BASE_REV=$(cat /etc/debian_version | sed -e 's/\([0-9]*\)\..*/\1/')
+            DIST=$(grep '^DISTRIB_ID=' /etc/lsb-release /etc/os-release 2>/dev/null | head -n 1 | awk -F=  '{ print $2 }')
+            [ -z "$DIST" ] && DIST=$(grep '^NAME=' /etc/lsb-release /etc/os-release 2>/dev/null | head -n 1 | awk -F=  '{ print $2 }' | sed 's/"//g')
+            REV_NAME=$(grep '^DISTRIB_CODENAME=' /etc/lsb-release /etc/os-release 2>/dev/null | head -n 1 | awk -F=  '{ print $2 }')
+            [ -z "$REV_NAME" ] && REV_NAME=$(grep '^VERSION=' /etc/lsb-release /etc/os-release 2>/dev/null | head -n 1 | awk -F=  '{ print $2 }' | sed 's/^.*(\(.*\)).*/\1/g')
+            REV=$(grep '^DISTRIB_RELEASE=' /etc/lsb-release /etc/os-release 2>/dev/null | head -n 1 | awk -F=  '{ print $2 }')
+            [ -z "$REV" ] && REV=$(cat /etc/debian_version)
         fi
         if [ -f /etc/UnitedLinux-release ] ; then
             DIST="${DIST}[$(cat /etc/UnitedLinux-release | tr "\n" ' ' | sed s/VERSION.*//)]"
@@ -59,6 +63,7 @@ else
         declare -r MACH
         declare -r DIST
         declare -r DIST_BASE
+        declare -r DIST_BASE_REV
         declare -r REV_NAME
         declare -r REV
     fi
@@ -68,9 +73,9 @@ fi
 system_info() {
   local dist_base
   local rev
-  [ -n "$DIST_BASE" ] && dist_base=" based on $DIST_BASE"
-  [ -n "$REV" ] && rev=" $REV $REV_NAME"
-  echo "$OS system with kernel $KERNEL $MACH ($DIST$rev$dist_base)"
+  [ -n "$DIST_BASE" ] && dist_base="based on $DIST_BASE $DIST_BASE_REV"
+  [ -n "$REV" ] && rev="$REV $REV_NAME"
+  echo "$OS system with kernel $KERNEL $MACH ($(echo $DIST $rev $dist_base))"
 }
 
 hw_cores() { grep -c ^processor /proc/cpuinfo; }
