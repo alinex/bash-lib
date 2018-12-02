@@ -4,12 +4,12 @@
 echo -e "
 Build combined bash-lib
 $(yellow)$(bold)
-Usage:            $0 [<option>]
+Usage:              $0 [<option>]
 $(reset)
 Options:
 
-    -h --help     to show a short help integrated page
-    -V --version  displays the version of this program
+    -h --help       to show a short help integrated page
+    -V --version    displays the version of this program
 
 -------------------------------------------------------------------------
 
