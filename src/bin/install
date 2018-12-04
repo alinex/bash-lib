@@ -27,8 +27,8 @@ done
 
 # Installing debian tools
 log HEADING "Install neccessary tools for bash-lib"
-log INFO "text2xls needs the perl binaries: spreadsheet-writeexcel text-csv-xs"
-log_cmd sudo apt-get install -y libspreadsheet-writeexcel-perl libtext-csv-xs-perl >/dev/null \
+log INFO "text2xls needs recode and the perl binaries: spreadsheet-writeexcel text-csv-xs"
+log_cmd sudo apt-get install -y recode libspreadsheet-writeexcel-perl libtext-csv-xs-perl >/dev/null \
 || log ALERT "Not possible automatically install"
 
 log NOTICE "Done"
