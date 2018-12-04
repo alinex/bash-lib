@@ -116,6 +116,8 @@ async_name() {
         log INFO "Job $name already done in this run, skipping"
         return
     fi
+    [ -n "$STEPFILE" ] \
+        && echo "Started: step $1 at $(date '+%Y-%m-%d %H:%M:%S')" >>$STEPFILE
     local call=$(printf "%q " "${@:2}")
     eval "$call" &
     _async[$name]=$! # store pid
