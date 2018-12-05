@@ -43,7 +43,6 @@ lock() {
     # symlink was created successfully, lock acquired
 
     # if the locking process exits without unlocking, delete our lock
-    #trap 'rm -f "$lockfile" "$lockfile.$$"' EXIT
     trap 'unlock $lockfile' EXIT
 
     return 0
@@ -56,20 +55,27 @@ lock() {
 # - error-code (optional)
 lock_exit() {
     local lockfile="${1:-$LOCKFILE}"
-    local default="Stop processing because this is locked in $lockfile by $(cat $lockfile)"
+    local default="Stop processing because this is locked in $lockfile"
     local message="${2:-$default}"
-    local exit_code="$3"
+    local exit_code="${3:-1}"
+
+    # make a file with our PID
+    echo $$ > "$lockfile.$$" 2>/dev/null || log_exit ALERT "failed to create PID lockfile: $lockfile.$$"
 
     _lock_remove "$lockfile"
 
-    # check for existing lock
-    if [ -e "$lockfile" ] ; then
-        pid=$(cat "$lockfile" || log_exit ALERT "could not read lockfile $lockfile" "$exit_code")
-        log_exit WARN "$message"
+    # try to symlink it
+    ln "$lockfile.$$" "$lockfile" 2>/dev/null
+    if [ $? -ne 0 ]; then
+        rm "$lockfile.$$" 2>/dev/null
+        log_exit WARN "$message by PID $pid"
     fi
+    # symlink was created successfully, lock acquired
 
-    lock "$lockfile"
-    return $?
+    # if the locking process exits without unlocking, delete our lock
+    trap 'unlock $lockfile' EXIT
+
+    return 0
 }
 
 # remove the lock

@@ -25,11 +25,13 @@ lock $lockfile   # create the lock
 unlock $lockfile # remove the lock
 ```
 
-An alternative is to use the `exit_lock` method which won't wait till it can get the lock but exit immediately:
+An alternative is to use the `lock_exit` method which won't wait till it can get the lock but exit immediately:
 
 ```bash
 lock_exit $lockfile $message $code  # ... and exit if already locked
 ```
+
+If you don't give an lockfile the environment variable `LOCKFILE` or `tmp/processname-lock` will be used.
 
 ### Async
 
@@ -66,6 +68,7 @@ The only possible configuration is:
 
 ```bash
 LOCK_SLEEP=10 # time to wait before rechecking for the lock
+LOCKFILE="/tmp/$(basename $0)-lock" # lockfile used if none given in function call
 STEPFILE="/tmp/$(basename $0)-steps" # for async steps (see below)
 ```
 
