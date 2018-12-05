@@ -25,7 +25,7 @@ lock $lockfile   # create the lock
 unlock $lockfile # remove the lock
 ```
 
-An alternative is to use the `exit_lock` method which won't wait till it can get the lock but exit immediately:
+An alternative is to use the `lock_exi` method which won't wait till it can get the lock but exit immediately:
 
 ```bash
 lock_exit $lockfile $message $code  # ... and exit if already locked
