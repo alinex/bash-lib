@@ -31,6 +31,8 @@ An alternative is to use the `exit_lock` method which won't wait till it can get
 lock_exit $lockfile $message $code  # ... and exit if already locked
 ```
 
+If you don't give an lockfile the environment variable `LOCKFILE` or `tmp/processname` will be used.
+
 ### Async
 
 Running some tasks in parallel can save time but may be problematic to manage. This methods
