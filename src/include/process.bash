@@ -58,7 +58,7 @@ lock_exit() {
     local lockfile="${1:-$LOCKFILE}"
     local default="Stop processing because this is locked in $lockfile by $(cat $lockfile)"
     local message="${2:-$default}"
-    local exit_code="$3"
+    local exit_code="${3:-1}"
 
     _lock_remove "$lockfile"
 
