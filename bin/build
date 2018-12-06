@@ -76,6 +76,7 @@ for pack in "${!lib[@]}"; do
         | sed 's/^VERSION=.*$/VERSION=$VERSION/g' \
         | sed 's/^REVISION=.*$/REVISION=$REVISION/g' \
         | sed 's/^GITLAB=.*$/GITLAB=$sed_gitlab/g' \
+        | perl -0777pe 's/\\\\\n//sg'
         " >> $dest
 done
 
