@@ -4,7 +4,7 @@
 echo -e "
 Build combined bash-lib
 $(yellow)$(bold)
-Usage:              $0 [<option>]
+Usage:              $0 [options]
 $(reset)
 Options:
 

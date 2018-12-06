@@ -4,7 +4,7 @@
 echo -e "
 Install necessary tools to use bash-lib
 $(yellow)$(bold)
-Usage:              $0 [<option>]
+Usage:              $0 [options]
 $(reset)
 Options:
 

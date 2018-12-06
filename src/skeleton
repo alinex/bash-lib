@@ -8,9 +8,7 @@
 #
 # The skeleton is used as a base to make your own scripts.
 
-# Include bash-lib
 source_dir=$(dirname $(readlink -f "${BASH_SOURCE[0]:-$(pwd)/x}"))
-source "$source_dir/../lib/base.bash"
 
 # Configuration
 LOG_LEVEL=DEBUG
@@ -19,6 +17,9 @@ LOG_FILE=${LOG_FILE:-$source_dir/../log/$(basename $0).log}
 VERSION=$(git describe --abbrev=0 --tags 2>/dev/null); VERSION=${VERSION:-master}
 REVISION=$(git rev-parse --verify master)
 GITLAB=$(git config --get remote.origin.url | sed 's/\.git$//')
+
+# Include library
+source "$source_dir/../lib/base.bash"
 
 # Parameter checking
 parsed=$(getopt --options=:Vh --longoptions=version,help --name "$0" -- "$@")

@@ -4,14 +4,14 @@
 echo -e "
 Log messages
 $(yellow)$(bold)
-Usage:              $0 <type> <message>
-                    $0 [<type>] < STDIN
-                    $0 [<option>]
+Usage:              $0 type message
+                    $0 [type] < STDIN
+                    $0 [option]
 $(reset)
 Parameters:
 
-    <type>:         a log level for this message like INFO, NOTICE, WARN, ERROR...
-    <message>:      the message text to be logged
+    type:           a log level for this message like INFO, NOTICE, WARN, ERROR...
+    message:        the message text to be logged
 
 Environment Settings:
 
