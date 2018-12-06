@@ -8,12 +8,12 @@ Usage:              $0 type message
                     $0 [type] < STDIN
                     $0 [option]
 $(reset)
-Parameters:
+$(bold)Parameters:$(reset)
 
     type:           a log level for this message like INFO, NOTICE, WARN, ERROR...
     message:        the message text to be logged
 
-Environment Settings:
+$(bold)Environment Settings:$(reset)
 
     LOG_CONSOLE='SIMPLE'                # output to STDERR (default)
     LOG_CONSOLE='FULL'                  # output to STDERR without date, tag, pid and type
@@ -31,7 +31,7 @@ Environment Settings:
     LOG_CMD_QUIET=1                     # will prevent call and success messages
     LOG_CMD_LEVEL=AUTO_INFO             # the log level used for command output
 
-Options:
+$(bold)Options:$(reset)
 
     -h --help       to show a short help integrated page
     -V --version    displays the version of this program
