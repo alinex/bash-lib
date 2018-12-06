@@ -82,8 +82,8 @@ csv2xls() {
     else
         echo "${@:2}" >$csvfile
     fi
-    recode ..windows-1252 $csvfile || log_exit ALERT "Failed to convert character set using recode"
-    $conv -i $csvfile -o $xlsfile -h
+    #recode -f utf-8..windows-1252 $csvfile || log_exit ALERT "Failed to convert character set using recode"
+    $conv --binary -i $csvfile -o $xlsfile -h
     log INFO "generated Excel with $(du -h "$xlsfile" | cut -f1)B"
     rm $csvfile
 }
