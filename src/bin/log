@@ -10,18 +10,19 @@
 # xxx | log             # pipe to log
 # xxx | log <type>      # pipe with specific log type
 
+source_dir=$(dirname $(readlink -f "${BASH_SOURCE[0]:-$(pwd)/x}"))
+
 # Configuration
 VERSION=$(git describe --abbrev=0 --tags 2>/dev/null); VERSION=${VERSION:-master}
 REVISION=$(git rev-parse --verify master)
 GITLAB=$(git config --get remote.origin.url | sed 's/\.git$//')
 
 # DIST include base.bash
-source_dir=$(dirname $(readlink -f "${BASH_SOURCE[0]:-$(pwd)/x}"))
 source "$source_dir/../include/log.bash" # load log handler
 
 # Parameter checking
 parsed=$(getopt --options=:Vh --longoptions=version,help --name "$0" -- "$@")
-[ ${PIPESTATUS[0]} -eq 0 ] || log_exit "Could not parse parameters!"
+[ $? -eq 0 ] || log_exit ALERT "Incorrect options provided!"
 eval set -- "$parsed"
 while true; do
     case "$1" in

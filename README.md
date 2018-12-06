@@ -111,6 +111,8 @@ If you need the above libraries, don't use them directly, better use one of the 
 
 Select the one you need and copy it to your application.
 
+> You should always only include one library. If you need multiple functions, include a bigger one.
+
 ## Internal processing
 
 The internal `bin/build` command will make the distribution files by:
@@ -128,12 +130,13 @@ Which libraries to build and what is included is configured within the [build sc
 To include a library within a command put a comment exactly like below in the code:
 
 ```bash
-# DIST include base.bash
 source_dir=$(dirname $(readlink -f "${BASH_SOURCE[0]:-$(pwd)/x}"))
+
+# DIST include base.bash
 source "$source_dir/../include/log.bash" # load log handler
 ```
 
-That will directly include the `base.bash` at the top of the command. The `source` line will be removed.
+That will directly include the `base.bash` at the position of this comment and remove the line behind which is the `source` line.
 
 ### Variable replacement
 

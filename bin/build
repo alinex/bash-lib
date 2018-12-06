@@ -4,6 +4,8 @@
 #
 # http://172.17.101.90/divibib-betrieb/bash-lib/blob/master/README.md
 
+source_dir=$(dirname $(readlink -f "${BASH_SOURCE[0]:-$(pwd)/x}"))
+
 # Configuration
 declare -A lib
 lib[base]="core, colors, log"
@@ -19,12 +21,11 @@ REVISION=$(git rev-parse --verify master)
 GITLAB=$(git config --get remote.origin.url | sed 's/\.git$//')
 
 # Load libraries
-source_dir=$(dirname $(readlink -f "${BASH_SOURCE[0]:-$(pwd)/x}"))
 source "$source_dir/../src/include/log.bash"
 
 # Parameter checking
 parsed=$(getopt --options=:Vh --longoptions=version,help --name "$0" -- "$@")
-[ ${PIPESTATUS[0]} -eq 0 ] || log_exit "Could not parse parameters!"
+[ $? -eq 0 ] || log_exit ALERT "Incorrect options provided!"
 eval set -- "$parsed"
 while true; do
     case "$1" in
@@ -83,25 +84,42 @@ for file in src/bin/*; do
     dest="dist/$(basename $file)"
     case $(head -n 1 $file) in
         \#!/bin/bash)
-            used_lib=$(grep "DIST include" $file | awk '{ print $4 }')
-            log INFO "Building $dest using $used_lib"
-            [ -e "dist/$used_lib" ] || log_exit ALERT "Library $used_lib not existing, referenced in $file"
+            used_lib=$(grep "# DIST include" $file | awk '{ print $4 }')
+            if [ -n "$used_lib" ]; then
+                [ -e "dist/$used_lib" ] \
+                || log_exit ALERT "Library $used_lib not existing, referenced in $file"
+                log INFO "Building $dest using $used_lib library"
+            else
+                log INFO "Building $dest"
+            fi
             # Header
             echo "#!/bin/bash" > $dest
             echo -e "$info_comment" >> $dest
-            # Add library
             if [ -n "$used_lib" ]; then
-                egrep -v '^#' "dist/$used_lib" >> $dest
-            else
-                echo >> $dest
-            fi
-            # Compress
-            egrep -hv 'source \"\$source_dir/|source_dir=' $file \
+                # script till library inclusion
+                sed -e '/# DIST include/,$d' $file \
                 | sed "s/^VERSION=.*$/VERSION=$VERSION/g" \
                 | sed "s/^REVISION=.*$/REVISION=$REVISION/g" \
                 | sed "s/^GITLAB=.*$/GITLAB=$sed_gitlab/g" \
                 | sed -e '/^\s*#/d;s/\s\s*#\s.*//g;s/^[[:space:]]*//;/^$/d' \
                 >> $dest
+                # add library
+                egrep -v '^#' "dist/$used_lib" | sed '/^$/d' >> $dest
+                # Going on in script
+                sed -e '1,/# DIST include/d' $file | tail -n +2 \
+                | sed "s/^VERSION=.*$/VERSION=$VERSION/g" \
+                | sed "s/^REVISION=.*$/REVISION=$REVISION/g" \
+                | sed "s/^GITLAB=.*$/GITLAB=$sed_gitlab/g" \
+                | sed -e '/^\s*#/d;s/\s\s*#\s.*//g;s/^[[:space:]]*//;/^$/d' \
+                >> $dest
+            else
+                cat $file \
+                | sed "s/^VERSION=.*$/VERSION=$VERSION/g" \
+                | sed "s/^REVISION=.*$/REVISION=$REVISION/g" \
+                | sed "s/^GITLAB=.*$/GITLAB=$sed_gitlab/g" \
+                | sed -e '/^\s*#/d;s/\s\s*#\s.*//g;s/^[[:space:]]*//;/^$/d' \
+                >> $dest
+            fi
             ;;
         \#!/usr/bin/perl*)
             log INFO "Compress $dest"
