@@ -1,16 +1,18 @@
 # Bash Helper
 
-> Helper programs and libraries for administration tool development (mostly in bash).
+Helper programs and libraries for administration tool development (mostly in bash).
 
 A short help is always included in the files but this documentation contains further information with usage examples for each library.
 
 ## Installation
 
+Mostly you won't install the bash-lib on a server but create some scripts based on it. See the following chapter for the possibilities.
+
 ### Build
 
-This library contains a build script under `bin/build` which should be called to create the distribution folder.
+First of all, if you have this source repository checked out on your machine you need to run the build script under `bin/build` to create the distribution folder `dist`. This folder will hold the files you may use.
 
-After that you will find different combined libraries in the `dist` folder:
+The `dist` folder contains the combined libraries, described below:
 
         -rw-rw-r-- 1 alex alex  9994 Nov  9 08:11 base.bash
         -rw-rw-r-- 1 alex alex 10970 Nov  9 08:11 psql.bash
@@ -18,7 +20,7 @@ After that you will find different combined libraries in the `dist` folder:
         -rw-rw-r-- 1 alex alex 13350 Nov  9 08:11 info.bash
         -rw-rw-r-- 1 alex alex 15935 Nov  9 08:11 all.bash
 
-And also some commands:
+And also some commands (without extension):
 
         -rwxrwxr-x 1 alex alex   549 Nov  9 08:23 log
         -rwxrwxr-x 1 alex alex 79640 Nov  9 08:23 sendmail
@@ -39,14 +41,29 @@ source "$source_dir/lib.bash"
 
 ### Standalone Commands
 
-To use them on a machine, copy the `dist` folder to a central position and use it from there. This will often be in `/opt` or `/opt/divibib/` and included in the path:
+To use them on a machine, copy the `dist` folder to a central position and use it from there. This will often be in `/opt` or `/opt/divibib/` and also included in the path:
 
     cp dist /opt/bash-lib
     echo "PATH=\"$PATH:/opt/bash-lib\"" >> ~/.bashrc
 
 But you can also always copy the command directly to any other folder and use it from there.
 
+### Short usage
+
+To only use it in single bash script, put the library directly beside your script:
+
+```bash
+source_dir=$(dirname $(readlink -f "${BASH_SOURCE[0]:-$(pwd)/x}"))
+source "$source_dir/base.bash"
+
+# here you can use it
+```
+
+But if it belongs to the administration tasks it is often better for the overview to add it to the already existing [admin-utils](/divibib-betrieb/admin-utils).
+
 ## Programs
+
+This is a list of all included programs, which can be also called directly from bash:
 
 - `log` command to write to file, `STDERR` or syslog
 - `sendmail` is a simple SMTP mailer
@@ -82,15 +99,17 @@ The following modules are available:
 
 Additionally a [skeleton](src/skeleton.md) is used as template to create new scripts.
 
-## Minified libs
+### Minified libraries
 
-This all is packaged in the following distribution libraries (see install above):
+If you need the above libraries, don't use them directly, better use one of the combined collections. Each package contains some or all of the libraries:
 
 - `all` including core, colors, log, locking, info, psql
 - `base` including core, colors, log
 - `psql` including core, colors, log, psql
 - `process` including core, colors, log, process
 - `info` including core, colors, log, info
+
+Select the one you need and copy it to your application.
 
 ## Internal processing
 
