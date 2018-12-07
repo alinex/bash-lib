@@ -14,8 +14,6 @@ lib[info]="core, colors, log, info"
 lib[psql]="core, colors, log, psql"
 lib[all]="core, colors, log, process, info, psql"
 
-LOG_LEVEL=DEBUG
-
 VERSION=$(git describe --abbrev=0 --tags 2>/dev/null); VERSION=${VERSION:-master}
 REVISION=$(git rev-parse --verify master)
 GITLAB=$(git config --get remote.origin.url | sed 's/\.git$//')
@@ -38,6 +36,7 @@ done
 [ $# -gt 0 ] && log WARN "No parameters are supported, only -h to show help - ignoring them"
 
 # check if tools are installed or install them
+log DEBUG "Check for needed 3rd party tools"
 command -v perltidy >/dev/null
 if [ $? -ne 0 ]; then
     log WARN "Command perltidy will be installed"
@@ -46,6 +45,7 @@ if [ $? -ne 0 ]; then
 fi
 
 # check that everything is up to date
+log DEBUG "Inform if not everything is checked in"
 cd "$(path)/.."
 (git diff --exit-code && git diff --cached --exit-code) >/dev/null 2>/dev/null
 [ $? -eq 0 ] || \

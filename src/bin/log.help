@@ -8,6 +8,11 @@ Usage:              $0 type message
                     $0 [type] < STDIN
                     $0 [option]
 $(reset)
+$(bold)Options:$(reset)
+
+    -h --help       to show a short help integrated page
+    -V --version    displays the version of this program
+
 $(bold)Parameters:$(reset)
 
     type:           a log level for this message like INFO, NOTICE, WARN, ERROR...
@@ -30,11 +35,6 @@ $(bold)Environment Settings:$(reset)
     LOG_AUTO[MARK]=\"!!!\"
     LOG_CMD_QUIET=1                     # will prevent call and success messages
     LOG_CMD_LEVEL=AUTO_INFO             # the log level used for command output
-
-$(bold)Options:$(reset)
-
-    -h --help       to show a short help integrated page
-    -V --version    displays the version of this program
 
 -------------------------------------------------------------------------
 

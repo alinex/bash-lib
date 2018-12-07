@@ -11,6 +11,11 @@ $(bold)Options:$(reset)
     -h --help       to show a short help integrated page
     -V --version    displays the version of this program
 
+$(bold)Environment Settings:$(reset)
+
+    LOG_LEVEL=DEBUG change the default log level to get more information
+    LOG_...         also you can setup file logging, rotation... (log library)
+
 -------------------------------------------------------------------------
 
 Call it without any parameter to build the combined libraries within the dist
