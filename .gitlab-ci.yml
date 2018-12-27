@@ -1,40 +1,25 @@
-#test:
-#  image: node:latest
-#  before_script:
-#    - npm install -g bats
-#  script:
-#    - bats test
-#    - test/colors
-#    - test/log-simple
-#    - test/log-full
-#    - test/log-auto
-#    - test/log-file
-#    - test/log-rotate-size
-#    - test/log-rotate-time
-#    - test/log-cmd
-#
-#build:
-#  stage: build
-#  image: python:alpine
-#
-#  before_script:
-#      - apk --update --upgrade add gcc musl-dev jpeg-dev zlib-dev libffi-dev cairo-dev pango-dev gdk-pixbuf
-#      - pip install mkdocs
-#      - pip install mkdocs-material
-#      - pip install pymdown-extensions
-#      - pip install markdown-blockdiag
-#      - pip install markdown-include
-#      - pip install mkdocs-pdf-export-plugin
-#  script:
-#      - cat bin/build
-#      - bash bin/build
-#      - ENABLE_PDF_EXPORT=0 mkdocs build
-#
-#test:
-#    script:
-#      - touch site
+stages:
+  - test
+  - build
 
+test:
+  stage: test
+  image: node:latest
+  before_script:
+    - npm install -g bats
+  script:
+    - bats test
+    - test/colors
+    - test/log-simple
+    - test/log-full
+    - test/log-auto
+    - test/log-file
+    - test/log-rotate-size
+    - test/log-rotate-time
+    - test/log-cmd
+    
 pages:
+    stage: build
     image: python:alpine
     script:
         ## build distribution
