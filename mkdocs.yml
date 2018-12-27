@@ -1,0 +1,80 @@
+site_name: Alinex Bash Library
+site_description: Helper programs and libraries for administration tool development (mostly in bash).
+site_author: Alexander Schilling
+copyright: "Copyright &copy; 2018 Alexander Schilling"
+#site_url: pages
+
+nav:
+    - Home:
+          - README.md
+          - build.md
+    - Libraries:
+          - libs/colors.md
+          - libs/info.md
+          - libs/log.md
+          - libs/process.md
+          - libs/psql.md
+    - downloads/README.md
+
+theme:
+    name: material
+    #logo: logo.png quadratic logo
+    #favicon: 'assets/images/favicon.ico'
+    language: en
+    palette:
+        primary: indigo
+        accent: orange
+    font: false
+    #    font:
+    #        text: Roboto
+    #        code: Roboto Mono
+    feature:
+        tabs: true
+
+repo_name: "alinex/bash-lib"
+repo_url: "https://gitlab.com/alinex/bash-lib"
+
+extra:
+    manifest: "manifest.webmanifest"
+    social:
+        - type: "github"
+          link: "https://github.com/alinex"
+        - type: "gitlab"
+          link: "https://gitlab.com/alinex"
+
+extra_css:
+    - css/extra.css
+
+plugins:
+    - pdf-export:
+          verbose: false
+          media_type: print
+          combined: true
+          combined_output_path: bash-lib-book.pdf
+          enabled_if_env: ENABLE_PDF_EXPORT
+
+markdown_extensions:
+    - extra
+    - toc:
+          permalink: true
+    - pymdownx.caret
+    - pymdownx.tilde
+    - pymdownx.mark
+    - admonition
+    - pymdownx.details
+    - codehilite:
+          guess_lang: false
+          linenums: true
+    - pymdownx.inlinehilite
+    - pymdownx.superfences
+    - pymdownx.betterem:
+          smart_enable: all
+    - pymdownx.emoji:
+          emoji_generator: !!python/name:pymdownx.emoji.to_svg
+    - pymdownx.keys
+    - pymdownx.smartsymbols
+    - pymdownx.tasklist:
+          custom_checkbox: true
+    - markdown_blockdiag:
+          format: svg
+    - markdown_include.include
