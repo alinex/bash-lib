@@ -38,7 +38,7 @@ pages:
     image: debian:buster
     script:
         ## build distribution
-        #- apt-get update
+        - apt-get update
         #- apt-get install -y git perltidy
         #- bin/build
         # create documentation
