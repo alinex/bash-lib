@@ -32,7 +32,8 @@ test:
 
 pages:
     script:
-        - bash bin/test
+        - bash bin/build
+        - ls -al
         - mv site public
         - mv dist public 
     artifacts:
