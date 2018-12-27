@@ -38,7 +38,7 @@ pages:
     image: python:alpine
     script:
         ## build distribution
-        - apk --update --upgrade add bash ncurses git bash-completion
+        - apk --update --upgrade add bash bash-completion ncurses git sed
         - alias perltidy=/usr/share/bash-completion/completions/perltidy
         - bin/build
         # create documentation
