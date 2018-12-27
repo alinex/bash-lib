@@ -4,6 +4,7 @@ stages:
   - deploy
 
 test:
+  stage: test
   image: node:latest
   before_script:
     - npm install -g bats
