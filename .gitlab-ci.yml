@@ -37,6 +37,7 @@
 pages:
     image: debian:stretch
     script:
+        - apt-get install -y git perltidy
         - bin/build
         - ls -al
         - mv site public
