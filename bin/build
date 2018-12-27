@@ -36,13 +36,13 @@ done
 [ $# -gt 0 ] && log WARN "No parameters are supported, only -h to show help - ignoring them"
 
 # check if tools are installed or install them
-log DEBUG "Check for needed 3rd party tools"
-command -v perltidy >/dev/null
-if [ $? -ne 0 ]; then
-    log WARN "Command perltidy will be installed"
-    log_cmd sudo apt-get install perltidy -y >/dev/null \
-    || log_exit ALERT "Could not install perltidy"
-fi
+#log DEBUG "Check for needed 3rd party tools"
+#command -v perltidy >/dev/null
+#if [ $? -ne 0 ]; then
+#    log WARN "Command perltidy will be installed"
+#    log_cmd sudo apt-get install perltidy -y >/dev/null \
+#    || log_exit ALERT "Could not install perltidy"
+#fi
 
 # check that everything is up to date
 log DEBUG "Inform if not everything is checked in"
