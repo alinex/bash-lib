@@ -37,6 +37,7 @@
 pages:
     image: debian:stretch
     script:
+        - apt-get update
         - apt-get install -y git perltidy
         - bin/build
         - ls -al
