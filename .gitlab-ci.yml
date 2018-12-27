@@ -12,6 +12,30 @@ test:
     - test/log-rotate-time
     - test/log-cmd
 
+build:
+  image: python:alpine
+
+  before_script:
+      - apk --update --upgrade add gcc musl-dev jpeg-dev zlib-dev libffi-dev cairo-dev pango-dev gdk-pixbuf
+      - pip install mkdocs
+      - pip install mkdocs-material
+      - pip install pymdown-extensions
+      - pip install markdown-blockdiag
+      - pip install markdown-include
+      - pip install mkdocs-pdf-export-plugin
+      - bin/build
+
+  pages:
+      script:
+          - ENABLE_PDF_EXPORT=0 mkdocs build
+          - mv site public
+          - mv dist public 
+      artifacts:
+          paths:
+              - public
+      only:
+          - master
+    
 # lint:
 #   image: koalaman/shellcheck-alpine
 #   script:
