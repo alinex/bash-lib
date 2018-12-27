@@ -17,7 +17,7 @@ test:
     - test/log-rotate-size
     - test/log-rotate-time
     - test/log-cmd
-    
+
 pages:
     stage: build
     image: python:alpine
@@ -25,6 +25,7 @@ pages:
         ## build distribution
         - apk --update --upgrade add bash bash-completion ncurses git perl
         - bin/build
+        - tar czvf bash-lib.tgz dist
         # create documentation
         - apk --update --upgrade add gcc musl-dev jpeg-dev zlib-dev libffi-dev cairo-dev pango-dev gdk-pixbuf
         - pip install mkdocs
@@ -36,7 +37,7 @@ pages:
         - ENABLE_PDF_EXPORT=0 mkdocs build
         # move to website
         - mv site public
-        - mv dist public 
+        - mv *.tgz public/downloads
     artifacts:
         paths:
             - public
