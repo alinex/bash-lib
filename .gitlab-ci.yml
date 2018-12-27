@@ -39,8 +39,6 @@ pages:
     script:
         ## build distribution
         - apk --update --upgrade add bash bash-completion ncurses git
-        - echo $PATH
-        - ln -s /usr/share/bash-completion/completions/perltidy /usr/bin
         - bin/build
         # create documentation
         #- apt-get install -y python3 
