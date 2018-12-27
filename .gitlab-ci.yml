@@ -1,7 +1,6 @@
 stages:
   - test
   - build
-  - deploy
 
 test:
   stage: test
@@ -33,11 +32,12 @@ build:
       - pip install mkdocs-pdf-export-plugin
       - pwd
   script:
-#      - bin/build
+      - cat bin/build
+      - bash bin/build
       - ENABLE_PDF_EXPORT=0 mkdocs build
 
 pages:
-    stage: deploy
+    stage: build
     script:
         - mv site public
         - mv dist public 
