@@ -12,18 +12,21 @@
 #    - test/log-rotate-time
 #    - test/log-cmd
 #
-image: python:alpine
 
-before_script:
-    - apk --update --upgrade add gcc musl-dev jpeg-dev zlib-dev libffi-dev cairo-dev pango-dev gdk-pixbuf
-    - pip install mkdocs
-    - pip install mkdocs-material
-    - pip install pymdown-extensions
-    - pip install markdown-blockdiag
-    - pip install markdown-include
-    - pip install mkdocs-pdf-export-plugin
-    - pwd
-    - ls -al bin/build
+build:
+  image: python:alpine
+
+  before_script:
+      - apk --update --upgrade add gcc musl-dev jpeg-dev zlib-dev libffi-dev cairo-dev pango-dev gdk-pixbuf
+      - pip install mkdocs
+      - pip install mkdocs-material
+      - pip install pymdown-extensions
+      - pip install markdown-blockdiag
+      - pip install markdown-include
+      - pip install mkdocs-pdf-export-plugin
+      - pwd
+  script:
+      - ls -al bin/build
 
 pages:
     script:
