@@ -29,13 +29,15 @@
 #      - cat bin/build
 #      - bash bin/build
 #      - ENABLE_PDF_EXPORT=0 mkdocs build
-
-test:
-    script:
-      - touch site
+#
+#test:
+#    script:
+#      - touch site
 
 pages:
+    image: debian:stretch
     script:
+        - bin/build
         - ls -al
         - mv site public
         - mv dist public 
