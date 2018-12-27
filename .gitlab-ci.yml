@@ -1,21 +1,22 @@
 stages:
+  - test
   - build
   - deploy
 
-#test:
-#  image: node:latest
-#  script:
-#    - npm install -g bats
-#    - bats test
-#    - test/colors
-#    - test/log-simple
-#    - test/log-full
-#    - test/log-auto
-#    - test/log-file
-#    - test/log-rotate-size
-#    - test/log-rotate-time
-#    - test/log-cmd
-#
+test:
+  image: node:latest
+  before_script:
+    - npm install -g bats
+  script:
+    - bats test
+    - test/colors
+    - test/log-simple
+    - test/log-full
+    - test/log-auto
+    - test/log-file
+    - test/log-rotate-size
+    - test/log-rotate-time
+    - test/log-cmd
 
 build:
   stage: build
@@ -31,7 +32,7 @@ build:
       - pip install mkdocs-pdf-export-plugin
       - pwd
   script:
-      - bin/build
+#      - bin/build
       - ENABLE_PDF_EXPORT=0 mkdocs build
 
 pages:
