@@ -31,10 +31,8 @@ test:
 #      - ENABLE_PDF_EXPORT=0 mkdocs build
 
 pages:
-    stage: build
-    before-script:
-        - bash bin/test
     script:
+        - bash bin/test
         - mv site public
         - mv dist public 
     artifacts:
