@@ -25,16 +25,16 @@ build:
       - pip install mkdocs-pdf-export-plugin
       - bin/build
 
-  pages:
-      script:
-          - ENABLE_PDF_EXPORT=0 mkdocs build
-          - mv site public
-          - mv dist public 
-      artifacts:
-          paths:
-              - public
-      only:
-          - master
+pages:
+    script:
+        - ENABLE_PDF_EXPORT=0 mkdocs build
+        - mv site public
+        - mv dist public 
+    artifacts:
+        paths:
+            - public
+    only:
+        - master
     
 # lint:
 #   image: koalaman/shellcheck-alpine
