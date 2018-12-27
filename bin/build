@@ -124,9 +124,10 @@ for file in src/bin/*; do
             ;;
         \#!/usr/bin/perl*)
             log INFO "Compress $dest"
-            /usr/share/bash-completion/completions/perltidy -i=0 -act=2 -pt=2 -ci=0 -tso -nsfs -dsm -dws \
-                -nwls="= + - / *" -nwrs="= + - / *" -tqw -dnl -kbl=0 \
-                --delete-all-comments "$file" -o "$dest" |& log
+            cp $file $dest
+            #perltidy -i=0 -act=2 -pt=2 -ci=0 -tso -nsfs -dsm -dws \
+            #    -nwls="= + - / *" -nwrs="= + - / *" -tqw -dnl -kbl=0 \
+            #    --delete-all-comments "$file" -o "$dest" |& log
             sed -i "2i$info_comment" "$dest"
             sed -i "s/###VERSION###/$VERSION/g" "$dest"
             sed -i "s/###REVISION###/$REVISION/g" "$dest"
