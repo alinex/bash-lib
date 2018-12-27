@@ -1,9 +1,4 @@
-stages:
-  - test
-  - build
-
 test:
-  stage: test
   image: node:latest
   before_script:
     - npm install -g bats
@@ -18,26 +13,27 @@ test:
     - test/log-rotate-time
     - test/log-cmd
 
-build:
-  stage: build
-  image: python:alpine
-
-  before_script:
-      - apk --update --upgrade add gcc musl-dev jpeg-dev zlib-dev libffi-dev cairo-dev pango-dev gdk-pixbuf
-      - pip install mkdocs
-      - pip install mkdocs-material
-      - pip install pymdown-extensions
-      - pip install markdown-blockdiag
-      - pip install markdown-include
-      - pip install mkdocs-pdf-export-plugin
-      - pwd
-  script:
-      - cat bin/build
-      - bash bin/build
-      - ENABLE_PDF_EXPORT=0 mkdocs build
+#build:
+#  stage: build
+#  image: python:alpine
+#
+#  before_script:
+#      - apk --update --upgrade add gcc musl-dev jpeg-dev zlib-dev libffi-dev cairo-dev pango-dev gdk-pixbuf
+#      - pip install mkdocs
+#      - pip install mkdocs-material
+#      - pip install pymdown-extensions
+#      - pip install markdown-blockdiag
+#      - pip install markdown-include
+#      - pip install mkdocs-pdf-export-plugin
+#  script:
+#      - cat bin/build
+#      - bash bin/build
+#      - ENABLE_PDF_EXPORT=0 mkdocs build
 
 pages:
     stage: build
+    before-script:
+        - bash bin/test
     script:
         - mv site public
         - mv dist public 
