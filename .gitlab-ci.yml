@@ -35,7 +35,7 @@
 #      - touch site
 
 pages:
-    image: debian:stretch
+    image: debian:buster
     script:
         # build distribution
         - apt-get update
