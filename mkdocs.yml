@@ -7,18 +7,23 @@ copyright: "Copyright &copy; 2018 Alexander Schilling"
 nav:
     - Home:
           - README.md
-          - build.md
     - Libraries:
+          - libs/README.md
           - libs/colors.md
           - libs/info.md
           - libs/log.md
           - libs/process.md
           - libs/psql.md
+          - bin/README.md
+    - Development:
+          - dev/README.md
+          - dev/build.md
     - downloads/README.md
 
 theme:
     name: material
-    #logo: logo.png quadratic logo
+    logo: 
+      icon: code
     #favicon: 'assets/images/favicon.ico'
     language: en
     palette:

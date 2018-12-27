@@ -38,7 +38,8 @@ pages:
         # move to website
         - mv site public
         - mv *.tgz public/downloads
-        - mv *.bash public/downloads
+        - mv dist/*.bash public/downloads
+        - mv dist/install public/downloads
     artifacts:
         paths:
             - public
