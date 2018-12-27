@@ -1,3 +1,7 @@
+stages:
+  - build
+  - deploy
+
 #test:
 #  image: node:latest
 #  script:
@@ -14,6 +18,7 @@
 #
 
 build:
+  stage: build
   image: python:alpine
 
   before_script:
@@ -26,11 +31,12 @@ build:
       - pip install mkdocs-pdf-export-plugin
       - pwd
   script:
-      - ls -al bin/build
+      - bin/build
+      - ENABLE_PDF_EXPORT=0 mkdocs build
 
 pages:
+    stage: deploy
     script:
-        - ENABLE_PDF_EXPORT=0 mkdocs build
         - mv site public
         - mv dist public 
     artifacts:
