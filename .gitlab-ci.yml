@@ -37,10 +37,20 @@
 pages:
     image: debian:stretch
     script:
+        # build distribution
         - apt-get update
         - apt-get install -y git perltidy
         - bin/build
-        - ls -al
+        # create documentation
+        - apt-get install -y build-essential python3-dev python3-pip python3-setuptools python3-wheel python3-cffi libcairo2 libpango-1.0-0 libpangocairo-1.0-0 libgdk-pixbuf2.0-0 libffi-dev shared-mime-info
+        - pip install mkdocs
+        - pip install mkdocs-material
+        - pip install pymdown-extensions
+        - pip install markdown-blockdiag
+        - pip install markdown-include
+        - pip install mkdocs-pdf-export-plugin
+        - ENABLE_PDF_EXPORT=0 mkdocs build
+        # move to website
         - mv site public
         - mv dist public 
     artifacts:
