@@ -38,7 +38,7 @@ pages:
     image: python:alpine
     script:
         ## build distribution
-        - apk --update --upgrade add bash
+        - apk --update --upgrade add bash ncurses git perltidy
         - bin/build
         # create documentation
         #- apt-get install -y python3 
