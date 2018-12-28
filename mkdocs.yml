@@ -2,7 +2,6 @@ site_name: Alinex Bash Library
 site_description: Helper programs and libraries for administration tool development (mostly in bash).
 site_author: Alexander Schilling
 copyright: "Copyright &copy; 2018 Alexander Schilling"
-#site_url: pages
 
 nav:
     - Home:
@@ -28,12 +27,13 @@ theme:
     name: material
     logo:
         icon: code
-    #favicon: 'assets/images/favicon.ico'
+    favicon: "https://assets.gitlab-static.net/uploads/-/system/project/avatar/10069235/images__1_.jpeg"
     language: en
     palette:
-        primary: indigo
-        accent: orange
+        primary: green
+        accent: deep orange
     font: false
+    # remove to be GDPR conform
     #    font:
     #        text: Roboto
     #        code: Roboto Mono
@@ -52,9 +52,10 @@ extra:
           link: "https://gitlab.com/alinex"
 
 extra_css:
-    - css/extra.css
+    - assets/extra.css
 
 plugins:
+    - search
     - pdf-export:
           verbose: false
           media_type: print
