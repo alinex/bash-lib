@@ -2,7 +2,7 @@ title: Usage
 
 # Bash Library
 
-This is a collection of helper programs and libraries for administration tool development (mostly in bash). The complete library is build into combined packages, which mostly can be added as single include file to work. 
+This is a collection of helper programs and libraries for administration tool development (mostly in bash). The complete library is build into combined packages, which mostly can be added as single include file to work.
 
 This documentation will show you how to use them.
 
@@ -10,7 +10,7 @@ This documentation will show you how to use them.
 
 Mostly you won't install the bash-lib on a server but create some scripts based on it. But that won't mean you can't or you shouldn't do so. As always it depends on your needs.
 
-> See the following chapter for all the possibilities to use it. 
+> See the following chapter for all the possibilities to use it.
 
 First copy the full distribution package or only the parts you need standalone or within your application onto a server. See the [downloads page](downloads) for the latest releases.
 
@@ -54,3 +54,5 @@ source "$source_dir/base.bash"
 
 # here you can use it
 ```
+
+> See also the following [Skeleton](skeleton.md) which gives you a fast start for your own script.

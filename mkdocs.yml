@@ -7,6 +7,7 @@ copyright: "Copyright &copy; 2018 Alexander Schilling"
 nav:
     - Home:
           - README.md
+          - skeleton.md
     - Libraries:
           - libs/README.md
           - libs/colors.md
