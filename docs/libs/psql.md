@@ -1,3 +1,5 @@
+title: PostgreSQL
+
 # PostgreSQL Access
 
 Library for easy database integration in bash scripts.
@@ -6,12 +8,12 @@ Library for easy database integration in bash scripts.
 
 The following environment settings should be used:
 
-- `PGUSER` PostgreSQL user name to connect as
-- `PGPASSWORD` password to be used if the server demands password authentication
-- `PGHOST` specifies the name of host to connect to
-- `PGPORT` port number to connect to at the server host (if not default port 5432)
-- `PGDATABASE` is the database name
-- `PGLOG` set this flag to log the calls to postgreSQL and the returned results
+-   `PGUSER` PostgreSQL user name to connect as
+-   `PGPASSWORD` password to be used if the server demands password authentication
+-   `PGHOST` specifies the name of host to connect to
+-   `PGPORT` port number to connect to at the server host (if not default port 5432)
+-   `PGDATABASE` is the database name
+-   `PGLOG` set this flag to log the calls to postgreSQL and the returned results
 
 ## Methods
 
@@ -49,8 +51,8 @@ This may create a file with the following contents:
 
 As shown in the example above special cases are:
 
-- Record 2: containing quotes as content
-- Record 3: contains a multiline text field
+-   Record 2: containing quotes as content
+-   Record 3: contains a multiline text field
 
 ### csv2html <csv> or | csv2html
 

@@ -32,7 +32,7 @@ source_dir=$(dirname $(readlink -f "${BASH_SOURCE[0]:-$(pwd)/x}"))
 source "$source_dir/colors.bash" # load color methods
 ```
 
-Keep in mind that `source_dir` may change within a library and both lines will also be removed while [building](build.md) the packages. If you need the directory later again, set it again with another variable name.
+Keep in mind that `source_dir` may change within a library and both lines will also be removed while [building](build.md) the packages. If you need the directory later better use the method `$(path)` which is in the base library and gives you the same path.
 
 The next part always is the configuration section. This includes:
 
@@ -51,12 +51,15 @@ The results will be written as text to `STDOUT`. This allows to pipe them into f
 
 ## Languages
 
+While the bash library is mainly written in bash itself, some more complex operations are done by perl scripts which includes seamlessly into the library.
+
 ## System Tools
 
 Some of the default unix tools are used like:
 
--   grep
--   tail and head
--   sed, awk or perl
+-   `grep` to match lines
+-   `tail` and `head` to extract part of the strings
+-   `sed`, `awk` or `perl` to match or replace parts
+-   and a lot of other default linux utils
 
 But this should neither be a problem because all of them are base tools and already installed.

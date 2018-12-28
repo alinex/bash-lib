@@ -1,4 +1,6 @@
-# Programs
+title: Commands
+
+# Standalone Commands
 
 This is a list of all included programs, which can be also called directly from bash:
 

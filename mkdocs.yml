@@ -10,6 +10,7 @@ nav:
           - skeleton.md
     - Libraries:
           - libs/README.md
+          - libs/core.md
           - libs/colors.md
           - libs/log.md
           - libs/info.md

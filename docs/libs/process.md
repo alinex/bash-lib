@@ -1,4 +1,6 @@
-# Process Serialize/Parallelize
+title: Process
+
+# Process Serial/Parallel
 
 This methods will help you to lock a special process that it can't run in parallel using file based locks.
 If the same lock is used another time in another process or sub process it will wait till the first one releases the flag. You have to give a lock file path to be used as flag.

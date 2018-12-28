@@ -1,39 +1,70 @@
 # Color Output
 
-Setup color methods to be used in bash scripts for formatting. It will output ANSI color codes.
+Setup color methods to be used in bash scripts for formatting. It contains methods to output ANSI color codes.
+
+The possible colors and styles supported are:
 
 ![example](colors.png)
 
-The terminal will automatically interpret this but to also see them in other programs use:
+The terminal will automatically interpret this but depending on the color scheme of your terminal the colors may differ.
 
-- `alias less='less -R'` enables ANSI color support
+To also see the color codes in other programs use:
 
-## Usage
+-   `alias less='less -R'` enables ANSI color support
 
-First you have to load the library:
+## Include
+
+First you have to load the library or any package, because all contain them:
 
 ```bash
-source ../bash-lib/colors.bash  # load color methods
+source src/bash-lib/colors.bash  # load color methods
+source dist/core.bash            # or load the core package
 ```
 
-Now you can use colorized output in different ways:
+See the [general usage](../) on how to include.
+
+## Add color or style
+
+To set the different colors and styles you have different methods, which all work the same way:
+
+**Format text** if a text is given as arguments, use style only for this
 
 ```bash
 red "Direct ouput without newline"
-echo "$(red 'output with newline')"
+echo "$(red 'output with newline') but not this"
 echo "$(red multiple parameters are joined by spaces)"
 x=$(red "load colorized into variable")
 x="manually switch $(red +)on$(reset) and off"
+```
+
+Above you see the different possibilities to use. While line 1 to 3 will write to `STDOUT` the last two lines will store the colored output in a variable.
+
+**Text given as pipe** instead of parameters
+
+Like done in bash with other methods, you can also pipe the stream to colorize it:
+
+```bash
 echo "This text is colored using pipe" | cyan
 ```
 
-Above you see the different possibilities to use.
+But then no parameter is allowed to the color or style method.
 
-1. **Format text** if a text is given, use style only for this
-2. **Text given as pipe** instead of parameters
-3. **Only start style** if called with `+` or without arguments and pipe
+**Separately start and end style** if called with `+` or without arguments and pipe
 
-And if you want to remove the coloring later again:
+```bash
+red +
+echo -n "Text in red"
+bold +
+echo -n " and bold"
+reset
+echo " and normal again.
+```
+
+As shown above you start using the `+` sign and end all styles with `reset`. The `-n` switch to echo is used to prevent newline on the first two calls and get all into one line.
+
+## Remove colors and styles
+
+And if you want to remove the coloring later again use the `decolor` method:
 
 ```bash
 ctext=$(bg_red "This text with red background")
@@ -44,33 +75,35 @@ echo "decolor using pipe: $ctext" | decolor
 
 ## Foreground color
 
-- `black`
-- `red`
-- `green`
-- `yellow`
-- `blue`
-- `magenta`
-- `cyan`
-- `white`
+The following methods will set the foreground colors:
+
+-   `black`
+-   `red`
+-   `green`
+-   `yellow`
+-   `blue`
+-   `magenta`
+-   `cyan`
+-   `white`
 
 # Background color
 
-- `bg_black`
-- `bg_red`
-- `bg_green`
-- `bg_yellow`
-- `bg_blue`
-- `bg_magenta`
-- `bg_cyan`
-- `bg_white`
+The following methods will set the background colors:
+
+-   `bg_black`
+-   `bg_red`
+-   `bg_green`
+-   `bg_yellow`
+-   `bg_blue`
+-   `bg_magenta`
+-   `bg_cyan`
+-   `bg_white`
 
 ## Styles
 
-- `bold`
-- `underline`
-- `inverse`
-- `dim`
+The following methods will set other styles:
 
-## Reset
-
-- `reset`
+-   `bold`
+-   `underline`
+-   `inverse`
+-   `dim`
