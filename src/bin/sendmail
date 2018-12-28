@@ -1,14 +1,9 @@
 #!/usr/bin/perl -w
 
 # Script to easily send email from command line
-#
-# http://172.17.101.90/divibib-betrieb/server-utils/blob/master/doc/sendmail.md
-#
-# Usage: sendmail <params>
-#
-# The skeleton is used as a base to make your own scripts.
-#
-# Original written by: Brandon Zehm <caspian@dotconf.net> under GPL (version 1.56)
+
+# Original written by: Brandon Zehm <caspian@dotconf.net> under GPL
+# http://caspian.dotconf.net/menu/Software/SendEmail (version 1.56 Sep 29th 2009)
 # This modification includes environment variable support.
 
 use strict;

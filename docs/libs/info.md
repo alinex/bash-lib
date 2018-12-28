@@ -2,7 +2,7 @@
 
 This is a collection of methods to gain system information.
 
-## Basics Information
+## Base Information
 
 The general information is stored within variables on load:
 
