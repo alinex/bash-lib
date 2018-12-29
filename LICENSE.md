@@ -22,10 +22,10 @@
 
 This utility is included as separate helper tool.
 
-> Original written as SendEmail by: Brandon Zehm <caspian@dotconf.net> under GPL
+> Originally written as SendEmail by: Brandon Zehm <caspian@dotconf.net> under GPL
 > [http://caspian.dotconf.net/menu/Software/SendEmail](http://caspian.dotconf.net/menu/Software/SendEmail) (version 1.56, Sep 29th 2009)
 
-Modified 2018 by Alexander Schilling to support environment variables for default settings.
+Modified 2018 by Alexander Schilling 2018 to support environment variables for default settings.
 
 !!! abstract "GPLv2"
 
