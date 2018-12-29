@@ -27,7 +27,7 @@ theme:
     name: material
     logo:
         icon: code
-    favicon: "https://assets.gitlab-static.net/uploads/-/system/project/avatar/10069235/images__1_.jpeg"
+    favicon: https://assets.gitlab-static.net/uploads/-/system/project/avatar/10069235/images__1_.jpeg
     language: en
     palette:
         primary: green
