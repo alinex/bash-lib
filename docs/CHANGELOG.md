@@ -3,6 +3,7 @@
 ## Newest Changes
 
 -   add changelog
+-   add readme, license and changelog to distribution
 
 ## Version 1.2.0 (29.12.2018)
 
