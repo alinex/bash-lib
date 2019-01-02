@@ -142,4 +142,8 @@ for file in src/bin/*; do
     chmod a+rx "$dest" |& log
 done
 
+log HEADING "Add meta data..."
+
+cp -v README.md LICENSE.md docs/CHANGELOG.md dist/ |& log AUTO_INFO
+
 log HEADING "DONE."
