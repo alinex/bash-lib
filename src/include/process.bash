@@ -2,7 +2,7 @@
 
 # Library to serialize parallel tasks
 #
-# http://172.17.101.90/ivibib-betrieb/bash-lib/blob/master/doc/process.md
+# https://gitlab.com/alinex/bash-lib/blob/master/doc/log.md
 
 source_dir=$(dirname $(readlink -f "${BASH_SOURCE[0]:-$(pwd)/x}"))
 source "$source_dir/log.bash" # load log handler

@@ -2,7 +2,7 @@
 
 # General helper
 #
-# http://172.17.101.90/ivibib-betrieb/helper-lib/blob/master/doc/core.md
+# https://gitlab.com/alinex/bash-lib/blob/master/doc/log.md
 
 # get the path from the called command
 path() {

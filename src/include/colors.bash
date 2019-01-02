@@ -2,7 +2,7 @@
 
 # Library for colorized output
 #
-# http://172.17.101.90/ivibib-betrieb/helper-lib/blob/master/doc/colors.md
+# https://gitlab.com/alinex/bash-lib/blob/master/doc/log.md
 #
 # Usage:
 #

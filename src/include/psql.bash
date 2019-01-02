@@ -2,7 +2,7 @@
 
 # Log library
 #
-# http://172.17.101.90/divibib-betrieb/bash-lib/blob/master/doc/psql.md
+# https://gitlab.com/alinex/bash-lib/blob/master/doc/psql.md
 #
 # Usage:
 #
