@@ -8,6 +8,7 @@ nav:
           - README.md
           - skeleton.md
           - CHANGELOG.md
+          - policy.md
     - Libraries:
           - libs/README.md
           - libs/core.md
