@@ -1,7 +1,7 @@
 site_name: Alinex Bash Library
 site_description: Helper programs and libraries for administration tool development (mostly in bash).
 site_author: Alexander Schilling
-copyright: "Copyright &copy; 2018 - 2019 Alexander Schilling"
+copyright: Copyright &copy; 2018 - 2019 <a href="https://alinex.de">Alexander Schilling</a>
 
 nav:
     - Home:
@@ -47,14 +47,16 @@ repo_url: "https://gitlab.com/alinex/bash-lib"
 extra:
     manifest: "manifest.webmanifest"
     social:
-        - type: "gitlab"
-          link: "https://gitlab.com/alinex"
-        - type: "github"
-          link: "https://github.com/alinex"
-        - type: "book"
-          link: "https://alinex.gitlab.io"
-        - type: "home"
-          link: "https://alinex.de"
+        - type: gitlab
+          link: https://gitlab.com/alinex
+        - type: github
+          link: https://github.com/alinex
+        - type: book
+          link: https://alinex.gitlab.io
+        - type: home
+          link: https://alinex.de
+        - type: envelope
+          link: mailto:info@alinex.de
 
 extra_css:
     - assets/extra.css
@@ -79,7 +81,7 @@ markdown_extensions:
     - pymdownx.details
     - codehilite:
           guess_lang: false
-          linenums: true
+          linenums: false
     - pymdownx.inlinehilite
     - pymdownx.superfences
     - pymdownx.betterem:
