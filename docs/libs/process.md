@@ -64,14 +64,15 @@ As an alternative `lock_exit` can be used to abort if this is already locked. It
 lock_exit $lockfile $message $code  # ... and exit if already locked
 ```
 
-If you don't give an lockfile the environment variable `LOCKFILE` or `tmp/<process-name>-lock` will be used.
+If you don't give a lockfile the environment variable `LOCKFILE` or `tmp/<process-name>-lock` will be used.
 
 ### Configuration
 
 The only configurable value here beside the logging is:
 
 ```bash
-LOCKFILE="tmp/$(basename $0)-lock` # use name of current process
+LOCKFILE="tmp/$(basename $0)-lock" # use name of current process
+LOCK_SLEEP=10 # time to wait till retrying if other process locked it
 ```
 
 ### Checking the Lock
@@ -80,10 +81,20 @@ The locking is done by local files whose name part is given or used from the cur
 script. so `mx-program` will work like:
 
 1. The `lock` is set by making a file containing the filename with the PID as file extension and content. This indicates, that this PID is waiting to retrieve the lock like `/tmp/my-program-lock.1587`
-2. Create a softlink without extension for it `/tmp/my-program-lock -> /tmp/my-program-lock.1587` if there is already such an softlink, try again every second.
-3. Remove the softlink and the lock with the PID on `unlock`
+2. remove lockfile `/tmp/my-program-lock` if the process within is no longer active
+3. Create a softlink without extension for it `/tmp/my-program-lock -> /tmp/my-program-lock.1587` if there is already such an softlink, try again every second.
+4. Remove the softlink and the lock with the PID on `unlock`
 
-If the program is terminated in between some old files may be present. The code also contains a `trap` to prevent such problems by removing them also on breaks. But if something abnormally happens, you should remove all the lock files by hand if the PID is no longer running.
+If the program is terminated in between some old files may be present. The code also contains a `trap` to prevent such problems by removing them also on breaks.
+
+While waiting to get the lock the process is:
+
+1. wait the defined time `$LOCK_SLEEP`
+2. if the PID file `/tmp/my-program-lock.1587` got lost recreate it
+3. remove lockfile if the process within is no longer active
+4. retry creating the softlink
+
+You can always remove all the lock files by hand if the PID is no longer running. But this should neither be needed.
 
 ## Asynchronous Calls
 
