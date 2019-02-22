@@ -1,22 +1,23 @@
 stages:
-  - test
-  - build
+    - test
+    - build
 
 test:
-  stage: test
-  image: node:latest
-  before_script:
-    - npm install -g bats
-  script:
-    - bats test
-    - test/colors
-    - test/log-simple
-    - test/log-full
-    - test/log-auto
-    - test/log-file
-    - test/log-rotate-size
-    - test/log-rotate-time
-    - test/log-cmd
+    stage: test
+    image: node:latest
+    before_script:
+        - npm install -g bats
+    script:
+        - bats test
+        - test/colors
+        - test/log-simple
+        - test/log-full
+        - test/log-auto
+        - test/log-file
+        - test/log-rotate-size
+        - test/log-rotate-time
+        - test/log-cmd
+        - test/info
 
 pages:
     stage: build
@@ -45,7 +46,6 @@ pages:
             - public
     only:
         - master
-    
 # lint:
 #   image: koalaman/shellcheck-alpine
 #   script:

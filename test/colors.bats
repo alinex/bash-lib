@@ -1,11 +1,11 @@
-@test "output black text directly" {
+@test "colors: output black text directly" {
   load "../src/include/colors"
   run black text
   [ $status ]
   echo "black text: $output" >&3
   [[ "$output" =~ "text" ]]
 }
-@test "output black text with builder" {
+@test "colors: output black text with builder" {
   load "../src/include/colors"
   run echo "$(black)text$(reset)"
   [ $status ]
@@ -13,14 +13,14 @@
   [[ "$output" =~ "text" ]]
 }
 
-@test "output red text directly" {
+@test "colors: output red text directly" {
   load "../src/include/colors"
   run red text
   [ $status ]
   echo "red text: $output" >&3
   [[ "$output" =~ "text" ]]
 }
-@test "output red text with builder" {
+@test "colors: output red text with builder" {
   load "../src/include/colors"
   run echo "$(red)text$(reset)"
   [ $status ]
@@ -28,14 +28,14 @@
   [[ "$output" =~ "text" ]]
 }
 
-@test "output green text directly" {
+@test "colors: output green text directly" {
   load "../src/include/colors"
   run green text
   [ $status ]
   echo "green text: $output" >&3
   [[ "$output" =~ "text" ]]
 }
-@test "output green text with builder" {
+@test "colors: output green text with builder" {
   load "../src/include/colors"
   run echo "$(green)text$(reset)"
   [ $status ]
@@ -43,14 +43,14 @@
   [[ "$output" =~ "text" ]]
 }
 
-@test "output yellow text directly" {
+@test "colors: output yellow text directly" {
   load "../src/include/colors"
   run yellow text
   [ $status ]
   echo "yellow text: $output" >&3
   [[ "$output" =~ "text" ]]
 }
-@test "output yellow text with builder" {
+@test "colors: output yellow text with builder" {
   load "../src/include/colors"
   run echo "$(yellow)text$(reset)"
   [ $status ]
@@ -58,14 +58,14 @@
   [[ "$output" =~ "text" ]]
 }
 
-@test "output blue text directly" {
+@test "colors: output blue text directly" {
   load "../src/include/colors"
   run blue text
   [ $status ]
   echo "blue text: $output" >&3
   [[ "$output" =~ "text" ]]
 }
-@test "output blue text with builder" {
+@test "colors: output blue text with builder" {
   load "../src/include/colors"
   run echo "$(blue)text$(reset)"
   [ $status ]
@@ -73,14 +73,14 @@
   [[ "$output" =~ "text" ]]
 }
 
-@test "output magenta text directly" {
+@test "colors: output magenta text directly" {
   load "../src/include/colors"
   run magenta text
   [ $status ]
   echo "magenta text: $output" >&3
   [[ "$output" =~ "text" ]]
 }
-@test "output magenta text with builder" {
+@test "colors: output magenta text with builder" {
   load "../src/include/colors"
   run echo "$(magenta)text$(reset)"
   [ $status ]
@@ -88,14 +88,14 @@
   [[ "$output" =~ "text" ]]
 }
 
-@test "output cyan text directly" {
+@test "colors: output cyan text directly" {
   load "../src/include/colors"
   run cyan text
   [ $status ]
   echo "cyan text: $output" >&3
   [[ "$output" =~ "text" ]]
 }
-@test "output cyan text with builder" {
+@test "colors: output cyan text with builder" {
   load "../src/include/colors"
   run echo "$(cyan)text$(reset)"
   [ $status ]
@@ -103,14 +103,14 @@
   [[ "$output" =~ "text" ]]
 }
 
-@test "output white text directly" {
+@test "colors: output white text directly" {
   load "../src/include/colors"
   run white text
   [ $status ]
   echo "white text: $output" >&3
   [[ "$output" =~ "text" ]]
 }
-@test "output white text with builder" {
+@test "colors: output white text with builder" {
   load "../src/include/colors"
   run echo "$(white)text$(reset)"
   [ $status ]
@@ -120,14 +120,14 @@
 
 # background colors
 
-@test "output bg_black text directly" {
+@test "colors: output bg_black text directly" {
   load "../src/include/colors"
   run bg_black text
   [ $status ]
   echo "bg_black text: $output" >&3
   [[ "$output" =~ "text" ]]
 }
-@test "output bg_black text with builder" {
+@test "colors: output bg_black text with builder" {
   load "../src/include/colors"
   run echo "$(bg_black)text$(reset)"
   [ $status ]
@@ -135,14 +135,14 @@
   [[ "$output" =~ "text" ]]
 }
 
-@test "output bg_red text directly" {
+@test "colors: output bg_red text directly" {
   load "../src/include/colors"
   run bg_red text
   [ $status ]
   echo "bg_red text: $output" >&3
   [[ "$output" =~ "text" ]]
 }
-@test "output bg_red text with builder" {
+@test "colors: output bg_red text with builder" {
   load "../src/include/colors"
   run echo "$(bg_red)text$(reset)"
   [ $status ]
@@ -150,14 +150,14 @@
   [[ "$output" =~ "text" ]]
 }
 
-@test "output bg_green text directly" {
+@test "colors: output bg_green text directly" {
   load "../src/include/colors"
   run bg_green text
   [ $status ]
   echo "bg_green text: $output" >&3
   [[ "$output" =~ "text" ]]
 }
-@test "output bg_green text with builder" {
+@test "colors: output bg_green text with builder" {
   load "../src/include/colors"
   run echo "$(bg_green)text$(reset)"
   [ $status ]
@@ -165,14 +165,14 @@
   [[ "$output" =~ "text" ]]
 }
 
-@test "output bg_yellow text directly" {
+@test "colors: output bg_yellow text directly" {
   load "../src/include/colors"
   run bg_yellow text
   [ $status ]
   echo "bg_yellow text: $output" >&3
   [[ "$output" =~ "text" ]]
 }
-@test "output bg_yellow text with builder" {
+@test "colors: output bg_yellow text with builder" {
   load "../src/include/colors"
   run echo "$(bg_yellow)text$(reset)"
   [ $status ]
@@ -180,14 +180,14 @@
   [[ "$output" =~ "text" ]]
 }
 
-@test "output bg_blue text directly" {
+@test "colors: output bg_blue text directly" {
   load "../src/include/colors"
   run bg_blue text
   [ $status ]
   echo "bg_blue text: $output" >&3
   [[ "$output" =~ "text" ]]
 }
-@test "output bg_blue text with builder" {
+@test "colors: output bg_blue text with builder" {
   load "../src/include/colors"
   run echo "$(bg_blue)text$(reset)"
   [ $status ]
@@ -195,14 +195,14 @@
   [[ "$output" =~ "text" ]]
 }
 
-@test "output bg_magenta text directly" {
+@test "colors: output bg_magenta text directly" {
   load "../src/include/colors"
   run bg_magenta text
   [ $status ]
   echo "bg_magenta text: $output" >&3
   [[ "$output" =~ "text" ]]
 }
-@test "output bg_magenta text with builder" {
+@test "colors: output bg_magenta text with builder" {
   load "../src/include/colors"
   run echo "$(bg_magenta)text$(reset)"
   [ $status ]
@@ -210,14 +210,14 @@
   [[ "$output" =~ "text" ]]
 }
 
-@test "output bg_cyan text directly" {
+@test "colors: output bg_cyan text directly" {
   load "../src/include/colors"
   run bg_cyan text
   [ $status ]
   echo "bg_cyan text: $output" >&3
   [[ "$output" =~ "text" ]]
 }
-@test "output bg_cyan text with builder" {
+@test "colors: output bg_cyan text with builder" {
   load "../src/include/colors"
   run echo "$(bg_cyan)text$(reset)"
   [ $status ]
@@ -225,14 +225,14 @@
   [[ "$output" =~ "text" ]]
 }
 
-@test "output bg_white text directly" {
+@test "colors: output bg_white text directly" {
   load "../src/include/colors"
   run bg_white text
   [ $status ]
   echo "bg_white text: $output" >&3
   [[ "$output" =~ "text" ]]
 }
-@test "output bg_white text with builder" {
+@test "colors: output bg_white text with builder" {
   load "../src/include/colors"
   run echo "$(bg_white)text$(reset)"
   [ $status ]
@@ -242,14 +242,14 @@
 
 # Styles
 
-@test "output bold text directly" {
+@test "colors: output bold text directly" {
   load "../src/include/colors"
   run bold text
   [ $status ]
   echo "bold text: $output" >&3
   [[ "$output" =~ "text" ]]
 }
-@test "output bold text with builder" {
+@test "colors: output bold text with builder" {
   load "../src/include/colors"
   run echo "$(bold)text$(reset)"
   [ $status ]
@@ -257,14 +257,14 @@
   [[ "$output" =~ "text" ]]
 }
 
-@test "output underline text directly" {
+@test "colors: output underline text directly" {
   load "../src/include/colors"
   run underline text
   [ $status ]
   echo "underline text: $output" >&3
   [[ "$output" =~ "text" ]]
 }
-@test "output underline text with builder" {
+@test "colors: output underline text with builder" {
   load "../src/include/colors"
   run echo "$(underline)text$(reset)"
   [ $status ]
@@ -272,14 +272,14 @@
   [[ "$output" =~ "text" ]]
 }
 
-@test "output inverse text directly" {
+@test "colors: output inverse text directly" {
   load "../src/include/colors"
   run inverse text
   [ $status ]
   echo "inverse text: $output" >&3
   [[ "$output" =~ "text" ]]
 }
-@test "output inverse text with builder" {
+@test "colors: output inverse text with builder" {
   load "../src/include/colors"
   run echo "$(inverse)text$(reset)"
   [ $status ]
@@ -287,14 +287,14 @@
   [[ "$output" =~ "text" ]]
 }
 
-@test "output dim text directly" {
+@test "colors: output dim text directly" {
   load "../src/include/colors"
   run dim text
   [ $status ]
   echo "dim text: $output" >&3
   [[ "$output" =~ "text" ]]
 }
-@test "output dim text with builder" {
+@test "colors: output dim text with builder" {
   load "../src/include/colors"
   run echo "$(dim)text$(reset)"
   [ $status ]
@@ -304,7 +304,7 @@
 
 # combined
 
-@test "mixed colors and styles" {
+@test "colors: mixed colors and styles" {
   load "../src/include/colors"
   run echo "This $(red)text $(bold)fails$(reset) sometimes"
   [ $status ]

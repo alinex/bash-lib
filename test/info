@@ -1,0 +1,75 @@
+#!/bin/bash
+# https://github.com/kward/shunit2
+
+source_dir=$(dirname $(readlink -f "${BASH_SOURCE[0]:-$(pwd)/x}"))
+source "$source_dir/../src/include/info.bash"
+
+test_Base_Info() {
+    echo "> $OS"
+    assertNotNull '$OS' "$OS" 
+    echo "> $KERNEL"
+    assertNotNull '$KERNEL' "$KERNEL" 
+    echo "> $MACH"
+    assertNotNull '$MACH' "$MACH" 
+    echo "> $DIST_BASE"
+    assertNotNull '$DIST_BASE' "$DIST_BASE" 
+    echo "> $DIST_BASE_REV"
+    assertNotNull '$DIST_BASE_REV' "$DIST_BASE_REV" 
+    echo "> $DIST"
+    assertNotNull '$DIST' "$DIST" 
+    echo "> $REV"
+    assertNotNull '$REV' "$REV" 
+    echo "> $REV_NAME"
+    assertNotNull '$REV_NAME' "$REV_NAME" 
+}
+test_hw_machine_id() {
+    result=$(hw_machine_id)
+    assertEquals "exitCode" 0 $?
+    echo "> $result"
+    assertNotNull 'result' "$result" 
+}
+test_hw_virtual() {
+    result=$(hw_virtual)
+    assertEquals "exitCode" 0 $?
+    if [ -n "$result" ]; then echo "> $result"; fi
+}
+test_hw_cores() {
+    result=$(hw_cores)
+    assertEquals "exitCode" 0 $?
+    echo "> $result"
+    assertTrue 'at least one' "[ $result -ge 1 ]"
+}
+test_hw_processor() {
+    result=$(hw_processor)
+    assertEquals "exitCode" 0 $?
+    echo "> $result"
+    assertNotNull 'result' "$result" 
+}
+test_hw_memory_mb() {
+    result=$(hw_memory_mb)
+    assertEquals "exitCode" 0 $?
+    echo "> $result"
+    assertTrue 'at least one' "[ $result -ge 100 ]"
+}
+test_hw_disks() {
+    result=$(hw_disks)
+    assertEquals "exitCode" 0 $?
+    echo "> $result" | sed ':a;N;$!ba;s/\n/\n> /g'
+    assertNotNull 'result' "$result" 
+}
+test_ip_main() {
+    result=$(ip_main)
+    assertEquals "exitCode" 0 $?
+    echo "> $result"
+    assertNotNull 'result' "$result" 
+}
+test_ip_list() {
+    result=$(ip_list)
+    assertEquals "exitCode" 0 $?
+    echo "> $result" | sed ':a;N;$!ba;s/\n/\n> /g'
+    assertNotNull 'result' "$result" 
+}
+
+# Load shUnit2.
+source_dir=$(dirname $(readlink -f "${BASH_SOURCE[0]:-$(pwd)/x}"))
+source $source_dir/shunit2/shunit2

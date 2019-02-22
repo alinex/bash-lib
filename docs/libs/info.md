@@ -9,7 +9,8 @@ The general information is stored within variables on load:
 -   `OS` - type of OS like: Linux, windows, mac, Solaris, AIX
 -   `KERNEL` - version number like: 4.4.0-135-generic
 -   `MACH` - machine type like: x86_64
--   `DIST_BASE` - distribution (for Linux): RedHat, SuSe, Mandrake, Debian
+-   `DIST_BASE` - base distribution (for Linux): RedHat, SuSe, Mandrake, Debian
+-   `DIST_BASE_REV` - base distribution number or name
 -   `DIST` - distribution like: LinuxMint, Ubuntu
 -   `REV` - revision number of distribution
 -   `REV_NAME` - code name of this revision
