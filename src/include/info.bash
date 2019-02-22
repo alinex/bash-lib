@@ -94,7 +94,7 @@ hw_disks() {
 }
 
 ip_main() { ip route get 1 | sed -e 's/ uid.*//' | awk '{print $NF;exit}'; }
-ip_list() { ip address | grep global | awk '{ print $2 }'; }
+ip_list() { ip address | grep global | awk '{ print $2 }' | sed -e 's/\/.*//'; }
 
 # lookup for real names
 declare -A _package_debian
