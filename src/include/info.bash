@@ -94,7 +94,7 @@ hw_disks() {
 }
 
 ip_main() { ip route get 1 | sed -e 's/ uid.*//' | awk '{print $NF;exit}'; }
-ip_list() { LANG=C /sbin/ifconfig | grep inet | egrep -v "127.0.0.1|::1/128|::1 " | awk '{ print $2 }'; }
+ip_list() { LANG=C ifconfig | grep inet | egrep -v "127.0.0.1|::1/128|::1 " | awk '{ print $2 }'; }
 
 # lookup for real names
 declare -A _package_debian
