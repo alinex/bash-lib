@@ -78,6 +78,7 @@ system_info() {
   echo "$OS system with kernel $KERNEL $MACH ($(echo $DIST $rev $dist_base))"
 }
 
+hw_machine_id() { cat /etc/machine-id; }
 hw_virtual() { grep -q '^flags.* hypervisor' /proc/cpuinfo && echo "true"; }
 hw_cores() { grep -c ^processor /proc/cpuinfo; }
 hw_processor() { grep 'model name' /proc/cpuinfo | head -n 1 | sed 's/^.*: //'; }

@@ -25,6 +25,10 @@ echo $info # Linux system with kernel 4.15.0-38-generic x86_64 (neon 18.04 bioni
 
 ## Extended System Info
 
+### hw_machine_id
+
+Unique ID for the hardware machine.
+
 ### hw_virtual
 
 Returns `true` if this is a virtual machine.
