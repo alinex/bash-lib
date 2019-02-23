@@ -23,35 +23,36 @@ generic:
 #    image: debian
 #    script:
 #        - test/info
-
 #ubuntu:
 #    stage: test
 #    image: tutum/ubuntu
 #    script:
 #        - test/info
+linux-mint:
+    stage: test
+    image: vcatechnology/linux-mint
+    script:
+        - test/info
 
 #redhat:
 #    stage: test
 #    image: hjd48/redhat
 #    script:
 #        - test/info
-centos:
-    stage: test
-    image: centos
-    before_script:
-        #        - yum update -y
-        - yum install -y net-tools
-    script:
-        - test/info
-# missing ip command; update fails
-mandrake:
-    stage: test
-    image: tyuatsu/mandrake
-    before_script:
-        #        - yum update -y
-        - yum install -y net-tools
-    script:
-        - test/info
+#centos:
+#    stage: test
+#    image: centos
+#    before_script:
+#        - yum install -y net-tools
+#    script:
+#        - test/info
+#mandrake:
+#    stage: test
+#    image: tyuatsu/mandrake
+#    before_script:
+#        - yum install -y net-tools
+#    script:
+#        - test/info
 
 #gentoo
 #fedora
