@@ -39,15 +39,19 @@ centos:
     stage: test
     image: centos
     before_script:
-        - yum install net-tools
+        - yum update
+        - yum install -y net-tools
     script:
         - test/info
 # missing ip command
-#mandrake:
-#    stage: test
-#    image: tyuatsu/mandrake
-#    script:
-#        - test/info
+mandrake:
+    stage: test
+    image: tyuatsu/mandrake
+    before_script:
+        - yum update
+        - yum install -y net-tools
+    script:
+        - test/info
 
 #gentoo
 #fedora
