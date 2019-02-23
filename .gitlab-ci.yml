@@ -69,7 +69,7 @@ fedora:
     stage: test
     image: fedora
     before_script:
-        - yum -y install findutils
+        - yum -y install findutils net-utils
     script:
         - test/info
 
