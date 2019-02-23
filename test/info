@@ -76,6 +76,12 @@ test_ip_list() {
     echo "> $result" | sed ':a;N;$!ba;s/\n/\n> /g'
     assertNotNull 'result' "$result" 
 }
+test_ip_public() {
+    result=$(ip_public)
+    assertEquals "exitCode" 0 $?
+    echo "> $result"
+    assertNotNull 'result' "$result" 
+}
 
 # Load shUnit2.
 source_dir=$(dirname $(readlink -f "${BASH_SOURCE[0]:-$(pwd)/x}"))

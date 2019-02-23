@@ -64,6 +64,10 @@ Returns the main IP address.
 
 Returns all listening IP addresses.
 
+### ip_public
+
+Return the public ip address through which this machine accesses the internet.
+
 ## Packages
 
 With `package` you may check if a specific package is installed and get the version from it.

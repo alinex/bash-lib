@@ -108,8 +108,23 @@ hw_disks() {
 }
 
 # ip analyzation
-ip_main() { ip route get 1 | sed -e 's/ uid.*//' | awk '{print $NF;exit}'; }
-ip_list() { ip address | grep global | awk '{ print $2 }' | sed -e 's/\/.*//'; }
+ip_main() { 
+    which ip
+    if [ $? -eq 0 ]; then 
+        ip route get 1 | sed -e 's/ uid.*//' | awk '{print $NF;exit}'
+    else
+        ifconfig | egrep 'inet |inet6 ' | egrep -v ' ::1|127.0.0.1' | awk '{print $2}' | head -n 1
+    fi
+}
+ip_list() { 
+    which ip
+    if [ $? -eq 0 ]; then 
+        ip address | grep global | awk '{ print $2 }' | sed -e 's/\/.*//'
+    else
+        ifconfig | egrep 'inet |inet6 ' | egrep -v ' ::1|127.0.0.1' | awk '{print $2}'
+    fi
+}
+ip_public() { dig +short myip.opendns.com @resolver1.opendns.com; }
 
 # Software analyzation
 
