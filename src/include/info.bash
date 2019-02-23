@@ -88,6 +88,8 @@ hw_virtual() {
 hw_cores() { grep -c ^processor /proc/cpuinfo; }
 hw_processor() { grep 'model name' /proc/cpuinfo | head -n 1 | sed 's/^.*: //'; }
 hw_memory_mb() { free -m | grep -oP '\d+' | head -n 1; }
+hw_swap_mb() { free -m | tail -n 1 | grep -oP '\d+' | head -n 1; }
+
 # return size, usage, mount
 hw_disks() {
     df -lBG | grep ^/dev/ | awk '{print $2, $5, $6}'

@@ -51,6 +51,12 @@ test_hw_memory_mb() {
     echo "> $result"
     assertTrue 'at least one' "[ $result -ge 100 ]"
 }
+test_hw_swap_mb() {
+    result=$(hw_swap_mb)
+    assertEquals "exitCode" 0 $?
+    echo "> $result"
+    assertTrue 'at least one' "[ $result -ge 100 ]"
+}
 test_hw_disks() {
     result=$(hw_disks)
     assertEquals "exitCode" 0 $?

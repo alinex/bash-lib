@@ -26,6 +26,8 @@ echo $info # Linux system with kernel 4.15.0-38-generic x86_64 (neon 18.04 bioni
 
 ## Extended System Info
 
+This information is reachable with some parameter less function calls.
+
 ### hw_machine_id
 
 Unique ID for the hardware machine.
@@ -44,7 +46,11 @@ Returns the processor model name which may include some technical specifications
 
 ### hw_memory_mb
 
-Returns the memory size in MB. { free -m | grep -oP '\d+' | head -n 1; }
+Returns the memory size in MB.
+
+### hw_swap_mb
+
+Returns the swap size in MB.
 
 ### hw_disks
 
