@@ -30,10 +30,14 @@ generic:
 #    script:
 #        - test/info
 
-#redhat centos
-redhat:
+#redhat:
+#    stage: test
+#    image: hjd48/redhat
+#    script:
+#        - test/info
+centos:
     stage: test
-    image: hjd48/redhat
+    image: centos
     script:
         - test/info
 

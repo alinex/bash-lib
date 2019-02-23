@@ -10,7 +10,7 @@ The general information is stored within variables on load:
 -   `KERNEL` - version number like: 4.4.0-135-generic
 -   `MACH` - machine type like: x86_64
 -   `DIST_BASE` - base distribution (for Linux): RedHat, SuSe, Mandrake, Debian
--   `DIST_BASE_REV` - base distribution number or name
+-   `DIST_BASE_REV` - base distribution number or name (if possible)
 -   `DIST` - distribution like: LinuxMint, Ubuntu
 -   `REV` - revision number of distribution
 -   `REV_NAME` - code name of this revision
@@ -30,7 +30,7 @@ This information is reachable with some parameter less function calls.
 
 ### hw_machine_id
 
-Unique ID for the hardware machine.
+Unique ID for the hardware machine if defined.
 
 ### hw_virtual
 
