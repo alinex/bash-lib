@@ -2,7 +2,7 @@ stages:
     - test
     - build
 
-all:
+generic:
     stage: test
     image: node:latest
     before_script:
@@ -17,7 +17,6 @@ all:
         - test/log-rotate-size
         - test/log-rotate-time
         - test/log-cmd
-        - test/info
 
 debian:
     stage: test

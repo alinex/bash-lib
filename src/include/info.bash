@@ -32,10 +32,13 @@ else
         #OS_STRING="${OS} ${REV}(${ARCH} $(uname -v))"
     #elif [ "${OS}" = "AIX" ] ; then
         #OS_STRING="${OS} $(oslevel) ($(oslevel -r))"
-    elif [ "${OS}" = "linux" ] ; then
+    elif [ "${OS}" = "Linux" ] ; then
         if [ -f /etc/arch-release ] ; then
             DIST_BASE='ArchLinux'
-        if [ -f /etc/redhat-release ] ; then
+            #DIST=$(cat /etc/arch-release | sed s/\ release.*//)
+            #REV_NAME=$(cat /etc/arch-release | sed s/.*\(// | sed s/\)//)
+            #REV=$(cat /etc/arch-release | sed s/.*release\ // | sed s/\ .*//)
+        elif [ -f /etc/redhat-release ] ; then
             DIST_BASE='RedHat'
             DIST=$(cat /etc/redhat-release | sed s/\ release.*//)
             REV_NAME=$(cat /etc/redhat-release | sed s/.*\(// | sed s/\)//)
@@ -165,4 +168,3 @@ package() {
 
 # output: <user> <cron line>
 #cront_tasks() {}
-
