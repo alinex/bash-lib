@@ -27,7 +27,7 @@ debian:
 
 archlinux:
     stage: test
-    image: archlinux
+    image: pritunl/archlinux
     script:
         - test/info
 
