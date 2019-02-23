@@ -37,7 +37,7 @@ generic:
 #        - test/info
 centos:
     stage: test
-    image: pivotaldata/centos
+    image: tutum/centos
     script:
         - test/info
 # missing ip command
