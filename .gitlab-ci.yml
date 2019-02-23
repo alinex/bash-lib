@@ -19,17 +19,17 @@ all:
         - test/log-cmd
         - test/info
 
-#debian:
-#    stage: test
-#    image: debian
-#    script:
-#        - test/info
-
-archlinux:
+debian:
     stage: test
-    image: archlinux/base
+    image: debian
     script:
         - test/info
+
+#archlinux:
+#    stage: test
+#    image: archlinux/base
+#    script:
+#        - test/info
 
 pages:
     stage: build
