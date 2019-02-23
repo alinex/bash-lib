@@ -18,16 +18,27 @@ generic:
         - test/log-rotate-time
         - test/log-cmd
 
-debian:
-    stage: test
-    image: debian
-    script:
-        - test/info
+#debian:
+#    stage: test
+#    image: debian
+#    script:
+#        - test/info
 ubuntu:
     stage: test
     image: tutum/ubuntu
     script:
         - test/info
+mandrake:
+    stage: test
+    image: tyuatsu/mandrake
+    script:
+        - test/info
+#gentoo
+#fedora
+#redhat centos
+#mandriva
+#slackware
+#suse
 
 #archlinux:
 #    stage: test

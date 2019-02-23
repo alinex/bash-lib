@@ -26,7 +26,6 @@ test_hw_machine_id() {
     result=$(hw_machine_id)
     assertEquals "exitCode" 0 $?
     echo "> $result"
-    assertNotNull 'result' "$result" 
 }
 test_hw_virtual() {
     result=$(hw_virtual)
