@@ -15,6 +15,7 @@ source_dir=$(dirname $(readlink -f "${BASH_SOURCE[0]:-$(pwd)/x}"))
 source "$source_dir/log.bash" # load log handler
 
 # start basic analyzation
+
 OS=$(uname | tr '[:upper:]' '[:lower:]')
 KERNEL=$(uname -r)
 MACH=$(uname -m)
@@ -78,6 +79,7 @@ system_info() {
   echo "$OS system with kernel $KERNEL $MACH ($(echo $DIST $rev $dist_base))"
 }
 
+# Extended hardware analyzation
 hw_machine_id() { 
     cat /etc/machine-id || cat /var/lib/dbus/machine-id || cat /var/db/dbus/machine-id
 }
@@ -89,23 +91,25 @@ hw_cores() { grep -c ^processor /proc/cpuinfo; }
 hw_processor() { grep 'model name' /proc/cpuinfo | head -n 1 | sed 's/^.*: //'; }
 hw_memory_mb() { free -m | grep -oP '\d+' | head -n 1; }
 hw_swap_mb() { free -m | tail -n 1 | grep -oP '\d+' | head -n 1; }
-
 # return size, usage, mount
 hw_disks() {
     df -lBG | grep ^/dev/ | awk '{print $2, $5, $6}'
 }
 
+# ip analyzation
 ip_main() { ip route get 1 | sed -e 's/ uid.*//' | awk '{print $NF;exit}'; }
 ip_list() { ip address | grep global | awk '{ print $2 }' | sed -e 's/\/.*//'; }
+
+# Software analyzation
 
 # lookup for real names
 declare -A _package_debian
 _package_debian[apache]="apache2"
-_package_debian[tomcat]="tomcat7 tomcat8"
+_package_debian[tomcat]="tomcat8 tomcat7"
 _package_debian[jdk]="openjdk-11-jdk openjdk-10-jdk openjdk-9-jdk openjdk-8-jdk openjdk-7-jdk openjdk-6-jdk"
 _package_debian[jre]="openjdk-11-jre openjdk-10-jre openjdk-9-jre openjdk-8-jre openjdk-7-jre openjdk-6-jre"
 _package_debian[postgresql]="postgresql-10 postgresql-9.6 postgresql-9.4 postgresql-9.3"
-#declare -r _package_debian
+declare -r _package_debian
 
 # Usage: info_package <name>
 # Output: version number
@@ -143,3 +147,13 @@ package() {
         ;;
     esac
 }
+# output: <package name> <version>
+package_list() {}
+
+# setup information
+
+# output: <user> <key> <name>
+ssh_keys() {}
+
+# output: <user> <cron line>
+cront_tasks() {}

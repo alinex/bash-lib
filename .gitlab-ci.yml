@@ -19,6 +19,18 @@ test:
         - test/log-cmd
         - test/info
 
+debian:
+    stage: test
+    image: debian
+    script:
+        - test/info
+
+archlinux:
+    stage: test
+    image: archlinux
+    script:
+        - test/info
+
 pages:
     stage: build
     image: python:alpine
