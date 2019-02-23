@@ -39,7 +39,7 @@ centos:
     stage: test
     image: centos
     before_script:
-        - yum update
+        - yum update -y
         - yum install -y net-tools
     script:
         - test/info
@@ -48,7 +48,7 @@ mandrake:
     stage: test
     image: tyuatsu/mandrake
     before_script:
-        - yum update
+        - yum update -y
         - yum install -y net-tools
     script:
         - test/info
