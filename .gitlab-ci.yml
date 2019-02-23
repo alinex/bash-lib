@@ -27,7 +27,7 @@ all:
 
 archlinux:
     stage: test
-    image: pritunl/archlinux
+    image: archlinux/base
     script:
         - test/info
 
