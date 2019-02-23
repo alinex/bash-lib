@@ -38,18 +38,18 @@ generic:
 centos:
     stage: test
     image: centos
-    #    before_script:
-    #        - yum update -y
-    #        - yum install -y net-tools
+    before_script:
+        #        - yum update -y
+        - yum install -y net-tools
     script:
         - test/info
 # missing ip command; update fails
 mandrake:
     stage: test
     image: tyuatsu/mandrake
-    #    before_script:
-    #        - yum update -y
-    #        - yum install -y net-tools
+    before_script:
+        #        - yum update -y
+        - yum install -y net-tools
     script:
         - test/info
 

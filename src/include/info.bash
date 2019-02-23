@@ -109,7 +109,7 @@ hw_disks() {
 
 # ip analyzation
 ip_main() { 
-    which ip
+    command -v ip
     if [ $? -eq 0 ]; then 
         ip route get 1 | sed -e 's/ uid.*//' | awk '{print $NF;exit}'
     else
@@ -117,7 +117,7 @@ ip_main() {
     fi
 }
 ip_list() { 
-    which ip
+    command -v ip
     if [ $? -eq 0 ]; then 
         ip address | grep global | awk '{ print $2 }' | sed -e 's/\/.*//'
     else
