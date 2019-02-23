@@ -124,7 +124,7 @@ ip_list() {
         ifconfig | egrep 'inet |inet6 ' | egrep -v ' ::1|127.0.0.1' | awk '{print $2}'
     fi
 }
-ip_public() { dig +short myip.opendns.com @resolver1.opendns.com; }
+ip_public() { curl -s ifconfig.co; }
 
 # Software analyzation
 
