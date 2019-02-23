@@ -13,8 +13,10 @@ test_Base_Info() {
     assertNotNull '$MACH' "$MACH" 
     echo "> $DIST_BASE"
     assertNotNull '$DIST_BASE' "$DIST_BASE" 
-    echo "> $DIST_BASE_REV"
-    assertNotNull '$DIST_BASE_REV' "$DIST_BASE_REV" 
+    if [ "$DIST_BASE" = "Debian" ]; then
+        echo "> $DIST_BASE_REV"
+        assertNotNull '$DIST_BASE_REV' "$DIST_BASE_REV" 
+    fi
     echo "> $DIST"
     assertNotNull '$DIST' "$DIST" 
     echo "> $REV"

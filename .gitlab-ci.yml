@@ -23,19 +23,29 @@ generic:
 #    image: debian
 #    script:
 #        - test/info
-ubuntu:
+
+#ubuntu:
+#    stage: test
+#    image: tutum/ubuntu
+#    script:
+#        - test/info
+
+#redhat centos
+redhat:
     stage: test
-    image: tutum/ubuntu
+    image: crorvick/redhat
     script:
         - test/info
-mandrake:
-    stage: test
-    image: tyuatsu/mandrake
-    script:
-        - test/info
+
+# missing ip command
+#mandrake:
+#    stage: test
+#    image: tyuatsu/mandrake
+#    script:
+#        - test/info
+
 #gentoo
 #fedora
-#redhat centos
 #mandriva
 #slackware
 #suse
