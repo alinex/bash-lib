@@ -32,7 +32,12 @@ else
         #OS_STRING="${OS} ${REV}(${ARCH} $(uname -v))"
     #elif [ "${OS}" = "AIX" ] ; then
         #OS_STRING="${OS} $(oslevel) ($(oslevel -r))"
-    elif [ "${OS}" = "Linux" ] ; then
+    elif [ "${OS}" = "linux" ] ; then
+        if [ -f /etc/arch-release ] ; then
+            DIST_BASE='ArchLinux'
+            DIST=$(cat /etc/arch-release | sed s/\ release.*//)
+            REV_NAME=$(cat /etc/arch-release | sed s/.*\(// | sed s/\)//)
+            REV=$(cat /etc/arch-release | sed s/.*release\ // | sed s/\ .*//)
         if [ -f /etc/redhat-release ] ; then
             DIST_BASE='RedHat'
             DIST=$(cat /etc/redhat-release | sed s/\ release.*//)
@@ -154,12 +159,12 @@ package() {
     esac
 }
 # output: <package name> <version>
-package_list() {}
+#package_list() {}
 
 # setup information
 
 # output: <user> <key> <name>
-ssh_keys() {}
+#ssh_keys() {}
 
 # output: <user> <cron line>
-cront_tasks() {}
+#cront_tasks() {}
