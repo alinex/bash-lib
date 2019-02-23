@@ -2,7 +2,7 @@ stages:
     - test
     - build
 
-test:
+all:
     stage: test
     image: node:latest
     before_script:
