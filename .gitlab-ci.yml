@@ -25,7 +25,7 @@ debian:
         - test/info
 ubuntu:
     stage: test
-    image: ubuntu
+    image: tutum/ubuntu
     script:
         - test/info
 
