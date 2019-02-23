@@ -125,6 +125,8 @@ ip_list() {
     fi
 }
 ip_public() { curl -s ifconfig.co; }
+ip_country() { curl -s ifconfig.co/country; }
+ip_city() { curl -s ifconfig.co/city; }
 
 # Software analyzation
 

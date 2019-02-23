@@ -68,6 +68,10 @@ Returns all listening IP addresses.
 
 Return the public ip address through which this machine accesses the internet.
 
+### ip_country / ip_city
+
+Return country or city of public IP. This may be the point it is routed from private to public network.
+
 ## Packages
 
 With `package` you may check if a specific package is installed and get the version from it.

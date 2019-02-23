@@ -82,6 +82,18 @@ test_ip_public() {
     echo "> $result"
     assertNotNull 'result' "$result" 
 }
+test_ip_country() {
+    result=$(ip_country)
+    assertEquals "exitCode" 0 $?
+    echo "> $result"
+    assertNotNull 'result' "$result" 
+}
+test_ip_city() {
+    result=$(ip_city)
+    assertEquals "exitCode" 0 $?
+    echo "> $result"
+    assertNotNull 'result' "$result" 
+}
 
 # Load shUnit2.
 source_dir=$(dirname $(readlink -f "${BASH_SOURCE[0]:-$(pwd)/x}"))
