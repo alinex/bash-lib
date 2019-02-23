@@ -37,10 +37,9 @@ generic:
 #        - test/info
 centos:
     stage: test
-    image: centos
+    image: pivotaldata/centos
     script:
         - test/info
-
 # missing ip command
 #mandrake:
 #    stage: test
