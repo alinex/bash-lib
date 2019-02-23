@@ -23,6 +23,11 @@ debian:
     image: debian
     script:
         - test/info
+ubuntu:
+    stage: test
+    image: ubuntu
+    script:
+        - test/info
 
 #archlinux:
 #    stage: test
