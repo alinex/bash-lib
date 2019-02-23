@@ -86,7 +86,7 @@ system_info() {
 
 # Extended hardware analyzation
 hw_machine_id() { 
-    cat /etc/machine-id || cat /var/lib/dbus/machine-id || cat /var/db/dbus/machine-id
+    cat /etc/machine-id /var/lib/dbus/machine-id /var/db/dbus/machine-id /sys/class/dmi/id/board_serial 2>/dev/null | head -n 1
 }
 hw_virtual() { 
     grep -q '^flags.* hypervisor' /proc/cpuinfo && echo "true"
