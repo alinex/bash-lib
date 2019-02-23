@@ -59,7 +59,7 @@ generic:
 
 suse:
     stage: test
-    image: laiyd/suse
+    image: mstormo/suse
     #    before_script:
     #        - yum install -y net-tools
     script:
