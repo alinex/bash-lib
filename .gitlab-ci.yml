@@ -37,7 +37,9 @@ generic:
 #        - test/info
 centos:
     stage: test
-    image: tutum/centos
+    image: centos
+    before_script:
+        - yum install net-tools
     script:
         - test/info
 # missing ip command
