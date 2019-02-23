@@ -28,14 +28,14 @@ generic:
 #    image: tutum/ubuntu
 #    script:
 #        - test/info
-linux-mint:
-    stage: test
-    image: vcatechnology/linux-mint
-    before_script:
-        - apt-get update
-        - apt-get install -y curl
-    script:
-        - test/info
+#linux-mint:
+#    stage: test
+#    image: vcatechnology/linux-mint
+#    before_script:
+#        - apt-get update
+#        - apt-get install -y curl
+#    script:
+#        - test/info
 
 #redhat:
 #    stage: test
@@ -57,11 +57,17 @@ linux-mint:
 #    script:
 #        - test/info
 
+suse:
+    stage: test
+    image: laiyd/suse
+    #    before_script:
+    #        - yum install -y net-tools
+    script:
+        - test/info
+
 #gentoo
 #fedora
-#mandriva
 #slackware
-#suse
 
 #archlinux:
 #    stage: test
