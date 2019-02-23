@@ -64,9 +64,12 @@ generic:
 #    script:
 #        - test/info
 
+# bug: xargs command not found
 fedora:
     stage: test
     image: fedora
+    before_script:
+        - yum -y install findutils
     script:
         - test/info
 
