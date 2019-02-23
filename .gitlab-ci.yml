@@ -33,7 +33,7 @@ generic:
 #redhat centos
 redhat:
     stage: test
-    image: crorvick/redhat
+    image: hjd48/redhat
     script:
         - test/info
 
