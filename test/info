@@ -29,8 +29,7 @@ test_Base_Info() {
 test_hw_machine_id() {
     result=$(hw_machine_id)
     assertEquals "exitCode" 0 $?
-    [ -n "$result" ] && echo "> machine_id: $result"
-    exit 0
+    echo "> machine_id: $result"
 }
 test_hw_virtual() {
     result=$(hw_virtual)
@@ -98,8 +97,7 @@ test_ip_country() {
 test_ip_city() {
     result=$(ip_city)
     assertEquals "exitCode" 0 $?
-    [ -n "$result" ] && echo "> ip_city: $result"
-    exit 0
+    echo "> ip_city: $result"
 }
 
 # Load shUnit2.

@@ -80,14 +80,16 @@ gentoo:
     script:
         - test/info
 
-slackware:
-    stage: test
-    image: vbatts/slackware
-    before_script:
-        - slackpkg update
-        - slackpkg -batch=on -default_answer=y install curl
-    script:
-        - test/info
+# bug: tput: unknown terminal "dumb"
+# bug: curl: error while loading shared libraries: libsasl2.so.3
+#slackware:
+#    stage: test
+#    image: vbatts/slackware
+#    before_script:
+#        - slackpkg update
+#        - slackpkg -batch=on -default_answer=y install curl
+#    script:
+#        - test/info
 
 #archlinux:
 #    stage: test
