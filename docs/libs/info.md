@@ -70,7 +70,7 @@ Return the public ip address through which this machine accesses the internet.
 
 ### ip_country / ip_city
 
-Return country or city of public IP. This may be the point it is routed from private to public network.
+Return country or city of public IP. This is the point, where it is routed from private to public network. The city can be blank.
 
 ## Packages
 
