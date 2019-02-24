@@ -2,6 +2,8 @@ stages:
     - test
     - build
 
+# manual test using: sudo docker run -i gentoo/stage3-amd64 bash
+
 generic:
     stage: test
     image: node:latest
@@ -64,6 +66,7 @@ generic:
 #    script:
 #        - test/info
 
+# bug detecting ip_city
 fedora:
     stage: test
     image: fedora
@@ -72,6 +75,7 @@ fedora:
     script:
         - test/info
 
+# detect distribution
 gentoo:
     stage: test
     image: gentoo/stage3-amd64
@@ -81,14 +85,17 @@ gentoo:
 slackware:
     stage: test
     image: vbatts/slackware
+    before_script:
+        - installpkg curl-7.49.1-x86_64-1.txz
     script:
         - test/info
 
+# bug: ifconfig tool
 archlinux:
     stage: test
     image: archlinux/base
     before_script:
-        - pacman -Sy net-tools
+        - pacman -Sy --noconfirm net-tools
     script:
         - test/info
 

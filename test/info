@@ -21,8 +21,10 @@ test_Base_Info() {
     assertNotNull '$DIST' "$DIST" 
     echo "> $REV"
     assertNotNull '$REV' "$REV" 
-    echo "> $REV_NAME"
-    assertNotNull '$REV_NAME' "$REV_NAME" 
+    if [ "$DIST_BASE" != "gentoo" ]; then    
+        echo "> $REV_NAME"
+        assertNotNull '$REV_NAME' "$REV_NAME" 
+    fi
 }
 test_hw_machine_id() {
     result=$(hw_machine_id)

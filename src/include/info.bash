@@ -38,6 +38,10 @@ else
             #DIST=$(cat /etc/arch-release | sed s/\ release.*//)
             #REV_NAME=$(cat /etc/arch-release | sed s/.*\(// | sed s/\)//)
             #REV=$(cat /etc/arch-release | sed s/.*release\ // | sed s/\ .*//)
+        elif [ -f /etc/gentoo-release ] ; then
+            DIST_BASE='Gentoo'
+            DIST=$(cat /etc/gentoo-release | sed s/\ release.*//)
+            REV=$(cat /etc/gentoo-release | sed s/.*release\ // | sed s/\ .*//)        
         elif [ -f /etc/redhat-release ] ; then
             DIST_BASE='RedHat'
             DIST=$(cat /etc/redhat-release | sed s/\ release.*//)
