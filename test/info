@@ -34,7 +34,11 @@ test_hw_machine_id() {
 test_hw_virtual() {
     result=$(hw_virtual)
     assertEquals "exitCode" 0 $?
-    if [ -n "$result" ]; then echo "> virtual: $result"; else; echo "> virtual: false"; fi
+    if [ -n "$result" ]; then 
+        echo "> virtual: $result"
+    else
+        echo "> virtual: false"
+    fi
 }
 test_hw_cores() {
     result=$(hw_cores)
