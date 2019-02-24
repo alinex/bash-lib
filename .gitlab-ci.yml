@@ -72,14 +72,23 @@ fedora:
     script:
         - test/info
 
-#gentoo
-#slackware
+gentoo:
+    stage: test
+    image: gentoo/stage3-amd64
+    script:
+        - test/info
+
+slackware:
+    stage: test
+    image: vbatts/slackware
+    script:
+        - test/info
 
 archlinux:
     stage: test
     image: archlinux/base
     before_script:
-        - pacman -S net-tools
+        - pacman -Sy net-tools
     script:
         - test/info
 
