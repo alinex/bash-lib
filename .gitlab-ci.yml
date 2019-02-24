@@ -1,5 +1,6 @@
 stages:
     - test
+    - variant
     - build
 
 # manual test using: sudo docker run -i gentoo/stage3-amd64 bash
@@ -10,6 +11,8 @@ generic:
     before_script:
         - npm install -g bats
     script:
+        - test/info
+        # old tests
         - bats test
         - test/colors
         - test/log-simple
@@ -21,17 +24,23 @@ generic:
         - test/log-cmd
 
 debian:
-    stage: test
+    stage: variant
     image: debian
+    before_script:
+        - apt-get update
+        - apt-get install -y curl
     script:
         - test/info
 ubuntu:
-    stage: test
+    stage: variant
     image: tutum/ubuntu
+    before_script:
+        - apt-get update
+        - apt-get install -y curl
     script:
         - test/info
 linux-mint:
-    stage: test
+    stage: variant
     image: vcatechnology/linux-mint
     before_script:
         - apt-get update
@@ -40,19 +49,19 @@ linux-mint:
         - test/info
 
 redhat:
-    stage: test
+    stage: variant
     image: hjd48/redhat
     script:
         - test/info
 centos:
-    stage: test
+    stage: variant
     image: centos
     before_script:
         - yum install -y net-tools
     script:
         - test/info
 mandrake:
-    stage: test
+    stage: variant
     image: tyuatsu/mandrake
     before_script:
         - yum install -y net-tools
@@ -61,13 +70,13 @@ mandrake:
 
 # bug: declar -A unknown
 #suse:
-#    stage: test
+#    stage: variant
 #    image: mstormo/suse
 #    script:
 #        - test/info
 
 fedora:
-    stage: test
+    stage: variant
     image: fedora
     before_script:
         - yum -y install findutils net-tools
@@ -75,7 +84,7 @@ fedora:
         - test/info
 
 gentoo:
-    stage: test
+    stage: variant
     image: gentoo/stage3-amd64
     script:
         - test/info
@@ -83,7 +92,7 @@ gentoo:
 # bug: tput: unknown terminal "dumb"
 # bug: curl: error while loading shared libraries: libsasl2.so.3
 #slackware:
-#    stage: test
+#    stage: variant
 #    image: vbatts/slackware
 #    before_script:
 #        - slackpkg update
@@ -92,7 +101,7 @@ gentoo:
 #        - test/info
 
 archlinux:
-    stage: test
+    stage: variant
     image: archlinux/base
     before_script:
         - pacman -Sy --noconfirm net-tools
