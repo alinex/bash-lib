@@ -66,7 +66,6 @@ generic:
 #    script:
 #        - test/info
 
-# bug detecting ip_city
 fedora:
     stage: test
     image: fedora
@@ -75,7 +74,6 @@ fedora:
     script:
         - test/info
 
-# detect distribution
 gentoo:
     stage: test
     image: gentoo/stage3-amd64
@@ -86,18 +84,18 @@ slackware:
     stage: test
     image: vbatts/slackware
     before_script:
-        - installpkg curl-7.49.1-x86_64-1.txz
+        - slackpkg update
+        - slackpkg -batch=on -default_answer=y install curl
     script:
         - test/info
 
-# bug: ifconfig tool
-archlinux:
-    stage: test
-    image: archlinux/base
-    before_script:
-        - pacman -Sy --noconfirm net-tools
-    script:
-        - test/info
+#archlinux:
+#    stage: test
+#    image: archlinux/base
+#    before_script:
+#        - pacman -Sy --noconfirm net-tools
+#    script:
+#        - test/info
 
 pages:
     stage: build

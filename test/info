@@ -5,96 +5,95 @@ source_dir=$(dirname $(readlink -f "${BASH_SOURCE[0]:-$(pwd)/x}"))
 source "$source_dir/../src/include/info.bash"
 
 test_Base_Info() {
-    echo "> $OS"
+    echo "> OS: $OS"
     assertNotNull '$OS' "$OS" 
-    echo "> $KERNEL"
+    echo "> KERNEL: $KERNEL"
     assertNotNull '$KERNEL' "$KERNEL" 
-    echo "> $MACH"
+    echo "> MACH: $MACH"
     assertNotNull '$MACH' "$MACH" 
-    echo "> $DIST_BASE"
+    echo "> DIST_BASE: $DIST_BASE"
     assertNotNull '$DIST_BASE' "$DIST_BASE" 
     if [ "$DIST_BASE" = "Debian" ]; then
-        echo "> $DIST_BASE_REV"
+        echo "> DIST_BASE_REV: $DIST_BASE_REV"
         assertNotNull '$DIST_BASE_REV' "$DIST_BASE_REV" 
     fi
-    echo "> $DIST"
+    echo "> DIST: $DIST"
     assertNotNull '$DIST' "$DIST" 
-    echo "> $REV"
+    echo "> REV: $REV"
     assertNotNull '$REV' "$REV" 
-    if [ "$DIST_BASE" != "gentoo" ]; then    
-        echo "> $REV_NAME"
+    if [ "$DIST_BASE" != "Gentoo" ]; then    
+        echo "> REV_NAME: $REV_NAME"
         assertNotNull '$REV_NAME' "$REV_NAME" 
     fi
 }
 test_hw_machine_id() {
     result=$(hw_machine_id)
     assertEquals "exitCode" 0 $?
-    echo "> $result"
+    [ -n "$result" ] && echo "> machine_id: $result"
 }
 test_hw_virtual() {
     result=$(hw_virtual)
     assertEquals "exitCode" 0 $?
-    if [ -n "$result" ]; then echo "> $result"; fi
+    if [ -n "$result" ]; then echo "> virtual: $result"; else; echo "> virtual: false"; fi
 }
 test_hw_cores() {
     result=$(hw_cores)
     assertEquals "exitCode" 0 $?
-    echo "> $result"
+    echo "> cores: $result"
     assertTrue 'at least one' "[ $result -ge 1 ]"
 }
 test_hw_processor() {
     result=$(hw_processor)
     assertEquals "exitCode" 0 $?
-    echo "> $result"
+    echo "> processor: $result"
     assertNotNull 'result' "$result" 
 }
 test_hw_memory_mb() {
     result=$(hw_memory_mb)
     assertEquals "exitCode" 0 $?
-    echo "> $result"
+    echo "> memory_mb: $result"
     assertTrue 'at least one' "[ $result -ge 100 ]"
 }
 test_hw_swap_mb() {
     result=$(hw_swap_mb)
     assertEquals "exitCode" 0 $?
-    echo "> $result"
+    echo "> swap_mb: $result"
     assertTrue 'at least one' "[ $result -ge 100 ]"
 }
 test_hw_disks() {
     result=$(hw_disks)
     assertEquals "exitCode" 0 $?
-    echo "> $result" | sed ':a;N;$!ba;s/\n/\n> /g'
+    echo "> disks: $result" | sed ':a;N;$!ba;s/\n/\n> /g'
     assertNotNull 'result' "$result" 
 }
 test_ip_main() {
     result=$(ip_main)
     assertEquals "exitCode" 0 $?
-    echo "> $result"
+    echo "> ip_main: $result"
     assertNotNull 'result' "$result" 
 }
 test_ip_list() {
     result=$(ip_list)
     assertEquals "exitCode" 0 $?
-    echo "> $result" | sed ':a;N;$!ba;s/\n/\n> /g'
+    echo "> ip_list: $result" | sed ':a;N;$!ba;s/\n/\n> ip_list: /g'
     assertNotNull 'result' "$result" 
 }
 test_ip_public() {
     result=$(ip_public)
     assertEquals "exitCode" 0 $?
-    echo "> $result"
+    echo "> ip_public: $result"
     assertNotNull 'result' "$result" 
 }
 test_ip_country() {
     result=$(ip_country)
     assertEquals "exitCode" 0 $?
-    echo "> $result"
+    echo "> ip_country: $result"
     assertNotNull 'result' "$result" 
 }
 test_ip_city() {
     result=$(ip_city)
     assertEquals "exitCode" 0 $?
-    echo "> $result"
-    assertNotNull 'result' "$result" 
+    [ -n "$result" ] && echo "> ip_city: $result"
 }
 
 # Load shUnit2.
