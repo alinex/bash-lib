@@ -104,7 +104,7 @@ archlinux:
     stage: variant
     image: archlinux/base
     before_script:
-        - pacman -Sy --noconfirm net-tools
+        - pacman -Sy --noconfirm net-tools grep
     script:
         - test/info
 
