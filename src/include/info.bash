@@ -41,7 +41,7 @@ else
         elif [ -f /etc/gentoo-release ] ; then
             DIST_BASE='Gentoo'
             DIST=$(cat /etc/gentoo-release | sed s/\ release.*//)
-            REV=$(cat /etc/gentoo-release | sed s/.*release\ // | sed s/\ .*//)        
+            REV=$(cat /etc/gentoo-release | sed s/.*release\ // | sed s/\ .*//)
         elif [ -f /etc/redhat-release ] ; then
             DIST_BASE='RedHat'
             DIST=$(cat /etc/redhat-release | sed s/\ release.*//)
@@ -89,20 +89,20 @@ system_info() {
 }
 
 # Extended hardware analyzation
-hw_machine_id() { 
+hw_machine_id() {
     cat /etc/machine-id /var/lib/dbus/machine-id /var/db/dbus/machine-id /sys/class/dmi/id/board_serial 2>/dev/null | head -n 1
 }
-hw_virtual() { 
+hw_virtual() {
     grep -q '^flags.* hypervisor' /proc/cpuinfo && echo "true"
     exit 0
 }
 hw_cores() { grep -c ^processor /proc/cpuinfo; }
 hw_processor() { grep 'model name' /proc/cpuinfo | head -n 1 | sed 's/^.*: //'; }
-hw_memory_mb() { 
+hw_memory_mb() {
     #free -m | grep -oP '\d+' | head -n 1
     expr $(grep MemTotal /proc/meminfo | awk '{print $2}') / 1024
 }
-hw_swap_mb() { 
+hw_swap_mb() {
     #free -m | tail -n 1 | grep -oP '\d+' | head -n 1
     expr $(grep SwapTotal /proc/meminfo | awk '{print $2}') / 1024
 }
@@ -112,17 +112,17 @@ hw_disks() {
 }
 
 # ip analyzation
-ip_main() { 
-    command -v ip
-    if [ $? -eq 0 ]; then 
+ip_main() {
+    command -v ip > /dev/null
+    if [ $? -eq 0 ]; then
         ip route get 1 | sed -e 's/ uid.*//' | awk '{print $NF;exit}'
     else
         ifconfig | egrep 'inet |inet6 ' | egrep -v ' ::1|127.0.0.1' | awk '{print $2}' | head -n 1
     fi
 }
-ip_list() { 
-    command -v ip
-    if [ $? -eq 0 ]; then 
+ip_list() {
+    command -v ip > /dev/null
+    if [ $? -eq 0 ]; then
         ip address | grep global | awk '{ print $2 }' | sed -e 's/\/.*//'
     else
         ifconfig | egrep 'inet |inet6 ' | egrep -v ' ::1|127.0.0.1' | awk '{print $2}'
