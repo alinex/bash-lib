@@ -108,6 +108,11 @@ archlinux:
     script:
         - test/info
 
+# presencelab/darwin
+# macos
+# solaris???
+# openbsd
+
 pages:
     stage: build
     image: python:alpine
