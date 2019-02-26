@@ -7,9 +7,8 @@
 # Usage:
 #
 # source ../bash-lib/include/info.bash  # load methods
-# data=$(info_debian)
 
-[ -n "$OS" ] && return 0 # library already loaded
+#[ -n "$OS" ] && return 0 # library already loaded
 
 source_dir=$(dirname $(readlink -f "${BASH_SOURCE[0]:-$(pwd)/x}"))
 source "$source_dir/log.bash" # load log handler
@@ -135,44 +134,50 @@ ip_city() { curl -s ifconfig.co/city; }
 # Software analyzation
 
 # lookup for real names
-declare -A _package_debian
-_package_debian[apache]="apache2"
-_package_debian[tomcat]="tomcat8 tomcat7"
-_package_debian[jdk]="openjdk-11-jdk openjdk-10-jdk openjdk-9-jdk openjdk-8-jdk openjdk-7-jdk openjdk-6-jdk"
-_package_debian[jre]="openjdk-11-jre openjdk-10-jre openjdk-9-jre openjdk-8-jre openjdk-7-jre openjdk-6-jre"
-_package_debian[postgresql]="postgresql-10 postgresql-9.6 postgresql-9.4 postgresql-9.3"
-declare -r _package_debian
+declare -A _package
+_package[apache]="apache2"
+_package[tomcat]="tomcat8 tomcat7 tomcat6"
+_package[jdk]="openjdk-11-jdk openjdk-10-jdk openjdk-9-jdk openjdk-8-jdk openjdk-7-jdk openjdk-6-jdk"
+_package[jre]="openjdk-11-jre openjdk-10-jre openjdk-9-jre openjdk-8-jre openjdk-7-jre openjdk-6-jre"
+_package[postgresql]="postgresql-11 postgresql-10 postgresql-9.6 postgresql-9.4 postgresql-9.3"
+declare -r _package
 
-# Usage: info_package <name>
-# Output: version number
+# Usage: package <name>
+# Output: name section package version
 package() {
-    [ "$#" -ne 1 ] && log_exit ALERT "parameter missing. Usage: info_package <name>"
+    [ "$#" -ne 1 ] && log_exit ALERT "parameter missing. Usage: package <name>"
     unset IFS # in case it is not the default
-
+    search=$1
+    return=1
     case $DIST_BASE in
     Debian)
-        alt=${_package_debian[$1]}
+        alt=${_package[$search]}
         if [ -n "$alt" ]; then
             for check in $alt
             do
                 # check package
                 local found=$(dpkg -s $check 2>/dev/null)
-                if [ -n "$found" ]; then
-                    result=$(echo -e "$found" | grep Version | sed "s/Version: //")
-                    log DEBUG "package $1 is installed with version $result"
-                    echo $result
-                return 0
+                if [[ $found =~ ok.installed ]]; then
+                    package=$(echo -e "$found" | grep Package | awk '{print $2}')
+                    section=$(echo -e "$found" | grep Section | awk '{print $2}')
+                    version=$(echo -e "$found" | grep Version | awk '{print $2}')
+                    log DEBUG "$search is installed with package $package version $version"
+                    echo $search $section $package $version
+                    return=0
                 fi
             done
         else
-            local found=$(dpkg -s $1 2>/dev/null)
-            [ $? -eq 0 ] || return 1
-            result=$(echo -e "$found" | grep Version | sed "s/Version: //")
-            log DEBUG "package $1 is installed with version $result"
-            echo $result
-            return 0
+            local found=$(dpkg -s $search 2>/dev/null)
+            if [[ $found =~ ok.installed ]]; then
+                package=$(echo -e "$found" | grep Package | awk '{print $2}')
+                section=$(echo -e "$found" | grep Section | awk '{print $2}')
+                version=$(echo -e "$found" | grep Version | awk '{print $2}')
+                log DEBUG "$search is installed with package $package version $version"
+                echo $search $section $package $version
+                return=0
+            fi
         fi
-        return 1
+        return $return
         ;;
     *)
         log_exit ALERT "operating system not supported: $(system_info)"
@@ -180,7 +185,11 @@ package() {
     esac
 }
 # output: <package name> <version>
-#package_list() {}
+package_list() {
+    for p in "${!_package[@]}"; do
+        package $p
+    done
+}
 
 # setup information
 
