@@ -194,7 +194,28 @@ package_list() {
 # setup information
 
 # output: <user> <key> <name>
-#ssh_keys() {}
+ssh_keys() {
+    for user in $(awk -F'[/:]' '{if ($3 >= 1000 && $3 != 65534) print $1}' /etc/passwd); do
+        ssh=$(cat /home/$user/.ssh/authorized_keys? 2>/dev/null)
+        if [ -n "$ssh" ]; then
+            echo $ssh | sed "s/s/^/$user /"
+            # remove before ssh-rsa/dsa
+        fi
+    done
+}
 
-# output: <user> <cron line>
-#cront_tasks() {}
+# output: <user> <minute> <hour> <day> <month> <wday> <command>
+#cron_tasks() {
+# all user crontabs in /var/spool/cron/crontabs/<user>
+# remove comments
+# 1. * -> 0..59; 1,2; 3-4
+# 2. * -> 0..12
+# 3. * -> 1..31
+# 4. * -> 1..12
+# 5. * -> 1..7; 0 => 7
+
+# cron.d
+# cron.hourly with time from /etc/crontab
+# cron.daily with time from /etc/crontab
+# cron.monthly with time from /etc/crontab
+#}

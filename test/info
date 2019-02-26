@@ -99,6 +99,11 @@ test_ip_city() {
     assertEquals "exitCode" 0 $?
     echo "> ip_city: $result"
 }
+test_package() {
+    result=$(package curl)
+    assertEquals "exitCode" 0 $?
+    echo "> package: $result"
+}
 
 # Load shUnit2.
 source_dir=$(dirname $(readlink -f "${BASH_SOURCE[0]:-$(pwd)/x}"))
