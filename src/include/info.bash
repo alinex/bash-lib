@@ -219,18 +219,29 @@ ssh_keys() {
     done
 }
 
-# output: <user> <minute> <hour> <day> <month> <wday> <command>
-#cron_tasks() {
-# all user crontabs in /var/spool/cron/crontabs/<user>
-# remove comments
+# output: <where> <minute> <hour> <day> <month> <wday> <user> <command>
+cron_tasks() {
+    ls /var/spool/cron/crontabs \
+    | while read user; do
+        cat /var/spool/cron/crontabs/$user | sed 's/#.*//g' | awk 'NF' \
+        | while read min hour day month week cmd; do
+            echo "user $min $hour $day $month $week $user $cmd"
+        done
+    done
+
+    cat /etc/cron.d/* | sed 's/#.*//g' | awk 'NF' | sed "s/^/cron.d /"
+
+    periods=(daily weekly monthly)
+    for period in $periods; do
+        grep /etc/cron.period /etc/crontab | head -n 1 \
+        | while read min hour day month week cmd; do
+            ls -1 /etc/cron.period | sed "s/^/period $min $hour $day $month $week root /"
+        done
+    done
+
 # 1. * -> 0..59; 1,2; 3-4
 # 2. * -> 0..12
 # 3. * -> 1..31
 # 4. * -> 1..12
 # 5. * -> 1..7; 0 => 7
-
-# cron.d
-# cron.hourly with time from /etc/crontab
-# cron.daily with time from /etc/crontab
-# cron.monthly with time from /etc/crontab
-#}
+}
