@@ -206,14 +206,15 @@ package_list() {
 
 # setup information
 
-# output: <user> <key> <name>
+# output: <account> <name> <type> <key>
 ssh_keys() {
-    echo 111
     for user in $(awk -F'[/:]' '{if ($3 >= 1000 && $3 != 65534) print $1}' /etc/passwd); do
-        ssh=$(cat /home/$user/.ssh/authorized_keys? 2>/dev/null)
+        ssh=$(cat /home/$user/.ssh/authorized_keys /home/$user/.ssh/authorized_keys2 2>/dev/null)
         if [ -n "$ssh" ]; then
-            echo $ssh | sed "s/s/^/$user /"
-            # remove before ssh-rsa/dsa
+            echo "$ssh" | grep ssh- \
+            | sed 's/:.*SSHAUTH_USERNAME=\\"\([0-9]* - \)\?\([^ ]*\).* \(ssh-.*\)/ \3 \2/;s/^[a-z/]*\/\([a-z]*\)\/.ssh.* /\1 /;s/ $//' \
+            | awk 'NF' | awk '{ print $3 " " $1 " " $2}' \
+            | sed "s/^/$user /" | sort | uniq
         fi
     done
 }

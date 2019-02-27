@@ -64,15 +64,22 @@ Returns the main IP address.
 
 Returns all listening IP addresses.
 
-### ip_public
+### ip_info
 
-Return the public ip address through which this machine accesses the internet.
+Retrieves some geo location information from the IP the system uses to enter the public internet like:
 
-### ip_country / ip_city
-
-Return country or city of public IP. This is the point, where it is routed from private to public network. The city can be blank.
+    ip 46.237.195.215
+    hostname HSI-KBW-46-237-195-215.hsi.kabel-badenwuerttemberg.de
+    city Dornhan
+    region Baden-Württemberg Region
+    country DE
+    loc 48.3501,8.5090
+    postal 72175
+    org AS29562 Unitymedia BW GmbH
 
 ## Packages
+
+### package
 
 With `package` you may check if a specific package is installed and get the version from it.
 
@@ -82,3 +89,14 @@ echo $tomcat # will output 8
 ```
 
 As seen above you can also use shortcuts which don't completely equal to the package name because it will be extended automatically as far as this is predefined in code.
+
+### package_list
+
+You can also check which of the special systems (hard coded list) are installed.
+It will return: `<package name> <version>`
+
+## Configuration
+
+### ssh_keys
+
+If called this script will generate a list of all allowed ssh-key based users with: `<account> <name> <type> <key>`
