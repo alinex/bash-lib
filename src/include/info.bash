@@ -127,9 +127,22 @@ ip_list() {
         ifconfig | egrep 'inet |inet6 ' | egrep -v ' ::1|127.0.0.1' | awk '{print $2}'
     fi
 }
-ip_public() { curl -s ifconfig.co; }
-ip_country() { curl -s ifconfig.co/country; }
-ip_city() { curl -s ifconfig.co/city; }
+
+# return:
+# ip 46.237.195.215
+# hostname HSI-KBW-46-237-195-215.hsi.kabel-badenwuerttemberg.de
+# city Dornhan
+# region Baden-Württemberg Region
+# country DE
+# loc 48.3501,8.5090
+# postal 72175
+# org AS29562 Unitymedia BW GmbH
+ip_info() {
+    if [ -z "$_ip_info" ]; then
+        _ip_info=$(curl -s ipinfo.io | tr '\n' ' ' | sed -e 's/[{}]/''/g;s/",/"\n/g;s/ *"//g;s/:/ /g' | awk 'NF')
+    fi
+    echo "$_ip_info"
+}
 
 # Software analyzation
 
@@ -195,6 +208,7 @@ package_list() {
 
 # output: <user> <key> <name>
 ssh_keys() {
+    echo 111
     for user in $(awk -F'[/:]' '{if ($3 >= 1000 && $3 != 65534) print $1}' /etc/passwd); do
         ssh=$(cat /home/$user/.ssh/authorized_keys? 2>/dev/null)
         if [ -n "$ssh" ]; then

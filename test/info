@@ -6,24 +6,24 @@ source "$source_dir/../src/include/info.bash"
 
 test_Base_Info() {
     echo "> OS: $OS"
-    assertNotNull '$OS' "$OS" 
+    assertNotNull '$OS' "$OS"
     echo "> KERNEL: $KERNEL"
-    assertNotNull '$KERNEL' "$KERNEL" 
+    assertNotNull '$KERNEL' "$KERNEL"
     echo "> MACH: $MACH"
-    assertNotNull '$MACH' "$MACH" 
+    assertNotNull '$MACH' "$MACH"
     echo "> DIST_BASE: $DIST_BASE"
-    assertNotNull '$DIST_BASE' "$DIST_BASE" 
+    assertNotNull '$DIST_BASE' "$DIST_BASE"
     if [ "$DIST_BASE" = "Debian" ]; then
         echo "> DIST_BASE_REV: $DIST_BASE_REV"
-        assertNotNull '$DIST_BASE_REV' "$DIST_BASE_REV" 
+        assertNotNull '$DIST_BASE_REV' "$DIST_BASE_REV"
     fi
     echo "> DIST: $DIST"
-    assertNotNull '$DIST' "$DIST" 
+    assertNotNull '$DIST' "$DIST"
     echo "> REV: $REV"
-    assertNotNull '$REV' "$REV" 
-    if [ "$DIST_BASE" != "Gentoo" ]; then    
+    assertNotNull '$REV' "$REV"
+    if [ "$DIST_BASE" != "Gentoo" ]; then
         echo "> REV_NAME: $REV_NAME"
-        assertNotNull '$REV_NAME' "$REV_NAME" 
+        assertNotNull '$REV_NAME' "$REV_NAME"
     fi
 }
 test_hw_machine_id() {
@@ -34,7 +34,7 @@ test_hw_machine_id() {
 test_hw_virtual() {
     result=$(hw_virtual)
     assertEquals "exitCode" 0 $?
-    if [ -n "$result" ]; then 
+    if [ -n "$result" ]; then
         echo "> virtual: $result"
     else
         echo "> virtual: false"
@@ -50,7 +50,7 @@ test_hw_processor() {
     result=$(hw_processor)
     assertEquals "exitCode" 0 $?
     echo "> processor: $result"
-    assertNotNull 'result' "$result" 
+    assertNotNull 'result' "$result"
 }
 test_hw_memory_mb() {
     result=$(hw_memory_mb)
@@ -68,36 +68,29 @@ test_hw_disks() {
     result=$(hw_disks)
     assertEquals "exitCode" 0 $?
     echo "> disks: $result" | sed ':a;N;$!ba;s/\n/\n> /g'
-    assertNotNull 'result' "$result" 
+    assertNotNull 'result' "$result"
 }
 test_ip_main() {
     result=$(ip_main)
     assertEquals "exitCode" 0 $?
     echo "> ip_main: $result"
-    assertNotNull 'result' "$result" 
+    assertNotNull 'result' "$result"
 }
 test_ip_list() {
     result=$(ip_list)
     assertEquals "exitCode" 0 $?
     echo "> ip_list: $result" | sed ':a;N;$!ba;s/\n/\n> ip_list: /g'
-    assertNotNull 'result' "$result" 
+    assertNotNull 'result' "$result"
 }
-test_ip_public() {
-    result=$(ip_public)
+test_ip_info() {
+    result=$(ip_info)
     assertEquals "exitCode" 0 $?
-    echo "> ip_public: $result"
-    assertNotNull 'result' "$result" 
-}
-test_ip_country() {
-    result=$(ip_country)
-    assertEquals "exitCode" 0 $?
-    echo "> ip_country: $result"
-    assertNotNull 'result' "$result" 
-}
-test_ip_city() {
-    result=$(ip_city)
-    assertEquals "exitCode" 0 $?
-    echo "> ip_city: $result"
+    echo "> ip_info: $result" | sed ':a;N;$!ba;s/\n/\n> ip_info: /g'
+    assertNotNull 'ip' "$(echo "$result" | grep ip)"
+    assertNotNull 'countr' "$(echo "$result" | grep countr)"
+    assertNotNull 'region' "$(echo "$result" | grep region)"
+    assertNotNull 'city' "$(echo "$result" | grep city)"
+    assertNotNull 'org' "$(echo "$result" | grep org)"
 }
 test_package() {
     result=$(package curl)
