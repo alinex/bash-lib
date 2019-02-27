@@ -93,7 +93,7 @@ test_ip_info() {
     assertNotNull 'org' "$(echo "$result" | grep org)"
 }
 test_package() {
-    [ "$DIST_BASE" -ne "Linux" ] && startSkipping
+    [ "$DIST_BASE" = "Linux" ] || startSkipping
     result=$(package curl)
     assertEquals "exitCode" 0 $?
     echo "> package: $result"
