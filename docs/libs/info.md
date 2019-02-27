@@ -100,3 +100,13 @@ It will return: `<package name> <version>`
 ### ssh_keys
 
 If called this script will generate a list of all allowed ssh-key based users with: `<account> <name> <type> <key>`
+
+### cron_tasks
+
+This will go through:
+
+-   user crontabs
+-   cron.d scripts
+-   hourly, daily, weekly, monthly tasks
+
+All found entries will be combined into the following format: `<where> <minute> <hour> <day> <month> <wday> <user> <command>`.

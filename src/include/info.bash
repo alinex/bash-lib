@@ -238,10 +238,9 @@ cron_tasks() {
             ls -1 /etc/cron.period | sed "s/^/period $min $hour $day $month $week root /"
         done
     done
-
-# 1. * -> 0..59; 1,2; 3-4
-# 2. * -> 0..12
-# 3. * -> 1..31
-# 4. * -> 1..12
-# 5. * -> 1..7; 0 => 7
 }
+
+# output: <tomcat> <port> <context> <service> <version>
+#tomcat_webapps() {
+
+#}
