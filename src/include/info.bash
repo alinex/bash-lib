@@ -220,16 +220,18 @@ ssh_keys() {
 }
 
 # output: <where> <minute> <hour> <day> <month> <wday> <user> <command>
+strings='s/^@yearly/0 0 1 1 \*/;s/^@annually/0 0 1 1 \*/;s/^@monthly/0 0 1 \* \*/;s/^@weekly/0 0 \* \* 0/;s/^@daily/0 0 \* \* \*/
+s/^@midnight/0 0 \* \* \*/;s/^@hourly/0 \* \* \* \*/'
 cron_tasks() {
     ls /var/spool/cron/crontabs \
     | while read user; do
-        cat /var/spool/cron/crontabs/$user | sed 's/#.*//g' | awk 'NF' \
+        cat /var/spool/cron/crontabs/$user | sed "$strings;s/#.*//g" | awk 'NF' \
         | while read min hour day month week cmd; do
             echo "user $min $hour $day $month $week $user $cmd"
         done
     done
 
-    cat /etc/cron.d/* | sed 's/#.*//g' | awk 'NF' | sed "s/^/cron.d /"
+    cat /etc/cron.d/* | sed "$strings;s/#.*//g" | awk 'NF' | sed "s/^/cron.d /"
 
     periods=(daily weekly monthly)
     for period in $periods; do
@@ -239,8 +241,8 @@ cron_tasks() {
         done
     done
 }
+#https://manpages.debian.org/testing/cron/crontab.5.en.html
 
 # output: <tomcat> <port> <context> <service> <version>
 #tomcat_webapps() {
-
 #}
