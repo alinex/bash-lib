@@ -221,7 +221,7 @@ ssh_keys() {
 
 # output: <where> <minute> <hour> <day> <month> <wday> <user> <command>
 strings='s/^@yearly/0 0 1 1 \*/;s/^@annually/0 0 1 1 \*/;s/^@monthly/0 0 1 \* \*/;s/^@weekly/0 0 \* \* 0/;s/^@daily/0 0 \* \* \*/
-s/^@midnight/0 0 \* \* \*/;s/^@hourly/0 \* \* \* \*/'
+s/^@midnight/0 0 \* \* \*/;s/^@hourly/0 \* \* \* \*/;/^[a-zA-Z]*=/d'
 cron_tasks() {
     ls /var/spool/cron/crontabs \
     | while read user; do
