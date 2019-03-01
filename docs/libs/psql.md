@@ -21,12 +21,18 @@ The following environment settings should be used:
 
 Check that the database connection is configured and exit with error message if not. A log message is emitted.
 
-### psql_exec <query>
+### psql_exec <query> or | psql_exec
 
 Run the given query and return only the results:
 
 ```bash
 result=$(psql_exec <query>) || log_exit ALERT "Failed to export from DB"
+```
+
+Another alternative is to pipe the sql commands into the process:
+
+```bash
+cat file.sql | psql_exec
 ```
 
 The resulting text may contain the `UPDATE` or `DELETE` success message or in case of `SELECT` it will contain the resulting rows with `|` as record separator.
