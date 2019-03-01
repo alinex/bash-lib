@@ -223,13 +223,21 @@ ssh_keys() {
 strings='s/^@yearly/0 0 1 1 \*/;s/^@annually/0 0 1 1 \*/;s/^@monthly/0 0 1 \* \*/;s/^@weekly/0 0 \* \* 0/;s/^@daily/0 0 \* \* \*/
 s/^@midnight/0 0 \* \* \*/;s/^@hourly/0 \* \* \* \*/;/^[a-zA-Z]*=/d'
 cron_tasks() {
-    ls /var/spool/cron/crontabs \
-    | while read user; do
-        cat /var/spool/cron/crontabs/$user | sed "$strings;s/#.*//g" | awk 'NF' \
+    if [ $(id -u) -ne 0 ]; then
+        log WARN "Could only read cron entries from the connecting user: $(whoami)"
+        crontab -l | sed "$strings;s/#.*//g" | awk 'NF' \
         | while read min hour day month week cmd; do
-            echo "user $min $hour $day $month $week $user $cmd"
+            echo "user $min $hour $day $month $week $(whoami) $cmd"
         done
-    done
+    else
+        ls /var/spool/cron/crontabs \
+        | while read user; do
+            cat /var/spool/cron/crontabs/$user | sed "$strings;s/#.*//g" | awk 'NF' \
+            | while read min hour day month week cmd; do
+                echo "user $min $hour $day $month $week $user $cmd"
+            done
+        done
+    fi
 
     cat /etc/cron.d/* | sed "$strings;s/#.*//g" | awk 'NF' | sed "s/^/cron.d /"
 

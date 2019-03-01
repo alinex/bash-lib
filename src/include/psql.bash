@@ -28,12 +28,22 @@ psql_exit() {
 }
 
 psql_exec() {
-    [ $# -ne 1 ] && log_exit ALERT "The SQL command parameter is needed in call to psql_exec"
-    if [ -n "$PGLOG" ] && [ "$PGLOG" != 0 ] ; then
-        log_cmd psql -Atc "$1"
+    if [ -z "$1" ]; then
+        # use STDIN pipe
+        if [ -n "$PGLOG" ] && [ "$PGLOG" != 0 ] ; then
+            log_cmd psql -v ON_ERROR_STOP=1 -At </dev/stdin
+        else
+            psql -v ON_ERROR_STOP=1 -At </dev/stdin
+        fi
     else
-        psql -Atc "$1"
+        if [ -n "$PGLOG" ] && [ "$PGLOG" != 0 ] ; then
+            log_cmd psql -v ON_ERROR_STOP=1 -Atc "$1"
+        else
+            psql -v ON_ERROR_STOP=1 -Atc "$1"
+        fi
     fi
+    [ $? -ne 0 ] && log_exit WARN "Error in SQL $1"
+    exit 0
 }
 
 psql_csv() {
