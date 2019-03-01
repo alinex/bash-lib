@@ -2,6 +2,18 @@
 
 ## Newest Changes
 
+-   support piped input in `psql_exec`
+-   increase info package with
+    -   hardware detection
+    -   geo location
+    -   package analyzation
+    -   user and crontab analyzation
+-   support for more linux OS versions in detection
+-   automatic unit testing based on shunit2
+
+## Version 1.2.1 (21.02.2019)
+
+-   fix process locking in `lock`
 -   add changelog
 -   add readme, license and changelog to distribution
 
