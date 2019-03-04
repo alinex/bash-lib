@@ -92,7 +92,7 @@ hw_machine_id() {
     cat /etc/machine-id /var/lib/dbus/machine-id /var/db/dbus/machine-id /sys/class/dmi/id/board_serial 2>/dev/null | head -n 1
 }
 hw_virtual() {
-    grep -q '^flags.* hypervisor' /proc/cpuinfo && echo "true"
+    grep -q '^flags.* hypervisor' /proc/cpuinfo && echo "true" || echo "false"
     exit 0
 }
 hw_cores() { grep -c ^processor /proc/cpuinfo; }
@@ -139,7 +139,12 @@ ip_list() {
 # org AS29562 Unitymedia BW GmbH
 ip_info() {
     if [ -z "$_ip_info" ]; then
-        _ip_info=$(curl -s ipinfo.io | tr '\n' ' ' | sed -e 's/[{}]/''/g;s/",/"\n/g;s/ *"//g;s/:/ /g' | awk 'NF')
+        command -v curl > /dev/null
+        if [ $? -eq 0 ]; then
+            _ip_info=$(curl -s ipinfo.io | tr '\n' ' ' | sed -e 's/[{}]/''/g;s/",/"\n/g;s/ *"//g;s/:/ /g' | awk 'NF')
+        else
+            _ip_info=$(wget -qO - ipinfo.io | tr '\n' ' ' | sed -e 's/[{}]/''/g;s/",/"\n/g;s/ *"//g;s/:/ /g' | awk 'NF')
+        fi
     fi
     echo "$_ip_info"
 }
@@ -257,5 +262,5 @@ cron_tasks() {
 
 # app
 # output: <package> <middleware> <app> <version> <setting> <value>
-#         tomcat        tomcat8_1 xxx    1.0.1  uri http://:8080/context  
-#         tomcat        tomcat8_1 xxx    1.0.1  threads 500 
+#         tomcat        tomcat8_1 xxx    1.0.1  uri http://:8080/context
+#         tomcat        tomcat8_1 xxx    1.0.1  threads 500
