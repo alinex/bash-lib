@@ -251,6 +251,11 @@ cron_tasks() {
 }
 #https://manpages.debian.org/testing/cron/crontab.5.en.html
 
-# output: <tomcat> <port> <context> <service> <version>
-#tomcat_webapps() {
-#}
+# middleware
+# output: <package> <middleware> <setting> <value>
+#         tomcat     tomcat8_1   uri http://:8080
+
+# app
+# output: <package> <middleware> <app> <version> <setting> <value>
+#         tomcat        tomcat8_1 xxx    1.0.1  uri http://:8080/context  
+#         tomcat        tomcat8_1 xxx    1.0.1  threads 500 
