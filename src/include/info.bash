@@ -214,6 +214,13 @@ package_list() {
 # output: <account> <name> <type> <key>
 ssh_keys() {
     for user in $(awk -F'[/:]' '{if ($3 >= 1000 && $3 != 65534) print $1}' /etc/passwd); do
+        ssh=$(cat /root/.ssh/authorized_keys /root/.ssh/authorized_keys2 2>/dev/null)
+        if [ -n "$ssh" ]; then
+            echo "$ssh" | grep ssh- \
+            | sed 's/:.*SSHAUTH_USERNAME=\\"\([0-9]* - \)\?\([^ ]*\).* \(ssh-.*\)/ \3 \2/;s/^[a-z/]*\/\([a-z]*\)\/.ssh.* /\1 /;s/ $//' \
+            | awk 'NF' | awk '{ print $3 " " $1 " " $2}' \
+            | sed "s/^/root /" | sort | uniq
+        fi
         ssh=$(cat /home/$user/.ssh/authorized_keys /home/$user/.ssh/authorized_keys2 2>/dev/null)
         if [ -n "$ssh" ]; then
             echo "$ssh" | grep ssh- \
@@ -261,6 +268,6 @@ cron_tasks() {
 #         tomcat     tomcat8_1   uri http://:8080
 
 # app
-# output: <package> <middleware> <app> <version> <setting> <value>
-#         tomcat        tomcat8_1 xxx    1.0.1  uri http://:8080/context
-#         tomcat        tomcat8_1 xxx    1.0.1  threads 500
+# output: <package> <middleware> <app> <setting> <value>
+#         tomcat        tomcat8_1 xxx  uri http://:8080/context
+#         tomcat        tomcat8_1 xxx  threads 500
