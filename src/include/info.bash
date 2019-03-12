@@ -161,7 +161,7 @@ _package[postgresql]="postgresql-11 postgresql-10 postgresql-9.6 postgresql-9.4 
 declare -r _package
 
 # Usage: package <name>
-# Output: name section package version
+# Output: group section package version
 package() {
     [ "$#" -ne 1 ] && log_exit ALERT "parameter missing. Usage: package <name>"
     unset IFS # in case it is not the default
@@ -209,7 +209,28 @@ package_list() {
     done
 }
 
-# setup information
+# output: <group> <middleware> <setting> <value>
+#         tomcat     tomcat8_1   uri http://:8080
+middleware() {
+    # tomcat
+    for path in $(echo /var/lib/tomcat*); do
+        port=$(cat $path/conf/server.xml | sed 's/<!--/\x0<!--/g;s/-->/-->\x0/g' | grep -zv '^<!--' | tr -d '\0' | grep 'protocol="HTTP' | sed 's/^.*port="//;s/".*//')
+        echo tomcat $(basename $path) uri http://$(ip_main):$port
+    done
+}
+
+# output: <group> <middleware> <app> <setting> <value>
+#         tomcat        tomcat8_1 xxx  uri http://:8080/context
+#         tomcat        tomcat8_1 xxx  threads 500
+app() {
+    # tomcat
+    for path in $(echo /var/lib/tomcat*); do
+        port=$(cat $path/conf/server.xml | sed 's/<!--/\x0<!--/g;s/-->/-->\x0/g' | grep -zv '^<!--' | tr -d '\0' | grep 'protocol="HTTP' | sed 's/^.*port="//;s/".*//')
+        for webapp in $(ls $path/webapps/ | egrep -v 'ROOT|.war'); do
+            echo tomcat $(basename $path) $webapp uri http://$(ip_main):$port/$webapp
+        done
+    done
+}
 
 # output: <account> <name> <type> <key>
 ssh_keys() {
@@ -261,13 +282,3 @@ cron_tasks() {
         done
     done
 }
-#https://manpages.debian.org/testing/cron/crontab.5.en.html
-
-# middleware
-# output: <package> <middleware> <setting> <value>
-#         tomcat     tomcat8_1   uri http://:8080
-
-# app
-# output: <package> <middleware> <app> <setting> <value>
-#         tomcat        tomcat8_1 xxx  uri http://:8080/context
-#         tomcat        tomcat8_1 xxx  threads 500
