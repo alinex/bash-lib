@@ -43,7 +43,6 @@ psql_exec() {
         fi
     fi
     [ $? -ne 0 ] && log_exit WARN "Error in SQL $1"
-    exit 0
 }
 
 psql_csv() {
