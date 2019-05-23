@@ -154,7 +154,7 @@ ip_info() {
 # lookup for real names
 declare -A _package
 _package[apache]="apache2"
-_package[tomcat]="tomcat8 tomcat7 tomcat6"
+_package[tomcat]="tomcat9 tomcat8 tomcat7 tomcat6"
 _package[jdk]="openjdk-11-jdk openjdk-10-jdk openjdk-9-jdk openjdk-8-jdk openjdk-7-jdk openjdk-6-jdk oracle-java8-installer"
 _package[jre]="openjdk-11-jre openjdk-10-jre openjdk-9-jre openjdk-8-jre openjdk-7-jre openjdk-6-jre"
 _package[postgresql]="postgresql-11 postgresql-10 postgresql-9.6 postgresql-9.4 postgresql-9.3"
