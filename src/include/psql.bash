@@ -42,7 +42,9 @@ psql_exec() {
             psql -v ON_ERROR_STOP=1 -Atc "$1"
         fi
     fi
-    [ $? -ne 0 ] && log_exit WARN "Error in SQL $1"
+    code=$?
+    [ $ode -ne 0 ] && log_exit WARN "Error in SQL $1"
+    return $code
 }
 
 psql_csv() {
