@@ -43,7 +43,7 @@ psql_exec() {
         fi
     fi
     code=$?
-    [ $ode -ne 0 ] && log_exit WARN "Error in SQL $1"
+    [ $code -ne 0 ] && log_exit WARN "Error in SQL $1"
     return $code
 }
 
