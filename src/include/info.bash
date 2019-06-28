@@ -12,6 +12,7 @@
 
 source_dir=$(dirname $(readlink -f "${BASH_SOURCE[0]:-$(pwd)/x}"))
 source "$source_dir/log.bash" # load log handler
+[ $(id -u) -ne 0 ] && usesudo="sudo" || usesudo=""
 
 # start basic analyzation
 
@@ -260,21 +261,21 @@ ssh_keys() {
 strings='s/^@yearly/0 0 1 1 \*/;s/^@annually/0 0 1 1 \*/;s/^@monthly/0 0 1 \* \*/;s/^@weekly/0 0 \* \* 0/;s/^@daily/0 0 \* \* \*/
 s/^@midnight/0 0 \* \* \*/;s/^@hourly/0 \* \* \* \*/;/^[a-zA-Z]*=/d'
 cron_tasks() {
-    if [ $(id -u) -ne 0 ]; then
-        log WARN "Could only read cron entries from the connecting user: $(whoami)"
-        crontab -l | sed "$strings;s/#.*//g" | awk 'NF' \
-        | while read min hour day month week cmd; do
-            echo "user $min $hour $day $month $week $(whoami) $cmd"
-        done
-    else
-        ls /var/spool/cron/crontabs \
+#    if [ $(id -u) -ne 0 ]; then
+#        log WARN "Could only read cron entries from the connecting user: $(whoami)"
+#        crontab -l | sed "$strings;s/#.*//g" | awk 'NF' \
+#        | while read min hour day month week cmd; do
+#            echo "user $min $hour $day $month $week $(whoami) $cmd"
+#        done
+#    else
+        $usesudo ls /var/spool/cron/crontabs \
         | while read user; do
-            cat /var/spool/cron/crontabs/$user | sed "$strings;s/#.*//g" | awk 'NF' \
+            $usesudo cat /var/spool/cron/crontabs/$user | sed "$strings;s/#.*//g" | awk 'NF' \
             | while read min hour day month week cmd; do
                 echo "user $min $hour $day $month $week $user $cmd"
             done
         done
-    fi
+#    fi
 
     cat /etc/cron.d/* | sed "$strings;s/#.*//g" | awk 'NF' | sed "s/^/cron.d /"
 
