@@ -260,6 +260,8 @@ ssh_keys() {
 }
 
 # output: <account> <sudo-rights>
+#         root      (ALL : ALL) NOPASSWD: ALL
+#         admin     (root) NOPASSWD: /bin/systemctl * tomcat8*
 sudoers() {
     usesudo=$(usesudo)
     for user in $(awk -F'[/:]' '{if ($3 >= 1000 && $3 != 65534) print $1}' /etc/passwd); do
