@@ -1,6 +1,6 @@
 # Last Changes
 
-## Newest Changes
+## Version 1.3.0 - 5th July 2019
 
 -   support piped input in `psql_exec`
 -   increase info package with
@@ -10,8 +10,9 @@
     -   user and crontab analyzation
 -   support for more linux OS versions in detection
 -   automatic unit testing based on shunit2
+-   add sudo support to core
 
-## Version 1.2.1 (21.02.2019)
+## Version 1.2.1 - 21st February 2019
 
 -   fix process locking in `lock`
 -   add changelog

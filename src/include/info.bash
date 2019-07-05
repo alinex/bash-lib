@@ -229,7 +229,7 @@ middleware() {
 #         tomcat        tomcat8_1 xxx  threads 500
 app() {
     # tomcat
-    for path in $(echo /var/lib/tomcat*); do
+    for path in $(ls -d /var/lib/tomcat* 2>/dev/null); do
         port=$(cat $path/conf/server.xml | sed 's/<!--/\x0<!--/g;s/-->/-->\x0/g' | grep -zv '^<!--' | tr -d '\0' | grep 'protocol="HTTP' | sed 's/^.*port="//;s/".*//')
         for webapp in $(ls $path/webapps/ | egrep -v 'ROOT|.war'); do
             echo tomcat $(basename $path) $webapp uri http://$(ip_main):$port/$webapp
@@ -254,6 +254,14 @@ ssh_keys() {
             | awk 'NF' | awk '{ print $3 " " $1 " " $2}' \
             | sed "s/^/$user /" | sort | uniq
         fi
+    done
+}
+
+# output: <account> <sudo-rights>
+sudoers() {
+    usesudo=$(usesudo)
+    for user in $(awk -F'[/:]' '{if ($3 >= 1000 && $3 != 65534) print $1}' /etc/passwd); do
+        $usesudo sudo -U $user -l | sed "1,4d;s/^[[:space:]]*/$user /"
     done
 }
 
