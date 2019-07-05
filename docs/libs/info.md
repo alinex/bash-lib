@@ -101,6 +101,10 @@ It will return: `<package name> <version>`
 
 If called this script will generate a list of all allowed ssh-key based users with: `<account> <name> <type> <key>`
 
+### sudoers
+
+This will create a list with all users on the system and what they are allowed to call using sudo: `<account> <sudo-rights>`
+
 ### cron_tasks
 
 This will go through:
