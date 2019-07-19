@@ -28,6 +28,7 @@ SYSLOG_FACILITY='local7'            # output to syslog
 LOG_LEVEL='INFO'                    # minimum log level
 LOG_LEVEL_DEFAULT='AUTO_INFO'       # default log level to use if none
 LOG_DATE_FORMAT="+%Y-%m-%d %H:%M:%S"
+LOG_TAG="test"                      # defaults to current process name
 # file rotation
 LOG_ROTATE_TIME=[DAILY|WEEKLY|MONTHLY]
 LOG_ROTATE_SIZE=<bytes>
