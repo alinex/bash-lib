@@ -1,5 +1,7 @@
 # Last Changes
 
+-   Optimized logging within lock/unlock
+
 ## Version 1.3.0 - 5th July 2019
 
 -   support piped input in `psql_exec`
