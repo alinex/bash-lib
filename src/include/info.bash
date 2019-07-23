@@ -135,16 +135,19 @@ ip_list() {
 # city Dornhan
 # region Baden-Württemberg Region
 # country DE
-# loc 48.3501,8.5090
 # postal 72175
 # org AS29562 Unitymedia BW GmbH
 ip_info() {
     if [ -z "$_ip_info" ]; then
         command -v curl > /dev/null
         if [ $? -eq 0 ]; then
-            _ip_info=$(curl -s ipinfo.io | tr '\n' ' ' | sed -e 's/[{}]/''/g;s/",/"\n/g;s/ *"//g;s/:/ /g' | awk 'NF')
+            # ipinfo.io has a hard rate limit
+            # _ip_info=$(curl -s ipinfo.io | tr '\n' ' ' | sed -e 's/[{}]/''/g;s/",/"\n/g;s/ *"//g;s/:/ /g' | awk 'NF')
+            _ip_info=$(curl -s https://ipapi.co/json | sed 's/,$//' | tr '\n' '^' | sed -e 's/[{}]/''/g;s/\^/\n/g;s/ *"//g;s/:/ /g' | awk 'NF')
         else
-            _ip_info=$(wget -qO - ipinfo.io | tr '\n' ' ' | sed -e 's/[{}]/''/g;s/",/"\n/g;s/ *"//g;s/:/ /g' | awk 'NF')
+            # ipinfo.io has a hard rate limit
+            # _ip_info=$(wget -qO - ipinfo.io | tr '\n' ' ' | sed -e 's/[{}]/''/g;s/",/"\n/g;s/ *"//g;s/:/ /g' | awk 'NF')
+            _ip_info=$(wget -qO - https://ipapi.co/json | sed 's/,$//' | tr '\n' '^' | sed -e 's/[{}]/''/g;s/\^/\n/g;s/ *"//g;s/:/ /g' | awk 'NF')
         fi
     fi
     echo "$_ip_info"

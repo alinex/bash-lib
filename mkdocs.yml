@@ -32,7 +32,7 @@ theme:
     favicon: https://assets.gitlab-static.net/uploads/-/system/project/avatar/10069235/images__1_.jpeg
     language: en
     palette:
-        primary: green
+        primary: grey
         accent: deep orange
     font: false
     # remove to be GDPR conform
@@ -42,11 +42,11 @@ theme:
     feature:
         tabs: true
 
-repo_name: "alinex/bash-lib"
-repo_url: "https://gitlab.com/alinex/bash-lib"
+repo_name: 'alinex/bash-lib'
+repo_url: 'https://gitlab.com/alinex/bash-lib'
 
 extra:
-    manifest: "manifest.webmanifest"
+    manifest: 'manifest.webmanifest'
     social:
         - type: gitlab
           link: https://gitlab.com/alinex
@@ -61,6 +61,7 @@ extra:
 
 extra_css:
     - assets/extra.css
+    - assets/pdf.css
 
 plugins:
     - search

@@ -1,0 +1,15 @@
+@media print {
+    @page {
+        size: a4 portrait;
+        margin: 25mm 10mm 25mm 10mm;
+        font-family: "Roboto","Helvetica Neue",Helvetica,Arial,sans-serif;
+        white-space: pre;
+        color: grey;
+        @bottom-left {
+            content: '© Alexander Schilling';
+        }
+        @bottom-right {
+            content: 'Alinex DataStore';
+        }
+    }
+}

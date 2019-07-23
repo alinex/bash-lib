@@ -82,6 +82,7 @@ test_ip_list() {
     echo "> ip_list: $result" | sed ':a;N;$!ba;s/\n/\n> ip_list: /g'
     assertNotNull 'result' "$result"
 }
+# skip because of rate limit on ipinfo
 test_ip_info() {
     result=$(ip_info)
     assertEquals "exitCode" 0 $?
