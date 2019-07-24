@@ -166,6 +166,7 @@ _package[gitlab]="gitlab-ee gitlab-ce"
 _package[subversion]="subversion"
 _package[activemq]="activemq"
 _package[rabbitmq]="rabbitmq-server"
+_package[docker]="docker docker-ce"
 declare -r _package
 
 # Usage: package <name>
@@ -223,8 +224,8 @@ middleware() {
     usesudo=$(usesudo)
     # tomcat
     for path in $(echo /var/lib/tomcat*); do
-        port=$($usesudo cat $path/conf/server.xml | sed 's/<!--/\x0<!--/g;s/-->/-->\x0/g' | grep -zv '^<!--' | tr -d '\0' | grep 'protocol="HTTP' | sed 's/^.*port="//;s/".*//')
-        echo tomcat $(basename $path) uri http://$(ip_main):$port
+        port=$($usesudo cat $path/conf/server.xml 2>/dev/null | sed 's/<!--/\x0<!--/g;s/-->/-->\x0/g' | grep -zv '^<!--' | tr -d '\0' | grep 'protocol="HTTP' | sed 's/^.*port="//;s/".*//')
+        [ -n "$port" ] && echo tomcat $(basename $path) uri http://$(ip_main):$port
     done
 }
 
