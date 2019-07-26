@@ -142,7 +142,7 @@ Eight logging levels are supported, combining the levels from the Python logging
 | TRACE or VERBOSE   | 5       | 7      | Log Utilities | Very detailed logging (not always used)   |
 | DEBUG              | 10      | 7      | RFC 5424      | Diagnostically helpful messages           |
 | INFO               | 20      | 6      | RFC 5424      | Something which may be useful to know     |
-| NOTICE or NOTE     | 25      | 5      | RFC 5424      | Success message or step done              |
+| NOTICE             | 25      | 5      | RFC 5424      | Success message or step done              |
 | MARK               | 25      | 5      | own extension | Special marked like information asked for |
 | WARN or WARNING    | 30      | 4      | RFC 5424      | Warning which may be OK                   |
 | HEADING            | 35      | 4      | own extension | Start of new bigger Part                  |
