@@ -21,6 +21,7 @@ declare -A _log_level
 # These are the python numeric log levels, with the addition
 # of RFC 5424 levels. The RFC 5424 levels have been given
 # numbers to sequence them with the python levels.
+_log_level[TRACE]=5
 _log_level[DEBUG]=10
 _log_level[INFO]=20
 _log_level[NOTICE]=25   # RFC 5424 specific
@@ -41,6 +42,7 @@ declare -A _log_color
 # These are the python numeric log levels, with the addition
 # of RFC 5424 levels. The RFC 5424 levels have been given
 # numbers to sequence them with the python levels.
+_log_color[TRACE]="$(dim +)"
 _log_color[DEBUG]="$(dim +)"
 _log_color[INFO]=""
 _log_color[NOTICE]="$(green +)" # RFC 5424 specific
@@ -59,6 +61,7 @@ declare -r _log_color
 
 # These are the RFC 5424 numeric severity levels.
 declare -A _syslog_severity
+_syslog_severity[TRACE]=7
 _syslog_severity[DEBUG]=7
 _syslog_severity[INFO]=6
 _syslog_severity[NOTICE]=5
@@ -76,9 +79,10 @@ _syslog_severity[EMERGENCY]=0
 declare -r _syslog_severity
 
 declare -A _log_auto
+_log_auto[TRACE]="\b(TRACE|VERBOSE)\b"
 _log_auto[DEBUG]="\b(DEBUG|COPYRIGHT|WARRANTY)\b|^\s*(AT|AFTER) "
 _log_auto[INFO]="\b(INFO|(START|CALL)(ING)?|TRANSMITTED)\b"
-_log_auto[NOTICE]="\b(NOTICE|ERFOLGREICH|SUCCEEDED|FINISHED)\b"
+_log_auto[NOTICE]="\b(NOTICE|NOTE|ERFOLGREICH|SUCCEEDED|FINISHED)\b"
 _log_auto[MARK]="\b(MARK)\b|!!!"
 _log_auto[WARN]="\b(WARN)\b|\bW:"
 _log_auto[WARNING]="\b(WARNING|MISSING|UNKNOWN)\b"

@@ -1,6 +1,7 @@
 # Last Changes
 
 -   Optimized logging within lock/unlock
+-   Support the TRACE level in logging to be more detailed as DEBUG
 
 ## Version 1.3.0 - 5th July 2019
 

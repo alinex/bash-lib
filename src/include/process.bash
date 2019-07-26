@@ -40,6 +40,8 @@ lock() {
         if [ ! $logged ]; then  # write message once
             log INFO "Waiting for unlock $lockfile..."
             logged=1
+        else
+            log TRACE "Waiting for unlock $lockfile..."
         fi
         # if the symlink failed, wait for the current lock holder to exit
         sleep $LOCK_SLEEP
