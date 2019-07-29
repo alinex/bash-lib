@@ -23,6 +23,6 @@ needsudo() {
     [ $(id -u) -eq 0 ] && return 0
     sudo -v 2>/dev/null || log_exit ALERT "For this call root rights are needed! Please use another user or allow sudo for user $(whoami)."
     for cmd in "$@"; do
-        sudo -l $cmd || log_exit ALERT "User $(whoami) is not allowed to call 'sudo $cmd', but this is neccessary!"
+        sudo -l $cmd >/dev/null || log_exit ALERT "User $(whoami) is not allowed to call 'sudo $cmd', but this is neccessary!"
     done
 }
