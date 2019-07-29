@@ -14,7 +14,7 @@
 source_dir=$(dirname $(readlink -f "${BASH_SOURCE[0]:-$(pwd)/x}"))
 source "$source_dir/colors.bash" # load color methods
 
-declare -ar _log_detect=(DEBUG INFO NOTICE WARN MARK WARNING HEADING ERR ERROR CRIT CRITICAL ALERT EMERG EMERGENCY)
+declare -ar _log_detect=(TRACE DEBUG INFO NOTICE WARN MARK WARNING HEADING ERR ERROR CRIT CRITICAL ALERT EMERG EMERGENCY)
 
 # Log levels are taken from python and RFC 5424.
 declare -A _log_level
@@ -251,12 +251,12 @@ _log() {
     # check message level
     declare -u message_level=${1:-AUTO}
     if [ "${message_level:0:4}" = "AUTO" ]; then
-        min=${_log_level[DEBUG]}
+        min=${_log_level[TRACE]}
         if [ "${message_level:4:1}" = "_" ]; then
             min=${_log_level[${message_level:5:10}]}
             message_level="${message_level:5:10}" # set to min level
         else
-            message_level="DEBUG" # use as min level
+            message_level="TRACE" # use as min level
         fi
         for i in "${_log_detect[@]}"
         do
