@@ -12,7 +12,7 @@
 
 source_dir=$(dirname $(readlink -f "${BASH_SOURCE[0]:-$(pwd)/x}"))
 source "$source_dir/log.bash" # load log handler
-[ $(id -u) -ne 0 ] && usesudo="sudo" || usesudo=""
+usesudo=$(usesudo)
 
 # start basic analyzation
 
@@ -167,6 +167,7 @@ _package[subversion]="subversion"
 _package[activemq]="activemq"
 _package[rabbitmq]="rabbitmq-server"
 _package[docker]="docker docker-ce"
+_package[elasticsearch]="elasticsearch"
 declare -r _package
 
 # Usage: package <name>
@@ -221,7 +222,6 @@ package_list() {
 # output: <group> <middleware> <setting> <value>
 #         tomcat     tomcat8_1   uri http://:8080
 middleware() {
-    usesudo=$(usesudo)
     # tomcat
     for path in $(echo /var/lib/tomcat*); do
         port=$($usesudo cat $path/conf/server.xml 2>/dev/null | sed 's/<!--/\x0<!--/g;s/-->/-->\x0/g' | grep -zv '^<!--' | tr -d '\0' | grep 'protocol="HTTP' | sed 's/^.*port="//;s/".*//')
@@ -233,7 +233,6 @@ middleware() {
 #         tomcat        tomcat8_1 xxx  uri http://:8080/context
 #         tomcat        tomcat8_1 xxx  threads 500
 app() {
-    usesudo=$(usesudo)
     # tomcat
     for path in $(ls -d /var/lib/tomcat* 2>/dev/null); do
         port=$($usesudo cat $path/conf/server.xml | sed 's/<!--/\x0<!--/g;s/-->/-->\x0/g' | grep -zv '^<!--' | tr -d '\0' | grep 'protocol="HTTP' | sed 's/^.*port="//;s/".*//')
@@ -267,7 +266,10 @@ ssh_keys() {
 #         root      (ALL : ALL) NOPASSWD: ALL
 #         admin     (root) NOPASSWD: /bin/systemctl * tomcat8*
 sudoers() {
-    usesudo=$(usesudo)
+    if [ $(id -u) -ne 0 ] && [ -z "$usesudo" ]; then
+        log WARN "Could not analyze sudoers without sudo rights."
+        return
+    fi
     for user in $(awk -F'[/:]' '{if ($3 >= 1000 && $3 != 65534) print $1}' /etc/passwd); do
         $usesudo sudo -U $user -l | sed "1,4d;s/^[[:space:]]*/$user /"
     done
