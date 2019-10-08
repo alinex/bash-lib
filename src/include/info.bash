@@ -310,3 +310,8 @@ cron_tasks() {
         done
     done
 }
+
+# output: <share> <type> <size>
+mounts() {
+    ( df -Tt nfs 2>/dev/null; df -Tt cifs 2>/dev/null ) | grep / | awk '{ printf "%s %s %.0f\n", $1, $2, $4+$5 }'
+}
