@@ -172,6 +172,7 @@ _package[activemq]="activemq"
 _package[rabbitmq]="rabbitmq-server"
 _package[docker]="docker docker-ce"
 _package[elasticsearch]="elasticsearch"
+_package[s3cmd]="s3cmd"
 declare -r _package
 
 # Usage: package <name>
