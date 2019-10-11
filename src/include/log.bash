@@ -324,7 +324,7 @@ log_cmd() {
     LOG_CMD_LEVEL=${LOG_CMD_LEVEL:-AUTO}
     local cmd="$1"
     local call=$(printf "%q " "$@")
-    [ -n "$LOG_CMD_QUIET" ] || log INFO "calling: $call"
+    [ -n "$LOG_CMD_QUIET" ] || log $LOG_CMD_LEVEL "calling: $call"
     # result=$(eval $(printf "%q " "$@") |& tee >/dev/fd/5 >(log) )
 
     exec 5>&1 # fd to write to real output
@@ -342,7 +342,7 @@ log_cmd() {
     sleep 1 # wait for output
 
     if [ $code -eq 0 ]; then
-        [ -n "$LOG_CMD_QUIET" ] || log NOTICE "$cmd call succeeded"
+        [ -n "$LOG_CMD_QUIET" ] || log $LOG_CMD_LEVEL "$cmd call succeeded"
     else
         log ERROR "$cmd exited with return code $code"
     fi

@@ -162,7 +162,7 @@ _package[nginx]="nginx"
 _package[tomcat]="tomcat9 tomcat8 tomcat7 tomcat6"
 _package[jdk]="openjdk-11-jdk openjdk-10-jdk openjdk-9-jdk openjdk-8-jdk openjdk-7-jdk zulu-7 openjdk-6-jdk oracle-java8-installer"
 _package[jre]="openjdk-11-jre openjdk-10-jre openjdk-9-jre openjdk-8-jre openjdk-7-jre openjdk-6-jre"
-_package[postgresql]="postgresql-11 postgresql-10 postgresql-9.6 postgresql-9.4 postgresql-9.3"
+_package[postgresql]="postgresql-11 postgresql-10 postgresql-9.6 postgresql-9.4 postgresql-9.3 postgresql-client-11 postgresql-client-10 postgresql-client-9.6 postgresql-client-9.4 postgresql-client-9.3"
 _package[mysql]="mysql-server percona-server-server-5.7"
 _package[redis]="redis-server"
 _package[gitlab]="gitlab-ee gitlab-ce"
@@ -172,7 +172,9 @@ _package[activemq]="activemq"
 _package[rabbitmq]="rabbitmq-server"
 _package[docker]="docker docker-ce"
 _package[elasticsearch]="elasticsearch"
+# tools
 _package[s3cmd]="s3cmd"
+_package[s3cmd]="rclone"
 declare -r _package
 
 # Usage: package <name>
