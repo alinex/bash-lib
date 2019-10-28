@@ -172,6 +172,7 @@ _package[activemq]="activemq"
 _package[rabbitmq]="rabbitmq-server"
 _package[docker]="docker docker-ce"
 _package[elasticsearch]="elasticsearch"
+add ftp_package[ftp]="proftpd-basic openssh-sftp-server"
 # tools
 _package[s3cmd]="s3cmd"
 _package[s3cmd]="rclone"
