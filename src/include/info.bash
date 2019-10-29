@@ -231,9 +231,13 @@ package_list() {
 #         tomcat     tomcat8_1   uri http://:8080
 middleware() {
     # tomcat
-    for path in $(echo /var/lib/tomcat*); do
-        port=$($usesudo cat $path/conf/server.xml 2>/dev/null | sed 's/<!--/\x0<!--/g;s/-->/-->\x0/g' | grep -zv '^<!--' | tr -d '\0' | grep 'protocol="HTTP' | sed 's/^.*port="//;s/".*//')
-        [ -n "$port" ] && echo tomcat $(basename $path) uri http://$(ip_main):$port
+    for name in $(systemctl --type=service --state=active | grep tomcat | sed 's/.*@//;s/\..*//;s/.* //'); do
+        port=$($usesudo cat /var/lib/$name/conf/server.xml 2>/dev/null | sed 's/<!--/\x0<!--/g;s/-->/-->\x0/g' | grep -zv '^<!--' | tr -d '\0' | grep 'protocol="HTTP' | sed 's/^.*port="//;s/".*//')
+        [ -n "$port" ] && echo tomcat $name uri http://$(ip_main):$port
+        xmx=$(cat /etc/default/$name | egrep ^JAVA_OPTS | grep \\-Xmx | sed 's/.*-Xmx\([0-9]*[mg]\).*/\1/')
+        [ -n "$xmx" ] && echo tomcat $name xmx $xmx
+        threads=$( cat /var/lib/tomcat8_1/conf/server.xml | sed '/<!--.*-->/d' | sed '/<!--/,/-->/d' | grep maxThreads | sed 's/.* maxThreads="//;s/".*//')
+        [ -n "$threads" ] && echo tomcat $name threads $threads
     done
 }
 
