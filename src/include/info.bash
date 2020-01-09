@@ -173,9 +173,9 @@ _package[activemq]="activemq"
 _package[rabbitmq]="rabbitmq-server"
 _package[docker]="docker docker-ce"
 _package[elasticsearch]="elasticsearch"
-_package[syslog]="rsyslog"
-_package[ftp]="proftpd-basic openssh-sftp-server"
-# tools
+#_package[syslog]="rsyslog"
+#_package[ftp]="proftpd-basic openssh-sftp-server"
+# special tools
 _package[s3cmd]="s3cmd"
 _package[s3cmd]="rclone"
 declare -r _package
@@ -234,11 +234,13 @@ package_list() {
 middleware() {
     # tomcat
     for name in $(systemctl --type=service --state=active | grep tomcat | sed 's/.*@//;s/\..*//;s/.* //'); do
-        port=$($usesudo cat /var/lib/$name/conf/server.xml 2>/dev/null | sed 's/<!--/\x0<!--/g;s/-->/-->\x0/g' | grep -zv '^<!--' | tr -d '\0' | grep 'protocol="HTTP' | sed 's/^.*port="//;s/".*//')
+        port=$($usesudo cat /var/lib/$name/conf/server.xml 2>/dev/null | sed 's/<!--/\x0<!--/g;s/-->/-->\x0/g' \
+        | grep -zv '^<!--' | tr -d '\0' | grep 'protocol="HTTP' | sed 's/^.*port="//;s/".*//')
         [ -n "$port" ] && echo tomcat $name uri http://$(ip_main):$port
         xmx=$(cat /etc/default/$name | egrep ^JAVA_OPTS | grep \\-Xmx | sed 's/.*-Xmx\([0-9]*[mg]\).*/\1/')
         [ -n "$xmx" ] && echo tomcat $name xmx $xmx
-        threads=$( cat /var/lib/tomcat8_1/conf/server.xml | sed '/<!--.*-->/d' | sed '/<!--/,/-->/d' | grep maxThreads | sed 's/.* maxThreads="//;s/".*//')
+        threads=$( cat /var/lib/$name/conf/server.xml | sed '/<!--.*-->/d' | sed '/<!--/,/-->/d' \
+        | (grep maxThreads || echo "200") | sed 's/.* maxThreads="//;s/".*//')
         [ -n "$threads" ] && echo tomcat $name threads $threads
     done
 }
@@ -249,7 +251,8 @@ middleware() {
 app() {
     # tomcat
     for path in $(ls -d /var/lib/tomcat* 2>/dev/null); do
-        port=$($usesudo cat $path/conf/server.xml | sed 's/<!--/\x0<!--/g;s/-->/-->\x0/g' | grep -zv '^<!--' | tr -d '\0' | grep 'protocol="HTTP' | sed 's/^.*port="//;s/".*//')
+        port=$($usesudo cat $path/conf/server.xml | sed 's/<!--/\x0<!--/g;s/-->/-->\x0/g' \
+        | grep -zv '^<!--' | tr -d '\0' | grep 'protocol="HTTP' | sed 's/^.*port="//;s/".*//')
         for webapp in $(ls $path/webapps/ | egrep -v 'ROOT|.war'); do
             echo tomcat $(basename $path) $webapp uri http://$(ip_main):$port/$webapp
         done
