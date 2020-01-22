@@ -88,10 +88,10 @@ _log_auto[WARN]="\b(WARN)\b|\bW:"
 _log_auto[WARNING]="\b(WARNING|MISSING|UNKNOWN|PENDING)\b"
 _log_auto[HEADING]="\b(HEADING)\b"
 _log_auto[ERR]="\b(ERR)\b|\bE:"
-_log_auto[ERROR]="\b(ERROR|FEHLERHAFT|FAILED|FAILING|COMMAND NOT FOUND|PERMISSION DENIED)\b|ERROR\b"
+_log_auto[ERROR]="\b(ERROR|FEHLERHAFT|FAILED|FAILING|COMMAND NOT FOUND|PERMISSION DENIED)\b"
 _log_auto[CRIT]="\b(CRIT)\b"
 _log_auto[CRITICAL]="\b(CRITICAL|FATAL)\b"
-_log_auto[ALERT]="\b(ALERT|EXCEPTION)\b"
+_log_auto[ALERT]="\b(ALERT|EXCEPTION)\b|EXCEPTION\b"
 _log_auto[EMERG]="\b(EMERG)\b"
 _log_auto[EMERGENCY]="\b(EMERGENCY)\b"
 declare -r _log_auto
@@ -329,13 +329,22 @@ log_cmd() {
 
     exec 5>&1 # fd to write to real output
     set -o pipefail
+    # early tries:
     # eval "stdbuf -o0 -e0 $call" |& tee >&5 >(log)
-#    eval "tee >(log) | stdbuf -o0 -e0 $call" </dev/stdin |& tee >&5 >(log)
-#    ( eval "stdbuf -o0 -e0 $call" 3>&1 1>&2 2>&3 | tee >&5 >(log) ) 3>&1 1>&2 2>&3 | tee >&5 >(log)
-#    ( eval "stdbuf -o0 -e0 $call" 3>&1 1>&2 2>&3 | tee >&5 >(log AUTO_WARN) ) 3>&1 1>&2 2>&3 | tee >&5 >(log)
-    #tee >(log) | stdbuf -o0 -e0 $call |& tee >&5 >(log)
-    #LANG=C stdbuf -o0 -e0 $call </dev/stdin |& tee >&5 >(log)
-    eval "LANG=C stdbuf -o0 -e0 $call </dev/stdin |& tee >&5 >(log $LOG_CMD_LEVEL)"
+    # eval "tee >(log) | stdbuf -o0 -e0 $call" </dev/stdin |& tee >&5 >(log)
+    # ( eval "stdbuf -o0 -e0 $call" 3>&1 1>&2 2>&3 | tee >&5 >(log) ) 3>&1 1>&2 2>&3 | tee >&5 >(log)
+    # ( eval "stdbuf -o0 -e0 $call" 3>&1 1>&2 2>&3 | tee >&5 >(log AUTO_WARN) ) 3>&1 1>&2 2>&3 | tee >&5 >(log)
+    # tee >(log) | stdbuf -o0 -e0 $call |& tee >&5 >(log)
+    # LANG=C stdbuf -o0 -e0 $call </dev/stdin |& tee >&5 >(log)
+
+    # eval "LANG=C stdbuf -o0 -e0 $call </dev/stdin |& tee >&5 >(log $LOG_CMD_LEVEL)"
+    # last line won't work if called using cron
+
+    # Idea:
+    # $call 1> >(tee >(log ) ) 2> >(tee >(log AUTO_WARN ) >&2 )
+
+    # call it without logging output
+    $call
     code=$?
     #code=${PIPESTATUS[0]}
     exec 5>&- # close
