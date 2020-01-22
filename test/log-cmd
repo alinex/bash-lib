@@ -1,6 +1,6 @@
 #!/bin/bash
 
-LOG_LEVEL=DEBUG
+LOG_LEVEL=TRACE
 LOG_CONSOLE=SIMPLE
 
 source_dir=$(dirname "${BASH_SOURCE[0]}")
@@ -10,7 +10,7 @@ source "$source_dir/../src/include/log.bash"
 #set -e # exit on any error
 
 echo $(cyan "$(bold)Simple commands:")
-log_cmd apt-get update >/dev/null || log ALERT "Could not..."
+log_cmd sudo apt-get update >/dev/null || log ALERT "Could not..."
 
 echo $(cyan "$(bold)Quiet commands:")
 LOG_CMD_QUIET=1

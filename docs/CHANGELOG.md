@@ -3,7 +3,12 @@
 -   Optimized logging within lock/unlock
 -   Support the TRACE level in logging to be more detailed as DEBUG
 
-## Version 1.3.0 - 5th July 2019
+## Version 1.3.1 (22.01.2020)
+
+-   command logging fixed (had problems if called through sudo or cron)
+-   error detection optimized in logging
+
+## Version 1.3.0 (05.07.2019)
 
 -   support piped input in `psql_exec`
 -   increase info package with
@@ -15,7 +20,7 @@
 -   automatic unit testing based on shunit2
 -   add sudo support to core
 
-## Version 1.2.1 - 21st February 2019
+## Version 1.2.1 (21.02.2019)
 
 -   fix process locking in `lock`
 -   add changelog

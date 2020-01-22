@@ -336,15 +336,12 @@ log_cmd() {
     # ( eval "stdbuf -o0 -e0 $call" 3>&1 1>&2 2>&3 | tee >&5 >(log AUTO_WARN) ) 3>&1 1>&2 2>&3 | tee >&5 >(log)
     # tee >(log) | stdbuf -o0 -e0 $call |& tee >&5 >(log)
     # LANG=C stdbuf -o0 -e0 $call </dev/stdin |& tee >&5 >(log)
-
+    # next line won't work if called using cron
     # eval "LANG=C stdbuf -o0 -e0 $call </dev/stdin |& tee >&5 >(log $LOG_CMD_LEVEL)"
-    # last line won't work if called using cron
-
-    # Idea:
-    # $call 1> >(tee >(log ) ) 2> >(tee >(log AUTO_WARN ) >&2 )
-
     # call it without logging output
-    $call
+    #$call
+#    $call 1> >(tee >(log ) ) 2> >(tee >(log AUTO_WARN ) >&2 )
+    $call 1> >(tee >(log ) ) 2> >(log AUTO_WARN >&2 )
     code=$?
     #code=${PIPESTATUS[0]}
     exec 5>&- # close

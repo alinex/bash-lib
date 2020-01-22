@@ -190,3 +190,32 @@ The rotated files may also be compressed by setting the `LOG_ROTATE_COMPRESS` fl
 ## Switching log file
 
 If really necessary, it is possible to switch log file by changing the setting of `LOG_FILE` and calling `log_init` without parameters.
+
+## Log Commands
+
+It is also possible to log details from the commands completely:
+
+```bash
+log_cmd sudo apt-get update >/dev/null
+```
+
+This will log the called command, the output and error messages, the exit code and pipe the standard output further on.
+
+```text
+[INFO     ] calling: sudo apt-get update
+[TRACE    ] OK:1 http://de.archive.ubuntu.com/ubuntu bionic InRelease
+[TRACE    ] OK:2 http://linux.teamviewer.com/deb stable InRelease
+[TRACE    ] OK:3 http://ppa.launchpad.net/micahflee/ppa/ubuntu bionic InRelease
+[TRACE    ] OK:4 http://de.archive.ubuntu.com/ubuntu bionic-updates InRelease
+[TRACE    ] Holen:5 http://archive.neon.kde.org/user bionic InRelease [131 kB]
+[TRACE    ] OK:6 http://apt.postgresql.org/pub/repos/apt buster-pgdg InRelease
+[TRACE    ] OK:7 http://packages.microsoft.com/repos/vscode stable InRelease
+[TRACE    ] OK:8 http://de.archive.ubuntu.com/ubuntu bionic-backports InRelease
+[TRACE    ] OK:9 http://security.ubuntu.com/ubuntu bionic-security InRelease
+[TRACE    ] OK:10 http://apt.postgresql.org/pub/repos/apt jessie-pgdg InRelease
+[TRACE    ] OK:11 https://repo.fortinet.com/repo/ubuntu /bionic InRelease
+[TRACE    ] Es wurden 131 kB in 2 s geholt (76,0 kB/s).
+[TRACE    ] Paketlisten werden gelesen...
+[WARN     ] W: Das Laden der konfigurierten Datei »multiverse/binary-i386/Packages« wird übersprungen, da das Depot »https://repo.fortinet.com/repo/ubuntu /bionic InRelease« die Datei scheinbar nicht bereitstellt. (Schreibfehler bei der Angabe der Komponente in sources.list?)
+[NOTICE   ] sudo call succeeded
+```

@@ -37,7 +37,7 @@ psql_exec() {
         fi
     else
         if [ -n "$PGLOG" ] && [ "$PGLOG" != 0 ] ; then
-            log_cmd psql -v ON_ERROR_STOP=1 -Atc "$1"
+            psql -v ON_ERROR_STOP=1 -Atc "$1"
         else
             psql -v ON_ERROR_STOP=1 -Atc "$1"
         fi

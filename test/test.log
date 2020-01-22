@@ -1,0 +1,122 @@
+2020-01-22 07:56:48 log-cmd:main[12869] INFO: calling: apt-get update(B[m
+[31m2020-01-22 07:56:49 log-cmd:main[12869] ERR: E: Sperrdatei /var/lib/apt/lists/lock konnte nicht geöffnet werden. - open (13: Keine Berechtigung)(B[m
+[31m2020-01-22 07:56:49 log-cmd:main[12869] ERR: E: Das Verzeichnis /var/lib/apt/lists/ kann nicht gesperrt werden.(B[m
+[33m2020-01-22 07:56:49 log-cmd:main[12869] WARN: W: Problem beim Entfernen (unlink) der Datei /var/cache/apt/pkgcache.bin - RemoveCaches (13: Keine Berechtigung)(B[m
+[33m2020-01-22 07:56:49 log-cmd:main[12869] WARN: W: Problem beim Entfernen (unlink) der Datei /var/cache/apt/srcpkgcache.bin - RemoveCaches (13: Keine Berechtigung)(B[m
+[31m2020-01-22 07:56:50 log-cmd:main[12869] ERROR: apt-get exited with return code 100(B[m
+[31m[1m[7m2020-01-22 07:56:50 log-cmd:main[12869] ALERT: Could not...(B[m
+2020-01-22 07:58:03 log-cmd:main[13259] INFO: calling: sudo apt-get update(B[m
+[33m2020-01-22 07:58:12 log-cmd:main[13259] WARN: W: Das Laden der konfigurierten Datei »multiverse/binary-i386/Packages« wird übersprungen, da das Depot »https://repo.fortinet.com/repo/ubuntu /bionic InRelease« die Datei scheinbar nicht bereitstellt. (Schreibfehler bei der Angabe der Komponente in sources.list?)(B[m
+[32m2020-01-22 07:58:13 log-cmd:main[13259] NOTICE: sudo call succeeded(B[m
+2020-01-22 07:59:13 log-cmd:main[14450] INFO: calling: sudo apt-get update(B[m
+[33m2020-01-22 07:59:15 log-cmd:main[14450] WARN: W: Skipping acquire of configured file 'multiverse/binary-i386/Packages' as repository 'https://repo.fortinet.com/repo/ubuntu /bionic InRelease' does not seem to provide it (sources.list entry misspelt?)(B[m
+[32m2020-01-22 07:59:16 log-cmd:main[14450] NOTICE: sudo call succeeded(B[m
+2020-01-22 08:00:13 log-cmd:main[17342] INFO: calling: sudo apt-get update(B[m
+[2m2020-01-22 08:00:13 log-cmd:main[17342] TRACE: Hit:1 http://packages.microsoft.com/repos/vscode stable InRelease(B[m
+[2m2020-01-22 08:00:13 log-cmd:main[17342] TRACE: Hit:2 http://ppa.launchpad.net/micahflee/ppa/ubuntu bionic InRelease(B[m
+[2m2020-01-22 08:00:13 log-cmd:main[17342] TRACE: Hit:3 http://de.archive.ubuntu.com/ubuntu bionic InRelease(B[m
+[2m2020-01-22 08:00:13 log-cmd:main[17342] TRACE: Get:4 http://archive.neon.kde.org/user bionic InRelease [131 kB](B[m
+[2m2020-01-22 08:00:13 log-cmd:main[17342] TRACE: Hit:5 http://linux.teamviewer.com/deb stable InRelease(B[m
+[2m2020-01-22 08:00:13 log-cmd:main[17342] TRACE: Hit:6 http://de.archive.ubuntu.com/ubuntu bionic-updates InRelease(B[m
+[2m2020-01-22 08:00:13 log-cmd:main[17342] TRACE: Hit:7 http://de.archive.ubuntu.com/ubuntu bionic-backports InRelease(B[m
+[2m2020-01-22 08:00:13 log-cmd:main[17342] TRACE: Hit:8 http://security.ubuntu.com/ubuntu bionic-security InRelease(B[m
+[2m2020-01-22 08:00:13 log-cmd:main[17342] TRACE: Hit:9 http://apt.postgresql.org/pub/repos/apt buster-pgdg InRelease(B[m
+[2m2020-01-22 08:00:14 log-cmd:main[17342] TRACE: Hit:10 http://apt.postgresql.org/pub/repos/apt jessie-pgdg InRelease(B[m
+[2m2020-01-22 08:00:14 log-cmd:main[17342] TRACE: Hit:11 https://repo.fortinet.com/repo/ubuntu /bionic InRelease(B[m
+[2m2020-01-22 08:00:14 log-cmd:main[17342] TRACE: Fetched 131 kB in 1s (132 kB/s)(B[m
+[2m2020-01-22 08:00:15 log-cmd:main[17342] TRACE: Reading package lists...(B[m
+[33m2020-01-22 08:00:15 log-cmd:main[17342] WARN: W: Skipping acquire of configured file 'multiverse/binary-i386/Packages' as repository 'https://repo.fortinet.com/repo/ubuntu /bionic InRelease' does not seem to provide it (sources.list entry misspelt?)(B[m
+[32m2020-01-22 08:00:16 log-cmd:main[17342] NOTICE: sudo call succeeded(B[m
+[2m2020-01-22 08:00:16 log-cmd:main[17342] TRACE: Wed Jan 22 08:00:16 CET 2020(B[m
+2020-01-22 08:00:32 log-cmd:main[18585] INFO: calling: sudo apt-get update(B[m
+[32m2020-01-22 08:00:35 log-cmd:main[18585] NOTICE: sudo call succeeded(B[m
+2020-01-22 08:00:43 log-cmd:main[19600] INFO: calling: sudo apt-get update(B[m
+[2m2020-01-22 08:00:44 log-cmd:main[19600] TRACE: OK:1 http://linux.teamviewer.com/deb stable InRelease(B[m
+[2m2020-01-22 08:00:44 log-cmd:main[19600] TRACE: OK:2 http://packages.microsoft.com/repos/vscode stable InRelease(B[m
+[2m2020-01-22 08:00:44 log-cmd:main[19600] TRACE: OK:3 http://ppa.launchpad.net/micahflee/ppa/ubuntu bionic InRelease(B[m
+[2m2020-01-22 08:00:44 log-cmd:main[19600] TRACE: OK:4 http://de.archive.ubuntu.com/ubuntu bionic InRelease(B[m
+[2m2020-01-22 08:00:44 log-cmd:main[19600] TRACE: Holen:5 http://archive.neon.kde.org/user bionic InRelease [131 kB](B[m
+[2m2020-01-22 08:00:44 log-cmd:main[19600] TRACE: OK:6 http://de.archive.ubuntu.com/ubuntu bionic-updates InRelease(B[m
+[2m2020-01-22 08:00:44 log-cmd:main[19600] TRACE: OK:7 http://de.archive.ubuntu.com/ubuntu bionic-backports InRelease(B[m
+[2m2020-01-22 08:00:44 log-cmd:main[19600] TRACE: OK:8 http://security.ubuntu.com/ubuntu bionic-security InRelease(B[m
+[2m2020-01-22 08:00:44 log-cmd:main[19600] TRACE: OK:9 http://apt.postgresql.org/pub/repos/apt buster-pgdg InRelease(B[m
+[2m2020-01-22 08:00:44 log-cmd:main[19600] TRACE: OK:10 http://apt.postgresql.org/pub/repos/apt jessie-pgdg InRelease(B[m
+[2m2020-01-22 08:00:45 log-cmd:main[19600] TRACE: OK:11 https://repo.fortinet.com/repo/ubuntu /bionic InRelease(B[m
+[2m2020-01-22 08:00:46 log-cmd:main[19600] TRACE: Es wurden 131 kB in 2 s geholt (72,4 kB/s).(B[m
+[2m2020-01-22 08:00:48 log-cmd:main[19600] TRACE: Paketlisten werden gelesen...(B[m
+[33m2020-01-22 08:00:48 log-cmd:main[19600] WARN: W: Das Laden der konfigurierten Datei »multiverse/binary-i386/Packages« wird übersprungen, da das Depot »https://repo.fortinet.com/repo/ubuntu /bionic InRelease« die Datei scheinbar nicht bereitstellt. (Schreibfehler bei der Angabe der Komponente in sources.list?)(B[m
+[32m2020-01-22 08:00:49 log-cmd:main[19600] NOTICE: sudo call succeeded(B[m
+[2m2020-01-22 08:00:49 log-cmd:main[19600] TRACE: Mi 22. Jan 08:00:49 CET 2020(B[m
+2020-01-22 08:21:24 log-cmd:main[22335] INFO: calling: sudo apt-get update(B[m
+[2m2020-01-22 08:21:28 log-cmd:main[22335] TRACE: OK:1 http://ppa.launchpad.net/micahflee/ppa/ubuntu bionic InRelease(B[m
+[2m2020-01-22 08:21:28 log-cmd:main[22335] TRACE: OK:2 http://linux.teamviewer.com/deb stable InRelease(B[m
+[2m2020-01-22 08:21:28 log-cmd:main[22335] TRACE: OK:3 http://de.archive.ubuntu.com/ubuntu bionic InRelease(B[m
+[2m2020-01-22 08:21:28 log-cmd:main[22335] TRACE: Holen:4 http://archive.neon.kde.org/user bionic InRelease [131 kB](B[m
+[2m2020-01-22 08:21:28 log-cmd:main[22335] TRACE: OK:5 http://packages.microsoft.com/repos/vscode stable InRelease(B[m
+[2m2020-01-22 08:21:28 log-cmd:main[22335] TRACE: OK:6 http://de.archive.ubuntu.com/ubuntu bionic-updates InRelease(B[m
+[2m2020-01-22 08:21:28 log-cmd:main[22335] TRACE: OK:7 http://de.archive.ubuntu.com/ubuntu bionic-backports InRelease(B[m
+[2m2020-01-22 08:21:28 log-cmd:main[22335] TRACE: Holen:8 http://security.ubuntu.com/ubuntu bionic-security InRelease [88,7 kB](B[m
+[2m2020-01-22 08:21:28 log-cmd:main[22335] TRACE: OK:9 http://apt.postgresql.org/pub/repos/apt buster-pgdg InRelease(B[m
+[2m2020-01-22 08:21:28 log-cmd:main[22335] TRACE: OK:10 http://apt.postgresql.org/pub/repos/apt jessie-pgdg InRelease(B[m
+[2m2020-01-22 08:21:29 log-cmd:main[22335] TRACE: OK:11 https://repo.fortinet.com/repo/ubuntu /bionic InRelease(B[m
+[2m2020-01-22 08:21:32 log-cmd:main[22335] TRACE: Es wurden 220 kB in 1 s geholt (239 kB/s).(B[m
+[2m2020-01-22 08:21:33 log-cmd:main[22335] TRACE: Paketlisten werden gelesen...(B[m
+[33m2020-01-22 08:21:33 log-cmd:main[22335] WARN: W: Das Laden der konfigurierten Datei »multiverse/binary-i386/Packages« wird übersprungen, da das Depot »https://repo.fortinet.com/repo/ubuntu /bionic InRelease« die Datei scheinbar nicht bereitstellt. (Schreibfehler bei der Angabe der Komponente in sources.list?)(B[m
+[32m2020-01-22 08:21:34 log-cmd:main[22335] NOTICE: sudo call succeeded(B[m
+[2m2020-01-22 08:21:34 log-cmd:main[22335] TRACE: Mi 22. Jan 08:21:34 CET 2020(B[m
+2020-01-22 08:22:07 log-cmd:main[23624] INFO: calling: sudo apt-get update(B[m
+[2m2020-01-22 08:22:07 log-cmd:main[23624] TRACE: OK:1 http://linux.teamviewer.com/deb stable InRelease(B[m
+[2m2020-01-22 08:22:07 log-cmd:main[23624] TRACE: OK:2 http://ppa.launchpad.net/micahflee/ppa/ubuntu bionic InRelease(B[m
+[2m2020-01-22 08:22:07 log-cmd:main[23624] TRACE: Holen:3 http://archive.neon.kde.org/user bionic InRelease [131 kB](B[m
+[2m2020-01-22 08:22:07 log-cmd:main[23624] TRACE: OK:4 http://de.archive.ubuntu.com/ubuntu bionic InRelease(B[m
+[2m2020-01-22 08:22:07 log-cmd:main[23624] TRACE: OK:5 http://apt.postgresql.org/pub/repos/apt buster-pgdg InRelease(B[m
+[2m2020-01-22 08:22:07 log-cmd:main[23624] TRACE: OK:6 http://security.ubuntu.com/ubuntu bionic-security InRelease(B[m
+[2m2020-01-22 08:22:07 log-cmd:main[23624] TRACE: OK:7 http://packages.microsoft.com/repos/vscode stable InRelease(B[m
+[2m2020-01-22 08:22:07 log-cmd:main[23624] TRACE: OK:8 http://de.archive.ubuntu.com/ubuntu bionic-updates InRelease(B[m
+[2m2020-01-22 08:22:07 log-cmd:main[23624] TRACE: OK:9 http://de.archive.ubuntu.com/ubuntu bionic-backports InRelease(B[m
+[2m2020-01-22 08:22:07 log-cmd:main[23624] TRACE: OK:10 http://apt.postgresql.org/pub/repos/apt jessie-pgdg InRelease(B[m
+[2m2020-01-22 08:22:08 log-cmd:main[23624] TRACE: OK:11 https://repo.fortinet.com/repo/ubuntu /bionic InRelease(B[m
+[2m2020-01-22 08:22:08 log-cmd:main[23624] TRACE: Es wurden 131 kB in 1 s geholt (153 kB/s).(B[m
+[2m2020-01-22 08:22:09 log-cmd:main[23624] TRACE: Paketlisten werden gelesen...(B[m
+[33m2020-01-22 08:22:10 log-cmd:main[23624] WARN: W: Das Laden der konfigurierten Datei »multiverse/binary-i386/Packages« wird übersprungen, da das Depot »https://repo.fortinet.com/repo/ubuntu /bionic InRelease« die Datei scheinbar nicht bereitstellt. (Schreibfehler bei der Angabe der Komponente in sources.list?)(B[m
+[32m2020-01-22 08:22:11 log-cmd:main[23624] NOTICE: sudo call succeeded(B[m
+[2m2020-01-22 08:22:11 log-cmd:main[23624] TRACE: Mi 22. Jan 08:22:11 CET 2020(B[m
+2020-01-22 08:22:23 log-cmd:main[24849] INFO: calling: sudo apt-get update(B[m
+[2m2020-01-22 08:22:23 log-cmd:main[24849] TRACE: OK:1 http://linux.teamviewer.com/deb stable InRelease(B[m
+[2m2020-01-22 08:22:23 log-cmd:main[24849] TRACE: OK:2 http://ppa.launchpad.net/micahflee/ppa/ubuntu bionic InRelease(B[m
+[2m2020-01-22 08:22:23 log-cmd:main[24849] TRACE: OK:3 http://de.archive.ubuntu.com/ubuntu bionic InRelease(B[m
+[2m2020-01-22 08:22:23 log-cmd:main[24849] TRACE: OK:4 http://security.ubuntu.com/ubuntu bionic-security InRelease(B[m
+[2m2020-01-22 08:22:23 log-cmd:main[24849] TRACE: OK:5 http://packages.microsoft.com/repos/vscode stable InRelease(B[m
+[2m2020-01-22 08:22:23 log-cmd:main[24849] TRACE: Holen:6 http://archive.neon.kde.org/user bionic InRelease [131 kB](B[m
+[2m2020-01-22 08:22:23 log-cmd:main[24849] TRACE: OK:7 http://de.archive.ubuntu.com/ubuntu bionic-updates InRelease(B[m
+[2m2020-01-22 08:22:23 log-cmd:main[24849] TRACE: OK:8 http://de.archive.ubuntu.com/ubuntu bionic-backports InRelease(B[m
+[2m2020-01-22 08:22:23 log-cmd:main[24849] TRACE: OK:9 http://apt.postgresql.org/pub/repos/apt buster-pgdg InRelease(B[m
+[2m2020-01-22 08:22:23 log-cmd:main[24849] TRACE: OK:10 http://apt.postgresql.org/pub/repos/apt jessie-pgdg InRelease(B[m
+[2m2020-01-22 08:22:24 log-cmd:main[24849] TRACE: OK:11 https://repo.fortinet.com/repo/ubuntu /bionic InRelease(B[m
+[2m2020-01-22 08:22:24 log-cmd:main[24849] TRACE: Es wurden 131 kB in 1 s geholt (137 kB/s).(B[m
+[2m2020-01-22 08:22:25 log-cmd:main[24849] TRACE: Paketlisten werden gelesen...(B[m
+[33m2020-01-22 08:22:25 log-cmd:main[24849] WARN: W: Das Laden der konfigurierten Datei »multiverse/binary-i386/Packages« wird übersprungen, da das Depot »https://repo.fortinet.com/repo/ubuntu /bionic InRelease« die Datei scheinbar nicht bereitstellt. (Schreibfehler bei der Angabe der Komponente in sources.list?)(B[m
+[32m2020-01-22 08:22:26 log-cmd:main[24849] NOTICE: sudo call succeeded(B[m
+[2m2020-01-22 08:22:26 log-cmd:main[24849] TRACE: Mi 22. Jan 08:22:26 CET 2020(B[m
+2020-01-22 08:23:16 log-cmd:main[26212] INFO: calling: sudo\ apt-get\ update\ \>/dev/null\ 2\>/dev/null(B[m
+[33m2020-01-22 08:23:16 log-cmd:main[26212] WARN: test/../src/include/log.bash: Zeile 343: sudo: Befehl nicht gefunden(B[m
+[31m2020-01-22 08:23:17 log-cmd:main[26212] ERROR: sudo apt-get update >/dev/null 2>/dev/null exited with return code 127(B[m
+[31m[1m[7m2020-01-22 08:23:17 log-cmd:main[26212] ALERT: Could not...(B[m
+[2m2020-01-22 08:23:17 log-cmd:main[26212] TRACE: Mi 22. Jan 08:23:17 CET 2020(B[m
+2020-01-22 08:25:24 log-cmd:main[26625] INFO: calling: sudo apt-get update(B[m
+[2m2020-01-22 08:25:24 log-cmd:main[26625] TRACE: OK:1 http://de.archive.ubuntu.com/ubuntu bionic InRelease(B[m
+[2m2020-01-22 08:25:24 log-cmd:main[26625] TRACE: OK:2 http://linux.teamviewer.com/deb stable InRelease(B[m
+[2m2020-01-22 08:25:24 log-cmd:main[26625] TRACE: OK:3 http://ppa.launchpad.net/micahflee/ppa/ubuntu bionic InRelease(B[m
+[2m2020-01-22 08:25:24 log-cmd:main[26625] TRACE: OK:4 http://de.archive.ubuntu.com/ubuntu bionic-updates InRelease(B[m
+[2m2020-01-22 08:25:24 log-cmd:main[26625] TRACE: Holen:5 http://archive.neon.kde.org/user bionic InRelease [131 kB](B[m
+[2m2020-01-22 08:25:24 log-cmd:main[26625] TRACE: OK:6 http://apt.postgresql.org/pub/repos/apt buster-pgdg InRelease(B[m
+[2m2020-01-22 08:25:24 log-cmd:main[26625] TRACE: OK:7 http://packages.microsoft.com/repos/vscode stable InRelease(B[m
+[2m2020-01-22 08:25:25 log-cmd:main[26625] TRACE: OK:8 http://de.archive.ubuntu.com/ubuntu bionic-backports InRelease(B[m
+[2m2020-01-22 08:25:25 log-cmd:main[26625] TRACE: OK:9 http://security.ubuntu.com/ubuntu bionic-security InRelease(B[m
+[2m2020-01-22 08:25:25 log-cmd:main[26625] TRACE: OK:10 http://apt.postgresql.org/pub/repos/apt jessie-pgdg InRelease(B[m
+[2m2020-01-22 08:25:25 log-cmd:main[26625] TRACE: OK:11 https://repo.fortinet.com/repo/ubuntu /bionic InRelease(B[m
+[2m2020-01-22 08:25:26 log-cmd:main[26625] TRACE: Es wurden 131 kB in 2 s geholt (76,0 kB/s).(B[m
+[2m2020-01-22 08:25:27 log-cmd:main[26625] TRACE: Paketlisten werden gelesen...(B[m
+[33m2020-01-22 08:25:28 log-cmd:main[26625] WARN: W: Das Laden der konfigurierten Datei »multiverse/binary-i386/Packages« wird übersprungen, da das Depot »https://repo.fortinet.com/repo/ubuntu /bionic InRelease« die Datei scheinbar nicht bereitstellt. (Schreibfehler bei der Angabe der Komponente in sources.list?)(B[m
+[32m2020-01-22 08:25:29 log-cmd:main[26625] NOTICE: sudo call succeeded(B[m
+[2m2020-01-22 08:25:29 log-cmd:main[26625] TRACE: Mi 22. Jan 08:25:29 CET 2020(B[m

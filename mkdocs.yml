@@ -1,7 +1,7 @@
 site_name: Alinex Bash Library
 site_description: Helper programs and libraries for administration tool development (mostly in bash).
 site_author: Alexander Schilling
-copyright: Copyright &copy; 2018 - 2019 <a href="https://alinex.de">Alexander Schilling</a>
+copyright: Copyright &copy; 2018 - 2020 <a href="https://alinex.de">Alexander Schilling</a>
 
 nav:
     - Home:
@@ -42,11 +42,11 @@ theme:
     feature:
         tabs: true
 
-repo_name: 'alinex/bash-lib'
-repo_url: 'https://gitlab.com/alinex/bash-lib'
+repo_name: "alinex/bash-lib"
+repo_url: "https://gitlab.com/alinex/bash-lib"
 
 extra:
-    manifest: 'manifest.webmanifest'
+    manifest: "manifest.webmanifest"
     social:
         - type: gitlab
           link: https://gitlab.com/alinex
