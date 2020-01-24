@@ -1,12 +1,15 @@
 # Last Changes
 
--   Optimized logging within lock/unlock
--   Support the TRACE level in logging to be more detailed as DEBUG
+## Unpublished
+
+-   added status in middleware detection
 
 ## Version 1.3.1 (22.01.2020)
 
 -   command logging fixed (had problems if called through sudo or cron)
 -   error detection optimized in logging
+-   Optimized logging within lock/unlock
+-   Support the TRACE level in logging to be more detailed as DEBUG
 
 ## Version 1.3.0 (05.07.2019)
 
