@@ -229,19 +229,20 @@ package_list() {
     done
 }
 
-# output: <group> <middleware> <setting> <value>
-#         tomcat     tomcat8_1   uri http://:8080
+# output: <group> <middleware> <status> <setting> <value>
+#         tomcat  tomcat8_1    active   uri       http://:8080
 middleware() {
     # tomcat
     for name in $(systemctl --type=service --state=active | grep tomcat | sed 's/.*@//;s/\..*//;s/.* //'); do
+        status=$(systemctl --type=service --all | grep $name.service | awk '{print $3}')
         port=$($usesudo cat /var/lib/$name/conf/server.xml 2>/dev/null | sed 's/<!--/\x0<!--/g;s/-->/-->\x0/g' \
         | grep -zv '^<!--' | tr -d '\0' | grep 'protocol="HTTP' | sed 's/^.*port="//;s/".*//')
-        [ -n "$port" ] && echo tomcat $name uri http://$(ip_main):$port
+        [ -n "$port" ] && echo tomcat $name $status uri http://$(ip_main):$port
         xmx=$(cat /etc/default/$name | egrep ^JAVA_OPTS | grep \\-Xmx | sed 's/.*-Xmx\([0-9]*[mg]\).*/\1/')
-        [ -n "$xmx" ] && echo tomcat $name xmx $xmx
+        [ -n "$xmx" ] && echo tomcat $name $status xmx $xmx
         threads=$( cat /var/lib/$name/conf/server.xml | sed '/<!--.*-->/d' | sed '/<!--/,/-->/d' \
         | (grep maxThreads || echo "200") | sed 's/.* maxThreads="//;s/".*//')
-        [ -n "$threads" ] && echo tomcat $name threads $threads
+        [ -n "$threads" ] && echo tomcat $name $status threads $threads
     done
 }
 
