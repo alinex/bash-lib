@@ -97,14 +97,22 @@ hw_virtual() {
     exit 0
 }
 hw_cores() { grep -c ^processor /proc/cpuinfo; }
+hw_load() { cat /proc/loadavg | awk '{print $1}'; }
 hw_processor() { grep 'model name' /proc/cpuinfo | head -n 1 | sed 's/^.*: //'; }
 hw_memory_mb() {
-    #free -m | grep -oP '\d+' | head -n 1
     expr $(grep MemTotal /proc/meminfo | awk '{print $2}') / 1024
 }
+hw_avail_mb() {
+    expr $(grep MemAvailable /proc/meminfo | awk '{print $2}') / 1024
+}
+hw_free_mb() {
+    expr $(grep MemFree /proc/meminfo | awk '{print $2}') / 1024
+}
 hw_swap_mb() {
-    #free -m | tail -n 1 | grep -oP '\d+' | head -n 1
     expr $(grep SwapTotal /proc/meminfo | awk '{print $2}') / 1024
+}
+hw_swap_free_mb() {
+    expr $(grep SwapFree /proc/meminfo | awk '{print $2}') / 1024
 }
 # return size, usage, mount
 hw_disks() {
@@ -234,7 +242,7 @@ package_list() {
 middleware() {
     # tomcat
     for name in $(systemctl --type=service --state=active | grep tomcat | sed 's/.*@//;s/\..*//;s/.* //'); do
-        status=$(systemctl --type=service --all | grep $name.service | awk '{print $3}')
+        status=$(systemctl --type=service --all | grep $name.service | awk '{print $4}')
         port=$($usesudo cat /var/lib/$name/conf/server.xml 2>/dev/null | sed 's/<!--/\x0<!--/g;s/-->/-->\x0/g' \
         | grep -zv '^<!--' | tr -d '\0' | grep 'protocol="HTTP' | sed 's/^.*port="//;s/".*//')
         [ -n "$port" ] && echo tomcat $name $status uri http://$(ip_main):$port
