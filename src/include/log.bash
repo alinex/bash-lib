@@ -14,8 +14,6 @@
 source_dir=$(dirname $(readlink -f "${BASH_SOURCE[0]:-$(pwd)/x}"))
 source "$source_dir/colors.bash" # load color methods
 
-TERM="${TERM:-xterm}" # needed to be run using ssh without terminal
-
 declare -ar _log_detect=(TRACE DEBUG INFO NOTICE WARN MARK WARNING HEADING ERR ERROR CRIT CRITICAL ALERT EMERG EMERGENCY)
 
 # Log levels are taken from python and RFC 5424.
