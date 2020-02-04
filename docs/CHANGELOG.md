@@ -4,6 +4,7 @@
 
 -   added status in middleware detection
 -   added more info methods for current load and memory usage
+-   fixed logging if called without terminal (ssh)
 
 ## Version 1.3.1 (22.01.2020)
 
