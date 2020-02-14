@@ -12,7 +12,6 @@
 
 source_dir=$(dirname $(readlink -f "${BASH_SOURCE[0]:-$(pwd)/x}"))
 source "$source_dir/log.bash" # load log handler
-usesudo=$(usesudo)
 
 # start basic analyzation
 
@@ -240,6 +239,7 @@ package_list() {
 # output: <group> <middleware> <status> <setting> <value>
 #         tomcat  tomcat8_1    active   uri       http://:8080
 middleware() {
+    usesudo=$(usesudo)
     # tomcat
     for name in $(systemctl --type=service --state=active | grep tomcat | sed 's/.*@//;s/\..*//;s/.* //'); do
         status=$(systemctl --type=service --all | grep $name.service | awk '{print $4}')
@@ -258,6 +258,7 @@ middleware() {
 #         tomcat        tomcat8_1 xxx  uri http://:8080/context
 #         tomcat        tomcat8_1 xxx  threads 500
 app() {
+    usesudo=$(usesudo)
     # tomcat
     for path in $(ls -d /var/lib/tomcat* 2>/dev/null); do
         port=$($usesudo cat $path/conf/server.xml | sed 's/<!--/\x0<!--/g;s/-->/-->\x0/g' \
@@ -292,6 +293,7 @@ ssh_keys() {
 #         root      (ALL : ALL) NOPASSWD: ALL
 #         admin     (root) NOPASSWD: /bin/systemctl * tomcat8*
 sudoers() {
+    usesudo=$(usesudo)
     if [ $(id -u) -ne 0 ] && [ -z "$usesudo" ]; then
         log WARN "Could not analyze sudoers without sudo rights."
         return
@@ -305,6 +307,7 @@ sudoers() {
 strings='s/^@yearly/0 0 1 1 \*/;s/^@annually/0 0 1 1 \*/;s/^@monthly/0 0 1 \* \*/;s/^@weekly/0 0 \* \* 0/;s/^@daily/0 0 \* \* \*/
 s/^@midnight/0 0 \* \* \*/;s/^@hourly/0 \* \* \* \*/;/^[a-zA-Z]*=/d'
 cron_tasks() {
+    usesudo=$(usesudo)
 #    if [ $(id -u) -ne 0 ]; then
 #        log WARN "Could only read cron entries from the connecting user: $(whoami)"
 #        crontab -l | sed "$strings;s/#.*//g" | awk 'NF' \
