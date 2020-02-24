@@ -140,7 +140,7 @@ ip_list() {
 # ip 46.237.195.215
 # hostname HSI-KBW-46-237-195-215.hsi.kabel-badenwuerttemberg.de
 # city Dornhan
-# region Baden-Württemberg Region
+# region Baden-Württemberg
 # country DE
 # postal 72175
 # org AS29562 Unitymedia BW GmbH
