@@ -326,11 +326,11 @@ cron_tasks() {
 
     cat /etc/cron.d/* | sed "$strings;s/#.*//g" | awk 'NF' | sed "s/^/cron.d /"
 
-    periods=(hourly daily weekly monthly)
+    periods="hourly daily weekly monthly"
     for period in $periods; do
         grep /etc/cron.$period /etc/crontab | head -n 1 \
         | while read min hour day month week cmd; do
-            ls -1 /etc/cron.$period | sed "s/^/period $min $hour $day $month $week root /"
+            ls -1 /etc/cron.$period | sed "s/^/$period $min $hour $day $month $week root /"
         done
     done
 }
