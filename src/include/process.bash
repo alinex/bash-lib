@@ -78,7 +78,7 @@ lock_exit() {
     ln "$lockfile.$$" "$lockfile" 2>/dev/null
     if [ $? -ne 0 ]; then
         rm "$lockfile.$$" 2>/dev/null
-        log_exit WARN "$message by PID $pid"
+        log_exit WARN "$message by PID $pid" $exit_code
     fi
     # symlink was created successfully, lock acquired
 

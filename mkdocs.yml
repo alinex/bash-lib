@@ -71,6 +71,9 @@ plugins:
           combined: true
           combined_output_path: bash-lib-book.pdf
           enabled_if_env: ENABLE_PDF_EXPORT
+#    - mkpdfs:
+#          - company: The War Company Inc.
+#          - author: Monsieur Silvestre
 
 markdown_extensions:
     - extra
