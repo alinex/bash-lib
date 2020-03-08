@@ -12,7 +12,6 @@
 
 source_dir=$(dirname $(readlink -f "${BASH_SOURCE[0]:-$(pwd)/x}"))
 source "$source_dir/log.bash" # load log handler
-[ $(id -u) -ne 0 ] && usesudo="sudo" || usesudo=""
 
 # start basic analyzation
 
@@ -97,14 +96,22 @@ hw_virtual() {
     exit 0
 }
 hw_cores() { grep -c ^processor /proc/cpuinfo; }
+hw_load() { cat /proc/loadavg | awk '{print $1}'; }
 hw_processor() { grep 'model name' /proc/cpuinfo | head -n 1 | sed 's/^.*: //'; }
 hw_memory_mb() {
-    #free -m | grep -oP '\d+' | head -n 1
     expr $(grep MemTotal /proc/meminfo | awk '{print $2}') / 1024
 }
+hw_avail_mb() {
+    expr $(grep MemAvailable /proc/meminfo | awk '{print $2}') / 1024
+}
+hw_free_mb() {
+    expr $(grep MemFree /proc/meminfo | awk '{print $2}') / 1024
+}
 hw_swap_mb() {
-    #free -m | tail -n 1 | grep -oP '\d+' | head -n 1
     expr $(grep SwapTotal /proc/meminfo | awk '{print $2}') / 1024
+}
+hw_swap_free_mb() {
+    expr $(grep SwapFree /proc/meminfo | awk '{print $2}') / 1024
 }
 # return size, usage, mount
 hw_disks() {
@@ -133,18 +140,21 @@ ip_list() {
 # ip 46.237.195.215
 # hostname HSI-KBW-46-237-195-215.hsi.kabel-badenwuerttemberg.de
 # city Dornhan
-# region Baden-Württemberg Region
+# region Baden-Württemberg
 # country DE
-# loc 48.3501,8.5090
 # postal 72175
 # org AS29562 Unitymedia BW GmbH
 ip_info() {
     if [ -z "$_ip_info" ]; then
         command -v curl > /dev/null
         if [ $? -eq 0 ]; then
-            _ip_info=$(curl -s ipinfo.io | tr '\n' ' ' | sed -e 's/[{}]/''/g;s/",/"\n/g;s/ *"//g;s/:/ /g' | awk 'NF')
+            # ipinfo.io has a hard rate limit
+            # _ip_info=$(curl -s ipinfo.io | tr '\n' ' ' | sed -e 's/[{}]/''/g;s/",/"\n/g;s/ *"//g;s/:/ /g' | awk 'NF')
+            _ip_info=$(curl -s https://ipapi.co/json | sed 's/,$//' | tr '\n' '^' | sed -e 's/[{}]/''/g;s/\^/\n/g;s/ *"//g;s/:/ /g' | awk 'NF')
         else
-            _ip_info=$(wget -qO - ipinfo.io | tr '\n' ' ' | sed -e 's/[{}]/''/g;s/",/"\n/g;s/ *"//g;s/:/ /g' | awk 'NF')
+            # ipinfo.io has a hard rate limit
+            # _ip_info=$(wget -qO - ipinfo.io | tr '\n' ' ' | sed -e 's/[{}]/''/g;s/",/"\n/g;s/ *"//g;s/:/ /g' | awk 'NF')
+            _ip_info=$(wget -qO - https://ipapi.co/json | sed 's/,$//' | tr '\n' '^' | sed -e 's/[{}]/''/g;s/\^/\n/g;s/ *"//g;s/:/ /g' | awk 'NF')
         fi
     fi
     echo "$_ip_info"
@@ -155,14 +165,26 @@ ip_info() {
 # lookup for real names
 declare -A _package
 _package[apache]="apache2"
+_package[nginx]="nginx"
 _package[tomcat]="tomcat9 tomcat8 tomcat7 tomcat6"
 _package[jdk]="openjdk-11-jdk openjdk-10-jdk openjdk-9-jdk openjdk-8-jdk openjdk-7-jdk zulu-7 openjdk-6-jdk oracle-java8-installer"
 _package[jre]="openjdk-11-jre openjdk-10-jre openjdk-9-jre openjdk-8-jre openjdk-7-jre openjdk-6-jre"
-_package[postgresql]="postgresql-11 postgresql-10 postgresql-9.6 postgresql-9.4 postgresql-9.3"
+_package[php]="php7.0 php7.1 php7.2 php7.3"
+_package[postgresql]="postgresql-11 postgresql-10 postgresql-9.6 postgresql-9.4 postgresql-9.3 postgresql-client-11 postgresql-client-10 postgresql-client-9.6 postgresql-client-9.4 postgresql-client-9.3"
+_package[mysql]="mysql-server percona-server-server-5.7"
+_package[redis]="redis-server"
 _package[gitlab]="gitlab-ee gitlab-ce"
 _package[subversion]="subversion"
+_package[samba]="samba"
 _package[activemq]="activemq"
 _package[rabbitmq]="rabbitmq-server"
+_package[docker]="docker docker-ce"
+_package[elasticsearch]="elasticsearch"
+#_package[syslog]="rsyslog"
+#_package[ftp]="proftpd-basic openssh-sftp-server"
+# special tools
+_package[s3cmd]="s3cmd"
+_package[s3cmd]="rclone"
 declare -r _package
 
 # Usage: package <name>
@@ -214,14 +236,21 @@ package_list() {
     done
 }
 
-# output: <group> <middleware> <setting> <value>
-#         tomcat     tomcat8_1   uri http://:8080
+# output: <group> <middleware> <status> <setting> <value>
+#         tomcat  tomcat8_1    active   uri       http://:8080
 middleware() {
     usesudo=$(usesudo)
     # tomcat
-    for path in $(echo /var/lib/tomcat*); do
-        port=$($usesudo cat $path/conf/server.xml | sed 's/<!--/\x0<!--/g;s/-->/-->\x0/g' | grep -zv '^<!--' | tr -d '\0' | grep 'protocol="HTTP' | sed 's/^.*port="//;s/".*//')
-        echo tomcat $(basename $path) uri http://$(ip_main):$port
+    for name in $(systemctl --type=service --state=active | grep tomcat | sed 's/.*@//;s/\..*//;s/.* //'); do
+        status=$(systemctl --type=service --all | grep $name.service | awk '{print $4}')
+        port=$($usesudo cat /var/lib/$name/conf/server.xml 2>/dev/null | sed 's/<!--/\x0<!--/g;s/-->/-->\x0/g' \
+        | grep -zv '^<!--' | tr -d '\0' | grep 'protocol="HTTP' | sed 's/^.*port="//;s/".*//')
+        [ -n "$port" ] && echo tomcat $name $status uri http://$(ip_main):$port
+        xmx=$(cat /etc/default/$name | egrep ^JAVA_OPTS | grep \\-Xmx | sed 's/.*-Xmx\([0-9]*[mg]\).*/\1/')
+        [ -n "$xmx" ] && echo tomcat $name $status xmx $xmx
+        threads=$( cat /var/lib/$name/conf/server.xml | sed '/<!--.*-->/d' | sed '/<!--/,/-->/d' \
+        | (grep maxThreads || echo "200") | sed 's/.* maxThreads="//;s/".*//')
+        [ -n "$threads" ] && echo tomcat $name $status threads $threads
     done
 }
 
@@ -232,7 +261,8 @@ app() {
     usesudo=$(usesudo)
     # tomcat
     for path in $(ls -d /var/lib/tomcat* 2>/dev/null); do
-        port=$($usesudo cat $path/conf/server.xml | sed 's/<!--/\x0<!--/g;s/-->/-->\x0/g' | grep -zv '^<!--' | tr -d '\0' | grep 'protocol="HTTP' | sed 's/^.*port="//;s/".*//')
+        port=$($usesudo cat $path/conf/server.xml | sed 's/<!--/\x0<!--/g;s/-->/-->\x0/g' \
+        | grep -zv '^<!--' | tr -d '\0' | grep 'protocol="HTTP' | sed 's/^.*port="//;s/".*//')
         for webapp in $(ls $path/webapps/ | egrep -v 'ROOT|.war'); do
             echo tomcat $(basename $path) $webapp uri http://$(ip_main):$port/$webapp
         done
@@ -264,6 +294,10 @@ ssh_keys() {
 #         admin     (root) NOPASSWD: /bin/systemctl * tomcat8*
 sudoers() {
     usesudo=$(usesudo)
+    if [ $(id -u) -ne 0 ] && [ -z "$usesudo" ]; then
+        log WARN "Could not analyze sudoers without sudo rights."
+        return
+    fi
     for user in $(awk -F'[/:]' '{if ($3 >= 1000 && $3 != 65534) print $1}' /etc/passwd); do
         $usesudo sudo -U $user -l | sed "1,4d;s/^[[:space:]]*/$user /"
     done
@@ -273,6 +307,7 @@ sudoers() {
 strings='s/^@yearly/0 0 1 1 \*/;s/^@annually/0 0 1 1 \*/;s/^@monthly/0 0 1 \* \*/;s/^@weekly/0 0 \* \* 0/;s/^@daily/0 0 \* \* \*/
 s/^@midnight/0 0 \* \* \*/;s/^@hourly/0 \* \* \* \*/;/^[a-zA-Z]*=/d'
 cron_tasks() {
+    usesudo=$(usesudo)
 #    if [ $(id -u) -ne 0 ]; then
 #        log WARN "Could only read cron entries from the connecting user: $(whoami)"
 #        crontab -l | sed "$strings;s/#.*//g" | awk 'NF' \
@@ -291,11 +326,16 @@ cron_tasks() {
 
     cat /etc/cron.d/* | sed "$strings;s/#.*//g" | awk 'NF' | sed "s/^/cron.d /"
 
-    periods=(daily weekly monthly)
+    periods="hourly daily weekly monthly"
     for period in $periods; do
-        grep /etc/cron.period /etc/crontab | head -n 1 \
+        grep /etc/cron.$period /etc/crontab | head -n 1 \
         | while read min hour day month week cmd; do
-            ls -1 /etc/cron.period | sed "s/^/period $min $hour $day $month $week root /"
+            ls -1 /etc/cron.$period | sed "s/^/$period $min $hour $day $month $week root /"
         done
     done
+}
+
+# output: <share> <type> <size-gb> <mount>
+mounts() {
+    ( df -Tt nfs 2>/dev/null; df -Tt cifs 2>/dev/null ) | grep / | awk '{ printf "%s %s %.0f %s\n", $1, $2, ($4+$5)/1024/1024, $7 }'
 }

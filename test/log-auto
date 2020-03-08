@@ -5,9 +5,10 @@ source "$source_dir/../src/include/log.bash"
 
 set -e # exit on any error
 
-LOG_LEVEL=DEBUG
+LOG_LEVEL=TRACE
 
 echo $(cyan "$(bold)Directly given:")
+log AUTO "text with TRACE level"
 log AUTO "text with DEBUG level"
 log AUTO "text with INFO level"
 log AUTO "text with NOTICE level"

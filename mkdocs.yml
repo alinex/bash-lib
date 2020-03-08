@@ -1,7 +1,7 @@
 site_name: Alinex Bash Library
 site_description: Helper programs and libraries for administration tool development (mostly in bash).
 site_author: Alexander Schilling
-copyright: Copyright &copy; 2018 - 2019 <a href="https://alinex.de">Alexander Schilling</a>
+copyright: Copyright &copy; 2018 - 2020 <a href="https://alinex.de">Alexander Schilling</a>
 
 nav:
     - Home:
@@ -32,7 +32,7 @@ theme:
     favicon: https://assets.gitlab-static.net/uploads/-/system/project/avatar/10069235/images__1_.jpeg
     language: en
     palette:
-        primary: green
+        primary: grey
         accent: deep orange
     font: false
     # remove to be GDPR conform

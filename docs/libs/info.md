@@ -40,6 +40,14 @@ Returns `true` if this is a virtual machine.
 
 Returns the number of cpu cores available.
 
+### hw_cores
+
+Returns the number of cpu cores available.
+
+### hw_load
+
+Returns the short load of the system.
+
 ### hw_processor
 
 Returns the processor model name which may include some technical specifications.
@@ -48,9 +56,21 @@ Returns the processor model name which may include some technical specifications
 
 Returns the memory size in MB.
 
+### hw_free_mb
+
+Returns the free memory size in MB.
+
+### hw_avail_mb
+
+Returns the available memory, which is available for processes. This may be occupied by caching at the moment.
+
 ### hw_swap_mb
 
 Returns the swap size in MB.
+
+### hw_swap_free_mb
+
+Returns the free swap size in MB.
 
 ### hw_disks
 

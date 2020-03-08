@@ -111,18 +111,19 @@ run-process |& log
 run-process |& log AUTO
 ```
 
-This will auto detect the concrete log level for each line. Currently `DEBUG`, `INFO`, `NOTICE`, `MARK`, `WARN`, `WARNING`, `HEADING`, `ERR`, `ERROR`, `CRIT`, `CRITICAL`, `ALERT`, `EMERG` and `EMERGENCY` will trigger the specified log type. Some other keywords are also interpreted and all other lines are output using the minimum level.
+This will auto detect the concrete log level for each line. Currently `TRACE`, `DEBUG`, `INFO`, `NOTICE`, `MARK`, `WARN`, `WARNING`, `HEADING`, `ERR`, `ERROR`, `CRIT`, `CRITICAL`, `ALERT`, `EMERG` and `EMERGENCY` will trigger the specified log type. Some other keywords are also interpreted and all other lines are output using the minimum level.
 
-You can also specify a higher minimum level as `DEBUG` by using:
+You can also specify a higher or lower minimum level as `DEBUG` by using:
 
 ```bash
 run-process |& log AUTO_INFO
 run-process |& log AUTO_WARN
+run-process |& log AUTO_TRACE
 ```
 
-If this is set the minimum level be the given one but it will be increased by autodetection.
+If this is set the minimum level be the given one but it will be increased by auto detection.
 
-To add more rules for the autodetection you may add a regular expression per each log level:
+To add more rules for the auto detection you may add a regular expression per each log level:
 
 ```bash
 declare -A LOG_AUTO # only needed if defined before loading the liubrary
@@ -138,14 +139,15 @@ Eight logging levels are supported, combining the levels from the Python logging
 
 | Level              | Numeric | Syslog | Origin        | Usage                                     |
 | ------------------ | ------- | ------ | ------------- | ----------------------------------------- |
-| DEBUG              | 10      | 7      | RFC 5424      | Everything not specified                  |
+| TRACE or VERBOSE   | 5       | 7      | Log Utilities | Very detailed logging (not always used)   |
+| DEBUG              | 10      | 7      | RFC 5424      | Diagnostically helpful messages           |
 | INFO               | 20      | 6      | RFC 5424      | Something which may be useful to know     |
 | NOTICE             | 25      | 5      | RFC 5424      | Success message or step done              |
 | MARK               | 25      | 5      | own extension | Special marked like information asked for |
-| WARN or WARNING    | 30      | 4      | RFC 5424      | Warning which may be ok                   |
+| WARN or WARNING    | 30      | 4      | RFC 5424      | Warning which may be OK                   |
 | HEADING            | 35      | 4      | own extension | Start of new bigger Part                  |
-| ERR or ERROR       | 40      | 3      | RFC 5424      | An error which can occure                 |
-| CRIT or CRITICAL   | 50      | 2      | RFC 5424      | An error which should not occure          |
+| ERR or ERROR       | 40      | 3      | RFC 5424      | An error which can occur                  |
+| CRIT or CRITICAL   | 50      | 2      | RFC 5424      | An error which should not occur           |
 | ALERT              | 60      | 1      | RFC 5424      | Very critical like incorrect method call  |
 | EMERG or EMERGENCY | 70      | 0      | RFC 5424      | Something which should never happen       |
 
@@ -188,3 +190,32 @@ The rotated files may also be compressed by setting the `LOG_ROTATE_COMPRESS` fl
 ## Switching log file
 
 If really necessary, it is possible to switch log file by changing the setting of `LOG_FILE` and calling `log_init` without parameters.
+
+## Log Commands
+
+It is also possible to log details from the commands completely:
+
+```bash
+log_cmd sudo apt-get update >/dev/null
+```
+
+This will log the called command, the output and error messages, the exit code and pipe the standard output further on.
+
+```text
+[INFO     ] calling: sudo apt-get update
+[TRACE    ] OK:1 http://de.archive.ubuntu.com/ubuntu bionic InRelease
+[TRACE    ] OK:2 http://linux.teamviewer.com/deb stable InRelease
+[TRACE    ] OK:3 http://ppa.launchpad.net/micahflee/ppa/ubuntu bionic InRelease
+[TRACE    ] OK:4 http://de.archive.ubuntu.com/ubuntu bionic-updates InRelease
+[TRACE    ] Holen:5 http://archive.neon.kde.org/user bionic InRelease [131 kB]
+[TRACE    ] OK:6 http://apt.postgresql.org/pub/repos/apt buster-pgdg InRelease
+[TRACE    ] OK:7 http://packages.microsoft.com/repos/vscode stable InRelease
+[TRACE    ] OK:8 http://de.archive.ubuntu.com/ubuntu bionic-backports InRelease
+[TRACE    ] OK:9 http://security.ubuntu.com/ubuntu bionic-security InRelease
+[TRACE    ] OK:10 http://apt.postgresql.org/pub/repos/apt jessie-pgdg InRelease
+[TRACE    ] OK:11 https://repo.fortinet.com/repo/ubuntu /bionic InRelease
+[TRACE    ] Es wurden 131 kB in 2 s geholt (76,0 kB/s).
+[TRACE    ] Paketlisten werden gelesen...
+[WARN     ] W: Das Laden der konfigurierten Datei »multiverse/binary-i386/Packages« wird übersprungen, da das Depot »https://repo.fortinet.com/repo/ubuntu /bionic InRelease« die Datei scheinbar nicht bereitstellt. (Schreibfehler bei der Angabe der Komponente in sources.list?)
+[NOTICE   ] sudo call succeeded
+```

@@ -14,13 +14,14 @@
 source_dir=$(dirname $(readlink -f "${BASH_SOURCE[0]:-$(pwd)/x}"))
 source "$source_dir/colors.bash" # load color methods
 
-declare -ar _log_detect=(DEBUG INFO NOTICE WARN MARK WARNING HEADING ERR ERROR CRIT CRITICAL ALERT EMERG EMERGENCY)
+declare -ar _log_detect=(TRACE DEBUG INFO NOTICE WARN MARK WARNING HEADING ERR ERROR CRIT CRITICAL ALERT EMERG EMERGENCY)
 
 # Log levels are taken from python and RFC 5424.
 declare -A _log_level
 # These are the python numeric log levels, with the addition
 # of RFC 5424 levels. The RFC 5424 levels have been given
 # numbers to sequence them with the python levels.
+_log_level[TRACE]=5
 _log_level[DEBUG]=10
 _log_level[INFO]=20
 _log_level[NOTICE]=25   # RFC 5424 specific
@@ -41,6 +42,7 @@ declare -A _log_color
 # These are the python numeric log levels, with the addition
 # of RFC 5424 levels. The RFC 5424 levels have been given
 # numbers to sequence them with the python levels.
+_log_color[TRACE]="$(dim +)"
 _log_color[DEBUG]="$(dim +)"
 _log_color[INFO]=""
 _log_color[NOTICE]="$(green +)" # RFC 5424 specific
@@ -59,6 +61,7 @@ declare -r _log_color
 
 # These are the RFC 5424 numeric severity levels.
 declare -A _syslog_severity
+_syslog_severity[TRACE]=7
 _syslog_severity[DEBUG]=7
 _syslog_severity[INFO]=6
 _syslog_severity[NOTICE]=5
@@ -76,18 +79,19 @@ _syslog_severity[EMERGENCY]=0
 declare -r _syslog_severity
 
 declare -A _log_auto
+_log_auto[TRACE]="\b(TRACE|VERBOSE)\b"
 _log_auto[DEBUG]="\b(DEBUG|COPYRIGHT|WARRANTY)\b|^\s*(AT|AFTER) "
 _log_auto[INFO]="\b(INFO|(START|CALL)(ING)?|TRANSMITTED)\b"
-_log_auto[NOTICE]="\b(NOTICE|ERFOLGREICH|SUCCEEDED|FINISHED)\b"
+_log_auto[NOTICE]="\b(NOTICE|NOTE|ERFOLGREICH|SUCCEEDED|FINISHED|PASSING)\b"
 _log_auto[MARK]="\b(MARK)\b|!!!"
 _log_auto[WARN]="\b(WARN)\b|\bW:"
-_log_auto[WARNING]="\b(WARNING|MISSING|UNKNOWN)\b"
+_log_auto[WARNING]="\b(WARNING|MISSING|UNKNOWN|PENDING)\b"
 _log_auto[HEADING]="\b(HEADING)\b"
 _log_auto[ERR]="\b(ERR)\b|\bE:"
-_log_auto[ERROR]="\b(ERROR|FEHLERHAFT|FAILED|COMMAND NOT FOUND|PERMISSION DENIED)\b|ERROR\b"
+_log_auto[ERROR]="\b(ERROR|FEHLERHAFT|FAILED|FAILING|COMMAND NOT FOUND|PERMISSION DENIED)\b"
 _log_auto[CRIT]="\b(CRIT)\b"
 _log_auto[CRITICAL]="\b(CRITICAL|FATAL)\b"
-_log_auto[ALERT]="\b(ALERT|EXCEPTION)\b"
+_log_auto[ALERT]="\b(ALERT|EXCEPTION)\b|EXCEPTION\b"
 _log_auto[EMERG]="\b(EMERG)\b"
 _log_auto[EMERGENCY]="\b(EMERGENCY)\b"
 declare -r _log_auto
@@ -247,12 +251,12 @@ _log() {
     # check message level
     declare -u message_level=${1:-AUTO}
     if [ "${message_level:0:4}" = "AUTO" ]; then
-        min=${_log_level[DEBUG]}
+        min=${_log_level[TRACE]}
         if [ "${message_level:4:1}" = "_" ]; then
             min=${_log_level[${message_level:5:10}]}
             message_level="${message_level:5:10}" # set to min level
         else
-            message_level="DEBUG" # use as min level
+            message_level="TRACE" # use as min level
         fi
         for i in "${_log_detect[@]}"
         do
@@ -320,25 +324,31 @@ log_cmd() {
     LOG_CMD_LEVEL=${LOG_CMD_LEVEL:-AUTO}
     local cmd="$1"
     local call=$(printf "%q " "$@")
-    [ -n "$LOG_CMD_QUIET" ] || log INFO "calling: $call"
+    [ -n "$LOG_CMD_QUIET" ] || log $LOG_CMD_LEVEL "calling: $call"
     # result=$(eval $(printf "%q " "$@") |& tee >/dev/fd/5 >(log) )
 
     exec 5>&1 # fd to write to real output
     set -o pipefail
+    # early tries:
     # eval "stdbuf -o0 -e0 $call" |& tee >&5 >(log)
-#    eval "tee >(log) | stdbuf -o0 -e0 $call" </dev/stdin |& tee >&5 >(log)
-#    ( eval "stdbuf -o0 -e0 $call" 3>&1 1>&2 2>&3 | tee >&5 >(log) ) 3>&1 1>&2 2>&3 | tee >&5 >(log)
-#    ( eval "stdbuf -o0 -e0 $call" 3>&1 1>&2 2>&3 | tee >&5 >(log AUTO_WARN) ) 3>&1 1>&2 2>&3 | tee >&5 >(log)
-    #tee >(log) | stdbuf -o0 -e0 $call |& tee >&5 >(log)
-    #LANG=C stdbuf -o0 -e0 $call </dev/stdin |& tee >&5 >(log)
-    eval "LANG=C stdbuf -o0 -e0 $call </dev/stdin |& tee >&5 >(log $LOG_CMD_LEVEL)"
+    # eval "tee >(log) | stdbuf -o0 -e0 $call" </dev/stdin |& tee >&5 >(log)
+    # ( eval "stdbuf -o0 -e0 $call" 3>&1 1>&2 2>&3 | tee >&5 >(log) ) 3>&1 1>&2 2>&3 | tee >&5 >(log)
+    # ( eval "stdbuf -o0 -e0 $call" 3>&1 1>&2 2>&3 | tee >&5 >(log AUTO_WARN) ) 3>&1 1>&2 2>&3 | tee >&5 >(log)
+    # tee >(log) | stdbuf -o0 -e0 $call |& tee >&5 >(log)
+    # LANG=C stdbuf -o0 -e0 $call </dev/stdin |& tee >&5 >(log)
+    # next line won't work if called using cron
+    # eval "LANG=C stdbuf -o0 -e0 $call </dev/stdin |& tee >&5 >(log $LOG_CMD_LEVEL)"
+    # call it without logging output
+    #$call
+#    $call 1> >(tee >(log ) ) 2> >(tee >(log AUTO_WARN ) >&2 )
+    $call 1> >(tee >(log ) ) 2> >(log AUTO_WARN >&2 )
     code=$?
     #code=${PIPESTATUS[0]}
     exec 5>&- # close
     sleep 1 # wait for output
 
     if [ $code -eq 0 ]; then
-        [ -n "$LOG_CMD_QUIET" ] || log NOTICE "$cmd call succeeded"
+        [ -n "$LOG_CMD_QUIET" ] || log $LOG_CMD_LEVEL "$cmd call succeeded"
     else
         log ERROR "$cmd exited with return code $code"
     fi

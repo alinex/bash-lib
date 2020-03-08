@@ -12,6 +12,7 @@
 # echo "$(red Failed)"
 # echo "$colored" | uncolor
 
+[ "$TERM" = "unknown" ] && TERM='' # use default
 term=${TERM:-xterm-256color} # use xterm as default if no terminal set
 
 source_dir=$(dirname $(readlink -f "${BASH_SOURCE[0]:-$(pwd)/x}"))

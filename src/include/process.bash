@@ -35,8 +35,14 @@ lock() {
     _lock_remove "$lockfile"
 
     # try it, till it works
+    logged=0
     while ! ln "$lockfile.$$" "$lockfile" 2>/dev/null; do
-        log INFO "...waiting for lock $lockfile"
+        if [ ! $logged ]; then  # write message once
+            log INFO "Waiting for unlock $lockfile..."
+            logged=1
+        else
+            log TRACE "Waiting for unlock $lockfile..."
+        fi
         # if the symlink failed, wait for the current lock holder to exit
         sleep $LOCK_SLEEP
         # make a file with our PID, if no longer existent
@@ -72,7 +78,7 @@ lock_exit() {
     ln "$lockfile.$$" "$lockfile" 2>/dev/null
     if [ $? -ne 0 ]; then
         rm "$lockfile.$$" 2>/dev/null
-        log_exit WARN "$message by PID $pid"
+        log_exit WARN "$message by PID $pid" $exit_code
     fi
     # symlink was created successfully, lock acquired
 
@@ -96,6 +102,7 @@ unlock() {
         pid=$(cat "$lockfile" || log_exit ALERT "could not read lockfile $lockfile")
         if [ "$pid" -eq "$$" ]; then
             rm -f $lockfile || log_exit ALERT "failed to remove lockfile: $lockfile"
+            log INFO "... successful unlocked $lockfile"
         else
             log_exit ALERT "could not remove lockfile because it is set from another process"
         fi
