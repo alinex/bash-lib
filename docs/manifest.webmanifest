@@ -1,10 +1,10 @@
 {
-    "name": "Alinex Development Guide",
-    "short_name": "Alinex Guide",
+    "name": "Alinex Bash-Lib Guide",
+    "short_name": "Bash-Lib Guide",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#fff",
-    "description": "A book to learn modern web technologies.",
+    "description": "How to use the bash-lib helpers.",
     "lang": "en-US",
     "theme_color": "indigo"
 }
