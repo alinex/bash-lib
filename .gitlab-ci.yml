@@ -118,7 +118,7 @@ pages:
     image: silentstorm/pandoc-mkdocs
     script:
         ## build distribution
-        - apt-get upgrade -y
+        - apt-get update
         - apt-get install -y bash bash-completion ncurses git perl
         - bin/build
         - tar czvf bash-lib.tgz dist
