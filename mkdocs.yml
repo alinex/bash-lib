@@ -42,11 +42,11 @@ theme:
     feature:
         tabs: true
 
-repo_name: "alinex/bash-lib"
-repo_url: "https://gitlab.com/alinex/bash-lib"
+repo_name: 'alinex/bash-lib'
+repo_url: 'https://gitlab.com/alinex/bash-lib'
 
 extra:
-    manifest: "manifest.webmanifest"
+    manifest: 'manifest.webmanifest'
     social:
         - type: gitlab
           link: https://gitlab.com/alinex
@@ -61,15 +61,17 @@ extra:
 
 extra_css:
     - assets/extra.css
+#PDF#    - assets/pdf.css
 
 plugins:
     - search
-    - pdf-export:
-          verbose: false
-          media_type: print
-          combined: true
-          combined_output_path: bash-lib-book.pdf
-          enabled_if_env: ENABLE_PDF_EXPORT
+# Enable for PDF export
+#PDF#    - pdf-export:
+#PDF#          verbose: false
+#PDF#          media_type: print
+#PDF#          combined: true
+#PDF#          combined_output_path: alinex-bashlib.pdf
+# theme_handler_path: theme-handler.py
 
 markdown_extensions:
     - extra

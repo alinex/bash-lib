@@ -115,22 +115,24 @@ archlinux:
 
 pages:
     stage: build
-    image: python:alpine
+    image: silentstorm/pandoc-mkdocs
     script:
         ## build distribution
-        - apk --update --upgrade add bash bash-completion ncurses git perl
+        - apt-get upgrade
+        - apt-get install -y bash bash-completion ncurses git perl
         - bin/build
         - tar czvf bash-lib.tgz dist
         # create documentation
-        - apk --update --upgrade add gcc musl-dev jpeg-dev zlib-dev libffi-dev cairo-dev pango-dev gdk-pixbuf
-        - pip install mkdocs
+        - apt-get install -y  gcc musl-dev jpeg-dev zlib-dev libffi-dev cairo-dev pango-dev gdk-pixbuf
+        - pip install --upgrade pip
         - pip install mkdocs-material
         - pip install pymdown-extensions
         - pip install markdown-blockdiag
         - pip install markdown-include
-        - pip install mkdocs-pdf-export-plugin
-        - ENABLE_PDF_EXPORT=0 mkdocs build
+        - pip install mkdocs-mk2pdf-plugin
+        - mkdocs build
         # move to website
+        - rm -rf public
         - mv site public
         - mv *.tgz public/downloads
         - mv dist/*.bash public/downloads

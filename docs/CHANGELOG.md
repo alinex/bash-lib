@@ -1,5 +1,9 @@
 # Last Changes
 
+## Version 1.4.0 (2020-03-08)
+
+-   Updated documentation
+-   Fixed bug in setting exit code in lock_exit
 -   Optimized logging within lock/unlock
 
 ## Version 1.3.0 - 5th July 2019

@@ -56,3 +56,7 @@ source "$source_dir/base.bash"
 ```
 
 > See also the following [Skeleton](skeleton.md) which gives you a fast start for your own script.
+
+## Download PDF or ePub
+
+This guide is also available as PDF or ePub, so if you need a static copy (not always fully up to date) download: [alinex-bashlib.pdf](alinex-bashlib.pdf) or [alinex-bashlib.epub](alinex-bashlib.epub).
