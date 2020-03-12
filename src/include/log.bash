@@ -225,12 +225,12 @@ log () {
 
     if [ -z "$2" ] && [ ! -t 0 ]; then
         while read line; do
-            _log "$1" "$line" </dev/null
+            _log "$message_level" "$line" </dev/null
         done </dev/stdin
     else
         echo "${@:2}" |
         while read -r line; do
-            _log "$1" "$line" </dev/null
+            _log "$message_level" "$line" </dev/null
         done
 
     fi

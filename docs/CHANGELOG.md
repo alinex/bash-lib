@@ -1,5 +1,9 @@
 # Last Changes
 
+## Unpublished
+
+-   Fix to use LOG_LEVEL_DEFAULT
+
 ## Version 1.4.0 (2020-03-08)
 
 -   Updated documentation
