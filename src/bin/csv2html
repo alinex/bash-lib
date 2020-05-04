@@ -61,6 +61,7 @@ while ( ! $fh->eof() )
         foreach my $token (@field)
         {
             $token =~ s/\n/<br\/>/g;
+            $token =~ s/(.)/ord($1)>160?'&#'.ord($1).';':$1/ge; # convert umlaut
             print("<$cell>$token</$cell>");
         }
         print("</tr>\n");
