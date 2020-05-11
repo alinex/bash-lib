@@ -85,6 +85,8 @@ markdown_extensions:
     - codehilite:
           guess_lang: false
           linenums: false
+    - pymdownx.tabbed
+    - pymdownx.superfences
     - pymdownx.inlinehilite
     - pymdownx.betterem:
           smart_enable: all
@@ -94,7 +96,6 @@ markdown_extensions:
     - pymdownx.smartsymbols
     - pymdownx.tasklist:
           custom_checkbox: true
-    - pymdownx.tabbed
     - markdown_blockdiag:
           format: svg
     - markdown_include.include
