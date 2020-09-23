@@ -22,6 +22,7 @@ generic:
         - test/log-rotate-size
         - test/log-rotate-time
         - test/log-cmd
+    interruptible: true
 
 debian:
     stage: variant
@@ -31,6 +32,7 @@ debian:
         - apt-get install -y curl
     script:
         - test/info
+    interruptible: true
 ubuntu:
     stage: variant
     image: tutum/ubuntu
@@ -39,6 +41,7 @@ ubuntu:
         - apt-get install -y curl
     script:
         - test/info
+    interruptible: true
 linux-mint:
     stage: variant
     image: vcatechnology/linux-mint
@@ -47,12 +50,14 @@ linux-mint:
         - apt-get install -y curl
     script:
         - test/info
+    interruptible: true
 
 redhat:
     stage: variant
     image: hjd48/redhat
     script:
         - test/info
+    interruptible: true
 centos:
     stage: variant
     image: centos
@@ -60,6 +65,7 @@ centos:
         - yum install -y net-tools
     script:
         - test/info
+    interruptible: true
 mandrake:
     stage: variant
     image: tyuatsu/mandrake
@@ -67,6 +73,7 @@ mandrake:
         - yum install -y net-tools
     script:
         - test/info
+    interruptible: true
 
 # bug: declar -A unknown
 #suse:
@@ -74,6 +81,7 @@ mandrake:
 #    image: mstormo/suse
 #    script:
 #        - test/info
+#    interruptible: true
 
 fedora:
     stage: variant
@@ -82,12 +90,14 @@ fedora:
         - yum -y install findutils net-tools
     script:
         - test/info
+    interruptible: true
 
 gentoo:
     stage: variant
     image: gentoo/stage3-amd64
     script:
         - test/info
+    interruptible: true
 
 # bug: tput: unknown terminal "dumb"
 # bug: curl: error while loading shared libraries: libsasl2.so.3
@@ -99,6 +109,7 @@ gentoo:
 #        - slackpkg -batch=on -default_answer=y install curl
 #    script:
 #        - test/info
+#    interruptible: true
 
 archlinux:
     stage: variant
@@ -107,6 +118,7 @@ archlinux:
         - pacman -Sy --noconfirm net-tools grep gawk
     script:
         - test/info
+    interruptible: true
 
 # presencelab/darwin
 # macos
@@ -141,7 +153,9 @@ pages:
             - public
     only:
         - master
+    interruptible: true
 # lint:
 #   image: koalaman/shellcheck-alpine
 #   script:
 #     - shellcheck include/*.bash
+#    interruptible: true

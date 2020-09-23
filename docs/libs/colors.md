@@ -62,18 +62,9 @@ echo " and normal again.
 
 As shown above you start using the `+` sign and end all styles with `reset`. The `-n` switch to echo is used to prevent newline on the first two calls and get all into one line.
 
-## Remove colors and styles
+## Defined colors and styles
 
-And if you want to remove the coloring later again use the `decolor` method:
-
-```bash
-ctext=$(bg_red "This text with red background")
-echo "original: $ctext"
-echo "decolor using parameters: $(decolor $ctext)"
-echo "decolor using pipe: $ctext" | decolor
-```
-
-## Foreground color
+### Foreground color
 
 The following methods will set the foreground colors:
 
@@ -86,7 +77,7 @@ The following methods will set the foreground colors:
 -   `cyan`
 -   `white`
 
-# Background color
+### Background color
 
 The following methods will set the background colors:
 
@@ -99,7 +90,7 @@ The following methods will set the background colors:
 -   `bg_cyan`
 -   `bg_white`
 
-## Styles
+### Styles
 
 The following methods will set other styles:
 
@@ -107,3 +98,22 @@ The following methods will set other styles:
 -   `underline`
 -   `inverse`
 -   `dim`
+
+## Remove colors and styles
+
+And if you want to remove the coloring later again use the `decolor` method:
+
+```bash
+ctext=$(bg_red "This text with red background")
+echo "original: $ctext"
+echo "decolor using parameters: $(decolor $ctext)"
+echo "decolor using pipe: $ctext" | decolor
+```
+
+## Convert to HTML
+
+This is easily done using [aha](https://github.com/theZiz/aha), a small converter which may be installed as linux package from the default repository.
+
+```bash
+command 2>&1 | aha -b | mail -s "Command Report" -a "Content-Type: text/html" myself@email.de
+```
