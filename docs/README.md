@@ -57,6 +57,43 @@ source "$source_dir/base.bash"
 
 > See also the following [Skeleton](skeleton.md) which gives you a fast start for your own script.
 
+### Install and Use
+
+If you want to run a script with the bash lib but don't know if it is already installed, you can always check and install before you use it automatically:
+
+```bash
+# load bash lib or use alternative log method
+log() { echo $2; }
+source_dir=$(dirname $(readlink -f "${BASH_SOURCE[0]:-$(pwd)/x}"))
+if [ -e "$source_dir/lib/base.bash" ]; then
+    source "$source_dir/lib/base.bash"
+else
+    # update bash lib
+    log INFO "Installing bash-lib..."
+    rm -rf "$source_dir/lib"
+    curl -s https://alinex.gitlab.io/bash-lib/downloads/bash-lib.tgz | tar -xz
+    mv dist "$source_dir/lib"
+    source "$source_dir/lib/base.bash"
+fi
+```
+
+And if you want to always update it to the newest version use:
+
+```bash
+# load bash lib or use alternative log method
+log() { echo $2; }
+source_dir=$(dirname $(readlink -f "${BASH_SOURCE[0]:-$(pwd)/x}"))
+if [ -e "$source_dir/lib/base.bash" ]; then
+    source "$source_dir/lib/base.bash"
+fi
+# update bash lib
+log INFO "Updating bash-lib..."
+rm -rf "$source_dir/lib"
+curl -s https://alinex.gitlab.io/bash-lib/downloads/bash-lib.tgz | tar -xz
+mv dist "$source_dir/lib"
+source "$source_dir/lib/base.bash"
+```
+
 ## Download PDF or ePub
 
 This guide is also available as PDF or ePub, so if you need a static copy (not always fully up to date) download: [alinex-bashlib.pdf](alinex-bashlib.pdf) or [alinex-bashlib.epub](alinex-bashlib.epub).
