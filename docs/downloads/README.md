@@ -26,3 +26,5 @@ You should always only include one library. If you need multiple functions, incl
 Also you may need the following script to check if your server is ready for the bash-lib or if you should install something:
 
 -   [Install checker](install)
+
+{!docs/assets/abbreviations.txt!}

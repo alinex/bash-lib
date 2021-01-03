@@ -1,8 +1,17 @@
-# License
+## Statistics
 
-## Alinex Bash Library
+The following statistics will give you a better understanding about it's complexity.
+The documentation has 34 pages (in A4 PDF format) and contains 41030 characters.
 
-> Copyright 2018-2021 Alexander Schilling (https://gitlab.com/alinex/bash-lib)
+## Download Documentation
+
+If you want to have an offline access to the documentation, feel free to download the 34 pages [PDF Documentation](alinex-bash.pdf).
+
+## License
+
+### Alinex Bash Library
+
+> Copyright 2018-2019 Alexander Schilling (https://gitlab.com/alinex/bash-lib)
 
 !!! abstract "Apache License, Version 2.0"
 
@@ -18,14 +27,14 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-## SendMail (Perl)
+### SendMail (Perl)
 
 This utility is included as separate helper tool.
 
 > Originally written as SendEmail by: Brandon Zehm <caspian@dotconf.net> under GPL
 > [http://caspian.dotconf.net/menu/Software/SendEmail](http://caspian.dotconf.net/menu/Software/SendEmail) (version 1.56, Sep 29th 2009)
 
-Modified by Alexander Schilling 2018 to support environment variables for default settings.
+Modified 2018 by Alexander Schilling 2018 to support environment variables for default settings.
 
 !!! abstract "GPLv2"
 

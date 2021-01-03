@@ -94,6 +94,6 @@ mv dist "$source_dir/lib"
 source "$source_dir/lib/base.bash"
 ```
 
-## Download PDF or ePub
+{!docs/assets/stats-pdf-license.txt!}
 
-This guide is also available as PDF or ePub, so if you need a static copy (not always fully up to date) download: [alinex-bashlib.pdf](alinex-bashlib.pdf) or [alinex-bashlib.epub](alinex-bashlib.epub).
+{!docs/assets/abbreviations.txt!}

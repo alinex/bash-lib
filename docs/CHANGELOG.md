@@ -3,6 +3,7 @@
 ## Unpublished
 
 -   Fix to use LOG_LEVEL_DEFAULT
+-   Update doc theme
 
 ## Version 1.4.0 (2020-03-08)
 
@@ -78,3 +79,5 @@
 -   locking management
 -   psql integration
 -   info module
+
+{!docs/assets/abbreviations.txt!}

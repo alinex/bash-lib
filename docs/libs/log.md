@@ -219,3 +219,5 @@ This will log the called command, the output and error messages, the exit code a
 [WARN     ] W: Das Laden der konfigurierten Datei »multiverse/binary-i386/Packages« wird übersprungen, da das Depot »https://repo.fortinet.com/repo/ubuntu /bionic InRelease« die Datei scheinbar nicht bereitstellt. (Schreibfehler bei der Angabe der Komponente in sources.list?)
 [NOTICE   ] sudo call succeeded
 ```
+
+{!docs/assets/abbreviations.txt!}

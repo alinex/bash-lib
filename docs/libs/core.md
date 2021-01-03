@@ -43,3 +43,5 @@ And to check some specific commands use:
 ```bash
 needsudo "systemctl start tomcat8"
 ```
+
+{!docs/assets/abbreviations.txt!}

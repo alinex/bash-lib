@@ -1,101 +1,105 @@
 site_name: Alinex Bash Library
 site_description: Helper programs and libraries for administration tool development (mostly in bash).
 site_author: Alexander Schilling
-copyright: Copyright &copy; 2018 - 2020 <a href="https://alinex.de">Alexander Schilling</a>
+copyright: Copyright &copy; 2018 - 2021 <a href="https://alinex.de">Alexander Schilling</a>
 
 nav:
-    - Home:
-          - README.md
-          - skeleton.md
-          - CHANGELOG.md
-          - roadmap.md
-          - policy.md
-    - Libraries:
-          - libs/README.md
-          - libs/core.md
-          - libs/colors.md
-          - libs/log.md
-          - libs/info.md
-          - libs/process.md
-          - libs/psql.md
-          - bin/README.md
-    - Development:
-          - dev/README.md
-          - dev/build.md
-    - Downloads:
-          - downloads/README.md
-          - downloads/license.md
+  - Home:
+      - README.md
+      - skeleton.md
+      - CHANGELOG.md
+      - roadmap.md
+      - policy.md
+  - Libraries:
+      - libs/README.md
+      - libs/core.md
+      - libs/colors.md
+      - libs/log.md
+      - libs/info.md
+      - libs/process.md
+      - libs/psql.md
+      - bin/README.md
+  - Development:
+      - dev/README.md
+      - dev/build.md
+  - Downloads:
+      - downloads/README.md
+      - downloads/license.md
 
 theme:
-    name: material
-    icon:
-        logo: material/code-tags
-    favicon: https://assets.gitlab-static.net/uploads/-/system/project/avatar/10069235/images__1_.jpeg
-    language: en
-    palette:
-        primary: grey
-        accent: deep orange
-    font: false
-    # remove to be GDPR conform
-    #    font:
-    #        text: Roboto
-    #        code: Roboto Mono
-    features:
-        - tabs
-        - instant
+  name: material
+  icon:
+    logo: material/code-tags
+  favicon: https://assets.gitlab-static.net/uploads/-/system/project/avatar/10069235/images__1_.jpeg
+  language: en
+  palette:
+    scheme: slate
+    primary: grey
+    accent: dark orange
+  font:
+    text: Lato
+    code: Roboto Mono
+  features:
+    - navigation.instant
 
-repo_name: 'alinex/bash-lib'
-repo_url: 'https://gitlab.com/alinex/bash-lib'
+repo_name: "alinex/bash-lib"
+repo_url: "https://gitlab.com/alinex/bash-lib"
+edit_uri: ""
 
 extra:
-    manifest: 'manifest.webmanifest'
-    social:
-        - icon: material/gitlab
-          link: https://gitlab.com/alinex
-        - icon: material/github
-          link: https://github.com/alinex
-        - icon: material/book-open-variant
-          link: https://alinex.gitlab.io
-        - icon: material/home
-          link: https://alinex.de
+  manifest: "manifest.webmanifest"
+  social:
+    - icon: material/gitlab
+      link: https://gitlab.com/alinex
+    - icon: material/github
+      link: https://github.com/alinex
+    - icon: material/book-open-variant
+      link: https://alinex.gitlab.io
+    - icon: material/home
+      link: https://alinex.de
 
 extra_css:
-    - assets/extra.css
-#PDF#    - assets/pdf.css
+  - assets/extra.css
+
+extra_javascript:
+  - assets/mathjax.js
+  - https://polyfill.io/v3/polyfill.min.js?features=es6
+  - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
 
 plugins:
-    - search
-# Enable for PDF export
-#PDF#    - pdf-export:
-#PDF#          verbose: false
-#PDF#          media_type: print
-#PDF#          combined: true
-#PDF#          combined_output_path: alinex-bashlib.pdf
-# theme_handler_path: theme-handler.py
+  - search
+  - with-pdf:
+      cover_subtitle: Helper programs and libraries for administration tool development (mostly in bash)
+      cover_logo: https://assets.gitlab-static.net/uploads/-/system/project/avatar/10069235/images__1_.jpeg
+      toc_level: 3
+      output_path: alinex-bash.pdf
 
 markdown_extensions:
-    - extra
-    - toc:
-          permalink: true
-    - pymdownx.caret
-    - pymdownx.tilde
-    - pymdownx.mark
-    - admonition
-    - pymdownx.details
-    - codehilite:
-          guess_lang: false
-          linenums: false
-    - pymdownx.tabbed
-    - pymdownx.superfences
-    - pymdownx.inlinehilite
-    - pymdownx.betterem:
-          smart_enable: all
-    - pymdownx.emoji:
-          emoji_generator: !!python/name:pymdownx.emoji.to_svg
-    - pymdownx.keys
-    - pymdownx.smartsymbols
-    - pymdownx.tasklist:
-          custom_checkbox: true
-    - markdown_blockdiag:
-          format: svg
-    - markdown_include.include
+  - extra
+  - toc:
+      permalink: true
+  - pymdownx.caret
+  - pymdownx.tilde
+  - pymdownx.mark
+  - admonition
+  - pymdownx.details
+  - codehilite:
+      guess_lang: false
+      linenums: false
+  - pymdownx.tabbed
+  - pymdownx.superfences
+  - pymdownx.inlinehilite
+  - pymdownx.betterem:
+      smart_enable: all
+  - pymdownx.emoji:
+      emoji_index: !!python/name:materialx.emoji.twemoji
+      emoji_generator: !!python/name:materialx.emoji.to_svg
+  - pymdownx.keys
+  - pymdownx.smartsymbols
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - markdown_blockdiag:
+      format: svg
+  - markdown_include.include
+  - pymdownx.arithmatex:
+      generic: true

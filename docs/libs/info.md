@@ -134,3 +134,5 @@ This will go through:
 -   hourly, daily, weekly, monthly tasks
 
 All found entries will be combined into the following format: `<where> <minute> <hour> <day> <month> <wday> <user> <command>`.
+
+{!docs/assets/abbreviations.txt!}

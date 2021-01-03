@@ -63,3 +63,5 @@ Some of the default unix tools are used like:
 -   and a lot of other default linux utils
 
 But this should neither be a problem because all of them are base tools and already installed.
+
+{!docs/assets/abbreviations.txt!}

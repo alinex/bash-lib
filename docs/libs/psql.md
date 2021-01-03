@@ -79,3 +79,5 @@ psql_csv <query> | csv2xls result.xls || log_exit ALERT "Failed to export from D
 ```
 
 > Keep in mind that the `install` command of the bash-lib have to be run to make this work.
+
+{!docs/assets/abbreviations.txt!}

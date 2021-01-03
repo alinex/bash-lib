@@ -219,3 +219,5 @@ rm $STEPFILE # clear steps
 trap - SIGINT SIGTERM EXIT # remove trap
 unlock # free the file lock
 ```
+
+{!docs/assets/abbreviations.txt!}

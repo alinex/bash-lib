@@ -75,3 +75,4 @@ In Perl:
 -   `###REVISION###`
 -   `###GITLAB###`
 
+{!docs/assets/abbreviations.txt!}

@@ -56,3 +56,5 @@ log NOTICE Done.
 ```
 
 Copy this code and change it to your specification and add the processing...
+
+{!docs/assets/abbreviations.txt!}

@@ -16,3 +16,5 @@ The following modules are available:
 -   [process](process.md) serialize or parallelize tasks
 -   [psql](psql.md) to access PostgreSQL Database
 -   [info](info.md) is a collection of system information methods
+
+{!docs/assets/abbreviations.txt!}

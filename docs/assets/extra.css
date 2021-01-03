@@ -1,75 +1,142 @@
-/* use image for grey color theme */
-[data-md-color-primary='grey'] .md-tabs,
-[data-md-color-primary='grey'] .md-header,
-footer {
-    /*    background-image: url('blue-tunnel.jpg');*/
-    background-image: url('default.jpg');
-    background-size: cover;
-    background-attachment: fixed;
+@import url("https://fonts.googleapis.com/css2?family=Oswald&display=swap");
+
+/* use image for color theme */
+body,
+.md-header,
+.md-footer,
+.md-tabs {
+  /*    background-image: url('blue-tunnel.jpg');*/
+  background-image: url("default.jpg");
+  background-size: cover;
+  background-attachment: fixed;
+}
+.md-container,
+.md-search__inner {
+  background-color: rgba(0, 0, 0, 0.9);
 }
 .md-footer-nav,
 .md-footer-meta {
-    background: transparent;
+  background: transparent;
+}
+
+/* General style */
+.md-typeset h1,
+.md-tabs,
+.md-header-nav__topic,
+.md-sidebar {
+  font-family: "Oswald", sans-serif;
+}
+.md-tabs a {
+  font-size: 0.9rem;
+}
+.md-sidebar label {
+  font-size: 0.85rem;
+}
+.md-sidebar a {
+  font-size: 0.75rem;
+  margin-top: 0.4em;
+}
+.md-typeset h1 {
+  color: white;
+}
+.md-typeset__table th {
+  border-bottom: 2px solid darkorange;
+  font-weight: bold;
+}
+.md-typeset__table tr:nth-child(even) {
+  background: rgb(61, 61, 76);
+}
+.md-typeset table:not([class]) tr:nth-child(even):hover {
+  background-color: rgba(61, 61, 76, 0.035);
 }
 
 /* change link colors for grey theme */
 .md-header-nav__button:hover {
-    opacity: 1;
-    color: darkorange;
-    transition: color 0.5s;
+  opacity: 1;
+  color: darkorange;
+  transition: color 0.5s;
 }
-[data-md-color-primary='grey'] .md-typeset a {
-    color: #cc3200;
+[data-md-color-primary="grey"] .md-typeset a {
+  color: #00ade2;
 }
-[data-md-color-primary='grey'] .md-typeset a:hover {
-    color: darkorange;
+[data-md-color-primary="grey"] .md-typeset a:hover {
+  color: darkorange;
+}
+.md-nav__item .md-nav__link--active {
+  color: white;
+}
+.md-sidebar label,
+.md-nav__item--nested > .md-nav__link,
+.md-sidebar a {
+  color: gray;
 }
 .md-nav__link:hover {
-    color: darkorange;
+  color: darkorange;
+}
+.md-nav__link[data-md-state="blur"] {
+  color: rgb(180, 180, 180);
+}
+.md-nav__item .md-nav__link--active {
+  color: white;
 }
 .md-footer-nav__link {
-    font-weight: bold;
+  font-weight: bold;
 }
 .md-footer-nav__link:hover {
-    opacity: 1;
-    color: darkorange;
-    transition: color 0.5s;
+  opacity: 1;
+  color: darkorange;
+  transition: color 0.5s;
+}
+a.headerlink {
+  color: gray;
 }
 
 /* display external links with icon */
 div.md-content a[href^="http://"]:not([href*="alinex.gitlab.io"]):after,
 div.md-content a[href^="https://"]:not([href*="alinex.gitlab.io"]):after,
-div.md-content a[href^="//"]:not([href*="alinex.gitlab.io"]) {
-    font-family: 'FontAwesome';
-    content: ' \f08e';
-    font-weight: normal;
-    font-style: normal;
-    font-size: 70%;
-    vertical-align: top;
-    display: inline-block;
-    text-decoration: none;
-    padding-left: 3px;
+div.md-content a[href^="//"]:not([href*="alinex.gitlab.io"])
+{
+  content: "↗";
+  font-weight: normal;
+  font-style: normal;
+  font-size: 70%;
+  vertical-align: top;
+  display: inline-block;
+  text-decoration: none;
 }
 
 /* attribute classes to be used via {: .class} */
 .left {
-    /* left align with text float on the right */
-    float: left;
-    padding-right: 20px;
+  /* left align with text float on the right */
+  float: left;
+  padding-right: 20px;
 }
 .right {
-    /* right align with text float on the left */
-    float: right;
-    padding-left: 20px;
+  /* right align with text float on the left */
+  float: right;
+  padding-left: 20px;
 }
 .icon {
-    /* change image size */
-    width: 25%;
+  /* change image size */
+  width: 25%;
 }
 .border {
-    /* add drop shadow */
-    border: 1px solid #021a40;
-    -webkit-box-shadow: 0px 0px 18px 5px rgba(0, 0, 0, 0.5);
-    -moz-box-shadow: 0px 0px 18px 5px rgba(0, 0, 0, 0.5);
-    box-shadow: 0px 0px 18px 5px rgba(0, 0, 0, 0.5);
+  /* add drop shadow */
+  border: 1px solid #021a40;
+  -webkit-box-shadow: 0px 0px 18px 5px rgba(0, 0, 0, 0.5);
+  -moz-box-shadow: 0px 0px 18px 5px rgba(0, 0, 0, 0.5);
+  box-shadow: 0px 0px 18px 5px rgba(0, 0, 0, 0.5);
+}
+
+/* special use tags ==...== */
+mark,
+.md-typeset mark {
+  background-color: rgb(255, 253, 130);
+  color: black;
+  font-weight: bold;
+}
+
+/* blockdiag */
+img[src*="%3Ctitle%3Eblockdiag%3C"] {
+  background-color: lightgray;
 }

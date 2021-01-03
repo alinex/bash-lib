@@ -117,3 +117,5 @@ This is easily done using [aha](https://github.com/theZiz/aha), a small converte
 ```bash
 command 2>&1 | aha -b | mail -s "Command Report" -a "Content-Type: text/html" myself@email.de
 ```
+
+{!docs/assets/abbreviations.txt!}

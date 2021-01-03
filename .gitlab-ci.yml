@@ -1,79 +1,79 @@
 stages:
-    - test
-    - variant
-    - build
+  - test
+  - variant
+  - build
 
 # manual test using: sudo docker run -i gentoo/stage3-amd64 bash
 
 generic:
-    stage: test
-    image: node:latest
-    before_script:
-        - npm install -g bats
-    script:
-        - test/info
-        # old tests
-        - bats test
-        - test/colors
-        - test/log-simple
-        - test/log-full
-        - test/log-auto
-        - test/log-file
-        - test/log-rotate-size
-        - test/log-rotate-time
-        - test/log-cmd
-    interruptible: true
+  stage: test
+  image: node:latest
+  before_script:
+    - npm install -g bats
+  script:
+    - test/info
+    # old tests
+    - bats test
+    - test/colors
+    - test/log-simple
+    - test/log-full
+    - test/log-auto
+    - test/log-file
+    - test/log-rotate-size
+    - test/log-rotate-time
+    - test/log-cmd
+  interruptible: true
 
 debian:
-    stage: variant
-    image: debian
-    before_script:
-        - apt-get update
-        - apt-get install -y curl
-    script:
-        - test/info
-    interruptible: true
+  stage: variant
+  image: debian
+  before_script:
+    - apt-get update
+    - apt-get install -y curl
+  script:
+    - test/info
+  interruptible: true
 ubuntu:
-    stage: variant
-    image: tutum/ubuntu
-    before_script:
-        - apt-get update
-        - apt-get install -y curl
-    script:
-        - test/info
-    interruptible: true
+  stage: variant
+  image: tutum/ubuntu
+  before_script:
+    - apt-get update
+    - apt-get install -y curl
+  script:
+    - test/info
+  interruptible: true
 linux-mint:
-    stage: variant
-    image: vcatechnology/linux-mint
-    before_script:
-        - apt-get update
-        - apt-get install -y curl
-    script:
-        - test/info
-    interruptible: true
+  stage: variant
+  image: vcatechnology/linux-mint
+  before_script:
+    - apt-get update
+    - apt-get install -y curl
+  script:
+    - test/info
+  interruptible: true
 
 redhat:
-    stage: variant
-    image: hjd48/redhat
-    script:
-        - test/info
-    interruptible: true
+  stage: variant
+  image: hjd48/redhat
+  script:
+    - test/info
+  interruptible: true
 centos:
-    stage: variant
-    image: centos
-    before_script:
-        - yum install -y net-tools
-    script:
-        - test/info
-    interruptible: true
+  stage: variant
+  image: centos
+  before_script:
+    - yum install -y net-tools
+  script:
+    - test/info
+  interruptible: true
 mandrake:
-    stage: variant
-    image: tyuatsu/mandrake
-    before_script:
-        - yum install -y net-tools
-    script:
-        - test/info
-    interruptible: true
+  stage: variant
+  image: tyuatsu/mandrake
+  before_script:
+    - yum install -y net-tools
+  script:
+    - test/info
+  interruptible: true
 
 # bug: declar -A unknown
 #suse:
@@ -84,20 +84,20 @@ mandrake:
 #    interruptible: true
 
 fedora:
-    stage: variant
-    image: fedora
-    before_script:
-        - yum -y install findutils net-tools
-    script:
-        - test/info
-    interruptible: true
+  stage: variant
+  image: fedora
+  before_script:
+    - yum -y install findutils net-tools
+  script:
+    - test/info
+  interruptible: true
 
 gentoo:
-    stage: variant
-    image: gentoo/stage3-amd64
-    script:
-        - test/info
-    interruptible: true
+  stage: variant
+  image: gentoo/stage3-amd64
+  script:
+    - test/info
+  interruptible: true
 
 # bug: tput: unknown terminal "dumb"
 # bug: curl: error while loading shared libraries: libsasl2.so.3
@@ -112,13 +112,13 @@ gentoo:
 #    interruptible: true
 
 archlinux:
-    stage: variant
-    image: archlinux/base
-    before_script:
-        - pacman -Sy --noconfirm net-tools grep gawk
-    script:
-        - test/info
-    interruptible: true
+  stage: variant
+  image: archlinux/base
+  before_script:
+    - pacman -Sy --noconfirm net-tools grep gawk
+  script:
+    - test/info
+  interruptible: true
 
 # presencelab/darwin
 # macos
@@ -126,34 +126,34 @@ archlinux:
 # openbsd
 
 pages:
-    stage: build
-    image: silentstorm/pandoc-mkdocs
-    script:
-        ## build distribution
-        - apt-get update
-        - apt-get install -y bash bash-completion git perl
-        - bin/build
-        - tar czvf bash-lib.tgz dist
-        # create documentation
-        - pip install --upgrade pip
-        - pip install mkdocs-material
-        - pip install pymdown-extensions
-        - pip install markdown-blockdiag
-        - pip install markdown-include
-        - pip install mkdocs-mk2pdf-plugin
-        - mkdocs build
-        # move to website
-        - rm -rf public
-        - mv site public
-        - mv *.tgz public/downloads
-        - mv dist/*.bash public/downloads
-        - mv dist/install public/downloads
-    artifacts:
-        paths:
-            - public
-    only:
-        - master
-    interruptible: true
+  stage: build
+  image: silentstorm/pandoc-mkdocs
+  script:
+    ## build distribution
+    - apt-get update
+    - apt-get install -y bash bash-completion git perl
+    - bin/build
+    - tar czvf bash-lib.tgz dist
+    # create documentation
+    - pip install --upgrade pip
+    - pip install mkdocs-material
+    - pip install pymdown-extensions
+    - pip install markdown-blockdiag
+    - pip install markdown-include
+    - pip install mkdocs-with-pdf
+    - mkdocs build
+    # move to website
+    - rm -rf public
+    - mv site public
+    - mv *.tgz public/downloads
+    - mv dist/*.bash public/downloads
+    - mv dist/install public/downloads
+  artifacts:
+    paths:
+      - public
+  only:
+    - master
+  interruptible: true
 # lint:
 #   image: koalaman/shellcheck-alpine
 #   script:

@@ -1,4 +1,5 @@
 # Roadmap
 
-{!docs/abbreviations.txt!}
+Currently nothing is planned, here.
 
+{!docs/assets/abbreviations.txt!}
