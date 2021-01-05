@@ -2,6 +2,8 @@ title: Usage
 
 # Bash Library
 
+![bash-lib icon](https://assets.gitlab-static.net/uploads/-/system/project/avatar/10069235/bash-icon.png){: .right .icon}
+
 This is a collection of helper programs and libraries for administration tool development (mostly in bash). The complete library is build into combined packages, which mostly can be added as single include file to work.
 
 This documentation will show you how to use them.
