@@ -105,7 +105,7 @@ declare -r _log_rotate_time
 
 # Set defaults if variables have not been specified
 declare -u LOG_LEVEL_DEFAULT=${LOG_LEVEL_DEFAULT:-AUTO}
-LOG_TAG=${LOG_TAG:-$(basename -- "$0")}
+LOG_TAG=${LOG_TAG:-$(basename "$0")}
 LOG_DATE_FORMAT=${LOG_DATE_FORMAT:-"+%Y-%m-%d %H:%M:%S"}
 declare -u LOG_LEVEL=${LOG_LEVEL:-INFO}
 declare -u LOG_CONSOLE
