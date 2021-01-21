@@ -1,8 +1,9 @@
 # Last Changes
 
-## Unpublished
+## Version 1.4.1 (2021-01-21)
 
 -   Fix to use LOG_LEVEL_DEFAULT
+-   Fix bug with wrong use of basename in log module
 -   Update doc theme
 
 ## Version 1.4.0 (2020-03-08)
