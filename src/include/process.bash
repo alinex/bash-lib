@@ -129,7 +129,7 @@ async() {
 async_name() {
     [ "$#" -lt 2 ] && log_exit ALERT "parameter missing. Usage: async <name> <command> [<args>...]"
     local name="$1"
-    if [ -n "$STEPFILE" ] && [ -e "$STEPFILE" ] && grep -q "Finished: step $name" $STEPFILE; then
+    if [ -n "$STEPFILE" ] && [ -e "$STEPFILE" ] && grep -q "Finished: step $name at " $STEPFILE; then
         log INFO "Job $name already done in this run, skipping"
         return
     fi
