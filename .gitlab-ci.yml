@@ -9,6 +9,8 @@ generic:
   stage: test
   image: node:latest
   before_script:
+    - apt-get update
+    - apt-get install -y net-tools
     - npm install -g bats
   script:
     - test/info
