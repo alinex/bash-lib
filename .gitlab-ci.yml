@@ -80,7 +80,7 @@ mandrake:
 # bug: declar -A unknown
 suse:
     stage: variant
-    image: opensuse
+    image: opensuse/leap
     script:
         - test/info
     interruptible: true
@@ -103,15 +103,15 @@ gentoo:
 
 # bug: tput: unknown terminal "dumb"
 # bug: curl: error while loading shared libraries: libsasl2.so.3
-slackware:
-    stage: variant
-    image: vbatts/slackware
-    before_script:
-        - slackpkg update
-        - slackpkg -batch=on -default_answer=y install curl
-    script:
-        - test/info
-    interruptible: true
+# slackware:
+#     stage: variant
+#     image: vbatts/slackware
+#     before_script:
+#         - slackpkg update
+#         - slackpkg -batch=on -default_answer=y install curl
+#     script:
+#         - test/info
+#     interruptible: true
 
 archlinux:
   stage: variant
@@ -125,8 +125,6 @@ archlinux:
 alpine: 
   stage: variant
   image: alpine
-  before_script:
-    - pacman -Sy --noconfirm net-tools grep gawk
   script:
     - test/info
   interruptible: true
