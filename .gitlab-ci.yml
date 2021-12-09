@@ -77,13 +77,13 @@ mandrake:
     - test/info
   interruptible: true
 
-# bug: declar -A unknown
-suse:
-    stage: variant
-    image: opensuse/leap
-    script:
-        - test/info
-    interruptible: true
+# Not supported in os analyze, yet
+# suse:
+#     stage: variant
+#     image: opensuse/leap
+#     script:
+#         - test/info
+#     interruptible: true
 
 fedora:
   stage: variant
@@ -122,12 +122,13 @@ archlinux:
     - test/info
   interruptible: true
 
-alpine: 
-  stage: variant
-  image: alpine
-  script:
-    - test/info
-  interruptible: true
+# Problem callint test/info: not found
+# alpine: 
+#   stage: variant
+#   image: alpine
+#   script:
+#     - test/info
+#   interruptible: true
 
 # presencelab/darwin
 # macos
