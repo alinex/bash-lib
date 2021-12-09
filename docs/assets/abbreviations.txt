@@ -405,7 +405,7 @@
 *[RTT]: Round Trip Time
 *[S/MIME]: Secure/Multipurpose Internet Mail Extensions
 *[SaaS]: Software as a Service
-*[SAN]: Storage Area Network
+*[SAN]: Storage Area Network / Subject Alternate Name (DNS)
 *[SAS]: Serial attached SCSI
 *[SATA]: Serial ATA
 *[SCSI]: Small Computer System Interface

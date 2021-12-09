@@ -1,0 +1,6 @@
+#!/bin/bash
+
+source_dir=$(dirname $(readlink -f "${BASH_SOURCE[0]:-$(pwd)/x}"))
+cd $source_dir/..
+
+../node-core/bin/stats

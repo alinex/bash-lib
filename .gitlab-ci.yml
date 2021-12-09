@@ -157,36 +157,6 @@ pages:
       - public
   interruptible: true
 
-#pages:
-#  stage: build
-#  image: silentstorm/pandoc-mkdocs
-#  script:
-#    ## build distribution
-#    - apt-get update
-#    - apt-get install -y bash bash-completion git perl
-#    - bin/build
-#    - tar czvf bash-lib.tgz dist
-#    # create documentation
-#    - pip install --upgrade pip
-#    - pip install mkdocs-material
-#    - pip install pymdown-extensions
-#    - pip install markdown-blockdiag
-#    - pip install markdown-include
-#    - pip install mkdocs-with-pdf
-#    - mkdocs build
-#    # move to website
-#    - rm -rf public
-#    - mv site public
-#    - mv *.tgz public/downloads
-#    - mv dist/*.bash public/downloads
-#    - mv dist/install public/downloads
-#  artifacts:
-#    paths:
-#      - public
-#  only:
-#    - master
-#  interruptible: true
-
 # lint:
 #   image: koalaman/shellcheck-alpine
 #   script:
