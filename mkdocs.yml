@@ -26,6 +26,8 @@ nav:
       - downloads/README.md
       - downloads/license.md
 
+use_directory_urls: false
+
 theme:
   name: material
   icon:
@@ -62,12 +64,19 @@ extra_css:
   - assets/extra.css
 
 extra_javascript:
-  - assets/mathjax.js
+  - assets/extra.js
   - https://polyfill.io/v3/polyfill.min.js?features=es6
   - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
 
 plugins:
   - search
+  - awesome-pages
+  - include-markdown
+  - git-revision-date-localized
+  - minify:
+      minify_html: true
+      htmlmin_opts:
+          remove_comments: true
   - with-pdf:
       cover_subtitle: Helper programs and libraries for administration tool development (mostly in bash)
       cover_logo: https://alinex.gitlab.io/assets/icons/bash.png
@@ -103,3 +112,4 @@ markdown_extensions:
   - markdown_include.include
   - pymdownx.arithmatex:
       generic: true
+  - pymdownx.progressbar
