@@ -1,3 +1,5 @@
+#!/usr/bin/env bats
+
 @test "colors: output black text directly" {
   load "../src/include/colors"
   run black text

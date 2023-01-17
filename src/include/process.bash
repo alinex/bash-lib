@@ -9,7 +9,7 @@ source "$source_dir/log.bash" # load log handler
 
 
 declare -i LOCK_SLEEP=${LOCK_SLEEP:-10}
-declare LOCKFILE="${LOCKFILE:-/tmp/$(basename $0)-lock}"
+declare LOCKFILE="${LOCKFILE:-/tmp/$(basename /$0)-lock}"
 
 # remove lockfile if the process isn't running any more
 # parameter:
@@ -37,7 +37,7 @@ lock() {
     # try it, till it works
     logged=0
     while ! ln "$lockfile.$$" "$lockfile" 2>/dev/null; do
-        if [ ! $logged ]; then  # write message once
+        if [ $logged -eq 0 ]; then  # write message once
             log INFO "Waiting for unlock $lockfile..."
             logged=1
         else
