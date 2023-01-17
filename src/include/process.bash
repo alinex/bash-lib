@@ -102,7 +102,7 @@ unlock() {
         pid=$(cat "$lockfile" || log_exit ALERT "could not read lockfile $lockfile")
         if [ "$pid" -eq "$$" ]; then
             rm -f $lockfile || log_exit ALERT "failed to remove lockfile: $lockfile"
-            log INFO "... successful unlocked $lockfile"
+            log TRACE "... successful unlocked $lockfile"
         else
             log_exit ALERT "could not remove lockfile because it is set from another process"
         fi
