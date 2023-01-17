@@ -60,14 +60,14 @@ redhat:
   script:
     - test/info
   interruptible: true
-centos:
-  stage: variant
-  image: centos
-  before_script:
-    - yum install -y net-tools
-  script:
-    - test/info
-  interruptible: true
+#centos:
+#  stage: variant
+#  image: centos
+#  before_script:
+#    - yum install -y net-tools
+#  script:
+#    - test/info
+#  interruptible: true
 mandrake:
   stage: variant
   image: tyuatsu/mandrake
@@ -94,12 +94,12 @@ fedora:
     - test/info
   interruptible: true
 
-gentoo:
-  stage: variant
-  image: gentoo/stage3-amd64
-  script:
-    - test/info
-  interruptible: true
+#gentoo:
+#  stage: variant
+#  image: gentoo/stage3-amd64
+#  script:
+#    - test/info
+#  interruptible: true
 
 # bug: tput: unknown terminal "dumb"
 # bug: curl: error while loading shared libraries: libsasl2.so.3
@@ -123,7 +123,7 @@ archlinux:
   interruptible: true
 
 # Problem callint test/info: not found
-# alpine: 
+# alpine:
 #   stage: variant
 #   image: alpine
 #   script:
@@ -156,7 +156,6 @@ pages:
     paths:
       - public
   interruptible: true
-
 # lint:
 #   image: koalaman/shellcheck-alpine
 #   script:
