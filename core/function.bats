@@ -1,10 +1,10 @@
 #!/usr/bin/env bats
 
-# bats file_tags=core
+# bats file_tags=function
 setup() {
     bats_load_library bats-support
     bats_load_library bats-assert
-    load .loader
+    load $BASHLIB_HOME/loader
 }
 
 # bats test_tags=input
@@ -14,6 +14,7 @@ setup() {
     assert_success
     echo $output # use --show-output-of-passing-tests to see it
 }
+
 # bats test_tags=input
 @test "input: from stdin into line" {
     run bats_pipe echo one two three \| input
@@ -124,7 +125,7 @@ h help  -       Show Help Page"
 }
 # bats test_tags=mktemp
 @test "mktemp: normal behaviour for directory" {
-    run mktemp -d
+    run mktemp -d dir
     assert_success
     assert [ -d $output ]
     echo $output # use --show-output-of-passing-tests to see it

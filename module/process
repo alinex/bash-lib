@@ -181,11 +181,11 @@ unlock() {
 env_store() {
     # parameter parsing
     eval set -- "$(option_parse $'d disk -\np path +' "$@")"
-    local disk opt
+    local opt="-m"
     while true; do
         case "$1" in
         -d | --disk)
-            disk=$
+            opt=""
             shift
             ;;
         -p | --path)
@@ -202,11 +202,7 @@ env_store() {
     # processing
     local ident=$1
     shift || true
-    if [ -n "$disk" ]; then
-        declare -p "$@" | sed 's/^declare\b/declare -g/' >$(mktemp $opt -e env "$ident")
-    else
-        declare -p "$@" | sed 's/^declare\b/declare -g/' >$(mkshm -e env "$ident")
-    fi
+    declare -p "$@" | sed 's/^declare\b/declare -g/' >$(mktemp $opt -e env "$ident")
 }
 
 # Restore environment from shared memory/file
@@ -216,11 +212,11 @@ env_store() {
 env_restore() {
     # parameter parsing
     eval set -- "$(option_parse $'d disk -\np path +' "$@")"
-    local disk opt
+    local opt="-m"
     while true; do
         case "$1" in
         -d | --disk)
-            disk=$
+            opt=""
             shift
             ;;
         -p | --path)
@@ -235,11 +231,7 @@ env_restore() {
         esac
     done
     # processing
-    if [ -n "$disk" ]; then
-        source $(mktemp $opt -e env "$1") 2>/dev/null || true
-    else
-        source $(mkshm -e env "$1") 2>/dev/null || true
-    fi
+    source $(mktemp $opt -e env "$1") 2>/dev/null || true
 }
 
 # Remove stored environment from shared memory/file
@@ -249,11 +241,11 @@ env_restore() {
 env_clean() {
     # parameter parsing
     eval set -- "$(option_parse $'d disk -\np path +' "$@")"
-    local disk opt
+    local opt="-m"
     while true; do
         case "$1" in
         -d | --disk)
-            disk=$
+            opt=""
             shift
             ;;
         -p | --path)
@@ -268,11 +260,7 @@ env_clean() {
         esac
     done
     # processing
-    if [ -n "$disk" ]; then
-        rm -f $(mktemp $opt -e env "$1")
-    else
-        rm -f $(mkshm -e env "$1")
-    fi
+    rm -f $(mktemp $opt -e env "$1")
 }
 
 # Change environment in shared memory/file

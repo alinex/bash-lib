@@ -121,7 +121,7 @@ color_256_bg() {
 # Context Specific Declaration
 ######################################################################################
 
-# Set color for critical/disaster massages 
+# Set color for critical/disaster massages
 CC_CRITICAL=$'\033[1;45m'
 # Set color for error messages and failures
 CC_ERROR=$'\033[1;31m'

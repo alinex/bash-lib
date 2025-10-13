@@ -5,3 +5,4 @@ for f in "$BASHLIB_HOME"/config/*; do
         source "$f"
     fi
 done
+source "$BASHLIB_HOME/config/lang.${LANG%%_*}"

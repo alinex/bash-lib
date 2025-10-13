@@ -6,12 +6,26 @@
 # Context
 ######################################################################################
 
+# Show help page and exit
+# Usage:    help <heading> <usage> <options-spec> <details>
+help() {
+    heading "Hilfe: $1"
+    info "Usage: $2"
+    echo ""
+    if [ -n "$3" ]; then
+        option_help "$3"
+        echo ""
+    fi
+    echo "$4"
+    exit 0
+}
+
 # Print block heading
 # Usage:    heading <title>
 #           <title> | heading
 # Stdout:   colored <string>
 # Variable: $server
-heading() { 
+heading() {
     local prefix=""
     test -z "${server-}" || prefix="${server-} "
     echo -e "\n${CC_INVERS}$prefix${CC_RESET}${CC_HEADING}$(input "$@")...${CC_RESET}\n"
@@ -85,7 +99,7 @@ color() {
 #           <message> | ok
 # Stderr:   colored <string>
 debug() {
-    if [ -n "$DEBUG" ]; then 
+    if [ -n "$DEBUG" ]; then
         local text="$(input "$@")"
         test -z "$text" || echo "$CC_BLACK$text$CC_RESET" >&2
     fi
@@ -108,9 +122,9 @@ uncolorize() {
 #           <html-part> | html2md
 # Stdout:   <md>
 html2md() {
-    input "$@" \
-    | sed 's#&rarr;#→#g;s#&auml;#ä#g;s#&ouml;#ö#g;s#&uuml;#ü#g;s#&Auml;#Ä#g;s#&Ouml;#Ö#g;s#&Uuml;#Ü#g;s#&szlig;#ß#g;s#<strong>\([^<]*\)</strong>#**\1**#g;s#<br/\?>#\n#g;s#<li>#\n- #g;s#<[^>]*>##g' \
-    | grep -v '^$'
+    input "$@" |
+        sed 's#&rarr;#→#g;s#&auml;#ä#g;s#&ouml;#ö#g;s#&uuml;#ü#g;s#&Auml;#Ä#g;s#&Ouml;#Ö#g;s#&Uuml;#Ü#g;s#&szlig;#ß#g;s#<strong>\([^<]*\)</strong>#**\1**#g;s#<br/\?>#\n#g;s#<li>#\n- #g;s#<[^>]*>##g' |
+        grep -v '^$'
 }
 
 # Remove carriage return from line endings
@@ -118,7 +132,7 @@ html2md() {
 #           <text> | nocr
 # Stdout:   <text>
 nocr() {
-    input "$@" | sed 's/\r$//'   # removes all: tr -d '\r'
+    input "$@" | sed 's/\r$//' # removes all: tr -d '\r'
 }
 
 # Encode message to be used within the url
@@ -127,7 +141,7 @@ nocr() {
 # Stdout:   <string>
 urlencode() {
     install jq
-    input "$@" | jq -sRr @uri | sed 's/%0A$//' 
+    input "$@" | jq -sRr @uri | sed 's/%0A$//'
 }
 
 # Convert TSV data into visual table
@@ -156,7 +170,7 @@ tsv2md() {
 # Usage:    pause <message>
 #           <message> | pause
 # TTY:      <question> <key>
-pause() { 
+pause() {
     local local text="$(input "$@")"
     test -z "$text" || warn "$text"
     read -n 1 -s -r -p "Taste drücken um fortzufahren..." key
@@ -174,12 +188,14 @@ ask_no() {
         echo -ne "${CC_INFO}" >/dev/tty
         read -n 1 -s -p "$text (n/J) " yn
         case $yn in
-            ""|[Nn]) 
-                echo -e "Nein${CC_RESET}" >/dev/tty
-                return 1 ;;
-            [JjYy]) 
-                echo -e "Ja${CC_RESET}" >/dev/tty
-                return 0 ;;
+        "" | [Nn])
+            echo -e "Nein${CC_RESET}" >/dev/tty
+            return 1
+            ;;
+        [JjYy])
+            echo -e "Ja${CC_RESET}" >/dev/tty
+            return 0
+            ;;
         esac
         echo "$yn -> ungültige Antwort" >/dev/tty
     done
@@ -196,12 +212,14 @@ ask_yes() {
         echo -ne "${CC_INFO}" >/dev/tty
         read -n 1 -s -p "$text (J/n) " yn
         case $yn in
-            [Nn]) 
-                echo -e "Nein${CC_RESET}" >/dev/tty
-                return 1 ;;
-            ""|[JjYy]) 
-                echo -e "Ja${CC_RESET}" >/dev/tty
-                return 0 ;;
+        [Nn])
+            echo -e "Nein${CC_RESET}" >/dev/tty
+            return 1
+            ;;
+        "" | [JjYy])
+            echo -e "Ja${CC_RESET}" >/dev/tty
+            return 0
+            ;;
         esac
         echo "$yn -> ungültige Antwort" >/dev/tty
     done
@@ -216,7 +234,7 @@ ask_yes() {
 ask_input() {
     local local text="$(input "$@")"
     local answer prompt
-    if (( $# < 2 )); then
+    if (($# < 2)); then
         prompt="$text "
     else
         prompt="$text (Standard: $2) "
@@ -250,11 +268,23 @@ choose() {
     eval set -- "$(option_parse $'t title +\nx exit +\nd default +' "$@")"
     while true; do
         case "$1" in
-            -t|--title) info "$2" >/dev/tty; shift 2 ;;
-            -d|--default) default="$2"; shift 2 ;;
-            -x|--exit) end="$2"; shift 2 ;;
-            --) shift; break ;;
-            *) die "Unerwartete option in: $1" ;;
+        -t | --title)
+            info "$2" >/dev/tty
+            shift 2
+            ;;
+        -d | --default)
+            default="$2"
+            shift 2
+            ;;
+        -x | --exit)
+            end="$2"
+            shift 2
+            ;;
+        --)
+            shift
+            break
+            ;;
+        *) die "Unerwartete option in: $1" ;;
         esac
     done
     # processing
@@ -267,7 +297,7 @@ choose() {
         num=$((num + 1))
         IFS="|" read -r key display <<<"$line"
         printf "%4d) $(trim "${display:-$key}")\n" $num >/dev/tty
-    done <<< "$list"
+    done <<<"$list"
     [ -z "$end" ] || printf "%4s) ${end}\n" x >/dev/tty
     while true; do
         read -r -p "$question " select </dev/tty
@@ -287,7 +317,7 @@ choose() {
 }
 
 # Run tasks as selected by user
-# Usage:    tasks <function>"|"<entry>"...  # entries from arguments 
+# Usage:    tasks <function>"|"<entry>"...  # entries from arguments
 #           <list> | tasks                  # entries from ppe
 #           tasks <function>                # entries from function (dynamic)
 # Option    -t, --title <title>             # display text line above selection
@@ -316,9 +346,15 @@ tasks() {
     eval set -- "$(option_parse $'t title +' "$@")"
     while true; do
         case "$1" in
-            -t|--title) title="-t$2" >/dev/tty; shift 2 ;;
-            --) shift; break ;;
-            *) die "Unerwartete option in: $1" ;;
+        -t | --title)
+            title="-t$2" >/dev/tty
+            shift 2
+            ;;
+        --)
+            shift
+            break
+            ;;
+        *) die "Unerwartete option in: $1" ;;
         esac
     done
     # processing
@@ -327,7 +363,7 @@ tasks() {
     while true; do
         [ -z "$1" ] || list="$("$1")"
         task=$(choose "$title" -x Beenden "$list")
-        [[ "$task" != "exit" ]] || break 
+        [[ "$task" != "exit" ]] || break
         $task || die "Got error $? running: $task"
         echo ""
     done

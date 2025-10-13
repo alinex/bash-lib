@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+# The core configuration which is needed for the core functions.
+
+######################################################################################
+### Script Base Setup
+######################################################################################
+
+set -eE         # exit on uncatched failure
+set -o pipefail # fail if any command in a pipeline fails
+#set -u # exit on use of unset variables
+
+######################################################################################
+### Colors
+######################################################################################
+
+# Reset all
+CC_RESET=$'\033[0m'
+# Set color for critical/disaster massages
+CC_CRITICAL=$'\033[1;45m'

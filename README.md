@@ -7,7 +7,7 @@ This is the updated version of my personal library used to easily write powerful
 Version 2 is a complete rework of the library meaning it is another toolset and you could not upgrade to it.
 Some functionalities from the older version will no longer be available like logging while a lot of new possibilities are included.
 
-If you already use it jump directly to the [module description](docs/README.md).
+If you already use it jump directly to the [module description](https://gitlab.com/alinex/bash-lib/-/blob/master/doc/README.md).
 
 ## Architecture
 
@@ -51,6 +51,14 @@ source $BASHLIB_HOME/module/output  # and then single modules
 
 ## Configuration
 
+The configuration should be put under `config/` folder and will be loaded in alphabetically order using:
+
+```bash
+source $BASHLIB_HOME/configs
+```
+
+The `config/` folder also contains some language files `lang.<xx>` which will be loaded if the shell is running in the appropriate `$LANG` to have multilingual output.
+
 ### Environment
 
 There is a build in `DEBUG=1` flag, which you can set to do some specific debugging steps within the code. This is aimed to be used for development and bug fixing.
@@ -72,7 +80,7 @@ The update will generate minimized files, if you use them and have an error you 
 $ ps-contracts 
 /home/alex/dvb/scripts/local/bash-lib/full: Zeile 317: server ist nicht gesetzt.
 $ source $BASHLIB/loader
-$ ps-contracts 
+$ ps-contracts
 /home/alex/dvb/scripts/local/bash-lib/module/output: Zeile 12: server ist nicht gesetzt.
 ```
 

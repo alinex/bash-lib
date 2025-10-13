@@ -144,7 +144,7 @@ new="$(echo "$current"|sed "s#;* *$remove##")"
 trap "$new" "$sig"
 }
 mktemp(){
-eval set -- "$(option_parse $'d directory -\ne extension +\np path +' "$@")"
+eval set -- "$(option_parse $'d directory -\ne extension +\nm memory -\np path +' "$@")"
 local dir ext result
 local path=${TMPDIR:-/tmp}
 while true;do
@@ -1067,10 +1067,10 @@ return 0
 }
 env_store(){
 eval set -- "$(option_parse $'d disk -\np path +' "$@")"
-local disk opt
+local opt="-m"
 while true;do
 case "$1" in
--d|--disk)disk=$
+-d|--disk)opt=""
 shift
 ;;
 -p|--path)opt="$1 $2"
@@ -1084,18 +1084,14 @@ esac
 done
 local ident=$1
 shift||true
-if [ -n "$disk" ];then
 declare -p "$@"|sed 's/^declare\b/declare -g/' >$(mktemp $opt -e env "$ident")
-else
-declare -p "$@"|sed 's/^declare\b/declare -g/' >$(mkshm -e env "$ident")
-fi
 }
 env_restore(){
 eval set -- "$(option_parse $'d disk -\np path +' "$@")"
-local disk opt
+local opt="-m"
 while true;do
 case "$1" in
--d|--disk)disk=$
+-d|--disk)opt=""
 shift
 ;;
 -p|--path)opt="$1 $2"
@@ -1107,18 +1103,14 @@ break
 *)shift
 esac
 done
-if [ -n "$disk" ];then
 source $(mktemp $opt -e env "$1") 2>/dev/null||true
-else
-source $(mkshm -e env "$1") 2>/dev/null||true
-fi
 }
 env_clean(){
 eval set -- "$(option_parse $'d disk -\np path +' "$@")"
-local disk opt
+local opt="-m"
 while true;do
 case "$1" in
--d|--disk)disk=$
+-d|--disk)opt=""
 shift
 ;;
 -p|--path)opt="$1 $2"
@@ -1130,11 +1122,7 @@ break
 *)shift
 esac
 done
-if [ -n "$disk" ];then
 rm -f $(mktemp $opt -e env "$1")
-else
-rm -f $(mkshm -e env "$1")
-fi
 }
 env_change(){
 eval set -- "$(option_parse $'d disk -\np path +' "$@")"

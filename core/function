@@ -1,25 +1,6 @@
 #!/usr/bin/env bash
 
-# The core module contains essential parts which may also be used while loading the library.
-
-######################################################################################
-### Script Base Setup
-######################################################################################
-
-set -eE         # exit on uncatched failure
-set -o pipefail # fail if any command in a pipeline fails
-#set -u # exit on use of unset variables
-
-trap 'exit 1' ERR # in case the error is not correctly tracked back
-
-# Path to the directory in which the bash-lib is
-BASHLIB_BASE="$(dirname "$(readlink -f "${BASH_SOURCE[0]:-$(pwd)/x}")")"
-# Path to the directory of the started program
-if [ ${#BASH_SOURCE[@]} -gt 0 ]; then
-    PROGRAM_BASE="$(dirname "$(readlink -f "${BASH_SOURCE[-1]:-$(pwd)/x}")")"
-else
-    PROGRAM_BASE="$(pwd)"
-fi
+# The core functions contains essential parts which may also be used while loading the library.
 
 ######################################################################################
 ### Base functions
@@ -101,7 +82,7 @@ trap_remove() {
 # Stdout:   <path>
 mktemp() {
     # parameter parsing
-    eval set -- "$(option_parse $'d directory -\ne extension +\np path +' "$@")"
+    eval set -- "$(option_parse $'d directory -\ne extension +\nm memory -\np path +' "$@")"
     local dir ext result
     local path=${TMPDIR:-/tmp}
     while true; do
@@ -201,18 +182,4 @@ option_help() {
         fi
         printf "  %-40s %s\n" "$short_text--$name$type_text" "${opt_descriptions[$name]}"
     done
-}
-
-# Show help page and exit
-# Usage:    help <heading> <usage> <options-spec> <details>
-help() {
-    heading "Hilfe: $1"
-    info "Usage: $2"
-    echo ""
-    if [ -n "$3" ]; then
-        option_help "$3"
-        echo ""
-    fi
-    echo "$4"
-    exit 0
 }
