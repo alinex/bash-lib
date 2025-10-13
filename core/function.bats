@@ -6,6 +6,10 @@ setup() {
     bats_load_library bats-assert
     load $BASHLIB_HOME/loader
 }
+teardown_file() {
+    rm -rf /tmp/bats-exec*
+    rm -rf /dev/shm/bats-exec*
+}
 
 # bats test_tags=input
 @test "input: as arguments into line" {
@@ -117,21 +121,29 @@ h help  -       Show Help Page"
 }
 
 # bats test_tags=mktemp
-@test "mktemp: normal behaviour for file" {
+@test "mktemp: for file" {
     run mktemp
     assert_success
     assert [ -e $output ]
     echo $output # use --show-output-of-passing-tests to see it
 }
 # bats test_tags=mktemp
-@test "mktemp: normal behaviour for directory" {
+@test "mktemp: for directory" {
     run mktemp -d dir
     assert_success
     assert [ -d $output ]
     echo $output # use --show-output-of-passing-tests to see it
 }
 # bats test_tags=mktemp
-@test "mktemp: recognizable file" {
+@test "mktemp: in memory" {
+    run mktemp -m test
+    assert_success
+    assert [ -e $output ]
+    assert_output "/dev/shm/bats-exec-test_test"
+    echo $output # use --show-output-of-passing-tests to see it
+}
+# bats test_tags=mktemp
+@test "mktemp: with identifier" {
     run mktemp test
     assert_success
     assert [ -e $output ]
@@ -139,18 +151,10 @@ h help  -       Show Help Page"
     echo $output # use --show-output-of-passing-tests to see it
 }
 # bats test_tags=mktemp
-@test "mktemp: recognizable file with extension" {
+@test "mktemp: with extension" {
     run mktemp test -e env
     assert_success
     assert [ -e $output ]
     assert_output "/tmp/bats-exec-test_test.env"
-    echo $output # use --show-output-of-passing-tests to see it
-}
-# bats test_tags=mktemp
-@test "mktemp: recognizable directory" {
-    run mktemp testdir -d
-    assert_success
-    assert [ -d $output ]
-    assert_output "/tmp/bats-exec-test_testdir"
     echo $output # use --show-output-of-passing-tests to see it
 }

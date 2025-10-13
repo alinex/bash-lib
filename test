@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+echo "Run all unit Tests"
+bats core module
