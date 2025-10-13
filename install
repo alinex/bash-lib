@@ -9,13 +9,12 @@ echo "This will setup the bashlib on this host if not already done..."
 echo ""
 
 echo "Step 1: Download bashlib to your system"
-read -rp "Where to put it: [$HOME/bashlib] " answer
-if [ -z "$answer" ] && [ -n "$2" ]; then
-    path="${answer:-$HOME/bashlib}"
-fi
+read -rp "Where to put it: [$HOME/bashlib] " path </dev/tty
+path="${path:-$HOME/bashlib}"
 mkdir -p $path
 curl -L $BASHLIB_DOWNLOAD -o /tmp/bashlib.tgz
-tar -xzf /tmp/bashliub.tgz -C $path
+tar -xzf /tmp/bashlib.tgz -C $path
+rm /tmp/bashlib.tgz
 echo ""
 
 echo "Step 2: Setup BASHLIB_HOME in your environment."
