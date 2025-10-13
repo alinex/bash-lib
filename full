@@ -1,0 +1,1578 @@
+#!/usr/bin/env bash
+COLORS=$(tput colors 2>/dev/null||echo 0)
+CC_RESET=$'\033[0m'
+CC_RESET_FG=$'\033[39m'
+CC_RESET_BG=$'\033[49m'
+CC_INTENSITY_BOLD=$'\033[1m'
+CC_INTENSITY_LIGHT=$'\033[2m'
+CC_INTENSITY_OFF=$'\033[22m'
+CC_ITALIC=$'\033[3m'
+CC_ITALIC_OFF=$'\033[23m'
+CC_UNDERLINE=$'\033[4m'
+CC_UNDERLINE_OFF=$'\033[24m'
+CC_INVERSE=$'\033[7m'
+CC_INVERSE_OFF=$'\033[27m'
+CC_DASHED=$'\033[9m'
+CC_DASHED_OFF=$'\033[29m'
+CC_BLACK=$'\033[30m'
+CC_RED=$'\033[31m'
+CC_GREEN=$'\033[32m'
+CC_YELLOW=$'\033[33m'
+CC_BLUE=$'\033[34m'
+CC_MAGENTA=$'\033[35m'
+CC_CYAN=$'\033[36m'
+CC_WHITE=$'\033[37m'
+CC_BLACK_BOLD=$'\033[90m'
+CC_RED_BOLD=$'\033[91m'
+CC_GREEN_BOLD=$'\033[92m'
+CC_YELLOW_BOLD=$'\033[93m'
+CC_BLUE_BOLD=$'\033[94m'
+CC_MAGENTA_BOLD=$'\033[95m'
+CC_CYAN_BOLD=$'\033[96m'
+CC_WHITE_BOLD=$'\033[97m'
+CC_BLACK_BG=$'\033[40m'
+CC_RED_BG=$'\033[41m'
+CC_GREEN_BG=$'\033[42m'
+CC_YELLOW_BG=$'\033[43m'
+CC_BLUE_BG=$'\033[44m'
+CC_MAGENTA_BG=$'\033[45m'
+CC_CYAN_BG=$'\033[46m'
+CC_BLACK_BOLD_BG=$'\033[100m'
+CC_RED_BOLD_BG=$'\033[101m'
+CC_GREEN_BOLD_BG=$'\033[102m'
+CC_YELLOW_BOLD_BG=$'\033[103m'
+CC_BLUE_BOLD_BG=$'\033[104m'
+CC_MAGENTA_BOLD_BG=$'\033[105m'
+CC_CYAN_BOLD_BG=$'\033[106m'
+color_256(){
+echo $'\033[38;5;'${1:-0}'m'
+}
+color_256_bg(){
+echo $'\033[48;5;'${1:-0}'m'
+}
+CC_CRITICAL=$'\033[1;45m'
+CC_ERROR=$'\033[1;31m'
+CC_WARN=$'\033[1;33m'
+CC_INFO=$'\033[1;34m'
+CC_OK=$'\033[1;32m'
+CC_HEADING=$'\033[44m'
+CC_INVERS=$'\033[7m'
+color_table(){
+echo "Basic Colors:"
+echo -e "\t${CC_BLACK}CC_BLACK\t${CC_BLACK_BOLD}CC_BLACK_BOLD\t${CC_BLACK_BG}CC_BLACK_BG\t${CC_BLACK_BOLD_BG}CC_BLACK_BOLD_BG$CC_RESET"
+echo -e "\t${CC_RED}CC_RED\t\t${CC_RED_BOLD}CC_RED_BOLD\t${CC_RED_BG}CC_RED_BG\t${CC_RED_BOLD_BG}CC_RED_BOLD_BG$CC_RESET"
+echo -e "\t${CC_GREEN}CC_GREEN\t${CC_GREEN_BOLD}CC_GREEN_BOLD\t${CC_GREEN_BG}CC_GREEN_BG\t${CC_GREEN_BOLD_BG}CC_GREEN_BOLD_BG$CC_RESET"
+echo -e "\t${CC_YELLOW}CC_YELLOW\t${CC_YELLOW_BOLD}CC_YELLOW_BOLD\t${CC_YELLOW_BG}CC_YELLOW_BG\t${CC_YELLOW_BOLD_BG}CC_YELLOW_BOLD_BG$CC_RESET"
+echo -e "\t${CC_BLUE}CC_BLUE\t\t${CC_BLUE_BOLD}CC_BLUE_BOLD\t${CC_BLUE_BG}CC_BLUE_BG\t${CC_BLUE_BOLD_BG}CC_BLUE_BOLD_BG$CC_RESET"
+echo -e "\t${CC_MAGENTA}CC_MAGENTA\t${CC_MAGENTA_BOLD}CC_MAGENTA_BOLD\t${CC_MAGENTA_BG}CC_MAGENTA_BG\t${CC_MAGENTA_BOLD_BG}CC_MAGENTA_BOLD_BG$CC_RESET"
+echo -e "\t${CC_CYAN}CC_CYAN\t\t${CC_CYAN_BOLD}CC_CYAN_BOLD\t${CC_CYAN_BG}CC_CYAN_BG\t${CC_CYAN_BOLD_BG}CC_CYAN_BOLD_BG$CC_RESET"
+echo "Special Formats:"
+echo -e "\t${CC_INTENSITY_BOLD}CC_INTENSITY_BOLD\t${CC_INTENSITY_LIGHT}CC_INTENSITY_LIGHT$CC_RESET"
+echo -e "\t${CC_ITALIC}CC_ITALIC$CC_RESET"
+echo -e "\t${CC_UNDERLINE}CC_UNDERLINE$CC_RESET"
+echo -e "\t${CC_DASHED}CC_DASHED$CC_RESET"
+echo -e "\t${CC_INVERSE}CC_INVERSE$CC_RESET"
+echo "256 Color palette:"
+local cols=15
+local rows=15
+for c in $(seq 0 $cols);do
+for r in $(seq 0 $rows);do
+num=$((r*cols+c))
+echo -ne "\t$(color_256 $num)FG $num"
+done
+echo ""
+done
+for c in $(seq 0 $cols);do
+for r in $(seq 0 $rows);do
+num=$((r*cols+c))
+echo -ne "\t$(color_256_bg $num)BG $num$CC_RESET"
+done
+echo ""
+done
+echo "Context specific colors:"
+echo -e "\t${CC_CRITICAL}CC_CRITICAL$CC_RESET"
+echo -e "\t${CC_ERROR}CC_ERROR$CC_RESET"
+echo -e "\t${CC_WARN}CC_WARN$CC_RESET"
+echo -e "\t${CC_INFO}CC_INFO$CC_RESET"
+echo -e "\t${CC_OK}CC_OK$CC_RESET"
+echo -e "\t${CC_HEADING}CC_HEADING$CC_RESET"
+echo -e "\t${CC_INVERS}CC_INVERS$CC_RESET"
+}
+set -eE
+set -o pipefail
+trap 'exit 1' ERR
+BASHLIB_BASE="$(dirname "$(readlink -f "${BASH_SOURCE[0]:-$(pwd)/x}")")"
+if [ ${#BASH_SOURCE[@]} -gt 0 ];then
+PROGRAM_BASE="$(dirname "$(readlink -f "${BASH_SOURCE[-1]:-$(pwd)/x}")")"
+else
+PROGRAM_BASE="$(pwd)"
+fi
+input(){
+test -p /dev/stdin&&test $# -eq 0&&cat -||echo "$*"
+}
+input_args(){
+local num=${1-}
+local start=$((num+2))
+[ -n "$num" ]||die "No <num> argument in call to input_args!"
+[ "$num" -gt 0 ]||die "<num>=$num argument is not a valid number!"
+test -p /dev/stdin&&cat -||echo "${@:start}"
+}
+input_lines(){
+test -p /dev/stdin&&test -z "${1-}"&&cat -||for arg in "$@";do echo "$arg";done
+}
+die(){
+echo -e "$CC_CRITICAL$(input "$@")$CC_RESET" >&2
+exit 1
+}
+trap_add(){
+local new="$1"
+local sig="$2"
+local old
+old="$(trap -p "$sig"|awk -F"'" '{print $2}')"
+if [[ -n $old ]];then
+trap "$new; $old" "$sig"
+else
+trap "$new" "$sig"
+fi
+}
+trap_remove(){
+local remove="$1"
+local sig="$2"
+local current new
+current="$(trap -p "$sig"|awk -F"'" '{print $2}')"
+new="$(echo "$current"|sed "s#;* *$remove##")"
+trap "$new" "$sig"
+}
+mktemp(){
+eval set -- "$(option_parse $'d directory -\ne extension +\np path +' "$@")"
+local dir ext result
+local path=${TMPDIR:-/tmp}
+while true;do
+case "$1" in
+-d|--directory)dir=1
+shift
+;;
+-e|--extension)ext=".$2"
+shift 2
+;;
+-m|--memory)path="/dev/shm"
+shift
+;;
+-p|--path)path="$2"
+shift 2
+;;
+--)shift
+break
+;;
+*)shift
+esac
+done
+result="$path/$(basename $0)_$1$ext"
+if [ -n "$dir" ];then
+mkdir -p "$result"
+else
+touch "$result"
+fi
+echo "$result"
+}
+option_parse(){
+local short=""
+local long=""
+while read -r opt name type desc;do
+[[ $opt =~ ^# ]]&&continue
+[[ -z $opt ]]&&continue
+if [ ! "$type" = "-" ];then
+[ "$opt" = "-" ]||short+="$opt:"
+long+="$name:,"
+else
+[ "$opt" = "-" ]||short+="$opt"
+long+="$name,"
+fi
+done <<<"$1"
+shift
+getopt -o "$short" --long "$long" -n "$0" -- "$@"
+}
+option_help(){
+declare -A opt_descriptions
+declare -A opt_type
+declare -A opt_short
+while read -r opt name type desc;do
+[[ $opt =~ ^# ]]&&continue
+[[ -z $opt ]]&&continue
+opt_descriptions[$name]="$desc"
+opt_type[$name]=$type
+opt_short[$name]=$opt
+done <<<"$1"
+echo "Optionen:"
+for name in "${!opt_descriptions[@]}";do
+local type_text=""
+local short_text=""
+if [ ! "${opt_type[$name]}" = "-" ];then
+type_text=" <${opt_type[$name]}>"
+fi
+if [[ ! ${opt_short[$name]} == "-" ]];then
+short_text="-${opt_short[$name]}$type_text, "
+fi
+printf "  %-40s %s\n" "$short_text--$name$type_text" "${opt_descriptions[$name]}"
+done
+}
+help(){
+heading "Hilfe: $1"
+info "Usage: $2"
+echo ""
+if [ -n "$3" ];then
+option_help "$3"
+echo ""
+fi
+echo "$4"
+exit 0
+}
+contains(){
+local array=$1
+local value=$2
+local e
+for e in "${array[@]}";do
+[[ $e != "$value" ]]||return 0
+done
+return 1
+}
+confluence(){
+install jq
+curl -H "Content-Type: application/json" -u "$ATLASSIAN_USER:$ATLASSIAN_TOKEN" "$CONFLUENCE_API/content/$1?expand=body.storage"|jq .body.storage.value -r||die "Could not read confluence page!"
+}
+confluence_outage(){
+local row="$(confluence $CONFLUENCE_OUTAGE|sed 's/<\/tr>/<\/tr>\n/g;s/<tr>/\n<tr>/g'|grep '^<tr'|grep "$1"|head -1|sed 's/<\/td>/<\/td>\n/g;s/<td>/\n<td>/g'|grep '^<td')"
+test -n "$row"||return
+local office="$(echo "$row"|sed -n '2p'|html2md)"
+local customer="$(echo "$row"|sed -n '3p'|html2md)"
+local user="$(echo "$row"|sed -n '4p'|html2md)"
+echo -e "##### Auswirkungen für Endkunden\n\n$user\n\n##### Auswirkungen für Bibliotheken\n\n$customer\n\n##### Auswirkungen intern divibib/ekz\n\n$office"
+}
+jira_search(){
+install jq
+curl -u "$ATLASSIAN_USER:$ATLASSIAN_TOKEN" -H "Content-Type: application/json" -X GET "$JIRA_API/search/jql?jql=$1&fields=*all"|jq '.issues[]'||die "Could not search for Jira issues using $1!"
+}
+jira_get(){
+curl -u "$ATLASSIAN_USER:$ATLASSIAN_TOKEN" -H "Content-Type: application/json" -X GET "$JIRA_API/issue/$1"||die "Could not get Jira issue $1!"
+}
+jira_create(){
+install jq
+curl -u "$ATLASSIAN_USER:$ATLASSIAN_TOKEN" -H "Content-Type: application/json" -X POST "$JIRA_API/issue/" -d "$1"|jq '.key' -r||die "Could not create Jira issue!"
+}
+jira_update(){
+curl -u "$ATLASSIAN_USER:$ATLASSIAN_TOKEN" -H "Content-Type: application/json" -X PUT "$JIRA_API/issue/$1" -d "$1"||die "Could not update Jira issue $1!"
+}
+now(){
+date +%s
+}
+date_diff(){
+local start end
+num_parameters "$@" --min 2 --max 2 --die "Need exactly two parameters: diff_sec <start> <end>"
+is_integer "$1"&&start=${1-}||start=$(date -d "$1" +%s)||die "Date format '$1' not parsable!"
+is_integer "$2"&&end=${2-}||end=$(date -d "$2" +%s)||die "Date format '$2' not parsable!"
+echo $((end-start))
+}
+date_format(){
+local value format
+case $1 in
+iso)format="--iso-8601=seconds";;
+iso-date)format="--iso-8601";;
+zulu)format="-u +%Y-%m-%dT%H:%M:%SZ";;
+sql)format='+"%Y-%m-%d %H:%M:%S"';;
+unix)format="+%s";;
+eu-date)format="+%Y-%m-%d";;
+us-date)format="+%m/%d/%Y";;
+human-date)format="+%A, %B %d, %Y";;
+time)format="%H:%M:%S";;
+time-short)format="%H:%M";;
+*)format="$1"
+esac
+[ -n "$2" ]&&value="${2-}"||value=$(now)
+is_integer "$value"&&eval "date -d @$value $format"||eval "date -d \"$value\" $format"||die "Date format '$value' not parsable!"
+}
+[ -n "$MIDDLEWARE_SWAGGER_PASSWORD" ]||die "No MIDDLEWARE_SWAGGER_PASSWORD defined, please add this in the environment like .bashrc!"
+backoffice_set(){
+local start
+local end
+[[ $1 =~ ^[0-9]+$ ]]&&start="$(date -d @$1 -u +"%Y-%m-%dT%H:%M:%SZ"|urlencode)"||start="$(date -d "$1" -u +"%Y-%m-%dT%H:%M:%SZ"|urlencode)"
+[[ $2 =~ ^[0-9]+$ ]]&&end="$(date -d @$2 -u +"%Y-%m-%dT%H:%M:%SZ"|urlencode)"||end="$(date -d "$2" -u +"%Y-%m-%dT%H:%M:%SZ"|urlencode)"
+local message="$(echo "${3:-Wartungsarbeiten}"|urlencode)"
+echo "Meldung im Backoffice: ${3:-Wartungsarbeiten}" >&2
+curl -u "swagger:$MIDDLEWARE_SWAGGER_PASSWORD" -X POST "http://user-application.service.user.dvb/v1/back-office/maintenance?validFrom=$start&validTo=$end&message=$message"
+}
+backoffice_unset(){
+echo "Meldung im Backoffice entfernt" >&2
+curl -u "swagger:$MIDDLEWARE_SWAGGER_PASSWORD" -X DELETE 'http://user-application.service.user.dvb/v1/back-office/maintenance'
+}
+declare -A _mattermost_cache
+_mattermost_user(){
+if [[ ! -v _mattermost_cache["__u"] ]];then
+debug "GET mattermost/users/me"
+_mattermost_cache["__u"]="$(curl -H "Authorization: Bearer $MATTERMOST_TOKEN" $MATTERMOST_API/users/me|jq '.id' -r)"||die "Could not find myself in mattermost!"
+fi
+echo "${_mattermost_cache["__u"]}"
+}
+_mattermost_team(){
+if [[ ! -v _mattermost_cache["__t_$1"] ]];then
+debug "GET mattermost/teams"
+_mattermost_cache["__t_$1"]="$(curl -H "Authorization: Bearer $MATTERMOST_TOKEN" $MATTERMOST_API/teams|jq '.[] | select(.display_name == "'"$1"'") | .id' -r)"||die "Could not get ID of team $1 in mattermost!"
+fi
+[ -n "${_mattermost_cache["__t_$1"]}" ]||die "Team $1 does not exist in mattermost."
+echo "${_mattermost_cache["__t_$1"]}"
+}
+_mattermost_channel(){
+if [[ ! -v _mattermost_cache["channel_$1_$2"] ]];then
+debug "GET mattermost/users/me/teams/<team-id>/channels"
+_mattermost_cache["channel_$1_$2"]="$(curl -H "Authorization: Bearer $MATTERMOST_TOKEN" $MATTERMOST_API/users/me/teams/$1/channels|jq '.[] | select(.display_name == "'"$2"'") | .id' -r)"||die "Could not get ID of channel $1/$2 in mattermost!"
+fi
+[ -n "${_mattermost_cache["channel_$1_$2"]}" ]||die "Channel $2 does not exist in mattermost (team $1)"
+echo "${_mattermost_cache["channel_$1_$2"]}"
+}
+_mattermost_channel_bypost(){
+debug "GET mattermost/posts/<post-id>"
+curl -H "Authorization: Bearer $MATTERMOST_TOKEN" $MATTERMOST_API/posts/$1|jq '.channel_id' -r||die "Could not get channel of post $1 in mattermost!"
+}
+_mattermost_post(){
+local att=""
+if [ -n "$3" ];then
+[[ $3 == \[* ]]&&att="$3"||att="[$3]"
+att=', "props": {"attachments": '"$att"'}'
+fi
+local json="$(jq -n --arg c $1 --arg t "$2" '{ channel_id: $c, message: $t '"$att"' }')"
+debug "POST mattermost/posts"
+debug "JSON: $json" >&2
+local pid=$(curl -H "Authorization: Bearer $MATTERMOST_TOKEN" -H 'Content-Type: application/json' -X POST $MATTERMOST_API/posts -d "$json"|jq '.id' -r)||die "Couls not send new post to mattermost!"
+debug "-> $pid"
+echo "$1/$pid"
+}
+_mattermost_repost(){
+local att=""
+if [ -n "$4" ];then
+[[ $4 == \[* ]]&&att="$4"||att="[$4]"
+att=', "props": {"attachments": '"$att"'}'
+fi
+local json="$(jq -n --arg c $1 --arg r $2 --arg t "$3" '{ channel_id: $c, root_id: $r, message: $t '"$att"' }')"
+debug "POST mattermost/posts"
+debug "JSON: $json" >&2
+local pid=$(curl -H "Authorization: Bearer $MATTERMOST_TOKEN" -H 'Content-Type: application/json' -X POST $MATTERMOST_API/posts -d "$json"|jq '.id' -r)||die "Could not send repost to mattermost!"
+echo "$1/$pid"
+}
+_mattermost_reaction(){
+local json="$(jq -n --arg u "$(_mattermost_user)" --arg p $1 --arg t "$2" '{ user_id: $u, post_id: $p, emoji_name: $t }')"
+debug "POST mattermost/reactions"
+curl -X POST -H "Authorization: Bearer $MATTERMOST_TOKEN" -H 'Content-Type: application/json' $MATTERMOST_API/reactions -d "$json" > \
+/dev/null||die "Could not add reaction to mattermost post!"
+}
+_mattermost_find_channels(){
+id(){
+local val
+val=$(_mattermost_channel "$1" "$2")||exit 1
+echo -n "$1/$val "
+}
+local channel=${1:-$server}
+local divibib ekz id result
+divibib=$(_mattermost_team divibib)||exit 1
+ekz=$(_mattermost_team ekz)||exit 1
+result=""
+shopt -s nocasematch
+local missing=0
+case $channel in
+Entwicklung)id $divibib Entwicklung;;
+Spielwiese)id $divibib Spielwiese;;
+lobster*.host.*)missing=$((missing+1));;
+content.host.*)id $divibib Content;;
+pentaho*.host.*)id $divibib "Pentaho Betrieb";;
+*.host.cloud.dvb)id $divibib "Status Global";;
+*.host.stage.dvb|\
+*.host.stage.grp)id $divibib "Status Stage";;
+*.host.test.dvb|\
+*.host.test.grp)id $divibib "Status Test";;
+*.host.*.dvb|\
+*.host.*.grp)id $divibib "Status Produktiv";;
+*.host.*.grp)id $divibib "Status Global";;
+cloud)id $divibib "Status Global";;
+prod)id $divibib "Status Produktiv";;
+stage)id $divibib "Status Stage";;
+test)id $divibib "Status Test";;
+pentaho)id $divibib "Pentaho Betrieb";;
+content)id $divibib Content;;
+aktuell)id $divibib Aktuell;;
+betrieb)id $divibib Betrieb;;
+pim|pim3)id $divibib "PIM 3.0";;
+*)missing=$((missing+1))
+esac
+case $channel in
+acs.host.user.dvb)id $divibib Support;;
+portal*.host.customer.dvb)id $divibib Aktuell;;
+jenkins.host.office.dvb|\
+sonar.host.office.dvb|\
+build-*.host.office.grp|\
+gitlab.host.office.grp)id $divibib Entwicklung;;
+product*|platin*|pim3*|media*|\
+systematic*|feuer*)id $divibib "PIM 3.0";;
+middleware*)id $divibib "Onleihe 3 Entwicklung";;
+Spielwiese)id $divibib Spielwiese
+esac
+echo ""
+case $channel in
+lobster*.host.*)id $ekz Lobster;;
+aktuell)id $ekz Aktuell;;
+*)missing=$((missing+1))
+esac
+echo ""
+[ $missing -lt 2 ]||die "Could not detect mattermost channel for $1"
+shopt -s nocasematch
+}
+mattermost_post_ids=""
+mattermost(){
+install jq
+local channels line main links link mainid postid result
+channels="$(_mattermost_find_channels "$1")"||exit 1
+while read line;do
+[ -n "$line" ]||continue
+read -r main links <<<"$line"
+IFS="/" read -r team channel <<<"$main"
+mainid=$(_mattermost_post $channel "$2" "$3")
+IFS="/" read -r _ post <<<"$mainid"
+result="$result\n$mainid"
+while IFS=" " read link;do
+[ -n "$link" ]||continue
+IFS="/" read -r team channel <<<"$link"
+postid=$(_mattermost_post $channel "https://mattermost.ekz.de/divibib/pl/$post")
+result="$result $postid"
+done <<<"$links"
+done <<<"$channels"
+mattermost_post_ids="${result:2}"
+}
+mattermost_attachement(){
+install jq
+local json="{}"
+local fields
+eval set -- "$(option_parse $'- color +\n- text +\n- author +\n- avatar +\n- home +\n- title +\n- link +\n- image +\n- thumb +\n- fields +\n- footer +\n- logo +' "$@")"
+while true;do
+case "$1" in
+--color)local color="$2"
+case $color in
+critical)color="#FF0000";;
+error)color="#FFA500";;
+warning)color="#FFFF00";;
+ok)color="#008000";;
+info)color="#0000FF";;
+default)color="#808080"
+esac
+json="$(echo "$json"|jq --arg i "$color" '. + {color: $i}')"
+shift 2
+;;
+--text)json="$(echo "$json"|jq --arg i "$2" '. + {text: $i}')"
+shift 2
+;;
+--author)json="$(echo "$json"|jq --arg i "$2" '. + {author_name: $i}')"
+shift 2
+;;
+--avatar)json="$(echo "$json"|jq --arg i "$2" '. + {author_icon: $i}')"
+shift 2
+;;
+--home)json="$(echo "$json"|jq --arg i "$2" '. + {author_link: $i}')"
+shift 2
+;;
+--title)json="$(echo "$json"|jq --arg i "$2" '. + {title: $i}')"
+shift 2
+;;
+--link)json="$(echo "$json"|jq --arg i "$2" '. + {title_link: $i}')"
+shift 2
+;;
+--image)json="$(echo "$json"|jq --arg i "$2" '. + {image_url: $i}')"
+shift 2
+;;
+--thumb)json="$(echo "$json"|jq --arg i "$2" '. + {thumb_url: $i}')"
+shift 2
+;;
+--fields)fields="$2"
+shift 2
+;;
+--footer)json="$(echo "$json"|jq --arg i "$2" '. + {footer: $i}')"
+shift 2
+;;
+--logo)json="$(echo "$json"|jq --arg i "$2" '. + {footer_image: $i}')"
+shift 2
+;;
+--)shift
+break
+;;
+*)die "Unrecognized option: $1"
+esac
+done
+if [ -n "$fields" ];then
+[[ $fields == \[* ]]||fields="[$fields]"
+json="$(echo "$json"|jq ". + {fields: $fields}")"
+fi
+echo "$json"
+}
+mattermost_reaction(){
+local post_links emoji line main links link channel post
+eval set -- "$(option_parse $'l links -' "$@")"
+while true;do
+case "$1" in
+-l|--links)post_links=1
+shift
+;;
+--)shift
+break
+;;
+*)die "Unerwartete option in: $1"
+esac
+done
+emoji=$1
+case $1 in
+check|ok)emoji=white_check_mark
+esac
+while read line;do
+[ -n "$line" ]||continue
+read -r main links <<<"$line"
+IFS="/" read -r channel post <<<"$main"
+_mattermost_reaction $post "$emoji"
+if [ -n "$post_links" ];then
+while IFS=" " read link;do
+[ -n "$link" ]||continue
+IFS="/" read -r channel post <<<"$link"
+_mattermost_reaction $post "$emoji"
+done <<<"$links"
+fi
+done <<<"$mattermost_post_ids"
+}
+mattermost_repost(){
+local line main channel post
+while read line;do
+[ -n "$line" ]||continue
+read -r main _ <<<"$line"
+debug "main $main"
+IFS="/" read -r channel post <<<"$main"
+debug "channel $channel post $post"
+_mattermost_repost $channel $post "$1" "$2" >/dev/null
+done <<<"$mattermost_post_ids"
+}
+exporter(){
+install jq yq
+local arg name value
+local filter=""
+for arg in "$@";do
+IFS='=' read name value <<<"$arg"
+unset IFS
+local field=""
+case $name in
+instance)filter="$filter select(.labels.$name|test(\"$value\")) |";;
+*)filter="$filter select(.labels.$name==\"$value\") |"
+esac
+done
+local server api line
+local auth=""
+for server in $PROMETHEUS;do
+remote true 2>/dev/null||continue
+auth="$auth"$'\n'"$(remote cat /etc/prometheus/prometheus.yml|yq -r '.scrape_configs[] | select(.basic_auth) | .job_name as $j | .basic_auth as $b | .static_configs[].targets[] | [$j, $b.username, $b.password, .] | @tsv')"
+done
+for api in $PROMETHEUS_API;do
+curl $api/targets|jq '.data.activeTargets[] | '"$filter"' [.scrapeUrl, .labels.job, (.labels | join(", ")), .discoveredLabels.__address__] | @tsv' -r|while read line;do
+local login="$(echo "$auth"|grep "$(echo "$line"|cut -f2)"|grep "$(echo "$line"|cut -f4)")"
+if [ -n "$login" ];then
+local user="$(echo "$login"|cut -f2|tr -d '\n'|urlencode)"
+local pass="$(echo "$login"|cut -f3|tr -d '\n'|urlencode)"
+echo "$line"|cut -f1-3|sed "s#://#://$user:$pass@#"
+else
+echo "$line"|cut -f1-3
+fi
+done||die "Could not get exporters from prometheus!"
+done
+}
+scrape(){
+num_parameters "$@" --min 1 --max 2 --die "Wrong number of parameters for scrape!"
+echo "Scrape the prometheus exporter at $1" >&2
+local metrics="$(curl "$1"|egrep "$2"|egrep -v '^($|#)'||die "Could not scrape the prometheus exporter at $1!")"
+echo "$metrics"|grep '{'|sed 's/,\?[{}]/\t/g'
+echo "$metrics"|grep -v '{'|sed 's/ /\t\t/g'
+}
+alerts(){
+local filter=""
+eval set -- "$(option_parse $'i instance +' "$@")"
+while true;do
+case "$1" in
+-i|--instance)filter="$filter | select(.labels.instance|test(\"$2\"))"
+shift 2
+;;
+--)shift
+break
+;;
+*)die "Unerwartete option in: $1"
+esac
+done
+install jq mlr
+local alerts="$(curl -H "Authorization: Bearer $GRAFANA_TOKEN" "$GRAFANA_API/alertmanager/grafana/api/v2/alerts"|jq 'sort_by(.startsAt) | .[] '"$filter")"||die "Could not get alerts from Grafana!"
+local format=${1:-console}
+case $format in
+tsv|console)alerts="Severity\tNetz\tInstanz\tZusammenfassung\tStart             _\n$(jq -r '[.labels.severity, .labels.net, .labels.instance, .annotations.summary, (.startsAt| split(".")[0]| strptime("%Y-%m-%dT%H:%M:%S")| strftime("%Y-%m-%d %H:%M:%S"))] | @tsv' <<<"$alerts")"
+;;
+mattermost)alerts="$(jq -s '.[] | {
+                color:  (if .labels.severity == "disaster" then "#ff0000"
+                        elif  .labels.severity == "critical" then "#FFA500"
+                        elif  .labels.severity == "warning" then "#FFFF00"
+                        else "#0000FF" end), 
+                title:  ((.labels.severity|(.[:1] | ascii_upcase) + .[1:]) + ": " + .labels.alertname), 
+                linktitle_link: .generatorURL,
+                text:   ("**" + .annotations.summary + "**\n" + .annotations.description), 
+                footer: "Grafana Alerts",
+                fields: (.labels 
+                    | {
+                        Netz:(.net|ascii_upcase),Instanz:.instance
+                    } 
+                    | to_entries
+                    | map({title: (.key|(.[:1] | ascii_upcase) + .[1:]), value: .value, short:true})
+                )
+            }' <<<"$alerts"|jq -s .)"
+esac
+case $format in
+console)echo -e "$alerts"|tsv2table|while
+read -r line
+do
+case $line in
+Severity*)invers "$line";;
+warning*)warn "$line";;
+critical*)error "$line";;
+disaster*)critical "$line";;
+*)echo "$line"
+esac
+done
+;;
+*)echo -e "$alerts"
+esac
+}
+prometheus(){
+local api=$(echo "$PROMETHEUS_API"|sed 's/ .*//')
+curl "$api/query?query=$(echo "$1"|urlencode)"
+}
+prometheus_scrape(){
+install yq
+local job=$1
+local seconds=${2:-60}
+for server in $PROMETHEUS;do
+remote true 2>/dev/null||continue
+echo "Let $server scrape $job again, now."
+echo "yq '(.scrape_configs[] | select(.job_name == \"$job\")).scrape_interval = \"${seconds}s\" | (.scrape_configs[] | select(.job_name == \"$job\")).scrape_timeout = \"${seconds}s\"' </etc/prometheus/prometheus.yml | sponge /etc/prometheus/prometheus.yml"|remote
+remote curl -sX POST http://localhost:9090/-/reload
+done
+echo "Wait $seconds seconds till scrape should be done..."
+sleep $seconds
+echo "Reset config back to default."
+for server in $PROMETHEUS;do
+remote true 2>/dev/null||continue
+remote /etc/prometheus/config-builder/update >/dev/null
+done
+}
+_os_detected=""
+OS=
+KERNEL=
+MACH=
+DIST_BASE=
+DIST_BASE_REV=
+DIST=
+REV_NAME=
+REV=
+MACH_ID=
+IS_VIRTUAL=
+CPU_NUM=
+CPU_MODEL=
+detect_os(){
+[ -z "$_os_detected" ]||return
+case "$(uname -s)" in
+"Darwin")OS=MacOS;;
+"SunOS")OS=Solaris;;
+"Haiku")OS=Haiku;;
+"MINIX")OS=MINIX;;
+"AIX")OS=AIX;;
+"IRIX"*)OS=IRIX;;
+"FreeMiNT")OS=FreeMiNT;;
+"Linux"|"GNU"*)OS=Linux;;
+*"BSD"|"DragonFly"|"Bitrig")OS=BSD;;
+"CYGWIN"*|"MSYS"*|"MINGW"*)OS=Windows;;
+*)OS=Unknown
+esac
+KERNEL=$(uname -r)
+MACH=$(uname -m)
+DIST_BASE=
+DIST_BASE_REV=
+DIST=
+REV_NAME=
+REV=
+case $OS in
+Solaris)MACH=$(uname -p)
+;;
+Linux)if
+[ -f /etc/arch-release ]
+then
+DIST_BASE='ArchLinux'
+DIST='ArchLinux'
+REV_NAME="Rolling"
+REV=$(grep base /var/log/pacman.log|tail -n 1)
+elif [ -f /etc/gentoo-release ];then
+DIST_BASE='Gentoo'
+DIST=$(cat /etc/gentoo-release|sed s/\ release.*//)
+REV=$(cat /etc/gentoo-release|sed s/.*release\ //|sed s/\ .*//)
+elif [ -f /etc/redhat-release ];then
+DIST_BASE='RedHat'
+DIST=$(cat /etc/redhat-release|sed s/\ release.*//)
+REV_NAME=$(cat /etc/redhat-release|sed s/.*\(//|sed s/\)//)
+REV=$(cat /etc/redhat-release|sed s/.*release\ //|sed s/\ .*//)
+elif [ -f /etc/SuSE-release ];then
+DIST_BASE='SuSe'
+REV_NAME=$(cat /etc/SuSE-release|tr "\n" ' '|sed s/VERSION.*//)
+REV=$(cat /etc/SuSE-release|tr "\n" ' '|sed s/.*=\ //)
+elif [ -f /etc/mandrake-release ];then
+DIST_BASE='Mandrake'
+REV_NAME=$(cat /etc/mandrake-release|sed s/.*\(//|sed s/\)//)
+REV=$(cat /etc/mandrake-release|sed s/.*release\ //|sed s/\ .*//)
+elif [ -f /etc/debian_version ];then
+DIST_BASE='Debian'
+DIST_BASE_REV=$(cat /etc/debian_version|sed -e 's/\([0-9]*\)\..*/\1/;s/\/.*//')
+if [[ $DIST_BASE_REV =~ [a-z] ]];then
+[ -e /etc/debian_version_number ]||curl -s https://ftp.debian.org/debian/dists/$DIST_BASE_REV/Release|grep Version|cut -d' ' -f2|sed 's/\..*//'|sudo tee /etc/debian_version_number >/dev/null
+DIST_BASE_REV=$(cat /etc/debian_version_number)
+fi
+DIST=$(grep '^DISTRIB_ID=' /etc/lsb-release /etc/os-release 2>/dev/null|head -n 1|awk -F= '{ print $2 }')
+[ -z "$DIST" ]&&DIST=$(grep '^NAME=' /etc/lsb-release /etc/os-release 2>/dev/null|head -n 1|awk -F= '{ print $2 }'|sed 's/"//g')
+REV_NAME=$(grep '^DISTRIB_CODENAME=' /etc/lsb-release /etc/os-release 2>/dev/null|head -n 1|awk -F= '{ print $2 }')
+[ -z "$REV_NAME" ]&&REV_NAME=$(grep '^VERSION=' /etc/lsb-release /etc/os-release 2>/dev/null|head -n 1|awk -F= '{ print $2 }'|sed 's/^.*(\(.*\)).*/\1/g')
+REV=$(grep '^DISTRIB_RELEASE=' /etc/lsb-release /etc/os-release 2>/dev/null|head -n 1|awk -F= '{ print $2 }')
+[ -z "$REV" ]&&REV=$(cat /etc/debian_version)
+fi
+if [ -f /etc/UnitedLinux-release ];then
+DIST="$DIST[$(cat /etc/UnitedLinux-release|tr "\n" ' '|sed s/VERSION.*//)]"
+fi
+esac
+MACH_ID=$(cat /etc/machine-id /var/lib/dbus/machine-id /var/db/dbus/machine-id /sys/class/dmi/id/board_serial 2>/dev/null|head -n 1||true)
+IS_VIRTUAL=
+grep -q '^flags.* hypervisor' /proc/cpuinfo&&IS_VIRTUAL=1||IS_VIRTUAL=""
+CPU_NUM=$(grep -c ^processor /proc/cpuinfo)
+CPU_MODEL="$(grep 'model name' /proc/cpuinfo|head -n 1|sed 's/^.*: //')"
+}
+IP_INTERN=$(hostname -I|cut -d' ' -f1)
+IP_EXTERN=
+IP_COUNTRY=
+IP_COUNTRY_CODE=
+IP_REGION_CODE=
+IP_CITY=
+IP_PROVIDER=
+detect_extern_ip(){
+local data="$(curl http://ip-api.com/json)"
+IP_EXTERN=$(jq -r .query <<<"$data")
+IP_COUNTRY=$(jq -r .country <<<"$data")
+IP_COUNTRY_CODE=$(jq -r .countryCode <<<"$data")
+IP_REGION_CODE=$(jq -r .region <<<"$data")
+IP_CITY=$(jq -r .city <<<"$data")
+IP_PROVIDER=$(jq -r .isp <<<"$data")
+}
+system_info(){
+detect_os
+local dist_base
+local rev
+[ -n "$DIST_BASE" ]&&dist_base="based on $DIST_BASE $DIST_BASE_REV"
+[ -n "$REV" ]&&rev="$REV $REV_NAME"
+echo "$OS system with kernel $KERNEL $MACH ($(echo $DIST $rev $dist_base))"
+[ -z "$IS_VIRTUAL" ]||virtual="(virtual machine)"
+echo "$CPU_MODEL with $CPU_NUM cores $virtual"
+_os_detected=1
+}
+has_tty(){
+{ : >/dev/tty;} &>/dev/null
+}
+is_bash(){
+[[ -n ${BASH_VERSION:-} ]]
+}
+heading(){
+local prefix=""
+test -z "${server-}"||prefix="${server-} "
+echo -e "\n$CC_INVERS$prefix$CC_RESET$CC_HEADING$(input "$@")...$CC_RESET\n"
+}
+critical(){
+local text="$(input "$@")"
+test -z "$text"||echo -e "$CC_CRITICAL$text$CC_RESET"
+}
+error(){
+local text="$(input "$@")"
+test -z "$text"||echo -e "$CC_ERROR$text$CC_RESET"
+}
+warn(){
+local text="$(input "$@")"
+test -z "$text"||echo -e "$CC_WARN$text$CC_RESET"
+}
+info(){
+local text="$(input "$@")"
+test -z "$text"||echo -e "$CC_INFO$text$CC_RESET"
+}
+ok(){
+local text="$(input "$@")"
+test -z "$text"||echo -e "$CC_OK$text$CC_RESET"
+}
+invers(){
+local text="$(input "$@")"
+test -z "$text"||echo -e "$CC_INVERS$text$CC_RESET"
+}
+color(){
+local text="$(input_args 1 "$@")"
+test -z "$text"||echo -e "$CC_ERROR$text$CC_RESET"
+}
+debug(){
+if [ -n "$DEBUG" ];then
+local text="$(input "$@")"
+test -z "$text"||echo "$CC_BLACK$text$CC_RESET" >&2
+fi
+}
+uncolorize(){
+input "$@"|sed -r 's/\x1B\[[0-9;]*[mGK]//g'
+}
+html2md(){
+input "$@"|sed 's#&rarr;#→#g;s#&auml;#ä#g;s#&ouml;#ö#g;s#&uuml;#ü#g;s#&Auml;#Ä#g;s#&Ouml;#Ö#g;s#&Uuml;#Ü#g;s#&szlig;#ß#g;s#<strong>\([^<]*\)</strong>#**\1**#g;s#<br/\?>#\n#g;s#<li>#\n- #g;s#<[^>]*>##g'|grep -v '^$'
+}
+nocr(){
+input "$@"|sed 's/\r$//'
+}
+urlencode(){
+install jq
+input "$@"|jq -sRr @uri|sed 's/%0A$//'
+}
+tsv2table(){
+install mlr
+input "$@"|mlr -i tsv -o pprint cat
+}
+tsv2md(){
+install mlr
+input "$@"|uncolorize|mlr -i tsv -o md cat
+}
+pause(){
+local local text="$(input "$@")"
+test -z "$text"||warn "$text"
+read -n 1 -s -r -p "Taste drücken um fortzufahren..." key
+echo "" >/dev/tty
+}
+ask_no(){
+local local text="$(input "$@")"
+while true;do
+echo -ne "$CC_INFO" >/dev/tty
+read -n 1 -s -p "$text (n/J) " yn
+case $yn in
+""|[Nn])echo -e "Nein$CC_RESET" >/dev/tty
+return 1
+;;
+[JjYy])echo -e "Ja$CC_RESET" >/dev/tty
+return 0
+esac
+echo "$yn -> ungültige Antwort" >/dev/tty
+done
+}
+ask_yes(){
+local local text="$(input "$@")"
+while true;do
+echo -ne "$CC_INFO" >/dev/tty
+read -n 1 -s -p "$text (J/n) " yn
+case $yn in
+[Nn])echo -e "Nein$CC_RESET" >/dev/tty
+return 1
+;;
+""|[JjYy])echo -e "Ja$CC_RESET" >/dev/tty
+return 0
+esac
+echo "$yn -> ungültige Antwort" >/dev/tty
+done
+}
+ask_input(){
+local local text="$(input "$@")"
+local answer prompt
+if (($#<2));then
+prompt="$text "
+else
+prompt="$text (Standard: $2) "
+fi
+echo -ne "$CC_INFO" >/dev/tty
+read -rp "$prompt" answer
+if [ -z "$answer" ]&&[ -n "$2" ];then
+answer="$2"
+echo -n "Standardantwort genutzt: $answer" >/dev/tty
+fi
+echo -e "$CC_RESET" >/dev/tty
+echo "$answer"
+}
+choose(){
+local end default
+eval set -- "$(option_parse $'t title +\nx exit +\nd default +' "$@")"
+while true;do
+case "$1" in
+-t|--title)info "$2" >/dev/tty
+shift 2
+;;
+-d|--default)default="$2"
+shift 2
+;;
+-x|--exit)end="$2"
+shift 2
+;;
+--)shift
+break
+;;
+*)die "Unerwartete option in: $1"
+esac
+done
+local question="Wähle eine der obigen Optionen:"
+[ -z "$default" ]||question="$question [$default]"
+local list line key display num=0
+list="$(input_lines "$@")"
+list="$(trim "$list")"
+while read -r line;do
+num=$((num+1))
+IFS="|" read -r key display <<<"$line"
+printf "%4d) $(trim "${display:-$key}")\n" $num >/dev/tty
+done <<<"$list"
+[ -z "$end" ]||printf "%4s) $end\n" x >/dev/tty
+while true;do
+read -r -p "$question " select </dev/tty
+if [[ $select =~ ^[1-$num]$ ]];then
+sed -n "${select}p" <<<"$list"|sed 's/|.*//'
+return
+elif [ -n "$default" ]&&[ -z "$select" ];then
+is_integer $default&&sed -n "${default}p" <<<"$list"|sed 's/|.*//'||echo "$default"
+return
+elif [ -n "$end" ]&&compare "$select" =~ [xXqQ];then
+echo exit
+return
+else
+echo -n "Ungültige Eingabe: +$select+ +$default+ " >/dev/tty
+fi
+done
+}
+tasks(){
+local end title
+eval set -- "$(option_parse $'t title +' "$@")"
+while true;do
+case "$1" in
+-t|--title)title="-t$2" >/dev/tty
+shift 2
+;;
+--)shift
+break
+;;
+*)die "Unerwartete option in: $1"
+esac
+done
+local list task
+[ $# -eq 1 ]||list="$(input_lines "$@")"
+while true;do
+[ -z "$1" ]||list="$("$1")"
+task=$(choose "$title" -x Beenden "$list")
+[[ $task != "exit" ]]||break
+$task||die "Got error $? running: $task"
+echo ""
+done
+}
+repeat(){
+local -i n=$1
+[ $n -gt 0 ]||return
+shift
+for n in $(seq $n);do
+"$@"
+done
+}
+function retry {
+local retries=$1
+shift
+local count=0 exit wait
+until "$@";do
+exit=$?
+wait=$((2**count))
+count=$((count+1))
+if [ $count -lt $retries ];then
+echo "Try $count/$retries exited $exit, retrying in $wait seconds..." >&2
+sleep $wait
+else
+echo "Try $count/$retries exited $exit, no more retries left." >&2
+return $exit
+fi
+done
+return 0
+}
+countdown(){
+local abort
+eval set -- "$(option_parse $'a abort -' "$@")"
+while true;do
+case "$1" in
+-a|--abort)abort="(press any key to stop)"
+shift
+;;
+--)shift
+break
+;;
+*)die "Unerwartete option in: $1"
+esac
+done
+local seconds=$1
+local text=${2:-Waiting}
+while [ $seconds -gt 0 ];do
+echo -ne "\r$text $seconds seconds $abort"
+if [ -n "$abort" ];then
+read -t 1 -n 1 key&&return 1||true
+else
+sleep 1
+fi
+((seconds--))
+done
+echo ""
+}
+LOCK_SLEEP=10
+_lock_remove(){
+pid=$(cat "$lockfile")||true
+([ -n "$pid" ]&&kill -0 "$pid" 2>/dev/null)||rm -f "$lockfile" "$lockfile.$pid"||die "Failed to remove lockfile: $lockfile"
+}
+lock(){
+local lockfile logged
+lockfile="$(mktemp 'lockfile')"
+echo $$ >"$lockfile.$$" 2>/dev/null||die "Failed to create PID lockfile: $lockfile.$$"
+_lock_remove
+logged=0
+while ! ln "$lockfile.$$" "$lockfile" 2>/dev/null;do
+if [ $logged -eq 0 ];then
+echo "Waiting for unlock in $lockfile by PID $(cat "$lockfile")..." >&1
+logged=1
+fi
+sleep $LOCK_SLEEP
+echo $$ >"$lockfile.$$" 2>/dev/null
+_lock_remove
+done
+trap_add unlock EXIT
+}
+lock_exit(){
+local lockfile logged
+lockfile="$(mktemp 'lockfile')"
+echo $$ >"$lockfile.$$" 2>/dev/null||die "Failed to create PID lockfile: $lockfile.$$"
+_lock_remove
+ln "$lockfile.$$" "$lockfile" 2>/dev/null
+if [ $? -ne 0 ];then
+unlock
+die "Stop processing because this is locked in $lockfile by PID $(cat "$lockfile")"
+fi
+trap_add unlock EXIT
+}
+unlock(){
+local lockfile
+lockfile="$(mktemp 'lockfile')"
+[ ! -e "$lockfile.$$" ]||rm -f "$lockfile.$$" 2>/dev/null
+pid=$(cat "$lockfile")||true
+[ -n "$pid" ]||[[ $pid != "$$" ]]||rm -r "$lockfile" 2>/dev/null
+trap_remove unlock
+return 0
+}
+env_store(){
+eval set -- "$(option_parse $'d disk -\np path +' "$@")"
+local disk opt
+while true;do
+case "$1" in
+-d|--disk)disk=$
+shift
+;;
+-p|--path)opt="$1 $2"
+shift 2
+;;
+--)shift
+break
+;;
+*)shift
+esac
+done
+local ident=$1
+shift||true
+if [ -n "$disk" ];then
+declare -p "$@"|sed 's/^declare\b/declare -g/' >$(mktemp $opt -e env "$ident")
+else
+declare -p "$@"|sed 's/^declare\b/declare -g/' >$(mkshm -e env "$ident")
+fi
+}
+env_restore(){
+eval set -- "$(option_parse $'d disk -\np path +' "$@")"
+local disk opt
+while true;do
+case "$1" in
+-d|--disk)disk=$
+shift
+;;
+-p|--path)opt="$1 $2"
+shift 2
+;;
+--)shift
+break
+;;
+*)shift
+esac
+done
+if [ -n "$disk" ];then
+source $(mktemp $opt -e env "$1") 2>/dev/null||true
+else
+source $(mkshm -e env "$1") 2>/dev/null||true
+fi
+}
+env_clean(){
+eval set -- "$(option_parse $'d disk -\np path +' "$@")"
+local disk opt
+while true;do
+case "$1" in
+-d|--disk)disk=$
+shift
+;;
+-p|--path)opt="$1 $2"
+shift 2
+;;
+--)shift
+break
+;;
+*)shift
+esac
+done
+if [ -n "$disk" ];then
+rm -f $(mktemp $opt -e env "$1")
+else
+rm -f $(mkshm -e env "$1")
+fi
+}
+env_change(){
+eval set -- "$(option_parse $'d disk -\np path +' "$@")"
+local opt
+while true;do
+case "$1" in
+-d|--disk)opt="$opt $1"
+shift
+;;
+-p|--path)opt="$opt $1 $2"
+shift 2
+;;
+--)shift
+break
+;;
+*)shift
+esac
+done
+num_parameters --min 2 --die "At least <ident> <command> is needed!" -- "$@"
+local ident=$1
+shift||true
+local command=$1
+shift||true
+env_restore $opt "$ident"
+eval "$command"
+env_store $opt "$ident" "$@"
+}
+declare -A _async_running
+STEPS_VARIABLES=
+steps_init(){
+declare -g -A _STEPS
+env_restore steps
+declare -p _STEPS
+env_store steps _STEPS $STEPS_VARIABLES
+echo "Arbeitsschritte werden protokolliert um auch mittendrin wieder aufzusetzen..." >&2
+}
+steps_check(){
+num_parameters --min 1 --max 1 --die "Only an <ident> is needed, but must be there!" -- "$@"
+declare -p _STEPS 2>/dev/null|grep -q 'declare -A'||return 1
+if [ -n "${_STEPS["$1"]}" ];then
+echo "Job $1 already done in this run, skipping" >&2
+return 0
+else
+return 1
+fi
+env_store steps _STEPS $STEPS_VARIABLES
+}
+steps_done(){
+num_parameters --min 0 --max 1 --die "Only an <ident> is needed!" -- "$@"
+declare -p _STEPS 2>/dev/null|grep -q 'declare -A'||return
+if [ -n "$1" ];then
+_STEPS["$1"]=1
+echo "Finished: Step $1 at $(date_format sql)" >&2
+env_store steps _STEPS $STEPS_VARIABLES
+else
+env_clean steps
+fi
+}
+sync(){
+num_parameters --min 1 --die "At least a <command> is needed!" -- "$@"
+sync_name $1 "$@"
+}
+sync_name(){
+num_parameters --min 2 --die "At least a <name> and <command> is needed!" -- "$@"
+local name=$1
+shift
+steps_check $name&&return||true
+declare -p _STEPS 2>/dev/null|grep -q 'declare -A'&&echo "Started: step $name at $(date_format sql)" >&2||true
+"$@"
+steps_done $name
+}
+async(){
+num_parameters --min 1 --die "At least a <command> is needed!" -- "$@"
+async_name $1 "$@"
+}
+async_name(){
+num_parameters --min 2 --die "At least a <name> and <command> is needed!" -- "$@"
+local name=$1
+shift
+! steps_check $name||return
+declare -p _STEPS 2>/dev/null|grep -q 'declare -A'&&echo "Started: step $name at $(date_format sql)" >&2||true
+"$@"&
+env_change queue "_async_running[\"$name\"]=$!" _queue _async_running
+}
+async_wait(){
+[ -z "${_async_running["$1"]}" ]&&return 0||true
+wait "${_async_running["$1"]}"
+local code=$?
+if [ "$code" -eq 0 ];then
+steps_done $1
+env_change queue "unset async_running[\"$1\"]" _queue _async_running
+else
+declare -p _STEPS 2>/dev/null|grep -q 'declare -A'&&echo echo "Failed: Step $1 at $(date_format sql)" >&2||true
+fi
+return $code
+}
+ASYNC_QUEUE_MAX=2
+declare -a _queue
+declare _queue_control_pid
+env_store queue _queue _async_running
+_queue_control(){
+local name pid free first params num
+while true;do
+sleep 1
+env_restore queue
+if [ ${#_async_running[@]} -gt 0 ];then
+for name in "${!_async_running[@]}";do
+pid="${_async_running["$name"]}"
+if ! kill -0 "$pid" 2>/dev/null;then
+steps_done $name
+env_change queue "unset _async_running[\"$name\"]" _queue _async_running
+fi
+done||true
+fi
+env_restore queue
+debug "Task queue: $$ $BASHPID async ${#_async_running[@]} queue ${#_queue[@]}"
+[ ${#_queue[@]} -gt 0 ]||[ ${#_async_running[@]} -gt 0 ]||return 0
+free=$((ASYNC_QUEUE_MAX-${#_async_running[@]}))
+if [ $free -gt 0 ];then
+for num in $(seq 1 $free);do
+[ ${#_queue[@]} -gt 0 ]||break
+first="${_queue[0]}"
+env_change queue '_queue=("${_queue[@]:1}")' _queue _async_running
+IFS=$'\x1f' read -r -a params <<<"$first"
+async_name "${params[@]}"
+done
+fi
+done
+env_clean queue
+}
+queue(){
+num_parameters --min 1 --die "At least a <command> is needed!" -- "$@"
+queue_name $1 "$@"
+}
+queue_name(){
+num_parameters --min 2 --die "At least a <name> and <command> is needed!" -- "$@"
+! steps_check $1||return 0
+local entry=$(printf "%s\x1f" "$@")
+entry=${entry%$'\x1f'}
+env_change queue "_queue+=(\"$entry\")" _queue _async_running
+if [ -z "$_queue_control_pid" ];then
+_queue_control&
+_queue_control_pid=$!
+fi
+}
+remote(){
+local ssh="${slogin:-operator}@$server"
+if [ -p /dev/stdin ];then
+ssh $ssh bash -s
+return ${PIPESTATUS[0]}
+else
+ssh $ssh "$@"
+return ${PIPESTATUS[0]}
+fi
+}
+remote_term(){
+local ssh="${slogin:-operator}@$server"
+if [ -p /dev/stdin ];then
+ssh -t $ssh bash -s
+return ${PIPESTATUS[0]}
+else
+ssh -t $ssh "$@"
+return ${PIPESTATUS[0]}
+fi
+}
+remote_term_line(){
+local ssh="${slogin:-operator}@$server"
+if [ -p /dev/stdin ];then
+ssh -t $ssh bash -s 2> >(grep -v '^Connection to .* closed\.' >&2)|nocr
+return ${PIPESTATUS[0]}
+else
+ssh -t $ssh "$@" 2> >(grep -v '^Connection to .* closed\.' >&2)|nocr
+return ${PIPESTATUS[0]}
+fi
+}
+remote_file(){
+local file
+file="$(input "$@")"
+test "${file:0:1}" = "/"||file="$(path)/$file"
+test -f "$file"||die "No file to execute remotely under $file"
+local ssh="${slogin:-operator}@$server"
+ssh $ssh 'bash -s' <$file
+}
+upload(){
+local ssh="${slogin:-operator}@$server"
+local dir=${2:-~}
+rsync -av "$1" "$ssh:$dir"
+}
+download(){
+local ssh="${slogin:-operator}@$server"
+local dir=${2:-.}
+rsync -av "$ssh:$1" "$dir"
+}
+remote_install(){
+(cat $BASHLIB_BASE/1_color
+cat $BASHLIB_BASE/2_core
+cat $BASHLIB_BASE/software
+echo install "$@")|shfmt -mn|remote
+}
+remote_df(){
+local firstline="" percent
+IFS=$'\n'
+for line in $(remote df -h -l -x tmpfs -x efivarfs -x devtmpfs -x squashfs);do
+if [ -z "$firstline" ];then
+firstline=1
+invers $line
+else
+percent=$(echo $line|xargs echo|cut -d' ' -f5|sed 's/%//')
+if [ $percent -eq 100 ];then
+critical "$line"
+elif [ $percent -ge 90 ];then
+error "$line"
+elif [ $percent -ge 80 ];then
+warn "$line"
+else
+echo "$line"
+fi
+fi
+done
+unset IFS
+echo ""
+}
+remote_lvm(){
+remote sudo vgs --noheadings \&\& [ -n "$(sudo vgs --noheadings 2>/dev/null)" ] &>/dev/null
+}
+boot_wait(){
+eval set -- "$(option_parse $'q quiet -' "$@")"
+local quiet
+while true;do
+case "$1" in
+-q|--quiet)quiet=1
+shift
+;;
+--)shift
+break
+;;
+*)die "Unrecognized option: $1"
+esac
+done
+local uptime seconds=15
+echo -ne "Warten bis der Reboot fertig ist" >&2
+sleep $seconds
+while true;do
+[ -n "$quiet" ]||echo -ne "\rWarten bis der Reboot fertig ist ($seconds Sekunden)" >&2
+uptime=$(remote cut -d"' '" -f1 /proc/uptime 2>/dev/null|sed 's/[ .].*//')
+if [ -n "$uptime" ]&&[ $uptime -lt 300 ];then
+break
+else
+sleep 1
+((seconds++))
+fi
+done
+[ -n "$quiet" ]||recho ""
+[ -n "$quiet" ]||remote uptime --since
+}
+CURL_HTTP_CODE=""
+curl(){
+local file res
+file=$(mkshm)
+res=$(command curl -s -w "Error: %{method} %{url_effective} with RC:%{http_code}" -o $file -L "$@")
+CURL_HTTP_CODE=${res: -3}
+if [[ $rc =~ ^2[0-9]{2}$ ]];then
+cat $file
+rm $file
+else
+error "$res" >&2
+jq . $file >&2 2>/dev/null||cat $file >&2
+rm $file
+return 1
+fi
+}
+mongosh(){
+num_parameters --min 2 --max 2 --die "Mongosh needs two parameters: Usage mongosh <database> <command>" "$@"
+local cluster
+cluster="$(echo $server|sed 's/^[^.]*\.//')"
+command mongosh "mongodb://${MONGO_ADMIN_USERPASS["$cluster"]}@$server:27017/$1" --eval "$2"
+}
+declare -A _software_install
+install(){
+local apt=""
+local snap=""
+local reload=""
+for cmd in "$@";do
+if [[ ! -v _software_install["$cmd"] ]];then
+sudo which $cmd >/dev/null||case $cmd in
+yq)snap="$snap $cmd";;
+*)apt="$apt $cmd"
+esac
+_software_install["$cmd"]=1
+fi
+done
+test -z "$snap"||command -v snapd >/dev/null||(apt="$apt snapd"&&snap="$snap snapd"&&reload=1)
+test -z "$apt"||sudo apt-get install -y $apt
+test -z "$snap"||sudo apt snap install $snap
+test -z "$reload"||source ~/.bashrc
+}
+semver(){
+input "$@"|sed -e 's#[^0-9]*\([0-9]*:\)\?\([0-9]*\)\([.]\([0-9]*\)\)\?\([.]\([0-9]*\)\)\?\(-\([^+]*\)\)\?+\?\(.*\)\?.*#\2\n\4\n\6\n\8\n\9#'
+}
+semver_diff(){
+eval set -- "$(option_parse "h human -" "$@")"
+local human
+while true;do
+case "$1" in
+-h|--human)human=1
+shift
+;;
+--)shift
+break
+;;
+*)die "Unrecognized option: $1"
+esac
+done
+num_parameters "$@" --min 2 --max 2 --die "Need exactly two parameters: semver_diff [-h] <first> <second>"
+[[ ${1-} =~ [.-] ]]&&version1="$(semver "$1")"||version1="$1"
+[[ ${2-} =~ [.-] ]]&&version2="$(semver "$2")"||version2="$2"
+IFS=$'\n' readarray -t v1 <<<"$version1"
+IFS=$'\n' readarray -t v2 <<<"$version2"
+local num=0
+maj1=${v1[0]}
+maj2=${v2[0]}
+min1=${v1[1]:-0}
+min2=${v2[1]:-0}
+pat1=${v1[2]:-0}
+pat2=${v2[2]:-0}
+pre1=${v1[3]}
+pre2=${v2[3]}
+bld1=${v1[4]}
+bld2=${v2[4]}
+if [ "$maj1" -ne "$maj2" ];then
+num=$(((maj2-maj1)*1000000000))
+elif [ "$min1" -ne "$min2" ];then
+num=$(((min2-min1)*1000000))
+[ "$num" -lt 1000000000 ]||num=999000000
+elif [ "$pat1" -ne "$pat2" ];then
+num=$(((pat2-pat1)*1000))
+[ "$num" -lt 1000000 ]||num=999000
+elif [[ $pre1 < $pre2 ]];then
+num=10
+elif [[ $pre1 > $pre2 ]];then
+num=-10
+elif [[ $bld1 < $bld2 ]];then
+num=1
+elif [[ $bld1 > $bld2 ]];then
+num=-1
+fi
+if [ -n "$human" ];then
+echo -n "$1 -> $2 "
+if [ $num -eq 0 ];then
+echo "sind identische Versionen"
+elif [ $num -ge 1000000000 ];then
+echo "ist ein upgrade von $((num/1000000000)) Hauptversione(n)"
+elif [ $num -ge 1000000 ];then
+echo "ist ein upgrade von $((num/1000000)) Nebenversione(n)"
+elif [ $num -ge 1000 ];then
+echo "ist ein upgrade von $((num/1000)) Patch Level(n)"
+elif [ $num -ge 1 ];then
+echo "ist ein entwickler Upgrade)"
+elif [ $num -ge -1000 ];then
+echo "ist ein entwickler Downgrade"
+elif [ $num -ge 1000000 ];then
+echo "ist ein downgrade von $((num/-1000)) Patch Level(n)"
+elif [ $num -ge 1000000000 ];then
+echo "ist ein downgrade von $((num/-1000000)) Nebenversione(n)"
+else
+echo "ist ein downgrade von $((num/-1000000000)) Hauptversione(n)"
+fi
+return 0
+else
+echo $num
+fi
+[ $num -eq 0 ]&&return 0||return 1
+}
+num_parameters(){
+eval set -- "$(option_parse $'- min +\n- max +\n- die +' "$@")"
+local min max die
+while true;do
+case "$1" in
+--min)min=$2
+shift 2
+;;
+--max)max=$2
+shift 2
+;;
+--die)die=$2
+shift 2
+;;
+--)shift
+break
+;;
+*)die "Unrecognized option: $1"
+esac
+done
+_die(){
+read -r line func file <<<"$(caller 1)"
+echo "Check ${FUNCNAME[1]}: $1 ($func in $file:$line)" >&2
+[ -z "$die" ]||die "$die"
+return 1
+}
+[ -z "$min" ]||[ "$#" -ge "$min" ]||_die "[$*] $# < $min"||return 1
+[ -z "$max" ]||[ "$#" -le "$max" ]||_die "[$*] $# > $max"||return 1
+}
+is_success(){
+num_parameters --min 1 --max 1 --die "Only one argument allowed, got: $#" -- "$@"
+return $1
+}
+is_empty(){
+num_parameters --max 1 --die "Only one argument allowed, got: $#" -- "$@"
+[ -z "$1" ]
+}
+is_integer(){
+num_parameters --min 1 --max 1 --die "Only one argument allowed, got: $#" -- "$@"
+[[ $1 =~ ^-?[0-9]+$ ]]
+}
+is_float(){
+num_parameters --min 1 --max 1 --die "Only one argument allowed, got: $#" -- "$@"
+[[ $1 =~ ^[-+]?[0-9]+([.][0-9]+)?$ ]]
+}
+compare(){
+num_parameters --min 3 --max 3 --die "Exactly 3 parameter needed, got: $#" -- "$@"
+case "$2" in
+=|==)[[ $1 == $3 ]];;
+!=)[[ $1 != $3 ]];;
+=~)[[ $1 =~ $3 ]];;
+!~)[[ ! $1 =~ $3 ]];;
+*)[ "$1" $2 "$3" ]
+esac
+}
+trim_start(){
+local str="${1-}"
+local char="${2:-[:space:]}"
+echo "${str#"${str%%[!$char]*}"}"
+}
+trim_end(){
+local str="${1:-}"
+local char="${2:-[:space:]}"
+echo "${str%"${str##*[!$char]}"}"
+}
+trim(){
+trim_end "$(trim_start "$1" "$2")" "$2"
+}

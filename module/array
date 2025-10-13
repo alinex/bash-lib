@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+# Array helpers.
+
+######################################################################################
+### Array analyzing
+######################################################################################
+
+# Check if value is contained
+# Usage:    has_value <array> <match>
+contains() {
+    local array=$1
+    local value=$2
+    local e
+    for e in "${array[@]}"; do
+        [[ "$e" != "$value" ]] || return 0
+    done
+    return 1
+}

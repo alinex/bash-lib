@@ -1,0 +1,174 @@
+#!/usr/bin/env bash
+
+# Module with operating system specific helper functions.
+
+######################################################################################
+### Detect OS
+######################################################################################
+
+_os_detected=""
+
+# Operation System like: Linux, MacOS... (set in detect_os)
+OS=
+# Kernel version number (set in detect_os)
+KERNEL=
+# CPU type (set in detect_os)
+MACH=
+# Base distribution type like Debian (set in detect_os)
+DIST_BASE=
+# Base distributions number like 13 (set in detect_os)
+DIST_BASE_REV=
+# Distribution name like Ubuntu (set in detect_os)
+DIST=
+# Distributions revision name like noble (set in detect_os)
+REV_NAME=
+# Distribution revision version number like 14.04 (set in detect_os)
+REV=
+# CPU identifier (set in detect_os)
+MACH_ID=
+# Is a virtual machine (set in detect_os)
+IS_VIRTUAL=
+# Number of CPU cores (set in detect_os)
+CPU_NUM=
+# CPU Model description (set in detect_os)
+CPU_MODEL=
+
+# Run  os detection and set the constants
+# Usage:    detect_os
+detect_os() {
+    [ -z "$_os_detected" ] || return
+    case "$(uname -s)" in
+        "Darwin")                         OS=MacOS ;;
+        "SunOS")                          OS=Solaris ;;
+        "Haiku")                          OS=Haiku ;;
+        "MINIX")                          OS=MINIX ;;
+        "AIX")                            OS=AIX ;;
+        "IRIX"*)                          OS=IRIX ;;
+        "FreeMiNT")                       OS=FreeMiNT ;;
+        "Linux" | "GNU"*)                 OS=Linux ;;
+        *"BSD" | "DragonFly" | "Bitrig")  OS=BSD ;;
+        "CYGWIN"* | "MSYS"* | "MINGW"*)   OS=Windows ;;
+        *)                                OS=Unknown ;;
+    esac
+    KERNEL=$(uname -r)
+    MACH=$(uname -m)
+    DIST_BASE=
+    DIST_BASE_REV=
+    DIST=
+    REV_NAME=
+    REV=
+    # OS Specific Settings
+    case $OS in
+        Solaris) 
+            MACH=$(uname -p)
+            ;;
+        Linux)
+            if [ -f /etc/arch-release ] ; then
+                DIST_BASE='ArchLinux'
+                DIST='ArchLinux'
+                REV_NAME="Rolling"
+                REV=$(grep base /var/log/pacman.log | tail -n 1)
+            elif [ -f /etc/gentoo-release ] ; then
+                DIST_BASE='Gentoo'
+                DIST=$(cat /etc/gentoo-release | sed s/\ release.*//)
+                REV=$(cat /etc/gentoo-release | sed s/.*release\ // | sed s/\ .*//)
+            elif [ -f /etc/redhat-release ] ; then
+                DIST_BASE='RedHat'
+                DIST=$(cat /etc/redhat-release | sed s/\ release.*//)
+                REV_NAME=$(cat /etc/redhat-release | sed s/.*\(// | sed s/\)//)
+                REV=$(cat /etc/redhat-release | sed s/.*release\ // | sed s/\ .*//)
+            elif [ -f /etc/SuSE-release ] ; then
+                DIST_BASE='SuSe'
+                REV_NAME=$(cat /etc/SuSE-release | tr "\n" ' '| sed s/VERSION.*//)
+                REV=$(cat /etc/SuSE-release | tr "\n" ' ' | sed s/.*=\ //)
+            elif [ -f /etc/mandrake-release ] ; then
+                DIST_BASE='Mandrake'
+                REV_NAME=$(cat /etc/mandrake-release | sed s/.*\(// | sed s/\)//)
+                REV=$(cat /etc/mandrake-release | sed s/.*release\ // | sed s/\ .*//)
+            elif [ -f /etc/debian_version ] ; then
+                DIST_BASE='Debian'
+                DIST_BASE_REV=$(cat /etc/debian_version | sed -e 's/\([0-9]*\)\..*/\1/;s/\/.*//')
+                if [[ "$DIST_BASE_REV" =~ [a-z] ]]; then
+                    [ -e /etc/debian_version_number ] || curl -s https://ftp.debian.org/debian/dists/$DIST_BASE_REV/Release \
+                    | grep Version | cut -d' ' -f2 | sed 's/\..*//' | sudo tee /etc/debian_version_number >/dev/null
+                    DIST_BASE_REV=$(cat /etc/debian_version_number)
+                fi
+                DIST=$(grep '^DISTRIB_ID=' /etc/lsb-release /etc/os-release 2>/dev/null | head -n 1 | awk -F=  '{ print $2 }')
+                [ -z "$DIST" ] && DIST=$(grep '^NAME=' /etc/lsb-release /etc/os-release 2>/dev/null | head -n 1 | awk -F=  '{ print $2 }' | sed 's/"//g')
+                REV_NAME=$(grep '^DISTRIB_CODENAME=' /etc/lsb-release /etc/os-release 2>/dev/null | head -n 1 | awk -F=  '{ print $2 }')
+                [ -z "$REV_NAME" ] && REV_NAME=$(grep '^VERSION=' /etc/lsb-release /etc/os-release 2>/dev/null | head -n 1 | awk -F=  '{ print $2 }' | sed 's/^.*(\(.*\)).*/\1/g')
+                REV=$(grep '^DISTRIB_RELEASE=' /etc/lsb-release /etc/os-release 2>/dev/null | head -n 1 | awk -F=  '{ print $2 }')
+                [ -z "$REV" ] && REV=$(cat /etc/debian_version)
+            fi
+            if [ -f /etc/UnitedLinux-release ] ; then
+                DIST="${DIST}[$(cat /etc/UnitedLinux-release | tr "\n" ' ' | sed s/VERSION.*//)]"
+            fi
+    esac
+    MACH_ID=$(cat /etc/machine-id /var/lib/dbus/machine-id /var/db/dbus/machine-id /sys/class/dmi/id/board_serial 2>/dev/null | head -n 1 || true)
+    IS_VIRTUAL=
+    grep -q '^flags.* hypervisor' /proc/cpuinfo && IS_VIRTUAL=1 || IS_VIRTUAL=""
+    CPU_NUM=$(grep -c ^processor /proc/cpuinfo)
+    CPU_MODEL="$(grep 'model name' /proc/cpuinfo | head -n 1 | sed 's/^.*: //')"
+}
+
+# Internal IP
+IP_INTERN=$(hostname -I | cut -d' ' -f1)
+# External IP (set in detect_extern_ip)
+IP_EXTERN=
+# Country (set in detect_extern_ip)
+IP_COUNTRY=
+# Country Code (set in detect_extern_ip)
+IP_COUNTRY_CODE=
+# Region Code (set in detect_extern_ip)
+IP_REGION_CODE=
+# City (set in detect_extern_ip)
+IP_CITY=
+# Internet Provider (set in detect_extern_ip)
+IP_PROVIDER=
+
+# Run  os detection and set the constants
+# Usage:    detect_extern_ip
+detect_extern_ip() {
+    local data="$(curl http://ip-api.com/json)"
+    IP_EXTERN=$(jq -r .query <<<"$data")
+    IP_COUNTRY=$(jq -r .country <<<"$data")
+    IP_COUNTRY_CODE=$(jq -r .countryCode <<<"$data")
+    IP_REGION_CODE=$(jq -r .region <<<"$data")
+    IP_CITY=$(jq -r .city <<<"$data")
+    IP_PROVIDER=$(jq -r .isp <<<"$data")
+}
+
+# Display the system description
+# Usage:    system_info
+# Stdout:   <text> system info lines
+system_info() {
+    detect_os
+    # Output: human readable system information line
+    local dist_base
+    local rev
+    [ -n "$DIST_BASE" ] && dist_base="based on $DIST_BASE $DIST_BASE_REV"
+    [ -n "$REV" ] && rev="$REV $REV_NAME"
+    echo "$OS system with kernel $KERNEL $MACH ($(echo $DIST $rev $dist_base))"
+    [ -z "$IS_VIRTUAL" ] || virtual="(virtual machine)"
+    echo "$CPU_MODEL with $CPU_NUM cores $virtual"
+    # store flag to not redo it
+    _os_detected=1
+}
+
+######################################################################################
+### Further Specialities
+######################################################################################
+
+# Has tty present
+# Usage:    has_ttyp
+# Status:   0 || 1
+has_tty () {
+    { : >/dev/tty ; } &>/dev/null
+}
+
+# Is running with bash console
+# Usage:    is_bash
+# Status:   0 || 1
+is_bash () {
+    [[ -n "${BASH_VERSION:-}" ]]
+}

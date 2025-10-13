@@ -1,0 +1,218 @@
+#!/usr/bin/env bash
+
+# The core module contains essential parts which may also be used while loading the library.
+
+######################################################################################
+### Script Base Setup
+######################################################################################
+
+set -eE         # exit on uncatched failure
+set -o pipefail # fail if any command in a pipeline fails
+#set -u # exit on use of unset variables
+
+trap 'exit 1' ERR # in case the error is not correctly tracked back
+
+# Path to the directory in which the bash-lib is
+BASHLIB_BASE="$(dirname "$(readlink -f "${BASH_SOURCE[0]:-$(pwd)/x}")")"
+# Path to the directory of the started program
+if [ ${#BASH_SOURCE[@]} -gt 0 ]; then
+    PROGRAM_BASE="$(dirname "$(readlink -f "${BASH_SOURCE[-1]:-$(pwd)/x}")")"
+else
+    PROGRAM_BASE="$(pwd)"
+fi
+
+######################################################################################
+### Base functions
+######################################################################################
+
+# If stdin and no parameters then read stdin, else use parameters
+# Usage:    input "$@ parameters"
+# Stdout:   <string-input> or
+#           <string-params> separated by spaces
+input() {
+    test -p /dev/stdin && test $# -eq 0 && cat - || echo "$*"
+}
+
+# If stdin and not more than defined parameters, then read stdin
+# Usage:    input_args <num> "$@"
+# Stdout:   <string-input> or
+#           <string-params> separated by spaces
+input_args() {
+    local num=${1-}
+    local start=$((num + 2))
+    [ -n "$num" ] || die "No <num> argument in call to input_args!"
+    [ "$num" -gt 0 ] || die "<num>=$num argument is not a valid number!"
+    test -p /dev/stdin && cat - || echo "${@:$start}"
+}
+
+# Read stdin and no parameters then read stdin, else use parameters as lines
+# Usage:    input_lines "$@"
+# Stdout:   <string-input> or
+#           <string-params> separated by newlines
+input_lines() {
+    test -p /dev/stdin && test -z "${1-}" &&
+        cat - ||
+        for arg in "$@"; do echo "$arg"; done
+}
+
+# Output error and exit
+# Usage:    die <message>
+#           <message> | die
+# Stderr:   <message>
+# Status:   1
+die() {
+    echo -e "${CC_CRITICAL}$(input "$@")${CC_RESET}" >&2
+    # kill -s TERM "$PPID" # forcibly terminite the parent
+    exit 1
+}
+
+# Set or add an additiopnal trap without overwriting existing ones
+# Usage:    trap_add <code> <signal>
+trap_add() {
+    local new="$1"
+    local sig="$2"
+    local old
+    old="$(trap -p "$sig" | awk -F"'" '{print $2}')"
+    if [[ -n "$old" ]]; then
+        trap "$new; $old" "$sig"
+    else
+        trap "$new" "$sig"
+    fi
+}
+
+# Remove a specific trap
+# Usage:    trap_remove
+trap_remove() {
+    local remove="$1"
+    local sig="$2"
+    local current new
+    current="$(trap -p "$sig" | awk -F"'" '{print $2}')"
+    new="$(echo "$current" | sed "s#;* *$remove##")"
+    trap "$new" "$sig"
+}
+
+# Make a temporary file, which is recognizable
+# As the same invocation from the same program will get the same file it can be called multiple times.
+# Usage:    mktemp [<identifier>]       # use default temp if no identifier given
+# Options:  -d, --directory             # to make a directorty instead of a file
+#           -m, --memory                # use shared memory
+#           -e, --extension <string>    # to specify file extension (better readability)
+#           -p, --path <base-dir>       # folder under which to create file
+# Stdout:   <path>
+mktemp() {
+    # parameter parsing
+    eval set -- "$(option_parse $'d directory -\ne extension +\np path +' "$@")"
+    local dir ext result
+    local path=${TMPDIR:-/tmp}
+    while true; do
+        case "$1" in
+        -d | --directory)
+            dir=1
+            shift
+            ;;
+        -e | --extension)
+            ext=".$2"
+            shift 2
+            ;;
+        -m | --memory)
+            path="/dev/shm"
+            shift
+            ;;
+        -p | --path)
+            path="$2"
+            shift 2
+            ;;
+        --)
+            shift
+            break
+            ;;
+        *) shift ;; # ignore
+        esac
+    done
+    # processing
+    result="$path/$(basename $0)_$1$ext"
+    if [ -n "$dir" ]; then
+        mkdir -p "$result"
+    else
+        touch "$result"
+    fi
+    echo "$result"
+}
+
+######################################################################################
+### Help and option handling
+######################################################################################
+
+# Parse arguments based on given specification
+# Short options can also be given in short notation "-a45" -> "-a 45" or "--age 45"
+# Usage:        eval set -- "$(option_parse <spec> "$@")"
+# Spec lines:   <short-letter>|- <long-word> <type>|- <description>
+# Stdout:       parsed options <string>
+# Example:      OPTIONS="
+#               n name  string  Name of Birthday Person
+#               a age   int     Age in years
+#               h help  -       Show Help Page"
+#               option_parse "$OPTIONS" "$@"
+option_parse() {
+    local short=""
+    local long=""
+    # read spec lines
+    while read -r opt name type desc; do
+        [[ "$opt" =~ ^# ]] && continue # skip comments
+        [[ -z "$opt" ]] && continue    # skip empty lines
+        if [ ! "$type" = "-" ]; then
+            [ "${opt}" = "-" ] || short+="${opt}:"
+            long+="${name}:,"
+        else
+            [ "${opt}" = "-" ] || short+="${opt}"
+            long+="${name},"
+        fi
+    done <<<"$1"
+    shift
+    # parse
+    getopt -o "$short" --long "$long" -n "$0" -- "$@"
+}
+
+# Print help for options defined in options specification
+# Usage:        option_help <spec>
+# Spec lines:   <short-letter>|- <long-word> <type>|- <description>
+# Stdout:       List of options for help output
+option_help() {
+    declare -A opt_descriptions
+    declare -A opt_type
+    declare -A opt_short
+    # read spec lines
+    while read -r opt name type desc; do
+        [[ "$opt" =~ ^# ]] && continue # skip comments
+        [[ -z "$opt" ]] && continue    # skip empty lines
+        opt_descriptions[$name]="$desc"
+        opt_type[$name]=$type
+        opt_short[$name]=$opt
+    done <<<"$1"
+    echo "Optionen:"
+    for name in "${!opt_descriptions[@]}"; do
+        local type_text=""
+        local short_text=""
+        if [ ! "${opt_type[$name]}" = "-" ]; then
+            type_text=" <${opt_type[$name]}>"
+        fi
+        if [[ ! "${opt_short[$name]}" = "-" ]]; then
+            short_text="-${opt_short[$name]}$type_text, "
+        fi
+        printf "  %-40s %s\n" "$short_text--$name$type_text" "${opt_descriptions[$name]}"
+    done
+}
+
+# Show help page and exit
+# Usage:    help <heading> <usage> <options-spec> <details>
+help() {
+    heading "Hilfe: $1"
+    info "Usage: $2"
+    echo ""
+    if [ -n "$3" ]; then
+        option_help "$3"
+        echo ""
+    fi
+    echo "$4"
+    exit 0
+}

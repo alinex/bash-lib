@@ -1,0 +1,334 @@
+#!/usr/bin/env bash
+
+# Module with output and user interaction helpers.
+
+######################################################################################
+# Context
+######################################################################################
+
+# Print block heading
+# Usage:    heading <title>
+#           <title> | heading
+# Stdout:   colored <string>
+# Variable: $server
+heading() { 
+    local prefix=""
+    test -z "${server-}" || prefix="${server-} "
+    echo -e "\n${CC_INVERS}$prefix${CC_RESET}${CC_HEADING}$(input "$@")...${CC_RESET}\n"
+}
+
+# Print critical/disaster message
+# Usage:    critical <message>
+#           <message> | critical
+# Stdout:   colored <string>
+critical() {
+    local text="$(input "$@")"
+    test -z "$text" || echo -e "${CC_CRITICAL}$text${CC_RESET}"
+}
+
+# Print error message
+# Usage:    error <message>
+#           <message> | error
+# Stdout:   colored <string>
+error() {
+    local text="$(input "$@")"
+    test -z "$text" || echo -e "${CC_ERROR}$text${CC_RESET}"
+}
+
+# Print warning message
+# Usage:    warn <message>
+#           <message> | warn
+# Stdout:   colored <string>
+warn() {
+    local text="$(input "$@")"
+    test -z "$text" || echo -e "${CC_WARN}$text${CC_RESET}"
+}
+
+# Print special information message
+# Usage:    info <message>
+#           <message> | info
+# Stdout:   colored <string>
+info() {
+    local text="$(input "$@")"
+    test -z "$text" || echo -e "${CC_INFO}$text${CC_RESET}"
+}
+
+# Print success message
+# Usage:    ok <message>
+#           <message> | ok
+# Stdout:   colored <string>
+ok() {
+    local text="$(input "$@")"
+    test -z "$text" || echo -e "${CC_OK}$text${CC_RESET}"
+}
+
+# Print special marked message like table header
+# Usage:    invers <message>
+#           <message> | invers
+# Stdout:   colored <string>
+invers() {
+    local text="$(input "$@")"
+    test -z "$text" || echo -e "${CC_INVERS}$text${CC_RESET}"
+}
+
+# Print message in defined color
+# Usage:    color <color> <message>
+#           <message> | color <color>
+# Stdout:   colored <string>
+color() {
+    local text="$(input_args 1 "$@")"
+    test -z "$text" || echo -e "${CC_ERROR}$text${CC_RESET}"
+}
+
+# Write message to STDERR if in DEBUG mode else do nothing
+# Usage:    ok <message>
+#           <message> | ok
+# Stderr:   colored <string>
+debug() {
+    if [ -n "$DEBUG" ]; then 
+        local text="$(input "$@")"
+        test -z "$text" || echo "$CC_BLACK$text$CC_RESET" >&2
+    fi
+}
+
+######################################################################################
+# Format Helpers
+######################################################################################
+
+# Remove color codes from text
+# Usage:    uncolorize <text>
+#           <text> | uncolorize
+# Stdout:   <text>
+uncolorize() {
+    input "$@" | sed -r 's/\x1B\[[0-9;]*[mGK]//g'
+}
+
+# Convert HTML to markdown (simplified version)
+# Usage:    html2md <html-part>
+#           <html-part> | html2md
+# Stdout:   <md>
+html2md() {
+    input "$@" \
+    | sed 's#&rarr;#→#g;s#&auml;#ä#g;s#&ouml;#ö#g;s#&uuml;#ü#g;s#&Auml;#Ä#g;s#&Ouml;#Ö#g;s#&Uuml;#Ü#g;s#&szlig;#ß#g;s#<strong>\([^<]*\)</strong>#**\1**#g;s#<br/\?>#\n#g;s#<li>#\n- #g;s#<[^>]*>##g' \
+    | grep -v '^$'
+}
+
+# Remove carriage return from line endings
+# Usage:    nocr <text>
+#           <text> | nocr
+# Stdout:   <text>
+nocr() {
+    input "$@" | sed 's/\r$//'   # removes all: tr -d '\r'
+}
+
+# Encode message to be used within the url
+# Usage:    urlencode <string>
+#           <string> | urlencode
+# Stdout:   <string>
+urlencode() {
+    install jq
+    input "$@" | jq -sRr @uri | sed 's/%0A$//' 
+}
+
+# Convert TSV data into visual table
+# Usage:    tsv2table <tsv>
+#           <tsv> | tsv2table
+# Stdout:   <table>
+tsv2table() {
+    install mlr
+    input "$@" | mlr -i tsv -o pprint cat
+}
+
+# Convert TSV data into markdown table
+# Usage:    tsv2md <tsv>
+#           <tsv> | tsv2md
+# Stdout:   <md>
+tsv2md() {
+    install mlr
+    input "$@" | uncolorize | mlr -i tsv -o md cat
+}
+
+######################################################################################
+# User Input
+######################################################################################
+
+# Wait for user input
+# Usage:    pause <message>
+#           <message> | pause
+# TTY:      <question> <key>
+pause() { 
+    local local text="$(input "$@")"
+    test -z "$text" || warn "$text"
+    read -n 1 -s -r -p "Taste drücken um fortzufahren..." key
+    echo "" >/dev/tty
+}
+
+# Ask yes/no with default: no
+# Usage:    ask_no <question>
+#           <question> | ask_no
+# TTY:      <question> <key>
+# Status:   0 || 1
+ask_no() {
+    local local text="$(input "$@")"
+    while true; do
+        echo -ne "${CC_INFO}" >/dev/tty
+        read -n 1 -s -p "$text (n/J) " yn
+        case $yn in
+            ""|[Nn]) 
+                echo -e "Nein${CC_RESET}" >/dev/tty
+                return 1 ;;
+            [JjYy]) 
+                echo -e "Ja${CC_RESET}" >/dev/tty
+                return 0 ;;
+        esac
+        echo "$yn -> ungültige Antwort" >/dev/tty
+    done
+}
+
+# Ask yes/no with default: yes
+# Usage:    ask_yes <question>
+#           <question> | ask_yes
+# TTY:      <question> <key>
+# Status:   0 || 1
+ask_yes() {
+    local local text="$(input "$@")"
+    while true; do
+        echo -ne "${CC_INFO}" >/dev/tty
+        read -n 1 -s -p "$text (J/n) " yn
+        case $yn in
+            [Nn]) 
+                echo -e "Nein${CC_RESET}" >/dev/tty
+                return 1 ;;
+            ""|[JjYy]) 
+                echo -e "Ja${CC_RESET}" >/dev/tty
+                return 0 ;;
+        esac
+        echo "$yn -> ungültige Antwort" >/dev/tty
+    done
+}
+
+# Ask for a text line
+# Usage:    ask_input <question> [<default>]
+#           <question> | ask_input
+# TTY:      <question> <key>
+# Stdin:    <line>
+# Stdout:   <answer>
+ask_input() {
+    local local text="$(input "$@")"
+    local answer prompt
+    if (( $# < 2 )); then
+        prompt="$text "
+    else
+        prompt="$text (Standard: $2) "
+    fi
+    echo -ne "${CC_INFO}" >/dev/tty
+    read -rp "$prompt" answer
+    if [ -z "$answer" ] && [ -n "$2" ]; then
+        answer="$2"
+        echo -n "Standardantwort genutzt: $answer" >/dev/tty
+    fi
+    echo -e "${CC_RESET}" >/dev/tty
+    echo "$answer"
+}
+
+# Select from list (extended version of native select)
+# Usage:    choose [-t] <entry>...
+#           <list> | choose [-t]
+# Option    -t, --title <title>         # display text line above selection
+#           -x, --exit <string>         # will add an exit option at the end -> return "exit"
+#           -d, --default <string|int>  # the command or number which will be returned on <enter>
+# Entry:    <entry> := <string> | <key> "|" <display> # whitespace arround values are removed
+# TTY:      [<title>]
+#           <list>
+#           ...
+#           <question> <key>
+# Stdout:   selected <line>
+# TODO > 10 entries make two columns using mlr display
+choose() {
+    # parameter parsing
+    local end default
+    eval set -- "$(option_parse $'t title +\nx exit +\nd default +' "$@")"
+    while true; do
+        case "$1" in
+            -t|--title) info "$2" >/dev/tty; shift 2 ;;
+            -d|--default) default="$2"; shift 2 ;;
+            -x|--exit) end="$2"; shift 2 ;;
+            --) shift; break ;;
+            *) die "Unerwartete option in: $1" ;;
+        esac
+    done
+    # processing
+    local question="Wähle eine der obigen Optionen:"
+    [ -z "$default" ] || question="$question [$default]"
+    local list line key display num=0
+    list="$(input_lines "$@")"
+    list="$(trim "$list")"
+    while read -r line; do
+        num=$((num + 1))
+        IFS="|" read -r key display <<<"$line"
+        printf "%4d) $(trim "${display:-$key}")\n" $num >/dev/tty
+    done <<< "$list"
+    [ -z "$end" ] || printf "%4s) ${end}\n" x >/dev/tty
+    while true; do
+        read -r -p "$question " select </dev/tty
+        if [[ "$select" =~ ^[1-$num]$ ]]; then
+            sed -n "${select}p" <<<"$list" | sed 's/|.*//'
+            return
+        elif [ -n "$default" ] && [ -z "$select" ]; then
+            is_integer $default && sed -n "${default}p" <<<"$list" | sed 's/|.*//' || echo "$default"
+            return
+        elif [ -n "$end" ] && compare "$select" =~ [xXqQ]; then
+            echo exit
+            return
+        else
+            echo -n "Ungültige Eingabe: +$select+ +$default+ " >/dev/tty
+        fi
+    done
+}
+
+# Run tasks as selected by user
+# Usage:    tasks <function>"|"<entry>"...  # entries from arguments 
+#           <list> | tasks                  # entries from ppe
+#           tasks <function>                # entries from function (dynamic)
+# Option    -t, --title <title>             # display text line above selection
+# TTY:      [<title>]
+#           <list>
+#           ...
+#           <question> <key>
+# -----------------------------------------------------------------------------
+# Example:  list_tasks() {
+#               # can be created dynamically:
+#               cat <<'EOC'
+#               task_analyze    | Disk Analyze
+#               task_apt        | APT cleanup (15 kB)
+#           EOC
+#           }
+#           task_analyze() {
+#               heading Analyze
+#           }
+#           task_apt() {
+#               heading APT Cleanup
+#           }
+#           tasks -t "Nächste Schritte" list_tasks
+tasks() {
+    # parameter parsing
+    local end title
+    eval set -- "$(option_parse $'t title +' "$@")"
+    while true; do
+        case "$1" in
+            -t|--title) title="-t$2" >/dev/tty; shift 2 ;;
+            --) shift; break ;;
+            *) die "Unerwartete option in: $1" ;;
+        esac
+    done
+    # processing
+    local list task
+    [ $# -eq 1 ] || list="$(input_lines "$@")"
+    while true; do
+        [ -z "$1" ] || list="$("$1")"
+        task=$(choose "$title" -x Beenden "$list")
+        [[ "$task" != "exit" ]] || break 
+        $task || die "Got error $? running: $task"
+        echo ""
+    done
+}

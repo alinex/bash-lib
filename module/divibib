@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+
+# Module with divibib specific helpers.
+
+[ -n "$MIDDLEWARE_SWAGGER_PASSWORD" ] || die "No MIDDLEWARE_SWAGGER_PASSWORD defined, please add this in the environment like .bashrc!"
+
+######################################################################################
+# Middleware
+######################################################################################
+
+backoffice_set () {
+    # set message in backoffice <from> <to> <message>
+    local start
+    local end
+    [[ "$1" =~ ^[0-9]+$ ]] \
+    && start="$(date -d @$1 -u +"%Y-%m-%dT%H:%M:%SZ" | urlencode)" \
+    || start="$(date -d "$1" -u +"%Y-%m-%dT%H:%M:%SZ" | urlencode)"
+    [[ "$2" =~ ^[0-9]+$ ]] \
+    && end="$(date -d @$2 -u +"%Y-%m-%dT%H:%M:%SZ" | urlencode)" \
+    || end="$(date -d "$2" -u +"%Y-%m-%dT%H:%M:%SZ" | urlencode)"
+    local message="$(echo "${3:-Wartungsarbeiten}" | urlencode)"
+    echo "Meldung im Backoffice: ${3:-Wartungsarbeiten}" >&2
+    curl -u "swagger:$MIDDLEWARE_SWAGGER_PASSWORD" -X POST "http://user-application.service.user.dvb/v1/back-office/maintenance?validFrom=$start&validTo=$end&message=$message"
+}
+backoffice_unset () {
+    echo "Meldung im Backoffice entfernt" >&2
+    curl -u "swagger:$MIDDLEWARE_SWAGGER_PASSWORD" -X DELETE 'http://user-application.service.user.dvb/v1/back-office/maintenance' 
+}

@@ -1,0 +1,236 @@
+#!/usr/bin/env bash
+
+# Module with remote calling/execution helpers.
+# shellcheck disable=SC2154
+
+######################################################################################
+# Remote SSH
+######################################################################################
+
+# Run command on remote host
+# Usage:    remote <command>... # special characters have to be masked: | & * > <
+#           <title> | remote
+# Globals:  $server
+#           $login - default is "operator"
+# Output:   passed through
+remote() {
+    local ssh="${slogin:-operator}@${server}"
+    if [ -p /dev/stdin ]; then
+        ssh $ssh bash -s
+        return ${PIPESTATUS[0]}
+    else
+        # this allows interactivity
+        ssh $ssh "$@"
+        return ${PIPESTATUS[0]}
+    fi
+}
+
+# Run remote command with pseudo terminal
+# \r\n my be contained, remove with nocr
+# "Connection ... closed" in stderr: remove using: 2> >(grep -v '^Connection to .* closed\.' >&2)
+# Usage:    remote <command>... # special characters have to be masked: | & * > <
+#           <title> | remote
+# Globals:  $server
+#           $login - default is "operator"
+# Output:   passed through
+remote_term() {
+    local ssh="${slogin:-operator}@${server}"
+    if [ -p /dev/stdin ]; then
+        ssh -t $ssh bash -s
+        return ${PIPESTATUS[0]}
+    else
+        # this allows interactivity
+        ssh -t $ssh "$@"
+        return ${PIPESTATUS[0]}
+    fi
+}
+
+# Run remote command with pseudo terminal but line based output (problematic with questions)
+# Usage:    remote <command>... # special characters have to be masked: | & * > <
+#           <title> | remote
+# Globals:  $server
+#           $login - default is "operator"
+# Output:   passed through
+remote_term_line() {
+    local ssh="${slogin:-operator}@${server}"
+    if [ -p /dev/stdin ]; then
+        ssh -t $ssh bash -s 2> >(grep -v '^Connection to .* closed\.' >&2) | nocr
+        return ${PIPESTATUS[0]}
+    else
+        # this allows interactivity
+        ssh -t $ssh "$@" 2> >(grep -v '^Connection to .* closed\.' >&2) | nocr
+        return ${PIPESTATUS[0]}
+    fi
+}
+# STDERR_CLEANUP="2> >(grep -v '^Connection to .* closed\.' >&2)"
+
+# Run local script on remote
+# Usage:    remote_file <file>
+#           <file> | remote_file
+# Globals:  $server
+#           $login - default is "operator"
+# Output:   passed through
+remote_file() {
+    local file
+    file="$(input "$@")"
+    test "${file:0:1}" = "/" || file="$(path)/$file"
+    test -f "$file" || die "No file to execute remotely under $file"
+    local ssh="${slogin:-operator}@${server}"
+    ssh $ssh 'bash -s' <$file
+}
+
+# Upload file
+# Usage:    upload <source> <dest>
+# Globals:  $server
+#           $login - default is "operator"
+upload() {
+    local ssh="${slogin:-operator}@${server}"
+    local dir=${2:-~}
+    rsync -av "$1" "$ssh:$dir"
+}
+
+# Download file
+# Usage:    download <source> <dest>
+# Globals:  $server
+#           $login - default is "operator"
+download() {
+    local ssh="${slogin:-operator}@${server}"
+    local dir=${2:-.}
+    rsync -av "$ssh:$1" "$dir"
+}
+
+######################################################################################
+### Extended remote commands
+######################################################################################
+
+# Remote install package
+# Usage:    install <pack>...
+# Globals:  $server
+#           $login - default is "operator"
+# See:      software:install
+remote_install() {
+    (
+        cat $BASHLIB_BASE/1_color
+        cat $BASHLIB_BASE/2_core
+        cat $BASHLIB_BASE/software
+        echo install "$@"
+    ) | shfmt -mn | remote #> remote.sh
+}
+
+# Remote df with visual display
+remote_df() {
+    local firstline="" percent
+    IFS=$'\n'
+    for line in $(remote df -h -l -x tmpfs -x efivarfs -x devtmpfs -x squashfs); do
+        if [ -z "$firstline" ]; then
+            firstline=1
+            invers $line
+        else
+            percent=$(echo $line | xargs echo | cut -d' ' -f5 | sed 's/%//')
+            if [ $percent -eq 100 ]; then
+                critical "$line"
+            elif [ $percent -ge 90 ]; then
+                error "$line"
+            elif [ $percent -ge 80 ]; then
+                warn "$line"
+            else
+                echo "$line"
+            fi
+        fi
+    done
+    unset IFS
+    echo ""
+}
+
+# Remote check if LVM is used
+remote_lvm() {
+    remote sudo vgs --noheadings \&\& [ -n "$(sudo vgs --noheadings 2>/dev/null)" ] &>/dev/null
+}
+
+# Wait till reboot is finished
+# Usage:    boot_wait
+# Options:  -q, --quiet
+# Globals:  $server
+#           $login - default is "operator"
+# Stdout:   <sql-time>
+boot_wait() {
+    # parameter parsing
+    eval set -- "$(option_parse $'q quiet -' "$@")"
+    local quiet
+    while true; do
+        case "$1" in
+        -q | --quiet)
+            quiet=1
+            shift
+            ;;
+        --)
+            shift
+            break
+            ;;
+        *) die "Unrecognized option: $1" ;;
+        esac
+    done
+    # processing
+    local uptime seconds=15
+    echo -ne "Warten bis der Reboot fertig ist" >&2
+    sleep $seconds
+    while true; do
+        [ -n "$quiet" ] || echo -ne "\rWarten bis der Reboot fertig ist ($seconds Sekunden)" >&2
+        uptime=$(remote cut -d"' '" -f1 /proc/uptime 2>/dev/null | sed 's/[ .].*//')
+        if [ -n "$uptime" ] && [ $uptime -lt 300 ]; then
+            break
+        else
+            sleep 1
+            ((seconds++))
+        fi
+    done
+    [ -n "$quiet" ] || recho ""
+    [ -n "$quiet" ] || remote uptime --since
+}
+
+######################################################################################
+# Remote HTTP
+######################################################################################
+
+# Last HTTP return code from curl
+CURL_HTTP_CODE=""
+
+# Curl with added error handling
+# Usage:    like curl
+# Globals:  $server
+#           $login - default is "operator"
+#           CURL_HTTP_CODE set with last code
+# Stderr:   <text> if not RC:2xx
+# Status:   0 || 1 if not RC:2xx
+curl() {
+    local file res
+    file=$(mkshm)
+    res=$(command curl -s -w "Error: %{method} %{url_effective} with RC:%{http_code}" -o $file -L "$@")
+    CURL_HTTP_CODE=${res:(-3)}
+    if [[ "$rc" =~ ^2[0-9]{2}$ ]]; then
+        cat $file
+        rm $file
+    else
+        error "$res" >&2
+        jq . $file >&2 2>/dev/null || cat $file >&2
+        #cat $file
+        rm $file
+        return 1
+    fi
+}
+
+######################################################################################
+# Special Software
+######################################################################################
+
+# Run command on Mongo DB
+# Usage:    mongosh "" <command>            # global command
+# Usage:    mongosh <database> <command>    # work in database
+# Global:   $server
+#           $MONGO_ADMIN_USERPASS
+mongosh() {
+    num_parameters --min 2 --max 2 --die "Mongosh needs two parameters: Usage mongosh <database> <command>" "$@"
+    local cluster
+    cluster="$(echo $server | sed 's/^[^.]*\.//')"
+    command mongosh "mongodb://${MONGO_ADMIN_USERPASS["$cluster"]}@$server:27017/$1" --eval "$2"
+}

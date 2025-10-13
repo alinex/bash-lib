@@ -1,0 +1,303 @@
+#!/usr/bin/env bash
+
+# Using the mattermost API to write messages.
+
+######################################################################################
+# Mattermost Internal
+######################################################################################
+
+# Cache used to prevent multiple API calls for the same information in one run
+declare -A _mattermost_cache
+
+_mattermost_user() {
+    # get my user id -> <user-id>
+    if [[ ! -v _mattermost_cache["__u"] ]]; then
+        debug "GET mattermost/users/me"
+        _mattermost_cache["__u"]="$(
+            curl -H "Authorization: Bearer $MATTERMOST_TOKEN" $MATTERMOST_API/users/me \
+            | jq '.id' -r)" \
+        || die "Could not find myself in mattermost!"
+    fi
+    echo "${_mattermost_cache["__u"]}"
+}
+_mattermost_team() {
+    # get team <display_name> -> <team-id>
+    if [[ ! -v _mattermost_cache["__t_$1"] ]]; then
+        debug "GET mattermost/teams"
+        _mattermost_cache["__t_$1"]="$(
+            curl -H "Authorization: Bearer $MATTERMOST_TOKEN" $MATTERMOST_API/teams \
+            | jq '.[] | select(.display_name == "'"$1"'") | .id' -r)" \
+        || die "Could not get ID of team $1 in mattermost!"
+    fi
+    [ -n "${_mattermost_cache["__t_$1"]}" ] || die "Team $1 does not exist in mattermost."
+    echo "${_mattermost_cache["__t_$1"]}"
+}
+_mattermost_channel () {
+    # get channel <team-id> <display_name> -> <channel-id>
+    if [[ ! -v _mattermost_cache["channel_$1_$2"] ]]; then
+        debug "GET mattermost/users/me/teams/<team-id>/channels"
+        _mattermost_cache["channel_$1_$2"]="$(
+            curl -H "Authorization: Bearer $MATTERMOST_TOKEN" $MATTERMOST_API/users/me/teams/$1/channels \
+            | jq '.[] | select(.display_name == "'"$2"'") | .id' -r)" \
+        || die "Could not get ID of channel $1/$2 in mattermost!"
+    fi
+    [ -n "${_mattermost_cache["channel_$1_$2"]}" ] || die "Channel $2 does not exist in mattermost (team $1)"
+    echo "${_mattermost_cache["channel_$1_$2"]}"
+}
+_mattermost_channel_bypost () {
+    # get channel <postid>
+    debug "GET mattermost/posts/<post-id>"
+    curl -H "Authorization: Bearer $MATTERMOST_TOKEN" $MATTERMOST_API/posts/$1 \
+    | jq '.channel_id' -r \
+    || die "Could not get channel of post $1 in mattermost!"
+}
+_mattermost_post () {
+    # post <channelid> <message> [<attachements>] -> <channel-id>/<post-id>
+    local att=""
+    if [ -n "$3" ]; then
+        [[ "$3" == \[* ]] && att="$3" || att="[$3]"
+        att=', "props": {"attachments": '"$att"'}'
+    fi
+    local json="$(jq -n --arg c $1 --arg t "$2" '{ channel_id: $c, message: $t '"$att"' }')"
+    debug "POST mattermost/posts"
+    debug "JSON: $json" >&2
+    local pid=$(
+        curl -H "Authorization: Bearer $MATTERMOST_TOKEN" -H 'Content-Type: application/json' -X POST $MATTERMOST_API/posts -d "$json" \
+        | jq '.id' -r) \
+    || die "Couls not send new post to mattermost!"
+    debug "-> $pid"
+    echo "$1/$pid"
+}
+_mattermost_repost () {
+    # repost channel <channelid> <postid> <message> [<attachements>] -> <channel-id>/<post-id>
+    local att=""
+    if [ -n "$4" ]; then
+        [[ "$4" == \[* ]] && att="$4" || att="[$4]"
+        att=', "props": {"attachments": '"$att"'}'
+    fi
+    local json="$(jq -n --arg c $1 --arg r $2 --arg t "$3" '{ channel_id: $c, root_id: $r, message: $t '"$att"' }')"
+    debug "POST mattermost/posts"
+    debug "JSON: $json" >&2
+    local pid=$(
+        curl -H "Authorization: Bearer $MATTERMOST_TOKEN" -H 'Content-Type: application/json' -X POST $MATTERMOST_API/posts -d "$json" \
+        | jq '.id' -r) \
+    || die "Could not send repost to mattermost!"
+    echo "$1/$pid"
+}
+_mattermost_reaction () {
+    # reaction <postid> <smiley>
+    local json="$(jq -n --arg u "$(_mattermost_user)" --arg p $1 --arg t "$2" '{ user_id: $u, post_id: $p, emoji_name: $t }')"
+    debug "POST mattermost/reactions"
+    curl -X POST -H "Authorization: Bearer $MATTERMOST_TOKEN" -H 'Content-Type: application/json' $MATTERMOST_API/reactions -d "$json" \
+    >/dev/null \
+    || die "Could not add reaction to mattermost post!"
+}
+_mattermost_find_channels() {
+    id() {
+        local val
+        val=$(_mattermost_channel "$1" "$2") || exit 1
+        echo -n "$1/$val "
+    }
+    local channel=${1:-$server}
+    local divibib ekz id result
+    divibib=$(_mattermost_team divibib) || exit 1
+    ekz=$(_mattermost_team ekz) || exit 1
+    result=""
+    shopt -s nocasematch
+    local missing=0
+    # divibib main post
+    case $channel in
+        # Channels
+        Entwicklung) id $divibib Entwicklung ;;
+        Spielwiese) id $divibib Spielwiese ;;
+        # server
+        lobster*.host.*) missing=$((missing + 1)) ;;
+        content.host.*) id $divibib Content ;;
+        pentaho*.host.*) id $divibib "Pentaho Betrieb" ;;
+        *.host.cloud.dvb) id $divibib "Status Global" ;;
+        *.host.stage.dvb|\
+        *.host.stage.grp) id $divibib "Status Stage" ;;
+        *.host.test.dvb|\
+        *.host.test.grp) id $divibib "Status Test" ;;
+        *.host.*.dvb|\
+        *.host.*.grp) id $divibib "Status Produktiv" ;;
+        *.host.*.grp) id $divibib "Status Global" ;;
+        # names
+        cloud) id $divibib "Status Global" ;;
+        prod) id $divibib "Status Produktiv" ;;
+        stage) id $divibib "Status Stage" ;;
+        test) id $divibib "Status Test" ;;
+        pentaho) id $divibib "Pentaho Betrieb" ;;
+        content) id $divibib Content ;;
+        aktuell) id $divibib Aktuell ;;
+        betrieb) id $divibib Betrieb ;;
+        pim|pim3) id $divibib "PIM 3.0" ;;
+        *) missing=$((missing + 1)) ;;
+    esac
+    # divibib link
+    case $channel in
+        acs.host.user.dvb) id $divibib Support ;;
+        portal*.host.customer.dvb) id $divibib Aktuell ;; # für Erschließung
+        jenkins.host.office.dvb|\
+        sonar.host.office.dvb|\
+        build-*.host.office.grp|\
+        gitlab.host.office.grp) id $divibib Entwicklung ;;
+        product*|platin*|pim3*|media*|\
+        systematic*|feuer*) id $divibib "PIM 3.0" ;;
+        middleware*) id $divibib "Onleihe 3 Entwicklung" ;;
+        Spielwiese) id $divibib Spielwiese ;;
+    esac
+    echo ""
+    # ekz main
+    case $channel in
+        # server
+        lobster*.host.*) id $ekz Lobster ;;
+        aktuell) id $ekz Aktuell ;;
+        *) missing=$((missing + 1)) ;;
+    esac
+    # ekz link
+    echo ""
+    [ $missing -lt 2 ] || die "Could not detect mattermost channel for $1"
+    shopt -s nocasematch
+}
+
+######################################################################################
+# Mattermost Chat
+######################################################################################
+
+# Post IDs from last main posting to be used later for repost and reactions
+mattermost_post_ids=""
+
+# Send a message to Mattermost
+# Usage:    mattermost <channel-name> <text> [<attachements>]
+# Stdout:   <postid list>
+mattermost () {
+    install jq
+    local channels line main links link mainid postid result
+    channels="$(_mattermost_find_channels "$1")" || exit 1
+    # for lines in channels
+    while read line; do
+        [ -n "$line" ] || continue
+        read -r main links <<<"$line"
+        IFS="/" read -r team channel <<<"$main"
+        mainid=$(_mattermost_post $channel "$2" "$3")
+        IFS="/" read -r _ post <<<"$mainid"
+        result="$result\n$mainid"
+        while IFS=" " read link; do
+            [ -n "$link" ] || continue
+            IFS="/" read -r team channel <<<"$link"
+            postid=$(_mattermost_post $channel "https://mattermost.ekz.de/divibib/pl/$post")
+            result="$result $postid"
+        done <<<"$links"
+    done <<<"$channels"
+    mattermost_post_ids="${result:2}"
+}
+
+# Create an attachement json to be used in post
+# Usage:    mattermost_attachement 
+#           mattermost_post $channelid "" "$(mattermost_attachement --color ...)"
+# Options:  --color <hexcode>   # rgb color or names: critical, error, warning, ok, info, default
+#           --text <md>         # text content
+#           --author <name>     # author name
+#           --avatar <url>      # author icon
+#           --home <url>        # author link
+#           --title <string>    # title
+#           --link <url>        # title link
+#           --image <url>       # bottom image
+#           --thumb <url>       # right image
+#           --fields <json>     # array title=<words>, value=<text>, short=false
+#           --footer <string>   # footer
+#           --logo <url>        # footer image
+# Stdout:   <json> for this attachement
+# Find free linkable icons under https://icons8.de/icons/all
+mattermost_attachement () {
+    install jq
+    local json="{}"
+    local fields
+    # parameter parsing
+    eval set -- "$(option_parse $'- color +\n- text +\n- author +\n- avatar +\n- home +\n- title +\n- link +\n- image +\n- thumb +\n- fields +\n- footer +\n- logo +' "$@")"
+    while true; do
+        case "$1" in
+            --color)    
+                local color="$2"
+                case $color in
+                    critical)   color="#FF0000" ;;
+                    error)      color="#FFA500" ;;
+                    warning)    color="#FFFF00" ;;
+                    ok)         color="#008000" ;;
+                    info)       color="#0000FF" ;;
+                    default)    color="#808080" ;;
+                esac
+                json="$(echo "$json" | jq --arg i "$color" '. + {color: $i}')"
+                shift 2 ;;
+            --text)     json="$(echo "$json" | jq --arg i "$2" '. + {text: $i}')"; shift 2 ;;
+            --author)   json="$(echo "$json" | jq --arg i "$2" '. + {author_name: $i}')"; shift 2 ;;
+            --avatar)   json="$(echo "$json" | jq --arg i "$2" '. + {author_icon: $i}')"; shift 2 ;;
+            --home)     json="$(echo "$json" | jq --arg i "$2" '. + {author_link: $i}')"; shift 2 ;;
+            --title)    json="$(echo "$json" | jq --arg i "$2" '. + {title: $i}')"; shift 2 ;;
+            --link)     json="$(echo "$json" | jq --arg i "$2" '. + {title_link: $i}')"; shift 2 ;;
+            --image)    json="$(echo "$json" | jq --arg i "$2" '. + {image_url: $i}')"; shift 2 ;;
+            --thumb)    json="$(echo "$json" | jq --arg i "$2" '. + {thumb_url: $i}')"; shift 2 ;;
+            --fields)   fields="$2"; shift 2 ;;
+            --footer)   json="$(echo "$json" | jq --arg i "$2" '. + {footer: $i}')"; shift 2 ;;
+            --logo)     json="$(echo "$json" | jq --arg i "$2" '. + {footer_image: $i}')"; shift 2 ;;
+            --) shift; break ;;
+            *) die "Unrecognized option: $1" ;;
+        esac
+    done
+    # adding fields to json
+    if [ -n "$fields" ]; then
+        [[ "$fields" == \[* ]] || fields="[$fields]"
+        json="$(echo "$json" | jq ". + {fields: $fields}")"
+    fi
+    echo "$json"
+}
+
+# Add reaction to existing post
+# Usage:    mattermost_rteaction <emoji>
+# Options:  -l, --links     # also post this to the links
+mattermost_reaction () {
+    # parameter parsing
+    local post_links emoji line main links link channel post
+    eval set -- "$(option_parse $'l links -' "$@")"
+    while true; do
+        case "$1" in
+            -l|--links) post_links=1; shift ;;
+            --) shift; break ;;
+            *) die "Unerwartete option in: $1" ;;
+        esac
+    done
+    emoji=$1
+    case $1 in
+        check|ok) emoji=white_check_mark ;;
+    esac
+    # for lines in channels
+    while read line; do
+        [ -n "$line" ] || continue
+        read -r main links <<<"$line"
+        IFS="/" read -r channel post <<<"$main"
+        _mattermost_reaction $post "$emoji"
+        if [ -n "$post_links" ]; then
+            while IFS=" " read link; do
+                [ -n "$link" ] || continue
+                IFS="/" read -r channel post <<<"$link"
+                _mattermost_reaction $post "$emoji"
+            done <<<"$links"
+        fi
+    done <<<"$mattermost_post_ids"
+}
+
+# Add response to mattermost posting
+# Usage:    mattermost_response <text> [<attachements>]
+mattermost_repost () {
+    local line main channel post
+    # for lines in channels
+    while read line; do
+        [ -n "$line" ] || continue
+        read -r main _ <<<"$line"
+        debug "main $main"
+        IFS="/" read -r channel post <<<"$main"
+        debug "channel $channel post $post"
+        _mattermost_repost $channel $post "$1" "$2" >/dev/null
+    done <<<"$mattermost_post_ids"
+}

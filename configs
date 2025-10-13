@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+for f in "$BASHLIB_HOME"/config/*; do
+    if [[ -f "$f" && "$f" != *.* ]]; then
+        source "$f"
+    fi
+done

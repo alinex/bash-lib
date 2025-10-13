@@ -1,0 +1,501 @@
+#!/usr/bin/env bash
+
+# Module for process control
+
+######################################################################################
+# Looping
+######################################################################################
+
+# Execute command in N times
+# Usage:    repeat <N> <command> [<params>]...
+repeat() {
+    local -i n=$1
+    [ $n -gt 0 ] || return
+    shift
+    for n in $(seq $n); do
+        "$@"
+    done
+}
+
+# Retry a command multiple times until it succeeds
+# Using escalating delay between attempts. Delay is 2 * n + random up to 30s, then 30s + random after that.
+# For large numbers of retries the max delay is effectively the retry count in minutes.
+# Usage:    retry <N> <command> [<params>]...
+function retry {
+    local retries=$1
+    shift
+    local count=0 exit wait
+    until "$@"; do
+        exit=$?
+        wait=$((2 ** $count))
+        count=$(($count + 1))
+        if [ $count -lt $retries ]; then
+            echo "Try $count/$retries exited $exit, retrying in $wait seconds..." >&2
+            sleep $wait
+        else
+            echo "Try $count/$retries exited $exit, no more retries left." >&2
+            return $exit
+        fi
+    done
+    return 0
+}
+
+# Sleep with countdown some seconds
+# Usage:    countdown <num> <text>
+# Options:  -a, --abort     # let the countdown abort by key press
+# Exit:     1 if aborted
+countdown() {
+    # parameter parsing
+    local abort
+    eval set -- "$(option_parse $'a abort -' "$@")"
+    while true; do
+        case "$1" in
+        -a | --abort)
+            abort="(press any key to stop)"
+            shift
+            ;;
+        --)
+            shift
+            break
+            ;;
+        *) die "Unerwartete option in: $1" ;;
+        esac
+    done
+    # processing
+    local seconds=$1
+    local text=${2:-Waiting}
+    while [ $seconds -gt 0 ]; do
+        echo -ne "\r$text $seconds seconds $abort"
+        if [ -n "$abort" ]; then
+            read -t 1 -n 1 key && return 1 || true
+        else
+            sleep 1
+        fi
+        ((seconds--))
+    done
+    echo ""
+}
+
+######################################################################################
+# Locking
+######################################################################################
+
+LOCK_SLEEP=10
+
+_lock_remove() {
+    # Remove old locks for non existing processes or the defined pid lock
+    # Usage: _lock_remove
+    pid=$(cat "$lockfile") || true
+    ([ -n "$pid" ] && kill -0 "$pid" 2>/dev/null) ||
+        rm -f "$lockfile" "$lockfile.$pid" || die "Failed to remove lockfile: $lockfile"
+}
+
+# Set a lock or wait till it can be set
+# Usage:    lock
+# Files:    /tmp/<prog>-lockfile        # hard link to active process
+#           /tmp/<prog>-lockfile.<pid>  # active or waiting process
+# Stderr:   <wait message>
+# In any part of your script you can surround a block with lock and unlock statements. The
+# process will wait on the lock statement till no other process with the same lock is running
+# before going on.
+lock() {
+    local lockfile logged
+    lockfile="$(mktemp 'lockfile')"
+    # make a file with our PID
+    echo $$ >"$lockfile.$$" 2>/dev/null || die "Failed to create PID lockfile: $lockfile.$$"
+    # rmove old lock if no longer running
+    _lock_remove
+    # try it, till it works
+    logged=0
+    while ! ln "$lockfile.$$" "$lockfile" 2>/dev/null; do
+        if [ $logged -eq 0 ]; then # write message once
+            echo "Waiting for unlock in $lockfile by PID $(cat "$lockfile")..." >&1
+            logged=1
+        fi
+        # if the symlink failed, wait for the current lock holder to exit
+        sleep $LOCK_SLEEP
+        # make a file with our PID, if no longer existent
+        echo $$ >"$lockfile.$$" 2>/dev/null
+        # check again for zombies
+        _lock_remove
+    done
+    # if the locking process exits without unlocking, delete our lock
+    trap_add unlock EXIT
+}
+
+# Set the lock or exit with optional error message
+# Usage:    lock_exit
+# Files:    /tmp/<prog>-lockfile        # hard link to active process
+#           /tmp/<prog>-lockfile.<pid>  # active or waiting process
+# In any part of your script you can surround a block with lock and unlock statements. The
+# process will wait on the lock statement till no other process with the same lock is running
+# before going on.
+lock_exit() {
+    local lockfile logged
+    lockfile="$(mktemp 'lockfile')"
+    # make a file with our PID
+    echo $$ >"$lockfile.$$" 2>/dev/null || die "Failed to create PID lockfile: $lockfile.$$"
+    # rmove old lock if no longer running
+    _lock_remove
+    # try to symlink it
+    ln "$lockfile.$$" "$lockfile" 2>/dev/null
+    if [ $? -ne 0 ]; then
+        unlock
+        die "Stop processing because this is locked in $lockfile by PID $(cat "$lockfile")"
+    fi
+    # if the locking process exits without unlocking, delete our lock
+    trap_add unlock EXIT
+}
+
+# Remove the lock
+# Usage:    unlock
+unlock() {
+    local lockfile
+    lockfile="$(mktemp 'lockfile')"
+    # remove own lockfile
+    [ ! -e "$lockfile.$$" ] || rm -f "$lockfile.$$" 2>/dev/null
+    # remove link if no pid or pointing to myself
+    pid=$(cat "$lockfile") || true
+    [ -n "$pid" ] || [[ "$pid" != "$$" ]] || rm -r "$lockfile" 2>/dev/null
+    # remove the trap
+    trap_remove unlock
+    return 0
+}
+
+######################################################################################
+# Persistent environment store
+######################################################################################
+
+# Store environment into shared memory/file
+# Usage:    env_store [<ident>]                 # store complete environment
+#           env_store [<ident>] [<variable>]... # store only listed variables (ident can be empty string)
+# Options:  -d, --disk                          # store on disk in temporary folder
+#           -p, --path <base-dir>               # store on disk in given folder
+# Example:  env_restore
+#           ...<code>
+#           env_store # save changes
+#           ....
+#           env_store # save changes
+#           ....
+#           env_clean # everything done remove progress
+env_store() {
+    # parameter parsing
+    eval set -- "$(option_parse $'d disk -\np path +' "$@")"
+    local disk opt
+    while true; do
+        case "$1" in
+        -d | --disk)
+            disk=$
+            shift
+            ;;
+        -p | --path)
+            opt="$1 $2"
+            shift 2
+            ;;
+        --)
+            shift
+            break
+            ;;
+        *) shift ;; # ignore
+        esac
+    done
+    # processing
+    local ident=$1
+    shift || true
+    if [ -n "$disk" ]; then
+        declare -p "$@" | sed 's/^declare\b/declare -g/' >$(mktemp $opt -e env "$ident")
+    else
+        declare -p "$@" | sed 's/^declare\b/declare -g/' >$(mkshm -e env "$ident")
+    fi
+}
+
+# Restore environment from shared memory/file
+# Usage:    env_restore [<ident>]
+# Options:  -d, --disk                          # store on disk in temporary folder
+#           -p, --path <base-dir>               # store on disk in given folder
+env_restore() {
+    # parameter parsing
+    eval set -- "$(option_parse $'d disk -\np path +' "$@")"
+    local disk opt
+    while true; do
+        case "$1" in
+        -d | --disk)
+            disk=$
+            shift
+            ;;
+        -p | --path)
+            opt="$1 $2"
+            shift 2
+            ;;
+        --)
+            shift
+            break
+            ;;
+        *) shift ;; # ignore
+        esac
+    done
+    # processing
+    if [ -n "$disk" ]; then
+        source $(mktemp $opt -e env "$1") 2>/dev/null || true
+    else
+        source $(mkshm -e env "$1") 2>/dev/null || true
+    fi
+}
+
+# Remove stored environment from shared memory/file
+# Usage:    env_clean [<ident>]
+# Options:  -d, --disk                          # store on disk in temporary folder
+#           -p, --path <base-dir>               # store on disk in given folder
+env_clean() {
+    # parameter parsing
+    eval set -- "$(option_parse $'d disk -\np path +' "$@")"
+    local disk opt
+    while true; do
+        case "$1" in
+        -d | --disk)
+            disk=$
+            shift
+            ;;
+        -p | --path)
+            opt="$1 $2"
+            shift 2
+            ;;
+        --)
+            shift
+            break
+            ;;
+        *) shift ;; # ignore
+        esac
+    done
+    # processing
+    if [ -n "$disk" ]; then
+        rm -f $(mktemp $opt -e env "$1")
+    else
+        rm -f $(mkshm -e env "$1")
+    fi
+}
+
+# Change environment in shared memory/file
+# Usage:    env_change <ident> <command>                # store complete environment
+#           env_change <ident> <command> [<variable>]...# store only listed variables (ident can be empty string)
+env_change() {
+    # parameter parsing
+    eval set -- "$(option_parse $'d disk -\np path +' "$@")"
+    local opt
+    while true; do
+        case "$1" in
+        -d | --disk)
+            opt="$opt $1"
+            shift
+            ;;
+        -p | --path)
+            opt="$opt $1 $2"
+            shift 2
+            ;;
+        --)
+            shift
+            break
+            ;;
+        *) shift ;; # ignore
+        esac
+    done
+    # processing
+    num_parameters --min 2 --die "At least <ident> <command> is needed!" -- "$@"
+    local ident=$1
+    shift || true
+    local command=$1
+    shift || true
+    env_restore $opt "$ident"
+    eval "$command"
+    env_store $opt "$ident" "$@"
+}
+
+######################################################################################
+# Sync/Async calls with optional step control
+######################################################################################
+
+declare -A _async_running
+
+# Set the variables which should be stored with step control
+STEPS_VARIABLES=
+
+# Initialize nstep control
+# Usage:    steps_init
+# Example:  steps_init
+#           # sync | async | queue calls
+#           steps_done
+steps_init() {
+    declare -g -A _STEPS
+    env_restore steps
+    declare -p _STEPS
+    env_store steps _STEPS $STEPS_VARIABLES # initial store
+    echo "Arbeitsschritte werden protokolliert um auch mittendrin wieder aufzusetzen..." >&2
+}
+
+# Check if step already finished successfull
+# Usage:    steps_done <name>
+# Exit:     0 if done else not done or with failure
+steps_check() {
+    num_parameters --min 1 --max 1 --die "Only an <ident> is needed, but must be there!" -- "$@"
+    declare -p _STEPS 2>/dev/null | grep -q 'declare -A' || return 1 # return not found if no step control
+    if [ -n "${_STEPS["$1"]}" ]; then
+        echo "Job $1 already done in this run, skipping" >&2
+        return 0
+    else
+        return 1
+    fi
+    env_store steps _STEPS $STEPS_VARIABLES
+}
+
+# Set step as successfully done
+# Usage:    steps_done <name>   # finished one step
+#           steps_done          # completely finished -> cleanup
+steps_done() {
+    num_parameters --min 0 --max 1 --die "Only an <ident> is needed!" -- "$@"
+    declare -p _STEPS 2>/dev/null | grep -q 'declare -A' || return # do nothin if no step control
+    if [ -n "$1" ]; then
+        _STEPS["$1"]=1
+        echo "Finished: Step $1 at $(date_format sql)" >&2
+        env_store steps _STEPS $STEPS_VARIABLES
+    else
+        env_clean steps
+    fi
+}
+
+# Run the given command with optional step control
+# Usage:    sync <command> [<params>...]
+# This will use the command itself as name. If you run the same command multiple times use
+# async_name directly.
+sync() {
+    num_parameters --min 1 --die "At least a <command> is needed!" -- "$@"
+    sync_name $1 "$@"
+}
+
+# Alternative to sync in which this call is given a name to refer
+# Usage:     sync <name> <cmd> [<params>...]
+sync_name() {
+    num_parameters --min 2 --die "At least a <name> and <command> is needed!" -- "$@"
+    local name=$1
+    shift
+    steps_check $name && return || true
+    declare -p _STEPS 2>/dev/null | grep -q 'declare -A' && echo "Started: step $name at $(date_format sql)" >&2 || true
+    "$@"
+    steps_done $name
+}
+
+# Run the given command asynchronous ang go on in the calling routine (short form of async_name)
+# Usage:    async <command> [<params>...]
+# This will use the command itself as name. If you run the same command multiple times use
+# async_name directly.
+# Example:  async task1
+#           async task2
+#           async_wait task1
+#           async task3
+#           wait # for all to end
+async() {
+    num_parameters --min 1 --die "At least a <command> is needed!" -- "$@"
+    async_name $1 "$@"
+}
+
+# Alternative to async in which this call is given a name to refer in async_wait
+# Usage:    async <name> <cmd> [<params>...]
+async_name() {
+    num_parameters --min 2 --die "At least a <name> and <command> is needed!" -- "$@"
+    local name=$1
+    shift
+    ! steps_check $name || return
+    declare -p _STEPS 2>/dev/null | grep -q 'declare -A' && echo "Started: step $name at $(date_format sql)" >&2 || true
+    "$@" &
+    env_change queue "_async_running[\"$name\"]=$!" _queue _async_running
+}
+
+# Check if the command is done or wait here till it is so
+# Usage:    async_wait          # to wait for all to be done
+#           async_wait <name>   # to wiat for specific command to finish
+async_wait() {
+    [ -z "${_async_running["$1"]}" ] && return 0 || true
+    wait "${_async_running["$1"]}"
+    local code=$?
+    if [ "$code" -eq 0 ]; then
+        steps_done $1
+        env_change queue "unset async_running[\"$1\"]" _queue _async_running
+    else
+        declare -p _STEPS 2>/dev/null | grep -q 'declare -A' && echo echo "Failed: Step $1 at $(date_format sql)" >&2 || true
+    fi
+    return $code
+}
+
+# Maximum number of parallel tasks for queue
+ASYNC_QUEUE_MAX=2
+
+declare -a _queue
+declare _queue_control_pid
+
+env_store queue _queue _async_running # reset on each run
+_queue_control() {
+    local name pid free first params num
+    while true; do
+        sleep 1
+        # loop async table
+        env_restore queue
+        if [ ${#_async_running[@]} -gt 0 ]; then
+            for name in "${!_async_running[@]}"; do
+                pid="${_async_running["$name"]}"
+                # process no longer running
+                if ! kill -0 "$pid" 2>/dev/null; then
+                    steps_done $name
+                    env_change queue "unset _async_running[\"$name\"]" _queue _async_running
+                fi
+            done || true
+        fi
+        env_restore queue
+        debug "Task queue: $$ $BASHPID async ${#_async_running[@]} queue ${#_queue[@]}"
+        # test if queue and running are empty -> end control
+        [ ${#_queue[@]} -gt 0 ] || [ ${#_async_running[@]} -gt 0 ] || return 0
+        # async has free slots
+        free=$(($ASYNC_QUEUE_MAX - ${#_async_running[@]}))
+        if [ $free -gt 0 ]; then
+            for num in $(seq 1 $free); do
+                [ ${#_queue[@]} -gt 0 ] || break
+                # shift from queue
+                first="${_queue[0]}"
+                env_change queue "_queue=(\"\${_queue[@]:1}\")" _queue _async_running
+                IFS=$'\x1f' read -r -a params <<<"$first" # split back into array
+                # execute
+                async_name "${params[@]}"
+            done
+        fi
+    done
+    env_clean queue
+}
+
+# Add command to process queue
+# Usage:    queue <command> [<params>...]
+# This will use the command itself as name. If you run the same command multiple times use
+# queue_name directly.
+# Example:  queue task1
+#           queue task2
+#           queue task3
+#           async_wait task2
+#           queue task4
+#           wait # for all to end
+queue() {
+    num_parameters --min 1 --die "At least a <command> is needed!" -- "$@"
+    queue_name $1 "$@"
+}
+
+# Add command to process queue
+# Usage:    queue_name <name> <command> [<params>...]
+queue_name() {
+    num_parameters --min 2 --die "At least a <name> and <command> is needed!" -- "$@"
+    ! steps_check $1 || return 0
+    local entry=$(printf "%s\x1f" "$@")
+    entry=${entry%$'\x1f'} # remove trailing separator
+    # change queue and in shm
+    env_change queue "_queue+=(\"$entry\")" _queue _async_running
+    # start queue control if not running
+    if [ -z "$_queue_control_pid" ]; then
+        _queue_control &
+        _queue_control_pid=$!
+    fi
+}

@@ -1,6 +1,0 @@
-#!/bin/bash
-
-source_dir=$(dirname $(readlink -f "${BASH_SOURCE[0]:-$(pwd)/x}"))
-cd $source_dir/..
-
-docker run -v $(pwd):/data alinex/mkdocs && xdg-open file:///$(pwd)/site/index.html

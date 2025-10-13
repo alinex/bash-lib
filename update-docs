@@ -1,0 +1,66 @@
+#!/usr/bin/env bash
+
+BASHLIB_HOME="$(dirname "$(readlink -f "${BASH_SOURCE[0]:-$(pwd)/x}")")"
+
+echo -n "Update documentation..." >&2
+# remove commands from Readme
+sed -i '/which are listed below\./q' $BASHLIB_HOME/doc/README.md
+# add commands again
+for folder in core module; do
+    echo -e "\n## ${folder^}"
+    echo -n "$folder " >&2
+    for f in "$BASHLIB_HOME/$folder"/*; do
+        if [[ -f "$f" && "$f" != *.* ]]; then
+            name="${f#[0-9]*_}" # remove prefix
+            echo ""
+            echo "### [${name^} Module](module/$(basename "$f").md)"
+            echo ""
+            grep ^#\  "$f" | head -1 | sed 's/# *//'
+            echo ""
+            echo "| Variable/Function | Description |"
+            echo "| --- | --- |"
+            # variables
+            awk '{  if ($0 ~ /^#/) {
+                        if (!header_printed) {
+                            header_line = $0
+                            sub(/# /, "", header_line)
+                            header_printed = 1
+                        }
+                    } else {
+                        if ($0 ~ /^[0-9A-Z_]*=/) {
+                            line = $0
+                            sub(/=.*/, "", line)   # remove the pattern and everything after it
+                            if (header_printed) {
+                                print "| `$" line "` | " header_line " |"
+                            }
+                            header_printed = 0
+                        } else {
+                            header_printed = 0
+                        }
+                    }
+                }' "$f"
+            # functions
+            awk '{  if ($0 ~ /^#/) {
+                        if (!header_printed) {
+                            header_line = $0
+                            sub(/# /, "", header_line)
+                            header_printed = 1
+                        }
+                    } else {
+                        if ($0 ~ /^[a-zA-Z0-9_]* *\(\)/) {
+                            line = $0
+                            sub(/ *\(\).*/, "", line)   # remove the pattern and everything after it
+                            if (header_printed) {
+                                print "| `" line "` | " header_line " |"
+                            }
+                            header_printed = 0
+                        } else {
+                            header_printed = 0
+                        }
+                    }
+                }' "$f"
+        fi
+    done
+done >>$BASHLIB_HOME/doc/README.md
+echo ""
+echo "DONE"

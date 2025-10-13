@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+
+# The configuration module contains a lot of general configuration settings for the bash-lib modules itself.
+
+######################################################################################
+### Configuration
+######################################################################################
+
+# That are only the APIs, the tokens has to be defined in the environment, typically in .bashrc
+
+# Mattermost API url
+MATTERMOST_API=https://mattermost.ekz.de/api/v4
+# Grafana API url
+GRAFANA_API=http://grafana.service.cloud.dvb/api
+# Atlassian confluence API url
+CONFLUENCE_API=https://ekz-gruppe.atlassian.net/wiki/rest/api
+# Atlassian jira API url
+JIRA_API=https://ekz-gruppe.atlassian.net/rest/api/3
+# Prometheus API urls
+PROMETHEUS_API="http://prometheus.service.cloud.dvb/api/v1 http://prometheus.service.office.grp/api/v1"
+# Prometheus host names
+PROMETHEUS="prometheus.host.cloud.dvb prometheus.host.office.grp"
+
+# Check for defined security elements
+[ -n "$MATTERMOST_TOKEN" ] || die "No MATTERMOST_TOKEN defined, please add this in the environment like .bashrc!"
+[ -n "$GRAFANA_TOKEN" ] || die "No GRAFANA_TOKEN defined, please add this in the environment like .bashrc!"
+[ -n "$ATLASSIAN_USER" ] || die "No ATLASSIAN_USER defined, please add this in the environment like .bashrc!"
+[ -n "$ATLASSIAN_TOKEN" ] || die "No ATLASSIAN_TOKEN defined, please add this in the environment like .bashrc!"
+
+# Atlassian confluence page id for outage information
+CONFLUENCE_OUTAGE=677347344 # https://ekz-gruppe.atlassian.net/wiki/spaces/IS/pages/677347344/Ausf+lle+und+ihre+Auswirkungen
+
+# load the secure stuff from
+test ! -e ~/.bash_config_vars || source ~/.bash_config_vars

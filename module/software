@@ -1,0 +1,126 @@
+#!/usr/bin/env bash
+
+# Software management functions.
+
+######################################################################################
+### Installer
+######################################################################################
+
+# Cache used to prevent multiple install calls for the same information in one run
+declare -A _software_install
+
+# Install software package
+# Usage:    install <pack>...
+install () {
+    # collect what to be needed
+    local apt=""
+    local snap=""
+    local reload=""
+    # check what is needed
+    for cmd in "$@"; do
+        if [[ ! -v _software_install["$cmd"] ]]; then
+            sudo which $cmd >/dev/null \
+            || case $cmd in
+                yq) snap="$snap $cmd" ;;
+                *) apt="$apt $cmd" ;;
+            esac
+            _software_install["$cmd"]=1
+        fi
+    done
+    test -z "$snap" || command -v snapd >/dev/null || ( apt="$apt snapd" && snap="$snap snapd" && reload=1)
+    # install
+    test -z "$apt" || sudo apt-get install -y $apt
+    test -z "$snap" || sudo apt snap install $snap
+    # reload possibly changed config
+    test -z "$reload" || source ~/.bashrc
+}
+
+# TODO this should be done only if needed to also use the lib on remote machines
+
+# Parse semantic version number
+# Usage:    semver <string>
+#           <string> | semver
+# Stdout:   <major>
+#           <minor>         or "" if undefined
+#           <patch>         or "" if undefined
+#           <prerelease>    or "" if undefined
+#           <build>         or "" if undefined
+semver() {
+    input "$@" \
+    | sed -e 's#[^0-9]*\([0-9]*:\)\?\([0-9]*\)\([.]\([0-9]*\)\)\?\([.]\([0-9]*\)\)\?\(-\([^+]*\)\)\?+\?\(.*\)\?.*#\2\n\4\n\6\n\8\n\9#' 
+}
+
+# Calculate difference
+# Usage:    semver_diff [-h] <first> <second> # can already be parsed or not
+# Options:  -h,--human      # to show it user friendly
+# Stdout:   <int>:  >1000000000 newer major (num / 1000000000 = steps)
+#                   >1000000 newer minor (num / 1000000 = steps)
+#                   >1000 newer patch (num / 1000 = steps)
+#                   10 newer pre-release
+#                   1 newer build
+#                   0 identical
+#                   -1 older build
+#                   -10 older pre-release
+#                   <-1000 older patch (num / 1000 = steps)
+#                   <-1000000 older minor (num / 1000000 = steps)
+#                   <-1000000000 older major (num / 1000000000 = steps)
+semver_diff() {
+    # parameter parsing
+    eval set -- "$(option_parse "h human -" "$@")"
+    local human
+    while true; do
+        case "$1" in
+            -h|--human) human=1; shift ;;
+            --) shift; break ;;
+            *) die "Unrecognized option: $1" ;;
+        esac
+    done
+    num_parameters "$@" --min 2 --max 2 --die "Need exactly two parameters: semver_diff [-h] <first> <second>"
+    # processing
+    [[ "${1-}" =~ [.-] ]] && version1="$(semver "$1")" || version1="$1"
+    [[ "${2-}" =~ [.-] ]] && version2="$(semver "$2")" || version2="$2"
+    IFS=$'\n' readarray -t v1 <<< "$version1"
+    IFS=$'\n' readarray -t v2 <<< "$version2"
+    local num=0
+    maj1=${v1[0]}
+    maj2=${v2[0]}
+    min1=${v1[1]:-0}
+    min2=${v2[1]:-0}
+    pat1=${v1[2]:-0}
+    pat2=${v2[2]:-0}
+    pre1=${v1[3]}
+    pre2=${v2[3]}
+    bld1=${v1[4]}
+    bld2=${v2[4]}
+    if [ "$maj1" -ne "$maj2" ]; then 
+        num=$(( (maj2 - maj1) * 1000000000 ))
+    elif [ "$min1" -ne "$min2" ]; then 
+        num=$(( (min2 - min1) * 1000000 )); 
+        [ "$num" -lt 1000000000 ] || num=999000000
+    elif [ "$pat1" -ne "$pat2" ]; then 
+        num=$(( (pat2 - pat1) * 1000 ))
+        [ "$num" -lt 1000000 ] || num=999000
+    elif [[ "$pre1" < "$pre2" ]]; then num=10
+    elif [[ "$pre1" > "$pre2" ]]; then num=-10
+    elif [[ "$bld1" < "$bld2" ]]; then num=1
+    elif [[ "$bld1" > "$bld2" ]]; then num=-1
+    fi
+    # output
+    if [ -n "$human" ]; then
+        echo -n "$1 -> $2 "
+        if [ $num -eq 0 ];              then echo "sind identische Versionen"
+        elif [ $num -ge 1000000000 ];   then echo "ist ein upgrade von $((num / 1000000000)) Hauptversione(n)"
+        elif [ $num -ge 1000000 ];      then echo "ist ein upgrade von $((num / 1000000)) Nebenversione(n)"
+        elif [ $num -ge 1000 ];         then echo "ist ein upgrade von $((num / 1000)) Patch Level(n)"
+        elif [ $num -ge 1 ];            then echo "ist ein entwickler Upgrade)"
+        elif [ $num -ge -1000 ];        then echo "ist ein entwickler Downgrade"
+        elif [ $num -ge 1000000 ];      then echo "ist ein downgrade von $((num / -1000)) Patch Level(n)"
+        elif [ $num -ge 1000000000 ];   then echo "ist ein downgrade von $((num / -1000000)) Nebenversione(n)"
+        else                                 echo "ist ein downgrade von $((num / -1000000000)) Hauptversione(n)"
+        fi
+        return 0
+    else echo $num
+    fi
+    # return code
+    [ $num -eq 0 ] && return 0 || return 1
+}

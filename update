@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+
+BASHLIB_HOME="$(dirname "$(readlink -f "${BASH_SOURCE[0]:-$(pwd)/x}")")"
+
+echo -n "Update minimize bash-lib library... " >&2
+command -v shfmt >/dev/null || sudo apt install -y shfmt
+
+echo "#!/usr/bin/env bash" >"$BASHLIB_HOME/full"
+echo -n "full ("
+for folder in core module; do
+    echo -n "$folder "
+    for f in "$BASHLIB_HOME/$folder"/*; do
+        if [[ -f "$f" && "$f" != *.* ]]; then
+            shfmt -mn "$f" | grep -v '^#!/usr/bin/env bash' >>"$BASHLIB_HOME/full"
+        fi
+    done
+done
+echo -en "\b) base (core)"
+for f in "$BASHLIB_HOME"/core/*; do
+    if [[ -f "$f" && "$f" != *.* ]]; then
+        shfmt -mn "$f" | grep -v '^#!/usr/bin/env bash' >>"$BASHLIB_HOME/base"
+    fi
+done
+echo ""
+echo "DONE"

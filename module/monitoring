@@ -1,0 +1,159 @@
+#!/usr/bin/env bash
+
+# Using the Grafana/Prometheus APIs to get Monitoring information.
+
+######################################################################################
+# Monitoring
+######################################################################################
+
+# Get exporter list
+# Usage:    exporter [<field>=<value>]...
+# Stdout:   <url>\t<job>\t<label-values>
+#           ...
+exporter() {
+    install jq yq
+    local arg name value
+    local filter=""
+    for arg in "$@"; do
+        IFS='=' read name value <<< "$arg"
+        unset IFS
+        local field=""
+        case $name in 
+            instance) filter="$filter select(.labels.$name|test(\"$value\")) |" ;;
+            *) filter="$filter select(.labels.$name==\"$value\") |" ;;
+        esac
+    done
+    local server api line
+    local auth=""
+    for server in $PROMETHEUS; do
+        remote true 2>/dev/null || continue
+        auth="$auth"$'\n'"$(remote cat /etc/prometheus/prometheus.yml \
+        | yq -r '.scrape_configs[] | select(.basic_auth) | .job_name as $j | .basic_auth as $b | .static_configs[].targets[] | [$j, $b.username, $b.password, .] | @tsv')"        
+    done
+    for api in $PROMETHEUS_API; do
+        curl $api/targets | jq '.data.activeTargets[] | '"$filter"' [.scrapeUrl, .labels.job, (.labels | join(", ")), .discoveredLabels.__address__] | @tsv' -r \
+        | while read line; do
+            local login="$(echo "$auth" | grep "$(echo "$line" | cut -f2)" | grep "$(echo "$line" | cut -f4)")"
+            if [ -n "$login" ]; then
+                local user="$(echo "$login" | cut -f2 | tr -d '\n' | urlencode)"
+                local pass="$(echo "$login" | cut -f3 | tr -d '\n' | urlencode)"
+                echo "$line" | cut -f1-3 | sed "s#://#://$user:$pass@#"
+            else
+                echo "$line" | cut -f1-3
+            fi
+        done \
+        || die "Could not get exporters from prometheus!"
+    done
+}
+
+# Scrape prometheus exporter url now
+# Usage:    scrape <url> <pattern>
+# Stdout:   <metric>\t[<value>=<text>],...\t<value>
+#           ...
+scrape () {
+    num_parameters "$@" --min 1 --max 2 --die "Wrong number of parameters for scrape!"
+    echo "Scrape the prometheus exporter at $1" >&2
+    local metrics="$(curl "$1" | egrep "$2" | egrep -v '^($|#)' || die "Could not scrape the prometheus exporter at $1!")"
+    echo "$metrics" | grep '{' | sed 's/,\?[{}]/\t/g'
+    echo "$metrics" | grep -v '{' | sed 's/ /\t\t/g'
+}
+
+# Get grafana alerts 
+# Usage:    alerts [<format>]           # json, console, mattermost
+# Options:  -i, --instance <regexp>     # select only matching instances
+# Stdout:   <header-line>
+#           <severity>\t<network>\t<instance>\t<decription>\t<time>
+#           ...
+alerts() {
+    # parameter parsing
+    local filter=""
+    eval set -- "$(option_parse $'i instance +' "$@")"
+    while true; do
+        case "$1" in
+            -i|--instance) filter="$filter | select(.labels.instance|test(\"$2\"))"; shift 2 ;;
+            --) shift; break ;;
+            *) die "Unerwartete option in: $1" ;;
+        esac
+    done
+    # processing
+    install jq mlr
+    local alerts="$(curl -H "Authorization: Bearer $GRAFANA_TOKEN" "$GRAFANA_API/alertmanager/grafana/api/v2/alerts" \
+    | jq 'sort_by(.startsAt) | .[] '"$filter")" \
+    || die "Could not get alerts from Grafana!"
+    local format=${1:-console}
+    # pre format
+    case $format in
+        tsv|console)
+            alerts="Severity\tNetz\tInstanz\tZusammenfassung\tStart             _\n$(jq -r '[.labels.severity, .labels.net, .labels.instance, .annotations.summary, (.startsAt| split(".")[0]| strptime("%Y-%m-%dT%H:%M:%S")| strftime("%Y-%m-%d %H:%M:%S"))] | @tsv' <<<"$alerts")"
+            ;;
+        mattermost)
+            alerts="$(jq -s '.[] | {
+                color:  (if .labels.severity == "disaster" then "#ff0000"
+                        elif  .labels.severity == "critical" then "#FFA500"
+                        elif  .labels.severity == "warning" then "#FFFF00"
+                        else "#0000FF" end), 
+                title:  ((.labels.severity|(.[:1] | ascii_upcase) + .[1:]) + ": " + .labels.alertname), 
+                linktitle_link: .generatorURL,
+                text:   ("**" + .annotations.summary + "**\n" + .annotations.description), 
+                footer: "Grafana Alerts",
+                fields: (.labels 
+                    | {
+                        Netz:(.net|ascii_upcase),Instanz:.instance
+                    } 
+                    | to_entries
+                    | map({title: (.key|(.[:1] | ascii_upcase) + .[1:]), value: .value, short:true})
+                )
+            }' <<<"$alerts" | jq -s .)"
+            ;;
+    esac
+    # final format
+    case $format in
+        console)
+            echo -e "$alerts" \
+            | tsv2table \
+            | while read -r line; do
+                case $line in
+                    Severity*) invers "$line" ;;
+                    warning*) warn "$line" ;;
+                    critical*) error "$line" ;;
+                    disaster*) critical "$line" ;;
+                    *) echo "$line" ;;
+                esac
+            done
+            ;;
+        *)
+            echo -e "$alerts"
+            ;;
+    esac
+}
+
+# Prom ql ausführen 
+# Usage:    prometheus <prom-ql>
+prometheus () {
+    local api=$(echo "$PROMETHEUS_API" | sed 's/ .*//')
+    curl "$api/query?query=$(echo "$1" | urlencode)"
+    # start=
+    # end=
+    # step=
+}
+
+# Change scrape interval to scrape now and set back 
+# Usage:    prometheus_scrape <job> [<timeout>]
+prometheus_scrape () {
+    install yq
+    local job=$1
+    local seconds=${2:-60}
+    for server in $PROMETHEUS; do
+        remote true 2>/dev/null || continue # only work on reachable server
+        echo "Let $server scrape $job again, now."
+        echo "yq '(.scrape_configs[] | select(.job_name == \"$job\")).scrape_interval = \"${seconds}s\" | (.scrape_configs[] | select(.job_name == \"$job\")).scrape_timeout = \"${seconds}s\"' </etc/prometheus/prometheus.yml | sponge /etc/prometheus/prometheus.yml" | remote
+        remote curl -sX POST http://localhost:9090/-/reload
+    done
+    echo "Wait $seconds seconds till scrape should be done..."
+    sleep $seconds
+    echo "Reset config back to default."
+    for server in $PROMETHEUS; do
+        remote true 2>/dev/null || continue # only work on reachable server
+        remote /etc/prometheus/config-builder/update >/dev/null
+    done
+}
