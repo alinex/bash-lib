@@ -6,16 +6,21 @@
 ### Base functions
 ######################################################################################
 
-# If stdin and no parameters then read stdin, else use parameters
-# Usage:    input "$@ parameters"
+# Collect string from stdin (no parameters) or concatenate the parameters
+# This can be used to make functions which you can feed with one or multiple parameters as well as through a pipe.
+# Usage:    input "$@" | ....
+#           text="$(input "$@")"
 # Output:   <string-input> or
 #           <string-params> separated by spaces
 input() {
     test -p /dev/stdin && test $# -eq 0 && cat - || echo "$*"
 }
 
-# If stdin and not more than defined parameters, then read stdin
-# Usage:    input_args <num> "$@"
+# Collect string from stdin (not more than defined parameters) or concatenate the parameters0
+# This can be used to make functions which you can feed with one or multiple parameters as well as through a pipe.
+# But instead of the @input this will allow the first <num> additional parameters which will be not slurped in.
+# Usage:    input_args <num> "$@" | ....
+#           text="$(input <num> "$@")"
 # Output:   <string-input> or
 #           <string-params> separated by spaces
 input_args() {
@@ -26,8 +31,10 @@ input_args() {
     test -p /dev/stdin && cat - || echo "${@:$start}"
 }
 
-# Read stdin and no parameters then read stdin, else use parameters as lines
-# Usage:    input_lines "$@"
+# Collect string from stdin (no parameters) or parameters each as a line
+# The same as @input for piped content but the arguments will not be joined by spaces but read as separate lines.
+# Usage:    input_lines "$@" | ....
+#           text="$(input_lines "$@")"
 # Output:   <string-input> or
 #           <string-params> separated by newlines
 input_lines() {
@@ -36,7 +43,7 @@ input_lines() {
         for arg in "$@"; do echo "$arg"; done
 }
 
-# Output error and exit
+# Output error message and exit
 # Usage:    die <message>
 #           <message> | die
 # Error:    <message>
@@ -48,6 +55,7 @@ die() {
 }
 
 # Set or add an additiopnal trap without overwriting existing ones
+# This is done by adding the new code as additional command before the existing ones if the trap is already set.
 # Usage:    trap_add <code> <signal>
 trap_add() {
     local new="$1"
@@ -62,6 +70,7 @@ trap_add() {
 }
 
 # Remove a specific trap
+# Not the whole trap is removed, but only the given code.
 # Usage:    trap_remove
 trap_remove() {
     local remove="$1"
@@ -74,6 +83,8 @@ trap_remove() {
 
 # Make a temporary file, which is recognizable
 # As the same invocation from the same program will get the same file it can be called multiple times.
+# The file will be conducted out of the program name and the given <identifier>.
+# You should remove this file by yourself if no longer needed. The files will be available in `/tmp`` folder for about 3 unused days and in memory till the next reboot.
 # Usage:    mktemp [<identifier>]       # use default temp if no identifier given
 # Options:  -d, --directory             # to make a directorty instead of a file
 #           -m, --memory                # use shared memory
@@ -154,6 +165,7 @@ option_parse() {
 }
 
 # Print help for options defined in options specification
+# This is mainly used by the @help output.
 # Usage:        option_help <spec>
 #               <spec> lines := <short-letter>|- <long-word> <type>|- <description>
 # Output:       List of options for help output

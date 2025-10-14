@@ -3,6 +3,8 @@
 ## Make a temporary file, which is recognizable
 
 As the same invocation from the same program will get the same file it can be called multiple times.
+The file will be conducted out of the program name and the given `<identifier>`.
+You should remove this file by yourself if no longer needed. The files will be available in `/tmp`` folder for about 3 unused days and in memory till the next reboot.
 
 
 ### Usage

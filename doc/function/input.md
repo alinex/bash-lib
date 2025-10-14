@@ -1,13 +1,15 @@
 # input
 
-## If stdin and no parameters then read stdin, else use parameters
+## Collect string from stdin (no parameters) or concatenate the parameters
 
+This can be used to make functions which you can feed with one or multiple parameters as well as through a pipe.
 
 
 ### Usage
 
 ```bash
-input "$@ parameters"
+input "$@" | ....
+text="$(input "$@")"
 ```
 
 ### Output (stdout)

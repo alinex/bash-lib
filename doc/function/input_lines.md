@@ -1,13 +1,15 @@
 # input_lines
 
-## Read stdin and no parameters then read stdin, else use parameters as lines
+## Collect string from stdin (no parameters) or parameters each as a line
 
+The same as [input](function/input.md) for piped content but the arguments will not be joined by spaces but read as separate lines.
 
 
 ### Usage
 
 ```bash
-input_lines "$@"
+input_lines "$@" | ....
+text="$(input_lines "$@")"
 ```
 
 ### Output (stdout)

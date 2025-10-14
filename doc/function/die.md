@@ -1,6 +1,6 @@
 # die
 
-## Output error and exit
+## Output error message and exit
 
 
 

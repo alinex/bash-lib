@@ -16,5 +16,5 @@ set -o pipefail # fail if any command in a pipeline fails
 
 # Reset all
 CC_RESET=$'\033[0m'
-# Set color for critical/disaster massages
+# Set color for critical/disaster massages used by @die
 CC_CRITICAL=$'\033[1;45m'

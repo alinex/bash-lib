@@ -2,6 +2,7 @@
 
 ## Print help for options defined in options specification
 
+This is mainly used by the [help](function/help.md) output.
 
 
 ### Usage

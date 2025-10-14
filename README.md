@@ -106,6 +106,7 @@ Keep in mind that for some remote execution of bash-lib the modular files are ne
 - Each outside usable function and variable should have it's documentation just before the code.
 - Each module contains a description as first comment line.
 - Try to use simple bash tools instead of sed as often as possible to get better performance.
+- The bash-lib itself is seldom used within itself.
 
 ### Test Code
 

@@ -1,6 +1,6 @@
 # date_format
 
-## Format date in different nnamed versions or format string
+## Format date in different named versions or format string
 
 Formats:  iso         2025-10-01T12:00:00+02:00
 Stdout:   `<string>`

@@ -1,5 +1,6 @@
 # BashLib Modules
 
+This is a list of some examples and the reference documentation of all available modules.
 
 ## Examples
 
@@ -16,7 +17,7 @@ The core configuration which is needed for the core functions.
 | Variable/Function | Description |
 | --- | --- |
 | `$CC_RESET` | Reset all |
-| `$CC_CRITICAL` | Set color for critical/disaster massages |
+| `$CC_CRITICAL` | Set color for critical/disaster massages used by [die](function/die.md) |
 
 ### Function Module
 
@@ -24,10 +25,10 @@ The core functions contains essential parts which may also be used while loading
 
 | Variable/Function | Description |
 | --- | --- |
-| [`input`](function/input.md) | If stdin and no parameters then read stdin, else use parameters |
-| [`input_args`](function/input_args.md) | If stdin and not more than defined parameters, then read stdin |
-| [`input_lines`](function/input_lines.md) | Read stdin and no parameters then read stdin, else use parameters as lines |
-| [`die`](function/die.md) | Output error and exit |
+| [`input`](function/input.md) | Collect string from stdin (no parameters) or concatenate the parameters |
+| [`input_args`](function/input_args.md) | Collect string from stdin (not more than defined parameters) or concatenate the parameters0 |
+| [`input_lines`](function/input_lines.md) | Collect string from stdin (no parameters) or parameters each as a line |
+| [`die`](function/die.md) | Output error message and exit |
 | [`trap_add`](function/trap_add.md) | Set or add an additiopnal trap without overwriting existing ones |
 | [`trap_remove`](function/trap_remove.md) | Remove a specific trap |
 | [`mktemp`](function/mktemp.md) | Make a temporary file, which is recognizable |
@@ -127,7 +128,7 @@ Some helpers to work easier with dates.
 | --- | --- |
 | [`now`](function/now.md) | Get current timestamp |
 | [`date_diff`](function/date_diff.md) | Calculate difference in seconds |
-| [`date_format`](function/date_format.md) | Format date in different nnamed versions or format string |
+| [`date_format`](function/date_format.md) | Format date in different named versions or format string |
 
 ### Divibib Module
 
