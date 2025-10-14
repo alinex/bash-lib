@@ -120,3 +120,4 @@ fi
 printf "  %-40s %s\n" "$short_text--$name$type_text" "${opt_descriptions[$name]}"
 done
 }
+LL_OPTIONS_UNRECOGNIZED="Unrecognized option:"

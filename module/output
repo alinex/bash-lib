@@ -284,7 +284,7 @@ choose() {
             shift
             break
             ;;
-        *) die "Unerwartete option in: $1" ;;
+        *) die "$LL_OPTIONS_UNRECOGNIZED $1" ;;
         esac
     done
     # processing
@@ -325,7 +325,6 @@ choose() {
 #           <list>
 #           ...
 #           <question> <key>
-# -----------------------------------------------------------------------------
 # Example:  list_tasks() {
 #               # can be created dynamically:
 #               cat <<'EOC'
@@ -354,7 +353,7 @@ tasks() {
             shift
             break
             ;;
-        *) die "Unerwartete option in: $1" ;;
+        *) die "$LL_OPTIONS_UNRECOGNIZED $1" ;;
         esac
     done
     # processing

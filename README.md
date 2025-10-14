@@ -56,8 +56,8 @@ Your scripts will start with:
 source $BASHLIB_HOME/full           # to have all tools ready
 
 source $BASHLIB_HOME/base           # to load only basics
-source $BASHLIB_HOME/configs        # load configuration
 source $BASHLIB_HOME/module/output  # and then single modules
+source $BASHLIB_HOME/configs        # load configuration
 ```
 
 ## Configuration

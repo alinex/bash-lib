@@ -52,6 +52,14 @@ The core functions contains essential parts which may also be used while loading
 | [`option_parse`](function/option_parse.md) | Parse arguments based on given specification |
 | [`option_help`](function/option_help.md) | Print help for options defined in options specification |
 
+### Lang Module
+
+The base language file, to support another language copy this to `config/lang.LL` and translate the values.
+
+| Variable/Function | Description |
+| --- | --- |
+| ``$LL_OPTIONS_UNRECOGNIZED`` | Translate: Unrecognized option given |
+
 ## Module
 
 ### Array Module

@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 
-# These are language templates for german output.
+# The base language file, to support another language copy this to `config/lang.LL` and translate the values.
 
 ######################################################################################
 ### Core function
 ######################################################################################
 
 # Translate: Unrecognized option given
-LL_OPTIONS_UNRECOGNIZED="Unerwartete option:"
+LL_OPTIONS_UNRECOGNIZED="Unrecognized option:"

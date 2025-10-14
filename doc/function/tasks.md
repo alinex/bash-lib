@@ -4,7 +4,6 @@
 
 Option    -t, --title `<title>`             # display text line above selection
 TTY:      [`<title>`]
------------------------------------------------------------------------------
 
 
 ### Usage
