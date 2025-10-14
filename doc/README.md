@@ -52,12 +52,6 @@ The core functions contains essential parts which may also be used while loading
 | [`option_parse`](function/option_parse.md) | Parse arguments based on given specification |
 | [`option_help`](function/option_help.md) | Print help for options defined in options specification |
 
-### Gettext Module
-
-
-| Variable/Function | Description |
-| --- | --- |
-
 ## Module
 
 ### Array Module

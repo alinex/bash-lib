@@ -123,7 +123,6 @@ fi
 printf "  %-40s %s\n" "$short_text--$name$type_text" "${opt_descriptions[$name]}"
 done
 }
-
 contains(){
 local array=$1
 local value=$2

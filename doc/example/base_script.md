@@ -5,7 +5,6 @@ The script should always start including the BashLib:
 ```bash
 #!/usr/bin/env bash
 source $BASHLIB_HOME/full           # to have all tools ready
-source $BASHLIB_HOME/configs        # load individual configs
 ```
 
 Next in the script is the argument parsing and command help:
@@ -33,7 +32,7 @@ while true; do
         *) die "Unerwartete option: $1" ;;
     esac
 done
-num_parameters "$@" --min 1 --max 1 --die "Falsche Anzahl Parameter: $USAGE"
+num_parameters --min 1 --max 1 --die "Falsche Anzahl Parameter: $USAGE" -- "$@"
 ```
 
 Then your real script may begin...
