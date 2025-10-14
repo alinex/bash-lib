@@ -12,5 +12,5 @@ download <source> <dest>
 
 ### Globals
 
-- $server
-- $login - default is "operator"
+- `$server`
+- `$login` - default is "operator"

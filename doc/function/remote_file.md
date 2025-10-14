@@ -13,8 +13,8 @@ remote_file <file>
 
 ### Globals
 
-- $server
-- $login - default is "operator"
+- `$server`
+- `$login` - default is "operator"
 
 ### Output (stdout)
 

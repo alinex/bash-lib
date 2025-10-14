@@ -14,6 +14,6 @@ like curl
 
 ### Globals
 
-- $server
-- $login - default is "operator"
+- `$server`
+- `$login` - default is "operator"
 - CURL_HTTP_CODE set with last code

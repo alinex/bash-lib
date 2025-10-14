@@ -1263,6 +1263,7 @@ _queue_control&
 _queue_control_pid=$!
 fi
 }
+declare -F "num_parameters"||source $BASHLIB_HOME/module/validator
 remote(){
 local ssh="${slogin:-operator}@$server"
 if [ -p /dev/stdin ];then

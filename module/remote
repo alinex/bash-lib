@@ -2,7 +2,8 @@
 
 # Module with remote calling/execution helpers.
 
-# shellcheck disable=SC2154
+# load other modules if not already done
+declare -F "num_parameters" || source $BASHLIB_HOME/module/validator
 
 ######################################################################################
 # Remote SSH
@@ -10,7 +11,7 @@
 
 # Run command on remote host
 # Usage:    remote <command>... # special characters have to be masked: | & * > <
-#           <title> | remote
+#           <commands> | remote
 # Globals:  $server
 #           $login - default is "operator"
 # Output:   passed through

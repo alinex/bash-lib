@@ -7,7 +7,7 @@
 ### Usage
 
 ```bash
-num_parameters "$@" --min 1 --die "Zu viele Parameter: $USAGE"
+num_parameters "$@" --min 1 --die "Zu viele Parameter: `$USAGE`"
 ```
 
 ### Options

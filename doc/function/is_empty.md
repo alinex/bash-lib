@@ -8,5 +8,5 @@ Status:   0 =>` true
 ### Usage
 
 ```bash
-is_empty <var> 
+is_empty <var>
 ```

@@ -23,5 +23,5 @@ OPTIONS="
 n name  string  Name of Birthday Person
 a age   int     Age in years
 h help  -       Show Help Page"
-option_parse "$OPTIONS" "$@"
+option_parse "`$OPTIONS`" "$@"
 ```

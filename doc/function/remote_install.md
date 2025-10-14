@@ -13,5 +13,5 @@ install <pack>...
 
 ### Globals
 
-- $server
-- $login - default is "operator"
+- `$server`
+- `$login` - default is "operator"

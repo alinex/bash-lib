@@ -49,7 +49,7 @@ for folder in config core module; do
                     }
                 }' "$file" |
                 sed -E 's#(^|[^[:alnum:]_.-])@([[:alnum:]_]+)#\1[`\2`](function/\2.md)#g' |
-                sed -E 's#(^|[^[:alnum:]_.-])$([[:alnum:]_]+)#\1`\2`#g' \
+                sed -E 's#(^|[^[:alnum:]_.-])(\$[[:alnum:]_]+)#\1`\2`#g' \
                     >>$BASHLIB_HOME/doc/README.md
             # Get function names and start lines using grep and awk
             # Supports functions declared as: fname() { ... } or function fname { ... }
@@ -151,7 +151,7 @@ for folder in config core module; do
                     [ -z "$example" ] || echo -e "\n### Example\n\n\`\`\`bash${example}\n\`\`\`"
                 ) |
                     sed -E 's#(^|[^[:alnum:]_.-])@([[:alnum:]_]+)#\1[`\2`](function/\2.md)#g' |
-                    sed -E 's#(^|[^[:alnum:]_.-])$([[:alnum:]_]+)#\1`\2`#g' \
+                    sed -E 's#(^|[^[:alnum:]_.-])(\$[[:alnum:]_]+)#\1`\2`#g' \
                         >$BASHLIB_HOME/doc/function/$funcname.md
             done <<<"$function_lines"
         fi

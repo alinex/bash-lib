@@ -19,5 +19,5 @@ boot_wait
 
 ### Globals
 
-- $server
-- $login - default is "operator"
+- `$server`
+- `$login` - default is "operator"

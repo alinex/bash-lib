@@ -12,18 +12,18 @@ The BashLib contains some core functionality and optional modules which are list
 
 ### Environment Module
 
-The configuration module contains a lot of general configuration settings for the bash-lib modules itself.
+The configuration module contains a lot of general configuration settings for the bash-lib modules itself. Most of them are specific to the individual environment so they need to be set in the local `overwrite` config.
 
 | Variable/Function | Description |
 | --- | --- |
-| `$MOUNT_COLOR_LIMIT` | Hash: Color limits per mount pattern (critical error warn ok) |
-| `$MATTERMOST_API` | Mattermost API url |
-| `$GRAFANA_API` | Grafana API url |
-| `$CONFLUENCE_API` | Atlassian confluence API url |
-| `$JIRA_API` | Atlassian jira API url |
-| `$PROMETHEUS_API` | Prometheus API urls |
-| `$PROMETHEUS` | Prometheus host names |
-| `$CONFLUENCE_OUTAGE` | Atlassian confluence page id for outage information |
+| ``$MOUNT_COLOR_LIMIT`` | Array: Color limits per mount (pattern critical error warn ok) used in [`remote_df`](function/remote_df.md) |
+| ``$MATTERMOST_API`` | Mattermost API url |
+| ``$GRAFANA_API`` | Grafana API url |
+| ``$CONFLUENCE_API`` | Atlassian confluence API url |
+| ``$JIRA_API`` | Atlassian jira API url |
+| ``$PROMETHEUS_API`` | Prometheus API urls |
+| ``$PROMETHEUS`` | Prometheus host names |
+| ``$CONFLUENCE_OUTAGE`` | Atlassian confluence page id for outage information |
 
 ## Core
 
@@ -33,8 +33,8 @@ The core configuration which is needed for the core functions.
 
 | Variable/Function | Description |
 | --- | --- |
-| `$CC_RESET` | Reset all |
-| `$CC_CRITICAL` | Set color for critical/disaster massages used by [`die`](function/die.md) |
+| ``$CC_RESET`` | Reset all |
+| ``$CC_CRITICAL`` | Set color for critical/disaster massages used by [`die`](function/die.md) |
 
 ### Function Module
 
@@ -81,58 +81,58 @@ This module contains color specifications to be used in console output.
 
 | Variable/Function | Description |
 | --- | --- |
-| `$COLORS` | Number of colors possible on terminal |
-| `$CC_RESET` | Reset all |
-| `$CC_RESET_FG` | Reset text color |
-| `$CC_RESET_BG` | Reset background color |
-| `$CC_INTENSITY_BOLD` | Set intensity to bold |
-| `$CC_INTENSITY_LIGHT` | Set intensity to light |
-| `$CC_INTENSITY_OFF` | Set intensity back to normal |
-| `$CC_ITALIC` | Set italic mode |
-| `$CC_ITALIC_OFF` | Unset italic mode |
-| `$CC_UNDERLINE` | Set underline mode |
-| `$CC_UNDERLINE_OFF` | Unset underline mode |
-| `$CC_INVERSE` | Set inverse mode (change text color and background color) |
-| `$CC_INVERSE_OFF` | Unset inverse mode |
-| `$CC_DASHED` | Set strike through mode |
-| `$CC_DASHED_OFF` | Unset strike through mode |
-| `$CC_BLACK` | Set text color to black |
-| `$CC_RED` | Set text color to red |
-| `$CC_GREEN` | Set text color to green |
-| `$CC_YELLOW` | Set text color to yellow |
-| `$CC_BLUE` | Set text color to blue |
-| `$CC_MAGENTA` | Set text color to magenta |
-| `$CC_CYAN` | Set text color to cyan |
-| `$CC_WHITE` | Set text color to white |
-| `$CC_BLACK_BOLD` | Set text color to bold black |
-| `$CC_RED_BOLD` | Set text color to bold red |
-| `$CC_GREEN_BOLD` | Set text color to bold green |
-| `$CC_YELLOW_BOLD` | Set text color to bold yellow |
-| `$CC_BLUE_BOLD` | Set text color to bold blue |
-| `$CC_MAGENTA_BOLD` | Set text color to bold magenta |
-| `$CC_CYAN_BOLD` | Set text color to bold cyan |
-| `$CC_WHITE_BOLD` | Set text color to gray |
-| `$CC_BLACK_BG` | Set background color to black |
-| `$CC_RED_BG` | Set background color to red |
-| `$CC_GREEN_BG` | Set background color to green |
-| `$CC_YELLOW_BG` | Set background color to yellow |
-| `$CC_BLUE_BG` | Set background color to blue |
-| `$CC_MAGENTA_BG` | Set background color to magenat |
-| `$CC_CYAN_BG` | Set background color to white |
-| `$CC_BLACK_BOLD_BG` | Set background color to bold black |
-| `$CC_RED_BOLD_BG` | Set background color to bold red |
-| `$CC_GREEN_BOLD_BG` | Set background color to bold green |
-| `$CC_YELLOW_BOLD_BG` | Set background color to bold yellow |
-| `$CC_BLUE_BOLD_BG` | Set background color to bold blue |
-| `$CC_MAGENTA_BOLD_BG` | Set background color to bold magenta |
-| `$CC_CYAN_BOLD_BG` | Set background color to bold cyan |
-| `$CC_CRITICAL` | Set color for critical/disaster massages |
-| `$CC_ERROR` | Set color for error messages and failures |
-| `$CC_WARN` | Set color for warnings |
-| `$CC_INFO` | Set color for highlighted information |
-| `$CC_OK` | Set color for success messages |
-| `$CC_HEADING` | Set color for block headings |
-| `$CC_INVERS` | Set color for highlighted parts like table header |
+| ``$COLORS`` | Number of colors possible on terminal |
+| ``$CC_RESET`` | Reset all |
+| ``$CC_RESET_FG`` | Reset text color |
+| ``$CC_RESET_BG`` | Reset background color |
+| ``$CC_INTENSITY_BOLD`` | Set intensity to bold |
+| ``$CC_INTENSITY_LIGHT`` | Set intensity to light |
+| ``$CC_INTENSITY_OFF`` | Set intensity back to normal |
+| ``$CC_ITALIC`` | Set italic mode |
+| ``$CC_ITALIC_OFF`` | Unset italic mode |
+| ``$CC_UNDERLINE`` | Set underline mode |
+| ``$CC_UNDERLINE_OFF`` | Unset underline mode |
+| ``$CC_INVERSE`` | Set inverse mode (change text color and background color) |
+| ``$CC_INVERSE_OFF`` | Unset inverse mode |
+| ``$CC_DASHED`` | Set strike through mode |
+| ``$CC_DASHED_OFF`` | Unset strike through mode |
+| ``$CC_BLACK`` | Set text color to black |
+| ``$CC_RED`` | Set text color to red |
+| ``$CC_GREEN`` | Set text color to green |
+| ``$CC_YELLOW`` | Set text color to yellow |
+| ``$CC_BLUE`` | Set text color to blue |
+| ``$CC_MAGENTA`` | Set text color to magenta |
+| ``$CC_CYAN`` | Set text color to cyan |
+| ``$CC_WHITE`` | Set text color to white |
+| ``$CC_BLACK_BOLD`` | Set text color to bold black |
+| ``$CC_RED_BOLD`` | Set text color to bold red |
+| ``$CC_GREEN_BOLD`` | Set text color to bold green |
+| ``$CC_YELLOW_BOLD`` | Set text color to bold yellow |
+| ``$CC_BLUE_BOLD`` | Set text color to bold blue |
+| ``$CC_MAGENTA_BOLD`` | Set text color to bold magenta |
+| ``$CC_CYAN_BOLD`` | Set text color to bold cyan |
+| ``$CC_WHITE_BOLD`` | Set text color to gray |
+| ``$CC_BLACK_BG`` | Set background color to black |
+| ``$CC_RED_BG`` | Set background color to red |
+| ``$CC_GREEN_BG`` | Set background color to green |
+| ``$CC_YELLOW_BG`` | Set background color to yellow |
+| ``$CC_BLUE_BG`` | Set background color to blue |
+| ``$CC_MAGENTA_BG`` | Set background color to magenat |
+| ``$CC_CYAN_BG`` | Set background color to white |
+| ``$CC_BLACK_BOLD_BG`` | Set background color to bold black |
+| ``$CC_RED_BOLD_BG`` | Set background color to bold red |
+| ``$CC_GREEN_BOLD_BG`` | Set background color to bold green |
+| ``$CC_YELLOW_BOLD_BG`` | Set background color to bold yellow |
+| ``$CC_BLUE_BOLD_BG`` | Set background color to bold blue |
+| ``$CC_MAGENTA_BOLD_BG`` | Set background color to bold magenta |
+| ``$CC_CYAN_BOLD_BG`` | Set background color to bold cyan |
+| ``$CC_CRITICAL`` | Set color for critical/disaster massages |
+| ``$CC_ERROR`` | Set color for error messages and failures |
+| ``$CC_WARN`` | Set color for warnings |
+| ``$CC_INFO`` | Set color for highlighted information |
+| ``$CC_OK`` | Set color for success messages |
+| ``$CC_HEADING`` | Set color for block headings |
+| ``$CC_INVERS`` | Set color for highlighted parts like table header |
 | [`color_256`](function/color_256.md) | Get color code for text color number |
 | [`color_256_bg`](function/color_256_bg.md) | Get color code for background color number |
 | [`color_table`](function/color_table.md) | Show complete color table |
@@ -194,25 +194,25 @@ Module with operating system specific helper functions.
 
 | Variable/Function | Description |
 | --- | --- |
-| `$OS` | Operation System like: Linux, MacOS... (set in detect_os) |
-| `$KERNEL` | Kernel version number (set in detect_os) |
-| `$MACH` | CPU type (set in detect_os) |
-| `$DIST_BASE` | Base distribution type like Debian (set in detect_os) |
-| `$DIST_BASE_REV` | Base distributions number like 13 (set in detect_os) |
-| `$DIST` | Distribution name like Ubuntu (set in detect_os) |
-| `$REV_NAME` | Distributions revision name like noble (set in detect_os) |
-| `$REV` | Distribution revision version number like 14.04 (set in detect_os) |
-| `$MACH_ID` | CPU identifier (set in detect_os) |
-| `$IS_VIRTUAL` | Is a virtual machine (set in detect_os) |
-| `$CPU_NUM` | Number of CPU cores (set in detect_os) |
-| `$CPU_MODEL` | CPU Model description (set in detect_os) |
-| `$IP_INTERN` | Internal IP |
-| `$IP_EXTERN` | External IP (set in detect_extern_ip) |
-| `$IP_COUNTRY` | Country (set in detect_extern_ip) |
-| `$IP_COUNTRY_CODE` | Country Code (set in detect_extern_ip) |
-| `$IP_REGION_CODE` | Region Code (set in detect_extern_ip) |
-| `$IP_CITY` | City (set in detect_extern_ip) |
-| `$IP_PROVIDER` | Internet Provider (set in detect_extern_ip) |
+| ``$OS`` | Operation System like: Linux, MacOS... (set in detect_os) |
+| ``$KERNEL`` | Kernel version number (set in detect_os) |
+| ``$MACH`` | CPU type (set in detect_os) |
+| ``$DIST_BASE`` | Base distribution type like Debian (set in detect_os) |
+| ``$DIST_BASE_REV`` | Base distributions number like 13 (set in detect_os) |
+| ``$DIST`` | Distribution name like Ubuntu (set in detect_os) |
+| ``$REV_NAME`` | Distributions revision name like noble (set in detect_os) |
+| ``$REV`` | Distribution revision version number like 14.04 (set in detect_os) |
+| ``$MACH_ID`` | CPU identifier (set in detect_os) |
+| ``$IS_VIRTUAL`` | Is a virtual machine (set in detect_os) |
+| ``$CPU_NUM`` | Number of CPU cores (set in detect_os) |
+| ``$CPU_MODEL`` | CPU Model description (set in detect_os) |
+| ``$IP_INTERN`` | Internal IP |
+| ``$IP_EXTERN`` | External IP (set in detect_extern_ip) |
+| ``$IP_COUNTRY`` | Country (set in detect_extern_ip) |
+| ``$IP_COUNTRY_CODE`` | Country Code (set in detect_extern_ip) |
+| ``$IP_REGION_CODE`` | Region Code (set in detect_extern_ip) |
+| ``$IP_CITY`` | City (set in detect_extern_ip) |
+| ``$IP_PROVIDER`` | Internet Provider (set in detect_extern_ip) |
 | [`detect_os`](function/detect_os.md) | Run  os detection and set the constants |
 | [`detect_extern_ip`](function/detect_extern_ip.md) | Run  os detection and set the constants |
 | [`system_info`](function/system_info.md) | Display the system description |
@@ -254,8 +254,8 @@ Module for process control
 
 | Variable/Function | Description |
 | --- | --- |
-| `$STEPS_VARIABLES` | Set the variables which should be stored with step control |
-| `$ASYNC_QUEUE_MAX` | Maximum number of parallel tasks for queue |
+| ``$STEPS_VARIABLES`` | Set the variables which should be stored with step control |
+| ``$ASYNC_QUEUE_MAX`` | Maximum number of parallel tasks for queue |
 | [`repeat`](function/repeat.md) | Execute command in N times |
 | [`retry`](function/retry.md) | Retry a command multiple times until it succeeds |
 | [`countdown`](function/countdown.md) | Sleep with countdown some seconds |
@@ -285,7 +285,7 @@ Module with remote calling/execution helpers.
 
 | Variable/Function | Description |
 | --- | --- |
-| `$CURL_HTTP_CODE` | Last HTTP return code from curl |
+| ``$CURL_HTTP_CODE`` | Last HTTP return code from curl |
 | [`remote`](function/remote.md) | Run command on remote host |
 | [`remote_term`](function/remote_term.md) | Run remote command with pseudo terminal |
 | [`remote_term_line`](function/remote_term_line.md) | Run remote command with pseudo terminal but line based output (problematic with questions) |

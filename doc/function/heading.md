@@ -3,7 +3,7 @@
 ## Print block heading
 
 Stdout:   colored `<string>`
-Variable: $server
+Variable: `$server`
 
 
 ### Usage

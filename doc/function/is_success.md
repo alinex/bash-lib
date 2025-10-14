@@ -8,5 +8,5 @@ Status:   0 =>` true
 ### Usage
 
 ```bash
-is_success <code> 
+is_success <code>
 ```
