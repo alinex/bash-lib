@@ -1,6 +1,6 @@
 # prometheus_scrape
 
-## Change scrape interval to scrape now and set back 
+## Change scrape interval to scrape now and set back
 
 
 

@@ -168,9 +168,9 @@ Using the Grafana/Prometheus APIs to get Monitoring information.
 | --- | --- |
 | [`exporter`](function/exporter.md) | Get exporter list |
 | [`scrape`](function/scrape.md) | Scrape prometheus exporter url now |
-| [`alerts`](function/alerts.md) | Get grafana alerts  |
-| [`prometheus`](function/prometheus.md) | Prom ql ausführen  |
-| [`prometheus_scrape`](function/prometheus_scrape.md) | Change scrape interval to scrape now and set back  |
+| [`alerts`](function/alerts.md) | Get grafana alerts |
+| [`prometheus`](function/prometheus.md) | Prom ql ausführen |
+| [`prometheus_scrape`](function/prometheus_scrape.md) | Change scrape interval to scrape now and set back |
 
 ### Os Module
 

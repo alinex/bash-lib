@@ -1,6 +1,6 @@
 # alerts
 
-## Get grafana alerts 
+## Get grafana alerts
 
 Stdout:   `<header-line>`
 

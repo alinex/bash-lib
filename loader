@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+source $BASHLIB_HOME/configs
+
 for folder in core module; do
     for f in "$BASHLIB_HOME/$folder"/*; do
         if [[ -f "$f" && "$f" != *.* ]]; then

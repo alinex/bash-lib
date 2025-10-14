@@ -19,9 +19,10 @@ bashlib/
     full            # file with full functionality (minified)
     loader          # same as full but including all source files
     base            # only the base/core functionality (minified)
+    configs         # load all configurations
     core/           # core modules which always be needed
     config/         # individual configuration
-    modules/        # additional modules which can be optionally loaded
+    module/         # additional modules which can be optionally loaded
     install         # setup bashlib on this host
     update          # script to regenerate full file and docs after update 
     test            # run all unit tests
@@ -53,12 +54,13 @@ Your scripts will start with:
 source $BASHLIB_HOME/full           # to have all tools ready
 
 source $BASHLIB_HOME/base           # to load only basics
+source $BASHLIB_HOME/configs        # load configuration
 source $BASHLIB_HOME/module/output  # and then single modules
 ```
 
 ## Configuration
 
-The configuration should be put under `config/` folder and will be loaded in alphabetically order using:
+The configuration should be put under `config/` folder and will be loaded in alphabetically order in `full` or by using:
 
 ```bash
 source $BASHLIB_HOME/configs
