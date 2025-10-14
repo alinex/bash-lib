@@ -8,7 +8,7 @@
 
 # If stdin and no parameters then read stdin, else use parameters
 # Usage:    input "$@ parameters"
-# Stdout:   <string-input> or
+# Output:   <string-input> or
 #           <string-params> separated by spaces
 input() {
     test -p /dev/stdin && test $# -eq 0 && cat - || echo "$*"
@@ -16,7 +16,7 @@ input() {
 
 # If stdin and not more than defined parameters, then read stdin
 # Usage:    input_args <num> "$@"
-# Stdout:   <string-input> or
+# Output:   <string-input> or
 #           <string-params> separated by spaces
 input_args() {
     local num=${1-}
@@ -28,7 +28,7 @@ input_args() {
 
 # Read stdin and no parameters then read stdin, else use parameters as lines
 # Usage:    input_lines "$@"
-# Stdout:   <string-input> or
+# Output:   <string-input> or
 #           <string-params> separated by newlines
 input_lines() {
     test -p /dev/stdin && test -z "${1-}" &&
@@ -39,8 +39,8 @@ input_lines() {
 # Output error and exit
 # Usage:    die <message>
 #           <message> | die
-# Stderr:   <message>
-# Status:   1
+# Error:    <message>
+# Return:   always 1
 die() {
     echo -e "${CC_CRITICAL}$(input "$@")${CC_RESET}" >&2
     # kill -s TERM "$PPID" # forcibly terminite the parent
@@ -79,7 +79,7 @@ trap_remove() {
 #           -m, --memory                # use shared memory
 #           -e, --extension <string>    # to specify file extension (better readability)
 #           -p, --path <base-dir>       # folder under which to create file
-# Stdout:   <path>
+# Output:   <path>
 mktemp() {
     # parameter parsing
     eval set -- "$(option_parse $'d directory -\ne extension +\nm memory -\np path +' "$@")"
@@ -127,16 +127,15 @@ mktemp() {
 # Parse arguments based on given specification
 # Short options can also be given in short notation "-a45" -> "-a 45" or "--age 45"
 # Usage:        eval set -- "$(option_parse <spec> "$@")"
-# Spec lines:   <short-letter>|- <long-word> <type>|- <description>
-# Stdout:       parsed options <string>
+#               <spec> lines := <short-letter>|- <long-word> <type>|- <description>
+# Output:       parsed options <string>
 # Example:      OPTIONS="
 #               n name  string  Name of Birthday Person
 #               a age   int     Age in years
 #               h help  -       Show Help Page"
 #               option_parse "$OPTIONS" "$@"
 option_parse() {
-    local short=""
-    local long=""
+    local opt name type desc short="" long=""
     # read spec lines
     while read -r opt name type desc; do
         [[ "$opt" =~ ^# ]] && continue # skip comments
@@ -156,9 +155,10 @@ option_parse() {
 
 # Print help for options defined in options specification
 # Usage:        option_help <spec>
-# Spec lines:   <short-letter>|- <long-word> <type>|- <description>
-# Stdout:       List of options for help output
+#               <spec> lines := <short-letter>|- <long-word> <type>|- <description>
+# Output:       List of options for help output
 option_help() {
+    declare opt name type desc
     declare -A opt_descriptions
     declare -A opt_type
     declare -A opt_short

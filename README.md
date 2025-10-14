@@ -25,6 +25,7 @@ bashlib/
     install         # setup bashlib on this host
     update          # script to regenerate full file after update
     update-docs     # update documentation
+    test            # run all unit tests
 ```
 
 ## Installation
@@ -32,8 +33,15 @@ bashlib/
 Can be done locally after checking out the git repository manually by setting only the `BASHLIB_HOME` variable in your environment or directly from the repository by calling:
 
 ```bash
-curl -sL https://gitlab.com/alinex/bash-lib/-/raw/master/install | bash
+curl -sL https://gitlab.com/alinex/bash-lib/-/raw/master/install | bash                     # interactive
+curl -sL https://gitlab.com/alinex/bash-lib/-/raw/master/install | bash -s -- <path> y|n    # automatic
 ```
+
+The steps are:
+
+1. Download bashlib to your system into a given path (directory will be created)
+2. Setup BASHLIB_HOME in your environment in bashrc
+3. Update configuration links to the directory above bashlib
 
 The update will be the same, you only need to download the new files and overwrite the old ones.
 

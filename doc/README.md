@@ -9,273 +9,302 @@ The BashLib contains some core functionality and optional modules which are list
 
 ## Core
 
-### [/home/alex/dvb/scripts/local/bashlib/core/1_color Module](./1_color.md)
+### Config Module
 
-This module contains color specifications to be used in console output.
+The core configuration which is needed for the core functions.
 
-| Variable/Function     | Description                                               |
-| --------------------- | --------------------------------------------------------- |
-| `$COLORS`             | Number of colors possible on terminal                     |
-| `$CC_RESET`           | Reset all                                                 |
-| `$CC_RESET_FG`        | Reset text color                                          |
-| `$CC_RESET_BG`        | Reset background color                                    |
-| `$CC_INTENSITY_BOLD`  | Set intensity to bold                                     |
-| `$CC_INTENSITY_LIGHT` | Set intensity to light                                    |
-| `$CC_INTENSITY_OFF`   | Set intensity back to normal                              |
-| `$CC_ITALIC`          | Set italic mode                                           |
-| `$CC_ITALIC_OFF`      | Unset italic mode                                         |
-| `$CC_UNDERLINE`       | Set underline mode                                        |
-| `$CC_UNDERLINE_OFF`   | Unset underline mode                                      |
-| `$CC_INVERSE`         | Set inverse mode (change text color and background color) |
-| `$CC_INVERSE_OFF`     | Unset inverse mode                                        |
-| `$CC_DASHED`          | Set strike through mode                                   |
-| `$CC_DASHED_OFF`      | Unset strike through mode                                 |
-| `$CC_BLACK`           | Set text color to black                                   |
-| `$CC_RED`             | Set text color to red                                     |
-| `$CC_GREEN`           | Set text color to green                                   |
-| `$CC_YELLOW`          | Set text color to yellow                                  |
-| `$CC_BLUE`            | Set text color to blue                                    |
-| `$CC_MAGENTA`         | Set text color to magenta                                 |
-| `$CC_CYAN`            | Set text color to cyan                                    |
-| `$CC_WHITE`           | Set text color to white                                   |
-| `$CC_BLACK_BOLD`      | Set text color to bold black                              |
-| `$CC_RED_BOLD`        | Set text color to bold red                                |
-| `$CC_GREEN_BOLD`      | Set text color to bold green                              |
-| `$CC_YELLOW_BOLD`     | Set text color to bold yellow                             |
-| `$CC_BLUE_BOLD`       | Set text color to bold blue                               |
-| `$CC_MAGENTA_BOLD`    | Set text color to bold magenta                            |
-| `$CC_CYAN_BOLD`       | Set text color to bold cyan                               |
-| `$CC_WHITE_BOLD`      | Set text color to gray                                    |
-| `$CC_BLACK_BG`        | Set background color to black                             |
-| `$CC_RED_BG`          | Set background color to red                               |
-| `$CC_GREEN_BG`        | Set background color to green                             |
-| `$CC_YELLOW_BG`       | Set background color to yellow                            |
-| `$CC_BLUE_BG`         | Set background color to blue                              |
-| `$CC_MAGENTA_BG`      | Set background color to magenat                           |
-| `$CC_CYAN_BG`         | Set background color to white                             |
-| `$CC_BLACK_BOLD_BG`   | Set background color to bold black                        |
-| `$CC_RED_BOLD_BG`     | Set background color to bold red                          |
-| `$CC_GREEN_BOLD_BG`   | Set background color to bold green                        |
-| `$CC_YELLOW_BOLD_BG`  | Set background color to bold yellow                       |
-| `$CC_BLUE_BOLD_BG`    | Set background color to bold blue                         |
-| `$CC_MAGENTA_BOLD_BG` | Set background color to bold magenta                      |
-| `$CC_CYAN_BOLD_BG`    | Set background color to bold cyan                         |
-| `$CC_CRITICAL`        | Set color for critical/disaster massages                  |
-| `$CC_ERROR`           | Set color for error messages and failures                 |
-| `$CC_WARN`            | Set color for warnings                                    |
-| `$CC_INFO`            | Set color for highlighted information                     |
-| `$CC_OK`              | Set color for success messages                            |
-| `$CC_HEADING`         | Set color for block headings                              |
-| `$CC_INVERS`          | Set color for highlighted parts like table header         |
-| `color_256`           | Get color code for text color number                      |
-| `color_256_bg`        | Get color code for background color number                |
-| `color_table`         | Show complete color table                                 |
+| Variable/Function | Description |
+| --- | --- |
+| `$CC_RESET` | Reset all |
+| `$CC_CRITICAL` | Set color for critical/disaster massages |
+| [``](function/.md) |  |
 
-### [/home/alex/dvb/scripts/local/bashlib/core/2_core Module](./2_core.md)
+### Function Module
 
-The core module contains essential parts which may also be used while loading the library.
+The core functions contains essential parts which may also be used while loading the library.
 
-| Variable/Function | Description                                                                |
-| ----------------- | -------------------------------------------------------------------------- |
-| `$BASHLIB_BASE`   | Path to the directory in which the bash-lib is                             |
-| `input`           | If stdin and no parameters then read stdin, else use parameters            |
-| `input_args`      | If stdin and not more than defined parameters, then read stdin             |
-| `input_lines`     | Read stdin and no parameters then read stdin, else use parameters as lines |
-| `die`             | Output error and exit                                                      |
-| `trap_add`        | Set or add an additiopnal trap without overwriting existing ones           |
-| `trap_remove`     | Remove a specific trap                                                     |
-| `mktemp`          | Make a temporary file, which is recognizable                               |
-| `option_parse`    | Parse arguments based on given specification                               |
-| `option_help`     | Print help for options defined in options specification                    |
-| `help`            | Show help page and exit                                                    |
+| Variable/Function | Description |
+| --- | --- |
+| [`input`](function/input.md) | If stdin and no parameters then read stdin, else use parameters |
+| [`input_args`](function/input_args.md) | If stdin and not more than defined parameters, then read stdin |
+| [`input_lines`](function/input_lines.md) | Read stdin and no parameters then read stdin, else use parameters as lines |
+| [`die`](function/die.md) | Output error and exit |
+| [`trap_add`](function/trap_add.md) | Set or add an additiopnal trap without overwriting existing ones |
+| [`trap_remove`](function/trap_remove.md) | Remove a specific trap |
+| [`mktemp`](function/mktemp.md) | Make a temporary file, which is recognizable |
+| [`option_parse`](function/option_parse.md) | Parse arguments based on given specification |
+| [`option_help`](function/option_help.md) | Print help for options defined in options specification |
 
 ## Module
 
-### [/home/alex/dvb/scripts/local/bashlib/module/array Module](./array.md)
+### Array Module
 
 Array helpers.
 
-| Variable/Function | Description                 |
-| ----------------- | --------------------------- |
-| `contains`        | Check if value is contained |
+| Variable/Function | Description |
+| --- | --- |
+| [`contains`](function/contains.md) | Check if value is contained |
 
-### [/home/alex/dvb/scripts/local/bashlib/module/atlassian Module](./atlassian.md)
+### Atlassian Module
 
 This covers atlassian API for Jira and confluence.
 
-| Variable/Function | Description                                                                |
-| ----------------- | -------------------------------------------------------------------------- |
-| `jira_search`     | https://developer.atlassian.com/cloud/jira/platform/rest/v3/intro/#version |
+| Variable/Function | Description |
+| --- | --- |
+| [`confluence`](function/confluence.md) |  |
+| [`confluence_outage`](function/confluence_outage.md) |  |
+| [`jira_search`](function/jira_search.md) | https://developer.atlassian.com/cloud/jira/platform/rest/v3/intro/#version |
+| [`jira_get`](function/jira_get.md) |  |
+| [`jira_create`](function/jira_create.md) |  |
+| [`jira_update`](function/jira_update.md) |  |
 
-### [/home/alex/dvb/scripts/local/bashlib/module/date Module](./date.md)
+### Color Module
+
+This module contains color specifications to be used in console output.
+
+| Variable/Function | Description |
+| --- | --- |
+| `$COLORS` | Number of colors possible on terminal |
+| `$CC_RESET` | Reset all |
+| `$CC_RESET_FG` | Reset text color |
+| `$CC_RESET_BG` | Reset background color |
+| `$CC_INTENSITY_BOLD` | Set intensity to bold |
+| `$CC_INTENSITY_LIGHT` | Set intensity to light |
+| `$CC_INTENSITY_OFF` | Set intensity back to normal |
+| `$CC_ITALIC` | Set italic mode |
+| `$CC_ITALIC_OFF` | Unset italic mode |
+| `$CC_UNDERLINE` | Set underline mode |
+| `$CC_UNDERLINE_OFF` | Unset underline mode |
+| `$CC_INVERSE` | Set inverse mode (change text color and background color) |
+| `$CC_INVERSE_OFF` | Unset inverse mode |
+| `$CC_DASHED` | Set strike through mode |
+| `$CC_DASHED_OFF` | Unset strike through mode |
+| `$CC_BLACK` | Set text color to black |
+| `$CC_RED` | Set text color to red |
+| `$CC_GREEN` | Set text color to green |
+| `$CC_YELLOW` | Set text color to yellow |
+| `$CC_BLUE` | Set text color to blue |
+| `$CC_MAGENTA` | Set text color to magenta |
+| `$CC_CYAN` | Set text color to cyan |
+| `$CC_WHITE` | Set text color to white |
+| `$CC_BLACK_BOLD` | Set text color to bold black |
+| `$CC_RED_BOLD` | Set text color to bold red |
+| `$CC_GREEN_BOLD` | Set text color to bold green |
+| `$CC_YELLOW_BOLD` | Set text color to bold yellow |
+| `$CC_BLUE_BOLD` | Set text color to bold blue |
+| `$CC_MAGENTA_BOLD` | Set text color to bold magenta |
+| `$CC_CYAN_BOLD` | Set text color to bold cyan |
+| `$CC_WHITE_BOLD` | Set text color to gray |
+| `$CC_BLACK_BG` | Set background color to black |
+| `$CC_RED_BG` | Set background color to red |
+| `$CC_GREEN_BG` | Set background color to green |
+| `$CC_YELLOW_BG` | Set background color to yellow |
+| `$CC_BLUE_BG` | Set background color to blue |
+| `$CC_MAGENTA_BG` | Set background color to magenat |
+| `$CC_CYAN_BG` | Set background color to white |
+| `$CC_BLACK_BOLD_BG` | Set background color to bold black |
+| `$CC_RED_BOLD_BG` | Set background color to bold red |
+| `$CC_GREEN_BOLD_BG` | Set background color to bold green |
+| `$CC_YELLOW_BOLD_BG` | Set background color to bold yellow |
+| `$CC_BLUE_BOLD_BG` | Set background color to bold blue |
+| `$CC_MAGENTA_BOLD_BG` | Set background color to bold magenta |
+| `$CC_CYAN_BOLD_BG` | Set background color to bold cyan |
+| `$CC_CRITICAL` | Set color for critical/disaster massages |
+| `$CC_ERROR` | Set color for error messages and failures |
+| `$CC_WARN` | Set color for warnings |
+| `$CC_INFO` | Set color for highlighted information |
+| `$CC_OK` | Set color for success messages |
+| `$CC_HEADING` | Set color for block headings |
+| `$CC_INVERS` | Set color for highlighted parts like table header |
+| [`color_256`](function/color_256.md) | Get color code for text color number |
+| [`color_256_bg`](function/color_256_bg.md) | Get color code for background color number |
+| [`color_table`](function/color_table.md) | Show complete color table |
+
+### Date Module
 
 Some helpers to work easier with dates.
 
-| Variable/Function | Description                                               |
-| ----------------- | --------------------------------------------------------- |
-| `now`             | Get current timestamp                                     |
-| `date_diff`       | Calculate difference in seconds                           |
-| `date_format`     | Format date in different nnamed versions or format string |
+| Variable/Function | Description |
+| --- | --- |
+| [`now`](function/now.md) | Get current timestamp |
+| [`date_diff`](function/date_diff.md) | Calculate difference in seconds |
+| [`date_format`](function/date_format.md) | Format date in different nnamed versions or format string |
 
-### [/home/alex/dvb/scripts/local/bashlib/module/divibib Module](./divibib.md)
+### Divibib Module
 
 Module with divibib specific helpers.
 
 | Variable/Function | Description |
-| ----------------- | ----------- |
+| --- | --- |
+| [`backoffice_set`](function/backoffice_set.md) |  |
+| [`backoffice_unset`](function/backoffice_unset.md) |  |
 
-### [/home/alex/dvb/scripts/local/bashlib/module/mattermost Module](./mattermost.md)
+### Mattermost Module
 
 Using the mattermost API to write messages.
 
-| Variable/Function        | Description                                   |
-| ------------------------ | --------------------------------------------- |
-| `mattermost`             | Send a message to Mattermost                  |
-| `mattermost_attachement` | Create an attachement json to be used in post |
-| `mattermost_reaction`    | Add reaction to existing post                 |
-| `mattermost_repost`      | Add response to mattermost posting            |
+| Variable/Function | Description |
+| --- | --- |
+| [`_mattermost_user`](function/_mattermost_user.md) |  |
+| [`_mattermost_team`](function/_mattermost_team.md) |  |
+| [`_mattermost_channel`](function/_mattermost_channel.md) |  |
+| [`_mattermost_channel_bypost`](function/_mattermost_channel_bypost.md) |  |
+| [`_mattermost_post`](function/_mattermost_post.md) |  |
+| [`_mattermost_repost`](function/_mattermost_repost.md) |  |
+| [`_mattermost_reaction`](function/_mattermost_reaction.md) |  |
+| [`_mattermost_find_channels`](function/_mattermost_find_channels.md) |  |
+| [`id`](function/id.md) |  |
+| [`mattermost`](function/mattermost.md) | Send a message to Mattermost |
+| [`mattermost_attachement`](function/mattermost_attachement.md) | Create an attachement json to be used in post |
+| [`mattermost_reaction`](function/mattermost_reaction.md) | Add reaction to existing post |
+| [`mattermost_repost`](function/mattermost_repost.md) | Add response to mattermost posting |
 
-### [/home/alex/dvb/scripts/local/bashlib/module/monitoring Module](./monitoring.md)
+### Monitoring Module
 
 Using the Grafana/Prometheus APIs to get Monitoring information.
 
-| Variable/Function   | Description                                       |
-| ------------------- | ------------------------------------------------- |
-| `exporter`          | Get exporter list                                 |
-| `scrape`            | Scrape prometheus exporter url now                |
-| `alerts`            | Get grafana alerts                                |
-| `prometheus`        | Prom ql ausführen                                 |
-| `prometheus_scrape` | Change scrape interval to scrape now and set back |
+| Variable/Function | Description |
+| --- | --- |
+| [`exporter`](function/exporter.md) | Get exporter list |
+| [`scrape`](function/scrape.md) | Scrape prometheus exporter url now |
+| [`alerts`](function/alerts.md) | Get grafana alerts  |
+| [`prometheus`](function/prometheus.md) | Prom ql ausführen  |
+| [`prometheus_scrape`](function/prometheus_scrape.md) | Change scrape interval to scrape now and set back  |
 
-### [/home/alex/dvb/scripts/local/bashlib/module/os Module](./os.md)
+### Os Module
 
 Module with operating system specific helper functions.
 
-| Variable/Function  | Description                                                        |
-| ------------------ | ------------------------------------------------------------------ |
-| `$OS`              | Operation System like: Linux, MacOS... (set in detect_os)          |
-| `$KERNEL`          | Kernel version number (set in detect_os)                           |
-| `$MACH`            | CPU type (set in detect_os)                                        |
-| `$DIST_BASE`       | Base distribution type like Debian (set in detect_os)              |
-| `$DIST_BASE_REV`   | Base distributions number like 13 (set in detect_os)               |
-| `$DIST`            | Distribution name like Ubuntu (set in detect_os)                   |
-| `$REV_NAME`        | Distributions revision name like noble (set in detect_os)          |
-| `$REV`             | Distribution revision version number like 14.04 (set in detect_os) |
-| `$MACH_ID`         | CPU identifier (set in detect_os)                                  |
-| `$IS_VIRTUAL`      | Is a virtual machine (set in detect_os)                            |
-| `$CPU_NUM`         | Number of CPU cores (set in detect_os)                             |
-| `$CPU_MODEL`       | CPU Model description (set in detect_os)                           |
-| `$IP_INTERN`       | Internal IP                                                        |
-| `$IP_EXTERN`       | External IP (set in detect_extern_ip)                              |
-| `$IP_COUNTRY`      | Country (set in detect_extern_ip)                                  |
-| `$IP_COUNTRY_CODE` | Country Code (set in detect_extern_ip)                             |
-| `$IP_REGION_CODE`  | Region Code (set in detect_extern_ip)                              |
-| `$IP_CITY`         | City (set in detect_extern_ip)                                     |
-| `$IP_PROVIDER`     | Internet Provider (set in detect_extern_ip)                        |
-| `detect_os`        | Run  os detection and set the constants                            |
-| `detect_extern_ip` | Run  os detection and set the constants                            |
-| `system_info`      | Display the system description                                     |
-| `has_tty`          | Has tty present                                                    |
-| `is_bash`          | Is running with bash console                                       |
+| Variable/Function | Description |
+| --- | --- |
+| `$OS` | Operation System like: Linux, MacOS... (set in detect_os) |
+| `$KERNEL` | Kernel version number (set in detect_os) |
+| `$MACH` | CPU type (set in detect_os) |
+| `$DIST_BASE` | Base distribution type like Debian (set in detect_os) |
+| `$DIST_BASE_REV` | Base distributions number like 13 (set in detect_os) |
+| `$DIST` | Distribution name like Ubuntu (set in detect_os) |
+| `$REV_NAME` | Distributions revision name like noble (set in detect_os) |
+| `$REV` | Distribution revision version number like 14.04 (set in detect_os) |
+| `$MACH_ID` | CPU identifier (set in detect_os) |
+| `$IS_VIRTUAL` | Is a virtual machine (set in detect_os) |
+| `$CPU_NUM` | Number of CPU cores (set in detect_os) |
+| `$CPU_MODEL` | CPU Model description (set in detect_os) |
+| `$IP_INTERN` | Internal IP |
+| `$IP_EXTERN` | External IP (set in detect_extern_ip) |
+| `$IP_COUNTRY` | Country (set in detect_extern_ip) |
+| `$IP_COUNTRY_CODE` | Country Code (set in detect_extern_ip) |
+| `$IP_REGION_CODE` | Region Code (set in detect_extern_ip) |
+| `$IP_CITY` | City (set in detect_extern_ip) |
+| `$IP_PROVIDER` | Internet Provider (set in detect_extern_ip) |
+| [`detect_os`](function/detect_os.md) | Run  os detection and set the constants |
+| [`detect_extern_ip`](function/detect_extern_ip.md) | Run  os detection and set the constants |
+| [`system_info`](function/system_info.md) | Display the system description |
+| [`has_tty`](function/has_tty.md) | Has tty present |
+| [`is_bash`](function/is_bash.md) | Is running with bash console |
 
-### [/home/alex/dvb/scripts/local/bashlib/module/output Module](./output.md)
+### Output Module
 
 Module with output and user interaction helpers.
 
-| Variable/Function | Description                                              |
-| ----------------- | -------------------------------------------------------- |
-| `heading`         | Print block heading                                      |
-| `critical`        | Print critical/disaster message                          |
-| `error`           | Print error message                                      |
-| `warn`            | Print warning message                                    |
-| `info`            | Print special information message                        |
-| `ok`              | Print success message                                    |
-| `invers`          | Print special marked message like table header           |
-| `color`           | Print message in defined color                           |
-| `debug`           | Write message to STDERR if in DEBUG mode else do nothing |
-| `uncolorize`      | Remove color codes from text                             |
-| `html2md`         | Convert HTML to markdown (simplified version)            |
-| `nocr`            | Remove carriage return from line endings                 |
-| `urlencode`       | Encode message to be used within the url                 |
-| `tsv2table`       | Convert TSV data into visual table                       |
-| `tsv2md`          | Convert TSV data into markdown table                     |
-| `pause`           | Wait for user input                                      |
-| `ask_no`          | Ask yes/no with default: no                              |
-| `ask_yes`         | Ask yes/no with default: yes                             |
-| `ask_input`       | Ask for a text line                                      |
-| `choose`          | Select from list (extended version of native select)     |
-| `tasks`           | Run tasks as selected by user                            |
+| Variable/Function | Description |
+| --- | --- |
+| [`help`](function/help.md) | Show help page and exit |
+| [`heading`](function/heading.md) | Print block heading |
+| [`critical`](function/critical.md) | Print critical/disaster message |
+| [`error`](function/error.md) | Print error message |
+| [`warn`](function/warn.md) | Print warning message |
+| [`info`](function/info.md) | Print special information message |
+| [`ok`](function/ok.md) | Print success message |
+| [`invers`](function/invers.md) | Print special marked message like table header |
+| [`color`](function/color.md) | Print message in defined color |
+| [`debug`](function/debug.md) | Write message to STDERR if in DEBUG mode else do nothing |
+| [`uncolorize`](function/uncolorize.md) | Remove color codes from text |
+| [`html2md`](function/html2md.md) | Convert HTML to markdown (simplified version) |
+| [`nocr`](function/nocr.md) | Remove carriage return from line endings |
+| [`urlencode`](function/urlencode.md) | Encode message to be used within the url |
+| [`tsv2table`](function/tsv2table.md) | Convert TSV data into visual table |
+| [`tsv2md`](function/tsv2md.md) | Convert TSV data into markdown table |
+| [`pause`](function/pause.md) | Wait for user input |
+| [`ask_no`](function/ask_no.md) | Ask yes/no with default: no |
+| [`ask_yes`](function/ask_yes.md) | Ask yes/no with default: yes |
+| [`ask_input`](function/ask_input.md) | Ask for a text line |
+| [`choose`](function/choose.md) | Select from list (extended version of native select) |
+| [`tasks`](function/tasks.md) | Run tasks as selected by user |
 
-### [/home/alex/dvb/scripts/local/bashlib/module/process Module](./process.md)
+### Process Module
 
 Module for process control
 
-| Variable/Function  | Description                                                                                    |
-| ------------------ | ---------------------------------------------------------------------------------------------- |
-| `$STEPS_VARIABLES` | Set the variables which should be stored with step control                                     |
-| `$ASYNC_QUEUE_MAX` | Maximum number of parallel tasks for queue                                                     |
-| `repeat`           | Execute command in N times                                                                     |
-| `countdown`        | Sleep with countdown some seconds                                                              |
-| `lock`             | Set a lock or wait till it can be set                                                          |
-| `lock_exit`        | Set the lock or exit with optional error message                                               |
-| `unlock`           | Remove the lock                                                                                |
-| `env_store`        | Store environment into shared memory/file                                                      |
-| `env_restore`      | Restore environment from shared memory/file                                                    |
-| `env_clean`        | Remove stored environment from shared memory/file                                              |
-| `env_change`       | Change environment in shared memory/file                                                       |
-| `steps_init`       | Initialize nstep control                                                                       |
-| `steps_check`      | Check if step already finished successfull                                                     |
-| `steps_done`       | Set step as successfully done                                                                  |
-| `sync`             | Run the given command with optional step control                                               |
-| `sync_name`        | Alternative to sync in which this call is given a name to refer                                |
-| `async`            | Run the given command asynchronous ang go on in the calling routine (short form of async_name) |
-| `async_name`       | Alternative to async in which this call is given a name to refer in async_wait                 |
-| `async_wait`       | Check if the command is done or wait here till it is so                                        |
-| `queue`            | Add command to process queue                                                                   |
-| `queue_name`       | Add command to process queue                                                                   |
+| Variable/Function | Description |
+| --- | --- |
+| `$STEPS_VARIABLES` | Set the variables which should be stored with step control |
+| `$ASYNC_QUEUE_MAX` | Maximum number of parallel tasks for queue |
+| [`repeat`](function/repeat.md) | Execute command in N times |
+| [`retry`](function/retry.md) | Retry a command multiple times until it succeeds |
+| [`countdown`](function/countdown.md) | Sleep with countdown some seconds |
+| [`_lock_remove`](function/_lock_remove.md) |  |
+| [`lock`](function/lock.md) | Set a lock or wait till it can be set |
+| [`lock_exit`](function/lock_exit.md) | Set the lock or exit with optional error message |
+| [`unlock`](function/unlock.md) | Remove the lock |
+| [`env_store`](function/env_store.md) | Store environment into shared memory/file |
+| [`env_restore`](function/env_restore.md) | Restore environment from shared memory/file |
+| [`env_clean`](function/env_clean.md) | Remove stored environment from shared memory/file |
+| [`env_change`](function/env_change.md) | Change environment in shared memory/file |
+| [`steps_init`](function/steps_init.md) | Initialize nstep control |
+| [`steps_check`](function/steps_check.md) | Check if step already finished successfull |
+| [`steps_done`](function/steps_done.md) | Set step as successfully done |
+| [`sync`](function/sync.md) | Run the given command with optional step control |
+| [`sync_name`](function/sync_name.md) | Alternative to sync in which this call is given a name to refer |
+| [`async`](function/async.md) | Run the given command asynchronous ang go on in the calling routine (short form of async_name) |
+| [`async_name`](function/async_name.md) | Alternative to async in which this call is given a name to refer in async_wait |
+| [`async_wait`](function/async_wait.md) | Check if the command is done or wait here till it is so |
+| [`_queue_control`](function/_queue_control.md) |  |
+| [`queue`](function/queue.md) | Add command to process queue |
+| [`queue_name`](function/queue_name.md) | Add command to process queue |
 
-### [/home/alex/dvb/scripts/local/bashlib/module/remote Module](./remote.md)
+### Remote Module
 
 Module with remote calling/execution helpers.
 
-| Variable/Function  | Description                                                                                |
-| ------------------ | ------------------------------------------------------------------------------------------ |
-| `$CURL_HTTP_CODE`  | Last HTTP return code from curl                                                            |
-| `remote`           | Run command on remote host                                                                 |
-| `remote_term`      | Run remote command with pseudo terminal                                                    |
-| `remote_term_line` | Run remote command with pseudo terminal but line based output (problematic with questions) |
-| `remote_file`      | Run local script on remote                                                                 |
-| `upload`           | Upload file                                                                                |
-| `download`         | Download file                                                                              |
-| `remote_install`   | Remote install package                                                                     |
-| `remote_df`        | Remote df with visual display                                                              |
-| `remote_lvm`       | Remote check if LVM is used                                                                |
-| `boot_wait`        | Wait till reboot is finished                                                               |
-| `curl`             | Curl with added error handling                                                             |
-| `mongosh`          | Run command on Mongo DB                                                                    |
+| Variable/Function | Description |
+| --- | --- |
+| `$CURL_HTTP_CODE` | Last HTTP return code from curl |
+| [`remote`](function/remote.md) | Run command on remote host |
+| [`remote_term`](function/remote_term.md) | Run remote command with pseudo terminal |
+| [`remote_term_line`](function/remote_term_line.md) | Run remote command with pseudo terminal but line based output (problematic with questions) |
+| [`remote_file`](function/remote_file.md) | Run local script on remote |
+| [`upload`](function/upload.md) | Upload file |
+| [`download`](function/download.md) | Download file |
+| [`remote_install`](function/remote_install.md) | Remote install package |
+| [`remote_df`](function/remote_df.md) | Remote df with visual display |
+| [`remote_lvm`](function/remote_lvm.md) | Remote check if LVM is used |
+| [`boot_wait`](function/boot_wait.md) | Wait till reboot is finished |
+| [`curl`](function/curl.md) | Curl with added error handling |
+| [`mongosh`](function/mongosh.md) | Run command on Mongo DB |
 
-### [/home/alex/dvb/scripts/local/bashlib/module/software Module](./software.md)
+### Software Module
 
 Software management functions.
 
-| Variable/Function | Description                   |
-| ----------------- | ----------------------------- |
-| `install`         | Install software package      |
-| `semver`          | Parse semantic version number |
-| `semver_diff`     | Calculate difference          |
+| Variable/Function | Description |
+| --- | --- |
+| [`install`](function/install.md) | Install software package |
+| [`semver`](function/semver.md) | Parse semantic version number |
+| [`semver_diff`](function/semver_diff.md) | Calculate difference |
 
-### [/home/alex/dvb/scripts/local/bashlib/module/validator Module](./validator.md)
+### Validator Module
 
 Validators to make this easier and more readable.
 
-| Variable/Function | Description                                                 |
-| ----------------- | ----------------------------------------------------------- |
-| `num_parameters`  | Check that a specific number of parameters are given        |
-| `is_success`      | Test if given value is an exit/return success               |
-| `is_empty`        | Test if given value is an empty string or undefined         |
-| `is_integer`      | Test if given value is an integer                           |
-| `is_float`        | Test if given value is an float                             |
-| `compare`         | Compare two values (simplification of different bash tests) |
-| `trim_start`      | Trim leading whitespace or given character                  |
-| `trim_end`        | Trim trailing whitespace or given character                 |
-| `trim`            | Trim leading and trailing whitespace or given character     |
+| Variable/Function | Description |
+| --- | --- |
+| [`num_parameters`](function/num_parameters.md) | Check that a specific number of parameters are given |
+| [`_die`](function/_die.md) | processing |
+| [`is_success`](function/is_success.md) | Test if given value is an exit/return success |
+| [`is_empty`](function/is_empty.md) | Test if given value is an empty string or undefined |
+| [`is_integer`](function/is_integer.md) | Test if given value is an integer |
+| [`is_float`](function/is_float.md) | Test if given value is an float |
+| [`compare`](function/compare.md) | Compare two values (simplification of different bash tests) |
+| [`trim_start`](function/trim_start.md) | Trim leading whitespace or given character |
+| [`trim_end`](function/trim_end.md) | Trim trailing whitespace or given character |
+| [`trim`](function/trim.md) | Trim leading and trailing whitespace or given character |

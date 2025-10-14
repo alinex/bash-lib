@@ -2,6 +2,9 @@
 
 BASHLIB_DOWNLOAD="https://gitlab.com/alinex/bash-lib/-/archive/master/bash-lib-master.tar.gz"
 
+# To avoid question give all information:
+# Usage:    install <path> <y|n>
+
 set -eE         # exit on uncatched failure
 set -o pipefail # fail if any command in a pipeline fails
 
@@ -9,7 +12,7 @@ echo "This will setup the bashlib on this host if not already done..."
 echo ""
 
 echo "Step 1: Download bashlib to your system"
-read -rp "Where to put it: [$HOME/bashlib] " path </dev/tty
+[ -n "$1" ] && path="$1" || read -rp "Where to put it: [$HOME/bashlib] " path </dev/tty
 path="${path:-$HOME/bashlib}"
 mkdir -p $path
 curl -L $BASHLIB_DOWNLOAD -o /tmp/bashlib.tgz
@@ -18,13 +21,21 @@ rm /tmp/bashlib.tgz
 echo ""
 
 echo "Step 2: Setup BASHLIB_HOME in your environment."
-read -n 1 -s -p "Should the bashlib path be added to $HOME/.bashrc (J/n) " yn
+[ -n "$2" ] && yn="$2" || read -n 1 -s -p "Should the bashlib path be added to $HOME/.bashrc (J/n) " yn
 case $yn in
 "" | [JjYy])
     echo "export BASHLIB_HOME=\"$path\"" >>$HOME/.bashrc
     ;;
 *) true ;;
 esac
+echo ""
+
+echo "Step 3: Update configuration links."
+rm -rf $BASHLIB_HOME/config/secrets $BASHLIB_HOME/config/overwrite
+touch $path/../.bashlib-secrets
+ln -s $path/../.bashlib-secrets $path/config/secrets
+touch $path/../.bashlib-overwrite
+ln -s $path/../.bashlib-overwrite $path/config/overwrite
 echo ""
 
 echo "You could now use the bashlib by adding:
