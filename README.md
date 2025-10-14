@@ -23,8 +23,7 @@ bashlib/
     config/         # individual configuration
     modules/        # additional modules which can be optionally loaded
     install         # setup bashlib on this host
-    update          # script to regenerate full file after update
-    update-docs     # update documentation
+    update          # script to regenerate full file and docs after update 
     test            # run all unit tests
 ```
 
@@ -77,7 +76,6 @@ After updating the code you should rebuild the full version and documentation us
 
 ```bash
 ./update
-./update-docs
 ```
 
 ### Minimized library

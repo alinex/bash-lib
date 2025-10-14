@@ -68,12 +68,7 @@ This covers atlassian API for Jira and confluence.
 
 | Variable/Function | Description |
 | --- | --- |
-| [`confluence`](function/confluence.md) |  |
-| [`confluence_outage`](function/confluence_outage.md) |  |
 | [`jira_search`](function/jira_search.md) | https://developer.atlassian.com/cloud/jira/platform/rest/v3/intro/#version |
-| [`jira_get`](function/jira_get.md) |  |
-| [`jira_create`](function/jira_create.md) |  |
-| [`jira_update`](function/jira_update.md) |  |
 
 ### Color Module
 
@@ -153,8 +148,6 @@ Module with divibib specific helpers.
 
 | Variable/Function | Description |
 | --- | --- |
-| [`backoffice_set`](function/backoffice_set.md) |  |
-| [`backoffice_unset`](function/backoffice_unset.md) |  |
 
 ### Mattermost Module
 
@@ -162,15 +155,6 @@ Using the mattermost API to write messages.
 
 | Variable/Function | Description |
 | --- | --- |
-| [`_mattermost_user`](function/_mattermost_user.md) |  |
-| [`_mattermost_team`](function/_mattermost_team.md) |  |
-| [`_mattermost_channel`](function/_mattermost_channel.md) |  |
-| [`_mattermost_channel_bypost`](function/_mattermost_channel_bypost.md) |  |
-| [`_mattermost_post`](function/_mattermost_post.md) |  |
-| [`_mattermost_repost`](function/_mattermost_repost.md) |  |
-| [`_mattermost_reaction`](function/_mattermost_reaction.md) |  |
-| [`_mattermost_find_channels`](function/_mattermost_find_channels.md) |  |
-| [`id`](function/id.md) |  |
 | [`mattermost`](function/mattermost.md) | Send a message to Mattermost |
 | [`mattermost_attachement`](function/mattermost_attachement.md) | Create an attachement json to be used in post |
 | [`mattermost_reaction`](function/mattermost_reaction.md) | Add reaction to existing post |
@@ -259,7 +243,6 @@ Module for process control
 | [`repeat`](function/repeat.md) | Execute command in N times |
 | [`retry`](function/retry.md) | Retry a command multiple times until it succeeds |
 | [`countdown`](function/countdown.md) | Sleep with countdown some seconds |
-| [`_lock_remove`](function/_lock_remove.md) |  |
 | [`lock`](function/lock.md) | Set a lock or wait till it can be set |
 | [`lock_exit`](function/lock_exit.md) | Set the lock or exit with optional error message |
 | [`unlock`](function/unlock.md) | Remove the lock |
@@ -275,7 +258,6 @@ Module for process control
 | [`async`](function/async.md) | Run the given command asynchronous ang go on in the calling routine (short form of async_name) |
 | [`async_name`](function/async_name.md) | Alternative to async in which this call is given a name to refer in async_wait |
 | [`async_wait`](function/async_wait.md) | Check if the command is done or wait here till it is so |
-| [`_queue_control`](function/_queue_control.md) |  |
 | [`queue`](function/queue.md) | Add command to process queue |
 | [`queue_name`](function/queue_name.md) | Add command to process queue |
 
@@ -316,7 +298,6 @@ Validators to make this easier and more readable.
 | Variable/Function | Description |
 | --- | --- |
 | [`num_parameters`](function/num_parameters.md) | Check that a specific number of parameters are given |
-| [`_die`](function/_die.md) | processing |
 | [`is_success`](function/is_success.md) | Test if given value is an exit/return success |
 | [`is_empty`](function/is_empty.md) | Test if given value is an empty string or undefined |
 | [`is_integer`](function/is_integer.md) | Test if given value is an integer |

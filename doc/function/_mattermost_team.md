@@ -1,3 +1,0 @@
-# _mattermost_team
-
-## 

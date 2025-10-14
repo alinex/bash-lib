@@ -2,6 +2,7 @@
 
 ## Curl with added error handling
 
+This will load the content into a temporary shared memory file while running.
 
 
 ### Usage
