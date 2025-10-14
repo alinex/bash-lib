@@ -2,7 +2,7 @@
 
 ## Collect string from stdin (no parameters) or parameters each as a line
 
-The same as [input](function/input.md) for piped content but the arguments will not be joined by spaces but read as separate lines.
+The same as [`input`](function/input.md) for piped content but the arguments will not be joined by spaces but read as separate lines.
 
 
 ### Usage

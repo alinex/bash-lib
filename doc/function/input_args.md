@@ -3,7 +3,7 @@
 ## Collect string from stdin (not more than defined parameters) or concatenate the parameters0
 
 This can be used to make functions which you can feed with one or multiple parameters as well as through a pipe.
-But instead of the [input](function/input.md) this will allow the first `<num>` additional parameters which will be not slurped in.
+But instead of the [`input`](function/input.md) this will allow the first `<num>` additional parameters which will be not slurped in.
 
 
 ### Usage

@@ -17,7 +17,7 @@ The core configuration which is needed for the core functions.
 | Variable/Function | Description |
 | --- | --- |
 | `$CC_RESET` | Reset all |
-| `$CC_CRITICAL` | Set color for critical/disaster massages used by [die](function/die.md) |
+| `$CC_CRITICAL` | Set color for critical/disaster massages used by [`die`](function/die.md) |
 
 ### Function Module
 
