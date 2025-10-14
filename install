@@ -3,7 +3,7 @@
 BASHLIB_DOWNLOAD="https://gitlab.com/alinex/bash-lib/-/archive/master/bash-lib-master.tar.gz"
 
 # To avoid question give all information:
-# Usage:    install <path> <y|n>
+# Usage:    install <path> <y|n> <config-path>
 
 set -eE         # exit on uncatched failure
 set -o pipefail # fail if any command in a pipeline fails
@@ -31,11 +31,14 @@ esac
 echo ""
 
 echo "Step 3: Update configuration links."
+[ -n "$3" ] && config="$3" || read -rp "Where to put local configuration: [$HOME] " config </dev/tty
+config="${config:-$HOME}"
+mkdir -p $config
 rm -rf $BASHLIB_HOME/config/secrets $BASHLIB_HOME/config/overwrite
-touch $path/../.bashlib-secrets
-ln -s $path/../.bashlib-secrets $path/config/secrets
-touch $path/../.bashlib-overwrite
-ln -s $path/../.bashlib-overwrite $path/config/overwrite
+touch $config/.bashlib-secrets
+ln -s $config/.bashlib-secrets $path/config/secrets
+touch $config/.bashlib-overwrite
+ln -s $config/.bashlib-overwrite $path/config/overwrite
 echo ""
 
 echo "You could now use the bashlib by adding:
