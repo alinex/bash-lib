@@ -114,4 +114,26 @@ setup() {
 #    echo $output # use --show-output-of-passing-tests to see it
 }
 
-#
+# bats test_tags=remote_install
+@test "remote_install: should do nothing if installed" {
+    skip
+    run remote_install htop
+    assert_output ""
+    assert_success
+    echo $output # use --show-output-of-passing-tests to see it
+}
+
+# bats test_tags=remote_df
+@test "remote_df: should display table" {
+    run remote_df
+    assert [ -n "$output" ]
+    assert_success
+    echo $output # use --show-output-of-passing-tests to see it
+}
+# bats test_tags=remote_df
+@test "remote_df: should display only specific entries" {
+    run remote_df /mnt/acs /mnt/tea
+    assert [ "$(wc -l <<<"$output")" -eq 3 ]
+    assert_success
+    echo $output # use --show-output-of-passing-tests to see it
+}

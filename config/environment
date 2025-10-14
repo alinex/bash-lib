@@ -3,7 +3,17 @@
 # The configuration module contains a lot of general configuration settings for the bash-lib modules itself.
 
 ######################################################################################
-### Configuration
+### Host Specifica
+######################################################################################
+
+# Array: Color limits per mount (pattern critical error warn ok) used in @remote_df
+MOUNT_COLOR_LIMIT=(
+    "^10\.31\.0\." 100 96 94 50
+    ".*" 100 90 80 50
+)
+
+######################################################################################
+### Remote API
 ######################################################################################
 
 # That are only the APIs, the tokens has to be defined in the environment, typically in .bashrc

@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 # Module with remote calling/execution helpers.
+
 # shellcheck disable=SC2154
 
 ######################################################################################
@@ -118,23 +119,71 @@ remote_install() {
 }
 
 # Remote df with visual display
+# The lines will be colorized based on $MOUNT_COLOR_LIMIT setting, which contains sets of 5 entries (pattern critical error warn ok). The first matching pattern will decide the color limits.
+# Usage:    remote_df [<mount>...]                              # show table
+#           remote_df <var> <operator> <limit%> [<mount>...]    # additionaly collect specific volumes
+# Options:  -l, --local     # only list local devices
 remote_df() {
-    local firstline="" percent
+    # parameter parsing
+    local opt=""
+    eval set -- "$(option_parse $'l locale -' "$@")"
+    while true; do
+        case "$1" in
+        -l | --locale)
+            opt="-l"
+            shift
+            ;;
+        --)
+            shift
+            break
+            ;;
+        *) die "Unerwartete option in: $1" ;;
+        esac
+    done
+    # collect specific limit
+    if [ -n "$3" ] && is_integer "$3"; then
+        declare -n ref="$1"
+        local op="$2"
+        local limit=$3
+        shift 3
+    fi
+    # processing
+    local firstline="" percent mount device limit_c limit_e limit_w limit_o
+    # display
     IFS=$'\n'
-    for line in $(remote df -h -l -x tmpfs -x efivarfs -x devtmpfs -x squashfs); do
+    for line in $(remote df -h $opt -x tmpfs -x efivarfs -x devtmpfs -x squashfs "$@"); do
         if [ -z "$firstline" ]; then
             firstline=1
             invers $line
         else
             percent=$(echo $line | xargs echo | cut -d' ' -f5 | sed 's/%//')
-            if [ $percent -eq 100 ]; then
+            mount=$(echo $line | xargs echo | cut -d' ' -f6 | nocr)
+            # get color limits
+            device=$(echo $line | xargs echo | cut -d' ' -f1)
+            for ((i = 0; i < ${#MOUNT_COLOR_LIMIT[@]}; i += 5)); do
+                pattern="${MOUNT_COLOR_LIMIT[i]}"
+                if [[ "$device" =~ $pattern ]]; then
+                    limit_c="${MOUNT_COLOR_LIMIT[i + 1]}"
+                    limit_e="${MOUNT_COLOR_LIMIT[i + 2]}"
+                    limit_w="${MOUNT_COLOR_LIMIT[i + 3]}"
+                    limit_o="${MOUNT_COLOR_LIMIT[i + 4]}"
+                    break
+                fi
+            done
+            # display
+            if [ $percent -eq $limit_c ]; then
                 critical "$line"
-            elif [ $percent -ge 90 ]; then
+            elif [ $percent -ge $limit_e ]; then
                 error "$line"
-            elif [ $percent -ge 80 ]; then
+            elif [ $percent -ge $limit_w ]; then
                 warn "$line"
+            elif [ $percent -ge $limit_o ]; then
+                ok "$line"
             else
                 echo "$line"
+            fi
+            if [ -n "$limit" ] && compare $percent $op $limit; then
+                ref="${ref}${mount} "
             fi
         fi
     done

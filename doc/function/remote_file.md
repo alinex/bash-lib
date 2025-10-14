@@ -2,7 +2,6 @@
 
 ## Run local script on remote
 
-Globals:  $server
 
 
 ### Usage
@@ -10,8 +9,12 @@ Globals:  $server
 ```bash
 remote_file <file>
 <file> | remote_file
-$login - default is "operator"
 ```
+
+### Globals
+
+- $server
+- $login - default is "operator"
 
 ### Output (stdout)
 

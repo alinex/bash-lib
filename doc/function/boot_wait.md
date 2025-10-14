@@ -2,7 +2,6 @@
 
 ## Wait till reboot is finished
 
-Globals:  $server
 Stdout:   `<sql-time>`
 
 
@@ -16,5 +15,9 @@ boot_wait
 
 ```bash
 -q, --quiet
-$login - default is "operator"
 ```
+
+### Globals
+
+- $server
+- $login - default is "operator"

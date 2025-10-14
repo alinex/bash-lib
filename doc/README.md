@@ -8,6 +8,23 @@ This is a list of some examples and the reference documentation of all available
 
 The BashLib contains some core functionality and optional modules which are listed below.
 
+## Config
+
+### Environment Module
+
+The configuration module contains a lot of general configuration settings for the bash-lib modules itself.
+
+| Variable/Function | Description |
+| --- | --- |
+| `$MOUNT_COLOR_LIMIT` | Hash: Color limits per mount pattern (critical error warn ok) |
+| `$MATTERMOST_API` | Mattermost API url |
+| `$GRAFANA_API` | Grafana API url |
+| `$CONFLUENCE_API` | Atlassian confluence API url |
+| `$JIRA_API` | Atlassian jira API url |
+| `$PROMETHEUS_API` | Prometheus API urls |
+| `$PROMETHEUS` | Prometheus host names |
+| `$CONFLUENCE_OUTAGE` | Atlassian confluence page id for outage information |
+
 ## Core
 
 ### Config Module

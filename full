@@ -1,4 +1,152 @@
 #!/usr/bin/env bash
+set -eE
+set -o pipefail
+CC_RESET=$'\033[0m'
+CC_CRITICAL=$'\033[1;45m'
+input(){
+test -p /dev/stdin&&test $# -eq 0&&cat -||echo "$*"
+}
+input_args(){
+local num=${1-}
+local start=$((num+2))
+[ -n "$num" ]||die "No <num> argument in call to input_args!"
+[ "$num" -gt 0 ]||die "<num>=$num argument is not a valid number!"
+test -p /dev/stdin&&cat -||echo "${@:start}"
+}
+input_lines(){
+test -p /dev/stdin&&test -z "${1-}"&&cat -||for arg in "$@";do echo "$arg";done
+}
+die(){
+echo -e "$CC_CRITICAL$(input "$@")$CC_RESET" >&2
+exit 1
+}
+trap_add(){
+local new="$1"
+local sig="$2"
+local old
+old="$(trap -p "$sig"|awk -F"'" '{print $2}')"
+if [[ -n $old ]];then
+trap "$new; $old" "$sig"
+else
+trap "$new" "$sig"
+fi
+}
+trap_remove(){
+local remove="$1"
+local sig="$2"
+local current new
+current="$(trap -p "$sig"|awk -F"'" '{print $2}')"
+new="$(echo "$current"|sed "s#;* *$remove##")"
+trap "$new" "$sig"
+}
+mktemp(){
+eval set -- "$(option_parse $'d directory -\ne extension +\nm memory -\np path +' "$@")"
+local dir ext result
+local path=${TMPDIR:-/tmp}
+while true;do
+case "$1" in
+-d|--directory)dir=1
+shift
+;;
+-e|--extension)ext=".$2"
+shift 2
+;;
+-m|--memory)path="/dev/shm"
+shift
+;;
+-p|--path)path="$2"
+shift 2
+;;
+--)shift
+break
+;;
+*)shift
+esac
+done
+result="$path/$(basename $0)_$1$ext"
+if [ -n "$dir" ];then
+mkdir -p "$result"
+else
+touch "$result"
+fi
+echo "$result"
+}
+option_parse(){
+local opt name type desc short="" long=""
+while IFS=$' \t\n' read -r opt name type desc;do
+[[ $opt =~ ^# ]]&&continue
+[[ -z $opt ]]&&continue
+if [ ! "$type" = "-" ];then
+[ "$opt" = "-" ]||short+="$opt:"
+long+="$name:,"
+else
+[ "$opt" = "-" ]||short+="$opt"
+long+="$name,"
+fi
+done <<<"$1"
+shift
+getopt -o "$short" --long "$long" -n "$0" -- "$@"
+}
+option_help(){
+declare opt name type desc
+declare -A opt_descriptions
+declare -A opt_type
+declare -A opt_short
+while read -r opt name type desc;do
+[[ $opt =~ ^# ]]&&continue
+[[ -z $opt ]]&&continue
+opt_descriptions[$name]="$desc"
+opt_type[$name]=$type
+opt_short[$name]=$opt
+done <<<"$1"
+echo "Optionen:"
+for name in "${!opt_descriptions[@]}";do
+local type_text=""
+local short_text=""
+if [ ! "${opt_type[$name]}" = "-" ];then
+type_text=" <${opt_type[$name]}>"
+fi
+if [[ ! ${opt_short[$name]} == "-" ]];then
+short_text="-${opt_short[$name]}$type_text, "
+fi
+printf "  %-40s %s\n" "$short_text--$name$type_text" "${opt_descriptions[$name]}"
+done
+}
+contains(){
+local array=$1
+local value=$2
+local e
+for e in "${array[@]}";do
+[[ $e != "$value" ]]||return 0
+done
+return 1
+}
+confluence(){
+install jq
+curl -H "Content-Type: application/json" -u "$ATLASSIAN_USER:$ATLASSIAN_TOKEN" "$CONFLUENCE_API/content/$1?expand=body.storage"|jq .body.storage.value -r||die "Could not read confluence page!"
+}
+confluence_outage(){
+local row="$(confluence $CONFLUENCE_OUTAGE|sed 's/<\/tr>/<\/tr>\n/g;s/<tr>/\n<tr>/g'|grep '^<tr'|grep "$1"|head -1|sed 's/<\/td>/<\/td>\n/g;s/<td>/\n<td>/g'|grep '^<td')"
+test -n "$row"||return
+local office="$(echo "$row"|sed -n '2p'|html2md)"
+local customer="$(echo "$row"|sed -n '3p'|html2md)"
+local user="$(echo "$row"|sed -n '4p'|html2md)"
+echo -e "##### Auswirkungen für Endkunden\n\n$user\n\n##### Auswirkungen für Bibliotheken\n\n$customer\n\n##### Auswirkungen intern divibib/ekz\n\n$office"
+}
+jira_search(){
+install jq
+curl -u "$ATLASSIAN_USER:$ATLASSIAN_TOKEN" -H "Content-Type: application/json" -X GET "$JIRA_API/search/jql?jql=$1&fields=*all"|jq '.issues[]'||die "Could not search for Jira issues using $1!"
+}
+jira_get(){
+curl -u "$ATLASSIAN_USER:$ATLASSIAN_TOKEN" -H "Content-Type: application/json" -X GET "$JIRA_API/issue/$1"||die "Could not get Jira issue $1!"
+}
+jira_create(){
+install jq
+curl -u "$ATLASSIAN_USER:$ATLASSIAN_TOKEN" -H "Content-Type: application/json" -X POST "$JIRA_API/issue/" -d "$1"|jq '.key' -r||die "Could not create Jira issue!"
+}
+jira_update(){
+curl -u "$ATLASSIAN_USER:$ATLASSIAN_TOKEN" -H "Content-Type: application/json" -X PUT "$JIRA_API/issue/$1" -d "$1"||die "Could not update Jira issue $1!"
+}
 COLORS=$(tput colors 2>/dev/null||echo 0)
 CC_RESET=$'\033[0m'
 CC_RESET_FG=$'\033[39m'
@@ -97,170 +245,6 @@ echo -e "\t${CC_INFO}CC_INFO$CC_RESET"
 echo -e "\t${CC_OK}CC_OK$CC_RESET"
 echo -e "\t${CC_HEADING}CC_HEADING$CC_RESET"
 echo -e "\t${CC_INVERS}CC_INVERS$CC_RESET"
-}
-set -eE
-set -o pipefail
-trap 'exit 1' ERR
-BASHLIB_BASE="$(dirname "$(readlink -f "${BASH_SOURCE[0]:-$(pwd)/x}")")"
-if [ ${#BASH_SOURCE[@]} -gt 0 ];then
-PROGRAM_BASE="$(dirname "$(readlink -f "${BASH_SOURCE[-1]:-$(pwd)/x}")")"
-else
-PROGRAM_BASE="$(pwd)"
-fi
-input(){
-test -p /dev/stdin&&test $# -eq 0&&cat -||echo "$*"
-}
-input_args(){
-local num=${1-}
-local start=$((num+2))
-[ -n "$num" ]||die "No <num> argument in call to input_args!"
-[ "$num" -gt 0 ]||die "<num>=$num argument is not a valid number!"
-test -p /dev/stdin&&cat -||echo "${@:start}"
-}
-input_lines(){
-test -p /dev/stdin&&test -z "${1-}"&&cat -||for arg in "$@";do echo "$arg";done
-}
-die(){
-echo -e "$CC_CRITICAL$(input "$@")$CC_RESET" >&2
-exit 1
-}
-trap_add(){
-local new="$1"
-local sig="$2"
-local old
-old="$(trap -p "$sig"|awk -F"'" '{print $2}')"
-if [[ -n $old ]];then
-trap "$new; $old" "$sig"
-else
-trap "$new" "$sig"
-fi
-}
-trap_remove(){
-local remove="$1"
-local sig="$2"
-local current new
-current="$(trap -p "$sig"|awk -F"'" '{print $2}')"
-new="$(echo "$current"|sed "s#;* *$remove##")"
-trap "$new" "$sig"
-}
-mktemp(){
-eval set -- "$(option_parse $'d directory -\ne extension +\nm memory -\np path +' "$@")"
-local dir ext result
-local path=${TMPDIR:-/tmp}
-while true;do
-case "$1" in
--d|--directory)dir=1
-shift
-;;
--e|--extension)ext=".$2"
-shift 2
-;;
--m|--memory)path="/dev/shm"
-shift
-;;
--p|--path)path="$2"
-shift 2
-;;
---)shift
-break
-;;
-*)shift
-esac
-done
-result="$path/$(basename $0)_$1$ext"
-if [ -n "$dir" ];then
-mkdir -p "$result"
-else
-touch "$result"
-fi
-echo "$result"
-}
-option_parse(){
-local short=""
-local long=""
-while read -r opt name type desc;do
-[[ $opt =~ ^# ]]&&continue
-[[ -z $opt ]]&&continue
-if [ ! "$type" = "-" ];then
-[ "$opt" = "-" ]||short+="$opt:"
-long+="$name:,"
-else
-[ "$opt" = "-" ]||short+="$opt"
-long+="$name,"
-fi
-done <<<"$1"
-shift
-getopt -o "$short" --long "$long" -n "$0" -- "$@"
-}
-option_help(){
-declare -A opt_descriptions
-declare -A opt_type
-declare -A opt_short
-while read -r opt name type desc;do
-[[ $opt =~ ^# ]]&&continue
-[[ -z $opt ]]&&continue
-opt_descriptions[$name]="$desc"
-opt_type[$name]=$type
-opt_short[$name]=$opt
-done <<<"$1"
-echo "Optionen:"
-for name in "${!opt_descriptions[@]}";do
-local type_text=""
-local short_text=""
-if [ ! "${opt_type[$name]}" = "-" ];then
-type_text=" <${opt_type[$name]}>"
-fi
-if [[ ! ${opt_short[$name]} == "-" ]];then
-short_text="-${opt_short[$name]}$type_text, "
-fi
-printf "  %-40s %s\n" "$short_text--$name$type_text" "${opt_descriptions[$name]}"
-done
-}
-help(){
-heading "Hilfe: $1"
-info "Usage: $2"
-echo ""
-if [ -n "$3" ];then
-option_help "$3"
-echo ""
-fi
-echo "$4"
-exit 0
-}
-contains(){
-local array=$1
-local value=$2
-local e
-for e in "${array[@]}";do
-[[ $e != "$value" ]]||return 0
-done
-return 1
-}
-confluence(){
-install jq
-curl -H "Content-Type: application/json" -u "$ATLASSIAN_USER:$ATLASSIAN_TOKEN" "$CONFLUENCE_API/content/$1?expand=body.storage"|jq .body.storage.value -r||die "Could not read confluence page!"
-}
-confluence_outage(){
-local row="$(confluence $CONFLUENCE_OUTAGE|sed 's/<\/tr>/<\/tr>\n/g;s/<tr>/\n<tr>/g'|grep '^<tr'|grep "$1"|head -1|sed 's/<\/td>/<\/td>\n/g;s/<td>/\n<td>/g'|grep '^<td')"
-test -n "$row"||return
-local office="$(echo "$row"|sed -n '2p'|html2md)"
-local customer="$(echo "$row"|sed -n '3p'|html2md)"
-local user="$(echo "$row"|sed -n '4p'|html2md)"
-echo -e "##### Auswirkungen für Endkunden\n\n$user\n\n##### Auswirkungen für Bibliotheken\n\n$customer\n\n##### Auswirkungen intern divibib/ekz\n\n$office"
-}
-jira_search(){
-install jq
-curl -u "$ATLASSIAN_USER:$ATLASSIAN_TOKEN" -H "Content-Type: application/json" -X GET "$JIRA_API/search/jql?jql=$1&fields=*all"|jq '.issues[]'||die "Could not search for Jira issues using $1!"
-}
-jira_get(){
-curl -u "$ATLASSIAN_USER:$ATLASSIAN_TOKEN" -H "Content-Type: application/json" -X GET "$JIRA_API/issue/$1"||die "Could not get Jira issue $1!"
-}
-jira_create(){
-install jq
-curl -u "$ATLASSIAN_USER:$ATLASSIAN_TOKEN" -H "Content-Type: application/json" -X POST "$JIRA_API/issue/" -d "$1"|jq '.key' -r||die "Could not create Jira issue!"
-}
-jira_update(){
-curl -u "$ATLASSIAN_USER:$ATLASSIAN_TOKEN" -H "Content-Type: application/json" -X PUT "$JIRA_API/issue/$1" -d "$1"||die "Could not update Jira issue $1!"
 }
 now(){
 date +%s
@@ -784,6 +768,17 @@ has_tty(){
 }
 is_bash(){
 [[ -n ${BASH_VERSION:-} ]]
+}
+help(){
+heading "Hilfe: $1"
+info "Usage: $2"
+echo ""
+if [ -n "$3" ];then
+option_help "$3"
+echo ""
+fi
+echo "$4"
+exit 0
 }
 heading(){
 local prefix=""
@@ -1323,22 +1318,58 @@ cat $BASHLIB_BASE/software
 echo install "$@")|shfmt -mn|remote
 }
 remote_df(){
-local firstline="" percent
+local opt=""
+eval set -- "$(option_parse $'l locale -' "$@")"
+while true;do
+case "$1" in
+-l|--locale)opt="-l"
+shift
+;;
+--)shift
+break
+;;
+*)die "Unerwartete option in: $1"
+esac
+done
+if [ -n "$3" ]&&is_integer "$3";then
+declare -n ref="$1"
+local op="$2"
+local limit=$3
+shift 3
+fi
+local firstline="" percent mount device limit_c limit_e limit_w limit_o
 IFS=$'\n'
-for line in $(remote df -h -l -x tmpfs -x efivarfs -x devtmpfs -x squashfs);do
+for line in $(remote df -h $opt -x tmpfs -x efivarfs -x devtmpfs -x squashfs "$@");do
 if [ -z "$firstline" ];then
 firstline=1
 invers $line
 else
 percent=$(echo $line|xargs echo|cut -d' ' -f5|sed 's/%//')
-if [ $percent -eq 100 ];then
+mount=$(echo $line|xargs echo|cut -d' ' -f6|nocr)
+device=$(echo $line|xargs echo|cut -d' ' -f1)
+for ((i=0; i<${#MOUNT_COLOR_LIMIT[@]}; i+=5));do
+pattern="${MOUNT_COLOR_LIMIT[i]}"
+if [[ $device =~ $pattern ]];then
+limit_c="${MOUNT_COLOR_LIMIT[i+1]}"
+limit_e="${MOUNT_COLOR_LIMIT[i+2]}"
+limit_w="${MOUNT_COLOR_LIMIT[i+3]}"
+limit_o="${MOUNT_COLOR_LIMIT[i+4]}"
+break
+fi
+done
+if [ $percent -eq $limit_c ];then
 critical "$line"
-elif [ $percent -ge 90 ];then
+elif [ $percent -ge $limit_e ];then
 error "$line"
-elif [ $percent -ge 80 ];then
+elif [ $percent -ge $limit_w ];then
 warn "$line"
+elif [ $percent -ge $limit_o ];then
+ok "$line"
 else
 echo "$line"
+fi
+if [ -n "$limit" ]&&compare $percent $op $limit;then
+ref="$ref$mount "
 fi
 fi
 done

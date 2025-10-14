@@ -2,7 +2,6 @@
 
 ## Remote install package
 
-Globals:  $server
 See:      software:install
 
 
@@ -10,5 +9,9 @@ See:      software:install
 
 ```bash
 install <pack>...
-$login - default is "operator"
 ```
+
+### Globals
+
+- $server
+- $login - default is "operator"

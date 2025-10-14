@@ -252,7 +252,7 @@ ask_input() {
 # Select from list (extended version of native select)
 # Usage:    choose [-t] <entry>...
 #           <list> | choose [-t]
-# Option    -t, --title <title>         # display text line above selection
+# Options:  -t, --title <title>         # display text line above selection
 #           -x, --exit <string>         # will add an exit option at the end -> return "exit"
 #           -d, --default <string|int>  # the command or number which will be returned on <enter>
 # Entry:    <entry> := <string> | <key> "|" <display> # whitespace arround values are removed
