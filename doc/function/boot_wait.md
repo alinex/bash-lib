@@ -2,7 +2,6 @@
 
 ## Wait till reboot is finished
 
-Stdout:   `<sql-time>`
 
 
 ### Usage
@@ -21,3 +20,7 @@ boot_wait
 
 - `$server`
 - `$login` - default is "operator"
+
+### Error (stderr)
+
+- `<sql-time>`

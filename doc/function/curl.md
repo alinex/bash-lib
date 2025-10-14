@@ -2,8 +2,6 @@
 
 ## Curl with added error handling
 
-Stderr:   `<text>` if not RC:2xx
-Status:   0 || 1 if not RC:2xx
 
 
 ### Usage
@@ -17,3 +15,12 @@ like curl
 - `$server`
 - `$login` - default is "operator"
 - CURL_HTTP_CODE set with last code
+
+### Error (stderr)
+
+- `<text>` if not RC:2xx
+
+### Return (exit code)
+
+- 0 if RC:2xx
+- 1 if not

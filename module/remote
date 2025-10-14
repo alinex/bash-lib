@@ -10,7 +10,8 @@ declare -F "num_parameters" || source $BASHLIB_HOME/module/validator
 ######################################################################################
 
 # Run command on remote host
-# Usage:    remote <command>... # special characters have to be masked: | & * > <
+# Usage:    remote <command>... # special characters in command masked with backslash
+#           #                     <special char> := | & * > < $
 #           <commands> | remote
 # Globals:  $server
 #           $login - default is "operator"
@@ -105,11 +106,10 @@ download() {
 ### Extended remote commands
 ######################################################################################
 
-# Remote install package
+# Remote install package like @install
 # Usage:    install <pack>...
 # Globals:  $server
 #           $login - default is "operator"
-# See:      software:install
 remote_install() {
     (
         cat $BASHLIB_BASE/1_color
@@ -193,6 +193,9 @@ remote_df() {
 }
 
 # Remote check if LVM is used
+# Usage:    remote_lvm
+# Return:   0 for uses LVM
+#           1 if not
 remote_lvm() {
     remote sudo vgs --noheadings \&\& [ -n "$(sudo vgs --noheadings 2>/dev/null)" ] &>/dev/null
 }
@@ -202,7 +205,7 @@ remote_lvm() {
 # Options:  -q, --quiet
 # Globals:  $server
 #           $login - default is "operator"
-# Stdout:   <sql-time>
+# Error:    <sql-time>
 boot_wait() {
     # parameter parsing
     eval set -- "$(option_parse $'q quiet -' "$@")"
@@ -250,8 +253,9 @@ CURL_HTTP_CODE=""
 # Globals:  $server
 #           $login - default is "operator"
 #           CURL_HTTP_CODE set with last code
-# Stderr:   <text> if not RC:2xx
-# Status:   0 || 1 if not RC:2xx
+# Error:    <text> if not RC:2xx
+# Return:   0 if RC:2xx
+#           1 if not
 curl() {
     local file res
     file=$(mkshm)
@@ -275,7 +279,7 @@ curl() {
 
 # Run command on Mongo DB
 # Usage:    mongosh "" <command>            # global command
-# Usage:    mongosh <database> <command>    # work in database
+#           mongosh <database> <command>    # work in database
 # Global:   $server
 #           $MONGO_ADMIN_USERPASS
 mongosh() {

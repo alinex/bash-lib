@@ -1,8 +1,7 @@
 # remote_install
 
-## Remote install package
+## Remote install package like [`install`](function/install.md)
 
-See:      software:install
 
 
 ### Usage

@@ -7,8 +7,9 @@
 ### Usage
 
 ```bash
-remote <command>... # special characters have to be masked: | & * > <
-<title> | remote
+remote <command>... # special characters in command masked with backslash
+#                     <special char> := | & * > < $
+<commands> | remote
 ```
 
 ### Globals

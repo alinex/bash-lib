@@ -292,7 +292,7 @@ Module with remote calling/execution helpers.
 | [`remote_file`](function/remote_file.md) | Run local script on remote |
 | [`upload`](function/upload.md) | Upload file |
 | [`download`](function/download.md) | Download file |
-| [`remote_install`](function/remote_install.md) | Remote install package |
+| [`remote_install`](function/remote_install.md) | Remote install package like @install |
 | [`remote_df`](function/remote_df.md) | Remote df with visual display |
 | [`remote_lvm`](function/remote_lvm.md) | Remote check if LVM is used |
 | [`boot_wait`](function/boot_wait.md) | Wait till reboot is finished |
