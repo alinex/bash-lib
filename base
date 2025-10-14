@@ -3399,3 +3399,229 @@ fi
 printf "  %-40s %s\n" "$short_text--$name$type_text" "${opt_descriptions[$name]}"
 done
 }
+set -eE
+set -o pipefail
+CC_RESET=$'\033[0m'
+CC_CRITICAL=$'\033[1;45m'
+input(){
+test -p /dev/stdin&&test $# -eq 0&&cat -||echo "$*"
+}
+input_args(){
+local num=${1-}
+local start=$((num+2))
+[ -n "$num" ]||die "No <num> argument in call to input_args!"
+[ "$num" -gt 0 ]||die "<num>=$num argument is not a valid number!"
+test -p /dev/stdin&&cat -||echo "${@:start}"
+}
+input_lines(){
+test -p /dev/stdin&&test -z "${1-}"&&cat -||for arg in "$@";do echo "$arg";done
+}
+die(){
+echo -e "$CC_CRITICAL$(input "$@")$CC_RESET" >&2
+exit 1
+}
+trap_add(){
+local new="$1"
+local sig="$2"
+local old
+old="$(trap -p "$sig"|awk -F"'" '{print $2}')"
+if [[ -n $old ]];then
+trap "$new; $old" "$sig"
+else
+trap "$new" "$sig"
+fi
+}
+trap_remove(){
+local remove="$1"
+local sig="$2"
+local current new
+current="$(trap -p "$sig"|awk -F"'" '{print $2}')"
+new="$(echo "$current"|sed "s#;* *$remove##")"
+trap "$new" "$sig"
+}
+mktemp(){
+eval set -- "$(option_parse $'d directory -\ne extension +\nm memory -\np path +' "$@")"
+local dir ext result
+local path=${TMPDIR:-/tmp}
+while true;do
+case "$1" in
+-d|--directory)dir=1
+shift
+;;
+-e|--extension)ext=".$2"
+shift 2
+;;
+-m|--memory)path="/dev/shm"
+shift
+;;
+-p|--path)path="$2"
+shift 2
+;;
+--)shift
+break
+;;
+*)shift
+esac
+done
+result="$path/$(basename $0)_$1$ext"
+if [ -n "$dir" ];then
+mkdir -p "$result"
+else
+touch "$result"
+fi
+echo "$result"
+}
+option_parse(){
+local opt name type desc short="" long=""
+while IFS=$' \t\n' read -r opt name type desc;do
+[[ $opt =~ ^# ]]&&continue
+[[ -z $opt ]]&&continue
+if [ ! "$type" = "-" ];then
+[ "$opt" = "-" ]||short+="$opt:"
+long+="$name:,"
+else
+[ "$opt" = "-" ]||short+="$opt"
+long+="$name,"
+fi
+done <<<"$1"
+shift
+getopt -o "$short" --long "$long" -n "$0" -- "$@"
+}
+option_help(){
+declare opt name type desc
+declare -A opt_descriptions
+declare -A opt_type
+declare -A opt_short
+while read -r opt name type desc;do
+[[ $opt =~ ^# ]]&&continue
+[[ -z $opt ]]&&continue
+opt_descriptions[$name]="$desc"
+opt_type[$name]=$type
+opt_short[$name]=$opt
+done <<<"$1"
+echo "Optionen:"
+for name in "${!opt_descriptions[@]}";do
+local type_text=""
+local short_text=""
+if [ ! "${opt_type[$name]}" = "-" ];then
+type_text=" <${opt_type[$name]}>"
+fi
+if [[ ! ${opt_short[$name]} == "-" ]];then
+short_text="-${opt_short[$name]}$type_text, "
+fi
+printf "  %-40s %s\n" "$short_text--$name$type_text" "${opt_descriptions[$name]}"
+done
+}
+set -eE
+set -o pipefail
+CC_RESET=$'\033[0m'
+CC_CRITICAL=$'\033[1;45m'
+input(){
+test -p /dev/stdin&&test $# -eq 0&&cat -||echo "$*"
+}
+input_args(){
+local num=${1-}
+local start=$((num+2))
+[ -n "$num" ]||die "No <num> argument in call to input_args!"
+[ "$num" -gt 0 ]||die "<num>=$num argument is not a valid number!"
+test -p /dev/stdin&&cat -||echo "${@:start}"
+}
+input_lines(){
+test -p /dev/stdin&&test -z "${1-}"&&cat -||for arg in "$@";do echo "$arg";done
+}
+die(){
+echo -e "$CC_CRITICAL$(input "$@")$CC_RESET" >&2
+exit 1
+}
+trap_add(){
+local new="$1"
+local sig="$2"
+local old
+old="$(trap -p "$sig"|awk -F"'" '{print $2}')"
+if [[ -n $old ]];then
+trap "$new; $old" "$sig"
+else
+trap "$new" "$sig"
+fi
+}
+trap_remove(){
+local remove="$1"
+local sig="$2"
+local current new
+current="$(trap -p "$sig"|awk -F"'" '{print $2}')"
+new="$(echo "$current"|sed "s#;* *$remove##")"
+trap "$new" "$sig"
+}
+mktemp(){
+eval set -- "$(option_parse $'d directory -\ne extension +\nm memory -\np path +' "$@")"
+local dir ext result
+local path=${TMPDIR:-/tmp}
+while true;do
+case "$1" in
+-d|--directory)dir=1
+shift
+;;
+-e|--extension)ext=".$2"
+shift 2
+;;
+-m|--memory)path="/dev/shm"
+shift
+;;
+-p|--path)path="$2"
+shift 2
+;;
+--)shift
+break
+;;
+*)shift
+esac
+done
+result="$path/$(basename $0)_$1$ext"
+if [ -n "$dir" ];then
+mkdir -p "$result"
+else
+touch "$result"
+fi
+echo "$result"
+}
+option_parse(){
+local opt name type desc short="" long=""
+while IFS=$' \t\n' read -r opt name type desc;do
+[[ $opt =~ ^# ]]&&continue
+[[ -z $opt ]]&&continue
+if [ ! "$type" = "-" ];then
+[ "$opt" = "-" ]||short+="$opt:"
+long+="$name:,"
+else
+[ "$opt" = "-" ]||short+="$opt"
+long+="$name,"
+fi
+done <<<"$1"
+shift
+getopt -o "$short" --long "$long" -n "$0" -- "$@"
+}
+option_help(){
+declare opt name type desc
+declare -A opt_descriptions
+declare -A opt_type
+declare -A opt_short
+while read -r opt name type desc;do
+[[ $opt =~ ^# ]]&&continue
+[[ -z $opt ]]&&continue
+opt_descriptions[$name]="$desc"
+opt_type[$name]=$type
+opt_short[$name]=$opt
+done <<<"$1"
+echo "Optionen:"
+for name in "${!opt_descriptions[@]}";do
+local type_text=""
+local short_text=""
+if [ ! "${opt_type[$name]}" = "-" ];then
+type_text=" <${opt_type[$name]}>"
+fi
+if [[ ! ${opt_short[$name]} == "-" ]];then
+short_text="-${opt_short[$name]}$type_text, "
+fi
+printf "  %-40s %s\n" "$short_text--$name$type_text" "${opt_descriptions[$name]}"
+done
+}
