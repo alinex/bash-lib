@@ -7,9 +7,11 @@
 ######################################################################################
 
 # Check if value is contained
-# Usage:    has_value <array> <match>
+# Usage:    contains <array> <match>#
+# Example:  x=( one two three )
+#           contains x two && echo YES || echo NO
 contains() {
-    local array=$1
+    local -n array=$1
     local value=$2
     local e
     for e in "${array[@]}"; do
