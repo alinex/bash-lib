@@ -10,7 +10,7 @@
 # Usage:    now
 # Stdout:   <int> seconds since 1970
 now() {
-   date +%s
+    date +%s
 }
 
 ######################################################################################
@@ -23,14 +23,14 @@ now() {
 date_diff() {
     local start end
     num_parameters "$@" --min 2 --max 2 --die "Need exactly two parameters: diff_sec <start> <end>"
-    is_integer "$1" && start=${1-} || start=$(date -d "$1" +%s) \
-    || die "Date format '$1' not parsable!"
-    is_integer "$2" && end=${2-} || end=$(date -d "$2" +%s) \
-    || die "Date format '$2' not parsable!"
+    is_integer "$1" && start=${1-} || start=$(date -d "$1" +%s) ||
+        die "Date format '$1' not parsable!"
+    is_integer "$2" && end=${2-} || end=$(date -d "$2" +%s) ||
+        die "Date format '$2' not parsable!"
     echo $((end - start))
 }
 
-# Format date in different nnamed versions or format string
+# Format date in different named versions or format string
 # Usage:    date_format <format> [<value>] # use now if missing
 # Formats:  iso         2025-10-01T12:00:00+02:00
 #           iso-date    2025-10-01
@@ -48,19 +48,19 @@ date_format() {
     local value format
     # date_format <format> <value>
     case $1 in
-        iso)        format="--iso-8601=seconds" ;;
-        iso-date)   format="--iso-8601" ;;
-        zulu)       format="-u +%Y-%m-%dT%H:%M:%SZ" ;;
-        sql)        format="+\"%Y-%m-%d %H:%M:%S\"" ;;
-        unix)       format="+%s" ;;
-        eu-date)    format="+%Y-%m-%d" ;;
-        us-date)    format="+%m/%d/%Y" ;;
-        human-date) format="+%A, %B %d, %Y" ;;
-        time)       format="%H:%M:%S" ;;
-        time-short) format="%H:%M" ;;
-        *)          format="$1" ;;
+    iso) format="--iso-8601=seconds" ;;
+    iso-date) format="--iso-8601" ;;
+    zulu) format="-u +%Y-%m-%dT%H:%M:%SZ" ;;
+    sql) format="+\"%Y-%m-%d %H:%M:%S\"" ;;
+    unix) format="+%s" ;;
+    eu-date) format="+%Y-%m-%d" ;;
+    us-date) format="+%m/%d/%Y" ;;
+    human-date) format="+%A, %B %d, %Y" ;;
+    time) format="%H:%M:%S" ;;
+    time-short) format="%H:%M" ;;
+    *) format="$1" ;;
     esac
     [ -n "$2" ] && value="${2-}" || value=$(now)
-    is_integer "$value" && eval "date -d @$value $format" || eval "date -d \"$value\" $format" \
-    || die "Date format '$value' not parsable!"
+    is_integer "$value" && eval "date -d @$value $format" || eval "date -d \"$value\" $format" ||
+        die "Date format '$value' not parsable!"
 }

@@ -17,7 +17,6 @@ The core configuration which is needed for the core functions.
 | --- | --- |
 | `$CC_RESET` | Reset all |
 | `$CC_CRITICAL` | Set color for critical/disaster massages |
-| [``](function/.md) |  |
 
 ### Function Module
 

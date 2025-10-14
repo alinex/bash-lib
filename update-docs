@@ -62,6 +62,7 @@ for folder in core module; do
                 code="${code//>/>\`}"
                 echo "$code"
             }
+            [ -n "$function_lines" ] || continue
             # Loop over functions with line numbers
             while read -r line function_declaration; do
                 echo -n "." >&2
