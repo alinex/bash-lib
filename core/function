@@ -148,7 +148,7 @@ mktemp() {
 option_parse() {
     local opt name type desc short="" long=""
     # read spec lines
-    while read -r opt name type desc; do
+    while IFS=$' \t\n' read -r opt name type desc; do
         [[ "$opt" =~ ^# ]] && continue # skip comments
         [[ -z "$opt" ]] && continue    # skip empty lines
         if [ ! "$type" = "-" ]; then
