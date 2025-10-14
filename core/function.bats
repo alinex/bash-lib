@@ -93,6 +93,26 @@ h help  -       Show Help Page" captain -n "Alfred" --age 34 -h
     echo $output # use --show-output-of-passing-tests to see it
 }
 # bats test_tags=option_parse
+@test "option_parse: multiple short options together" {
+    run option_parse "
+n name  string  Name of Birthday Person
+a age   int     Age in years
+h help  -       Show Help Page" -hn "Alfred" --age 34 captain
+    assert_output " -h -n 'Alfred' --age '34' -- 'captain'"
+    assert_success
+    echo $output # use --show-output-of-passing-tests to see it
+}
+# bats test_tags=option_parse
+@test "option_parse: put name and value together" {
+    run option_parse "
+n name  string  Name of Birthday Person
+a age   int     Age in years
+h help  -       Show Help Page" -h -nAlfred --age=34 captain
+    assert_output " -h -n 'Alfred' --age '34' -- 'captain'"
+    assert_success
+    echo $output # use --show-output-of-passing-tests to see it
+}
+# bats test_tags=option_parse
 @test "option_parse: with short spec" {
     run option_parse $'a min +\nb max +\nc die +' \
     p1 p2 --min 5

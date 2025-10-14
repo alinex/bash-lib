@@ -10,7 +10,7 @@ TTY:      [`<title>`]
 
 ```bash
 tasks <function>"|"<entry>"...  # entries from arguments
-<list> | tasks                  # entries from ppe
+<list> | tasks                  # entries from pipe
 tasks <function>                # entries from function (dynamic)
 <list>
 ...

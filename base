@@ -3,6 +3,9 @@ set -eE
 set -o pipefail
 CC_RESET=$'\033[0m'
 CC_CRITICAL=$'\033[1;45m'
+export TEXTDOMAIN=bashlib
+export TEXTDOMAINDIR=$BASHLIB_HOME/locale
+source gettext.sh
 input(){
 test -p /dev/stdin&&test $# -eq 0&&cat -||echo "$*"
 }
@@ -120,4 +123,4 @@ fi
 printf "  %-40s %s\n" "$short_text--$name$type_text" "${opt_descriptions[$name]}"
 done
 }
-LL_OPTIONS_UNRECOGNIZED="Unrecognized option:"
+

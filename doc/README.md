@@ -43,7 +43,7 @@ The core functions contains essential parts which may also be used while loading
 | Variable/Function | Description |
 | --- | --- |
 | [`input`](function/input.md) | Collect string from stdin (no parameters) or concatenate the parameters |
-| [`input_args`](function/input_args.md) | Collect string from stdin (not more than defined parameters) or concatenate the parameters0 |
+| [`input_args`](function/input_args.md) | Collect string from stdin (not more than defined parameters) or concatenate the parameters |
 | [`input_lines`](function/input_lines.md) | Collect string from stdin (no parameters) or parameters each as a line |
 | [`die`](function/die.md) | Output error message and exit |
 | [`trap_add`](function/trap_add.md) | Set or add an additiopnal trap without overwriting existing ones |
@@ -52,13 +52,11 @@ The core functions contains essential parts which may also be used while loading
 | [`option_parse`](function/option_parse.md) | Parse arguments based on given specification |
 | [`option_help`](function/option_help.md) | Print help for options defined in options specification |
 
-### Lang Module
+### Gettext Module
 
-The base language file, to support another language copy this to `config/lang.LL` and translate the values.
 
 | Variable/Function | Description |
 | --- | --- |
-| ``$LL_OPTIONS_UNRECOGNIZED`` | Translate: Unrecognized option given |
 
 ## Module
 

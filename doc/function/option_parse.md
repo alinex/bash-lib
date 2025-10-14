@@ -2,7 +2,9 @@
 
 ## Parse arguments based on given specification
 
-Short options can also be given in short notation "-a45" ->` "-a 45" or "--age 45"
+This will parse the given options into a standardized form and validate them against the given specification.
+Options can be given in different forms: `-a 45`, `-a45`, `--age 45`, `--age=45` are all equal.
+Also multiple short options can be put together with only the last may need a value.
 
 
 ### Usage

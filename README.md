@@ -24,6 +24,7 @@ bashlib/
     config/         # individual configuration (dynamically loaded in full)
     module/         # additional modules but included in full
     extra/          # special modules which always  eb loaded individually
+    locale/         # translations
     install         # setup bashlib on this host
     update          # script to regenerate full file and docs after update 
     test            # run all unit tests
@@ -178,3 +179,32 @@ set +e
 ```
 
 Now you can run functions or the script line by line in the bash shell directly.
+
+### Internationalization
+
+This is done using the GNU gettext solution. All you have to do is to use it. 
+
+```bash
+# Use simple text translation
+gettext "Hello, world!"
+# Output the same with a newline
+echo "$(gettext "Hello, world!")"
+
+# Use variables
+name=Alex
+printf "$(gettext "Hello, %s!")\n" "$name"
+echo "$(eval_gettext 'Hello, $name!')"
+
+# Pluralization based on count
+count=2
+echo "$(eval_ngettext 'An egg' '$count eggs' $count)"
+```
+
+After that you should:
+
+1. Add translation entries in Code.
+2. Run `update` to get them into the po/mo files.
+3. Translate within `locale/<lang>/LC_MESSAGES/bashlib.po`
+4. Run `update` again.
+
+To support more languages add them to `$LOCALES` within the `update` script.

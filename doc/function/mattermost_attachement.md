@@ -9,7 +9,7 @@ Find free linkable icons under https://icons8.de/icons/all
 ### Usage
 
 ```bash
-mattermost_attachement 
+mattermost_attachement
 mattermost_post `$channelid` "" "$(mattermost_attachement --color ...)"
 ```
 

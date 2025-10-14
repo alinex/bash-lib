@@ -3,11 +3,20 @@
 # The core functions contains essential parts which may also be used while loading the library.
 
 ######################################################################################
+### Gettext setup
+######################################################################################
+
+export TEXTDOMAIN=bashlib
+export TEXTDOMAINDIR=$BASHLIB_HOME/locale
+source gettext.sh
+
+######################################################################################
 ### Base functions
 ######################################################################################
 
 # Collect string from stdin (no parameters) or concatenate the parameters
 # This can be used to make functions which you can feed with one or multiple parameters as well as through a pipe.
+# See also: @input_args @input_lines
 # Usage:    input "$@" | ....
 #           text="$(input "$@")"
 # Output:   <string-input> or
@@ -16,7 +25,7 @@ input() {
     test -p /dev/stdin && test $# -eq 0 && cat - || echo "$*"
 }
 
-# Collect string from stdin (not more than defined parameters) or concatenate the parameters0
+# Collect string from stdin (not more than defined parameters) or concatenate the parameters
 # This can be used to make functions which you can feed with one or multiple parameters as well as through a pipe.
 # But instead of the @input this will allow the first <num> additional parameters which will be not slurped in.
 # Usage:    input_args <num> "$@" | ....
@@ -47,7 +56,7 @@ input_lines() {
 # Usage:    die <message>
 #           <message> | die
 # Error:    <message>
-# Return:   always 1
+# Return:   always 1 and try to exit script with status 1
 die() {
     echo -e "${CC_CRITICAL}$(input "$@")${CC_RESET}" >&2
     # kill -s TERM "$PPID" # forcibly terminite the parent
@@ -90,7 +99,7 @@ trap_remove() {
 #           -m, --memory                # use shared memory
 #           -e, --extension <string>    # to specify file extension (better readability)
 #           -p, --path <base-dir>       # folder under which to create file
-#           -r, --random                # add an random path to the identifier
+#           -r, --random                # add a random (numeric) part to the identifier
 # Output:   <path>
 mktemp() {
     # parameter parsing
@@ -147,7 +156,9 @@ mktemp() {
 ######################################################################################
 
 # Parse arguments based on given specification
-# Short options can also be given in short notation "-a45" -> "-a 45" or "--age 45"
+# This will parse the given options into a standardized form and validate them against the given specification.
+# Options can be given in different forms: `-a 45`, `-a45`, `--age 45`, `--age=45` are all equal.
+# Also multiple short options can be put together with only the last may need a value.
 # Usage:        eval set -- "$(option_parse <spec> "$@")"
 #               <spec> lines := <short-letter>|- <long-word> <type>|- <description>
 # Output:       parsed options <string>

@@ -20,7 +20,7 @@ mktemp [<identifier>]       # use default temp if no identifier given
 -m, --memory                # use shared memory
 -e, --extension <string>    # to specify file extension (better readability)
 -p, --path <base-dir>       # folder under which to create file
--r, --random                # add an random path to the identifier
+-r, --random                # add a random (numeric) part to the identifier
 ```
 
 ### Output (stdout)

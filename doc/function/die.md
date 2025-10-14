@@ -17,4 +17,4 @@ die <message>
 
 ### Return (exit code)
 
-- always 1
+- always 1 and try to exit script with status 1

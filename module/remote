@@ -220,7 +220,7 @@ boot_wait() {
             shift
             break
             ;;
-        *) die "Unrecognized option: $1" ;;
+        *) die "$(gettext "Unrecognized option: \$1")" ;;
         esac
     done
     # processing

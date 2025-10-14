@@ -241,11 +241,11 @@ ask_input() {
     fi
     echo -ne "${CC_INFO}" >/dev/tty
     read -rp "$prompt" answer
+    echo -e "${CC_RESET}" >/dev/tty
     if [ -z "$answer" ] && [ -n "$2" ]; then
         answer="$2"
         echo -n "Standardantwort genutzt: $answer" >/dev/tty
     fi
-    echo -e "${CC_RESET}" >/dev/tty
     echo "$answer"
 }
 
@@ -284,7 +284,7 @@ choose() {
             shift
             break
             ;;
-        *) die "$LL_OPTIONS_UNRECOGNIZED $1" ;;
+        *) die "$(gettext "Unrecognized option: \$1")" ;;
         esac
     done
     # processing
@@ -311,14 +311,14 @@ choose() {
             echo exit
             return
         else
-            echo -n "Ungültige Eingabe: +$select+ +$default+ " >/dev/tty
+            echo -n "Ungültige Eingabe: " >/dev/tty
         fi
     done
 }
 
 # Run tasks as selected by user
 # Usage:    tasks <function>"|"<entry>"...  # entries from arguments
-#           <list> | tasks                  # entries from ppe
+#           <list> | tasks                  # entries from pipe
 #           tasks <function>                # entries from function (dynamic)
 # Option    -t, --title <title>             # display text line above selection
 # TTY:      [<title>]
@@ -353,7 +353,7 @@ tasks() {
             shift
             break
             ;;
-        *) die "$LL_OPTIONS_UNRECOGNIZED $1" ;;
+        *) die "$(gettext "Unrecognized option: \$1")" ;;
         esac
     done
     # processing
