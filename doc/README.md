@@ -306,3 +306,5 @@ Validators to make this easier and more readable.
 | [`trim_start`](function/trim_start.md) | Trim leading whitespace or given character |
 | [`trim_end`](function/trim_end.md) | Trim trailing whitespace or given character |
 | [`trim`](function/trim.md) | Trim leading and trailing whitespace or given character |
+
+## Extra

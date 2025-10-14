@@ -21,8 +21,9 @@ bashlib/
     base            # only the base/core functionality (minified)
     configs         # load all configurations
     core/           # core modules which always be needed
-    config/         # individual configuration
-    module/         # additional modules which can be optionally loaded
+    config/         # individual configuration (dynamically loaded in full)
+    module/         # additional modules but included in full
+    extra/          # special modules which always  eb loaded individually
     install         # setup bashlib on this host
     update          # script to regenerate full file and docs after update 
     test            # run all unit tests
@@ -33,8 +34,9 @@ bashlib/
 Can be done locally after checking out the git repository manually by setting only the `BASHLIB_HOME` variable in your environment or directly from the repository by calling:
 
 ```bash
-curl -sL https://gitlab.com/alinex/bash-lib/-/raw/master/install | bash                     # interactive
-curl -sL https://gitlab.com/alinex/bash-lib/-/raw/master/install | bash -s -- <path> y|n    # automatic
+curl -sL https://gitlab.com/alinex/bash-lib/-/raw/master/install | bash     # interactive
+curl -sL https://gitlab.com/alinex/bash-lib/-/raw/master/install | \
+    bash -s -- <path> y|n <config>                                          # automatic
 ```
 
 The steps are:
