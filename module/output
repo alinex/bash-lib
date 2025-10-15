@@ -318,7 +318,7 @@ choose() {
 
 # Run tasks as selected by user
 # Often the functions are also named `check-...` for the ones which will return tasks and `task-...` for the ones really doing the job. The first one may do a lot of analyzation and output user information on stdout.
-# The '|' character is not possible within the commans. If a pipe is neccessary put it within a function.
+# The '|' character is not possible within the commans. If a pipe is neccessary put it within a function. Also some commands can be disabled in the list by preceding the command with an `#` character.
 # Usage:    tasks <entry>...
 #           # <entry>       := <check-fn> or "<task-line>"
 #           # <check-fn>    := function called to return up to multiple <task-lines>
@@ -369,39 +369,39 @@ tasks() {
         esac
     done
     # processing
-    local list task num newlist opt cmd name res
-    list="$(input_lines "$@")"
-    # check for dynamic parts in list
-    while grep -qv '|' <<<"$list"; do
-        newlist=""
-        while IFS= read -r line; do
-            IFS='|' read -r cmd name <<<"$line"
-            if [ -n "$name" ]; then
-                newlist="$newlist$line"$'\n'
-            else
-                echo ">>> $cmd"
-                res="$($cmd)" || die "Could not get task list from command: $cmd"
-                [ -z "$res" ] || newlist="$newlist$res"$'\n'
-            fi
-        done <<<"$list"
-        list="$(echo "$newlist" | sed '/^[[:space:]]*$/d')"
-    done
-    if [ "$default" = "x" ]; then
-        opt="-d x"
-    elif [ -n "$default" ]; then
-        num=0
-        while IFS= read -r line; do
-            ((num++)) || true
-            IFS='|' read -r cmd name <<<"$line"
-            [ ! "$default" = "$(trim "$cmd")" ] || opt="-d $num"
-        done <<<"$list"
-    fi
+    local raw list task num newlist opt cmd name res
+    raw="$(input_lines "$@" | grep -v '^[[:space:]]*#')"
     # ask user to select
     while true; do
+        list="$raw"
+        # check for dynamic parts in list
+        while grep -qv '|' <<<"$list"; do
+            newlist=""
+            while IFS= read -r line; do
+                IFS='|' read -r cmd name <<<"$line"
+                if [ -n "$name" ]; then
+                    newlist="$newlist$line"$'\n'
+                else
+                    res="$($cmd </dev/null)" || die "Could not get task list from command: $cmd"
+                    [ -z "$res" ] || newlist="$newlist$res"$'\n'
+                fi
+            done <<<"$list"
+            list="$(echo "$newlist" | sed '/^[[:space:]]*$/d')"
+        done
+        if [ "$default" = "x" ]; then
+            opt="-d x"
+        elif [ -n "$default" ]; then
+            num=0
+            while IFS= read -r line; do
+                ((num++)) || true
+                IFS='|' read -r cmd name <<<"$line"
+                [ ! "$default" = "$(trim "$cmd")" ] || opt="-d $num"
+            done <<<"$list"
+        fi
         # shellcheck disable=SC2086
         task=$(choose "$title" -x Beenden $opt "$list")
         [[ "$task" != "exit" ]] || break
-        $task || die "Got error $? running: $task"
+        $task || error "Got error $? running: $task"
         echo ""
     done
 }

@@ -20,7 +20,7 @@ declare -F "num_parameters" >/dev/null || source "$BASHLIB_HOME"/module/validato
 # Output:   passed through
 remote() {
     local ssh="${slogin:-operator}@${server}"
-    if [ -p /dev/stdin ]; then
+    if [ -p /dev/stdin ] && [ $# -eq 0 ]; then
         ssh $ssh bash -s
         return ${PIPESTATUS[0]}
     else
@@ -82,6 +82,21 @@ remote_file() {
     test -f "$file" || die "No file to execute remotely under $file"
     local ssh="${slogin:-operator}@${server}"
     ssh $ssh 'bash -s' <$file
+}
+
+# Open an interactive console on remote host
+# The motd and banner are prevented by touching .hushlogin on the server.
+# Usage:    remote_console
+# Globals:  $server
+#           $login - default is "operator"
+# Output:   passed through
+# Return:   passed through
+remote_console() {
+    local rc
+    local ssh="${slogin:-operator}@${server}"
+    ssh $ssh '(nohup touch .hushlogin && sleep 1 && rm .hushlogin) >/dev/null 2>&1 </dev/null &' # no banner
+    ssh $ssh </dev/tty || rc=$?
+    return $rc
 }
 
 # Upload file

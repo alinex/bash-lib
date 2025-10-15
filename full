@@ -955,8 +955,10 @@ break
 *)die "$(gettext 'Unrecognized option: $1')"
 esac
 done
-local list task num newlist opt cmd name res
-list="$(input_lines "$@")"
+local raw list task num newlist opt cmd name res
+raw="$(input_lines "$@"|grep -v '^[[:space:]]*#')"
+while true;do
+list="$raw"
 while grep -qv '|' <<<"$list";do
 newlist=""
 while IFS= read -r line;do
@@ -964,8 +966,7 @@ IFS='|' read -r cmd name <<<"$line"
 if [ -n "$name" ];then
 newlist="$newlist$line"$'\n'
 else
-echo ">>> $cmd"
-res="$($cmd)"||die "Could not get task list from command: $cmd"
+res="$($cmd </dev/null)"||die "Could not get task list from command: $cmd"
 [ -z "$res" ]||newlist="$newlist$res"$'\n'
 fi
 done <<<"$list"
@@ -981,10 +982,9 @@ IFS='|' read -r cmd name <<<"$line"
 [ ! "$default" = "$(trim "$cmd")" ]||opt="-d $num"
 done <<<"$list"
 fi
-while true;do
 task=$(choose "$title" -x Beenden $opt "$list")
 [[ $task != "exit" ]]||break
-$task||die "Got error $? running: $task"
+$task||error "Got error $? running: $task"
 echo ""
 done
 }
@@ -1290,7 +1290,7 @@ fi
 declare -F "num_parameters" >/dev/null||source "$BASHLIB_HOME"/module/validator
 remote(){
 local ssh="${slogin:-operator}@$server"
-if [ -p /dev/stdin ];then
+if [ -p /dev/stdin ]&&[ $# -eq 0 ];then
 ssh $ssh bash -s
 return ${PIPESTATUS[0]}
 else
@@ -1325,6 +1325,13 @@ test "${file:0:1}" = "/"||file="$(path)/$file"
 test -f "$file"||die "No file to execute remotely under $file"
 local ssh="${slogin:-operator}@$server"
 ssh $ssh 'bash -s' <$file
+}
+remote_console(){
+local rc
+local ssh="${slogin:-operator}@$server"
+ssh $ssh '(nohup touch .hushlogin && sleep 1 && rm .hushlogin) >/dev/null 2>&1 </dev/null &'
+ssh $ssh </dev/tty||rc=$?
+return $rc
 }
 upload(){
 local ssh="${slogin:-operator}@$server"
