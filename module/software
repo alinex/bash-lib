@@ -19,7 +19,7 @@ install() {
     # check what is needed
     for cmd in "$@"; do
         if [[ ! -v _software_install["$cmd"] ]]; then
-            sudo which $cmd >/dev/null ||
+            sudo which "$cmd" >/dev/null ||
                 case $cmd in
                 yq) snap="$snap $cmd" ;;
                 *) apt="$apt $cmd" ;;
@@ -27,11 +27,18 @@ install() {
             _software_install["$cmd"]=1
         fi
     done
-    test -z "$snap" || command -v snapd >/dev/null || (apt="$apt snapd" && snap="$snap snapd" && reload=1)
+    if test -n "$snap" && ! command -v snapd >/dev/null; then
+        apt="$apt snapd"
+        snap="$snap snapd"
+        reload=1
+    fi
     # install
+    # shellcheck disable=SC2086
     test -z "$apt" || sudo apt-get install -y $apt
+    # shellcheck disable=SC2086
     test -z "$snap" || sudo apt snap install $snap
     # reload possibly changed config
+    # shellcheck disable=SC1090
     test -z "$reload" || source ~/.bashrc
 }
 
@@ -118,29 +125,29 @@ semver_diff() {
     # output
     if [ -n "$human" ]; then
         echo -n "$1 -> $2 "
-        if [ $num -eq 0 ]; then
+        if [ "$num" -eq 0 ]; then
             echo "sind identische Versionen"
-        elif [ $num -ge 1000000000 ]; then
+        elif [ "$num" -ge 1000000000 ]; then
             echo "ist ein upgrade von $((num / 1000000000)) Hauptversione(n)"
-        elif [ $num -ge 1000000 ]; then
+        elif [ "$num" -ge 1000000 ]; then
             echo "ist ein upgrade von $((num / 1000000)) Nebenversione(n)"
-        elif [ $num -ge 1000 ]; then
+        elif [ "$num" -ge 1000 ]; then
             echo "ist ein upgrade von $((num / 1000)) Patch Level(n)"
-        elif [ $num -ge 1 ]; then
+        elif [ "$num" -ge 1 ]; then
             echo "ist ein entwickler Upgrade)"
-        elif [ $num -ge -1000 ]; then
+        elif [ "$num" -ge -1000 ]; then
             echo "ist ein entwickler Downgrade"
-        elif [ $num -ge 1000000 ]; then
+        elif [ "$num" -ge 1000000 ]; then
             echo "ist ein downgrade von $((num / -1000)) Patch Level(n)"
-        elif [ $num -ge 1000000000 ]; then
+        elif [ "$num" -ge 1000000000 ]; then
             echo "ist ein downgrade von $((num / -1000000)) Nebenversione(n)"
         else
             echo "ist ein downgrade von $((num / -1000000000)) Hauptversione(n)"
         fi
         return 0
     else
-        echo $num
+        echo "$num"
     fi
     # return code
-    [ $num -eq 0 ] && return 0 || return 1
+    [ "$num" -eq 0 ] && return 0 || return 1
 }

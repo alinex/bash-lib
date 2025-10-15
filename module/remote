@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 # shellcheck source=base
 source /dev/null
+# shellcheck source=config/environment
+source /dev/null
+# shellcheck source=config/secrets
+source /dev/null
 
 # Module with remote calling/execution helpers.
 
@@ -19,13 +23,16 @@ declare -F "num_parameters" >/dev/null || source "$BASHLIB_HOME"/module/validato
 #           $login - default is "operator"
 # Output:   passed through
 remote() {
-    local ssh="${slogin:-operator}@${server}"
+    local ssh="${slogin:-operator}@${server-}"
     if [ -p /dev/stdin ] && [ $# -eq 0 ]; then
-        ssh $ssh bash -s
+        ssh "$ssh" bash -s
+        # shellcheck disable=SC2086
         return ${PIPESTATUS[0]}
     else
         # this allows interactivity
-        ssh $ssh "$@"
+        # shellcheck disable=SC2029
+        ssh "$ssh" "$@"
+        # shellcheck disable=SC2086
         return ${PIPESTATUS[0]}
     fi
 }
@@ -41,11 +48,13 @@ remote() {
 remote_term() {
     local ssh="${slogin:-operator}@${server}"
     if [ -p /dev/stdin ]; then
-        ssh -t $ssh bash -s
+        ssh -t "$ssh" bash -s
+        # shellcheck disable=SC2086
         return ${PIPESTATUS[0]}
     else
         # this allows interactivity
-        ssh -t $ssh "$@"
+        ssh -t "$ssh" "$@"
+        # shellcheck disable=SC2086
         return ${PIPESTATUS[0]}
     fi
 }
@@ -59,11 +68,13 @@ remote_term() {
 remote_term_line() {
     local ssh="${slogin:-operator}@${server}"
     if [ -p /dev/stdin ]; then
-        ssh -t $ssh bash -s 2> >(grep -v '^Connection to .* closed\.' >&2) | nocr
+        ssh -t "$ssh" bash -s 2> >(grep -v '^Connection to .* closed\.' >&2) | nocr
+        # shellcheck disable=SC2086
         return ${PIPESTATUS[0]}
     else
         # this allows interactivity
-        ssh -t $ssh "$@" 2> >(grep -v '^Connection to .* closed\.' >&2) | nocr
+        ssh -t "$ssh" "$@" 2> >(grep -v '^Connection to .* closed\.' >&2) | nocr
+        # shellcheck disable=SC2086
         return ${PIPESTATUS[0]}
     fi
 }
@@ -81,7 +92,7 @@ remote_file() {
     test "${file:0:1}" = "/" || file="$(path)/$file"
     test -f "$file" || die "No file to execute remotely under $file"
     local ssh="${slogin:-operator}@${server}"
-    ssh $ssh 'bash -s' <$file
+    ssh "$ssh" 'bash -s' <"$file"
 }
 
 # Open an interactive console on remote host
@@ -94,8 +105,9 @@ remote_file() {
 remote_console() {
     local rc
     local ssh="${slogin:-operator}@${server}"
-    ssh $ssh '(nohup touch .hushlogin && sleep 1 && rm .hushlogin) >/dev/null 2>&1 </dev/null &' # no banner
-    ssh $ssh </dev/tty || rc=$?
+    ssh "$ssh" '(nohup touch .hushlogin && sleep 1 && rm .hushlogin) >/dev/null 2>&1 </dev/null &' # no banner
+    ssh "$ssh" </dev/tty || rc=$?
+    # shellcheck disable=SC2248
     return $rc
 }
 
@@ -129,9 +141,8 @@ download() {
 #           $login - default is "operator"
 remote_install() {
     (
-        cat $BASHLIB_BASE/1_color
-        cat $BASHLIB_BASE/2_core
-        cat $BASHLIB_BASE/software
+        cat "$BASHLIB_HOME"/base
+        cat "$BASHLIB_HOME"/module/software
         echo install "$@"
     ) | shfmt -mn | remote #> remote.sh
 }
@@ -169,15 +180,16 @@ remote_df() {
     local firstline="" percent mount device limit_c limit_e limit_w limit_o
     # display
     IFS=$'\n'
+    # shellcheck disable=SC2248
     for line in $(remote df -h $opt -x tmpfs -x efivarfs -x devtmpfs -x squashfs "$@"); do
         if [ -z "$firstline" ]; then
             firstline=1
-            invers $line
+            invers "$line"
         else
-            percent=$(echo $line | xargs echo | cut -d' ' -f5 | sed 's/%//')
-            mount=$(echo $line | xargs echo | cut -d' ' -f6 | nocr)
+            percent=$(echo "$line" | xargs echo | cut -d' ' -f5 | sed 's/%//')
+            mount=$(echo "$line" | xargs echo | cut -d' ' -f6 | nocr)
             # get color limits
-            device=$(echo $line | xargs echo | cut -d' ' -f1)
+            device=$(echo "$line" | xargs echo | cut -d' ' -f1)
             for ((i = 0; i < ${#MOUNT_COLOR_LIMIT[@]}; i += 5)); do
                 pattern="${MOUNT_COLOR_LIMIT[i]}"
                 if [[ "$device" =~ $pattern ]]; then
@@ -189,18 +201,18 @@ remote_df() {
                 fi
             done
             # display
-            if [ $percent -eq $limit_c ]; then
+            if [ "$percent" -eq "$limit_c" ]; then
                 critical "$line"
-            elif [ $percent -ge $limit_e ]; then
+            elif [ "$percent" -ge "$limit_e" ]; then
                 error "$line"
-            elif [ $percent -ge $limit_w ]; then
+            elif [ "$percent" -ge "$limit_w" ]; then
                 warn "$line"
-            elif [ $percent -ge $limit_o ]; then
+            elif [ "$percent" -ge "$limit_o" ]; then
                 ok "$line"
             else
                 echo "$line"
             fi
-            if [ -n "$limit" ] && compare $percent $op $limit; then
+            if [ -n "$limit" ] && compare "$percent" "$op" "$limit"; then
                 ref="${ref}${mount} "
             fi
         fi
@@ -243,11 +255,11 @@ boot_wait() {
     # processing
     local uptime seconds=15
     echo -ne "Warten bis der Reboot fertig ist" >&2
-    sleep $seconds
+    sleep "$seconds"
     while true; do
         [ -n "$quiet" ] || echo -ne "\rWarten bis der Reboot fertig ist ($seconds Sekunden)" >&2
         uptime=$(remote cut -d"' '" -f1 /proc/uptime 2>/dev/null | sed 's/[ .].*//')
-        if [ -n "$uptime" ] && [ $uptime -lt 300 ]; then
+        if [ -n "$uptime" ] && [ "$uptime" -lt 300 ]; then
             break
         else
             sleep 1
@@ -277,16 +289,15 @@ CURL_HTTP_CODE=""
 curl() {
     local file res
     file=$(mktemp -m -r)
-    res=$(command curl -s -w "Error: %{method} %{url_effective} with RC:%{http_code}" -o $file -L "$@")
+    res=$(command curl -s -w "Error: %{method} %{url_effective} with RC:%{http_code}" -o "$file" -L "$@")
     CURL_HTTP_CODE=${res:(-3)}
     if [[ "$CURL_HTTP_CODE" =~ ^2[0-9]{2}$ ]]; then
-        cat $file
-        rm $file
+        cat "$file"
+        rm "$file"
     else
         error "$res" >&2
-        jq . $file >&2 2>/dev/null || cat $file >&2
-        #cat $file
-        rm $file
+        jq . "$file" >&2 2>/dev/null || cat "$file" >&2
+        rm "$file"
         return 1
     fi
 }
@@ -303,6 +314,7 @@ curl() {
 mongosh() {
     num_parameters --min 2 --max 2 --die "Mongosh needs two parameters: Usage mongosh <database> <command>" "$@"
     local cluster
-    cluster="$(echo $server | sed 's/^[^.]*\.//')"
+    # shellcheck disable=SC2001
+    cluster="$(sed 's/^[^.]*\.//' <<<"$server")"
     command mongosh "mongodb://${MONGO_ADMIN_USERPASS["$cluster"]}@$server:27017/$1" --eval "$2"
 }

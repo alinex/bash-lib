@@ -10,9 +10,9 @@
 # Usage:    repeat <N> <command> [<params>]...
 repeat() {
     local -i n=$1
-    [ $n -gt 0 ] || return
+    [ "$n" -gt 0 ] || return
     shift
-    for n in $(seq $n); do
+    for n in $(seq "$n"); do
         "$@"
     done
 }
@@ -27,14 +27,14 @@ function retry {
     local count=0 exit wait
     until "$@"; do
         exit=$?
-        wait=$((2 ** $count))
-        count=$(($count + 1))
-        if [ $count -lt $retries ]; then
+        wait=$((2 ** count))
+        count=$((count + 1))
+        if [ "$count" -lt "$retries" ]; then
             echo "Try $count/$retries exited $exit, retrying in $wait seconds..." >&2
-            sleep $wait
+            sleep "$wait"
         else
             echo "Try $count/$retries exited $exit, no more retries left." >&2
-            return $exit
+            return "$exit"
         fi
     done
     return 0
@@ -64,10 +64,10 @@ countdown() {
     # processing
     local seconds=$1
     local text=${2:-Waiting}
-    while [ $seconds -gt 0 ]; do
+    while [ "$seconds" -gt 0 ]; do
         echo -ne "\r$text $seconds seconds $abort"
         if [ -n "$abort" ]; then
-            read -t 1 -n 1 key && return 1 || true
+            read -r -t 1 -n 1 _ && return 1 || true
         else
             sleep 1
         fi
@@ -108,12 +108,12 @@ lock() {
     # try it, till it works
     logged=0
     while ! ln "$lockfile.$$" "$lockfile" 2>/dev/null; do
-        if [ $logged -eq 0 ]; then # write message once
+        if [ "$logged" -eq 0 ]; then # write message once
             echo "Waiting for unlock in $lockfile by PID $(cat "$lockfile")..." >&1
             logged=1
         fi
         # if the symlink failed, wait for the current lock holder to exit
-        sleep $LOCK_SLEEP
+        sleep "$LOCK_SLEEP"
         # make a file with our PID, if no longer existent
         echo $$ >"$lockfile.$$" 2>/dev/null
         # check again for zombies
@@ -138,8 +138,7 @@ lock_exit() {
     # rmove old lock if no longer running
     _lock_remove
     # try to symlink it
-    ln "$lockfile.$$" "$lockfile" 2>/dev/null
-    if [ $? -ne 0 ]; then
+    if ! ln "$lockfile.$$" "$lockfile" 2>/dev/null; then
         unlock
         die "Stop processing because this is locked in $lockfile by PID $(cat "$lockfile")"
     fi
@@ -202,7 +201,8 @@ env_store() {
     # processing
     local ident=$1
     shift || true
-    declare -p "$@" | sed 's/^declare\b/declare -g/' >$(mktemp $opt -e env "$ident")
+    # shellcheck disable=SC2086
+    declare -p "$@" | sed 's/^declare\b/declare -g/' >"$(mktemp $opt -e env "$ident")"
 }
 
 # Restore environment from shared memory/file
@@ -231,7 +231,9 @@ env_restore() {
         esac
     done
     # processing
-    source $(mktemp $opt -e env "$1") 2>/dev/null || true
+    # shellcheck disable=SC1090
+    # shellcheck disable=SC2086
+    source "$(mktemp $opt -e env "$1")" 2>/dev/null || true
 }
 
 # Remove stored environment from shared memory/file
@@ -260,7 +262,8 @@ env_clean() {
         esac
     done
     # processing
-    rm -f $(mktemp $opt -e env "$1")
+    # shellcheck disable=SC2086
+    rm -f "$(mktemp $opt -e env "$1")"
 }
 
 # Change environment in shared memory/file
@@ -293,8 +296,10 @@ env_change() {
     shift || true
     local command=$1
     shift || true
+    # shellcheck disable=SC2086
     env_restore $opt "$ident"
     eval "$command"
+    # shellcheck disable=SC2086
     env_store $opt "$ident" "$@"
 }
 
@@ -316,7 +321,7 @@ steps_init() {
     declare -g -A _STEPS
     env_restore steps
     declare -p _STEPS
-    env_store steps _STEPS $STEPS_VARIABLES # initial store
+    env_store steps _STEPS "$STEPS_VARIABLES" # initial store
     echo "Arbeitsschritte werden protokolliert um auch mittendrin wieder aufzusetzen..." >&2
 }
 
@@ -332,7 +337,6 @@ steps_check() {
     else
         return 1
     fi
-    env_store steps _STEPS $STEPS_VARIABLES
 }
 
 # Set step as successfully done
@@ -344,7 +348,7 @@ steps_done() {
     if [ -n "$1" ]; then
         _STEPS["$1"]=1
         echo "Finished: Step $1 at $(date_format sql)" >&2
-        env_store steps _STEPS $STEPS_VARIABLES
+        env_store steps _STEPS "$STEPS_VARIABLES"
     else
         env_clean steps
     fi
@@ -356,7 +360,7 @@ steps_done() {
 # async_name directly.
 sync() {
     num_parameters --min 1 --die "At least a <command> is needed!" -- "$@"
-    sync_name $1 "$@"
+    sync_name "$1" "$@"
 }
 
 # Alternative to sync in which this call is given a name to refer
@@ -365,10 +369,10 @@ sync_name() {
     num_parameters --min 2 --die "At least a <name> and <command> is needed!" -- "$@"
     local name=$1
     shift
-    steps_check $name && return || true
+    steps_check "$name" && return || true
     declare -p _STEPS 2>/dev/null | grep -q 'declare -A' && echo "Started: step $name at $(date_format sql)" >&2 || true
     "$@"
-    steps_done $name
+    steps_done "$name"
 }
 
 # Run the given command asynchronous ang go on in the calling routine (short form of async_name)
@@ -382,7 +386,7 @@ sync_name() {
 #           wait # for all to end
 async() {
     num_parameters --min 1 --die "At least a <command> is needed!" -- "$@"
-    async_name $1 "$@"
+    async_name "$1" "$@"
 }
 
 # Alternative to async in which this call is given a name to refer in async_wait
@@ -391,7 +395,7 @@ async_name() {
     num_parameters --min 2 --die "At least a <name> and <command> is needed!" -- "$@"
     local name=$1
     shift
-    ! steps_check $name || return
+    ! steps_check "$name" || return
     declare -p _STEPS 2>/dev/null | grep -q 'declare -A' && echo "Started: step $name at $(date_format sql)" >&2 || true
     "$@" &
     env_change queue "_async_running[\"$name\"]=$!" _queue _async_running
@@ -405,12 +409,12 @@ async_wait() {
     wait "${_async_running["$1"]}"
     local code=$?
     if [ "$code" -eq 0 ]; then
-        steps_done $1
+        steps_done "$1"
         env_change queue "unset async_running[\"$1\"]" _queue _async_running
     else
         declare -p _STEPS 2>/dev/null | grep -q 'declare -A' && echo echo "Failed: Step $1 at $(date_format sql)" >&2 || true
     fi
-    return $code
+    return "$code"
 }
 
 # Maximum number of parallel tasks for queue
@@ -421,7 +425,7 @@ declare _queue_control_pid
 
 env_store queue _queue _async_running # reset on each run
 _queue_control() {
-    local name pid free first params num
+    local name pid free first params
     while true; do
         sleep 1
         # loop async table
@@ -431,7 +435,7 @@ _queue_control() {
                 pid="${_async_running["$name"]}"
                 # process no longer running
                 if ! kill -0 "$pid" 2>/dev/null; then
-                    steps_done $name
+                    steps_done "$name"
                     env_change queue "unset _async_running[\"$name\"]" _queue _async_running
                 fi
             done || true
@@ -441,9 +445,9 @@ _queue_control() {
         # test if queue and running are empty -> end control
         [ ${#_queue[@]} -gt 0 ] || [ ${#_async_running[@]} -gt 0 ] || return 0
         # async has free slots
-        free=$(($ASYNC_QUEUE_MAX - ${#_async_running[@]}))
-        if [ $free -gt 0 ]; then
-            for num in $(seq 1 $free); do
+        free=$((ASYNC_QUEUE_MAX - ${#_async_running[@]}))
+        if [ "$free" -gt 0 ]; then
+            for _ in $(seq 1 "$free"); do
                 [ ${#_queue[@]} -gt 0 ] || break
                 # shift from queue
                 first="${_queue[0]}"
@@ -469,15 +473,16 @@ _queue_control() {
 #           wait # for all to end
 queue() {
     num_parameters --min 1 --die "At least a <command> is needed!" -- "$@"
-    queue_name $1 "$@"
+    queue_name "$1" "$@"
 }
 
 # Add command to process queue
 # Usage:    queue_name <name> <command> [<params>...]
 queue_name() {
     num_parameters --min 2 --die "At least a <name> and <command> is needed!" -- "$@"
-    ! steps_check $1 || return 0
-    local entry=$(printf "%s\x1f" "$@")
+    ! steps_check "$1" || return 0
+    local entry
+    entry=$(printf "%s\x1f" "$@")
     entry=${entry%$'\x1f'} # remove trailing separator
     # change queue and in shm
     env_change queue "_queue+=(\"$entry\")" _queue _async_running

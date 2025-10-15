@@ -1,4 +1,10 @@
 #!/usr/bin/env bash
+# shellcheck source=base
+source /dev/null
+# shellcheck source=config/environment
+source /dev/null
+# shellcheck source=config/secrets
+source /dev/null
 
 # Module with divibib specific helpers.
 
@@ -12,11 +18,12 @@
 # Usage:    confluence_outage <search>
 # Output:   <markdown>
 confluence_outage() {
-    local row="$(confluence $CONFLUENCE_OUTAGE | sed 's/<\/tr>/<\/tr>\n/g;s/<tr>/\n<tr>/g' | grep '^<tr' | grep "$1" | head -1 | sed 's/<\/td>/<\/td>\n/g;s/<td>/\n<td>/g' | grep '^<td')"
+    local row office customer user
+    row="$(confluence "$CONFLUENCE_OUTAGE" | sed 's/<\/tr>/<\/tr>\n/g;s/<tr>/\n<tr>/g' | grep '^<tr' | grep "$1" | head -1 | sed 's/<\/td>/<\/td>\n/g;s/<td>/\n<td>/g' | grep '^<td')"
     test -n "$row" || return
-    local office="$(echo "$row" | sed -n '2p' | html2md)"
-    local customer="$(echo "$row" | sed -n '3p' | html2md)"
-    local user="$(echo "$row" | sed -n '4p' | html2md)"
+    office="$(echo "$row" | sed -n '2p' | html2md)"
+    customer="$(echo "$row" | sed -n '3p' | html2md)"
+    user="$(echo "$row" | sed -n '4p' | html2md)"
     echo -e "##### Auswirkungen für Endkunden\n\n$user\n\n##### Auswirkungen für Bibliotheken\n\n$customer\n\n##### Auswirkungen intern divibib/ekz\n\n$office"
 }
 
@@ -26,15 +33,15 @@ confluence_outage() {
 
 backoffice_set() {
     # set message in backoffice <from> <to> <message>
-    local start
-    local end
+    local start end
     [[ "$1" =~ ^[0-9]+$ ]] &&
-        start="$(date -d @$1 -u +"%Y-%m-%dT%H:%M:%SZ" | urlencode)" ||
+        start="$(date -d @"$1" -u +"%Y-%m-%dT%H:%M:%SZ" | urlencode)" ||
         start="$(date -d "$1" -u +"%Y-%m-%dT%H:%M:%SZ" | urlencode)"
     [[ "$2" =~ ^[0-9]+$ ]] &&
-        end="$(date -d @$2 -u +"%Y-%m-%dT%H:%M:%SZ" | urlencode)" ||
+        end="$(date -d @"$2" -u +"%Y-%m-%dT%H:%M:%SZ" | urlencode)" ||
         end="$(date -d "$2" -u +"%Y-%m-%dT%H:%M:%SZ" | urlencode)"
-    local message="$(echo "${3:-Wartungsarbeiten}" | urlencode)"
+    local message
+    message="$(echo "${3:-Wartungsarbeiten}" | urlencode)"
     echo "Meldung im Backoffice: ${3:-Wartungsarbeiten}" >&2
     curl -u "swagger:$MIDDLEWARE_SWAGGER_PASSWORD" -X POST "http://user-application.service.user.dvb/v1/back-office/maintenance?validFrom=$start&validTo=$end&message=$message"
 }

@@ -88,6 +88,7 @@ is_float() {
 # Status:   1 if nots
 compare() {
     num_parameters --min 3 --max 3 --die "Exactly 3 parameter needed, got: $#" -- "$@"
+    # shellcheck disable=SC1009
     case "$2" in
     = | ==) [[ $1 == $3 ]] ;;
     !=) [[ $1 != $3 ]] ;;
