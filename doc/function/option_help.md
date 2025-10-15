@@ -15,3 +15,7 @@ option_help <spec>
 ### Output (stdout)
 
 - List of options for help output
+
+### Examples
+
+- [`base_script`](../example/base_script.md) includes a simple example

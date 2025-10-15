@@ -1,0 +1,245 @@
+#!/usr/bin/env bash
+# shellcheck source=base
+source /dev/null
+# shellcheck source=module/color
+source /dev/null
+
+# Module with user interaction helpers.
+
+# load other modules if not already done
+declare -F "color_256" >/dev/null || source "$BASHLIB_HOME"/module/color
+
+######################################################################################
+# User Input
+######################################################################################
+
+# Wait for user input
+# Usage:    pause <message>
+#           <message> | pause
+# TTY:      <question> <key>
+pause() {
+    local text
+    text="$(input "$@")"
+    test -z "$text" || warn "$text"
+    read -n 1 -s -r -p "Taste drücken um fortzufahren..." key
+    echo "" >/dev/tty
+}
+
+# Ask yes/no with default: no
+# Usage:    ask_no <question>
+#           <question> | ask_no
+# TTY:      <question> <key>
+# Status:   0 || 1
+ask_no() {
+    local text
+    text="$(input "$@")"
+    while true; do
+        echo -ne "${CC_INFO}" >/dev/tty
+        read -r -n 1 -s -p "$text (n/J) " yn
+        case $yn in
+        "" | [Nn])
+            echo -e "Nein${CC_RESET}" >/dev/tty
+            return 1
+            ;;
+        [JjYy])
+            echo -e "Ja${CC_RESET}" >/dev/tty
+            return 0
+            ;;
+        esac
+        echo "$yn -> ungültige Antwort" >/dev/tty
+    done
+}
+
+# Ask yes/no with default: yes
+# Usage:    ask_yes <question>
+#           <question> | ask_yes
+# TTY:      <question> <key>
+# Status:   0 || 1
+ask_yes() {
+    local text
+    text="$(input "$@")"
+    while true; do
+        echo -ne "${CC_INFO}" >/dev/tty
+        read -r -n 1 -s -p "$text (J/n) " yn
+        case $yn in
+        [Nn])
+            echo -e "Nein${CC_RESET}" >/dev/tty
+            return 1
+            ;;
+        "" | [JjYy])
+            echo -e "Ja${CC_RESET}" >/dev/tty
+            return 0
+            ;;
+        esac
+        echo "$yn -> ungültige Antwort" >/dev/tty
+    done
+}
+
+# Ask for a text line
+# Usage:    ask_input <question> [<default>]
+#           <question> | ask_input
+# TTY:      <question> <key>
+# Stdin:    <line>
+# Stdout:   <answer>
+ask_input() {
+    local text
+    text="$(input "$@")"
+    local answer prompt
+    if (($# < 2)); then
+        prompt="$text "
+    else
+        prompt="$text (Standard: $2) "
+    fi
+    echo -ne "${CC_INFO}" >/dev/tty
+    read -rp "$prompt" answer
+    echo -e "${CC_RESET}" >/dev/tty
+    if [ -z "$answer" ] && [ -n "$2" ]; then
+        answer="$2"
+        echo -n "Standardantwort genutzt: $answer" >/dev/tty
+    fi
+    echo "$answer"
+}
+
+# Select from list (extended version of native select)
+# Usage:    choose [-t] <entry>...
+#           <list> | choose [-t]
+# Options:  -t, --title <title>         # display text line above selection
+#           -x, --exit <string>         # will add an exit option at the end -> return "exit"
+#           -d, --default <string|int>  # the command or number which will be returned on <enter>
+# Entry:    <entry> := <string> | <key> "|" <display> # whitespace arround values are removed
+# TTY:      [<title>]
+#           <list>
+#           ...
+#           <question> <key>
+# Stdout:   selected <line>
+# TODO > 10 entries make two columns using mlr display
+choose() {
+    # parameter parsing
+    local end default
+    eval set -- "$(option_parse $'t title +\nx exit +\nd default +' "$@")"
+    while true; do
+        case "$1" in
+        -t | --title)
+            info "$2" >/dev/tty
+            shift 2
+            ;;
+        -d | --default)
+            default="$2"
+            shift 2
+            ;;
+        -x | --exit)
+            end="$2"
+            shift 2
+            ;;
+        --)
+            shift
+            break
+            ;;
+        *) die "$(gettext "Unrecognized option: \$1")" ;;
+        esac
+    done
+    # processing
+    local question="Wähle eine der obigen Optionen:"
+    [ -z "$default" ] || question="$question [$default]"
+    local list line key display num=0
+    list="$(input_lines "$@")"
+    list="$(trim "$list")"
+    while read -r line; do
+        num=$((num + 1))
+        IFS="|" read -r key display <<<"$line"
+        printf "%4d) $(trim "${display:-$key}")\n" "$num" >/dev/tty
+    done <<<"$list"
+    [ -z "$end" ] || printf "%4s) ${end}\n" x >/dev/tty
+    while true; do
+        read -r -p "$question " select </dev/tty
+        if [[ "$select" =~ ^[1-$num]$ ]]; then
+            sed -n "${select}p" <<<"$list" | sed 's/|.*//'
+            return
+        elif [ -n "$default" ] && [ -z "$select" ]; then
+            is_integer "$default" && sed -n "${default}p" <<<"$list" | sed 's/|.*//' || echo "$default"
+            return
+        elif [ -n "$end" ] && compare "$select" =~ [xXqQ]; then
+            echo exit
+            return
+        else
+            echo -n "Ungültige Eingabe: " >/dev/tty
+        fi
+    done
+}
+
+# Run tasks as selected by user
+# Often the functions are also named `check-...` for the ones which will return tasks and `task-...` for the ones really doing the job. The first one may do a lot of analyzation and output user information on stdout.
+# The '|' character is not possible within the commans. If a pipe is neccessary put it within a function. Also some commands can be disabled in the list by preceding the command with an `#` character.
+# Usage:    tasks <entry>...
+#           # <entry>       := <check-fn> or "<task-line>"
+#           # <check-fn>    := function called to return up to multiple <task-lines>
+#           # <task-fn>     := function to be run when selected
+#           # <task-line>   := "<task-fn> | <name>"
+#           <task-lines> | tasks            # entries from pipe
+#           tasks <check-fn>                # add entries from function (dynamic)
+# Option    -t, --title <title>             # display text line above selection
+#           -d, --default <task-fn> | "x"   # default command to start
+# TTY:      [<title>]
+#           1) <name>
+#           ...
+#           x) Beenden
+#           <question> <input>
+# Example:  &tasks different possibilities
+tasks() {
+    # parameter parsing
+    local end title default
+    eval set -- "$(option_parse $'t title +\nd default +' "$@")"
+    while true; do
+        case "$1" in
+        -t | --title)
+            title="-t$2" >/dev/tty
+            shift 2
+            ;;
+        -d | --default)
+            default="$2" >/dev/tty
+            shift 2
+            ;;
+        --)
+            shift
+            break
+            ;;
+        *) die "$(gettext "Unrecognized option: \$1")" ;;
+        esac
+    done
+    # processing
+    local raw list task num newlist opt cmd name res
+    raw="$(input_lines "$@" | grep -v '^[[:space:]]*#')"
+    # ask user to select
+    while true; do
+        list="$raw"
+        # check for dynamic parts in list
+        while grep -qv '|' <<<"$list"; do
+            newlist=""
+            while IFS= read -r line; do
+                IFS='|' read -r cmd name <<<"$line"
+                if [ -n "$name" ]; then
+                    newlist="$newlist$line"$'\n'
+                else
+                    res="$($cmd </dev/null)" || die "Could not get task list from command: $cmd"
+                    [ -z "$res" ] || newlist="$newlist$res"$'\n'
+                fi
+            done <<<"$list"
+            list="$(echo "$newlist" | sed '/^[[:space:]]*$/d')"
+        done
+        if [ "$default" = "x" ]; then
+            opt="-d x"
+        elif [ -n "$default" ]; then
+            num=0
+            while IFS= read -r line; do
+                ((num++)) || true
+                IFS='|' read -r cmd name <<<"$line"
+                [ ! "$default" = "$(trim "$cmd")" ] || opt="-d $num"
+            done <<<"$list"
+        fi
+        # shellcheck disable=SC2086
+        task=$(choose "$title" -x Beenden $opt "$list")
+        [[ "$task" != "exit" ]] || break
+        $task || error "Got error $? running: $task"
+        echo ""
+    done
+}

@@ -285,18 +285,173 @@ esac
 [ -n "$2" ]&&value="${2-}"||value=$(now)
 is_integer "$value"&&eval "date -d @$value $format"||eval "date -d \"$value\" $format"||die "Date format '$value' not parsable!"
 }
+declare -F "color_256" >/dev/null||source "$BASHLIB_HOME"/module/color
+pause(){
+local text
+text="$(input "$@")"
+test -z "$text"||warn "$text"
+read -n 1 -s -r -p "Taste drücken um fortzufahren..." key
+echo "" >/dev/tty
+}
+ask_no(){
+local text
+text="$(input "$@")"
+while true;do
+echo -ne "$CC_INFO" >/dev/tty
+read -r -n 1 -s -p "$text (n/J) " yn
+case $yn in
+""|[Nn])echo -e "Nein$CC_RESET" >/dev/tty
+return 1
+;;
+[JjYy])echo -e "Ja$CC_RESET" >/dev/tty
+return 0
+esac
+echo "$yn -> ungültige Antwort" >/dev/tty
+done
+}
+ask_yes(){
+local text
+text="$(input "$@")"
+while true;do
+echo -ne "$CC_INFO" >/dev/tty
+read -r -n 1 -s -p "$text (J/n) " yn
+case $yn in
+[Nn])echo -e "Nein$CC_RESET" >/dev/tty
+return 1
+;;
+""|[JjYy])echo -e "Ja$CC_RESET" >/dev/tty
+return 0
+esac
+echo "$yn -> ungültige Antwort" >/dev/tty
+done
+}
+ask_input(){
+local text
+text="$(input "$@")"
+local answer prompt
+if (($#<2));then
+prompt="$text "
+else
+prompt="$text (Standard: $2) "
+fi
+echo -ne "$CC_INFO" >/dev/tty
+read -rp "$prompt" answer
+echo -e "$CC_RESET" >/dev/tty
+if [ -z "$answer" ]&&[ -n "$2" ];then
+answer="$2"
+echo -n "Standardantwort genutzt: $answer" >/dev/tty
+fi
+echo "$answer"
+}
+choose(){
+local end default
+eval set -- "$(option_parse $'t title +\nx exit +\nd default +' "$@")"
+while true;do
+case "$1" in
+-t|--title)info "$2" >/dev/tty
+shift 2
+;;
+-d|--default)default="$2"
+shift 2
+;;
+-x|--exit)end="$2"
+shift 2
+;;
+--)shift
+break
+;;
+*)die "$(gettext 'Unrecognized option: $1')"
+esac
+done
+local question="Wähle eine der obigen Optionen:"
+[ -z "$default" ]||question="$question [$default]"
+local list line key display num=0
+list="$(input_lines "$@")"
+list="$(trim "$list")"
+while read -r line;do
+num=$((num+1))
+IFS="|" read -r key display <<<"$line"
+printf "%4d) $(trim "${display:-$key}")\n" "$num" >/dev/tty
+done <<<"$list"
+[ -z "$end" ]||printf "%4s) $end\n" x >/dev/tty
+while true;do
+read -r -p "$question " select </dev/tty
+if [[ $select =~ ^[1-$num]$ ]];then
+sed -n "${select}p" <<<"$list"|sed 's/|.*//'
+return
+elif [ -n "$default" ]&&[ -z "$select" ];then
+is_integer "$default"&&sed -n "${default}p" <<<"$list"|sed 's/|.*//'||echo "$default"
+return
+elif [ -n "$end" ]&&compare "$select" =~ [xXqQ];then
+echo exit
+return
+else
+echo -n "Ungültige Eingabe: " >/dev/tty
+fi
+done
+}
+tasks(){
+local end title default
+eval set -- "$(option_parse $'t title +\nd default +' "$@")"
+while true;do
+case "$1" in
+-t|--title)title="-t$2" >/dev/tty
+shift 2
+;;
+-d|--default)default="$2" >/dev/tty
+shift 2
+;;
+--)shift
+break
+;;
+*)die "$(gettext 'Unrecognized option: $1')"
+esac
+done
+local raw list task num newlist opt cmd name res
+raw="$(input_lines "$@"|grep -v '^[[:space:]]*#')"
+while true;do
+list="$raw"
+while grep -qv '|' <<<"$list";do
+newlist=""
+while IFS= read -r line;do
+IFS='|' read -r cmd name <<<"$line"
+if [ -n "$name" ];then
+newlist="$newlist$line"$'\n'
+else
+res="$($cmd </dev/null)"||die "Could not get task list from command: $cmd"
+[ -z "$res" ]||newlist="$newlist$res"$'\n'
+fi
+done <<<"$list"
+list="$(echo "$newlist"|sed '/^[[:space:]]*$/d')"
+done
+if [ "$default" = "x" ];then
+opt="-d x"
+elif [ -n "$default" ];then
+num=0
+while IFS= read -r line;do
+((num++))||true
+IFS='|' read -r cmd name <<<"$line"
+[ ! "$default" = "$(trim "$cmd")" ]||opt="-d $num"
+done <<<"$list"
+fi
+task=$(choose "$title" -x Beenden $opt "$list")
+[[ $task != "exit" ]]||break
+$task||error "Got error $? running: $task"
+echo ""
+done
+}
 declare -A _mattermost_cache
 _mattermost_user(){
 if [[ ! -v _mattermost_cache["__u"] ]];then
 debug "GET mattermost/users/me"
-_mattermost_cache["__u"]="$(curl -H "Authorization: Bearer $MATTERMOST_TOKEN" $MATTERMOST_API/users/me|jq '.id' -r)"||die "Could not find myself in mattermost!"
+_mattermost_cache["__u"]="$(curl -H "Authorization: Bearer $MATTERMOST_TOKEN" "$MATTERMOST_API"/users/me|jq '.id' -r)"||die "Could not find myself in mattermost!"
 fi
 echo "${_mattermost_cache["__u"]}"
 }
 _mattermost_team(){
 if [[ ! -v _mattermost_cache["__t_$1"] ]];then
 debug "GET mattermost/teams"
-_mattermost_cache["__t_$1"]="$(curl -H "Authorization: Bearer $MATTERMOST_TOKEN" $MATTERMOST_API/teams|jq '.[] | select(.display_name == "'"$1"'") | .id' -r)"||die "Could not get ID of team $1 in mattermost!"
+_mattermost_cache["__t_$1"]="$(curl -H "Authorization: Bearer $MATTERMOST_TOKEN" "$MATTERMOST_API"/teams|jq '.[] | select(.display_name == "'"$1"'") | .id' -r)"||die "Could not get ID of team $1 in mattermost!"
 fi
 [ -n "${_mattermost_cache["__t_$1"]}" ]||die "Team $1 does not exist in mattermost."
 echo "${_mattermost_cache["__t_$1"]}"
@@ -304,14 +459,14 @@ echo "${_mattermost_cache["__t_$1"]}"
 _mattermost_channel(){
 if [[ ! -v _mattermost_cache["channel_$1_$2"] ]];then
 debug "GET mattermost/users/me/teams/<team-id>/channels"
-_mattermost_cache["channel_$1_$2"]="$(curl -H "Authorization: Bearer $MATTERMOST_TOKEN" $MATTERMOST_API/users/me/teams/$1/channels|jq '.[] | select(.display_name == "'"$2"'") | .id' -r)"||die "Could not get ID of channel $1/$2 in mattermost!"
+_mattermost_cache["channel_$1_$2"]="$(curl -H "Authorization: Bearer $MATTERMOST_TOKEN" "$MATTERMOST_API"/users/me/teams/"$1"/channels|jq '.[] | select(.display_name == "'"$2"'") | .id' -r)"||die "Could not get ID of channel $1/$2 in mattermost!"
 fi
 [ -n "${_mattermost_cache["channel_$1_$2"]}" ]||die "Channel $2 does not exist in mattermost (team $1)"
 echo "${_mattermost_cache["channel_$1_$2"]}"
 }
 _mattermost_channel_bypost(){
 debug "GET mattermost/posts/<post-id>"
-curl -H "Authorization: Bearer $MATTERMOST_TOKEN" $MATTERMOST_API/posts/$1|jq '.channel_id' -r||die "Could not get channel of post $1 in mattermost!"
+curl -H "Authorization: Bearer $MATTERMOST_TOKEN" "$MATTERMOST_API"/posts/"$1"|jq '.channel_id' -r||die "Could not get channel of post $1 in mattermost!"
 }
 _mattermost_post(){
 local att=""
@@ -319,10 +474,11 @@ if [ -n "$3" ];then
 [[ $3 == \[* ]]&&att="$3"||att="[$3]"
 att=', "props": {"attachments": '"$att"'}'
 fi
-local json="$(jq -n --arg c $1 --arg t "$2" '{ channel_id: $c, message: $t '"$att"' }')"
+local json pid
+json="$(jq -n --arg c "$1" --arg t "$2" '{ channel_id: $c, message: $t '"$att"' }')"
 debug "POST mattermost/posts"
 debug "JSON: $json" >&2
-local pid=$(curl -H "Authorization: Bearer $MATTERMOST_TOKEN" -H 'Content-Type: application/json' -X POST $MATTERMOST_API/posts -d "$json"|jq '.id' -r)||die "Couls not send new post to mattermost!"
+pid=$(curl -H "Authorization: Bearer $MATTERMOST_TOKEN" -H 'Content-Type: application/json' -X POST "$MATTERMOST_API"/posts -d "$json"|jq '.id' -r)||die "Couls not send new post to mattermost!"
 debug "-> $pid"
 echo "$1/$pid"
 }
@@ -332,16 +488,18 @@ if [ -n "$4" ];then
 [[ $4 == \[* ]]&&att="$4"||att="[$4]"
 att=', "props": {"attachments": '"$att"'}'
 fi
-local json="$(jq -n --arg c $1 --arg r $2 --arg t "$3" '{ channel_id: $c, root_id: $r, message: $t '"$att"' }')"
+local json pid
+json="$(jq -n --arg c "$1" --arg r "$2" --arg t "$3" '{ channel_id: $c, root_id: $r, message: $t '"$att"' }')"
 debug "POST mattermost/posts"
 debug "JSON: $json" >&2
-local pid=$(curl -H "Authorization: Bearer $MATTERMOST_TOKEN" -H 'Content-Type: application/json' -X POST $MATTERMOST_API/posts -d "$json"|jq '.id' -r)||die "Could not send repost to mattermost!"
+pid=$(curl -H "Authorization: Bearer $MATTERMOST_TOKEN" -H 'Content-Type: application/json' -X POST "$MATTERMOST_API"/posts -d "$json"|jq '.id' -r)||die "Could not send repost to mattermost!"
 echo "$1/$pid"
 }
 _mattermost_reaction(){
-local json="$(jq -n --arg u "$(_mattermost_user)" --arg p $1 --arg t "$2" '{ user_id: $u, post_id: $p, emoji_name: $t }')"
+local json
+json="$(jq -n --arg u "$(_mattermost_user)" --arg p "$1" --arg t "$2" '{ user_id: $u, post_id: $p, emoji_name: $t }')"
 debug "POST mattermost/reactions"
-curl -X POST -H "Authorization: Bearer $MATTERMOST_TOKEN" -H 'Content-Type: application/json' $MATTERMOST_API/reactions -d "$json" > \
+curl -X POST -H "Authorization: Bearer $MATTERMOST_TOKEN" -H 'Content-Type: application/json' "$MATTERMOST_API"/reactions -d "$json" > \
 /dev/null||die "Could not add reaction to mattermost post!"
 }
 _mattermost_find_channels(){
@@ -351,57 +509,58 @@ val=$(_mattermost_channel "$1" "$2")||exit 1
 echo -n "$1/$val "
 }
 local channel=${1:-$server}
-local divibib ekz id result
+local divibib ekz result
 divibib=$(_mattermost_team divibib)||exit 1
 ekz=$(_mattermost_team ekz)||exit 1
 result=""
 shopt -s nocasematch
 local missing=0
 case $channel in
-Entwicklung)id $divibib Entwicklung;;
-Spielwiese)id $divibib Spielwiese;;
+Entwicklung)id "$divibib" Entwicklung;;
+Spielwiese)id "$divibib" Spielwiese;;
 lobster*.host.*)missing=$((missing+1));;
-content.host.*)id $divibib Content;;
-pentaho*.host.*)id $divibib "Pentaho Betrieb";;
-*.host.cloud.dvb)id $divibib "Status Global";;
+content.host.*)id "$divibib" Content;;
+pentaho*.host.*)id "$divibib" "Pentaho Betrieb";;
+*.host.cloud.dvb|\
+testing.*|build*|gitlab*)id "$divibib" "Status Global";;
 *.host.stage.dvb|\
-*.host.stage.grp)id $divibib "Status Stage";;
+*.host.stage.grp|\
+*.host.staging.grp)id "$divibib" "Status Stage";;
 *.host.test.dvb|\
-*.host.test.grp)id $divibib "Status Test";;
+*.host.test.grp)id "$divibib" "Status Test";;
 *.host.*.dvb|\
-*.host.*.grp)id $divibib "Status Produktiv";;
-*.host.*.grp)id $divibib "Status Global";;
-cloud)id $divibib "Status Global";;
-prod)id $divibib "Status Produktiv";;
-stage)id $divibib "Status Stage";;
-test)id $divibib "Status Test";;
-pentaho)id $divibib "Pentaho Betrieb";;
-content)id $divibib Content;;
-aktuell)id $divibib Aktuell;;
-betrieb)id $divibib Betrieb;;
-pim|pim3)id $divibib "PIM 3.0";;
+*.host.*.grp)id "$divibib" "Status Produktiv";;
+cloud)id "$divibib" "Status Global";;
+prod)id "$divibib" "Status Produktiv";;
+stage)id "$divibib" "Status Stage";;
+test)id "$divibib" "Status Test";;
+pentaho)id "$divibib" "Pentaho Betrieb";;
+content)id "$divibib" Content;;
+aktuell)id "$divibib" Aktuell;;
+betrieb)id "$divibib" Betrieb;;
+pim|pim3)id "$divibib" "PIM 3.0";;
 *)missing=$((missing+1))
 esac
 case $channel in
-acs.host.user.dvb)id $divibib Support;;
-portal*.host.customer.dvb)id $divibib Aktuell;;
+acs.host.user.dvb)id "$divibib" Support;;
+portal*.host.customer.dvb)id "$divibib" Aktuell;;
 jenkins.host.office.dvb|\
 sonar.host.office.dvb|\
 build-*.host.office.grp|\
-gitlab.host.office.grp)id $divibib Entwicklung;;
+gitlab.host.office.grp)id "$divibib" Entwicklung;;
 product*|platin*|pim3*|media*|\
-systematic*|feuer*)id $divibib "PIM 3.0";;
-middleware*)id $divibib "Onleihe 3 Entwicklung";;
-Spielwiese)id $divibib Spielwiese
+systematic*|feuer*)id "$divibib" "PIM 3.0";;
+middleware*)id "$divibib" "Onleihe 3 Entwicklung";;
+Spielwiese)id "$divibib" Spielwiese
 esac
 echo ""
 case $channel in
-lobster*.host.*)id $ekz Lobster;;
-aktuell)id $ekz Aktuell;;
+lobster*.host.*)id "$ekz" Lobster;;
+aktuell)id "$ekz" Aktuell;;
 *)missing=$((missing+1))
 esac
 echo ""
-[ $missing -lt 2 ]||die "Could not detect mattermost channel for $1"
+[ "$missing" -lt 2 ]||die "Could not detect mattermost channel for $1"
 shopt -s nocasematch
 }
 mattermost_post_ids=""
@@ -409,17 +568,17 @@ mattermost(){
 install jq
 local channels line main links link mainid postid result
 channels="$(_mattermost_find_channels "$1")"||exit 1
-while read line;do
+while read -r line;do
 [ -n "$line" ]||continue
 read -r main links <<<"$line"
-IFS="/" read -r team channel <<<"$main"
-mainid=$(_mattermost_post $channel "$2" "$3")
+IFS="/" read -r _ channel <<<"$main"
+mainid=$(_mattermost_post "$channel" "$2" "$3")
 IFS="/" read -r _ post <<<"$mainid"
 result="$result\n$mainid"
-while IFS=" " read link;do
+while IFS=" " read -r link;do
 [ -n "$link" ]||continue
-IFS="/" read -r team channel <<<"$link"
-postid=$(_mattermost_post $channel "https://mattermost.ekz.de/divibib/pl/$post")
+IFS="/" read -r _ channel <<<"$link"
+postid=$(_mattermost_post "$channel" "https://mattermost.ekz.de/divibib/pl/$post")
 result="$result $postid"
 done <<<"$links"
 done <<<"$channels"
@@ -507,40 +666,39 @@ emoji=$1
 case $1 in
 check|ok)emoji=white_check_mark
 esac
-while read line;do
+while read -r line;do
 [ -n "$line" ]||continue
 read -r main links <<<"$line"
 IFS="/" read -r channel post <<<"$main"
-_mattermost_reaction $post "$emoji"
+_mattermost_reaction "$post" "$emoji"
 if [ -n "$post_links" ];then
-while IFS=" " read link;do
+while IFS=" " read -r link;do
 [ -n "$link" ]||continue
 IFS="/" read -r channel post <<<"$link"
-_mattermost_reaction $post "$emoji"
+_mattermost_reaction "$post" "$emoji"
 done <<<"$links"
 fi
 done <<<"$mattermost_post_ids"
 }
 mattermost_repost(){
 local line main channel post
-while read line;do
+while read -r line;do
 [ -n "$line" ]||continue
 read -r main _ <<<"$line"
 debug "main $main"
 IFS="/" read -r channel post <<<"$main"
 debug "channel $channel post $post"
-_mattermost_repost $channel $post "$1" "$2" >/dev/null
+_mattermost_repost "$channel" "$post" "$1" "$2" >/dev/null
 done <<<"$mattermost_post_ids"
 }
-declare -F "curl" >/dev/null||source $BASHLIB_HOME/module/remote
+declare -F "curl" >/dev/null||source "$BASHLIB_HOME"/module/remote
 exporter(){
 install jq yq
 local arg name value
 local filter=""
 for arg in "$@";do
-IFS='=' read name value <<<"$arg"
+IFS='=' read -r name value <<<"$arg"
 unset IFS
-local field=""
 case $name in
 instance)filter="$filter select(.labels.$name|test(\"$value\")) |";;
 *)filter="$filter select(.labels.$name==\"$value\") |"
@@ -550,14 +708,21 @@ local server api line
 local auth=""
 for server in $PROMETHEUS;do
 remote true 2>/dev/null||continue
-auth="$auth"$'\n'"$(remote cat /etc/prometheus/prometheus.yml|yq -r '.scrape_configs[] | select(.basic_auth) | .job_name as $j | .basic_auth as $b | .static_configs[].targets[] | [$j, $b.username, $b.password, .] | @tsv')"
+auth="$auth"$'\n'"$(remote cat /etc/prometheus/prometheus.yml|yq -r '.scrape_configs[] 
+            | select(.basic_auth) 
+            | .job_name as $j 
+            | .basic_auth as $b 
+            | .static_configs[].targets[] 
+            | [$j, $b.username, $b.password, .] 
+            | @tsv')"
 done
 for api in $PROMETHEUS_API;do
-curl $api/targets|jq '.data.activeTargets[] | '"$filter"' [.scrapeUrl, .labels.job, (.labels | join(", ")), .discoveredLabels.__address__] | @tsv' -r|while read line;do
-local login="$(echo "$auth"|grep "$(echo "$line"|cut -f2)"|grep "$(echo "$line"|cut -f4)")"
+curl "$api"/targets|jq '.data.activeTargets[] | '"$filter"' [.scrapeUrl, .labels.job, (.labels | join(", ")), .discoveredLabels.__address__] | @tsv' -r|while read -r line;do
+local login user pass
+login="$(echo "$auth"|grep "$(echo "$line"|cut -f2)"|grep "$(echo "$line"|cut -f4)")"
 if [ -n "$login" ];then
-local user="$(echo "$login"|cut -f2|tr -d '\n'|urlencode)"
-local pass="$(echo "$login"|cut -f3|tr -d '\n'|urlencode)"
+user="$(echo "$login"|cut -f2|tr -d '\n'|urlencode)"
+pass="$(echo "$login"|cut -f3|tr -d '\n'|urlencode)"
 echo "$line"|cut -f1-3|sed "s#://#://$user:$pass@#"
 else
 echo "$line"|cut -f1-3
@@ -568,7 +733,8 @@ done
 scrape(){
 num_parameters "$@" --min 1 --max 2 --die "Wrong number of parameters for scrape!"
 echo "Scrape the prometheus exporter at $1" >&2
-local metrics="$(curl "$1"|egrep "$2"|egrep -v '^($|#)'||die "Could not scrape the prometheus exporter at $1!")"
+local metrics
+metrics="$(curl "$1"|grep -E "$2"|grep -Ev '^($|#)'||die "Could not scrape the prometheus exporter at $1!")"
 echo "$metrics"|grep '{'|sed 's/,\?[{}]/\t/g'
 echo "$metrics"|grep -v '{'|sed 's/ /\t\t/g'
 }
@@ -587,7 +753,8 @@ break
 esac
 done
 install jq mlr
-local alerts="$(curl -H "Authorization: Bearer $GRAFANA_TOKEN" "$GRAFANA_API/alertmanager/grafana/api/v2/alerts"|jq 'sort_by(.startsAt) | .[] '"$filter")"||die "Could not get alerts from Grafana!"
+local alerts
+alerts="$(curl -H "Authorization: Bearer $GRAFANA_TOKEN" "$GRAFANA_API/alertmanager/grafana/api/v2/alerts"|jq 'sort_by(.startsAt) | .[] '"$filter")"||die "Could not get alerts from Grafana!"
 local format=${1:-console}
 case $format in
 tsv|console)alerts="Severity\tNetz\tInstanz\tZusammenfassung\tStart             _\n$(jq -r '[.labels.severity, .labels.net, .labels.instance, .annotations.summary, (.startsAt| split(".")[0]| strptime("%Y-%m-%dT%H:%M:%S")| strftime("%Y-%m-%d %H:%M:%S"))] | @tsv' <<<"$alerts")"
@@ -627,13 +794,14 @@ done
 esac
 }
 prometheus(){
-local api=$(echo "$PROMETHEUS_API"|sed 's/ .*//')
+local api
+api="${PROMETHEUS_API%% *}"
 curl "$api/query?query=$(echo "$1"|urlencode)"
 }
 prometheus_scrape(){
 install yq
 local job=$1
-local seconds=${2:-60}
+local -i seconds=${2:-60}
 for server in $PROMETHEUS;do
 remote true 2>/dev/null||continue
 echo "Let $server scrape $job again, now."
@@ -641,7 +809,7 @@ echo "yq '(.scrape_configs[] | select(.job_name == \"$job\")).scrape_interval = 
 remote curl -sX POST http://localhost:9090/-/reload
 done
 echo "Wait $seconds seconds till scrape should be done..."
-sleep $seconds
+sleep "$seconds"
 echo "Reset config back to default."
 for server in $PROMETHEUS;do
 remote true 2>/dev/null||continue
@@ -714,7 +882,7 @@ elif [ -f /etc/debian_version ];then
 DIST_BASE='Debian'
 DIST_BASE_REV=$(cat /etc/debian_version|sed -e 's/\([0-9]*\)\..*/\1/;s/\/.*//')
 if [[ $DIST_BASE_REV =~ [a-z] ]];then
-[ -e /etc/debian_version_number ]||curl -s https://ftp.debian.org/debian/dists/$DIST_BASE_REV/Release|grep Version|cut -d' ' -f2|sed 's/\..*//'|sudo tee /etc/debian_version_number >/dev/null
+[ -e /etc/debian_version_number ]||curl -s https://ftp.debian.org/debian/dists/"$DIST_BASE_REV"/Release|grep Version|cut -d' ' -f2|sed 's/\..*//'|sudo tee /etc/debian_version_number >/dev/null
 DIST_BASE_REV=$(cat /etc/debian_version_number)
 fi
 DIST=$(grep '^DISTRIB_ID=' /etc/lsb-release /etc/os-release 2>/dev/null|head -n 1|awk -F= '{ print $2 }')
@@ -742,7 +910,8 @@ IP_REGION_CODE=
 IP_CITY=
 IP_PROVIDER=
 detect_extern_ip(){
-local data="$(curl http://ip-api.com/json)"
+local data
+data="$(curl http://ip-api.com/json)"
 IP_EXTERN=$(jq -r .query <<<"$data")
 IP_COUNTRY=$(jq -r .country <<<"$data")
 IP_COUNTRY_CODE=$(jq -r .countryCode <<<"$data")
@@ -784,36 +953,44 @@ test -z "${server-}"||prefix="${server-} "
 echo -e "\n$CC_INVERS$prefix$CC_RESET$CC_HEADING$(input "$@")...$CC_RESET\n"
 }
 critical(){
-local text="$(input "$@")"
+local text
+text="$(input "$@")"
 test -z "$text"||echo -e "$CC_CRITICAL$text$CC_RESET"
 }
 error(){
-local text="$(input "$@")"
+local text
+text="$(input "$@")"
 test -z "$text"||echo -e "$CC_ERROR$text$CC_RESET"
 }
 warn(){
-local text="$(input "$@")"
+local text
+text="$(input "$@")"
 test -z "$text"||echo -e "$CC_WARN$text$CC_RESET"
 }
 info(){
-local text="$(input "$@")"
+local text
+text="$(input "$@")"
 test -z "$text"||echo -e "$CC_INFO$text$CC_RESET"
 }
 ok(){
-local text="$(input "$@")"
+local text
+text="$(input "$@")"
 test -z "$text"||echo -e "$CC_OK$text$CC_RESET"
 }
 invers(){
-local text="$(input "$@")"
+local text
+text="$(input "$@")"
 test -z "$text"||echo -e "$CC_INVERS$text$CC_RESET"
 }
 color(){
-local text="$(input_args 1 "$@")"
+local text
+text="$(input_args 1 "$@")"
 test -z "$text"||echo -e "$CC_ERROR$text$CC_RESET"
 }
 debug(){
 if [ -n "$DEBUG" ];then
-local text="$(input "$@")"
+local text
+text="$(input "$@")"
 test -z "$text"||echo "$CC_BLACK$text$CC_RESET" >&2
 fi
 }
@@ -837,156 +1014,6 @@ input "$@"|mlr -i tsv -o pprint cat
 tsv2md(){
 install mlr
 input "$@"|uncolorize|mlr -i tsv -o md cat
-}
-pause(){
-local local text="$(input "$@")"
-test -z "$text"||warn "$text"
-read -n 1 -s -r -p "Taste drücken um fortzufahren..." key
-echo "" >/dev/tty
-}
-ask_no(){
-local local text="$(input "$@")"
-while true;do
-echo -ne "$CC_INFO" >/dev/tty
-read -n 1 -s -p "$text (n/J) " yn
-case $yn in
-""|[Nn])echo -e "Nein$CC_RESET" >/dev/tty
-return 1
-;;
-[JjYy])echo -e "Ja$CC_RESET" >/dev/tty
-return 0
-esac
-echo "$yn -> ungültige Antwort" >/dev/tty
-done
-}
-ask_yes(){
-local local text="$(input "$@")"
-while true;do
-echo -ne "$CC_INFO" >/dev/tty
-read -n 1 -s -p "$text (J/n) " yn
-case $yn in
-[Nn])echo -e "Nein$CC_RESET" >/dev/tty
-return 1
-;;
-""|[JjYy])echo -e "Ja$CC_RESET" >/dev/tty
-return 0
-esac
-echo "$yn -> ungültige Antwort" >/dev/tty
-done
-}
-ask_input(){
-local local text="$(input "$@")"
-local answer prompt
-if (($#<2));then
-prompt="$text "
-else
-prompt="$text (Standard: $2) "
-fi
-echo -ne "$CC_INFO" >/dev/tty
-read -rp "$prompt" answer
-echo -e "$CC_RESET" >/dev/tty
-if [ -z "$answer" ]&&[ -n "$2" ];then
-answer="$2"
-echo -n "Standardantwort genutzt: $answer" >/dev/tty
-fi
-echo "$answer"
-}
-choose(){
-local end default
-eval set -- "$(option_parse $'t title +\nx exit +\nd default +' "$@")"
-while true;do
-case "$1" in
--t|--title)info "$2" >/dev/tty
-shift 2
-;;
--d|--default)default="$2"
-shift 2
-;;
--x|--exit)end="$2"
-shift 2
-;;
---)shift
-break
-;;
-*)die "$(gettext 'Unrecognized option: $1')"
-esac
-done
-local question="Wähle eine der obigen Optionen:"
-[ -z "$default" ]||question="$question [$default]"
-local list line key display num=0
-list="$(input_lines "$@")"
-list="$(trim "$list")"
-while read -r line;do
-num=$((num+1))
-IFS="|" read -r key display <<<"$line"
-printf "%4d) $(trim "${display:-$key}")\n" $num >/dev/tty
-done <<<"$list"
-[ -z "$end" ]||printf "%4s) $end\n" x >/dev/tty
-while true;do
-read -r -p "$question " select </dev/tty
-if [[ $select =~ ^[1-$num]$ ]];then
-sed -n "${select}p" <<<"$list"|sed 's/|.*//'
-return
-elif [ -n "$default" ]&&[ -z "$select" ];then
-is_integer $default&&sed -n "${default}p" <<<"$list"|sed 's/|.*//'||echo "$default"
-return
-elif [ -n "$end" ]&&compare "$select" =~ [xXqQ];then
-echo exit
-return
-else
-echo -n "Ungültige Eingabe: " >/dev/tty
-fi
-done
-}
-tasks(){
-local end title default
-eval set -- "$(option_parse $'t title +\nd default +' "$@")"
-while true;do
-case "$1" in
--t|--title)title="-t$2" >/dev/tty
-shift 2
-;;
--d|--default)default="$2" >/dev/tty
-shift 2
-;;
---)shift
-break
-;;
-*)die "$(gettext 'Unrecognized option: $1')"
-esac
-done
-local raw list task num newlist opt cmd name res
-raw="$(input_lines "$@"|grep -v '^[[:space:]]*#')"
-while true;do
-list="$raw"
-while grep -qv '|' <<<"$list";do
-newlist=""
-while IFS= read -r line;do
-IFS='|' read -r cmd name <<<"$line"
-if [ -n "$name" ];then
-newlist="$newlist$line"$'\n'
-else
-res="$($cmd </dev/null)"||die "Could not get task list from command: $cmd"
-[ -z "$res" ]||newlist="$newlist$res"$'\n'
-fi
-done <<<"$list"
-list="$(echo "$newlist"|sed '/^[[:space:]]*$/d')"
-done
-if [ "$default" = "x" ];then
-opt="-d x"
-elif [ -n "$default" ];then
-num=0
-while IFS= read -r line;do
-((num++))||true
-IFS='|' read -r cmd name <<<"$line"
-[ ! "$default" = "$(trim "$cmd")" ]||opt="-d $num"
-done <<<"$list"
-fi
-task=$(choose "$title" -x Beenden $opt "$list")
-[[ $task != "exit" ]]||break
-$task||error "Got error $? running: $task"
-echo ""
-done
 }
 repeat(){
 local -i n=$1

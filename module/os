@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC2034
 
 # Module with operating system specific helper functions.
 
@@ -38,17 +39,17 @@ CPU_MODEL=
 detect_os() {
     [ -z "$_os_detected" ] || return
     case "$(uname -s)" in
-        "Darwin")                         OS=MacOS ;;
-        "SunOS")                          OS=Solaris ;;
-        "Haiku")                          OS=Haiku ;;
-        "MINIX")                          OS=MINIX ;;
-        "AIX")                            OS=AIX ;;
-        "IRIX"*)                          OS=IRIX ;;
-        "FreeMiNT")                       OS=FreeMiNT ;;
-        "Linux" | "GNU"*)                 OS=Linux ;;
-        *"BSD" | "DragonFly" | "Bitrig")  OS=BSD ;;
-        "CYGWIN"* | "MSYS"* | "MINGW"*)   OS=Windows ;;
-        *)                                OS=Unknown ;;
+    "Darwin") OS=MacOS ;;
+    "SunOS") OS=Solaris ;;
+    "Haiku") OS=Haiku ;;
+    "MINIX") OS=MINIX ;;
+    "AIX") OS=AIX ;;
+    "IRIX"*) OS=IRIX ;;
+    "FreeMiNT") OS=FreeMiNT ;;
+    "Linux" | "GNU"*) OS=Linux ;;
+    *"BSD" | "DragonFly" | "Bitrig") OS=BSD ;;
+    "CYGWIN"* | "MSYS"* | "MINGW"*) OS=Windows ;;
+    *) OS=Unknown ;;
     esac
     KERNEL=$(uname -r)
     MACH=$(uname -m)
@@ -59,50 +60,51 @@ detect_os() {
     REV=
     # OS Specific Settings
     case $OS in
-        Solaris) 
-            MACH=$(uname -p)
-            ;;
-        Linux)
-            if [ -f /etc/arch-release ] ; then
-                DIST_BASE='ArchLinux'
-                DIST='ArchLinux'
-                REV_NAME="Rolling"
-                REV=$(grep base /var/log/pacman.log | tail -n 1)
-            elif [ -f /etc/gentoo-release ] ; then
-                DIST_BASE='Gentoo'
-                DIST=$(cat /etc/gentoo-release | sed s/\ release.*//)
-                REV=$(cat /etc/gentoo-release | sed s/.*release\ // | sed s/\ .*//)
-            elif [ -f /etc/redhat-release ] ; then
-                DIST_BASE='RedHat'
-                DIST=$(cat /etc/redhat-release | sed s/\ release.*//)
-                REV_NAME=$(cat /etc/redhat-release | sed s/.*\(// | sed s/\)//)
-                REV=$(cat /etc/redhat-release | sed s/.*release\ // | sed s/\ .*//)
-            elif [ -f /etc/SuSE-release ] ; then
-                DIST_BASE='SuSe'
-                REV_NAME=$(cat /etc/SuSE-release | tr "\n" ' '| sed s/VERSION.*//)
-                REV=$(cat /etc/SuSE-release | tr "\n" ' ' | sed s/.*=\ //)
-            elif [ -f /etc/mandrake-release ] ; then
-                DIST_BASE='Mandrake'
-                REV_NAME=$(cat /etc/mandrake-release | sed s/.*\(// | sed s/\)//)
-                REV=$(cat /etc/mandrake-release | sed s/.*release\ // | sed s/\ .*//)
-            elif [ -f /etc/debian_version ] ; then
-                DIST_BASE='Debian'
-                DIST_BASE_REV=$(cat /etc/debian_version | sed -e 's/\([0-9]*\)\..*/\1/;s/\/.*//')
-                if [[ "$DIST_BASE_REV" =~ [a-z] ]]; then
-                    [ -e /etc/debian_version_number ] || curl -s https://ftp.debian.org/debian/dists/$DIST_BASE_REV/Release \
-                    | grep Version | cut -d' ' -f2 | sed 's/\..*//' | sudo tee /etc/debian_version_number >/dev/null
-                    DIST_BASE_REV=$(cat /etc/debian_version_number)
-                fi
-                DIST=$(grep '^DISTRIB_ID=' /etc/lsb-release /etc/os-release 2>/dev/null | head -n 1 | awk -F=  '{ print $2 }')
-                [ -z "$DIST" ] && DIST=$(grep '^NAME=' /etc/lsb-release /etc/os-release 2>/dev/null | head -n 1 | awk -F=  '{ print $2 }' | sed 's/"//g')
-                REV_NAME=$(grep '^DISTRIB_CODENAME=' /etc/lsb-release /etc/os-release 2>/dev/null | head -n 1 | awk -F=  '{ print $2 }')
-                [ -z "$REV_NAME" ] && REV_NAME=$(grep '^VERSION=' /etc/lsb-release /etc/os-release 2>/dev/null | head -n 1 | awk -F=  '{ print $2 }' | sed 's/^.*(\(.*\)).*/\1/g')
-                REV=$(grep '^DISTRIB_RELEASE=' /etc/lsb-release /etc/os-release 2>/dev/null | head -n 1 | awk -F=  '{ print $2 }')
-                [ -z "$REV" ] && REV=$(cat /etc/debian_version)
+    Solaris)
+        MACH=$(uname -p)
+        ;;
+    Linux)
+        if [ -f /etc/arch-release ]; then
+            DIST_BASE='ArchLinux'
+            DIST='ArchLinux'
+            REV_NAME="Rolling"
+            REV=$(grep base /var/log/pacman.log | tail -n 1)
+        elif [ -f /etc/gentoo-release ]; then
+            DIST_BASE='Gentoo'
+            DIST=$(cat /etc/gentoo-release | sed s/\ release.*//)
+            REV=$(cat /etc/gentoo-release | sed s/.*release\ // | sed s/\ .*//)
+        elif [ -f /etc/redhat-release ]; then
+            DIST_BASE='RedHat'
+            DIST=$(cat /etc/redhat-release | sed s/\ release.*//)
+            REV_NAME=$(cat /etc/redhat-release | sed s/.*\(// | sed s/\)//)
+            REV=$(cat /etc/redhat-release | sed s/.*release\ // | sed s/\ .*//)
+        elif [ -f /etc/SuSE-release ]; then
+            DIST_BASE='SuSe'
+            REV_NAME=$(cat /etc/SuSE-release | tr "\n" ' ' | sed s/VERSION.*//)
+            REV=$(cat /etc/SuSE-release | tr "\n" ' ' | sed s/.*=\ //)
+        elif [ -f /etc/mandrake-release ]; then
+            DIST_BASE='Mandrake'
+            REV_NAME=$(cat /etc/mandrake-release | sed s/.*\(// | sed s/\)//)
+            REV=$(cat /etc/mandrake-release | sed s/.*release\ // | sed s/\ .*//)
+        elif [ -f /etc/debian_version ]; then
+            DIST_BASE='Debian'
+            DIST_BASE_REV=$(cat /etc/debian_version | sed -e 's/\([0-9]*\)\..*/\1/;s/\/.*//')
+            if [[ "$DIST_BASE_REV" =~ [a-z] ]]; then
+                [ -e /etc/debian_version_number ] || curl -s https://ftp.debian.org/debian/dists/"$DIST_BASE_REV"/Release |
+                    grep Version | cut -d' ' -f2 | sed 's/\..*//' | sudo tee /etc/debian_version_number >/dev/null
+                DIST_BASE_REV=$(cat /etc/debian_version_number)
             fi
-            if [ -f /etc/UnitedLinux-release ] ; then
-                DIST="${DIST}[$(cat /etc/UnitedLinux-release | tr "\n" ' ' | sed s/VERSION.*//)]"
-            fi
+            DIST=$(grep '^DISTRIB_ID=' /etc/lsb-release /etc/os-release 2>/dev/null | head -n 1 | awk -F= '{ print $2 }')
+            [ -z "$DIST" ] && DIST=$(grep '^NAME=' /etc/lsb-release /etc/os-release 2>/dev/null | head -n 1 | awk -F= '{ print $2 }' | sed 's/"//g')
+            REV_NAME=$(grep '^DISTRIB_CODENAME=' /etc/lsb-release /etc/os-release 2>/dev/null | head -n 1 | awk -F= '{ print $2 }')
+            [ -z "$REV_NAME" ] && REV_NAME=$(grep '^VERSION=' /etc/lsb-release /etc/os-release 2>/dev/null | head -n 1 | awk -F= '{ print $2 }' | sed 's/^.*(\(.*\)).*/\1/g')
+            REV=$(grep '^DISTRIB_RELEASE=' /etc/lsb-release /etc/os-release 2>/dev/null | head -n 1 | awk -F= '{ print $2 }')
+            [ -z "$REV" ] && REV=$(cat /etc/debian_version)
+        fi
+        if [ -f /etc/UnitedLinux-release ]; then
+            DIST="${DIST}[$(cat /etc/UnitedLinux-release | tr "\n" ' ' | sed s/VERSION.*//)]"
+        fi
+        ;;
     esac
     MACH_ID=$(cat /etc/machine-id /var/lib/dbus/machine-id /var/db/dbus/machine-id /sys/class/dmi/id/board_serial 2>/dev/null | head -n 1 || true)
     IS_VIRTUAL=
@@ -129,7 +131,8 @@ IP_PROVIDER=
 # Run  os detection and set the constants
 # Usage:    detect_extern_ip
 detect_extern_ip() {
-    local data="$(curl http://ip-api.com/json)"
+    local data
+    data="$(curl http://ip-api.com/json)"
     IP_EXTERN=$(jq -r .query <<<"$data")
     IP_COUNTRY=$(jq -r .country <<<"$data")
     IP_COUNTRY_CODE=$(jq -r .countryCode <<<"$data")
@@ -148,6 +151,8 @@ system_info() {
     local rev
     [ -n "$DIST_BASE" ] && dist_base="based on $DIST_BASE $DIST_BASE_REV"
     [ -n "$REV" ] && rev="$REV $REV_NAME"
+    # shellcheck disable=SC2116
+    # shellcheck disable=SC2086
     echo "$OS system with kernel $KERNEL $MACH ($(echo $DIST $rev $dist_base))"
     [ -z "$IS_VIRTUAL" ] || virtual="(virtual machine)"
     echo "$CPU_MODEL with $CPU_NUM cores $virtual"
@@ -162,13 +167,13 @@ system_info() {
 # Has tty present
 # Usage:    has_ttyp
 # Status:   0 || 1
-has_tty () {
-    { : >/dev/tty ; } &>/dev/null
+has_tty() {
+    { : >/dev/tty; } &>/dev/null
 }
 
 # Is running with bash console
 # Usage:    is_bash
 # Status:   0 || 1
-is_bash () {
+is_bash() {
     [[ -n "${BASH_VERSION:-}" ]]
 }
