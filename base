@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 set -eE
 set -o pipefail
+BASHLIB_HOME=${BASHLIB_HOME:-$HOME/bashlib}
 CC_RESET=$'\033[0m'
 CC_CRITICAL=$'\033[1;45m'
 export TEXTDOMAIN=bashlib
@@ -17,7 +18,11 @@ local start=$((num+2))
 test -p /dev/stdin&&cat -||echo "${@:start}"
 }
 input_lines(){
-test -p /dev/stdin&&test -z "${1-}"&&cat -||for arg in "$@";do echo "$arg";done
+if [ -p /dev/stdin ]&&[ -z "${1-}" ];then
+cat -
+else
+for arg in "$@";do echo "$arg";done
+fi
 }
 die(){
 echo -e "$CC_CRITICAL$(input "$@")$CC_RESET" >&2
@@ -69,10 +74,10 @@ break
 *)shift
 esac
 done
-result="$path/$(basename $0)_$1$rand$ext"
+result="$path/$(basename "$0")_$1$rand$ext"
 if [ -n "$rand" ];then
 while [ -e "$result" ];do
-result="$path/$(basename $0)_$1$RANDOM$ext"
+result="$path/$(basename "$0")_$1$RANDOM$ext"
 done
 fi
 if [ -n "$dir" ];then

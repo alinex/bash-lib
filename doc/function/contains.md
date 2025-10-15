@@ -1,11 +1,18 @@
 # contains
 
-## Check if value is contained
+## Check if value is contained in array
 
 
 
 ### Usage
 
 ```bash
-has_value <array> <match>
+contains <array-name> <match>
+```
+
+### Example
+
+```bash
+x=( one two three )
+contains x two && echo YES || echo NO
 ```

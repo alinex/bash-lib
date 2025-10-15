@@ -85,7 +85,7 @@ is_float() {
 
 # Compare two values (simplification of different bash tests)
 # Usage:    compare <value-1> <operator> <value-2>
-# Status:   1 if not
+# Status:   1 if nots
 compare() {
     num_parameters --min 3 --max 3 --die "Exactly 3 parameter needed, got: $#" -- "$@"
     case "$2" in
@@ -93,7 +93,7 @@ compare() {
     !=) [[ $1 != $3 ]] ;;
     =~) [[ $1 =~ $3 ]] ;;
     !~) [[ ! $1 =~ $3 ]] ;;
-    *) [ "$1" $2 "$3" ] ;;
+    *) [[ "$1" $2 "$3" ]] ;;
     esac
 }
 

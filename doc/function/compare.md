@@ -2,7 +2,7 @@
 
 ## Compare two values (simplification of different bash tests)
 
-Status:   1 if not
+Status:   1 if nots
 
 
 ### Usage

@@ -1,13 +1,13 @@
-# jira_search
+# jira_get
 
-## Search for jira tickets
+## Get jira ticket details
 
 
 
 ### Usage
 
 ```bash
-jira_search <jql>
+jira_get <issue-key>
 ```
 
 ### Output (stdout)

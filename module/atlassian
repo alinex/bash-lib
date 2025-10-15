@@ -6,52 +6,52 @@
 # Confluence
 ######################################################################################
 
-confluence () {
-    # get page content using API <page_id>
-    # return html body
+# Get page content from Confluence using API
+# Usage:    confluence <page_id>
+# Output:   <html>
+confluence() {
     install jq
-    curl -H "Content-Type: application/json" -u "$ATLASSIAN_USER:$ATLASSIAN_TOKEN" "$CONFLUENCE_API/content/$1?expand=body.storage" \
-    | jq .body.storage.value -r \
-    || die "Could not read confluence page!"
-}
-confluence_outage () {
-    # get outage information 
-    # <search>
-    local row="$(confluence $CONFLUENCE_OUTAGE | sed 's/<\/tr>/<\/tr>\n/g;s/<tr>/\n<tr>/g' | grep '^<tr' | grep "$1" | head -1 | sed 's/<\/td>/<\/td>\n/g;s/<td>/\n<td>/g' | grep '^<td')"
-    test -n "$row" || return
-    local office="$(echo "$row" | sed -n '2p' | html2md)"
-    local customer="$(echo "$row" | sed -n '3p' | html2md)"
-    local user="$(echo "$row" | sed -n '4p' | html2md)"
-    echo -e "##### Auswirkungen für Endkunden\n\n$user\n\n##### Auswirkungen für Bibliotheken\n\n$customer\n\n##### Auswirkungen intern divibib/ekz\n\n$office"
+    curl -H "Content-Type: application/json" -u "$ATLASSIAN_USER:$ATLASSIAN_TOKEN" "$CONFLUENCE_API/content/$1?expand=body.storage" |
+        jq .body.storage.value -r ||
+        die "Could not read confluence page!"
 }
 
 ######################################################################################
 # Jira
 ######################################################################################
-
 # https://developer.atlassian.com/cloud/jira/platform/rest/v3/intro/#version
-jira_search () {
-    # search for jira tickets <jql>
+
+# Search for jira tickets
+# Usage:    jira_search <jql>
+# Output:   <json>
+jira_search() {
     install jq
-    curl -u "$ATLASSIAN_USER:$ATLASSIAN_TOKEN" -H "Content-Type: application/json" -X GET "$JIRA_API/search/jql?jql=$1&fields=*all" \
-    | jq '.issues[]' \
-    || die "Could not search for Jira issues using $1!"
+    curl -u "$ATLASSIAN_USER:$ATLASSIAN_TOKEN" -H "Content-Type: application/json" -X GET "$JIRA_API/search/jql?jql=$1&fields=*all" |
+        jq '.issues[]' ||
+        die "Could not search for Jira issues using $1!"
 }
-jira_get () {
-    # get jira ticket details <issue-key>
-    curl -u "$ATLASSIAN_USER:$ATLASSIAN_TOKEN" -H "Content-Type: application/json" -X GET "$JIRA_API/issue/$1" \
-    || die "Could not get Jira issue $1!"
+
+# Get jira ticket details
+# Usage:    jira_get <issue-key>
+# Output:   <json>
+jira_get() {
+    curl -u "$ATLASSIAN_USER:$ATLASSIAN_TOKEN" -H "Content-Type: application/json" -X GET "$JIRA_API/issue/$1" ||
+        die "Could not get Jira issue $1!"
 }
-jira_create () {
-    # create jira tickets <json>
-    # retuns issue key
+
+# Create jira tickets
+# Usage:    jira_create <json>
+# Output:   <issue-key>
+jira_create() {
     install jq
-    curl -u "$ATLASSIAN_USER:$ATLASSIAN_TOKEN" -H "Content-Type: application/json" -X POST "$JIRA_API/issue/" -d "$1" \
-    | jq '.key' -r \
-    || die "Could not create Jira issue!"
+    curl -u "$ATLASSIAN_USER:$ATLASSIAN_TOKEN" -H "Content-Type: application/json" -X POST "$JIRA_API/issue/" -d "$1" |
+        jq '.key' -r ||
+        die "Could not create Jira issue!"
 }
-jira_update () {
-    # create jira tickets <iisue-key> <json>
-    curl -u "$ATLASSIAN_USER:$ATLASSIAN_TOKEN" -H "Content-Type: application/json" -X PUT "$JIRA_API/issue/$1" -d "$1" \
-    || die "Could not update Jira issue $1!"
+
+# Update jira tickets
+# Usage:    jira_update <issue-key> <json>
+jira_update() {
+    curl -u "$ATLASSIAN_USER:$ATLASSIAN_TOKEN" -H "Content-Type: application/json" -X PUT "$JIRA_API/issue/$1" -d "$1" ||
+        die "Could not update Jira issue $1!"
 }

@@ -1,0 +1,10 @@
+# Search paths for scripts
+source-path=SCRIPTDIR
+source-path=/home/alex/dvb/bash-lib
+# Enable following all sourced files
+external-sources=true
+# Enable selected optional checks
+enable=quote-safe-variables
+enable=check-unassigned-uppercase
+# Disable specific warnings
+disable=SC1072,SC1073,SC1134

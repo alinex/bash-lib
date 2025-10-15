@@ -12,7 +12,7 @@ for folder in core module; do
     echo -n "$folder "
     for f in "$BASHLIB_HOME/$folder"/*; do
         if [[ -f "$f" && "$f" != *.* ]]; then
-            shfmt -mn "$f" | grep -v '^#!/usr/bin/env bash' >>"$BASHLIB_HOME/full"
+            shfmt -mn "$f" | grep -Ev '^#!/usr/bin/env bash|source /dev/null' >>"$BASHLIB_HOME/full"
         fi
     done
 done
@@ -21,7 +21,7 @@ echo "#!/usr/bin/env bash" >"$BASHLIB_HOME/base"
 echo -en "\b) base (core)"
 for f in "$BASHLIB_HOME"/core/*; do
     if [[ -f "$f" && "$f" != *.* ]]; then
-        shfmt -mn "$f" | grep -v '^#!/usr/bin/env bash' >>"$BASHLIB_HOME/base"
+        shfmt -mn "$f" | grep -Ev '^#!/usr/bin/env bash|source /dev/null' >>"$BASHLIB_HOME/base"
     fi
 done
 echo

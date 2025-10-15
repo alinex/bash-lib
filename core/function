@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# shellcheck source=full
+source /dev/null
 
 # The core functions contains essential parts which may also be used while loading the library.
 
@@ -8,6 +10,7 @@
 
 export TEXTDOMAIN=bashlib
 export TEXTDOMAINDIR=$BASHLIB_HOME/locale
+# shellcheck source=/usr/bin/gettext.sh
 source gettext.sh
 
 ######################################################################################
@@ -47,9 +50,11 @@ input_args() {
 # Output:   <string-input> or
 #           <string-params> separated by newlines
 input_lines() {
-    test -p /dev/stdin && test -z "${1-}" &&
-        cat - ||
+    if [ -p /dev/stdin ] && [ -z "${1-}" ]; then
+        cat -
+    else
         for arg in "$@"; do echo "$arg"; done
+    fi
 }
 
 # Output error message and exit
@@ -63,7 +68,7 @@ die() {
     exit 1
 }
 
-# Set or add an additiopnal trap without overwriting existing ones
+# Set or add an additional trap without overwriting existing ones
 # This is done by adding the new code as additional command before the existing ones if the trap is already set.
 # Usage:    trap_add <code> <signal>
 trap_add() {
@@ -72,8 +77,10 @@ trap_add() {
     local old
     old="$(trap -p "$sig" | awk -F"'" '{print $2}')"
     if [[ -n "$old" ]]; then
+        # shellcheck disable=SC2064
         trap "$new; $old" "$sig"
     else
+        # shellcheck disable=SC2064
         trap "$new" "$sig"
     fi
 }
@@ -86,7 +93,9 @@ trap_remove() {
     local sig="$2"
     local current new
     current="$(trap -p "$sig" | awk -F"'" '{print $2}')"
+    # shellcheck disable=SC2001
     new="$(echo "$current" | sed "s#;* *$remove##")"
+    # shellcheck disable=SC2064
     trap "$new" "$sig"
 }
 
@@ -136,11 +145,11 @@ mktemp() {
         esac
     done
     # processing
-    result="$path/$(basename $0)_$1$rand$ext"
+    result="$path/$(basename "$0")_$1$rand$ext"
     if [ -n "$rand" ]; then
         # loop while already exists
         while [ -e "$result" ]; do
-            result="$path/$(basename $0)_$1$RANDOM$ext"
+            result="$path/$(basename "$0")_$1$RANDOM$ext"
         done
     fi
     if [ -n "$dir" ]; then

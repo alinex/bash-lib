@@ -33,12 +33,13 @@ The core configuration which is needed for the core functions.
 
 | Variable/Function | Description |
 | --- | --- |
+| ``$BASHLIB_HOME`` | Set in the environment to where the BASHLIB is installed |
 | ``$CC_RESET`` | Reset all |
 | ``$CC_CRITICAL`` | Set color for critical/disaster massages used by [`die`](function/die.md) |
 
 ### Function Module
 
-The core functions contains essential parts which may also be used while loading the library.
+shellcheck source=full
 
 | Variable/Function | Description |
 | --- | --- |
@@ -46,7 +47,7 @@ The core functions contains essential parts which may also be used while loading
 | [`input_args`](function/input_args.md) | Collect string from stdin (not more than defined parameters) or concatenate the parameters |
 | [`input_lines`](function/input_lines.md) | Collect string from stdin (no parameters) or parameters each as a line |
 | [`die`](function/die.md) | Output error message and exit |
-| [`trap_add`](function/trap_add.md) | Set or add an additiopnal trap without overwriting existing ones |
+| [`trap_add`](function/trap_add.md) | Set or add an additional trap without overwriting existing ones |
 | [`trap_remove`](function/trap_remove.md) | Remove a specific trap |
 | [`mktemp`](function/mktemp.md) | Make a temporary file, which is recognizable |
 | [`option_parse`](function/option_parse.md) | Parse arguments based on given specification |
@@ -60,7 +61,7 @@ Array helpers.
 
 | Variable/Function | Description |
 | --- | --- |
-| [`contains`](function/contains.md) | Check if value is contained |
+| [`contains`](function/contains.md) | Check if value is contained in array |
 
 ### Atlassian Module
 
@@ -68,7 +69,11 @@ This covers atlassian API for Jira and confluence.
 
 | Variable/Function | Description |
 | --- | --- |
-| [`jira_search`](function/jira_search.md) | https://developer.atlassian.com/cloud/jira/platform/rest/v3/intro/#version |
+| [`confluence`](function/confluence.md) | Get page content from Confluence using API |
+| [`jira_search`](function/jira_search.md) | Search for jira tickets |
+| [`jira_get`](function/jira_get.md) | Get jira ticket details |
+| [`jira_create`](function/jira_create.md) | Create jira tickets |
+| [`jira_update`](function/jira_update.md) | Update jira tickets |
 
 ### Color Module
 
@@ -141,13 +146,6 @@ Some helpers to work easier with dates.
 | [`now`](function/now.md) | Get current timestamp |
 | [`date_diff`](function/date_diff.md) | Calculate difference in seconds |
 | [`date_format`](function/date_format.md) | Format date in different named versions or format string |
-
-### Divibib Module
-
-Module with divibib specific helpers.
-
-| Variable/Function | Description |
-| --- | --- |
 
 ### Mattermost Module
 
@@ -308,3 +306,11 @@ Validators to make this easier and more readable.
 | [`trim`](function/trim.md) | Trim leading and trailing whitespace or given character |
 
 ## Extra
+
+### Divibib Module
+
+Module with divibib specific helpers.
+
+| Variable/Function | Description |
+| --- | --- |
+| [`confluence_outage`](function/confluence_outage.md) | Get outage information |

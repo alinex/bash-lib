@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# shellcheck source=full
+source /dev/null
 
 # The core configuration which is needed for the core functions.
 
@@ -9,6 +11,9 @@
 set -eE         # exit on uncatched failure
 set -o pipefail # fail if any command in a pipeline fails
 #set -u # exit on use of unset variables
+
+# Set in the environment to where the BASHLIB is installed
+BASHLIB_HOME=${BASHLIB_HOME:-$HOME/bashlib}
 
 ######################################################################################
 ### Colors
