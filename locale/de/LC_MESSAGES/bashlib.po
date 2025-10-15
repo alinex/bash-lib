@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-15 20:58+0200\n"
+"POT-Creation-Date: 2025-10-15 22:23+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,7 +17,35 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: module/input:138 module/input:206 module/remote:240 module/mattermost:295
-#: module/validator:36 module/software:81
+#: core/function:213
+msgid "Options"
+msgstr "Optionen"
+
+#: module/input:41 module/input:66
+msgid "No"
+msgstr "Nein"
+
+#: module/input:45 module/input:70
+msgid "Yes"
+msgstr "Ja"
+
+#: module/input:49 module/input:74 module/input:165
+msgid "Disallowed answer"
+msgstr "Ungültige Antwort"
+
+#: module/input:91
+msgid "default"
+msgstr "Standard"
+
+#: module/input:98
+msgid "Using default"
+msgstr "Standardantwort genutzt"
+
+#: module/input:138 module/input:206 module/remote:252 module/mattermost:295
+#: module/validator:36 module/software:88
 msgid "Unrecognized option: $1"
 msgstr "Unbekannte Option: $1"
+
+#: module/input:240
+msgid "Exit"
+msgstr "Beenden"

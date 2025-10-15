@@ -115,7 +115,7 @@ opt_descriptions[$name]="$desc"
 opt_type[$name]=$type
 opt_short[$name]=$opt
 done <<<"$1"
-echo "Optionen:"
+echo "$(gettext "Options"):"
 for name in "${!opt_descriptions[@]}";do
 local type_text=""
 local short_text=""

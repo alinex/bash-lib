@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# shellcheck source=base
+source /dev/null
 
 BASHLIB_DOWNLOAD="https://gitlab.com/alinex/bash-lib/-/archive/master/bash-lib-master.tar.gz"
 
@@ -12,33 +14,36 @@ echo "This will setup the bashlib on this host if not already done..."
 echo ""
 
 echo "Step 1: Download bashlib to your system"
+# shellcheck disable=SC2015
 [ -n "$1" ] && path="$1" || read -rp "Where to put it: [$HOME/bashlib] " path </dev/tty
 path="${path:-$HOME/bashlib}"
-mkdir -p $path
-curl -L $BASHLIB_DOWNLOAD -o /tmp/bashlib.tgz
-tar -xzf /tmp/bashlib.tgz -C $path
+mkdir -p "$path"
+curl -L "$BASHLIB_DOWNLOAD" -o /tmp/bashlib.tgz
+tar -xzf /tmp/bashlib.tgz -C "$path"
 rm /tmp/bashlib.tgz
 echo ""
 
 echo "Step 2: Setup BASHLIB_HOME in your environment."
-[ -n "$2" ] && yn="$2" || read -n 1 -s -p "Should the bashlib path be added to $HOME/.bashrc (J/n) " yn
+# shellcheck disable=SC2015
+[ -n "$2" ] && yn="$2" || read -r -n 1 -s -p "Should the bashlib path be added to $HOME/.bashrc (J/n) " yn
 case $yn in
 "" | [JjYy])
-    echo "export BASHLIB_HOME=\"$path\"" >>$HOME/.bashrc
+    echo "export BASHLIB_HOME=\"$path\"" >>"$HOME"/.bashrc
     ;;
 *) true ;;
 esac
 echo ""
 
 echo "Step 3: Update configuration links."
+# shellcheck disable=SC2015
 [ -n "$3" ] && config="$3" || read -rp "Where to put local configuration: [$HOME] " config </dev/tty
 config="${config:-$HOME}"
-mkdir -p $config
-rm -rf $BASHLIB_HOME/config/secrets $BASHLIB_HOME/config/overwrite
-touch $config/.bashlib-secrets
-ln -s $config/.bashlib-secrets $path/config/secrets
-touch $config/.bashlib-overwrite
-ln -s $config/.bashlib-overwrite $path/config/overwrite
+mkdir -p "$config"
+rm -rf "$BASHLIB_HOME"/config/secrets "$BASHLIB_HOME"/config/overwrite
+touch "$config"/.bashlib-secrets
+ln -s "$config"/.bashlib-secrets "$path"/config/secrets
+touch "$config"/.bashlib-overwrite
+ln -s "$config"/.bashlib-overwrite "$path"/config/overwrite
 echo ""
 
 echo "You could now use the bashlib by adding:

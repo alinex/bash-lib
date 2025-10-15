@@ -115,7 +115,7 @@ opt_descriptions[$name]="$desc"
 opt_type[$name]=$type
 opt_short[$name]=$opt
 done <<<"$1"
-echo "Optionen:"
+echo "$(gettext "Options"):"
 for name in "${!opt_descriptions[@]}";do
 local type_text=""
 local short_text=""
@@ -300,13 +300,13 @@ while true;do
 echo -ne "$CC_INFO" >/dev/tty
 read -r -n 1 -s -p "$text (n/J) " yn
 case $yn in
-""|[Nn])echo -e "Nein$CC_RESET" >/dev/tty
+""|[Nn])echo -e "$(gettext "No")$CC_RESET" >/dev/tty
 return 1
 ;;
-[JjYy])echo -e "Ja$CC_RESET" >/dev/tty
+[JjYy])echo -e "$(gettext "Yes")$CC_RESET" >/dev/tty
 return 0
 esac
-echo "$yn -> ungültige Antwort" >/dev/tty
+echo "$yn -> $(gettext "Disallowed answer")" >/dev/tty
 done
 }
 ask_yes(){
@@ -316,13 +316,13 @@ while true;do
 echo -ne "$CC_INFO" >/dev/tty
 read -r -n 1 -s -p "$text (J/n) " yn
 case $yn in
-[Nn])echo -e "Nein$CC_RESET" >/dev/tty
+[Nn])echo -e "$(gettext "No")$CC_RESET" >/dev/tty
 return 1
 ;;
-""|[JjYy])echo -e "Ja$CC_RESET" >/dev/tty
+""|[JjYy])echo -e "$(gettext "Yes")$CC_RESET" >/dev/tty
 return 0
 esac
-echo "$yn -> ungültige Antwort" >/dev/tty
+echo "$yn -> $(gettext "Disallowed answer")" >/dev/tty
 done
 }
 ask_input(){
@@ -332,14 +332,14 @@ local answer prompt
 if (($#<2));then
 prompt="$text "
 else
-prompt="$text (Standard: $2) "
+prompt="$text ($(gettext "default"): $2) "
 fi
 echo -ne "$CC_INFO" >/dev/tty
 read -rp "$prompt" answer
 echo -e "$CC_RESET" >/dev/tty
 if [ -z "$answer" ]&&[ -n "$2" ];then
 answer="$2"
-echo -n "Standardantwort genutzt: $answer" >/dev/tty
+echo -n "$(gettext "Using default"): $answer" >/dev/tty
 fi
 echo "$answer"
 }
@@ -386,7 +386,7 @@ elif [ -n "$end" ]&&compare "$select" =~ [xXqQ];then
 echo exit
 return
 else
-echo -n "Ungültige Eingabe: " >/dev/tty
+echo -n "$(gettext "Disallowed answer"): " >/dev/tty
 fi
 done
 }
@@ -434,7 +434,7 @@ IFS='|' read -r cmd name <<<"$line"
 [ ! "$default" = "$(trim "$cmd")" ]||opt="-d $num"
 done <<<"$list"
 fi
-task=$(choose "$title" -x Beenden $opt "$list")
+task=$(choose "$title" -x "$(gettext "Exit")" $opt "$list")
 [[ $task != "exit" ]]||break
 $task||error "Got error $? running: $task"
 echo ""
@@ -1017,9 +1017,9 @@ input "$@"|uncolorize|mlr -i tsv -o md cat
 }
 repeat(){
 local -i n=$1
-[ $n -gt 0 ]||return
+[ "$n" -gt 0 ]||return
 shift
-for n in $(seq $n);do
+for n in $(seq "$n");do
 "$@"
 done
 }
@@ -1031,12 +1031,12 @@ until "$@";do
 exit=$?
 wait=$((2**count))
 count=$((count+1))
-if [ $count -lt $retries ];then
+if [ "$count" -lt "$retries" ];then
 echo "Try $count/$retries exited $exit, retrying in $wait seconds..." >&2
-sleep $wait
+sleep "$wait"
 else
 echo "Try $count/$retries exited $exit, no more retries left." >&2
-return $exit
+return "$exit"
 fi
 done
 return 0
@@ -1057,10 +1057,10 @@ esac
 done
 local seconds=$1
 local text=${2:-Waiting}
-while [ $seconds -gt 0 ];do
+while [ "$seconds" -gt 0 ];do
 echo -ne "\r$text $seconds seconds $abort"
 if [ -n "$abort" ];then
-read -t 1 -n 1 key&&return 1||true
+read -r -t 1 -n 1 _&&return 1||true
 else
 sleep 1
 fi
@@ -1080,11 +1080,11 @@ echo $$ >"$lockfile.$$" 2>/dev/null||die "Failed to create PID lockfile: $lockfi
 _lock_remove
 logged=0
 while ! ln "$lockfile.$$" "$lockfile" 2>/dev/null;do
-if [ $logged -eq 0 ];then
+if [ "$logged" -eq 0 ];then
 echo "Waiting for unlock in $lockfile by PID $(cat "$lockfile")..." >&1
 logged=1
 fi
-sleep $LOCK_SLEEP
+sleep "$LOCK_SLEEP"
 echo $$ >"$lockfile.$$" 2>/dev/null
 _lock_remove
 done
@@ -1095,8 +1095,7 @@ local lockfile logged
 lockfile="$(mktemp 'lockfile')"
 echo $$ >"$lockfile.$$" 2>/dev/null||die "Failed to create PID lockfile: $lockfile.$$"
 _lock_remove
-ln "$lockfile.$$" "$lockfile" 2>/dev/null
-if [ $? -ne 0 ];then
+if ! ln "$lockfile.$$" "$lockfile" 2>/dev/null;then
 unlock
 die "Stop processing because this is locked in $lockfile by PID $(cat "$lockfile")"
 fi
@@ -1130,7 +1129,7 @@ esac
 done
 local ident=$1
 shift||true
-declare -p "$@"|sed 's/^declare\b/declare -g/' >$(mktemp $opt -e env "$ident")
+declare -p "$@"|sed 's/^declare\b/declare -g/' >"$(mktemp $opt -e env "$ident")"
 }
 env_restore(){
 eval set -- "$(option_parse $'d disk -\np path +' "$@")"
@@ -1149,7 +1148,7 @@ break
 *)shift
 esac
 done
-source $(mktemp $opt -e env "$1") 2>/dev/null||true
+source "$(mktemp $opt -e env "$1")" 2>/dev/null||true
 }
 env_clean(){
 eval set -- "$(option_parse $'d disk -\np path +' "$@")"
@@ -1168,7 +1167,7 @@ break
 *)shift
 esac
 done
-rm -f $(mktemp $opt -e env "$1")
+rm -f "$(mktemp $opt -e env "$1")"
 }
 env_change(){
 eval set -- "$(option_parse $'d disk -\np path +' "$@")"
@@ -1202,7 +1201,7 @@ steps_init(){
 declare -g -A _STEPS
 env_restore steps
 declare -p _STEPS
-env_store steps _STEPS $STEPS_VARIABLES
+env_store steps _STEPS "$STEPS_VARIABLES"
 echo "Arbeitsschritte werden protokolliert um auch mittendrin wieder aufzusetzen..." >&2
 }
 steps_check(){
@@ -1214,7 +1213,6 @@ return 0
 else
 return 1
 fi
-env_store steps _STEPS $STEPS_VARIABLES
 }
 steps_done(){
 num_parameters --min 0 --max 1 --die "Only an <ident> is needed!" -- "$@"
@@ -1222,33 +1220,33 @@ declare -p _STEPS 2>/dev/null|grep -q 'declare -A'||return
 if [ -n "$1" ];then
 _STEPS["$1"]=1
 echo "Finished: Step $1 at $(date_format sql)" >&2
-env_store steps _STEPS $STEPS_VARIABLES
+env_store steps _STEPS "$STEPS_VARIABLES"
 else
 env_clean steps
 fi
 }
 sync(){
 num_parameters --min 1 --die "At least a <command> is needed!" -- "$@"
-sync_name $1 "$@"
+sync_name "$1" "$@"
 }
 sync_name(){
 num_parameters --min 2 --die "At least a <name> and <command> is needed!" -- "$@"
 local name=$1
 shift
-steps_check $name&&return||true
+steps_check "$name"&&return||true
 declare -p _STEPS 2>/dev/null|grep -q 'declare -A'&&echo "Started: step $name at $(date_format sql)" >&2||true
 "$@"
-steps_done $name
+steps_done "$name"
 }
 async(){
 num_parameters --min 1 --die "At least a <command> is needed!" -- "$@"
-async_name $1 "$@"
+async_name "$1" "$@"
 }
 async_name(){
 num_parameters --min 2 --die "At least a <name> and <command> is needed!" -- "$@"
 local name=$1
 shift
-! steps_check $name||return
+! steps_check "$name"||return
 declare -p _STEPS 2>/dev/null|grep -q 'declare -A'&&echo "Started: step $name at $(date_format sql)" >&2||true
 "$@"&
 env_change queue "_async_running[\"$name\"]=$!" _queue _async_running
@@ -1258,19 +1256,19 @@ async_wait(){
 wait "${_async_running["$1"]}"
 local code=$?
 if [ "$code" -eq 0 ];then
-steps_done $1
+steps_done "$1"
 env_change queue "unset async_running[\"$1\"]" _queue _async_running
 else
 declare -p _STEPS 2>/dev/null|grep -q 'declare -A'&&echo echo "Failed: Step $1 at $(date_format sql)" >&2||true
 fi
-return $code
+return "$code"
 }
 ASYNC_QUEUE_MAX=2
 declare -a _queue
 declare _queue_control_pid
 env_store queue _queue _async_running
 _queue_control(){
-local name pid free first params num
+local name pid free first params
 while true;do
 sleep 1
 env_restore queue
@@ -1278,7 +1276,7 @@ if [ ${#_async_running[@]} -gt 0 ];then
 for name in "${!_async_running[@]}";do
 pid="${_async_running["$name"]}"
 if ! kill -0 "$pid" 2>/dev/null;then
-steps_done $name
+steps_done "$name"
 env_change queue "unset _async_running[\"$name\"]" _queue _async_running
 fi
 done||true
@@ -1287,8 +1285,8 @@ env_restore queue
 debug "Task queue: $$ $BASHPID async ${#_async_running[@]} queue ${#_queue[@]}"
 [ ${#_queue[@]} -gt 0 ]||[ ${#_async_running[@]} -gt 0 ]||return 0
 free=$((ASYNC_QUEUE_MAX-${#_async_running[@]}))
-if [ $free -gt 0 ];then
-for num in $(seq 1 $free);do
+if [ "$free" -gt 0 ];then
+for _ in $(seq 1 "$free");do
 [ ${#_queue[@]} -gt 0 ]||break
 first="${_queue[0]}"
 env_change queue '_queue=("${_queue[@]:1}")' _queue _async_running
@@ -1301,12 +1299,13 @@ env_clean queue
 }
 queue(){
 num_parameters --min 1 --die "At least a <command> is needed!" -- "$@"
-queue_name $1 "$@"
+queue_name "$1" "$@"
 }
 queue_name(){
 num_parameters --min 2 --die "At least a <name> and <command> is needed!" -- "$@"
-! steps_check $1||return 0
-local entry=$(printf "%s\x1f" "$@")
+! steps_check "$1"||return 0
+local entry
+entry=$(printf "%s\x1f" "$@")
 entry=${entry%$'\x1f'}
 env_change queue "_queue+=(\"$entry\")" _queue _async_running
 if [ -z "$_queue_control_pid" ];then
@@ -1316,32 +1315,32 @@ fi
 }
 declare -F "num_parameters" >/dev/null||source "$BASHLIB_HOME"/module/validator
 remote(){
-local ssh="${slogin:-operator}@$server"
+local ssh="${slogin:-operator}@${server-}"
 if [ -p /dev/stdin ]&&[ $# -eq 0 ];then
-ssh $ssh bash -s
+ssh "$ssh" bash -s
 return ${PIPESTATUS[0]}
 else
-ssh $ssh "$@"
+ssh "$ssh" "$@"
 return ${PIPESTATUS[0]}
 fi
 }
 remote_term(){
 local ssh="${slogin:-operator}@$server"
 if [ -p /dev/stdin ];then
-ssh -t $ssh bash -s
+ssh -t "$ssh" bash -s
 return ${PIPESTATUS[0]}
 else
-ssh -t $ssh "$@"
+ssh -t "$ssh" "$@"
 return ${PIPESTATUS[0]}
 fi
 }
 remote_term_line(){
 local ssh="${slogin:-operator}@$server"
 if [ -p /dev/stdin ];then
-ssh -t $ssh bash -s 2> >(grep -v '^Connection to .* closed\.' >&2)|nocr
+ssh -t "$ssh" bash -s 2> >(grep -v '^Connection to .* closed\.' >&2)|nocr
 return ${PIPESTATUS[0]}
 else
-ssh -t $ssh "$@" 2> >(grep -v '^Connection to .* closed\.' >&2)|nocr
+ssh -t "$ssh" "$@" 2> >(grep -v '^Connection to .* closed\.' >&2)|nocr
 return ${PIPESTATUS[0]}
 fi
 }
@@ -1351,13 +1350,13 @@ file="$(input "$@")"
 test "${file:0:1}" = "/"||file="$(path)/$file"
 test -f "$file"||die "No file to execute remotely under $file"
 local ssh="${slogin:-operator}@$server"
-ssh $ssh 'bash -s' <$file
+ssh "$ssh" 'bash -s' <"$file"
 }
 remote_console(){
 local rc
 local ssh="${slogin:-operator}@$server"
-ssh $ssh '(nohup touch .hushlogin && sleep 1 && rm .hushlogin) >/dev/null 2>&1 </dev/null &'
-ssh $ssh </dev/tty||rc=$?
+ssh "$ssh" '(nohup touch .hushlogin && sleep 1 && rm .hushlogin) >/dev/null 2>&1 </dev/null &'
+ssh "$ssh" </dev/tty||rc=$?
 return $rc
 }
 upload(){
@@ -1371,9 +1370,8 @@ local dir=${2:-.}
 rsync -av "$ssh:$1" "$dir"
 }
 remote_install(){
-(cat $BASHLIB_BASE/1_color
-cat $BASHLIB_BASE/2_core
-cat $BASHLIB_BASE/software
+(cat "$BASHLIB_HOME"/base
+cat "$BASHLIB_HOME"/module/software
 echo install "$@")|shfmt -mn|remote
 }
 remote_df(){
@@ -1401,11 +1399,11 @@ IFS=$'\n'
 for line in $(remote df -h $opt -x tmpfs -x efivarfs -x devtmpfs -x squashfs "$@");do
 if [ -z "$firstline" ];then
 firstline=1
-invers $line
+invers "$line"
 else
-percent=$(echo $line|xargs echo|cut -d' ' -f5|sed 's/%//')
-mount=$(echo $line|xargs echo|cut -d' ' -f6|nocr)
-device=$(echo $line|xargs echo|cut -d' ' -f1)
+percent=$(echo "$line"|xargs echo|cut -d' ' -f5|sed 's/%//')
+mount=$(echo "$line"|xargs echo|cut -d' ' -f6|nocr)
+device=$(echo "$line"|xargs echo|cut -d' ' -f1)
 for ((i=0; i<${#MOUNT_COLOR_LIMIT[@]}; i+=5));do
 pattern="${MOUNT_COLOR_LIMIT[i]}"
 if [[ $device =~ $pattern ]];then
@@ -1416,18 +1414,18 @@ limit_o="${MOUNT_COLOR_LIMIT[i+4]}"
 break
 fi
 done
-if [ $percent -eq $limit_c ];then
+if [ "$percent" -eq "$limit_c" ];then
 critical "$line"
-elif [ $percent -ge $limit_e ];then
+elif [ "$percent" -ge "$limit_e" ];then
 error "$line"
-elif [ $percent -ge $limit_w ];then
+elif [ "$percent" -ge "$limit_w" ];then
 warn "$line"
-elif [ $percent -ge $limit_o ];then
+elif [ "$percent" -ge "$limit_o" ];then
 ok "$line"
 else
 echo "$line"
 fi
-if [ -n "$limit" ]&&compare $percent $op $limit;then
+if [ -n "$limit" ]&&compare "$percent" "$op" "$limit";then
 ref="$ref$mount "
 fi
 fi
@@ -1454,11 +1452,11 @@ esac
 done
 local uptime seconds=15
 echo -ne "Warten bis der Reboot fertig ist" >&2
-sleep $seconds
+sleep "$seconds"
 while true;do
 [ -n "$quiet" ]||echo -ne "\rWarten bis der Reboot fertig ist ($seconds Sekunden)" >&2
 uptime=$(remote cut -d"' '" -f1 /proc/uptime 2>/dev/null|sed 's/[ .].*//')
-if [ -n "$uptime" ]&&[ $uptime -lt 300 ];then
+if [ -n "$uptime" ]&&[ "$uptime" -lt 300 ];then
 break
 else
 sleep 1
@@ -1472,22 +1470,22 @@ CURL_HTTP_CODE=""
 curl(){
 local file res
 file=$(mktemp -m -r)
-res=$(command curl -s -w "Error: %{method} %{url_effective} with RC:%{http_code}" -o $file -L "$@")
+res=$(command curl -s -w "Error: %{method} %{url_effective} with RC:%{http_code}" -o "$file" -L "$@")
 CURL_HTTP_CODE=${res: -3}
 if [[ $CURL_HTTP_CODE =~ ^2[0-9]{2}$ ]];then
-cat $file
-rm $file
+cat "$file"
+rm "$file"
 else
 error "$res" >&2
-jq . $file >&2 2>/dev/null||cat $file >&2
-rm $file
+jq . "$file" >&2 2>/dev/null||cat "$file" >&2
+rm "$file"
 return 1
 fi
 }
 mongosh(){
 num_parameters --min 2 --max 2 --die "Mongosh needs two parameters: Usage mongosh <database> <command>" "$@"
 local cluster
-cluster="$(echo $server|sed 's/^[^.]*\.//')"
+cluster="$(sed 's/^[^.]*\.//' <<<"$server")"
 command mongosh "mongodb://${MONGO_ADMIN_USERPASS["$cluster"]}@$server:27017/$1" --eval "$2"
 }
 declare -A _software_install
@@ -1497,14 +1495,18 @@ local snap=""
 local reload=""
 for cmd in "$@";do
 if [[ ! -v _software_install["$cmd"] ]];then
-sudo which $cmd >/dev/null||case $cmd in
+sudo which "$cmd" >/dev/null||case $cmd in
 yq)snap="$snap $cmd";;
 *)apt="$apt $cmd"
 esac
 _software_install["$cmd"]=1
 fi
 done
-test -z "$snap"||command -v snapd >/dev/null||(apt="$apt snapd"&&snap="$snap snapd"&&reload=1)
+if test -n "$snap"&&! command -v snapd >/dev/null;then
+apt="$apt snapd"
+snap="$snap snapd"
+reload=1
+fi
 test -z "$apt"||sudo apt-get install -y $apt
 test -z "$snap"||sudo apt snap install $snap
 test -z "$reload"||source ~/.bashrc
@@ -1561,30 +1563,30 @@ num=-1
 fi
 if [ -n "$human" ];then
 echo -n "$1 -> $2 "
-if [ $num -eq 0 ];then
+if [ "$num" -eq 0 ];then
 echo "sind identische Versionen"
-elif [ $num -ge 1000000000 ];then
+elif [ "$num" -ge 1000000000 ];then
 echo "ist ein upgrade von $((num/1000000000)) Hauptversione(n)"
-elif [ $num -ge 1000000 ];then
+elif [ "$num" -ge 1000000 ];then
 echo "ist ein upgrade von $((num/1000000)) Nebenversione(n)"
-elif [ $num -ge 1000 ];then
+elif [ "$num" -ge 1000 ];then
 echo "ist ein upgrade von $((num/1000)) Patch Level(n)"
-elif [ $num -ge 1 ];then
+elif [ "$num" -ge 1 ];then
 echo "ist ein entwickler Upgrade)"
-elif [ $num -ge -1000 ];then
+elif [ "$num" -ge -1000 ];then
 echo "ist ein entwickler Downgrade"
-elif [ $num -ge 1000000 ];then
+elif [ "$num" -ge 1000000 ];then
 echo "ist ein downgrade von $((num/-1000)) Patch Level(n)"
-elif [ $num -ge 1000000000 ];then
+elif [ "$num" -ge 1000000000 ];then
 echo "ist ein downgrade von $((num/-1000000)) Nebenversione(n)"
 else
 echo "ist ein downgrade von $((num/-1000000000)) Hauptversione(n)"
 fi
 return 0
 else
-echo $num
+echo "$num"
 fi
-[ $num -eq 0 ]&&return 0||return 1
+[ "$num" -eq 0 ]&&return 0||return 1
 }
 num_parameters(){
 eval set -- "$(option_parse $'- min +\n- max +\n- die +' "$@")"

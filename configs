@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# shellcheck source=base
+source /dev/null
 
 for f in "$BASHLIB_HOME"/config/*; do
     if [[ -f "$f" && "$f" != *.* ]]; then

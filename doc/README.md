@@ -318,7 +318,7 @@ Validators to make this easier and more readable.
 
 ### Divibib Module
 
-Module with divibib specific helpers.
+shellcheck source=base
 
 | Variable/Function | Description |
 | --- | --- |

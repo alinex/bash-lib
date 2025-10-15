@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# shellcheck source=base
+source /dev/null
 
 for folder in core module; do
     for f in "$BASHLIB_HOME/$folder"/*; do
@@ -8,4 +10,4 @@ for folder in core module; do
     done
 done
 
-source $BASHLIB_HOME/configs
+source "$BASHLIB_HOME"/configs

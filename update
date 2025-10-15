@@ -33,24 +33,24 @@ find core module extra -type f -not -name \*.\* -print0 | xargs -0 xgettext -L S
 #xgettext -L Shell -o locale/bashlib.pot _test
 sed -i 's/charset=CHARSET/charset=UTF-8/' locale/bashlib.pot
 for lang in $LOCALES; do
-    mkdir -p locale/$lang/LC_MESSAGES
-    if [ -e locale/$lang/LC_MESSAGES/bashlib.po ]; then
+    mkdir -p locale/"$lang"/LC_MESSAGES
+    if [ -e locale/"$lang"/LC_MESSAGES/bashlib.po ]; then
         msgmerge --update locale/de/LC_MESSAGES/bashlib.po locale/bashlib.pot
     else
-        cp locale/bashlib.pot locale/$lang/LC_MESSAGES/bashlib.po
-        sed "s/Language: \\n/Language: $lang\\n/" locale/LC_MESSAGES/$lang/bashlib.po
+        cp locale/bashlib.pot locale/"$lang"/LC_MESSAGES/bashlib.po
+        sed "s/Language: \\n/Language: $lang\\n/" locale/LC_MESSAGES/"$lang"/bashlib.po
     fi
-    msgfmt locale/$lang/LC_MESSAGES/bashlib.po -o locale/$lang/LC_MESSAGES/bashlib.mo
+    msgfmt locale/"$lang"/LC_MESSAGES/bashlib.po -o locale/"$lang"/LC_MESSAGES/bashlib.mo
 done
 echo
 
 echo "Update documentation..." >&2
-rm $BASHLIB_HOME/doc/function/* 2>/dev/null || true
+rm "$BASHLIB_HOME"/doc/function/* 2>/dev/null || true
 # remove commands from Readme
-sed -i '/which are listed below\./q' $BASHLIB_HOME/doc/README.md
+sed -i '/which are listed below\./q' "$BASHLIB_HOME"/doc/README.md
 # loop over folder
 for folder in config core module extra; do
-    echo -e "\n## ${folder^}" >>$BASHLIB_HOME/doc/README.md
+    echo -e "\n## ${folder^}" >>"$BASHLIB_HOME"/doc/README.md
     echo -ne "$folder:\t" >&2
     # loop over modules
     for file in "$BASHLIB_HOME/$folder"/*; do
@@ -67,8 +67,9 @@ for folder in config core module extra; do
                 echo ""
                 echo "| Variable/Function | Description |"
                 echo "| --- | --- |"
-            ) >>$BASHLIB_HOME/doc/README.md
+            ) >>"$BASHLIB_HOME"/doc/README.md
             # variables
+            # shellcheck disable=SC2016
             awk '{  if ($0 ~ /^#/) {
                         if (!header_printed) {
                             header_line = $0
@@ -91,7 +92,7 @@ for folder in config core module extra; do
                 }' "$file" |
                 sed -E 's#(^|[^[:alnum:]_.-])@([[:alnum:]_]+)#\1[`\2`](function/\2.md)#g' |
                 sed -E 's#(^|[^[:alnum:]_.-])(\$[[:alnum:]_]+)#\1`\2`#g' \
-                    >>$BASHLIB_HOME/doc/README.md
+                    >>"$BASHLIB_HOME"/doc/README.md
             # Get function names and start lines using grep and awk
             # Supports functions declared as: fname() { ... } or function fname { ... }
             function_lines=$(awk '
@@ -118,9 +119,10 @@ for folder in config core module extra; do
                 # Extract comment block directly above function
                 comments=""
                 linenum=$((line - 1))
-                while [ $linenum -gt 0 ]; do
+                while [ "$linenum" -gt 0 ]; do
                     line_content=$(sed -n "${linenum}p" "$file")
                     if [[ "$line_content" =~ ^[[:space:]]*# ]]; then
+                        # shellcheck disable=SC2001
                         comments="$(sed 's/^\s*# //' <<<"$line_content")"$'\n'"$comments"
                     else
                         break
@@ -145,37 +147,45 @@ for folder in config core module extra; do
                         first=""
                         title="$line"
                     elif [[ "$line" =~ ^usage: ]] || { [ "$chapter" = "usage" ] && [[ "$line" =~ ^[[:space:]] ]]; }; then
+                        # shellcheck disable=SC2001
                         line="$(sed 's/^\(usage:\)\?\s*//i' <<<"$line")"
                         usage="$usage\n$line"
-                        chapter=usage
+                        chapter="usage"
                     elif [[ "$line" =~ ^options: ]] || { [ "$chapter" = "options" ] && [[ "$line" =~ ^[[:space:]] ]]; }; then
+                        # shellcheck disable=SC2001
                         line="$(sed 's/^\(options:\)\?\s*//i' <<<"$line")"
                         options="$options\n$line"
-                        chapter=options
+                        chapter="options"
                     elif [[ "$line" =~ ^globals: ]] || { [ "$chapter" = "globals" ] && [[ "$line" =~ ^[[:space:]] ]]; }; then
+                        # shellcheck disable=SC2001
                         line="$(sed 's/^\(globals:\)\?\s*//i' <<<"$line")"
                         globals="$globals\n- $line"
-                        chapter=globals
+                        chapter="globals"
                     elif [[ "$line" =~ ^example: ]] || { [ "$chapter" = "example" ] && [[ "$line" =~ ^[[:space:]] ]]; }; then
+                        # shellcheck disable=SC2001
                         line="$(sed 's/^\(example:\)\?\s*//i' <<<"$line")"
                         example="$example\n- $line"
-                        chapter=example
+                        chapter="example"
                     elif [[ "$line" =~ ^tty: ]] || { [ "$chapter" = "tty" ] && [[ "$line" =~ ^[[:space:]] ]]; }; then
+                        # shellcheck disable=SC2001
                         line="$(sed 's/^\(tty:\)\?\s*//i' <<<"$line")"
                         tty="$tty\n$line"
-                        chapter=tty
+                        chapter="tty"
                     elif [[ "$line" =~ ^output: ]] || { [ "$chapter" = "output" ] && [[ "$line" =~ ^[[:space:]] ]]; }; then
+                        # shellcheck disable=SC2001
                         line="$(sed 's/^\(output:\)\?\s*//i' <<<"$line")"
                         output="$output\n- $line"
-                        chapter=output
+                        chapter="output"
                     elif [[ "$line" =~ ^error: ]] || { [ "$chapter" = "error" ] && [[ "$line" =~ ^[[:space:]] ]]; }; then
+                        # shellcheck disable=SC2001
                         line="$(sed 's/^\(error:\)\?\s*//i' <<<"$line")"
                         error="$error\n- $line"
-                        chapter=error
+                        chapter="error"
                     elif [[ "$line" =~ ^return: ]] || { [ "$chapter" = "return" ] && [[ "$line" =~ ^[[:space:]] ]]; }; then
+                        # shellcheck disable=SC2001
                         line="$(sed 's/^\(return:\)\?\s*//i' <<<"$line")"
                         return="$return\n- $line"
-                        chapter=return
+                        chapter="return"
                     else
                         description="$description\n$line"
                     fi
@@ -184,9 +194,10 @@ for folder in config core module extra; do
                 [ -n "$funcname" ] || continue
                 [[ ! "$funcname" =~ ^_.* ]] || continue
                 # add to table
-                echo "| [\`$funcname\`](function/$funcname.md) | $title |" >>$BASHLIB_HOME/doc/README.md
+                echo "| [\`$funcname\`](function/$funcname.md) | $title |" >>"$BASHLIB_HOME"/doc/README.md
                 # add detail pages
                 shopt -u nocasematch
+                # shellcheck disable=SC2016
                 (
                     echo "# $funcname"
                     echo -e "\n## $title"
@@ -203,7 +214,7 @@ for folder in config core module extra; do
                     sed -E 's#(^|[^[:alnum:]_.-])@([[:alnum:]_]+)#\1[`\2`](\2.md)#g' |
                     sed -E 's#(^|[^[:alnum:]_.-])&([[:alnum:]_]+)#\1[`\2`](../example/\2.md)#g' |
                     sed -E 's#(^|[^[:alnum:]_.-])(\$[[:alnum:]_]+)#\1`\2`#g' \
-                        >$BASHLIB_HOME/doc/function/$funcname.md
+                        >"$BASHLIB_HOME"/doc/function/"$funcname".md
             done <<<"$function_lines"
         fi
     done

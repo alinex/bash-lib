@@ -38,15 +38,15 @@ ask_no() {
         read -r -n 1 -s -p "$text (n/J) " yn
         case $yn in
         "" | [Nn])
-            echo -e "Nein${CC_RESET}" >/dev/tty
+            echo -e "$(gettext "No")${CC_RESET}" >/dev/tty
             return 1
             ;;
         [JjYy])
-            echo -e "Ja${CC_RESET}" >/dev/tty
+            echo -e "$(gettext "Yes")${CC_RESET}" >/dev/tty
             return 0
             ;;
         esac
-        echo "$yn -> ungültige Antwort" >/dev/tty
+        echo "$yn -> $(gettext "Disallowed answer")" >/dev/tty
     done
 }
 
@@ -63,15 +63,15 @@ ask_yes() {
         read -r -n 1 -s -p "$text (J/n) " yn
         case $yn in
         [Nn])
-            echo -e "Nein${CC_RESET}" >/dev/tty
+            echo -e "$(gettext "No")${CC_RESET}" >/dev/tty
             return 1
             ;;
         "" | [JjYy])
-            echo -e "Ja${CC_RESET}" >/dev/tty
+            echo -e "$(gettext "Yes")${CC_RESET}" >/dev/tty
             return 0
             ;;
         esac
-        echo "$yn -> ungültige Antwort" >/dev/tty
+        echo "$yn -> $(gettext "Disallowed answer")" >/dev/tty
     done
 }
 
@@ -88,14 +88,14 @@ ask_input() {
     if (($# < 2)); then
         prompt="$text "
     else
-        prompt="$text (Standard: $2) "
+        prompt="$text ($(gettext "default"): $2) "
     fi
     echo -ne "${CC_INFO}" >/dev/tty
     read -rp "$prompt" answer
     echo -e "${CC_RESET}" >/dev/tty
     if [ -z "$answer" ] && [ -n "$2" ]; then
         answer="$2"
-        echo -n "Standardantwort genutzt: $answer" >/dev/tty
+        echo -n "$(gettext "Using default"): $answer" >/dev/tty
     fi
     echo "$answer"
 }
@@ -162,7 +162,7 @@ choose() {
             echo exit
             return
         else
-            echo -n "Ungültige Eingabe: " >/dev/tty
+            echo -n "$(gettext "Disallowed answer"): " >/dev/tty
         fi
     done
 }
@@ -237,7 +237,7 @@ tasks() {
             done <<<"$list"
         fi
         # shellcheck disable=SC2086
-        task=$(choose "$title" -x Beenden $opt "$list")
+        task=$(choose "$title" -x "$(gettext "Exit")" $opt "$list")
         [[ "$task" != "exit" ]] || break
         $task || error "Got error $? running: $task"
         echo ""
