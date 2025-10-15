@@ -2,7 +2,6 @@
 
 ## Ask yes/no with default: no
 
-TTY:      `<question>` `<key>`
 Status:   0 || 1
 
 
@@ -11,4 +10,10 @@ Status:   0 || 1
 ```bash
 ask_no <question>
 <question> | ask_no
+```
+
+### TTY (direct)
+
+```bash
+<question> <key>
 ```

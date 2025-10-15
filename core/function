@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# shellcheck source=full
+# shellcheck source=base
 source /dev/null
 
 # The core functions contains essential parts which may also be used while loading the library.

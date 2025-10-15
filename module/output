@@ -317,14 +317,22 @@ choose() {
 }
 
 # Run tasks as selected by user
-# Usage:    tasks <function>"|"<entry>"...  # entries from arguments
-#           <list> | tasks                  # entries from pipe
-#           tasks <function>                # entries from function (dynamic)
+# Often the functions are also named `check-...` for the ones which will return tasks and `task-...` for the ones really doing the job. The first one may do a lot of analyzation and output user information on stdout.
+# The '|' character is not possible within the commans. If a pipe is neccessary put it within a function.
+# Usage:    tasks <entry>...
+#           # <entry>       := <check-fn> or "<task-line>"
+#           # <check-fn>    := function called to return up to multiple <task-lines>
+#           # <task-fn>     := function to be run when selected
+#           # <task-line>   := "<task-fn> | <name>"
+#           <task-lines> | tasks            # entries from pipe
+#           tasks <check-fn>                # add entries from function (dynamic)
 # Option    -t, --title <title>             # display text line above selection
+#           -d, --default <task-fn> | "x"   # default command to start
 # TTY:      [<title>]
-#           <list>
+#           1) <name>
 #           ...
-#           <question> <key>
+#           x) Beenden
+#           <question> <input>
 # Example:  list_tasks() {
 #               # can be created dynamically:
 #               cat <<'EOC'
@@ -341,12 +349,16 @@ choose() {
 #           tasks -t "Nächste Schritte" list_tasks
 tasks() {
     # parameter parsing
-    local end title
-    eval set -- "$(option_parse $'t title +' "$@")"
+    local end title default
+    eval set -- "$(option_parse $'t title +\nd default +' "$@")"
     while true; do
         case "$1" in
         -t | --title)
             title="-t$2" >/dev/tty
+            shift 2
+            ;;
+        -d | --default)
+            default="$2" >/dev/tty
             shift 2
             ;;
         --)
@@ -357,11 +369,37 @@ tasks() {
         esac
     done
     # processing
-    local list task
-    [ $# -eq 1 ] || list="$(input_lines "$@")"
+    local list task num newlist opt cmd name res
+    list="$(input_lines "$@")"
+    # check for dynamic parts in list
+    while grep -qv '|' <<<"$list"; do
+        newlist=""
+        while IFS= read -r line; do
+            IFS='|' read -r cmd name <<<"$line"
+            if [ -n "$name" ]; then
+                newlist="$newlist$line"$'\n'
+            else
+                echo ">>> $cmd"
+                res="$($cmd)" || die "Could not get task list from command: $cmd"
+                [ -z "$res" ] || newlist="$newlist$res"$'\n'
+            fi
+        done <<<"$list"
+        list="$(echo "$newlist" | sed '/^[[:space:]]*$/d')"
+    done
+    if [ "$default" = "x" ]; then
+        opt="-d x"
+    elif [ -n "$default" ]; then
+        num=0
+        while IFS= read -r line; do
+            ((num++)) || true
+            IFS='|' read -r cmd name <<<"$line"
+            [ ! "$default" = "$(trim "$cmd")" ] || opt="-d $num"
+        done <<<"$list"
+    fi
+    # ask user to select
     while true; do
-        [ -z "$1" ] || list="$("$1")"
-        task=$(choose "$title" -x Beenden "$list")
+        # shellcheck disable=SC2086
+        task=$(choose "$title" -x Beenden $opt "$list")
         [[ "$task" != "exit" ]] || break
         $task || die "Got error $? running: $task"
         echo ""

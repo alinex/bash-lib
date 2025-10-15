@@ -2,7 +2,6 @@
 
 ## Wait for user input
 
-TTY:      `<question>` `<key>`
 
 
 ### Usage
@@ -10,4 +9,10 @@ TTY:      `<question>` `<key>`
 ```bash
 pause <message>
 <message> | pause
+```
+
+### TTY (direct)
+
+```bash
+<question> <key>
 ```

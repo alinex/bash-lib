@@ -29,7 +29,7 @@ The configuration module contains a lot of general configuration settings for th
 
 ### Config Module
 
-The core configuration which is needed for the core functions.
+shellcheck disable=SC2034
 
 | Variable/Function | Description |
 | --- | --- |
@@ -39,7 +39,7 @@ The core configuration which is needed for the core functions.
 
 ### Function Module
 
-shellcheck source=full
+shellcheck source=base
 
 | Variable/Function | Description |
 | --- | --- |
@@ -65,7 +65,7 @@ Array helpers.
 
 ### Atlassian Module
 
-This covers atlassian API for Jira and confluence.
+shellcheck source=config/environment
 
 | Variable/Function | Description |
 | --- | --- |
@@ -77,7 +77,7 @@ This covers atlassian API for Jira and confluence.
 
 ### Color Module
 
-This module contains color specifications to be used in console output.
+shellcheck disable=SC2034
 
 | Variable/Function | Description |
 | --- | --- |
@@ -139,7 +139,7 @@ This module contains color specifications to be used in console output.
 
 ### Date Module
 
-Some helpers to work easier with dates.
+shellcheck source=base
 
 | Variable/Function | Description |
 | --- | --- |
@@ -261,7 +261,7 @@ Module for process control
 
 ### Remote Module
 
-Module with remote calling/execution helpers.
+shellcheck source=base
 
 | Variable/Function | Description |
 | --- | --- |

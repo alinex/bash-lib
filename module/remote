@@ -1,9 +1,11 @@
 #!/usr/bin/env bash
+# shellcheck source=base
+source /dev/null
 
 # Module with remote calling/execution helpers.
 
 # load other modules if not already done
-declare -F "num_parameters" >/dev/null || source $BASHLIB_HOME/module/validator
+declare -F "num_parameters" >/dev/null || source "$BASHLIB_HOME"/module/validator
 
 ######################################################################################
 # Remote SSH

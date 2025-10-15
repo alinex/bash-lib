@@ -2,19 +2,32 @@
 
 ## Run tasks as selected by user
 
+Often the functions are also named `check-...` for the ones which will return tasks and `task-...` for the ones really doing the job. The first one may do a lot of analyzation and output user information on stdout.
+The '|' character is not possible within the commans. If a pipe is neccessary put it within a function.
 Option    -t, --title `<title>`             # display text line above selection
-TTY:      [`<title>`]
 
 
 ### Usage
 
 ```bash
-tasks <function>"|"<entry>"...  # entries from arguments
-<list> | tasks                  # entries from pipe
-tasks <function>                # entries from function (dynamic)
-<list>
+tasks <entry>...
+# <entry>       := <check-fn> or "<task-line>"
+# <check-fn>    := function called to return up to multiple <task-lines>
+# <task-fn>     := function to be run when selected
+# <task-line>   := "<task-fn> | <name>"
+<task-lines> | tasks            # entries from pipe
+tasks <check-fn>                # add entries from function (dynamic)
+-d, --default <task-fn> | "x"   # default command to start
+```
+
+### TTY (direct)
+
+```bash
+[<title>]
+1) <name>
 ...
-<question> <key>
+x) Beenden
+<question> <input>
 ```
 
 ### Example

@@ -2,7 +2,6 @@
 
 ## Ask for a text line
 
-TTY:      `<question>` `<key>`
 Stdin:    `<line>`
 Stdout:   `<answer>`
 
@@ -12,4 +11,10 @@ Stdout:   `<answer>`
 ```bash
 ask_input <question> [<default>]
 <question> | ask_input
+```
+
+### TTY (direct)
+
+```bash
+<question> <key>
 ```

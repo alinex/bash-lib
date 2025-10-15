@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
+# shellcheck source=base
+source /dev/null
 
 # Some helpers to work easier with dates.
+
+# load other modules if not already done
+declare -F "is_integer" >/dev/null || source "$BASHLIB_HOME"/module/validator
 
 ######################################################################################
 ### Timestamp
