@@ -10,10 +10,8 @@
 steps_init
 ```
 
-### Example
+### Examples
 
-```bash
-steps_init
-# sync | async | queue calls
-steps_done
-```
+- steps_init
+- # sync | async | queue calls
+- steps_done

@@ -158,7 +158,7 @@ for folder in config core module extra; do
                         chapter=globals
                     elif [[ "$line" =~ ^example: ]] || { [ "$chapter" = "example" ] && [[ "$line" =~ ^[[:space:]] ]]; }; then
                         line="$(sed 's/^\(example:\)\?\s*//i' <<<"$line")"
-                        example="$example\n$line"
+                        example="$example\n- $line"
                         chapter=example
                     elif [[ "$line" =~ ^tty: ]] || { [ "$chapter" = "tty" ] && [[ "$line" =~ ^[[:space:]] ]]; }; then
                         line="$(sed 's/^\(tty:\)\?\s*//i' <<<"$line")"
@@ -198,9 +198,10 @@ for folder in config core module extra; do
                     [ -z "$output" ] || echo -e "\n### Output (stdout)\n$(tag2code "$output")"
                     [ -z "$error" ] || echo -e "\n### Error (stderr)\n$(tag2code "$error")"
                     [ -z "$return" ] || echo -e "\n### Return (exit code)\n$(tag2code "$return")"
-                    [ -z "$example" ] || echo -e "\n### Example\n\n\`\`\`bash${example}\n\`\`\`"
+                    [ -z "$example" ] || echo -e "\n### Examples\n$(tag2code "$example")"
                 ) |
-                    sed -E 's#(^|[^[:alnum:]_.-])@([[:alnum:]_]+)#\1[`\2`](function/\2.md)#g' |
+                    sed -E 's#(^|[^[:alnum:]_.-])@([[:alnum:]_]+)#\1[`\2`](\2.md)#g' |
+                    sed -E 's#(^|[^[:alnum:]_.-])&([[:alnum:]_]+)#\1[`\2`](../example/\2.md)#g' |
                     sed -E 's#(^|[^[:alnum:]_.-])(\$[[:alnum:]_]+)#\1`\2`#g' \
                         >$BASHLIB_HOME/doc/function/$funcname.md
             done <<<"$function_lines"

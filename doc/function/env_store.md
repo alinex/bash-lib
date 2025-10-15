@@ -18,14 +18,12 @@ env_store [<ident>] [<variable>]... # store only listed variables (ident can be 
 -p, --path <base-dir>               # store on disk in given folder
 ```
 
-### Example
+### Examples
 
-```bash
-env_restore
-...<code>
-env_store # save changes
-....
-env_store # save changes
-....
-env_clean # everything done remove progress
-```
+- env_restore
+- ...`<code>`
+- env_store # save changes
+- ....
+- env_store # save changes
+- ....
+- env_clean # everything done remove progress

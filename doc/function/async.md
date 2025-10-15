@@ -12,12 +12,10 @@ async_name directly.
 async <command> [<params>...]
 ```
 
-### Example
+### Examples
 
-```bash
-async task1
-async task2
-async_wait task1
-async task3
-wait # for all to end
-```
+- async task1
+- async task2
+- async_wait task1
+- async task3
+- wait # for all to end

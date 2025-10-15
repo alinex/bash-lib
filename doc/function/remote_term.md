@@ -4,7 +4,7 @@
 
 
  my be contained, remove with nocr
-"Connection ... closed" in stderr: remove using: 2>` >`(grep -v '^Connection to .* closed\.' >`&2)
+"Connection ... closed" in stderr: remove using: 2>` >`(grep -v '^Connection to .* closed\.' >`[`2`](../example/2.md))
 
 
 ### Usage

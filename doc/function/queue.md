@@ -12,13 +12,11 @@ queue_name directly.
 queue <command> [<params>...]
 ```
 
-### Example
+### Examples
 
-```bash
-queue task1
-queue task2
-queue task3
-async_wait task2
-queue task4
-wait # for all to end
-```
+- queue task1
+- queue task2
+- queue task3
+- async_wait task2
+- queue task4
+- wait # for all to end

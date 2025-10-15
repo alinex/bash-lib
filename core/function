@@ -171,11 +171,7 @@ mktemp() {
 # Usage:        eval set -- "$(option_parse <spec> "$@")"
 #               <spec> lines := <short-letter>|- <long-word> <type>|- <description>
 # Output:       parsed options <string>
-# Example:      OPTIONS="
-#               n name  string  Name of Birthday Person
-#               a age   int     Age in years
-#               h help  -       Show Help Page"
-#               option_parse "$OPTIONS" "$@"
+# Example:      &base_script includes a simple example
 option_parse() {
     local opt name type desc short="" long=""
     # read spec lines
@@ -200,6 +196,7 @@ option_parse() {
 # Usage:        option_help <spec>
 #               <spec> lines := <short-letter>|- <long-word> <type>|- <description>
 # Output:       List of options for help output
+# Example:      &base_script includes a simple example
 option_help() {
     declare opt name type desc
     declare -A opt_descriptions

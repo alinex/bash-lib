@@ -1,6 +1,6 @@
 # remote_install
 
-## Remote install package like [`install`](function/install.md)
+## Remote install package like [`install`](install.md)
 
 
 

@@ -10,9 +10,7 @@
 contains <array-name> <match>
 ```
 
-### Example
+### Examples
 
-```bash
-x=( one two three )
-contains x two && echo YES || echo NO
-```
+- x=( one two three )
+- contains x two && echo YES || echo NO

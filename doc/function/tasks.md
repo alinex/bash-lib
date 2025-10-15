@@ -30,21 +30,19 @@ x) Beenden
 <question> <input>
 ```
 
-### Example
+### Examples
 
-```bash
-list_tasks() {
-# can be created dynamically:
-cat <<'EOC'
-task_analyze    | Disk Analyze
-task_apt        | APT cleanup (15 kB)
-EOC
-}
-task_analyze() {
-heading Analyze
-}
-task_apt() {
-heading APT Cleanup
-}
-tasks -t "Nächste Schritte" list_tasks
-```
+- list_tasks() {
+- # can be created dynamically:
+- cat `<`<'EOC'
+- task_analyze    | Disk Analyze
+- task_apt        | APT cleanup (15 kB)
+- EOC
+- }
+- task_analyze() {
+- heading Analyze
+- }
+- task_apt() {
+- heading APT Cleanup
+- }
+- tasks -t "Nächste Schritte" list_tasks

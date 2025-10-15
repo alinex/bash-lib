@@ -4,10 +4,17 @@ The script should always start including the BashLib:
 
 ```bash
 #!/usr/bin/env bash
-source $BASHLIB_HOME/full           # to have all tools ready
+# shellcheck source=base
+source "$BASHLIB_HOME"/full # to have all tools ready
 ```
 
-Next in the script is the argument parsing and command help:
+> Use `#!/usr/bin/env bash` because it is more portable than direct bash path. The env command locates bash in your system’s PATH, so the script works regardless of where bash is installed. For example, on some systems, bash might be in `/bin/bash`, on others in `/usr/bin/bash`, or even `/usr/local/bin/bash`.
+
+> Next line 2 is only needed if you use shellcheck.
+
+> Then line 3 is the only thing you need to load the installed BashLib.
+
+Next you may have some argument parsing and validation:
 
 ```bash
 TITLE="Test Script"
@@ -25,14 +32,32 @@ DESCRIPTION=\
 eval set -- "$(option_parse "$OPTIONS" "$@")"
 while true; do
     case "$1" in
-        -n|--name)  name="$2"; shift 2 ;;
-        -a|--age)   age="$2"; shift 2 ;;
-        -h|--help)  help "$TITLE" "$USAGE" "$OPTIONS" "$DESCRIPTION"; shift ;;
-        --) shift; break ;;
-        *) die "Unerwartete option: $1" ;;
+    -n|--name)  
+        name="$2"
+        shift 2
+        ;;
+    -a|--age)   
+        age="$2"
+        shift 2
+        ;;
+    -h|--help)  
+        help "$TITLE" "$USAGE" "$OPTIONS" "$DESCRIPTION"
+        shift
+        ;;
+    --) 
+        shift
+        break
+        ;;
+    *)  die "Unerwartete option: $1"
+        ;;
     esac
 done
-num_parameters --min 1 --max 1 --die "Falsche Anzahl Parameter: $USAGE" -- "$@"
+num_parameters --min 1 --max 1 \
+    --die "Falsche Anzahl Parameter: $USAGE" \
+    -- "$@"
 ```
 
+> At least the `help` option should always be there.
+
 Then your real script may begin...
+You can work with the additional arguments in `$1`...

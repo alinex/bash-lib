@@ -18,12 +18,6 @@ eval set -- "$(option_parse <spec> "$@")"
 
 - parsed options `<string>`
 
-### Example
+### Examples
 
-```bash
-OPTIONS="
-n name  string  Name of Birthday Person
-a age   int     Age in years
-h help  -       Show Help Page"
-option_parse "`$OPTIONS`" "$@"
-```
+- [`base_script`](../example/base_script.md) includes a simple example
