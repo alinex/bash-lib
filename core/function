@@ -25,7 +25,7 @@ source gettext.sh
 # Output:   <string-input> or
 #           <string-params> separated by spaces
 input() {
-    test -p /dev/stdin && test $# -eq 0 && cat - || echo "$*"
+    test -p /dev/stdin && (($# == 0)) && cat - || echo "$*"
 }
 
 # Collect string from stdin (not more than defined parameters) or concatenate the parameters
@@ -39,7 +39,7 @@ input_args() {
     local num=${1-}
     local start=$((num + 2))
     [ -n "$num" ] || die "No <num> argument in call to input_args!"
-    [ "$num" -gt 0 ] || die "<num>=$num argument is not a valid number!"
+    ((num > 0)) || die "<num>=$num argument is not a valid number!"
     test -p /dev/stdin && cat - || echo "${@:$start}"
 }
 

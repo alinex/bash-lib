@@ -23,11 +23,12 @@ tasks <check-fn>                # add entries from function (dynamic)
 ### TTY (direct)
 
 ```bash
-[<title>]
-1) <name>
-...
+Nächste Schritte
+1) Analyse einzelner Partitionen
+2) Docker aufräumen mit etwa 206MB unter /data
+3) Remote Host Console (interaktiv)
 x) Beenden
-<question> <input>
+Wähle eine der obigen Optionen: [1]
 ```
 
 ### Examples

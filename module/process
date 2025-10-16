@@ -10,7 +10,7 @@
 # Usage:    repeat <N> <command> [<params>]...
 repeat() {
     local -i n=$1
-    [ "$n" -gt 0 ] || return
+    ((n > 0)) || return
     shift
     for n in $(seq "$n"); do
         "$@"
@@ -29,7 +29,7 @@ function retry {
         exit=$?
         wait=$((2 ** count))
         count=$((count + 1))
-        if [ "$count" -lt "$retries" ]; then
+        if ((count < retries)); then
             echo "Try $count/$retries exited $exit, retrying in $wait seconds..." >&2
             sleep "$wait"
         else
@@ -64,7 +64,7 @@ countdown() {
     # processing
     local seconds=$1
     local text=${2:-Waiting}
-    while [ "$seconds" -gt 0 ]; do
+    while ((seconds > 0)); do
         echo -ne "\r$text $seconds seconds $abort"
         if [ -n "$abort" ]; then
             read -r -t 1 -n 1 _ && return 1 || true
@@ -108,7 +108,7 @@ lock() {
     # try it, till it works
     logged=0
     while ! ln "$lockfile.$$" "$lockfile" 2>/dev/null; do
-        if [ "$logged" -eq 0 ]; then # write message once
+        if ((logged == 0)); then # write message once
             echo "Waiting for unlock in $lockfile by PID $(cat "$lockfile")..." >&1
             logged=1
         fi
@@ -408,7 +408,7 @@ async_wait() {
     [ -z "${_async_running["$1"]}" ] && return 0 || true
     wait "${_async_running["$1"]}"
     local code=$?
-    if [ "$code" -eq 0 ]; then
+    if ((code == 0)); then
         steps_done "$1"
         env_change queue "unset async_running[\"$1\"]" _queue _async_running
     else
@@ -430,7 +430,7 @@ _queue_control() {
         sleep 1
         # loop async table
         env_restore queue
-        if [ ${#_async_running[@]} -gt 0 ]; then
+        if ((${#_async_running[@]} > 0)); then
             for name in "${!_async_running[@]}"; do
                 pid="${_async_running["$name"]}"
                 # process no longer running
@@ -443,12 +443,12 @@ _queue_control() {
         env_restore queue
         debug "Task queue: $$ $BASHPID async ${#_async_running[@]} queue ${#_queue[@]}"
         # test if queue and running are empty -> end control
-        [ ${#_queue[@]} -gt 0 ] || [ ${#_async_running[@]} -gt 0 ] || return 0
+        ((${#_queue[@]} > 0 || ${#_async_running[@]} > 0)) || return 0
         # async has free slots
         free=$((ASYNC_QUEUE_MAX - ${#_async_running[@]}))
-        if [ "$free" -gt 0 ]; then
+        if ((free > 0)); then
             for _ in $(seq 1 "$free"); do
-                [ ${#_queue[@]} -gt 0 ] || break
+                ((${#_queue[@]} > 0)) || break
                 # shift from queue
                 first="${_queue[0]}"
                 env_change queue "_queue=(\"\${_queue[@]:1}\")" _queue _async_running

@@ -1,6 +1,6 @@
 # steps_check
 
-## Check if step already finished successfull
+## Check if step already finished successful
 
 Exit:     0 if done else not done or with failure
 

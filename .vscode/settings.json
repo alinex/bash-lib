@@ -31,6 +31,7 @@
     "peacock.color": "#61dafb",
     "cSpell.words": [
         "ngettext",
+        "POSIX",
         "SCRIPTDIR"
     ]
 }

@@ -170,7 +170,7 @@ _mattermost_find_channels() {
     esac
     # ekz link
     echo ""
-    [ "$missing" -lt 2 ] || die "Could not detect mattermost channel for $1"
+    ((missing < 2)) || die "Could not detect mattermost channel for $1"
     shopt -s nocasematch
 }
 

@@ -8,13 +8,13 @@ export TEXTDOMAIN=bashlib
 export TEXTDOMAINDIR=$BASHLIB_HOME/locale
 source gettext.sh
 input(){
-test -p /dev/stdin&&test $# -eq 0&&cat -||echo "$*"
+test -p /dev/stdin&&(($#==0))&&cat -||echo "$*"
 }
 input_args(){
 local num=${1-}
 local start=$((num+2))
 [ -n "$num" ]||die "No <num> argument in call to input_args!"
-[ "$num" -gt 0 ]||die "<num>=$num argument is not a valid number!"
+((num>0))||die "<num>=$num argument is not a valid number!"
 test -p /dev/stdin&&cat -||echo "${@:start}"
 }
 input_lines(){
@@ -560,7 +560,7 @@ aktuell)id "$ekz" Aktuell;;
 *)missing=$((missing+1))
 esac
 echo ""
-[ "$missing" -lt 2 ]||die "Could not detect mattermost channel for $1"
+((missing<2))||die "Could not detect mattermost channel for $1"
 shopt -s nocasematch
 }
 mattermost_post_ids=""
@@ -1017,7 +1017,7 @@ input "$@"|uncolorize|mlr -i tsv -o md cat
 }
 repeat(){
 local -i n=$1
-[ "$n" -gt 0 ]||return
+((n>0))||return
 shift
 for n in $(seq "$n");do
 "$@"
@@ -1031,7 +1031,7 @@ until "$@";do
 exit=$?
 wait=$((2**count))
 count=$((count+1))
-if [ "$count" -lt "$retries" ];then
+if ((count<retries));then
 echo "Try $count/$retries exited $exit, retrying in $wait seconds..." >&2
 sleep "$wait"
 else
@@ -1057,7 +1057,7 @@ esac
 done
 local seconds=$1
 local text=${2:-Waiting}
-while [ "$seconds" -gt 0 ];do
+while ((seconds>0));do
 echo -ne "\r$text $seconds seconds $abort"
 if [ -n "$abort" ];then
 read -r -t 1 -n 1 _&&return 1||true
@@ -1080,7 +1080,7 @@ echo $$ >"$lockfile.$$" 2>/dev/null||die "Failed to create PID lockfile: $lockfi
 _lock_remove
 logged=0
 while ! ln "$lockfile.$$" "$lockfile" 2>/dev/null;do
-if [ "$logged" -eq 0 ];then
+if ((logged==0));then
 echo "Waiting for unlock in $lockfile by PID $(cat "$lockfile")..." >&1
 logged=1
 fi
@@ -1255,7 +1255,7 @@ async_wait(){
 [ -z "${_async_running["$1"]}" ]&&return 0||true
 wait "${_async_running["$1"]}"
 local code=$?
-if [ "$code" -eq 0 ];then
+if ((code==0));then
 steps_done "$1"
 env_change queue "unset async_running[\"$1\"]" _queue _async_running
 else
@@ -1272,7 +1272,7 @@ local name pid free first params
 while true;do
 sleep 1
 env_restore queue
-if [ ${#_async_running[@]} -gt 0 ];then
+if ((${#_async_running[@]}>0));then
 for name in "${!_async_running[@]}";do
 pid="${_async_running["$name"]}"
 if ! kill -0 "$pid" 2>/dev/null;then
@@ -1283,11 +1283,11 @@ done||true
 fi
 env_restore queue
 debug "Task queue: $$ $BASHPID async ${#_async_running[@]} queue ${#_queue[@]}"
-[ ${#_queue[@]} -gt 0 ]||[ ${#_async_running[@]} -gt 0 ]||return 0
+((${#_queue[@]}>0||${#_async_running[@]}>0))||return 0
 free=$((ASYNC_QUEUE_MAX-${#_async_running[@]}))
-if [ "$free" -gt 0 ];then
+if ((free>0));then
 for _ in $(seq 1 "$free");do
-[ ${#_queue[@]} -gt 0 ]||break
+((${#_queue[@]}>0))||break
 first="${_queue[0]}"
 env_change queue '_queue=("${_queue[@]:1}")' _queue _async_running
 IFS=$'\x1f' read -r -a params <<<"$first"
@@ -1316,7 +1316,7 @@ fi
 declare -F "num_parameters" >/dev/null||source "$BASHLIB_HOME"/module/validator
 remote(){
 local ssh="${slogin:-operator}@${server-}"
-if [ -p /dev/stdin ]&&[ $# -eq 0 ];then
+if [ -p /dev/stdin ]&&(($#==0));then
 ssh "$ssh" bash -s
 return ${PIPESTATUS[0]}
 else
@@ -1414,13 +1414,13 @@ limit_o="${MOUNT_COLOR_LIMIT[i+4]}"
 break
 fi
 done
-if [ "$percent" -eq "$limit_c" ];then
+if ((percent==limit_c));then
 critical "$line"
-elif [ "$percent" -ge "$limit_e" ];then
+elif ((percent==limit_e));then
 error "$line"
-elif [ "$percent" -ge "$limit_w" ];then
+elif ((percent==limit_w));then
 warn "$line"
-elif [ "$percent" -ge "$limit_o" ];then
+elif ((percent==limit_o));then
 ok "$line"
 else
 echo "$line"
@@ -1456,7 +1456,7 @@ sleep "$seconds"
 while true;do
 [ -n "$quiet" ]||echo -ne "\rWarten bis der Reboot fertig ist ($seconds Sekunden)" >&2
 uptime=$(remote cut -d"' '" -f1 /proc/uptime 2>/dev/null|sed 's/[ .].*//')
-if [ -n "$uptime" ]&&[ "$uptime" -lt 300 ];then
+if ((uptime>0&&uptime<300));then
 break
 else
 sleep 1
@@ -1548,10 +1548,10 @@ if [ "$maj1" -ne "$maj2" ];then
 num=$(((maj2-maj1)*1000000000))
 elif [ "$min1" -ne "$min2" ];then
 num=$(((min2-min1)*1000000))
-[ "$num" -lt 1000000000 ]||num=999000000
+((num<1000000000))||num=999000000
 elif [ "$pat1" -ne "$pat2" ];then
 num=$(((pat2-pat1)*1000))
-[ "$num" -lt 1000000 ]||num=999000
+((num<1000000))||num=999000
 elif [[ $pre1 < $pre2 ]];then
 num=10
 elif [[ $pre1 > $pre2 ]];then
@@ -1563,21 +1563,21 @@ num=-1
 fi
 if [ -n "$human" ];then
 echo -n "$1 -> $2 "
-if [ "$num" -eq 0 ];then
+if ((num==0));then
 echo "sind identische Versionen"
-elif [ "$num" -ge 1000000000 ];then
+elif ((num>=1000000000));then
 echo "ist ein upgrade von $((num/1000000000)) Hauptversione(n)"
-elif [ "$num" -ge 1000000 ];then
+elif ((num>=1000000));then
 echo "ist ein upgrade von $((num/1000000)) Nebenversione(n)"
-elif [ "$num" -ge 1000 ];then
+elif ((num>=1000));then
 echo "ist ein upgrade von $((num/1000)) Patch Level(n)"
-elif [ "$num" -ge 1 ];then
+elif ((num>=1));then
 echo "ist ein entwickler Upgrade)"
-elif [ "$num" -ge -1000 ];then
+elif ((num>=-1000));then
 echo "ist ein entwickler Downgrade"
-elif [ "$num" -ge 1000000 ];then
+elif ((num>=1000000));then
 echo "ist ein downgrade von $((num/-1000)) Patch Level(n)"
-elif [ "$num" -ge 1000000000 ];then
+elif ((num>=1000000000));then
 echo "ist ein downgrade von $((num/-1000000)) Nebenversione(n)"
 else
 echo "ist ein downgrade von $((num/-1000000000)) Hauptversione(n)"
@@ -1586,7 +1586,7 @@ return 0
 else
 echo "$num"
 fi
-[ "$num" -eq 0 ]&&return 0||return 1
+((num==0))&&return 0||return 1
 }
 num_parameters(){
 eval set -- "$(option_parse $'- min +\n- max +\n- die +' "$@")"
@@ -1614,8 +1614,8 @@ echo "Check ${FUNCNAME[1]}: $1 ($func in $file:$line)" >&2
 [ -z "$die" ]||die "$die"
 return 1
 }
-[ -z "$min" ]||[ "$#" -ge "$min" ]||_die "[$*] $# < $min"||return 1
-[ -z "$max" ]||[ "$#" -le "$max" ]||_die "[$*] $# > $max"||return 1
+((min>0&&$#<=min))||_die "[$*] $# < $min"||return 1
+((max>0&&$#<=max))||_die "[$*] $# > $max"||return 1
 }
 is_success(){
 num_parameters --min 1 --max 1 --die "Only one argument allowed, got: $#" -- "$@"

@@ -24,7 +24,7 @@ declare -F "num_parameters" >/dev/null || source "$BASHLIB_HOME"/module/validato
 # Output:   passed through
 remote() {
     local ssh="${slogin:-operator}@${server-}"
-    if [ -p /dev/stdin ] && [ $# -eq 0 ]; then
+    if [ -p /dev/stdin ] && (($# == 0)); then
         ssh "$ssh" bash -s
         # shellcheck disable=SC2086
         return ${PIPESTATUS[0]}
@@ -201,13 +201,13 @@ remote_df() {
                 fi
             done
             # display
-            if [ "$percent" -eq "$limit_c" ]; then
+            if ((percent == limit_c)); then
                 critical "$line"
-            elif [ "$percent" -ge "$limit_e" ]; then
+            elif ((percent == limit_e)); then
                 error "$line"
-            elif [ "$percent" -ge "$limit_w" ]; then
+            elif ((percent == limit_w)); then
                 warn "$line"
-            elif [ "$percent" -ge "$limit_o" ]; then
+            elif ((percent == limit_o)); then
                 ok "$line"
             else
                 echo "$line"
@@ -259,7 +259,7 @@ boot_wait() {
     while true; do
         [ -n "$quiet" ] || echo -ne "\rWarten bis der Reboot fertig ist ($seconds Sekunden)" >&2
         uptime=$(remote cut -d"' '" -f1 /proc/uptime 2>/dev/null | sed 's/[ .].*//')
-        if [ -n "$uptime" ] && [ "$uptime" -lt 300 ]; then
+        if ((uptime > 0 && uptime < 300)); then
             break
         else
             sleep 1

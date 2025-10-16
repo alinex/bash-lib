@@ -111,10 +111,10 @@ semver_diff() {
         num=$(((maj2 - maj1) * 1000000000))
     elif [ "$min1" -ne "$min2" ]; then
         num=$(((min2 - min1) * 1000000))
-        [ "$num" -lt 1000000000 ] || num=999000000
+        ((num < 1000000000)) || num=999000000
     elif [ "$pat1" -ne "$pat2" ]; then
         num=$(((pat2 - pat1) * 1000))
-        [ "$num" -lt 1000000 ] || num=999000
+        ((num < 1000000)) || num=999000
     elif [[ "$pre1" < "$pre2" ]]; then
         num=10
     elif [[ "$pre1" > "$pre2" ]]; then
@@ -127,21 +127,21 @@ semver_diff() {
     # output
     if [ -n "$human" ]; then
         echo -n "$1 -> $2 "
-        if [ "$num" -eq 0 ]; then
+        if ((num == 0)); then
             echo "sind identische Versionen"
-        elif [ "$num" -ge 1000000000 ]; then
+        elif ((num >= 1000000000)); then
             echo "ist ein upgrade von $((num / 1000000000)) Hauptversione(n)"
-        elif [ "$num" -ge 1000000 ]; then
+        elif ((num >= 1000000)); then
             echo "ist ein upgrade von $((num / 1000000)) Nebenversione(n)"
-        elif [ "$num" -ge 1000 ]; then
+        elif ((num >= 1000)); then
             echo "ist ein upgrade von $((num / 1000)) Patch Level(n)"
-        elif [ "$num" -ge 1 ]; then
+        elif ((num >= 1)); then
             echo "ist ein entwickler Upgrade)"
-        elif [ "$num" -ge -1000 ]; then
+        elif ((num >= -1000)); then
             echo "ist ein entwickler Downgrade"
-        elif [ "$num" -ge 1000000 ]; then
+        elif ((num >= 1000000)); then
             echo "ist ein downgrade von $((num / -1000)) Patch Level(n)"
-        elif [ "$num" -ge 1000000000 ]; then
+        elif ((num >= 1000000000)); then
             echo "ist ein downgrade von $((num / -1000000)) Nebenversione(n)"
         else
             echo "ist ein downgrade von $((num / -1000000000)) Hauptversione(n)"
@@ -151,5 +151,5 @@ semver_diff() {
         echo "$num"
     fi
     # return code
-    [ "$num" -eq 0 ] && return 0 || return 1
+    ((num == 0)) && return 0 || return 1
 }

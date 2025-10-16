@@ -119,7 +119,7 @@ for folder in config core module extra; do
                 # Extract comment block directly above function
                 comments=""
                 linenum=$((line - 1))
-                while [ "$linenum" -gt 0 ]; do
+                while ((linenum > 0)); do
                     line_content=$(sed -n "${linenum}p" "$file")
                     if [[ "$line_content" =~ ^[[:space:]]*# ]]; then
                         # shellcheck disable=SC2001
