@@ -12,7 +12,7 @@ test -z "${DEBUG-}" && source "$BASHLIB_HOME"/full || source "$BASHLIB_HOME"/loa
 
 > Next line 2 is only needed if you use shellcheck also within your script.
 
-> Thlast line is the only thing you really need specifically to use the BashLib. If the BashLib is correctly installed it will find it and select the `full` (compressed code) or `loader` (all modules dynamically) if run in `DEBUG` mode.
+> The last line is the only thing you really need specifically to use the BashLib. If the BashLib is correctly installed it will find it and select the `full` (compressed code) or `loader` (all modules dynamically) if run in `DEBUG` mode.
 
 Next you may have some argument parsing and validation:
 

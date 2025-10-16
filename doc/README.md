@@ -257,7 +257,7 @@ Module for process control
 | [`env_clean`](function/env_clean.md)     | Remove stored environment from shared memory/file                                              |
 | [`env_change`](function/env_change.md)   | Change environment in shared memory/file                                                       |
 | [`steps_init`](function/steps_init.md)   | Initialize nstep control                                                                       |
-| [`steps_check`](function/steps_check.md) | Check if step already finished successfull                                                     |
+| [`steps_check`](function/steps_check.md) | Check if step already finished successful                                                      |
 | [`steps_done`](function/steps_done.md)   | Set step as successfully done                                                                  |
 | [`sync`](function/sync.md)               | Run the given command with optional step control                                               |
 | [`sync_name`](function/sync_name.md)     | Alternative to sync in which this call is given a name to refer                                |

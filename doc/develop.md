@@ -1,6 +1,6 @@
 # Developer Guide
 
-> Keep in mind that this is a collection which may be incomplete and contain only essential information. Base knowledge of bash and the linux toolset as well as the additional linux packages is assumed to already be known or can be gathered on the net.
+> Keep in mind that this is a collection which may be incomplete and contain only essential information. Base knowledge of bash and the Linux toolset as well as the additional Linux packages is assumed to already be known or can be gathered on the net.
 
 ## Basic Workflow
 
@@ -18,7 +18,7 @@ This will:
 
 ## Bug fixing
 
-### Debug
+### Debug Mode
 
 The minimized/compressed files which you normally use like `full` and `base` will give you bad hints on error. It will show the source within the compressed file, not the source module. To fix this, run your script with the `loader` instead of the minimized files:
 
@@ -35,21 +35,18 @@ $ DEBUG=1 my-script
 
 Also the `DEBUG` mode will enable additional output which is invoked using the [`debug`](function/debug.md) function.
 
-### Styleguide
+### Manual Debugger
 
-- Variables intended for global use are in UPPER-CASE letters.
-- Internal functions or variables start with an `_` to indicate not to use it in the script.
-- Declare function variables as local.
-- Comment usage of each function in comments before code.
-- Test code below code to be enabled (see below).
-- Use named arguments if there are more than a few.
-- Use short names for functions but don't overwrite system commands if not intended.
-- Each outside usable function and variable should have it's documentation just before the code.
-- Each module contains a description as first comment line.
-- Try to use simple bash tools instead of sed as often as possible to get better performance.
-- The bash-lib itself is seldom used within itself.
+If you could not find the Problem in `DEBUG` mode, you can load the bash-lib directly into shell, but unset the exit on error, because it may close the shell:
 
-### Test Code
+```bash
+source $BASHLIB_HOME/loader
+set +e
+```
+
+Now you can run functions or the script line by line in the bash shell directly.
+
+### Run Unit Tests
 
 Tests make the code base more stable. To also get this in bash we use [Bats](https://bats-core.readthedocs.io/) (Bash Automated Testing System).
 To do so we write a test file beside the code. You can run the test within and see how it is used.
@@ -78,9 +75,25 @@ Other possibilities to run the tests are:
 - `bats --show-output-of-passing-tests local/bash-lib` - to show the output of succeeded tests
 - `DEBUG=1 bats --filter-tags mattermost local/bash-lib` - run in debug mode and display debug messages below result
 
-As there are some **problems using bats with assoziative arrays and handling of exit** it could not completely test the whole framework. We tried other shell unit test tools but got no better result of bashunit or shellspec. So for the time being unit testing is only applied there possible.
+As there are some **problems using bats with assoziative arrays and handling of exit** it could not completely test the whole framework. We tried other shell unit test tools but got no better result of `bashunit` or `shellspec`. So for the time being unit testing is only applied there possible.
 
-### Quality Control
+## Coding
+
+### Style Guide
+
+- Variables intended for global use are in UPPER-CASE letters.
+- Internal functions or variables start with an `_` to indicate not to use it in the script.
+- Declare function variables as local.
+- Comment usage of each function in comments before code.
+- Test code below code to be enabled (see below).
+- Use named arguments if there are more than a few.
+- Use short names for functions but don't overwrite system commands if not intended.
+- Each outside usable function and variable should have it's documentation just before the code.
+- Each module contains a description as first comment line.
+- Try to use simple bash tools instead of sed as often as possible to get better performance.
+- The bash-lib itself is seldom used within itself.
+
+### Best Practice
 
 The library switches to `set -e` mode which will always exit a script if an unhandled error occur and this also if it is within a pipe so always handle these.
 
@@ -104,19 +117,6 @@ test -n "$t"        # bad
 test -n "${t-}"     # better
 test -v t           # only >= Bash 4.2
 ```
-
-### Debugging
-
-First use `DEBUG=1` to run it to get the real file an line position on errors.
-
-Next you can load the bash-lib directly into shell, but unset the exit on error, because it may close the shell:
-
-```bash
-source $BASHLIB_HOME/loader
-set +e
-```
-
-Now you can run functions or the script line by line in the bash shell directly.
 
 ### Internationalization
 
@@ -146,3 +146,27 @@ After that you should:
 4. Run `update` again.
 
 To support more languages add them to `$LOCALES` within the `update` script.
+
+### Shellcheck
+
+To use the shellcheck static analysis and linting tool also within the scripts you have to install [ShellCheck Plugin](https://marketplace.visualstudio.com/items?itemName=timonwong.shellcheck) for VS Code.
+
+With the following setup:
+
+- Exclude: SC1134 SC1072 SC1073
+- Use Workspace Root As Cwd: Yes
+
+Then you need to setup at least the bashlib path as source in `.shellcheckrc` in your project root:
+
+```bash
+# Search paths for scripts
+source-path=SCRIPTDIR
+source-path=/home/alex/dvb/bash-lib
+# Enable following all sourced files
+external-sources=true
+# Enable selected optional checks
+enable=quote-safe-variables
+enable=check-unassigned-uppercase
+# Disable specific warnings
+disable=SC1072,SC1073,SC1134
+```

@@ -325,7 +325,7 @@ steps_init() {
     echo "Arbeitsschritte werden protokolliert um auch mittendrin wieder aufzusetzen..." >&2
 }
 
-# Check if step already finished successfull
+# Check if step already finished successful
 # Usage:    steps_done <name>
 # Exit:     0 if done else not done or with failure
 steps_check() {
