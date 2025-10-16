@@ -285,6 +285,9 @@ esac
 [ -n "$2" ]&&value="${2-}"||value=$(now)
 is_integer "$value"&&eval "date -d @$value $format"||eval "date -d \"$value\" $format"||die "Date format '$value' not parsable!"
 }
+script_path(){
+dirname "$(readlink -f "${BASH_SOURCE[-1]:-$(pwd)/x}")"
+}
 declare -F "color_256" >/dev/null||source "$BASHLIB_HOME"/module/color
 pause(){
 local text
@@ -382,7 +385,7 @@ return
 elif [ -n "$default" ]&&[ -z "$select" ];then
 is_integer "$default"&&sed -n "${default}p" <<<"$list"|sed 's/|.*//'||echo "$default"
 return
-elif [ -n "$end" ]&&compare "$select" =~ [xXqQ];then
+elif [ -n "$end" ]&&[[ $select =~ [xXqQ] ]];then
 echo exit
 return
 else
@@ -1026,6 +1029,18 @@ tsv2md(){
 install mlr
 input "$@"|uncolorize|mlr -i tsv -o md cat
 }
+sudo_allow(){
+((EUID!=0))||return 0
+sudo -v 2>/dev/null||die "For this call root rights are needed! Please use another user or allow sudo for user $(whoami)."
+sudo -l "$@" >/dev/null||die "User $(whoami) is not allowed to call 'sudo $*', but this is neccessary!"
+}
+sudo(){
+if ((EUID!=0))&&sudo -v 2>/dev/null;then
+sudo "$@"
+else
+"$@"
+fi
+}
 repeat(){
 local -i n=$1
 ((n>0))||return
@@ -1645,14 +1660,8 @@ num_parameters --min 1 --max 1 --die "Only one argument allowed, got: $#" -- "$@
 [[ $1 =~ ^[-+]?[0-9]+([.][0-9]+)?$ ]]
 }
 compare(){
-num_parameters --min 3 --max 3 --die "Exactly 3 parameter needed, got: $#" -- "$@"
-case "$2" in
-=|==)[[ $1 == $3 ]];;
-!=)[[ $1 != $3 ]];;
-=~)[[ $1 =~ $3 ]];;
-!~)[[ ! $1 =~ $3 ]];;
-*)[ "$1" $2 "$3" ]
-esac
+read -r line func file <<<"$(caller 1)"
+die "DEPRECATED: ${FUNCNAME[0]} at $func in $file:$line please use [[ ... ]] instead"
 }
 trim_start(){
 local str="${1-}"

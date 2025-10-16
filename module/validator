@@ -83,19 +83,9 @@ is_float() {
     [[ "$1" =~ ^[-+]?[0-9]+([.][0-9]+)?$ ]]
 }
 
-# Compare two values (simplification of different bash tests)
-# Usage:    compare <value-1> <operator> <value-2>
-# Status:   1 if nots
 compare() {
-    num_parameters --min 3 --max 3 --die "Exactly 3 parameter needed, got: $#" -- "$@"
-    # shellcheck disable=SC1009
-    case "$2" in
-    = | ==) [[ $1 == $3 ]] ;;
-    !=) [[ $1 != $3 ]] ;;
-    =~) [[ $1 =~ $3 ]] ;;
-    !~) [[ ! $1 =~ $3 ]] ;;
-    *) [ "$1" $2 "$3" ] ;;
-    esac
+    read -r line func file <<<"$(caller 1)"
+    die "DEPRECATED: ${FUNCNAME[0]} at ${func} in ${file}:${line} please use [[ ... ]] instead"
 }
 
 ######################################################################################

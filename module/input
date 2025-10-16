@@ -158,7 +158,7 @@ choose() {
         elif [ -n "$default" ] && [ -z "$select" ]; then
             is_integer "$default" && sed -n "${default}p" <<<"$list" | sed 's/|.*//' || echo "$default"
             return
-        elif [ -n "$end" ] && compare "$select" =~ [xXqQ]; then
+        elif [ -n "$end" ] && [[ "$select" =~ [xXqQ] ]]; then
             echo exit
             return
         else

@@ -148,6 +148,14 @@ shellcheck source=base
 | [`date_diff`](function/date_diff.md) | Calculate difference in seconds |
 | [`date_format`](function/date_format.md) | Format date in different named versions or format string |
 
+### File Module
+
+shellcheck source=base
+
+| Variable/Function | Description |
+| --- | --- |
+| [`script_path`](function/script_path.md) | Get the path from the called command |
+
 ### Input Module
 
 shellcheck source=base
@@ -246,6 +254,8 @@ Module for process control
 | --- | --- |
 | ``$STEPS_VARIABLES`` | Set the variables which should be stored with step control |
 | ``$ASYNC_QUEUE_MAX`` | Maximum number of parallel tasks for queue |
+| [`sudo_allow`](function/sudo_allow.md) | Check if sudo is needed for command |
+| [`sudo`](function/sudo.md) | Sudo overwrite to only use sudo if needed |
 | [`repeat`](function/repeat.md) | Execute command in N times |
 | [`retry`](function/retry.md) | Retry a command multiple times until it succeeds |
 | [`countdown`](function/countdown.md) | Sleep with countdown some seconds |
@@ -309,7 +319,6 @@ Validators to make this easier and more readable.
 | [`is_empty`](function/is_empty.md) | Test if given value is an empty string or undefined |
 | [`is_integer`](function/is_integer.md) | Test if given value is an integer |
 | [`is_float`](function/is_float.md) | Test if given value is an float |
-| [`compare`](function/compare.md) | Compare two values (simplification of different bash tests) |
 | [`trim_start`](function/trim_start.md) | Trim leading whitespace or given character |
 | [`trim_end`](function/trim_end.md) | Trim trailing whitespace or given character |
 | [`trim`](function/trim.md) | Trim leading and trailing whitespace or given character |
