@@ -739,12 +739,15 @@ echo "$metrics"|grep '{'|sed 's/,\?[{}]/\t/g'
 echo "$metrics"|grep -v '{'|sed 's/ /\t\t/g'
 }
 alerts(){
-local filter=""
-eval set -- "$(option_parse $'i instance +' "$@")"
+local filter="" quiet
+eval set -- "$(option_parse $'i instance +\nq quiet -' "$@")"
 while true;do
 case "$1" in
 -i|--instance)filter="$filter | select(.labels.instance|test(\"$2\"))"
 shift 2
+;;
+-q|--quiet)quiet=1
+shift
 ;;
 --)shift
 break
@@ -756,6 +759,8 @@ install jq mlr
 local alerts
 alerts="$(curl -H "Authorization: Bearer $GRAFANA_TOKEN" "$GRAFANA_API/alertmanager/grafana/api/v2/alerts"|jq 'sort_by(.startsAt) | .[] '"$filter")"||die "Could not get alerts from Grafana!"
 local format=${1:-console}
+[ -n "$alerts" ]||return 0
+[ -z "$quiet" ]||return 1
 case $format in
 tsv|console)alerts="Severity\tNetz\tInstanz\tZusammenfassung\tStart             _\n$(jq -r '[.labels.severity, .labels.net, .labels.instance, .annotations.summary, (.startsAt| split(".")[0]| strptime("%Y-%m-%dT%H:%M:%S")| strftime("%Y-%m-%d %H:%M:%S"))] | @tsv' <<<"$alerts")"
 ;;
@@ -792,6 +797,8 @@ done
 ;;
 *)echo -e "$alerts"
 esac
+echo "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+return 1
 }
 prometheus(){
 local api
@@ -1614,7 +1621,7 @@ echo "Check ${FUNCNAME[1]}: $1 ($func in $file:$line)" >&2
 [ -z "$die" ]||die "$die"
 return 1
 }
-((min>0&&$#<=min))||_die "[$*] $# < $min"||return 1
+(($#>=min))||_die "[$*] $# < $min"||return 1
 ((max>0&&$#<=max))||_die "[$*] $# > $max"||return 1
 }
 is_success(){

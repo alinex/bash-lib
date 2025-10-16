@@ -78,18 +78,25 @@ scrape() {
 # Get grafana alerts
 # Usage:    alerts [<format>]           # json, console, mattermost
 # Options:  -i, --instance <regexp>     # select only matching instances
+#           -q, --quiet                 # return only status code
 # Stdout:   <header-line>
 #           <severity>\t<network>\t<instance>\t<decription>\t<time>
 #           ...
+# Return:   0 := no alerts
+#           0 := at least one alert
 alerts() {
     # parameter parsing
-    local filter=""
-    eval set -- "$(option_parse $'i instance +' "$@")"
+    local filter="" quiet
+    eval set -- "$(option_parse $'i instance +\nq quiet -' "$@")"
     while true; do
         case "$1" in
         -i | --instance)
             filter="$filter | select(.labels.instance|test(\"$2\"))"
             shift 2
+            ;;
+        -q | --quiet)
+            quiet=1
+            shift
             ;;
         --)
             shift
@@ -105,6 +112,10 @@ alerts() {
         jq 'sort_by(.startsAt) | .[] '"$filter")" ||
         die "Could not get alerts from Grafana!"
     local format=${1:-console}
+    # empty list
+    [ -n "$alerts" ] || return 0
+    # quiet mode
+    [ -z "$quiet" ] || return 1
     # pre format
     case $format in
     tsv | console)
@@ -149,6 +160,7 @@ alerts() {
         echo -e "$alerts"
         ;;
     esac
+    return 1
 }
 
 # Prom ql ausführen
