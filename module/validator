@@ -43,7 +43,7 @@ num_parameters() {
         [ -z "$die" ] || die "$die"
         return 1
     }
-    ((min > 0 && $# <= min)) || _die "[$*] $# < $min" || return 1
+    (($# >= min)) || _die "[$*] $# < $min" || return 1
     ((max > 0 && $# <= max)) || _die "[$*] $# > $max" || return 1
 }
 
