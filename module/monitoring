@@ -76,9 +76,10 @@ scrape() {
 }
 
 # Get grafana alerts
-# Usage:    alerts [<format>]           # json, console, mattermost
-# Options:  -i, --instance <regexp>     # select only matching instances
-#           -q, --quiet                 # return only status code
+# Usage:    alerts [<format>]                       # json, console, mattermost
+#           alerts -i "^$server" console || echo "" # will print the alerts with an empty line if there are some
+# Options:  -i, --instance <regexp>                 # select only matching instances
+#           -q, --quiet                             # return only status code
 # Stdout:   <header-line>
 #           <severity>\t<network>\t<instance>\t<decription>\t<time>
 #           ...
