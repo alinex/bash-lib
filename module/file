@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+# shellcheck source=base
+source /dev/null
+
+# File and directory helpers.
+
+######################################################################################
+### Directory
+######################################################################################
+
+# Get the path from the called command
+# Usage:    script_path
+# Output:   full real directory path to script
+script_path() {
+    dirname "$(readlink -f "${BASH_SOURCE[-1]:-$(pwd)/x}")"
+}
