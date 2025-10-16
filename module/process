@@ -3,6 +3,30 @@
 # Module for process control
 
 ######################################################################################
+# Sudo
+######################################################################################
+
+# Check if sudo is needed for command
+# This will @die if
+# Usage:    sudo_allow <command-line>
+# Return:   0 if allowed
+sudo_allow() {
+    ((EUID != 0)) || return 0
+    sudo -v 2>/dev/null || die "For this call root rights are needed! Please use another user or allow sudo for user $(whoami)."
+    sudo -l "$@" >/dev/null || die "User $(whoami) is not allowed to call 'sudo $*', but this is neccessary!"
+}
+
+# Sudo overwrite to only use sudo if needed
+# Usage:    sudo <command-line>
+sudo() {
+    if ((EUID != 0)) && sudo -v 2>/dev/null; then
+        sudo "$@"
+    else
+        "$@"
+    fi
+}
+
+######################################################################################
 # Looping
 ######################################################################################
 
