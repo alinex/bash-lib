@@ -736,10 +736,11 @@ done
 }
 scrape(){
 num_parameters "$@" --min 1 --max 2 --die "Wrong number of parameters for scrape!"
-echo "Scrape the prometheus exporter at $1" >&2
+debug "Scrape the prometheus exporter at $1"
 local metrics
 metrics="$(curl "$1"|grep -E "$2"|grep -Ev '^($|#)'||die "Could not scrape the prometheus exporter at $1!")"
-echo "$metrics"|grep '{'|sed 's/,\?[{}]/\t/g'
+debug ">>> $metrics"
+echo "$metrics"|grep '{'|sed 's/,\?[{}] \?/\t/g'
 echo "$metrics"|grep -v '{'|sed 's/ /\t\t/g'
 }
 alerts(){
