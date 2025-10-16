@@ -8,18 +8,20 @@ Stdout:   `<header-line>`
 ### Usage
 
 ```bash
-alerts [<format>]           # json, console, mattermost
+alerts [<format>]                       # json, console, mattermost
+alerts -i "^`$server`" console || echo "" # will print the alerts with an empty line if there are some
 ```
 
 ### Options
 
 ```bash
--i, --instance <regexp>     # select only matching instances
--q, --quiet                 # return only status code
+-i, --instance <regexp>                 # select only matching instances
+-q, --quiet                             # return only status code
 <severity>	<network>	<instance>	<decription>	<time>
 ...
 ```
 
 ### Return (exit code)
 
-- `0` = no alerts, `1` at least one alert
+- 0 := no alerts
+- 0 := at least one alert

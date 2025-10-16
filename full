@@ -423,6 +423,10 @@ res="$($cmd </dev/null)"||die "Could not get task list from command: $cmd"
 fi
 done <<<"$list"
 list="$(echo "$newlist"|sed '/^[[:space:]]*$/d')"
+if [ -z "$list" ];then
+ok "$(gettext "No tasks found to be executed.")"
+return
+fi
 done
 if [ "$default" = "x" ];then
 opt="-d x"
@@ -797,7 +801,6 @@ done
 ;;
 *)echo -e "$alerts"
 esac
-echo "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 return 1
 }
 prometheus(){
