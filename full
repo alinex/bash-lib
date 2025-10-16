@@ -1396,7 +1396,8 @@ local dir=${2:-.}
 rsync -av "$ssh:$1" "$dir"
 }
 remote_install(){
-(cat "$BASHLIB_HOME"/base
+(echo "DEBUG=${DEBUG:-}"
+cat "$BASHLIB_HOME"/base
 cat "$BASHLIB_HOME"/module/software
 echo install "$@")|shfmt -mn|remote
 }

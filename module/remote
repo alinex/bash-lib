@@ -136,11 +136,13 @@ download() {
 ######################################################################################
 
 # Remote install package like @install
+# It will also transfer the $DEBUG state to the remote machine.
 # Usage:    install <pack>...
 # Globals:  $server
 #           $login - default is "operator"
 remote_install() {
     (
+        echo "DEBUG=${DEBUG:-}"
         cat "$BASHLIB_HOME"/base
         cat "$BASHLIB_HOME"/module/software
         echo install "$@"
