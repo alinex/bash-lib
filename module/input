@@ -179,11 +179,12 @@ choose() {
 #           tasks <check-fn>                # add entries from function (dynamic)
 # Option    -t, --title <title>             # display text line above selection
 #           -d, --default <task-fn> | "x"   # default command to start
-# TTY:      [<title>]
-#           1) <name>
-#           ...
-#           x) Beenden
-#           <question> <input>
+# TTY:      Nächste Schritte
+#              1) Analyse einzelner Partitionen
+#              2) Docker aufräumen mit etwa 206MB unter /data
+#              3) Remote Host Console (interaktiv)
+#              x) Beenden
+#           Wähle eine der obigen Optionen: [1]
 # Example:  &tasks different possibilities
 tasks() {
     # parameter parsing
