@@ -42,7 +42,9 @@ install() {
     test -z "$reload" || source ~/.bashrc
 }
 
-# TODO this should be done only if needed to also use the lib on remote machines
+######################################################################################
+### Semantic Versioning
+######################################################################################
 
 # Parse semantic version number
 # Usage:    semver <string>

@@ -18,7 +18,7 @@ Next you may have some argument parsing and validation:
 
 ```bash
 TITLE="Test Script"
-USAGE="$(basename $0) [<options>] <instance>"
+USAGE="$(basename "$0") [<options>] <instance>"
 OPTIONS="
 n name  string  Name of Birthday Person
 a age   int     Age in years
@@ -55,6 +55,8 @@ done
 num_parameters --min 1 --max 1 \
     --die "Falsche Anzahl Parameter: $USAGE" \
     -- "$@"
+
+header "$TITLE"
 ```
 
 > At least the `help` option should always be there.

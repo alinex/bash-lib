@@ -2,6 +2,8 @@
 
 > Keep in mind that this is a collection which may be incomplete and contain only essential information. Base knowledge of bash and the Linux toolset as well as the additional Linux packages is assumed to already be known or can be gathered on the net.
 
+A [bash short reference](./bash-reference.md) is also available here.
+
 ## Basic Workflow
 
 After updating the code or language files you should rebuild it:
@@ -116,6 +118,13 @@ echo "${1-}"    # better always use this if the variable can be undefined
 test -n "$t"        # bad 
 test -n "${t-}"     # better
 test -v t           # only >= Bash 4.2
+```
+
+As far as possible use bash internal variable optimization:
+
+```bash
+pattern="$(echo "$1" | sed 's/ /|/g')"  # bad
+pattern="${1// /|}"                     # better
 ```
 
 ### Internationalization
