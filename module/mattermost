@@ -112,74 +112,45 @@ _mattermost_find_channels() {
     }
     local channel=${1:-$server}
     local divibib ekz result
+    # shellcheck disable=SC2034
     divibib=$(_mattermost_team divibib) || exit 1
+    # shellcheck disable=SC2034
     ekz=$(_mattermost_team ekz) || exit 1
     result=""
     shopt -s nocasematch
-    local missing=0
-    local team pattern goal
-    # divibib main post
-    #for ((i = 0; i < ${#MATTERMOST_CHANNEL_PATTERN[@]}; i += 3)); do
-    #    team="${MATTERMOST_CHANNEL_PATTERN[i]}"
-    #    pattern="${MATTERMOST_CHANNEL_PATTERN[i + 1]}"
-    #    if [[ "$channel" =~ $pattern ]]; then
-    #        goal="${MATTERMOST_CHANNEL_PATTERN[i + 2]}"
-    #        break
-    #    fi
-    #done
-
-    case $channel in
-    # Channels
-    Entwicklung) id "$divibib" Entwicklung ;;
-    Spielwiese) id "$divibib" Spielwiese ;;
-    # server
-    lobster*.host.*) missing=$((missing + 1)) ;;
-    content.host.*) id "$divibib" Content ;;
-    pentaho*.host.*) id "$divibib" "Pentaho Betrieb" ;;
-    *.host.cloud.dvb | \
-        testing.* | build* | gitlab*) id "$divibib" "Status Global" ;;
-    *.host.stage.dvb | \
-        *.host.stage.grp | \
-        *.host.staging.grp) id "$divibib" "Status Stage" ;;
-    *.host.test.dvb | \
-        *.host.test.grp) id "$divibib" "Status Test" ;;
-    *.host.*.dvb | \
-        *.host.*.grp) id "$divibib" "Status Produktiv" ;;
-    # names
-    cloud) id "$divibib" "Status Global" ;;
-    prod) id "$divibib" "Status Produktiv" ;;
-    stage) id "$divibib" "Status Stage" ;;
-    test) id "$divibib" "Status Test" ;;
-    pentaho) id "$divibib" "Pentaho Betrieb" ;;
-    content) id "$divibib" Content ;;
-    aktuell) id "$divibib" Aktuell ;;
-    betrieb) id "$divibib" Betrieb ;;
-    pim | pim3) id "$divibib" "PIM 3.0" ;;
-    *) missing=$((missing + 1)) ;;
-    esac
-    # divibib link
-    case $channel in
-    acs.host.user.dvb) id "$divibib" Support ;;
-    portal*.host.customer.dvb) id "$divibib" Aktuell ;; # für Erschließung
-    jenkins.host.office.dvb | \
-        sonar.host.office.dvb | \
-        build-*.host.office.grp | \
-        gitlab.host.office.grp) id "$divibib" Entwicklung ;;
-    product* | platin* | pim3* | media* | \
-        systematic* | feuer*) id "$divibib" "PIM 3.0" ;;
-    middleware*) id "$divibib" "Onleihe 3 Entwicklung" ;;
-    Spielwiese) id "$divibib" Spielwiese ;;
-    esac
-    echo ""
-    # ekz main
-    case $channel in
-    # server
-    lobster*.host.*) id "$ekz" Lobster ;;
-    aktuell) id "$ekz" Aktuell ;;
-    *) missing=$((missing + 1)) ;;
-    esac
-    # ekz link
-    echo ""
+    local missing=0 found team
+    shopt -s nocasematch
+    for team in divibib ekz; do
+        # main post
+        found=0
+        for ((i = 0; i < ${#MATTERMOST_CHANNEL_PATTERN[@]}; i += 3)); do
+            [[ "${MATTERMOST_CHANNEL_PATTERN[i]}" == "$team" ]] || continue # only entries of this team
+            if [[ "$channel" =~ ${MATTERMOST_CHANNEL_PATTERN[i + 1]} ]]; then
+                if [[ "${MATTERMOST_CHANNEL_PATTERN[i + 2]}" != "-" ]]; then
+                    id "${!team}" "${MATTERMOST_CHANNEL_PATTERN[i + 2]}"
+                    found=1
+                else
+                    ((missing++)) || true
+                fi
+                debug "Match Mattermost channel ${MATTERMOST_CHANNEL_PATTERN[i]} ${MATTERMOST_CHANNEL_PATTERN[i + 1]} ${MATTERMOST_CHANNEL_PATTERN[i + 2]}"
+                break
+            fi
+        done
+        if ((found > 0)); then
+            debug "search for links"
+            # link
+            for ((i = 0; i < ${#MATTERMOST_LINK_PATTERN[@]}; i += 3)); do
+                [[ "${MATTERMOST_LINK_PATTERN[i]}" = "$team" ]] || continue # only entries of this team
+                if [[ "$channel" =~ ${MATTERMOST_LINK_PATTERN[i + 1]} ]]; then
+                    id "${!team}" "${MATTERMOST_LINK_PATTERN[i + 2]}"
+                    debug "Match Mattermost link ${MATTERMOST_LINK_PATTERN[i]} ${MATTERMOST_LINK_PATTERN[i + 1]} ${MATTERMOST_LINK_PATTERN[i + 2]}"
+                    break
+                fi
+            done
+        fi
+        echo ""
+    done
+    shopt -u nocasematch
     ((missing < 2)) || die "Could not detect mattermost channel for $1"
     shopt -s nocasematch
 }

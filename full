@@ -534,53 +534,37 @@ divibib=$(_mattermost_team divibib)||exit 1
 ekz=$(_mattermost_team ekz)||exit 1
 result=""
 shopt -s nocasematch
-local missing=0
-local team pattern goal
-case $channel in
-Entwicklung)id "$divibib" Entwicklung;;
-Spielwiese)id "$divibib" Spielwiese;;
-lobster*.host.*)missing=$((missing+1));;
-content.host.*)id "$divibib" Content;;
-pentaho*.host.*)id "$divibib" "Pentaho Betrieb";;
-*.host.cloud.dvb|\
-testing.*|build*|gitlab*)id "$divibib" "Status Global";;
-*.host.stage.dvb|\
-*.host.stage.grp|\
-*.host.staging.grp)id "$divibib" "Status Stage";;
-*.host.test.dvb|\
-*.host.test.grp)id "$divibib" "Status Test";;
-*.host.*.dvb|\
-*.host.*.grp)id "$divibib" "Status Produktiv";;
-cloud)id "$divibib" "Status Global";;
-prod)id "$divibib" "Status Produktiv";;
-stage)id "$divibib" "Status Stage";;
-test)id "$divibib" "Status Test";;
-pentaho)id "$divibib" "Pentaho Betrieb";;
-content)id "$divibib" Content;;
-aktuell)id "$divibib" Aktuell;;
-betrieb)id "$divibib" Betrieb;;
-pim|pim3)id "$divibib" "PIM 3.0";;
-*)missing=$((missing+1))
-esac
-case $channel in
-acs.host.user.dvb)id "$divibib" Support;;
-portal*.host.customer.dvb)id "$divibib" Aktuell;;
-jenkins.host.office.dvb|\
-sonar.host.office.dvb|\
-build-*.host.office.grp|\
-gitlab.host.office.grp)id "$divibib" Entwicklung;;
-product*|platin*|pim3*|media*|\
-systematic*|feuer*)id "$divibib" "PIM 3.0";;
-middleware*)id "$divibib" "Onleihe 3 Entwicklung";;
-Spielwiese)id "$divibib" Spielwiese
-esac
+local missing=0 found team
+shopt -s nocasematch
+for team in divibib ekz;do
+found=0
+for ((i=0; i<${#MATTERMOST_CHANNEL_PATTERN[@]}; i+=3));do
+[[ ${MATTERMOST_CHANNEL_PATTERN[i]} == "$team" ]]||continue
+if [[ $channel =~ ${MATTERMOST_CHANNEL_PATTERN[i+1]} ]];then
+if [[ ${MATTERMOST_CHANNEL_PATTERN[i+2]} != "-" ]];then
+id "${!team}" "${MATTERMOST_CHANNEL_PATTERN[i+2]}"
+found=1
+else
+((missing++))||true
+fi
+debug "Match Mattermost channel ${MATTERMOST_CHANNEL_PATTERN[i]} ${MATTERMOST_CHANNEL_PATTERN[i+1]} ${MATTERMOST_CHANNEL_PATTERN[i+2]}"
+break
+fi
+done
+if ((found>0));then
+debug "search for links"
+for ((i=0; i<${#MATTERMOST_LINK_PATTERN[@]}; i+=3));do
+[[ ${MATTERMOST_LINK_PATTERN[i]} == "$team" ]]||continue
+if [[ $channel =~ ${MATTERMOST_LINK_PATTERN[i+1]} ]];then
+id "${!team}" "${MATTERMOST_LINK_PATTERN[i+2]}"
+debug "Match Mattermost link ${MATTERMOST_LINK_PATTERN[i]} ${MATTERMOST_LINK_PATTERN[i+1]} ${MATTERMOST_LINK_PATTERN[i+2]}"
+break
+fi
+done
+fi
 echo ""
-case $channel in
-lobster*.host.*)id "$ekz" Lobster;;
-aktuell)id "$ekz" Aktuell;;
-*)missing=$((missing+1))
-esac
-echo ""
+done
+shopt -u nocasematch
 ((missing<2))||die "Could not detect mattermost channel for $1"
 shopt -s nocasematch
 }
@@ -761,8 +745,10 @@ echo "$metrics"|grep '{'|sed 's/,\?[{}] \?/\t/g'
 echo "$metrics"|grep -v '{'|sed 's/ /\t\t/g'
 }
 alerts(){
+debug "$@"
 local filter="" quiet
 eval set -- "$(option_parse $'i instance +\nq quiet -' "$@")"
+debug "$@"
 while true;do
 case "$1" in
 -i|--instance)filter="$filter | select(.labels.instance|test(\"$2\"))"
@@ -777,16 +763,20 @@ break
 *)die "Unerwartete option in: $1"
 esac
 done
+debug 1 "$@"
 install jq mlr
-local alerts
-alerts="$(curl -H "Authorization: Bearer $GRAFANA_TOKEN" "$GRAFANA_API/alertmanager/grafana/api/v2/alerts"|jq 'sort_by(.startsAt) | .[] '"$filter")"||die "Could not get alerts from Grafana!"
+local list
+debug 2 "$@"
+list="$(curl -H "Authorization: Bearer $GRAFANA_TOKEN" "$GRAFANA_API/alertmanager/grafana/api/v2/alerts"|jq 'sort_by(.startsAt) | .[] '"$filter")"||die "Could not get alerts from Grafana!"
+debug 3 "$@"
 local format=${1:-console}
+debug 4 "$@"
 [ -n "$alerts" ]||return 0
 [ -z "$quiet" ]||return 1
 case $format in
-tsv|console)alerts="Severity\tNetz\tInstanz\tZusammenfassung\tStart             _\n$(jq -r '[.labels.severity, .labels.net, .labels.instance, .annotations.summary, (.startsAt| split(".")[0]| strptime("%Y-%m-%dT%H:%M:%S")| strftime("%Y-%m-%d %H:%M:%S"))] | @tsv' <<<"$alerts")"
+tsv|console)list="Severity\tNetz\tInstanz\tZusammenfassung\tStart             _\n$(jq -r '[.labels.severity, .labels.net, .labels.instance, .annotations.summary, (.startsAt| split(".")[0]| strptime("%Y-%m-%dT%H:%M:%S")| strftime("%Y-%m-%d %H:%M:%S"))] | @tsv' <<<"$alerts")"
 ;;
-mattermost)alerts="$(jq -s '.[] | {
+mattermost)list="$(jq -s '.[] | {
                 color:  (if .labels.severity == "disaster" then "#ff0000"
                         elif  .labels.severity == "critical" then "#FFA500"
                         elif  .labels.severity == "warning" then "#FFFF00"
@@ -802,10 +792,12 @@ mattermost)alerts="$(jq -s '.[] | {
                     | to_entries
                     | map({title: (.key|(.[:1] | ascii_upcase) + .[1:]), value: .value, short:true})
                 )
-            }' <<<"$alerts"|jq -s .)"
+            }' <<<"$list"|jq -s .)"
 esac
+debug "$@"
+return
 case $format in
-console)echo -e "$alerts"|tsv2table|while
+console)echo -e "$list"|tsv2table|while
 read -r line
 do
 case $line in
@@ -817,7 +809,7 @@ disaster*)critical "$line";;
 esac
 done
 ;;
-*)echo -e "$alerts"
+*)echo -e "$list"
 esac
 return 1
 }
