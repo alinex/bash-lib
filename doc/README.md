@@ -264,7 +264,7 @@ Module for process control
 | ``$STEPS_VARIABLES`` | Set the variables which should be stored with step control |
 | ``$ASYNC_QUEUE_MAX`` | Maximum number of parallel tasks for queue |
 | [`sudo_allow`](function/sudo_allow.md) | Check if sudo is needed for command |
-| [`xsudo`](function/xsudo.md) | Sudo overwrite to only use sudo if needed |
+| [`sudo`](function/sudo.md) | Sudo overwrite to only use sudo if needed |
 | [`repeat`](function/repeat.md) | Execute command in N times |
 | [`retry`](function/retry.md) | Retry a command multiple times until it succeeds |
 | [`countdown`](function/countdown.md) | Sleep with countdown some seconds |

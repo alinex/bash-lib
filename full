@@ -1025,9 +1025,9 @@ sudo_allow(){
 sudo -v 2>/dev/null||die "For this call root rights are needed! Please use another user or allow sudo for user $(whoami)."
 sudo -l "$@" >/dev/null||die "User $(whoami) is not allowed to call 'sudo $*', but this is neccessary!"
 }
-xsudo(){
+sudo(){
 if ((EUID!=0))&&sudo -v 2>/dev/null;then
-sudo "$@"
+command sudo "$@"
 else
 "$@"
 fi
@@ -1337,7 +1337,7 @@ local snap=""
 local reload=""
 for cmd in "$@";do
 if [[ ! -v _software_install["$cmd"] ]];then
-sudo which "$cmd" >/dev/null||case $cmd in
+PATH="$PATH:/usr/local/sbin:/usr/sbin:/sbin" which "$cmd" >/dev/null||case $cmd in
 yq)snap="$snap $cmd";;
 mlr)apt="$apt miller";;
 *)apt="$apt $cmd"
