@@ -19,7 +19,7 @@ install() {
     # check what is needed
     for cmd in "$@"; do
         if [[ ! -v _software_install["$cmd"] ]]; then
-            sudo which "$cmd" >/dev/null ||
+            PATH="$PATH:/usr/local/sbin:/usr/sbin:/sbin" which "$cmd" >/dev/null ||
                 case $cmd in
                 yq) snap="$snap $cmd" ;;
                 mlr) apt="$apt miller" ;;

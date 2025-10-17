@@ -18,9 +18,9 @@ sudo_allow() {
 
 # Sudo overwrite to only use sudo if needed
 # Usage:    sudo <command-line>
-xsudo() {
+sudo() {
     if ((EUID != 0)) && sudo -v 2>/dev/null; then
-        sudo "$@"
+        command sudo "$@"
     else
         "$@"
     fi
