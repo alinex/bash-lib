@@ -22,6 +22,7 @@ install() {
             sudo which "$cmd" >/dev/null ||
                 case $cmd in
                 yq) snap="$snap $cmd" ;;
+                mlr) apt="$apt miller" ;;
                 *) apt="$apt $cmd" ;;
                 esac
             _software_install["$cmd"]=1
