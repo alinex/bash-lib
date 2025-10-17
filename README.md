@@ -7,6 +7,21 @@ This is the updated version of my personal library used to easily write powerful
 Version 2 is a complete rework of the library meaning it is another toolset and you could not upgrade to it.
 Some functionalities from the older version will no longer be available like logging while a lot of new possibilities are included.
 
+Main Goals are:
+
+- more modulare
+- easier to use
+- more features
+- remote capabilities integrated
+- unit tested and linted
+- completely documented with examples
+
+The downside may be:
+
+- no backward compatibility - everything is new
+- the logging library is not included (at the moment)
+- needs bash v4.2 (February 2011)
+
 If you already use it jump directly to the [module description](https://gitlab.com/alinex/bash-lib/-/blob/master/doc/README.md).
 
 ## Architecture
@@ -92,6 +107,12 @@ The `config/` folder also contains some language files `lang.<xx>` which will be
 ### Environment
 
 There is a build in `DEBUG=1` flag, which you can set to do some specific debugging steps within the code. This is aimed to be used for development and bug fixing.
+
+Ideally you will also switch to use the loader from your script if `DEBUG` is set:
+
+```bash
+test -z "${DEBUG-}" && source "$BASHLIB_HOME"/full || source "$BASHLIB_HOME"/loader
+```
 
 ## Development
 

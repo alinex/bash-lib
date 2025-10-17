@@ -1093,7 +1093,8 @@ local text=${2:-Waiting}
 while ((seconds>0));do
 echo -ne "\r$text $seconds seconds $abort"
 if [ -n "$abort" ];then
-read -r -t 1 -n 1 _&&return 1||true
+read -r -t 1 -n 1 input </dev/tty
+[ -z "$input" ]||return 1
 else
 sleep 1
 fi
