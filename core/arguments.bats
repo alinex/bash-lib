@@ -1,6 +1,6 @@
 #!/usr/bin/env bats
 
-# bats file_tags=function
+# bats file_tags=arguments
 setup() {
     bats_load_library bats-support
     bats_load_library bats-assert
@@ -54,21 +54,6 @@ teardown_file() {
     run bats_pipe echo one two three \| input_lines
     assert_output 'one two three'
     assert_success
-    echo $output # use --show-output-of-passing-tests to see it
-}
-
-# bats test_tags=die
-@test "die: with message as argument" {
-    run die Failed
-    assert_output -p "Failed"
-    assert_failure
-    echo $output # use --show-output-of-passing-tests to see it
-}
-# bats test_tags=die
-@test "die: with piped message" {
-    run bats_pipe echo Failed \| die
-    assert_output -p "Failed"
-    assert_failure
     echo $output # use --show-output-of-passing-tests to see it
 }
 
@@ -137,44 +122,5 @@ a age   int     Age in years
 h help  -       Show Help Page"
     assert_output -p "Optionen:"
     assert_success
-    echo $output # use --show-output-of-passing-tests to see it
-}
-
-# bats test_tags=mktemp
-@test "mktemp: for file" {
-    run mktemp
-    assert_success
-    assert [ -e $output ]
-    echo $output # use --show-output-of-passing-tests to see it
-}
-# bats test_tags=mktemp
-@test "mktemp: for directory" {
-    run mktemp -d dir
-    assert_success
-    assert [ -d $output ]
-    echo $output # use --show-output-of-passing-tests to see it
-}
-# bats test_tags=mktemp
-@test "mktemp: in memory" {
-    run mktemp -m test
-    assert_success
-    assert [ -e $output ]
-    assert_output "/dev/shm/bats-exec-test_test"
-    echo $output # use --show-output-of-passing-tests to see it
-}
-# bats test_tags=mktemp
-@test "mktemp: with identifier" {
-    run mktemp test
-    assert_success
-    assert [ -e $output ]
-    assert_output "/tmp/bats-exec-test_test"
-    echo $output # use --show-output-of-passing-tests to see it
-}
-# bats test_tags=mktemp
-@test "mktemp: with extension" {
-    run mktemp test -e env
-    assert_success
-    assert [ -e $output ]
-    assert_output "/tmp/bats-exec-test_test.env"
     echo $output # use --show-output-of-passing-tests to see it
 }

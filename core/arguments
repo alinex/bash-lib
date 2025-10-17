@@ -1,0 +1,113 @@
+#!/usr/bin/env bash
+# shellcheck source=base
+source /dev/null
+
+# This should help to read function parameters/arguments in different ways.
+
+######################################################################################
+### Option Parsing
+######################################################################################
+
+# Parse arguments based on given specification
+# This will parse the given options into a standardized form and validate them against the given specification.
+# Options can be given in different forms: `-a 45`, `-a45`, `--age 45`, `--age=45` are all equal.
+# Also multiple short options can be put together with only the last may need a value.
+# Usage:        eval set -- "$(option_parse <spec> "$@")"
+#               <spec> lines := <short-letter>|- <long-word> <type>|- <description>
+# Output:       parsed options <string>
+# Example:      &base_script includes a simple example
+option_parse() {
+    local opt name type desc short="" long=""
+    # read spec lines
+    while IFS=$' \t\n' read -r opt name type desc; do
+        [[ "$opt" =~ ^# ]] && continue # skip comments
+        [[ -z "$opt" ]] && continue    # skip empty lines
+        if [ ! "$type" = "-" ]; then
+            [ "${opt}" = "-" ] || short+="${opt}:"
+            long+="${name}:,"
+        else
+            [ "${opt}" = "-" ] || short+="${opt}"
+            long+="${name},"
+        fi
+    done <<<"$1"
+    shift
+    # parse
+    getopt -o "$short" --long "$long" -n "$0" -- "$@"
+}
+
+# Print help for options defined in options specification
+# This is mainly used by the @help output.
+# Usage:        option_help <spec>
+#               <spec> lines := <short-letter>|- <long-word> <type>|- <description>
+# Output:       List of options for help output
+# Example:      &base_script includes a simple example
+option_help() {
+    declare opt name type desc
+    declare -A opt_descriptions
+    declare -A opt_type
+    declare -A opt_short
+    # read spec lines
+    while read -r opt name type desc; do
+        [[ "$opt" =~ ^# ]] && continue # skip comments
+        [[ -z "$opt" ]] && continue    # skip empty lines
+        opt_descriptions[$name]="$desc"
+        opt_type[$name]=$type
+        opt_short[$name]=$opt
+    done <<<"$1"
+    echo "$(gettext "Options"):"
+    for name in "${!opt_descriptions[@]}"; do
+        local type_text=""
+        local short_text=""
+        if [ ! "${opt_type[$name]}" = "-" ]; then
+            type_text=" <${opt_type[$name]}>"
+        fi
+        if [[ ! "${opt_short[$name]}" = "-" ]]; then
+            short_text="-${opt_short[$name]}$type_text, "
+        fi
+        printf "  %-40s %s\n" "$short_text--$name$type_text" "${opt_descriptions[$name]}"
+    done
+}
+
+######################################################################################
+### Argument vs Pipe
+######################################################################################
+
+# Collect string from stdin (no parameters) or concatenate the parameters
+# This can be used to make functions which you can feed with one or multiple parameters as well as through a pipe.
+# See also: @input_args @input_lines
+# Usage:    input "$@" | ....
+#           text="$(input "$@")"
+# Output:   <string-input> or
+#           <string-params> separated by spaces
+input() {
+    test -p /dev/stdin && (($# == 0)) && cat - || echo "$*"
+}
+
+# Collect string from stdin (not more than defined parameters) or concatenate the parameters
+# This can be used to make functions which you can feed with one or multiple parameters as well as through a pipe.
+# But instead of the @input this will allow the first <num> additional parameters which will be not slurped in.
+# Usage:    input_args <num> "$@" | ....
+#           text="$(input <num> "$@")"
+# Output:   <string-input> or
+#           <string-params> separated by spaces
+input_args() {
+    local num=${1-}
+    local start=$((num + 2))
+    [ -n "$num" ] || die "No <num> argument in call to input_args!"
+    ((num > 0)) || die "<num>=$num argument is not a valid number!"
+    test -p /dev/stdin && cat - || echo "${@:$start}"
+}
+
+# Collect string from stdin (no parameters) or parameters each as a line
+# The same as @input for piped content but the arguments will not be joined by spaces but read as separate lines.
+# Usage:    input_lines "$@" | ....
+#           text="$(input_lines "$@")"
+# Output:   <string-input> or
+#           <string-params> separated by newlines
+input_lines() {
+    if [ -p /dev/stdin ] && [ -z "${1-}" ]; then
+        cat -
+    else
+        for arg in "$@"; do echo "$arg"; done
+    fi
+}

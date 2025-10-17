@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+# shellcheck source=base
+source /dev/null
+
+# The internal functions contains parts which are only needed within the bashlib but not outside.
+
+######################################################################################
+### Gettext setup
+######################################################################################
+
+export TEXTDOMAIN=bashlib
+export TEXTDOMAINDIR=$BASHLIB_HOME/locale
+# shellcheck source=/usr/bin/gettext.sh
+source gettext.sh
+
+######################################################################################
+### Internal functions
+######################################################################################
+
+_deprecated() {
+    # Define the calling function as deprecated and output this message if used
+    IFS=$' \t\n' read -r line func file <<<"$(caller 1)"
+    die "DEPRECATED: ${FUNCNAME[0]} at ${func} in ${file}:${line} please use [[ ... ]] instead"
+}

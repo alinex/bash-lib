@@ -15,10 +15,12 @@ set -o pipefail # fail if any command in a pipeline fails
 BASHLIB_HOME=${BASHLIB_HOME:-$HOME/bashlib}
 
 ######################################################################################
-### Colors
+### Colors used in Core
 ######################################################################################
 
 # Reset all
 CC_RESET=$'\033[0m'
 # Set color for critical/disaster massages used by @die
 CC_CRITICAL=$'\033[1;45m'
+# Set text color to black
+CC_BLACK=$'\033[30m'

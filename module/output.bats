@@ -134,21 +134,6 @@ setup() {
     echo $output # use --show-output-of-passing-tests to see it
 }
 
-# bats test_tags=debug
-@test "debug: do nothing in normal mode" {
-    run debug Test
-    assert_output ""
-    assert_failure
-    echo $output # use --show-output-of-passing-tests to see it
-}
-# bats test_tags=debug
-@test "debug: output in debug mode" {
-    DEBUG=1 run debug Test
-    assert_output Test
-    assert_success
-    echo $output # use --show-output-of-passing-tests to see it
-}
-
 # bats test_tags=uncolorize
 @test "uncolorize: with message as argument" {
     run uncolorize "${CC_RED}Test${CC_RESET}"

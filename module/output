@@ -103,18 +103,6 @@ color() {
     test -z "$text" || echo -e "${CC_ERROR}$text${CC_RESET}"
 }
 
-# Write message to STDERR if in DEBUG mode else do nothing
-# Usage:    ok <message>
-#           <message> | ok
-# Stderr:   colored <string>
-debug() {
-    if [ -n "$DEBUG" ]; then
-        local text
-        text="$(input "$@")"
-        test -z "$text" || echo "$CC_BLACK$text$CC_RESET" >&2
-    fi
-}
-
 ######################################################################################
 # Format Helpers
 ######################################################################################

@@ -1,16 +1,44 @@
 #!/usr/bin/env bash
-set -eE
-set -o pipefail
-BASHLIB_HOME=${BASHLIB_HOME:-$HOME/bashlib}
-CC_RESET=$'\033[0m'
-CC_CRITICAL=$'\033[1;45m'
-export TEXTDOMAIN=bashlib
-export TEXTDOMAINDIR=$BASHLIB_HOME/locale
-source gettext.sh
-_deprecated(){
-IFS=$' \t\n' read -r line func file <<<"$(caller 1)"
-caller 1
-die "DEPRECATED: ${FUNCNAME[0]} at $func in $file:$line please use [[ ... ]] instead"
+option_parse(){
+local opt name type desc short="" long=""
+while IFS=$' \t\n' read -r opt name type desc;do
+[[ $opt =~ ^# ]]&&continue
+[[ -z $opt ]]&&continue
+if [ ! "$type" = "-" ];then
+[ "$opt" = "-" ]||short+="$opt:"
+long+="$name:,"
+else
+[ "$opt" = "-" ]||short+="$opt"
+long+="$name,"
+fi
+done <<<"$1"
+shift
+getopt -o "$short" --long "$long" -n "$0" -- "$@"
+}
+option_help(){
+declare opt name type desc
+declare -A opt_descriptions
+declare -A opt_type
+declare -A opt_short
+while read -r opt name type desc;do
+[[ $opt =~ ^# ]]&&continue
+[[ -z $opt ]]&&continue
+opt_descriptions[$name]="$desc"
+opt_type[$name]=$type
+opt_short[$name]=$opt
+done <<<"$1"
+echo "$(gettext "Options"):"
+for name in "${!opt_descriptions[@]}";do
+local type_text=""
+local short_text=""
+if [ ! "${opt_type[$name]}" = "-" ];then
+type_text=" <${opt_type[$name]}>"
+fi
+if [[ ! ${opt_short[$name]} == "-" ]];then
+short_text="-${opt_short[$name]}$type_text, "
+fi
+printf "  %-40s %s\n" "$short_text--$name$type_text" "${opt_descriptions[$name]}"
+done
 }
 input(){
 test -p /dev/stdin&&(($#==0))&&cat -||echo "$*"
@@ -29,6 +57,27 @@ else
 for arg in "$@";do echo "$arg";done
 fi
 }
+set -eE
+set -o pipefail
+BASHLIB_HOME=${BASHLIB_HOME:-$HOME/bashlib}
+CC_RESET=$'\033[0m'
+CC_CRITICAL=$'\033[1;45m'
+CC_BLACK=$'\033[30m'
+export TEXTDOMAIN=bashlib
+export TEXTDOMAINDIR=$BASHLIB_HOME/locale
+source gettext.sh
+_deprecated(){
+IFS=$' \t\n' read -r line func file <<<"$(caller 1)"
+die "DEPRECATED: ${FUNCNAME[0]} at $func in $file:$line please use [[ ... ]] instead"
+}
+debug(){
+if [ -n "$DEBUG" ];then
+local text
+text="$(input "$@")"
+test -z "$text"||echo "$CC_BLACK$text$CC_RESET" >&2
+fi
+}
+debug "Running in DEBUG=${DEBUG-} mode!"
 die(){
 echo -e "$CC_CRITICAL$(input "$@")$CC_RESET" >&2
 exit 1
@@ -91,47 +140,6 @@ else
 touch "$result"
 fi
 echo "$result"
-}
-option_parse(){
-local opt name type desc short="" long=""
-while IFS=$' \t\n' read -r opt name type desc;do
-[[ $opt =~ ^# ]]&&continue
-[[ -z $opt ]]&&continue
-if [ ! "$type" = "-" ];then
-[ "$opt" = "-" ]||short+="$opt:"
-long+="$name:,"
-else
-[ "$opt" = "-" ]||short+="$opt"
-long+="$name,"
-fi
-done <<<"$1"
-shift
-getopt -o "$short" --long "$long" -n "$0" -- "$@"
-}
-option_help(){
-declare opt name type desc
-declare -A opt_descriptions
-declare -A opt_type
-declare -A opt_short
-while read -r opt name type desc;do
-[[ $opt =~ ^# ]]&&continue
-[[ -z $opt ]]&&continue
-opt_descriptions[$name]="$desc"
-opt_type[$name]=$type
-opt_short[$name]=$opt
-done <<<"$1"
-echo "$(gettext "Options"):"
-for name in "${!opt_descriptions[@]}";do
-local type_text=""
-local short_text=""
-if [ ! "${opt_type[$name]}" = "-" ];then
-type_text=" <${opt_type[$name]}>"
-fi
-if [[ ! ${opt_short[$name]} == "-" ]];then
-short_text="-${opt_short[$name]}$type_text, "
-fi
-printf "  %-40s %s\n" "$short_text--$name$type_text" "${opt_descriptions[$name]}"
-done
 }
 contains(){
 local -n array=$1
@@ -1006,13 +1014,6 @@ color(){
 local text
 text="$(input_args 1 "$@")"
 test -z "$text"||echo -e "$CC_ERROR$text$CC_RESET"
-}
-debug(){
-if [ -n "$DEBUG" ];then
-local text
-text="$(input "$@")"
-test -z "$text"||echo "$CC_BLACK$text$CC_RESET" >&2
-fi
 }
 uncolorize(){
 input "$@"|sed -r 's/\x1B\[[0-9;]*[mGK]//g'

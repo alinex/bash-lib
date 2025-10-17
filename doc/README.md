@@ -30,6 +30,18 @@ The configuration module contains a lot of general configuration settings for th
 
 ## Core
 
+### Arguments Module
+
+shellcheck source=base
+
+| Variable/Function | Description |
+| --- | --- |
+| [`option_parse`](function/option_parse.md) | Parse arguments based on given specification |
+| [`option_help`](function/option_help.md) | Print help for options defined in options specification |
+| [`input`](function/input.md) | Collect string from stdin (no parameters) or concatenate the parameters |
+| [`input_args`](function/input_args.md) | Collect string from stdin (not more than defined parameters) or concatenate the parameters |
+| [`input_lines`](function/input_lines.md) | Collect string from stdin (no parameters) or parameters each as a line |
+
 ### Config Module
 
 shellcheck disable=SC2034
@@ -39,22 +51,26 @@ shellcheck disable=SC2034
 | ``$BASHLIB_HOME`` | Set in the environment to where the BASHLIB is installed |
 | ``$CC_RESET`` | Reset all |
 | ``$CC_CRITICAL`` | Set color for critical/disaster massages used by [`die`](function/die.md) |
+| ``$CC_BLACK`` | Set text color to black |
 
-### Function Module
+### Internal Module
 
 shellcheck source=base
 
 | Variable/Function | Description |
 | --- | --- |
-| [`input`](function/input.md) | Collect string from stdin (no parameters) or concatenate the parameters |
-| [`input_args`](function/input_args.md) | Collect string from stdin (not more than defined parameters) or concatenate the parameters |
-| [`input_lines`](function/input_lines.md) | Collect string from stdin (no parameters) or parameters each as a line |
+
+### Misc Module
+
+shellcheck source=base
+
+| Variable/Function | Description |
+| --- | --- |
+| [`debug`](function/debug.md) | Write message to STDERR if in DEBUG mode else do nothing |
 | [`die`](function/die.md) | Output error message and exit |
 | [`trap_add`](function/trap_add.md) | Set or add an additional trap without overwriting existing ones |
 | [`trap_remove`](function/trap_remove.md) | Remove a specific trap |
 | [`mktemp`](function/mktemp.md) | Make a temporary file, which is recognizable |
-| [`option_parse`](function/option_parse.md) | Parse arguments based on given specification |
-| [`option_help`](function/option_help.md) | Print help for options defined in options specification |
 
 ## Module
 
@@ -240,7 +256,6 @@ shellcheck source=module/color
 | [`ok`](function/ok.md) | Print success message |
 | [`invers`](function/invers.md) | Print special marked message like table header |
 | [`color`](function/color.md) | Print message in defined color |
-| [`debug`](function/debug.md) | Write message to STDERR if in DEBUG mode else do nothing |
 | [`uncolorize`](function/uncolorize.md) | Remove color codes from text |
 | [`html2md`](function/html2md.md) | Convert HTML to markdown (simplified version) |
 | [`nocr`](function/nocr.md) | Remove carriage return from line endings |

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-17 08:26+0200\n"
+"POT-Creation-Date: 2025-10-17 08:48+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: core/function:224
+#: core/arguments:57
 msgid "Options"
 msgstr ""
 
@@ -41,7 +41,7 @@ msgstr ""
 msgid "Using default"
 msgstr ""
 
-#: module/input:138 module/input:208 module/remote:256 module/mattermost:305
+#: module/input:138 module/input:208 module/remote:255 module/mattermost:305
 #: module/validator:36 module/software:90
 msgid "Unrecognized option: $1"
 msgstr ""

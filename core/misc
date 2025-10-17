@@ -1,0 +1,129 @@
+#!/usr/bin/env bash
+# shellcheck source=base
+source /dev/null
+
+# The core functions contains essential parts which may also be used while loading the library.
+
+######################################################################################
+### Debug and Error Handling
+######################################################################################
+
+# Write message to STDERR if in DEBUG mode else do nothing
+# Usage:    ok <message>
+#           <message> | ok
+# Stderr:   colored <string>
+debug() {
+    if [ -n "$DEBUG" ]; then
+        local text
+        text="$(input "$@")"
+        test -z "$text" || echo "$CC_BLACK$text$CC_RESET" >&2
+    fi
+}
+debug "Running in DEBUG=${DEBUG-} mode!"
+
+# Output error message and exit
+# Usage:    die <message>
+#           <message> | die
+# Error:    <message>
+# Return:   always 1 and try to exit script with status 1
+die() {
+    echo -e "${CC_CRITICAL}$(input "$@")${CC_RESET}" >&2
+    # kill -s TERM "$PPID" # forcibly terminite the parent
+    exit 1
+}
+
+# Set or add an additional trap without overwriting existing ones
+# This is done by adding the new code as additional command before the existing ones if the trap is already set.
+# Usage:    trap_add <code> <signal>
+trap_add() {
+    local new="$1"
+    local sig="$2"
+    local old
+    old="$(trap -p "$sig" | awk -F"'" '{print $2}')"
+    if [[ -n "$old" ]]; then
+        # shellcheck disable=SC2064
+        trap "$new; $old" "$sig"
+    else
+        # shellcheck disable=SC2064
+        trap "$new" "$sig"
+    fi
+}
+
+# Remove a specific trap
+# Not the whole trap is removed, but only the given code.
+# Usage:    trap_remove
+trap_remove() {
+    local remove="$1"
+    local sig="$2"
+    local current new
+    current="$(trap -p "$sig" | awk -F"'" '{print $2}')"
+    # shellcheck disable=SC2001
+    new="$(echo "$current" | sed "s#;* *$remove##")"
+    # shellcheck disable=SC2064
+    trap "$new" "$sig"
+}
+
+######################################################################################
+### Temporary Files
+######################################################################################
+
+# Make a temporary file, which is recognizable
+# As the same invocation from the same program will get the same file it can be called multiple times.
+# The file will be conducted out of the program name and the given <identifier>.
+# You should remove this file by yourself if no longer needed. The files will be available in `/tmp`` folder for about 3 unused days and in memory till the next reboot.
+# Usage:    mktemp [<identifier>]       # use default temp if no identifier given
+# Options:  -d, --directory             # to make a directorty instead of a file
+#           -m, --memory                # use shared memory
+#           -e, --extension <string>    # to specify file extension (better readability)
+#           -p, --path <base-dir>       # folder under which to create file
+#           -r, --random                # add a random (numeric) part to the identifier
+# Output:   <path>
+mktemp() {
+    # parameter parsing
+    eval set -- "$(option_parse $'d directory -\ne extension +\nm memory -\np path +\nr random -' "$@")"
+    local dir ext result rand
+    local path=${TMPDIR:-/tmp}
+    while true; do
+        case "$1" in
+        -d | --directory)
+            dir=1
+            shift
+            ;;
+        -e | --extension)
+            ext=".$2"
+            shift 2
+            ;;
+        -m | --memory)
+            path="/dev/shm"
+            shift
+            ;;
+        -p | --path)
+            path="$2"
+            shift 2
+            ;;
+        -r | --random)
+            rand=$RANDOM
+            shift
+            ;;
+        --)
+            shift
+            break
+            ;;
+        *) shift ;; # ignore
+        esac
+    done
+    # processing
+    result="$path/$(basename "$0")_$1$rand$ext"
+    if [ -n "$rand" ]; then
+        # loop while already exists
+        while [ -e "$result" ]; do
+            result="$path/$(basename "$0")_$1$RANDOM$ext"
+        done
+    fi
+    if [ -n "$dir" ]; then
+        mkdir -p "$result"
+    else
+        touch "$result"
+    fi
+    echo "$result"
+}
