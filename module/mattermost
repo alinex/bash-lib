@@ -117,7 +117,17 @@ _mattermost_find_channels() {
     result=""
     shopt -s nocasematch
     local missing=0
+    local team pattern goal
     # divibib main post
+    #for ((i = 0; i < ${#MATTERMOST_CHANNEL_PATTERN[@]}; i += 3)); do
+    #    team="${MATTERMOST_CHANNEL_PATTERN[i]}"
+    #    pattern="${MATTERMOST_CHANNEL_PATTERN[i + 1]}"
+    #    if [[ "$channel" =~ $pattern ]]; then
+    #        goal="${MATTERMOST_CHANNEL_PATTERN[i + 2]}"
+    #        break
+    #    fi
+    #done
+
     case $channel in
     # Channels
     Entwicklung) id "$divibib" Entwicklung ;;

@@ -17,7 +17,7 @@ The configuration module contains a lot of general configuration settings for th
 
 | Variable/Function | Description |
 | --- | --- |
-| ``$MOUNT_COLOR_LIMIT`` | Array: Color limits per mount (pattern critical error warn ok) used in [`remote_df`](function/remote_df.md) |
+| ``$MOUNT_COLOR_LIMIT`` | Array: Color limits per mount (regex critical error warn ok) used in [`remote_df`](function/remote_df.md) |
 | ``$MATTERMOST_API`` | Mattermost API url |
 | ``$GRAFANA_API`` | Grafana API url |
 | ``$CONFLUENCE_API`` | Atlassian confluence API url |
@@ -25,6 +25,8 @@ The configuration module contains a lot of general configuration settings for th
 | ``$PROMETHEUS_API`` | Prometheus API urls |
 | ``$PROMETHEUS`` | Prometheus host names |
 | ``$CONFLUENCE_OUTAGE`` | Atlassian confluence page id for outage information |
+| ``$MATTERMOST_CHANNEL_PATTERN`` | Array: Channel per pattern (team regex channel) used in [`mattermost`](function/mattermost.md), [`mattermost_repost`](function/mattermost_repost.md) ("-"" = no selection for team) |
+| ``$MATTERMOST_LINK_PATTERN`` | Array: Link channel per pattern (team regex channel) used in [`mattermost`](function/mattermost.md), [`mattermost_repost`](function/mattermost_repost.md) ("-"" = no selection for team) |
 
 ## Core
 

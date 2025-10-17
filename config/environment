@@ -6,7 +6,7 @@
 ### Host Specifica
 ######################################################################################
 
-# Array: Color limits per mount (pattern critical error warn ok) used in @remote_df
+# Array: Color limits per mount (regex critical error warn ok) used in @remote_df
 MOUNT_COLOR_LIMIT=(
     ".*" 100 90 80 50
 )
@@ -32,3 +32,10 @@ PROMETHEUS=
 
 # Atlassian confluence page id for outage information
 CONFLUENCE_OUTAGE=
+
+# Array: Channel per pattern (team regex channel) used in @mattermost, @mattermost_repost ("-"" = no selection for team)
+MATTERMOST_CHANNEL_PATTERN=(
+    MyTeam ".*" "Town Square"
+)
+# Array: Link channel per pattern (team regex channel) used in @mattermost, @mattermost_repost ("-"" = no selection for team)
+MATTERMOST_LINK_PATTERN=()
