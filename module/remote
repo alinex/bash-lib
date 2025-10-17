@@ -98,15 +98,35 @@ remote_file() {
 # Open an interactive console on remote host
 # The motd and banner are prevented by touching .hushlogin on the server.
 # Usage:    remote_console
+# Options:  -A, --forward-agent     # use local ssh-agent also on remote host for authentication.
 # Globals:  $server
 #           $login - default is "operator"
 # Output:   passed through
 # Return:   passed through
 remote_console() {
+    # parameter parsing
+    eval set -- "$(option_parse "A forward-agent -" "$@")"
+    local opt
+    while true; do
+        case "$1" in
+        -A | --forward-agent)
+            opt="-A"
+            shift
+            ;;
+        --)
+            shift
+            break
+            ;;
+        *) die "$(gettext "Unrecognized option: \$1")" ;;
+        esac
+    done
+    num_parameters "$@" --min 2 --max 2 --die "Need exactly two parameters: semver_diff [-h] <first> <second>"
+    # processing
     local rc
     local ssh="${slogin:-operator}@${server}"
     ssh "$ssh" '(nohup touch .hushlogin && sleep 1 && rm .hushlogin) >/dev/null 2>&1 </dev/null &' # no banner
-    ssh "$ssh" </dev/tty || rc=$?
+    # shellcheck disable=SC2248
+    ssh $opt "$ssh" </dev/tty || rc=$?
     # shellcheck disable=SC2248
     return $rc
 }

@@ -11,6 +11,12 @@ The motd and banner are prevented by touching .hushlogin on the server.
 remote_console
 ```
 
+### Options
+
+```bash
+-A, --forward-agent     # use local ssh-agent also on remote host for authentication.
+```
+
 ### Globals
 
 - `$server`
