@@ -63,7 +63,7 @@ for folder in config core module extra; do
                 echo ""
                 echo "### ${name^} Module"
                 echo ""
-                grep ^#\  "$file" | head -1 | sed 's/# *//'
+                grep ^# "$file" | grep -Ev '^(#!|# shellcheck)' | head -1 | sed 's/# *//'
                 echo ""
                 echo "| Variable/Function | Description |"
                 echo "| --- | --- |"

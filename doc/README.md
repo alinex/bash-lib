@@ -32,7 +32,7 @@ The configuration module contains a lot of general configuration settings for th
 
 ### Arguments Module
 
-shellcheck source=base
+This should help to read function parameters/arguments in different ways.
 
 | Variable/Function | Description |
 | --- | --- |
@@ -44,7 +44,7 @@ shellcheck source=base
 
 ### Config Module
 
-shellcheck disable=SC2034
+The core configuration which is needed for the core functions.
 
 | Variable/Function | Description |
 | --- | --- |
@@ -55,14 +55,14 @@ shellcheck disable=SC2034
 
 ### Internal Module
 
-shellcheck source=base
+The internal functions contains parts which are only needed within the bashlib but not outside.
 
 | Variable/Function | Description |
 | --- | --- |
 
 ### Misc Module
 
-shellcheck source=base
+The core functions contains essential parts which may also be used while loading the library.
 
 | Variable/Function | Description |
 | --- | --- |
@@ -84,7 +84,7 @@ Array helpers.
 
 ### Atlassian Module
 
-shellcheck source=config/environment
+This covers atlassian API for Jira and confluence.
 
 | Variable/Function | Description |
 | --- | --- |
@@ -96,7 +96,7 @@ shellcheck source=config/environment
 
 ### Color Module
 
-shellcheck disable=SC2034
+This module contains color specifications to be used in console output.
 
 | Variable/Function | Description |
 | --- | --- |
@@ -158,7 +158,7 @@ shellcheck disable=SC2034
 
 ### Date Module
 
-shellcheck source=base
+Some helpers to work easier with dates.
 
 | Variable/Function | Description |
 | --- | --- |
@@ -168,7 +168,7 @@ shellcheck source=base
 
 ### File Module
 
-shellcheck source=base
+File and directory helpers.
 
 | Variable/Function | Description |
 | --- | --- |
@@ -176,7 +176,7 @@ shellcheck source=base
 
 ### Input Module
 
-shellcheck source=base
+Module with user interaction helpers.
 
 | Variable/Function | Description |
 | --- | --- |
@@ -189,7 +189,7 @@ shellcheck source=base
 
 ### Mattermost Module
 
-shellcheck source=config/environment
+Using the mattermost API to write messages.
 
 | Variable/Function | Description |
 | --- | --- |
@@ -200,7 +200,7 @@ shellcheck source=config/environment
 
 ### Monitoring Module
 
-shellcheck source=base
+Using the Grafana/Prometheus APIs to get Monitoring information.
 
 | Variable/Function | Description |
 | --- | --- |
@@ -212,7 +212,7 @@ shellcheck source=base
 
 ### Os Module
 
-shellcheck disable=SC2034
+Module with operating system specific helper functions.
 
 | Variable/Function | Description |
 | --- | --- |
@@ -243,7 +243,7 @@ shellcheck disable=SC2034
 
 ### Output Module
 
-shellcheck source=module/color
+Module with output and user interaction helpers.
 
 | Variable/Function | Description |
 | --- | --- |
@@ -296,7 +296,7 @@ Module for process control
 
 ### Remote Module
 
-shellcheck source=base
+Module with remote calling/execution helpers.
 
 | Variable/Function | Description |
 | --- | --- |
@@ -344,7 +344,7 @@ Validators to make this easier and more readable.
 
 ### Divibib Module
 
-shellcheck source=base
+Module with divibib specific helpers.
 
 | Variable/Function | Description |
 | --- | --- |
