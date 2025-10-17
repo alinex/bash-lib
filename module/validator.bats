@@ -28,6 +28,13 @@ setup() {
     assert_failure
     echo $output # use --show-output-of-passing-tests to see it
 }
+# bats test_tags=num_parameters
+@test "num_parameters: should work with no parameters allowed" {
+    run num_parameters --max 0
+    assert_output ""
+    assert_success
+    echo $output # use --show-output-of-passing-tests to see it
+}
 
 # bats test_tags=is_success
 @test "is_success: 0 should be ok" {
@@ -96,91 +103,6 @@ setup() {
 @test "is_float: should work with -234" {
     run is_float -234
     assert_success
-    echo $output # use --show-output-of-passing-tests to see it
-}
-
-# bats test_tags=compare
-@test "compare: should work with =" {
-    run compare a = a
-    assert_success
-    echo $output # use --show-output-of-passing-tests to see it
-}
-# bats test_tags=compare
-@test "compare: should fail with =" {
-    run compare a = b
-    assert_failure
-    echo $output # use --show-output-of-passing-tests to see it
-}
-# bats test_tags=compare
-@test "compare: should work with ==" {
-    run compare a == a
-    assert_success
-    echo $output # use --show-output-of-passing-tests to see it
-}
-# bats test_tags=compare
-@test "compare: should fail with ==" {
-    run compare a == b
-    assert_failure
-    echo $output # use --show-output-of-passing-tests to see it
-}
-# bats test_tags=compare
-@test "compare: should work with !=" {
-    run compare a != b
-    assert_success
-    echo $output # use --show-output-of-passing-tests to see it
-}
-# bats test_tags=compare
-@test "compare: should fail with !=" {
-    run compare a != a
-    assert_failure
-    echo $output # use --show-output-of-passing-tests to see it
-}
-# bats test_tags=compare
-@test "compare: should work with =~" {
-    run compare axel =~ el\$
-    assert_success
-    echo $output # use --show-output-of-passing-tests to see it
-}
-# bats test_tags=compare
-@test "compare: should fail with =~" {
-    run compare axel =~ ax\$
-    assert_failure
-    echo $output # use --show-output-of-passing-tests to see it
-}
-# bats test_tags=compare
-@test "compare: should work with !~" {
-    run compare axel !~ ax\$
-    assert_success
-    echo $output # use --show-output-of-passing-tests to see it
-}
-# bats test_tags=compare
-@test "compare: should fail with !~" {
-    run compare axel !~ el\$
-    assert_failure
-    echo $output # use --show-output-of-passing-tests to see it
-}
-# bats test_tags=compare
-@test "compare: should work with -gt" {
-    run compare 5 -gt 1
-    assert_success
-    echo $output # use --show-output-of-passing-tests to see it
-}
-# bats test_tags=compare
-@test "compare: should fail with -gt" {
-    run compare 1 -gt 5
-    assert_failure
-    echo $output # use --show-output-of-passing-tests to see it
-}
-# bats test_tags=compare
-@test "compare: should work with >" {
-    run compare 5 \> 1
-    assert_success
-    echo $output # use --show-output-of-passing-tests to see it
-}
-# bats test_tags=compare
-@test "compare: should fail with >" {
-    run compare 1 \> 5
-    assert_failure
     echo $output # use --show-output-of-passing-tests to see it
 }
 

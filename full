@@ -1472,8 +1472,8 @@ echo "Check ${FUNCNAME[1]}: $1 ($func in $file:$line)" >&2
 [ -z "$die" ]||die "$die"
 return 1
 }
-(($#>=min))||_die "[$*] $# < $min"||return 1
-((max>0&&$#<=max))||_die "[$*] $# > $max"||return 1
+[ -z "$min" ]||(($#>=min))||_die "[$*] $# < $min (min)"||return 1
+[ -z "$max" ]||(($#<=max))||_die "[$*] $# > $max (max)"||return 1
 }
 is_success(){
 num_parameters --min 1 --max 1 --die "Only one argument allowed, got: $#" -- "$@"
