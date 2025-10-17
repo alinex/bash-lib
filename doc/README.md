@@ -24,18 +24,12 @@ The configuration module contains a lot of general configuration settings for th
 | ``$JIRA_API`` | Atlassian jira API url |
 | ``$PROMETHEUS_API`` | Prometheus API urls |
 | ``$PROMETHEUS`` | Prometheus host names |
-| ``$CONFLUENCE_OUTAGE`` | Atlassian confluence page id for outage information |
-| ``$MATTERMOST_CHANNEL_PATTERN`` | Array: Channel per pattern (team regex channel) used in [`mattermost`](function/mattermost.md), [`mattermost_repost`](function/mattermost_repost.md) ("-"" = no selection for team) |
-| ``$MATTERMOST_LINK_PATTERN`` | Array: Link channel per pattern (team regex channel) used in [`mattermost`](function/mattermost.md), [`mattermost_repost`](function/mattermost_repost.md) ("-"" = no selection for team) |
 
 ## Core
 
 ### Arguments Module
 
 This should help to read function parameters/arguments in different ways.
-
-| Variable/Function | Description |
-| --- | --- |
 | [`option_parse`](function/option_parse.md) | Parse arguments based on given specification |
 | [`option_help`](function/option_help.md) | Print help for options defined in options specification |
 | [`input`](function/input.md) | Collect string from stdin (no parameters) or concatenate the parameters |
@@ -56,9 +50,6 @@ The core configuration which is needed for the core functions.
 ### Internal Module
 
 The internal functions contains parts which are only needed within the bashlib but not outside.
-
-| Variable/Function | Description |
-| --- | --- |
 
 ### Misc Module
 
