@@ -86,7 +86,19 @@ Your scripts will start with:
 ```bash
 #!/usr/bin/env bash
 source $BASHLIB_HOME/full           # to have all tools ready
+```
 
+The optimal solution may to use the `full` or `loader` (based on `DEBUG` mode locally:
+
+```bash
+#!/usr/bin/env bash
+test -z "${DEBUG-}" && source "$BASHLIB_HOME"/full || source "$BASHLIB_HOME"/loader
+```
+
+And for the scripts better use the individual loading if not so much is needed:
+
+```bash
+#!/usr/bin/env bash
 source $BASHLIB_HOME/base           # to load only basics
 source $BASHLIB_HOME/module/output  # and then single modules
 source $BASHLIB_HOME/configs        # load configuration
