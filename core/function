@@ -14,6 +14,17 @@ export TEXTDOMAINDIR=$BASHLIB_HOME/locale
 source gettext.sh
 
 ######################################################################################
+### Internal functions
+######################################################################################
+
+_deprecated() {
+    # Define the calling function as deprecated and output this message if used
+    IFS=$' \t\n' read -r line func file <<<"$(caller 1)"
+    caller 1
+    die "DEPRECATED: ${FUNCNAME[0]} at ${func} in ${file}:${line} please use [[ ... ]] instead"
+}
+
+######################################################################################
 ### Base functions
 ######################################################################################
 

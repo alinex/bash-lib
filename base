@@ -7,6 +7,11 @@ CC_CRITICAL=$'\033[1;45m'
 export TEXTDOMAIN=bashlib
 export TEXTDOMAINDIR=$BASHLIB_HOME/locale
 source gettext.sh
+_deprecated(){
+IFS=$' \t\n' read -r line func file <<<"$(caller 1)"
+caller 1
+die "DEPRECATED: ${FUNCNAME[0]} at $func in $file:$line please use [[ ... ]] instead"
+}
 input(){
 test -p /dev/stdin&&(($#==0))&&cat -||echo "$*"
 }
