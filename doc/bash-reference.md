@@ -56,3 +56,10 @@ Indirect Expansion
 
 - `${!var}` — Expands value of the variable named by var.
 - `${!prefix*}` — Expands names of variables beginning with prefix.
+
+Case Change
+
+- `${variable^}` — Converts the first character of the variable's value to uppercase.
+- `${variable^^}` — Converts all characters in the variable's value to uppercase.
+- `${variable,}` — Converts the first character of the variable's value to lowercase.
+- `${variable,,}` — Converts all characters in the variable's value to lowercase.
