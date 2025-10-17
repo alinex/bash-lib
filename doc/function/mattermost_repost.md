@@ -7,5 +7,5 @@
 ### Usage
 
 ```bash
-mattermost_response <text> [<attachements>]
+mattermost_response <text> [<attachments>]
 ```

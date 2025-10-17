@@ -6,6 +6,7 @@ This is a list of some examples and the reference documentation of all available
 
 - [Base Script](example/base_script.md)
 - [Tasks](examples/tasks.md)
+- [Mattermost](examples/mattermost.md)
 
 The BashLib contains some core functionality and optional modules which are listed below.
 
@@ -185,7 +186,7 @@ Using the mattermost API to write messages.
 | Variable/Function | Description |
 | --- | --- |
 | [`mattermost`](function/mattermost.md) | Send a message to Mattermost |
-| [`mattermost_attachement`](function/mattermost_attachement.md) | Create an attachement json to be used in post |
+| [`mattermost_attachment`](function/mattermost_attachment.md) | Create an attachment json to be used in post |
 | [`mattermost_reaction`](function/mattermost_reaction.md) | Add reaction to existing post |
 | [`mattermost_repost`](function/mattermost_repost.md) | Add response to mattermost posting |
 
@@ -263,7 +264,7 @@ Module for process control
 | ``$STEPS_VARIABLES`` | Set the variables which should be stored with step control |
 | ``$ASYNC_QUEUE_MAX`` | Maximum number of parallel tasks for queue |
 | [`sudo_allow`](function/sudo_allow.md) | Check if sudo is needed for command |
-| [`sudo`](function/sudo.md) | Sudo overwrite to only use sudo if needed |
+| [`xsudo`](function/xsudo.md) | Sudo overwrite to only use sudo if needed |
 | [`repeat`](function/repeat.md) | Execute command in N times |
 | [`retry`](function/retry.md) | Retry a command multiple times until it succeeds |
 | [`countdown`](function/countdown.md) | Sleep with countdown some seconds |

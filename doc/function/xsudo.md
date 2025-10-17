@@ -1,4 +1,4 @@
-# sudo
+# xsudo
 
 ## Sudo overwrite to only use sudo if needed
 

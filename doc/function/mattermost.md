@@ -8,5 +8,5 @@ Stdout:   `<postid list>`
 ### Usage
 
 ```bash
-mattermost <channel-name> <text> [<attachements>]
+mattermost <channel-name> <text> [<attachments>]
 ```

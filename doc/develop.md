@@ -18,6 +18,8 @@ This will:
 - update the translation files (source/and binary)
 - recreate the API Documentation
 
+> If you run in `DEBUG` mode with the loader you don't need to run the update to test the changes if they are not in the core.
+
 ## Bug fixing
 
 ### Debug Mode

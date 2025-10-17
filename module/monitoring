@@ -109,22 +109,22 @@ alerts() {
     done
     # processing
     install jq mlr
-    local alerts
-    alerts="$(curl -H "Authorization: Bearer $GRAFANA_TOKEN" "$GRAFANA_API/alertmanager/grafana/api/v2/alerts" |
+    local list
+    list="$(curl -H "Authorization: Bearer $GRAFANA_TOKEN" "$GRAFANA_API/alertmanager/grafana/api/v2/alerts" |
         jq 'sort_by(.startsAt) | .[] '"$filter")" ||
         die "Could not get alerts from Grafana!"
     local format=${1:-console}
     # empty list
-    [ -n "$alerts" ] || return 0
+    [ -n "$list" ] || return 0
     # quiet mode
     [ -z "$quiet" ] || return 1
     # pre format
     case $format in
     tsv | console)
-        alerts="Severity\tNetz\tInstanz\tZusammenfassung\tStart             _\n$(jq -r '[.labels.severity, .labels.net, .labels.instance, .annotations.summary, (.startsAt| split(".")[0]| strptime("%Y-%m-%dT%H:%M:%S")| strftime("%Y-%m-%d %H:%M:%S"))] | @tsv' <<<"$alerts")"
+        list="Severity\tNetz\tInstanz\tZusammenfassung\tStart             _\n$(jq -r '[.labels.severity, .labels.net, .labels.instance, .annotations.summary, (.startsAt| split(".")[0]| strptime("%Y-%m-%dT%H:%M:%S")| strftime("%Y-%m-%d %H:%M:%S"))] | @tsv' <<<"$list")"
         ;;
     mattermost)
-        alerts="$(jq -s '.[] | {
+        list="$(jq -s '.[] | {
                 color:  (if .labels.severity == "disaster" then "#ff0000"
                         elif  .labels.severity == "critical" then "#FFA500"
                         elif  .labels.severity == "warning" then "#FFFF00"
@@ -140,13 +140,13 @@ alerts() {
                     | to_entries
                     | map({title: (.key|(.[:1] | ascii_upcase) + .[1:]), value: .value, short:true})
                 )
-            }' <<<"$alerts" | jq -s .)"
+            }' <<<"$list" | jq -s .)"
         ;;
     esac
     # final format
     case $format in
     console)
-        echo -e "$alerts" |
+        echo -e "$list" |
             tsv2table |
             while read -r line; do
                 case $line in
@@ -159,7 +159,7 @@ alerts() {
             done
         ;;
     *)
-        echo -e "$alerts"
+        echo -e "$list"
         ;;
     esac
     return 1

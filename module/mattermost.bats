@@ -81,7 +81,7 @@ setup() {
     echo "postid=$output" >>$SHARED_ENV
 }
 # bats test_tags=_mattermost_post
-@test "_mattermost_post: should post an attachement" {
+@test "_mattermost_post: should post an attachment" {
     run --separate-stderr _mattermost_post $channel_spielwiese "" \
     '{ color: "#FF8000", title: "Test Alert", title_link: "http://grafana.service.cloud.dvb/", text: "This is the attachment text."}'
     [ -z "$stderr" ] || echo "$stderr" | sed 's/^/   /' >&3
@@ -91,7 +91,7 @@ setup() {
     echo "postid=$output" >>$SHARED_ENV
 }
 # bats test_tags=_mattermost_post
-@test "_mattermost_post: should post two attachements" {
+@test "_mattermost_post: should post two attachments" {
     run --separate-stderr _mattermost_post $channel_spielwiese "" \
     '[{ color: "#FF8000", title: "Test Alert", text: "This is the attachment text."},
     { color: "#00FF00", title: "System OK", text: "This is the attachment text."}]'
@@ -102,7 +102,7 @@ setup() {
     echo "postid=$output" >>$SHARED_ENV
 }
 # bats test_tags=_mattermost_post
-@test "_mattermost_post: attachement with image" {
+@test "_mattermost_post: attachment with image" {
     run --separate-stderr _mattermost_post $channel_spielwiese "" \
     '{ image_url: "https://img.icons8.com/?size=100&id=q7wteb2_yVxu&format=png&color=000000", text: "This is the attachment text."}'
     [ -z "$stderr" ] || echo "$stderr" | sed 's/^/   /' >&3
@@ -112,7 +112,7 @@ setup() {
     echo "postid=$output" >>$SHARED_ENV
 }
 # bats test_tags=_mattermost_post
-@test "_mattermost_post: attachement with author" {
+@test "_mattermost_post: attachment with author" {
     run --separate-stderr _mattermost_post $channel_spielwiese "" \
     '{ color: "#FF8000", author_name: "Test BOT", author_icon: "https://img.icons8.com/?size=100&id=q7wteb2_yVxu&format=png&color=000000", author_link: "http://grafana.service.cloud.dvb/", title: "Test Alert", text: "This is the attachment text."}'
     [ -z "$stderr" ] || echo "$stderr" | sed 's/^/   /' >&3
@@ -122,7 +122,7 @@ setup() {
     echo "postid=$output" >>$SHARED_ENV
 }
 # bats test_tags=_mattermost_post
-@test "_mattermost_post: attachement with thumb image" {
+@test "_mattermost_post: attachment with thumb image" {
     run --separate-stderr _mattermost_post $channel_spielwiese "" \
     '{ color: "#FF8000", thumb_url: "https://img.icons8.com/?size=100&id=q7wteb2_yVxu&format=png&color=000000", title: "Test Alert", text: "This is the attachment text."}'
     [ -z "$stderr" ] || echo "$stderr" | sed 's/^/   /' >&3
@@ -132,7 +132,7 @@ setup() {
     echo "postid=$output" >>$SHARED_ENV
 }
 # bats test_tags=_mattermost_post
-@test "_mattermost_post: attachement with fields" {
+@test "_mattermost_post: attachment with fields" {
     run --separate-stderr _mattermost_post $channel_spielwiese "" \
     '{ color: "#FF8000", title: "Test Alert", text: "This is the attachment text.", "fields": [{"short":false, "title":"Long Field", "value":"Testing with a very long piece of text that will take up the whole width of the table. And then some more text to make it extra long." }, { "short":true, "title":"Column One", "value":"Testing" }, { "short":true, "title":"Column Two", "value":"Testing" }]}'
     [ -z "$stderr" ] || echo "$stderr" | sed 's/^/   /' >&3
@@ -142,7 +142,7 @@ setup() {
     echo "postid=$output" >>$SHARED_ENV
 }
 # bats test_tags=_mattermost_post
-@test "_mattermost_post: attachement with footer" {
+@test "_mattermost_post: attachment with footer" {
     run --separate-stderr _mattermost_post $channel_spielwiese "" \
     '{ text: "This is the attachment text.", footer: "Made by Bats Test Suite", footer_icon: "https://img.icons8.com/?size=100&id=q7wteb2_yVxu&format=png&color=000000" }'
     [ -z "$stderr" ] || echo "$stderr" | sed 's/^/   /' >&3
@@ -195,9 +195,9 @@ setup() {
 # Mattermost Chat
 ######################################################################################
 
-# bats test_tags=mattermost_attachement
-@test "mattermost_attachement: should make an attachement" {
-    run --separate-stderr mattermost_attachement --color "#FF8000" --title "Grafana Alert" --text "This is the attachment text."
+# bats test_tags=mattermost_attachment
+@test "mattermost_attachment: should make an attachment" {
+    run --separate-stderr mattermost_attachment --color "#FF8000" --title "Grafana Alert" --text "This is the attachment text."
     [ -z "$stderr" ] || echo "$stderr" | sed 's/^/   /' >&3
     assert_output '{
   "color": "#FF8000",

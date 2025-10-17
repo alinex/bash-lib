@@ -16,6 +16,10 @@ mattermost_repost "Fertig."
 mattermost_reaction check
 ```
 
+> ['mattermost'](../function/mattermost.md) will make the post
+> ['mattermost_repost'](../function/mattermost_repost.md) will add into this thread
+> ['mattermost_reaction'](../function/mattermost_reaction.md) will add a emoji reaction
+
 The concrete channels to which to post will be automatically calculated based on the defined pattern. Therefor the `MATTERMOST_CHANNEL_PATTERN` will be scanned top to bottom for all available teams. Each entry contains:
 
 - Team Name
@@ -36,4 +40,41 @@ MATTERMOST_LINK_PATTERN=(
     divibib Entwicklung "Spielwiese"
     ...
 )
+```
+
+If you want to add attachments to initial mattermost post or repost add another argument with the json:
+
+```bash
+json=<<EOT
+[
+  {
+    "color": "#0000FF",
+    "title": "Info: Partner Problem",
+    "linktitle_link": "http://grafana.service.cloud.dvb/alerting/grafana/fevrx0146bn5se/view",
+    "text": "**Plusserver hat derzeit maintenance Probleme**
+Siehe hierzu mehr unter https://status.plusserver.com//api/v2/summary.json",
+    "footer": "Grafana Alerts",
+    "fields": [
+      {
+        "title": "Netz",
+        "value": "PROD",
+        "short": true
+      },
+      {
+        "title": "Instanz",
+        "value": "status.plusserver.com",
+        "short": true
+      }
+    ]
+  }
+]
+EOT
+mattermost $server "Alert on Server" "$json"
+```
+
+The attachment can also be made using a helper ['mattermost_attachment'](../function/mattermost_attachment.md) so you don't have to write the text yourself:
+
+```bash
+mattermost $server "Alert on Server" \
+    "$(mattermost_attachment --color "#FF8000" --title "Grafana Alert" --text "This is the attachment text.")"
 ```

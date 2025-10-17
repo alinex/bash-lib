@@ -59,7 +59,7 @@ _mattermost_channel_bypost() {
         die "Could not get channel of post $1 in mattermost!"
 }
 _mattermost_post() {
-    # post <channelid> <message> [<attachements>] -> <channel-id>/<post-id>
+    # post <channelid> <message> [<attachments>] -> <channel-id>/<post-id>
     local att=""
     if [ -n "$3" ]; then
         [[ "$3" == \[* ]] && att="$3" || att="[$3]"
@@ -78,7 +78,7 @@ _mattermost_post() {
     echo "$1/$pid"
 }
 _mattermost_repost() {
-    # repost channel <channelid> <postid> <message> [<attachements>] -> <channel-id>/<post-id>
+    # repost channel <channelid> <postid> <message> [<attachments>] -> <channel-id>/<post-id>
     local att=""
     if [ -n "$4" ]; then
         [[ "$4" == \[* ]] && att="$4" || att="[$4]"
@@ -163,7 +163,7 @@ _mattermost_find_channels() {
 mattermost_post_ids=""
 
 # Send a message to Mattermost
-# Usage:    mattermost <channel-name> <text> [<attachements>]
+# Usage:    mattermost <channel-name> <text> [<attachments>]
 # Stdout:   <postid list>
 mattermost() {
     install jq
@@ -187,9 +187,9 @@ mattermost() {
     mattermost_post_ids="${result:2}"
 }
 
-# Create an attachement json to be used in post
-# Usage:    mattermost_attachement
-#           mattermost_post $channelid "" "$(mattermost_attachement --color ...)"
+# Create an attachment json to be used in post
+# Usage:    mattermost_attachment
+#           mattermost_post $channelid "" "$(mattermost_attachment --color ...)"
 # Options:  --color <hexcode>   # rgb color or names: critical, error, warning, ok, info, default
 #           --text <md>         # text content
 #           --author <name>     # author name
@@ -202,9 +202,9 @@ mattermost() {
 #           --fields <json>     # array title=<words>, value=<text>, short=false
 #           --footer <string>   # footer
 #           --logo <url>        # footer image
-# Stdout:   <json> for this attachement
+# Stdout:   <json> for this attachment
 # Find free linkable icons under https://icons8.de/icons/all
-mattermost_attachement() {
+mattermost_attachment() {
     install jq
     local json="{}"
     local fields
@@ -325,7 +325,7 @@ mattermost_reaction() {
 }
 
 # Add response to mattermost posting
-# Usage:    mattermost_response <text> [<attachements>]
+# Usage:    mattermost_response <text> [<attachments>]
 mattermost_repost() {
     local line main channel post
     # for lines in channels

@@ -589,7 +589,7 @@ done <<<"$links"
 done <<<"$channels"
 mattermost_post_ids="${result:2}"
 }
-mattermost_attachement(){
+mattermost_attachment(){
 install jq
 local json="{}"
 local fields
@@ -745,10 +745,8 @@ echo "$metrics"|grep '{'|sed 's/,\?[{}] \?/\t/g'
 echo "$metrics"|grep -v '{'|sed 's/ /\t\t/g'
 }
 alerts(){
-debug "$@"
 local filter="" quiet
 eval set -- "$(option_parse $'i instance +\nq quiet -' "$@")"
-debug "$@"
 while true;do
 case "$1" in
 -i|--instance)filter="$filter | select(.labels.instance|test(\"$2\"))"
@@ -763,18 +761,14 @@ break
 *)die "Unerwartete option in: $1"
 esac
 done
-debug 1 "$@"
 install jq mlr
 local list
-debug 2 "$@"
 list="$(curl -H "Authorization: Bearer $GRAFANA_TOKEN" "$GRAFANA_API/alertmanager/grafana/api/v2/alerts"|jq 'sort_by(.startsAt) | .[] '"$filter")"||die "Could not get alerts from Grafana!"
-debug 3 "$@"
 local format=${1:-console}
-debug 4 "$@"
-[ -n "$alerts" ]||return 0
+[ -n "$list" ]||return 0
 [ -z "$quiet" ]||return 1
 case $format in
-tsv|console)list="Severity\tNetz\tInstanz\tZusammenfassung\tStart             _\n$(jq -r '[.labels.severity, .labels.net, .labels.instance, .annotations.summary, (.startsAt| split(".")[0]| strptime("%Y-%m-%dT%H:%M:%S")| strftime("%Y-%m-%d %H:%M:%S"))] | @tsv' <<<"$alerts")"
+tsv|console)list="Severity\tNetz\tInstanz\tZusammenfassung\tStart             _\n$(jq -r '[.labels.severity, .labels.net, .labels.instance, .annotations.summary, (.startsAt| split(".")[0]| strptime("%Y-%m-%dT%H:%M:%S")| strftime("%Y-%m-%d %H:%M:%S"))] | @tsv' <<<"$list")"
 ;;
 mattermost)list="$(jq -s '.[] | {
                 color:  (if .labels.severity == "disaster" then "#ff0000"
@@ -794,8 +788,6 @@ mattermost)list="$(jq -s '.[] | {
                 )
             }' <<<"$list"|jq -s .)"
 esac
-debug "$@"
-return
 case $format in
 console)echo -e "$list"|tsv2table|while
 read -r line
@@ -1033,7 +1025,7 @@ sudo_allow(){
 sudo -v 2>/dev/null||die "For this call root rights are needed! Please use another user or allow sudo for user $(whoami)."
 sudo -l "$@" >/dev/null||die "User $(whoami) is not allowed to call 'sudo $*', but this is neccessary!"
 }
-sudo(){
+xsudo(){
 if ((EUID!=0))&&sudo -v 2>/dev/null;then
 sudo "$@"
 else
@@ -1347,6 +1339,7 @@ for cmd in "$@";do
 if [[ ! -v _software_install["$cmd"] ]];then
 sudo which "$cmd" >/dev/null||case $cmd in
 yq)snap="$snap $cmd";;
+mlr)apt="$apt miller";;
 *)apt="$apt $cmd"
 esac
 _software_install["$cmd"]=1
