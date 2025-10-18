@@ -235,7 +235,7 @@ remote_df() {
                 echo "$line"
             fi
             # shellcheck disable=SC1105
-            if [ -n "$limit" ] && ((percent "$op" limit)); then
+            if [ -n "$limit" ] && eval "[[ \$percent $op \$limit ]]"; then
                 ref="${ref}${mount} "
             fi
         fi

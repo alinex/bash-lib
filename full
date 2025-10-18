@@ -1330,6 +1330,196 @@ _queue_control&
 _queue_control_pid=$!
 fi
 }
+declare -F "num_parameters" >/dev/null||source "$BASHLIB_HOME"/module/validator
+remote(){
+local ssh="${slogin:-operator}@${server-}"
+if [ -p /dev/stdin ]&&(($#==0));then
+ssh "$ssh" bash -s
+return ${PIPESTATUS[0]}
+else
+ssh "$ssh" "$@"
+return ${PIPESTATUS[0]}
+fi
+}
+remote_term(){
+local ssh="${slogin:-operator}@$server"
+if [ -p /dev/stdin ];then
+ssh -t "$ssh" bash -s
+return ${PIPESTATUS[0]}
+else
+ssh -t "$ssh" "$@"
+return ${PIPESTATUS[0]}
+fi
+}
+remote_term_line(){
+local ssh="${slogin:-operator}@$server"
+if [ -p /dev/stdin ];then
+ssh -t "$ssh" bash -s 2> >(grep -v '^Connection to .* closed\.' >&2)|nocr
+return ${PIPESTATUS[0]}
+else
+ssh -t "$ssh" "$@" 2> >(grep -v '^Connection to .* closed\.' >&2)|nocr
+return ${PIPESTATUS[0]}
+fi
+}
+remote_file(){
+local file
+file="$(input "$@")"
+test "${file:0:1}" = "/"||file="$(path)/$file"
+test -f "$file"||die "No file to execute remotely under $file"
+local ssh="${slogin:-operator}@$server"
+ssh "$ssh" 'bash -s' <"$file"
+}
+remote_console(){
+eval set -- "$(option_parse "A forward-agent -" "$@")"
+local opt
+while true;do
+case "$1" in
+-A|--forward-agent)opt="-A"
+shift
+;;
+--)shift
+break
+;;
+*)die "$(gettext 'Unrecognized option: $1')"
+esac
+done
+num_parameters "$@" --min 2 --max 2 --die "Need exactly two parameters: semver_diff [-h] <first> <second>"
+local rc
+local ssh="${slogin:-operator}@$server"
+ssh "$ssh" '(nohup touch .hushlogin && sleep 1 && rm .hushlogin) >/dev/null 2>&1 </dev/null &'
+ssh $opt "$ssh" </dev/tty||rc=$?
+return $rc
+}
+upload(){
+local ssh="${slogin:-operator}@$server"
+local dir=${2:-~}
+rsync -av "$1" "$ssh:$dir"
+}
+download(){
+local ssh="${slogin:-operator}@$server"
+local dir=${2:-.}
+rsync -av "$ssh:$1" "$dir"
+}
+remote_install(){
+(echo "DEBUG=${DEBUG:-}"
+cat "$BASHLIB_HOME"/base
+cat "$BASHLIB_HOME"/module/software
+echo install "$@")|shfmt -mn|remote
+}
+remote_df(){
+local opt=""
+eval set -- "$(option_parse $'l locale -' "$@")"
+while true;do
+case "$1" in
+-l|--locale)opt="-l"
+shift
+;;
+--)shift
+break
+;;
+*)die "Unerwartete option in: $1"
+esac
+done
+if [ -n "$3" ]&&is_integer "$3";then
+declare -n ref="$1"
+local op="$2"
+local limit=$3
+shift 3
+fi
+local firstline="" percent mount device limit_c limit_e limit_w limit_o
+IFS=$'\n'
+for line in $(remote df -h $opt -x tmpfs -x efivarfs -x devtmpfs -x squashfs "$@");do
+if [ -z "$firstline" ];then
+firstline=1
+invers "$line"
+else
+percent=$(echo "$line"|xargs echo|cut -d' ' -f5|sed 's/%//')
+mount=$(echo "$line"|xargs echo|cut -d' ' -f6|nocr)
+device=$(echo "$line"|xargs echo|cut -d' ' -f1)
+for ((i=0; i<${#MOUNT_COLOR_LIMIT[@]}; i+=5));do
+pattern="${MOUNT_COLOR_LIMIT[i]}"
+if [[ $device =~ $pattern ]];then
+limit_c="${MOUNT_COLOR_LIMIT[i+1]}"
+limit_e="${MOUNT_COLOR_LIMIT[i+2]}"
+limit_w="${MOUNT_COLOR_LIMIT[i+3]}"
+limit_o="${MOUNT_COLOR_LIMIT[i+4]}"
+break
+fi
+done
+if ((percent==limit_c));then
+critical "$line"
+elif ((percent==limit_e));then
+error "$line"
+elif ((percent==limit_w));then
+warn "$line"
+elif ((percent==limit_o));then
+ok "$line"
+else
+echo "$line"
+fi
+if [ -n "$limit" ]&&eval "[[ \$percent $op \$limit ]]";then
+ref="$ref$mount "
+fi
+fi
+done
+unset IFS
+echo ""
+}
+remote_lvm(){
+remote sudo vgs --noheadings \&\& [ -n "$(sudo vgs --noheadings 2>/dev/null)" ] &>/dev/null
+}
+boot_wait(){
+eval set -- "$(option_parse $'q quiet -' "$@")"
+local quiet
+while true;do
+case "$1" in
+-q|--quiet)quiet=1
+shift
+;;
+--)shift
+break
+;;
+*)die "$(gettext 'Unrecognized option: $1')"
+esac
+done
+local uptime seconds=15
+echo -ne "Warten bis der Reboot fertig ist" >&2
+sleep "$seconds"
+while true;do
+[ -n "$quiet" ]||echo -ne "\rWarten bis der Reboot fertig ist ($seconds Sekunden)" >&2
+uptime=$(remote cut -d"' '" -f1 /proc/uptime 2>/dev/null|sed 's/[ .].*//')
+if ((uptime>0&&uptime<300));then
+break
+else
+sleep 1
+((seconds++))
+fi
+done
+[ -n "$quiet" ]||recho ""
+[ -n "$quiet" ]||remote uptime --since
+}
+CURL_HTTP_CODE=""
+curl(){
+local file res
+file=$(mktemp -m -r)
+res=$(command curl -s -w "Error: %{method} %{url_effective} with RC:%{http_code}" -o "$file" -L "$@")
+CURL_HTTP_CODE=${res: -3}
+if [[ $CURL_HTTP_CODE =~ ^2[0-9]{2}$ ]];then
+cat "$file"
+rm "$file"
+else
+error "$res" >&2
+jq . "$file" >&2 2>/dev/null||cat "$file" >&2
+rm "$file"
+return 1
+fi
+}
+mongosh(){
+num_parameters --min 2 --max 2 --die "Mongosh needs two parameters: Usage mongosh <database> <command>" "$@"
+local cluster
+cluster="$(sed 's/^[^.]*\.//' <<<"$server")"
+command mongosh "mongodb://${MONGO_ADMIN_USERPASS["$cluster"]}@$server:27017/$1" --eval "$2"
+}
 declare -A _software_install
 install(){
 local apt=""
