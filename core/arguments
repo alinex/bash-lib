@@ -93,8 +93,8 @@ input() {
 input_args() {
     local num=${1-}
     local start=$((num + 2))
-    [ -n "$num" ] || die "No <num> argument in call to input_args!"
-    ((num > 0)) || die "<num>=$num argument is not a valid number!"
+    [ -n "$num" ] || die "$(gettext "No <num> argument in call to input_args!")"
+    ((num > 0)) || die "$(eval_gettext '<num>=$num argument is not a valid number!')"
     test -p /dev/stdin && cat - || echo "${@:$start}"
 }
 

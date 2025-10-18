@@ -7,4 +7,4 @@ external-sources=true
 enable=quote-safe-variables
 enable=check-unassigned-uppercase
 # Disable specific warnings
-disable=SC1072,SC1073,SC1134
+disable=SC1072,SC1073,SC1134,SC2016
