@@ -80,6 +80,7 @@ scrape() {
 # Usage:    alerts [<format>]                       # json, console, mattermost
 #           alerts -i "^$server" console || echo "" # will print the alerts with an empty line if there are some
 # Options:  -i, --instance <regexp>                 # select only matching instances
+#           -a, --alertname <regexp>                # select alert name
 #           -q, --quiet                             # return only status code
 # Stdout:   <header-line>
 #           <severity>\t<network>\t<instance>\t<decription>\t<time>
@@ -89,11 +90,15 @@ scrape() {
 alerts() {
     # parameter parsing
     local filter="" quiet
-    eval set -- "$(option_parse $'i instance +\nq quiet -' "$@")"
+    eval set -- "$(option_parse $'i instance +\na alertname +\nq quiet -' "$@")"
     while true; do
         case "$1" in
         -i | --instance)
             filter="$filter | select(.labels.instance|test(\"$2\"))"
+            shift 2
+            ;;
+        -a | --alertname)
+            filter="$filter | select(.labels.alertname|test(\"$2\"))"
             shift 2
             ;;
         -q | --quiet)
@@ -120,9 +125,6 @@ alerts() {
     [ -z "$quiet" ] || return 1
     # pre format
     case $format in
-    tsv | console)
-        list="Severity\tNetz\tInstanz\tZusammenfassung\tStart             _\n$(jq -r '[.labels.severity, .labels.net, .labels.instance, .annotations.summary, (.startsAt| split(".")[0]| strptime("%Y-%m-%dT%H:%M:%S")| strftime("%Y-%m-%d %H:%M:%S"))] | @tsv' <<<"$list")"
-        ;;
     mattermost)
         list="$(jq -s '.[] | {
                 color:  (if .labels.severity == "disaster" then "#ff0000"
@@ -141,6 +143,9 @@ alerts() {
                     | map({title: (.key|(.[:1] | ascii_upcase) + .[1:]), value: .value, short:true})
                 )
             }' <<<"$list" | jq -s .)"
+        ;;
+    *)
+        list="Severity\tNetz\tInstanz\tZusammenfassung\tStart          _\n$(jq -r '[.labels.severity, .labels.net, .labels.instance, .annotations.summary, (.startsAt| split(".")[0]| strptime("%Y-%m-%dT%H:%M:%S")| strftime("%Y-%m-%d %H:%M:%S"))] | @tsv' <<<"$list")"
         ;;
     esac
     # final format
