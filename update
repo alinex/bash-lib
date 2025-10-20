@@ -135,6 +135,7 @@ for folder in config core module extra; do
                 # Parse documentation
                 first=1
                 chapter=""
+                spaces=0
                 description=""
                 usage=""
                 globals=""
@@ -151,49 +152,58 @@ for folder in config core module extra; do
                         first=""
                         title="$line"
                     elif [[ "$line" =~ ^usage: ]] || { [ "$chapter" = "usage" ] && [[ "$line" =~ ^[[:space:]] ]]; }; then
-                        # shellcheck disable=SC2001
-                        line="$(sed 's/^\(usage:\)\?\s*//i' <<<"$line")"
-                        usage="$usage\n$line"
-                        chapter="usage"
+                        if grep -Eiq "^usage:" <<<"$line"; then
+                            # shellcheck disable=SC2001
+                            start="$(sed 's/^\(usage:\s*\).*/\1/i' <<<"$line")"
+                            chapter="usage"
+                            spaces=${#start}
+                        fi
+                        usage+="\n${line:$spaces}"
                     elif [[ "$line" =~ ^options: ]] || { [ "$chapter" = "options" ] && [[ "$line" =~ ^[[:space:]] ]]; }; then
-                        # shellcheck disable=SC2001
-                        line="$(sed 's/^\(options\?:\)\?\s*//i' <<<"$line")"
-                        options="$options\n$line"
-                        chapter="options"
+                        if grep -Eiq "^options?:" <<<"$line"; then
+                            # shellcheck disable=SC2001
+                            start="$(sed 's/^\(options\?:\s*\).*/\1/i' <<<"$line")"
+                            chapter="options"
+                            spaces=${#start}
+                        fi
+                        options+="\n${line:$spaces}"
                     elif [[ "$line" =~ ^globals: ]] || { [ "$chapter" = "globals" ] && [[ "$line" =~ ^[[:space:]] ]]; }; then
                         # shellcheck disable=SC2001
                         line="$(sed 's/^\(globals\?:\)\?\s*//i' <<<"$line")"
-                        globals="$globals\n- $line"
+                        globals+="\n- $line"
                         chapter="globals"
                     elif [[ "$line" =~ ^example: ]] || { [ "$chapter" = "example" ] && [[ "$line" =~ ^[[:space:]] ]]; }; then
                         # shellcheck disable=SC2001
                         line="$(sed 's/^\(examples\?:\)\?\s*//i' <<<"$line")"
-                        example="$example\n- $line"
+                        example+="\n- $line"
                         chapter="example"
                     elif [[ "$line" =~ ^tty: ]] || { [ "$chapter" = "tty" ] && [[ "$line" =~ ^[[:space:]] ]]; }; then
-                        # shellcheck disable=SC2001
-                        line="$(sed 's/^\(tty:\)\?\s*//i' <<<"$line")"
-                        tty="$tty\n$line"
-                        chapter="tty"
+                        if grep -Eiq "^tty:" <<<"$line"; then
+                            # shellcheck disable=SC2001
+                            start="$(sed 's/^\(tty:\s*\).*/\1/i' <<<"$line")"
+                            chapter="tty"
+                            spaces=${#start}
+                        fi
+                        tty+="\n${line:$spaces}"
                     elif [[ "$line" =~ ^files: ]] || { [ "$chapter" = "files" ] && [[ "$line" =~ ^[[:space:]] ]]; }; then
                         # shellcheck disable=SC2001
                         line="$(sed 's/^\(files\?:\)\?\s*//i' <<<"$line")"
-                        files="$files\n- $line"
+                        files+="\n- $line"
                         chapter="files"
                     elif [[ "$line" =~ ^output: ]] || { [ "$chapter" = "output" ] && [[ "$line" =~ ^[[:space:]] ]]; }; then
                         # shellcheck disable=SC2001
                         line="$(sed 's/^\(output:\)\?\s*//i' <<<"$line")"
-                        output="$output\n- $line"
+                        output+="\n- $line"
                         chapter="output"
                     elif [[ "$line" =~ ^error: ]] || { [ "$chapter" = "error" ] && [[ "$line" =~ ^[[:space:]] ]]; }; then
                         # shellcheck disable=SC2001
                         line="$(sed 's/^\(error:\)\?\s*//i' <<<"$line")"
-                        error="$error\n- $line"
+                        error+="\n- $line"
                         chapter="error"
                     elif [[ "$line" =~ ^return: ]] || { [ "$chapter" = "return" ] && [[ "$line" =~ ^[[:space:]] ]]; }; then
                         # shellcheck disable=SC2001
                         line="$(sed 's/^\(returns\?:\)\?\s*//i' <<<"$line")"
-                        return="$return\n- $line"
+                        return+="\n- $line"
                         chapter="return"
                     else
                         description="$description\n$line"

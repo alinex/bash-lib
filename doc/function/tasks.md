@@ -25,10 +25,10 @@ tasks <check-fn>                # add entries from function (dynamic)
 
 ```bash
 Nächste Schritte
-1) Analyse einzelner Partitionen
-2) Docker aufräumen mit etwa 206MB unter /data
-3) Remote Host Console (interaktiv)
-x) Beenden
+   1) Analyse einzelner Partitionen
+   2) Docker aufräumen mit etwa 206MB unter /data
+   3) Remote Host Console (interaktiv)
+   x) Beenden
 Wähle eine der obigen Optionen: [1]
 ```
 
