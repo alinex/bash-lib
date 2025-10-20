@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-18 20:33+0200\n"
+"POT-Creation-Date: 2025-10-20 07:47+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -26,8 +26,7 @@ msgid "No <num> argument in call to input_args!"
 msgstr ""
 
 #: core/arguments:97
-#, sh-format
-msgid "<num>=$num argument is not a valid number!"
+msgid "argument is not a valid number!"
 msgstr ""
 
 #: module/input:41 module/input:66

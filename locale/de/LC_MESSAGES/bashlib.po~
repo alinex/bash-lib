@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-18 20:28+0200\n"
+"POT-Creation-Date: 2025-10-18 20:33+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -28,22 +28,6 @@ msgstr ""
 #: core/arguments:97
 #, sh-format
 msgid "<num>=$num argument is not a valid number!"
-msgstr ""
-
-#: module/atlassian:35
-msgid "Could not search for Jira issues using $1!"
-msgstr ""
-
-#: module/atlassian:43
-msgid "Could not get Jira issue $1!"
-msgstr ""
-
-#: module/atlassian:53
-msgid "Could not create Jira issue!"
-msgstr ""
-
-#: module/atlassian:60
-msgid "Could not update Jira issue $1!"
 msgstr ""
 
 #: module/input:41 module/input:66
@@ -78,20 +62,3 @@ msgstr "Keine Aufgaben zum Ausführen gefunden."
 #: module/input:247
 msgid "Exit"
 msgstr "Beenden"
-
-#: module/date:30
-msgid "Need exactly two parameters: diff_sec <start> <end>"
-msgstr ""
-
-#: module/date:32
-msgid "Date format $1 not parsable!"
-msgstr ""
-
-#: module/date:34
-msgid "Date format $2 not parsable!"
-msgstr ""
-
-#: module/date:70
-#, sh-format
-msgid "Date format $value not parsable!"
-msgstr ""
