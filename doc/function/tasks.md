@@ -32,6 +32,10 @@ x) Beenden
 Wähle eine der obigen Optionen: [1]
 ```
 
+### Files
+
+- `/dev/shm/`<prog>`_`<pid>`_tasks.env` to read `default` (prior to option)
+
 ### Examples
 
 - [`tasks`](../example/tasks.md) different possibilities

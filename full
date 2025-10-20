@@ -407,14 +407,14 @@ fi
 done
 }
 tasks(){
-local end title default
+local end title _default
 eval set -- "$(option_parse $'t title +\nd default +' "$@")"
 while true;do
 case "$1" in
 -t|--title)title="-t$2" >/dev/tty
 shift 2
 ;;
--d|--default)default="$2" >/dev/tty
+-d|--default)_default="$2" >/dev/tty
 shift 2
 ;;
 --)shift
@@ -423,6 +423,7 @@ break
 *)die "$(gettext 'Unrecognized option: $1')"
 esac
 done
+find /dev/shm -regex ".*/$0_[0-9]*_tasks.env\(-sub\)?" -mmin +1440 -delete 2>/dev/null||true
 local raw list task num newlist opt cmd name res
 raw="$(input_lines "$@"|grep -v '^[[:space:]]*#')"
 while true;do
@@ -438,24 +439,29 @@ res="$($cmd </dev/null)"||die "Could not get task list from command: $cmd"
 [ -z "$res" ]||newlist="$newlist$res"$'\n'
 fi
 done <<<"$list"
-list="$(echo "$newlist"|sed '/^[[:space:]]*$/d')"
+list="$(sed '/^[[:space:]]*$/d' <<<"$newlist")"
 if [ -z "$list" ];then
 ok "$(gettext "No tasks found to be executed.")"
 return
 fi
 done
-if [ "$default" = "x" ];then
+env_restore "$$_tasks" default
+[ -z "$default" ]||_default="$default"
+if [ "$_default" = "x" ];then
 opt="-d x"
-elif [ -n "$default" ];then
+elif [ -n "$_default" ];then
 num=0
 while IFS= read -r line;do
 ((num++))||true
 IFS='|' read -r cmd name <<<"$line"
-[ ! "$default" = "$(trim "$cmd")" ]||opt="-d $num"
+[ ! "$_default" = "$(trim "$cmd")" ]||opt="-d $num"
 done <<<"$list"
 fi
 task=$(choose "$title" -x "$(gettext "Exit")" $opt "$list")
-[[ $task != "exit" ]]||break
+if [[ $task == "exit" ]];then
+env_clean task
+break
+fi
 $task||error "Got error $? running: $task"
 echo ""
 done
@@ -1128,6 +1134,7 @@ trap_remove unlock
 return 0
 }
 env_store(){
+debug "env_store $*"
 eval set -- "$(option_parse $'d disk -\np path +' "$@")"
 local opt="-m"
 while true;do
@@ -1149,6 +1156,7 @@ shift||true
 declare -p "$@"|sed 's/^declare\b/declare -g/' >"$(mktemp $opt -e env "$ident")"
 }
 env_restore(){
+debug "env_restore $*"
 eval set -- "$(option_parse $'d disk -\np path +' "$@")"
 local opt="-m"
 while true;do
@@ -1165,9 +1173,19 @@ break
 *)shift
 esac
 done
-source "$(mktemp $opt -e env "$1")" 2>/dev/null||true
+local ident=${1-}
+shift
+if [[ $# -gt 0 ]];then
+temp="$(mktemp -me env-sub "${ident}_$BASHPID")"
+grep -E "$(tr ' ' '|' <<<"$*")" "$(mktemp $opt -e env "$ident")" >"$temp"
+source "$temp"||true
+rm -r "$temp"||true
+else
+source "$(mktemp $opt -e env "$ident")" 2>/dev/null||true
+fi
 }
 env_clean(){
+debug "env_clean $*"
 eval set -- "$(option_parse $'d disk -\np path +' "$@")"
 local opt="-m"
 while true;do

@@ -5,6 +5,7 @@ This is a list of some examples and the reference documentation of all available
 ## Examples
 
 - [Base Script](example/base_script.md)
+- [Shared Memory](examples/shares_memory.md)
 - [Tasks](examples/tasks.md)
 - [Mattermost](examples/mattermost.md)
 

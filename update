@@ -144,6 +144,7 @@ for folder in config core module extra; do
                 options=""
                 return=""
                 tty=""
+                files=""
                 shopt -s nocasematch
                 while IFS= read -r line; do
                     if [ -n "$first" ]; then
@@ -174,6 +175,11 @@ for folder in config core module extra; do
                         line="$(sed 's/^\(tty:\)\?\s*//i' <<<"$line")"
                         tty="$tty\n$line"
                         chapter="tty"
+                    elif [[ "$line" =~ ^files: ]] || { [ "$chapter" = "files" ] && [[ "$line" =~ ^[[:space:]] ]]; }; then
+                        # shellcheck disable=SC2001
+                        line="$(sed 's/^\(files:\)\?\s*//i' <<<"$line")"
+                        files="$files\n- $line"
+                        chapter="files"
                     elif [[ "$line" =~ ^output: ]] || { [ "$chapter" = "output" ] && [[ "$line" =~ ^[[:space:]] ]]; }; then
                         # shellcheck disable=SC2001
                         line="$(sed 's/^\(output:\)\?\s*//i' <<<"$line")"
@@ -209,6 +215,7 @@ for folder in config core module extra; do
                     [ -z "$options" ] || echo -e "\n### Options\n\n\`\`\`bash${options}\n\`\`\`"
                     [ -z "$globals" ] || echo -e "\n### Globals\n$(tag2code "$globals")"
                     [ -z "$tty" ] || echo -e "\n### TTY (direct)\n\n\`\`\`bash${tty}\n\`\`\`"
+                    [ -z "$files" ] || echo -e "\n### Files\n$(tag2code "$files")"
                     [ -z "$output" ] || echo -e "\n### Output (stdout)\n$(tag2code "$output")"
                     [ -z "$error" ] || echo -e "\n### Error (stderr)\n$(tag2code "$error")"
                     [ -z "$return" ] || echo -e "\n### Return (exit code)\n$(tag2code "$return")"

@@ -190,6 +190,7 @@ unlock() {
 ######################################################################################
 
 # Store environment into shared memory/file
+# Use `$$` or '${$}' as the program PID which will be also the same in Subshells or `${BASHPID}` which will differ.
 # Usage:    env_store [<ident>]                 # store complete environment
 #           env_store [<ident>] [<variable>]... # store only listed variables (ident can be empty string)
 # Options:  -d, --disk                          # store on disk in temporary folder
@@ -202,6 +203,7 @@ unlock() {
 #           ....
 #           env_clean # everything done remove progress
 env_store() {
+    debug "env_store $*"
     # parameter parsing
     eval set -- "$(option_parse $'d disk -\np path +' "$@")"
     local opt="-m"
@@ -230,10 +232,13 @@ env_store() {
 }
 
 # Restore environment from shared memory/file
-# Usage:    env_restore [<ident>]
+# If some variable names are given only those will be restored.
+# Usage:    env_restore [<ident>] [<variable>]...
 # Options:  -d, --disk                          # store on disk in temporary folder
 #           -p, --path <base-dir>               # store on disk in given folder
+# File:     `/dev/shm/<program>_<ident>_<sub-pid>.env.sub` very short temporary file to filter input
 env_restore() {
+    debug "env_restore $*"
     # parameter parsing
     eval set -- "$(option_parse $'d disk -\np path +' "$@")"
     local opt="-m"
@@ -255,9 +260,19 @@ env_restore() {
         esac
     done
     # processing
-    # shellcheck disable=SC1090
-    # shellcheck disable=SC2086
-    source "$(mktemp $opt -e env "$1")" 2>/dev/null || true
+    local ident=${1-}
+    shift
+    if [[ "$#" -gt 0 ]]; then
+        temp="$(mktemp -me env-sub "${ident}_${BASHPID}")"
+        grep -E "$(tr ' ' '|' <<<"$*")" "$(mktemp $opt -e env "$ident")" >"$temp"
+        # shellcheck disable=SC1090
+        source "$temp" || true
+        rm -r "$temp" || true
+    else
+        # shellcheck disable=SC1090
+        # shellcheck disable=SC2086
+        source "$(mktemp $opt -e env "$ident")" 2>/dev/null || true
+    fi
 }
 
 # Remove stored environment from shared memory/file
@@ -265,6 +280,7 @@ env_restore() {
 # Options:  -d, --disk                          # store on disk in temporary folder
 #           -p, --path <base-dir>               # store on disk in given folder
 env_clean() {
+    debug "env_clean $*"
     # parameter parsing
     eval set -- "$(option_parse $'d disk -\np path +' "$@")"
     local opt="-m"

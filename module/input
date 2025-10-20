@@ -186,10 +186,11 @@ choose() {
 #              3) Remote Host Console (interaktiv)
 #              x) Beenden
 #           Wähle eine der obigen Optionen: [1]
+# Files:    `/dev/shm/<prog>_<pid>_tasks.env` to read `default` (prior to option)
 # Example:  &tasks different possibilities
 tasks() {
     # parameter parsing
-    local end title default
+    local end title _default
     eval set -- "$(option_parse $'t title +\nd default +' "$@")"
     while true; do
         case "$1" in
@@ -198,7 +199,7 @@ tasks() {
             shift 2
             ;;
         -d | --default)
-            default="$2" >/dev/tty
+            _default="$2" >/dev/tty
             shift 2
             ;;
         --)
@@ -209,6 +210,7 @@ tasks() {
         esac
     done
     # processing
+    find /dev/shm -regex ".*/$0_[0-9]*_tasks.env\(-sub\)?" -mmin +1440 -delete 2>/dev/null || true # cleanup broken runs
     local raw list task num newlist opt cmd name res
     raw="$(input_lines "$@" | grep -v '^[[:space:]]*#')"
     # ask user to select
@@ -226,26 +228,31 @@ tasks() {
                     [ -z "$res" ] || newlist="$newlist$res"$'\n'
                 fi
             done <<<"$list"
-            list="$(echo "$newlist" | sed '/^[[:space:]]*$/d')"
+            list="$(sed '/^[[:space:]]*$/d' <<<"$newlist")"
             # list is empty
             if [ -z "$list" ]; then
                 ok "$(gettext "No tasks found to be executed.")"
                 return
             fi
         done
-        if [ "$default" = "x" ]; then
+        env_restore "${$}_tasks" default
+        [ -z "$default" ] || _default="$default"
+        if [ "$_default" = "x" ]; then
             opt="-d x"
-        elif [ -n "$default" ]; then
+        elif [ -n "$_default" ]; then
             num=0
             while IFS= read -r line; do
                 ((num++)) || true
                 IFS='|' read -r cmd name <<<"$line"
-                [ ! "$default" = "$(trim "$cmd")" ] || opt="-d $num"
+                [ ! "$_default" = "$(trim "$cmd")" ] || opt="-d $num"
             done <<<"$list"
         fi
         # shellcheck disable=SC2086
         task=$(choose "$title" -x "$(gettext "Exit")" $opt "$list")
-        [[ "$task" != "exit" ]] || break
+        if [[ "$task" == "exit" ]]; then
+            env_clean task
+            break
+        fi
         $task || error "Got error $? running: $task"
         echo ""
     done

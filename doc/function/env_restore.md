@@ -2,12 +2,14 @@
 
 ## Restore environment from shared memory/file
 
+If some variable names are given only those will be restored.
+File:     `/dev/shm/`<program>`_`<ident>`_`<sub-pid>`.env.sub` very short temporary file to filter input
 
 
 ### Usage
 
 ```bash
-env_restore [<ident>]
+env_restore [<ident>] [<variable>]...
 ```
 
 ### Options

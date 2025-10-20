@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-20 07:47+0200\n"
+"POT-Creation-Date: 2025-10-20 14:25+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -49,15 +49,15 @@ msgstr "Standard"
 msgid "Using default"
 msgstr "Standardantwort genutzt"
 
-#: module/input:138 module/input:208 module/remote:120 module/remote:275
+#: module/input:138 module/input:209 module/remote:120 module/remote:275
 #: module/mattermost:276 module/validator:36 module/software:91
 msgid "Unrecognized option: $1"
 msgstr "Unbekannte Option: $1"
 
-#: module/input:232
+#: module/input:234
 msgid "No tasks found to be executed."
 msgstr "Keine Aufgaben zum Ausführen gefunden."
 
-#: module/input:247
+#: module/input:251
 msgid "Exit"
 msgstr "Beenden"
