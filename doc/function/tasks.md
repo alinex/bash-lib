@@ -6,7 +6,6 @@ Often the functions are also named `check-...` for the ones which will return ta
 The '|' character is not possible within the commands. If a pipe is neccessary put it within a function. Also some commands can be disabled in the list by preceding the command with an `#` character.
 If there are no tasks defined or the dynamic list will return no tasks it will end with a success message.
 Option    -t, --title `<title>`             # display text line above selection
-File:     `/dev/shm/`<program>`_tasks_`<pid>`` will be used while dynamically generating the tasks list and removed afterwards
 
 
 ### Usage
@@ -32,6 +31,10 @@ Nächste Schritte
 x) Beenden
 Wähle eine der obigen Optionen: [1]
 ```
+
+### Files
+
+- `/dev/shm/`<program>`_tasks_`<pid>`` will be used while dynamically generating the tasks list and removed afterwards
 
 ### Examples
 

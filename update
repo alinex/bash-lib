@@ -157,17 +157,17 @@ for folder in config core module extra; do
                         chapter="usage"
                     elif [[ "$line" =~ ^options: ]] || { [ "$chapter" = "options" ] && [[ "$line" =~ ^[[:space:]] ]]; }; then
                         # shellcheck disable=SC2001
-                        line="$(sed 's/^\(options:\)\?\s*//i' <<<"$line")"
+                        line="$(sed 's/^\(options\?:\)\?\s*//i' <<<"$line")"
                         options="$options\n$line"
                         chapter="options"
                     elif [[ "$line" =~ ^globals: ]] || { [ "$chapter" = "globals" ] && [[ "$line" =~ ^[[:space:]] ]]; }; then
                         # shellcheck disable=SC2001
-                        line="$(sed 's/^\(globals:\)\?\s*//i' <<<"$line")"
+                        line="$(sed 's/^\(globals\?:\)\?\s*//i' <<<"$line")"
                         globals="$globals\n- $line"
                         chapter="globals"
                     elif [[ "$line" =~ ^example: ]] || { [ "$chapter" = "example" ] && [[ "$line" =~ ^[[:space:]] ]]; }; then
                         # shellcheck disable=SC2001
-                        line="$(sed 's/^\(example:\)\?\s*//i' <<<"$line")"
+                        line="$(sed 's/^\(examples\?:\)\?\s*//i' <<<"$line")"
                         example="$example\n- $line"
                         chapter="example"
                     elif [[ "$line" =~ ^tty: ]] || { [ "$chapter" = "tty" ] && [[ "$line" =~ ^[[:space:]] ]]; }; then
@@ -177,7 +177,7 @@ for folder in config core module extra; do
                         chapter="tty"
                     elif [[ "$line" =~ ^files: ]] || { [ "$chapter" = "files" ] && [[ "$line" =~ ^[[:space:]] ]]; }; then
                         # shellcheck disable=SC2001
-                        line="$(sed 's/^\(files:\)\?\s*//i' <<<"$line")"
+                        line="$(sed 's/^\(files\?:\)\?\s*//i' <<<"$line")"
                         files="$files\n- $line"
                         chapter="files"
                     elif [[ "$line" =~ ^output: ]] || { [ "$chapter" = "output" ] && [[ "$line" =~ ^[[:space:]] ]]; }; then
@@ -192,7 +192,7 @@ for folder in config core module extra; do
                         chapter="error"
                     elif [[ "$line" =~ ^return: ]] || { [ "$chapter" = "return" ] && [[ "$line" =~ ^[[:space:]] ]]; }; then
                         # shellcheck disable=SC2001
-                        line="$(sed 's/^\(return:\)\?\s*//i' <<<"$line")"
+                        line="$(sed 's/^\(returns\?:\)\?\s*//i' <<<"$line")"
                         return="$return\n- $line"
                         chapter="return"
                     else

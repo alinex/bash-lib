@@ -180,7 +180,7 @@ choose() {
 #           tasks <check-fn>                # add entries from function (dynamic)
 # Option    -t, --title <title>             # display text line above selection
 #           -d, --default <var> | <task-fn> | "x"   # default command to start
-# File:     `/dev/shm/<program>_tasks_<pid>` will be used while dynamically generating the tasks list and removed afterwards
+# Files:    `/dev/shm/<program>_tasks_<pid>` will be used while dynamically generating the tasks list and removed afterwards
 # TTY:      Nächste Schritte
 #              1) Analyse einzelner Partitionen
 #              2) Docker aufräumen mit etwa 206MB unter /data
