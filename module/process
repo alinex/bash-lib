@@ -267,13 +267,13 @@ env_restore() {
     [ -s "$shm_env" ] || return 0
     if [[ "$#" -gt 0 ]]; then
         temp="$(mktemp -me env-sub "${ident}_${BASHPID}")"
-        grep -E "$(tr ' ' '|' <<<"$*")" $shm_env >"$temp" || true
+        grep -E "$(tr ' ' '|' <<<"$*")" "$shm_env" >"$temp" || true
         # shellcheck disable=SC1090
         source "$temp" || true
         rm -r "$temp" || true
     else
         # shellcheck disable=SC1090
-        source $shm_env 2>/dev/null || true
+        source "$shm_env" 2>/dev/null || true
     fi
 }
 

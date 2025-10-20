@@ -3,9 +3,10 @@
 ## Run tasks as selected by user
 
 Often the functions are also named `check-...` for the ones which will return tasks and `task-...` for the ones really doing the job. The first one may do a lot of analyzation and output user information on stdout.
-The '|' character is not possible within the commans. If a pipe is neccessary put it within a function. Also some commands can be disabled in the list by preceding the command with an `#` character.
+The '|' character is not possible within the commands. If a pipe is neccessary put it within a function. Also some commands can be disabled in the list by preceding the command with an `#` character.
 If there are no tasks defined or the dynamic list will return no tasks it will end with a success message.
 Option    -t, --title `<title>`             # display text line above selection
+File:     `/dev/shm/`<program>`_tasks_`<pid>`` will be used while dynamically generating the tasks list and removed afterwards
 
 
 ### Usage
@@ -18,7 +19,7 @@ tasks <entry>...
 # <task-line>   := "<task-fn> | <name>"
 <task-lines> | tasks            # entries from pipe
 tasks <check-fn>                # add entries from function (dynamic)
--d, --default <task-fn> | "x"   # default command to start
+-d, --default <var> | <task-fn> | "x"   # default command to start
 ```
 
 ### TTY (direct)
@@ -31,10 +32,6 @@ Nächste Schritte
 x) Beenden
 Wähle eine der obigen Optionen: [1]
 ```
-
-### Files
-
-- `/dev/shm/`<prog>`_`<pid>`_tasks.env` to read `default` (prior to option)
 
 ### Examples
 

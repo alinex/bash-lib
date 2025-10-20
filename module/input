@@ -169,7 +169,7 @@ choose() {
 
 # Run tasks as selected by user
 # Often the functions are also named `check-...` for the ones which will return tasks and `task-...` for the ones really doing the job. The first one may do a lot of analyzation and output user information on stdout.
-# The '|' character is not possible within the commans. If a pipe is neccessary put it within a function. Also some commands can be disabled in the list by preceding the command with an `#` character.
+# The '|' character is not possible within the commands. If a pipe is neccessary put it within a function. Also some commands can be disabled in the list by preceding the command with an `#` character.
 # If there are no tasks defined or the dynamic list will return no tasks it will end with a success message.
 # Usage:    tasks <entry>...
 #           # <entry>       := <check-fn> or "<task-line>"
@@ -179,14 +179,14 @@ choose() {
 #           <task-lines> | tasks            # entries from pipe
 #           tasks <check-fn>                # add entries from function (dynamic)
 # Option    -t, --title <title>             # display text line above selection
-#           -d, --default <task-fn> | "x"   # default command to start
+#           -d, --default <var> | <task-fn> | "x"   # default command to start
+# File:     `/dev/shm/<program>_tasks_<pid>` will be used while dynamically generating the tasks list and removed afterwards
 # TTY:      Nächste Schritte
 #              1) Analyse einzelner Partitionen
 #              2) Docker aufräumen mit etwa 206MB unter /data
 #              3) Remote Host Console (interaktiv)
 #              x) Beenden
 #           Wähle eine der obigen Optionen: [1]
-# Files:    `/dev/shm/<prog>_<pid>_tasks.env` to read `default` (prior to option)
 # Example:  &tasks different possibilities
 tasks() {
     # parameter parsing
@@ -210,33 +210,34 @@ tasks() {
         esac
     done
     # processing
-    find /dev/shm -regex ".*/$0_[0-9]*_tasks.env\(-sub\)?" -mmin +1440 -delete 2>/dev/null || true # cleanup broken runs
     local raw list task num newlist opt cmd name res
+    find /dev/shm -regex ".*/$0_tasks_[0-9]*" -mmin +60 -delete 2>/dev/null || true # cleanup broken runs
+    newlist="$(mktemp -m "tasks_$$")"
     raw="$(input_lines "$@" | grep -v '^[[:space:]]*#')"
     # ask user to select
     while true; do
         list="$raw"
         # check for dynamic parts in list
         while grep -qv '|' <<<"$list"; do
-            newlist=""
+            : >"$newlist"
             while IFS= read -r line; do
                 IFS='|' read -r cmd name <<<"$line"
                 if [ -n "$name" ]; then
-                    newlist="$newlist$line"$'\n'
+                    echo "$line" >>"$newlist"
                 else
-                    res="$($cmd </dev/null)" || die "Could not get task list from command: $cmd"
-                    [ -z "$res" ] || newlist="$newlist$res"$'\n'
+                    $cmd </dev/null >>"$newlist" || die "Could not get task list from command: $cmd"
                 fi
             done <<<"$list"
-            list="$(sed '/^[[:space:]]*$/d' <<<"$newlist")"
+            list="$(sed '/^[[:space:]]*$/d' "$newlist")"
+            rm "$newlist"
             # list is empty
             if [ -z "$list" ]; then
                 ok "$(gettext "No tasks found to be executed.")"
                 return
             fi
         done
-        env_restore "${$}_tasks" default
-        [ -z "$default" ] || _default="$default"
+        debug "$_default xxx ${!_default}"
+        [ -z "$_default" ] || [ -z "${!_default}" ] || _default="${!_default}"
         if [ "$_default" = "x" ]; then
             opt="-d x"
         elif [ -n "$_default" ]; then

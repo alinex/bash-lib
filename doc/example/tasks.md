@@ -80,19 +80,22 @@ remote_console | Open Remote Console (interactive)
 
 ## Dynamic Default Setting
 
-The functions which generate the dynamic options can also dynamically evaluate the default option. Therefore a Shared Memory Segment with name `${$}_tasks` is used.
-This gives an unique name for the current script run.
+The functions which generate the dynamic options can also dynamically evaluate the default option. Therefore a global variable is used, which can be changed within the `list_*` or `check_*` methods. The default should be the complete command line to match.
 
 ```bash
 # initialize
 default=""
-env_store "${$}_task" default
 
-list_xxx() {
+list_tasks() {
     ...
     default="task_one"
-    env_store "${$}_task" default
 }
+task_one() {
+    ...
+}
+
+# start the task loop
+tasks -t "Next Steps" -d default list_tasks
 ```
 
-That's all, the [`tasks`](../function/tasks.md) function will read it if there and also remove it if the task loop is normally exited.
+That's all, the [`tasks`](../function/tasks.md) function will do the rest.

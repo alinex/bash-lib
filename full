@@ -423,30 +423,31 @@ break
 *)die "$(gettext 'Unrecognized option: $1')"
 esac
 done
-find /dev/shm -regex ".*/$0_[0-9]*_tasks.env\(-sub\)?" -mmin +1440 -delete 2>/dev/null||true
 local raw list task num newlist opt cmd name res
+find /dev/shm -regex ".*/$0_tasks_[0-9]*" -mmin +60 -delete 2>/dev/null||true
+newlist="$(mktemp -m "tasks_$$")"
 raw="$(input_lines "$@"|grep -v '^[[:space:]]*#')"
 while true;do
 list="$raw"
 while grep -qv '|' <<<"$list";do
-newlist=""
+: >"$newlist"
 while IFS= read -r line;do
 IFS='|' read -r cmd name <<<"$line"
 if [ -n "$name" ];then
-newlist="$newlist$line"$'\n'
+echo "$line" >>"$newlist"
 else
-res="$($cmd </dev/null)"||die "Could not get task list from command: $cmd"
-[ -z "$res" ]||newlist="$newlist$res"$'\n'
+$cmd </dev/null >>"$newlist"||die "Could not get task list from command: $cmd"
 fi
 done <<<"$list"
-list="$(sed '/^[[:space:]]*$/d' <<<"$newlist")"
+list="$(sed '/^[[:space:]]*$/d' "$newlist")"
+rm "$newlist"
 if [ -z "$list" ];then
 ok "$(gettext "No tasks found to be executed.")"
 return
 fi
 done
-env_restore "$$_tasks" default
-[ -z "$default" ]||_default="$default"
+debug "$_default xxx ${!_default}"
+[ -z "$_default" ]||[ -z "${!_default}" ]||_default="${!_default}"
 if [ "$_default" = "x" ];then
 opt="-d x"
 elif [ -n "$_default" ];then
@@ -1176,11 +1177,11 @@ shm_env="$(mktemp $opt -e env "$ident")"
 [ -s "$shm_env" ]||return 0
 if [[ $# -gt 0 ]];then
 temp="$(mktemp -me env-sub "${ident}_$BASHPID")"
-grep -E "$(tr ' ' '|' <<<"$*")" $shm_env >"$temp"||true
+grep -E "$(tr ' ' '|' <<<"$*")" "$shm_env" >"$temp"||true
 source "$temp"||true
 rm -r "$temp"||true
 else
-source $shm_env 2>/dev/null||true
+source "$shm_env" 2>/dev/null||true
 fi
 }
 env_clean(){
