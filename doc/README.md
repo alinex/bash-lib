@@ -158,6 +158,7 @@ Some helpers to work easier with dates.
 | [`now`](function/now.md) | Get current timestamp |
 | [`date_diff`](function/date_diff.md) | Calculate difference in seconds |
 | [`date_format`](function/date_format.md) | Format date in different named versions or format string |
+| [`duration_format`](function/duration_format.md) | Format duration in different numbers or human readable |
 
 ### File Module
 

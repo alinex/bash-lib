@@ -81,3 +81,95 @@ setup() {
     assert_success
     echo $output # use --show-output-of-passing-tests to see it
 }
+
+# bats test_tags=duration_format
+@test "duration_format: return number" {
+    run duration_format seconds "5"
+    assert_output 5
+    assert_success
+    echo $output # use --show-output-of-passing-tests to see it
+}
+# bats test_tags=duration_format
+@test "duration_format: parse seconds" {
+    run duration_format seconds "5s"
+    assert_output 5
+    assert_success
+    echo $output # use --show-output-of-passing-tests to see it
+}
+# bats test_tags=duration_format
+@test "duration_format: parse minutes" {
+    run duration_format seconds "5m"
+    assert_output 300
+    assert_success
+    echo $output # use --show-output-of-passing-tests to see it
+}
+# bats test_tags=duration_format
+@test "duration_format: parse hours" {
+    run duration_format seconds "1h"
+    assert_output 3600
+    assert_success
+    echo $output # use --show-output-of-passing-tests to see it
+}
+# bats test_tags=duration_format
+@test "duration_format: parse days" {
+    run duration_format seconds "1d"
+    assert_output 86400
+    assert_success
+    echo $output # use --show-output-of-passing-tests to see it
+}
+# bats test_tags=duration_format
+@test "duration_format: parse weeks" {
+    run duration_format seconds "1w"
+    assert_output 604800
+    assert_success
+    echo $output # use --show-output-of-passing-tests to see it
+}
+# bats test_tags=duration_format
+@test "duration_format: parse combined" {
+    run duration_format seconds "1h30m"
+    assert_output 5400
+    assert_success
+    echo $output # use --show-output-of-passing-tests to see it
+}
+# bats test_tags=duration_format
+@test "duration_format: parse ignore +" {
+    run duration_format seconds "+1h30m"
+    assert_output 5400
+    assert_success
+    echo $output # use --show-output-of-passing-tests to see it
+}
+# bats test_tags=duration_format
+@test "duration_format: parse negative" {
+    run duration_format seconds "-5"
+    assert_output -5
+    assert_success
+    echo $output # use --show-output-of-passing-tests to see it
+}
+# bats test_tags=duration_format
+@test "duration_format: parse cnegative ombined" {
+    run duration_format seconds "-1h30m"
+    assert_output -5400
+    assert_success
+    echo $output # use --show-output-of-passing-tests to see it
+}
+# bats test_tags=duration_format
+@test "duration_format: formats as human for seconds" {
+    run duration_format human 5
+    assert_output "5s"
+    assert_success
+    echo $output # use --show-output-of-passing-tests to see it
+}
+# bats test_tags=duration_format
+@test "duration_format: formats as human for combined" {
+    run duration_format human 5400
+    assert_output "1h30m"
+    assert_success
+    echo $output # use --show-output-of-passing-tests to see it
+}
+# bats test_tags=duration_format
+@test "duration_format: formats as human for negative" {
+    run duration_format human -5400
+    assert_output "-1h30m"
+    assert_success
+    echo $output # use --show-output-of-passing-tests to see it
+}

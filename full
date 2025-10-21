@@ -102,7 +102,7 @@ new="$(echo "$current"|sed "s#;* *$remove##")"
 trap "$new" "$sig"
 }
 mktemp(){
-eval set -- "$(option_parse $'d directory -\ne extension +\nm memory -\np path +\nr random -' "$@")"
+eval set -- "$(option_parse $'d directory -\ne extension +\nm memory -\np path +\nr random -\nT ttl +' "$@")"
 local dir ext result rand
 local path=${TMPDIR:-/tmp}
 while true;do
@@ -121,6 +121,9 @@ shift 2
 ;;
 -r|--random)rand=$RANDOM
 shift
+;;
+-T|--ttl)ttl="$2"
+shift 2
 ;;
 --)shift
 break
@@ -297,6 +300,68 @@ time-short)format="%H:%M";;
 esac
 [ -n "$2" ]&&value="${2-}"||value=$(now)
 is_integer "$value"&&eval "date -d @$value $format"||eval "date -d \"$value\" $format"||die "Date format '$value' not parsable!"
+}
+duration_format(){
+local value
+is_integer "$2"&&value="$2"||value="$(_parse_duration "$2")"
+case $1 in
+seconds)echo "$value";;
+minutes)echo $((value/60));;
+hours)echo $((value/3600));;
+days)echo $((value/86400));;
+human)_format_duration "$value"
+esac
+}
+_parse_duration(){
+local input="$1"
+local total=0
+local overall_sign=1
+local value unit vnum
+if [[ $input == -* ]];then
+overall_sign=-1
+input="${input#-}"
+elif [[ $input == +* ]];then
+overall_sign=1
+input="${input#+}"
+fi
+while read -r value unit;do
+if [[ $value =~ ^[+-] ]];then
+vnum="$value"
+else
+vnum=$((overall_sign*value))
+fi
+case "$unit" in
+''|s|sec|secs|second|seconds)total=$((total+vnum));;
+m|min|mins|minute|minutes)total=$((total+vnum*60));;
+h|hr|hrs|hour|hours)total=$((total+vnum*3600));;
+d|day|days)total=$((total+vnum*86400));;
+w|week|weeks)total=$((total+vnum*604800));;
+*)printf "$(gettext 'Invalid duration unit'): %s\n" "$unit" >&2
+return 1
+esac
+done < <(grep -Eo '[+-]?[0-9]+[[:alpha:]]*' <<<"$input"|sed -E 's/^([+-]?[0-9]+)([[:alpha:]]*)$/\1 \2/')
+printf '%d\n' "$total"
+}
+_format_duration(){
+local total="$1"
+local sign=""
+if ((total<0));then
+sign="-"
+total=$((-total))
+fi
+local w=$((total/604800))
+local d=$((total/86400))
+local h=$(((total%86400)/3600))
+local m=$(((total%3600)/60))
+local s=$((total%60))
+local out=""
+((w))&&out+="${w}w"
+((d))&&out+="${d}d"
+((h))&&out+="${h}h"
+((m))&&out+="${m}m"
+((s))&&out+="${s}s"
+[[ -z $out ]]&&out="0s"&&sign=""
+echo "$sign$out"
 }
 script_path(){
 dirname "$(readlink -f "${BASH_SOURCE[-1]:-$(pwd)/x}")"

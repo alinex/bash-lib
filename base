@@ -102,7 +102,7 @@ new="$(echo "$current"|sed "s#;* *$remove##")"
 trap "$new" "$sig"
 }
 mktemp(){
-eval set -- "$(option_parse $'d directory -\ne extension +\nm memory -\np path +\nr random -' "$@")"
+eval set -- "$(option_parse $'d directory -\ne extension +\nm memory -\np path +\nr random -\nT ttl +' "$@")"
 local dir ext result rand
 local path=${TMPDIR:-/tmp}
 while true;do
@@ -121,6 +121,9 @@ shift 2
 ;;
 -r|--random)rand=$RANDOM
 shift
+;;
+-T|--ttl)ttl="$2"
+shift 2
 ;;
 --)shift
 break

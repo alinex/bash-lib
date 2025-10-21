@@ -37,17 +37,17 @@ date_diff() {
 
 # Format date in different named versions or format string
 # Usage:    date_format <format> [<value>] # use now if missing
-# Formats:  iso         2025-10-01T12:00:00+02:00
-#           iso-date    2025-10-01
-#           zulu        2025-10-01T10:00:00Z
-#           sql         2025-10-01 12:00:00
-#           unix        1759312800
-#           eu-date     01.10.2025
-#           us-date     10/01/2025
-#           human-date  Mittwoch, Oktober 01, 2025
-#           time        12:00:00
-#           time-short  12:00
-#           +%Y         2025 (custom format)
+#           <format>:   iso         2025-10-01T12:00:00+02:00
+#                       iso-date    2025-10-01
+#                       zulu        2025-10-01T10:00:00Z
+#                       sql         2025-10-01 12:00:00
+#                       unix        1759312800
+#                       eu-date     01.10.2025
+#                       us-date     10/01/2025
+#                       human-date  Mittwoch, Oktober 01, 2025
+#                       time        12:00:00
+#                       time-short  12:00
+#                       +%Y         2025 (custom format)
 # Stdout:   <string>
 date_format() {
     local value format
@@ -68,4 +68,88 @@ date_format() {
     [ -n "$2" ] && value="${2-}" || value=$(now)
     is_integer "$value" && eval "date -d @$value $format" || eval "date -d \"$value\" $format" ||
         die "Date format '$value' not parsable!"
+}
+
+######################################################################################
+### Duration intervals
+######################################################################################
+
+# Format duration in different numbers or human readable
+# This function can convert into seconds and back into human format as you like. Months or years are not possible because they are not accurately better use 30d or 365 d for that.
+# Usage:    duration_format <format> <value>
+#           <format>:   seconds
+#                       minutes     # using floor 110s = 1
+#                       hours       # using floor
+#                       days        # using floor
+#                       human       # like 1h30m, 5w, 30s
+duration_format() {
+    local value
+    is_integer "$2" && value="$2" || value="$(_parse_duration "$2")"
+    case $1 in
+    seconds) echo "$value" ;;
+    minutes) echo $((value / 60)) ;;
+    hours) echo $((value / 3600)) ;;
+    days) echo $((value / 86400)) ;;
+    human) _format_duration "$value" ;;
+    esac
+}
+_parse_duration() {
+    local input="$1"
+    local total=0
+    local overall_sign=1
+    local value unit vnum
+    # Trim leading sign for the whole input, but remember it
+    if [[ "$input" == -* ]]; then
+        overall_sign=-1
+        input="${input#-}"
+    elif [[ "$input" == +* ]]; then
+        overall_sign=1
+        input="${input#+}"
+    fi
+    # Extract tokens like 1h, -30m, +5s, etc.
+    # We run on the (possibly sign-stripped) input so a leading '-' applied earlier becomes overall_sign.
+    while read -r value unit; do
+        # value may itself have a sign (e.g. -30)
+        if [[ "$value" =~ ^[+-] ]]; then
+            vnum="$value" # use token's own sign
+        else
+            vnum=$((overall_sign * value)) # apply overall sign
+        fi
+        case "$unit" in
+        '' | s | sec | secs | second | seconds) total=$((total + vnum)) ;;
+        m | min | mins | minute | minutes) total=$((total + vnum * 60)) ;;
+        h | hr | hrs | hour | hours) total=$((total + vnum * 3600)) ;;
+        d | day | days) total=$((total + vnum * 86400)) ;;
+        w | week | weeks) total=$((total + vnum * 604800)) ;;
+        *)
+            printf "$(gettext 'Invalid duration unit'): %s\n" "$unit" >&2
+            return 1
+            ;;
+        esac
+    done < <(grep -Eo '[+-]?[0-9]+[[:alpha:]]*' <<<"$input" | sed -E 's/^([+-]?[0-9]+)([[:alpha:]]*)$/\1 \2/')
+    printf '%d\n' "$total"
+}
+_format_duration() {
+    local total="$1"
+    local sign=""
+    # Handle sign
+    if ((total < 0)); then
+        sign="-"
+        total=$((-total))
+    fi
+    local w=$((total / 604800))
+    local d=$((total / 86400))
+    local h=$(((total % 86400) / 3600))
+    local m=$(((total % 3600) / 60))
+    local s=$((total % 60))
+    # Build string
+    local out=""
+    ((w)) && out+="${w}w"
+    ((d)) && out+="${d}d"
+    ((h)) && out+="${h}h"
+    ((m)) && out+="${m}m"
+    ((s)) && out+="${s}s"
+    # If total was exactly 0
+    [[ -z "$out" ]] && out="0s" && sign=""
+    echo "${sign}${out}"
 }
