@@ -80,6 +80,7 @@ scrape() {
 # Usage:    alerts [<format>]                       # json, console, mattermost
 #           alerts -i "^$server" console || echo "" # will print the alerts with an empty line if there are some
 # Options:  -a, --alertname <regexp>                # select alert name
+#           -n, --net <name>                        # select network name
 #           -i, --instance <regexp>                 # select only matching instances
 #           -s, --summary <regexp>                  # select by summary text
 #           -q, --quiet                             # return only status code
@@ -91,7 +92,7 @@ scrape() {
 alerts() {
     # parameter parsing
     local filter="" quiet
-    eval set -- "$(option_parse $'a alertname +\ni instance +\ns summary +\nq quiet -' "$@")"
+    eval set -- "$(option_parse $'a alertname +\ni instance +\nn net +\ns summary +\nq quiet -' "$@")"
     while true; do
         case "$1" in
         -i | --instance)
@@ -104,6 +105,10 @@ alerts() {
             ;;
         -s | --summary)
             [ -z "$2" ] || filter="$filter | select(.annotations.summary|test(\"$2\"))"
+            shift 2
+            ;;
+        -n | --net)
+            [ -z "$2" ] || filter="$filter | select(.labels.net==\"$2\")"
             shift 2
             ;;
         -q | --quiet)

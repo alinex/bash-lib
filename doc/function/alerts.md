@@ -16,6 +16,7 @@ alerts -i "^`$server`" console || echo "" # will print the alerts with an empty 
 
 ```bash
 -a, --alertname <regexp>                # select alert name
+-n, --net <name>                        # select network name
 -i, --instance <regexp>                 # select only matching instances
 -s, --summary <regexp>                  # select by summary text
 -q, --quiet                             # return only status code

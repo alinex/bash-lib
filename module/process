@@ -87,9 +87,9 @@ countdown() {
     done
     # processing
     local seconds=$1
-    local text=${2:-Waiting}
+    local text=${2:-$(gettext Waiting)}
     while ((seconds > 0)); do
-        echo -ne "\r$text $seconds seconds $abort"
+        echo -ne "\r$text $seconds $(gettext seconds) $abort"
         if [ -n "$abort" ]; then
             read -r -t 1 -n 1 _ </dev/tty && return 1 || true
         else

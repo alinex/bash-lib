@@ -753,7 +753,7 @@ echo "$metrics"|grep -v '{'|sed 's/ /\t\t/g'
 }
 alerts(){
 local filter="" quiet
-eval set -- "$(option_parse $'a alertname +\ni instance +\ns summary +\nq quiet -' "$@")"
+eval set -- "$(option_parse $'a alertname +\ni instance +\nn net +\ns summary +\nq quiet -' "$@")"
 while true;do
 case "$1" in
 -i|--instance)[ -z "$2" ]||filter="$filter | select(.labels.instance|test(\"$2\"))"
@@ -763,6 +763,9 @@ shift 2
 shift 2
 ;;
 -s|--summary)[ -z "$2" ]||filter="$filter | select(.annotations.summary|test(\"$2\"))"
+shift 2
+;;
+-n|--net)[ -z "$2" ]||filter="$filter | select(.labels.net==\"$2\")"
 shift 2
 ;;
 -q|--quiet)quiet=1
@@ -1083,9 +1086,9 @@ break
 esac
 done
 local seconds=$1
-local text=${2:-Waiting}
+local text=${2:-$(gettext Waiting)}
 while ((seconds>0));do
-echo -ne "\r$text $seconds seconds $abort"
+echo -ne "\r$text $seconds $(gettext seconds) $abort"
 if [ -n "$abort" ];then
 read -r -t 1 -n 1 _ </dev/tty&&return 1||true
 else
