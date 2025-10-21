@@ -77,10 +77,11 @@ trap_remove() {
 #           -e, --extension <string>    # to specify file extension (better readability)
 #           -p, --path <base-dir>       # folder under which to create file
 #           -r, --random                # add a random (numeric) part to the identifier
+#           -T, --ttl <duration>        # duration to remove file again as seconds or duration @duration_format
 # Output:   <path>
 mktemp() {
     # parameter parsing
-    eval set -- "$(option_parse $'d directory -\ne extension +\nm memory -\np path +\nr random -' "$@")"
+    eval set -- "$(option_parse $'d directory -\ne extension +\nm memory -\np path +\nr random -\nT ttl +' "$@")"
     local dir ext result rand
     local path=${TMPDIR:-/tmp}
     while true; do
@@ -105,6 +106,10 @@ mktemp() {
             rand=$RANDOM
             shift
             ;;
+        -T | --ttl)
+            ttl="$(duration_format seconds "$2")"
+            shift 2
+            ;;
         --)
             shift
             break
@@ -126,4 +131,18 @@ mktemp() {
         touch "$result"
     fi
     echo "$result"
+    debug "$result"
+    [ -z "$ttl" ] || (
+        _rmtemp "$ttl" "$result" >/dev/null 2>&1 &
+        disown
+    )
+}
+_rmtemp() {
+    local wait="$1" file="$2"
+    while [ -e "$result" ] && ((wait > 0)); do
+        sleep 1
+        debug "$wait"
+        ((wait--))
+    done
+    [ ! -e "$result" ] || rm -r "$result"
 }

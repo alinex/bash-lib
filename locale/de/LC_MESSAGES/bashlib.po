@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-21 21:57+0200\n"
+"POT-Creation-Date: 2025-10-21 22:27+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -28,6 +28,10 @@ msgstr "Kein <num> Argument im Aufruf zu input_args!"
 #: core/arguments:97
 msgid "argument is not a valid number!"
 msgstr "Argument ist nicht ganzzahlig"
+
+#: core/date:125
+msgid "Invalid duration unit"
+msgstr ""
 
 #: module/input:41 module/input:66
 msgid "No"
@@ -69,7 +73,3 @@ msgstr "Warten"
 #: module/process:92
 msgid "seconds"
 msgstr "Sekunden"
-
-#: module/date:125
-msgid "Invalid duration unit"
-msgstr ""

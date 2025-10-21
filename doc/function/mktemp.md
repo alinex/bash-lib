@@ -21,6 +21,7 @@ mktemp [<identifier>]       # use default temp if no identifier given
 -e, --extension <string>    # to specify file extension (better readability)
 -p, --path <base-dir>       # folder under which to create file
 -r, --random                # add a random (numeric) part to the identifier
+-T, --ttl <duration>        # duration to remove file again as seconds or duration [`duration_format`](duration_format.md)
 ```
 
 ### Output (stdout)

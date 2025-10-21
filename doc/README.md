@@ -49,9 +49,20 @@ The core configuration which is needed for the core functions.
 | ``$CC_CRITICAL`` | Set color for critical/disaster massages used by [`die`](function/die.md) |
 | ``$CC_BLACK`` | Set text color to black |
 
+### Date Module
+
+Some helpers to work easier with dates.
+| [`now`](function/now.md) | Get current timestamp |
+| [`date_diff`](function/date_diff.md) | Calculate difference in seconds |
+| [`date_format`](function/date_format.md) | Format date in different named versions or format string |
+| [`duration_format`](function/duration_format.md) | Format duration in different numbers or human readable |
+
 ### Internal Module
 
 The internal functions contains parts which are only needed within the bashlib but not outside.
+
+| Variable/Function | Description |
+| --- | --- |
 
 ### Misc Module
 
@@ -148,17 +159,6 @@ This module contains color specifications to be used in console output.
 | [`color_256`](function/color_256.md) | Get color code for text color number |
 | [`color_256_bg`](function/color_256_bg.md) | Get color code for background color number |
 | [`color_table`](function/color_table.md) | Show complete color table |
-
-### Date Module
-
-Some helpers to work easier with dates.
-
-| Variable/Function | Description |
-| --- | --- |
-| [`now`](function/now.md) | Get current timestamp |
-| [`date_diff`](function/date_diff.md) | Calculate difference in seconds |
-| [`date_format`](function/date_format.md) | Format date in different named versions or format string |
-| [`duration_format`](function/duration_format.md) | Format duration in different numbers or human readable |
 
 ### File Module
 
