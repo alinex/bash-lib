@@ -15,8 +15,9 @@ alerts -i "^`$server`" console || echo "" # will print the alerts with an empty 
 ### Options
 
 ```bash
--i, --instance <regexp>                 # select only matching instances
 -a, --alertname <regexp>                # select alert name
+-i, --instance <regexp>                 # select only matching instances
+-s, --summary <regexp>                  # select by summary text
 -q, --quiet                             # return only status code
 <severity>	<network>	<instance>	<decription>	<time>
 ...

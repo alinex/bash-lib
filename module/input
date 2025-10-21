@@ -91,7 +91,7 @@ ask_input() {
         prompt="$text ($(gettext "default"): $2) "
     fi
     echo -ne "${CC_INFO}" >/dev/tty
-    read -rp "$prompt" answer
+    read -rp "$prompt" answer </dev/tty
     echo -e "${CC_RESET}" >/dev/tty
     if [ -z "$answer" ] && [ -n "$2" ]; then
         answer="$2"
