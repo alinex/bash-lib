@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-21 16:00+0200\n"
+"POT-Creation-Date: 2025-10-21 20:47+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -37,7 +37,7 @@ msgstr ""
 msgid "Yes"
 msgstr ""
 
-#: module/input:49 module/input:74 module/input:165
+#: module/input:49 module/input:74 module/input:178
 msgid "Disallowed answer"
 msgstr ""
 
@@ -49,16 +49,16 @@ msgstr ""
 msgid "Using default"
 msgstr ""
 
-#: module/input:138 module/input:209 module/remote:120 module/remote:275
+#: module/input:143 module/input:227 module/remote:120 module/remote:275
 #: module/mattermost:276 module/validator:36 module/software:91
 msgid "Unrecognized option: $1"
 msgstr ""
 
-#: module/input:235
+#: module/input:253
 msgid "No tasks found to be executed."
 msgstr ""
 
-#: module/input:252
+#: module/input:269
 msgid "Exit"
 msgstr ""
 

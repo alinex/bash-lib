@@ -19,6 +19,7 @@ tasks <entry>...
 <task-lines> | tasks            # entries from pipe
 tasks <check-fn>                # add entries from function (dynamic)
 -d, --default <var> | <task-fn> | "x"   # default command to start
+-T, --timeout <sec>             # timeout till default selection
 ```
 
 ### TTY (direct)

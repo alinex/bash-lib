@@ -316,7 +316,7 @@ while true;do
 echo -ne "$CC_INFO" >/dev/tty
 read -r -n 1 -s -p "$text (n/J) " yn
 case $yn in
-""|[Nn])echo -e "$(gettext "No")$CC_RESET" >/dev/tty
+""|[Nn])echo -e "$(gettext "No")$ET" >/dev/tty
 return 1
 ;;
 [JjYy])echo -e "$(gettext "Yes")$CC_RESET" >/dev/tty
@@ -360,8 +360,8 @@ fi
 echo "$answer"
 }
 choose(){
-local end default
-eval set -- "$(option_parse $'t title +\nx exit +\nd default +' "$@")"
+local end default readopt
+eval set -- "$(option_parse $'t title +\nx exit +\nd default +\nT timeout +' "$@")"
 while true;do
 case "$1" in
 -t|--title)info "$2" >/dev/tty
@@ -373,6 +373,9 @@ shift 2
 -x|--exit)end="$2"
 shift 2
 ;;
+-T|--timeout)readopt="-t $2"
+shift 2
+;;
 --)shift
 break
 ;;
@@ -380,7 +383,7 @@ break
 esac
 done
 local question="Wähle eine der obigen Optionen:"
-[ -z "$default" ]||question="$question [$default]"
+[ -z "$default" ]&&readopt=""||question="$question [$default]"
 local list line key display num=0
 list="$(input_lines "$@")"
 list="$(trim "$list")"
@@ -391,14 +394,20 @@ printf "%4d) $(trim "${display:-$key}")\n" "$num" >/dev/tty
 done <<<"$list"
 [ -z "$end" ]||printf "%4s) $end\n" x >/dev/tty
 while true;do
-read -r -p "$question " select </dev/tty
+read $readopt -r -p "$question " select </dev/tty||true
 if [[ $select =~ ^[1-$num]$ ]];then
 sed -n "${select}p" <<<"$list"|sed 's/|.*//'
 return
 elif [ -n "$default" ]&&[ -z "$select" ];then
-is_integer "$default"&&sed -n "${default}p" <<<"$list"|sed 's/|.*//'||echo "$default"
+if is_integer "$default";then
+sed -n "${default}p" <<<"$list"|sed 's/|.*//'
 return
-elif [ -n "$end" ]&&[[ $select =~ [xXqQ] ]];then
+else
+select="$default"
+fi
+fi
+if [ -n "$end" ]&&[[ $select =~ [xXqQ] ]];then
+echo >/dev/tty
 echo exit
 return
 else
@@ -407,8 +416,8 @@ fi
 done
 }
 tasks(){
-local end title _default
-eval set -- "$(option_parse $'t title +\nd default +' "$@")"
+local end title _default opt
+eval set -- "$(option_parse $'t title +\nd default +\nT timeout +' "$@")"
 while true;do
 case "$1" in
 -t|--title)title="-t$2" >/dev/tty
@@ -417,13 +426,16 @@ shift 2
 -d|--default)_default="$2" >/dev/tty
 shift 2
 ;;
+-T|--timeout)opt="-T $2 " >/dev/tty
+shift 2
+;;
 --)shift
 break
 ;;
 *)die "$(gettext 'Unrecognized option: $1')"
 esac
 done
-local raw list task num newlist opt cmd name res
+local raw list task num newlist cmd name
 find /dev/shm -regex ".*/$0_tasks_[0-9]*" -mmin +60 -delete 2>/dev/null||true
 newlist="$(mktemp -m "tasks_$$")"
 raw="$(input_lines "$@"|grep -v '^[[:space:]]*#')"
@@ -446,23 +458,19 @@ ok "$(gettext "No tasks found to be executed.")"
 return
 fi
 done
-debug "$_default xxx ${!_default}"
 [ -z "$_default" ]||[ -z "${!_default}" ]||_default="${!_default}"
 if [ "$_default" = "x" ];then
-opt="-d x"
+opt+="-d x "
 elif [ -n "$_default" ];then
 num=0
 while IFS= read -r line;do
 ((num++))||true
 IFS='|' read -r cmd name <<<"$line"
-[ ! "$_default" = "$(trim "$cmd")" ]||opt="-d $num"
+[ ! "$_default" = "$(trim "$cmd")" ]||opt+="-d $num "
 done <<<"$list"
 fi
 task=$(choose "$title" -x "$(gettext "Exit")" $opt "$list")
-if [[ $task == "exit" ]];then
-env_clean task
-break
-fi
+[[ $task != "exit" ]]||break
 $task||error "Got error $? running: $task"
 echo ""
 done

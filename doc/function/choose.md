@@ -20,6 +20,7 @@ choose [-t] <entry>...
 -t, --title <title>         # display text line above selection
 -x, --exit <string>         # will add an exit option at the end -> return "exit"
 -d, --default <string|int>  # the command or number which will be returned on <enter>
+-T, --timeout <sec>         # timeout till default selection
 ```
 
 ### TTY (direct)

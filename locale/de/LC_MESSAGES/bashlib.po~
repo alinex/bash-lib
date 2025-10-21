@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-20 18:59+0200\n"
+"POT-Creation-Date: 2025-10-21 20:40+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -23,11 +23,11 @@ msgstr "Optionen"
 
 #: core/arguments:96
 msgid "No <num> argument in call to input_args!"
-msgstr ""
+msgstr "Kein <num> Argument im Aufruf zu input_args!"
 
 #: core/arguments:97
 msgid "argument is not a valid number!"
-msgstr ""
+msgstr "Argument ist nicht ganzzahlig"
 
 #: module/input:41 module/input:66
 msgid "No"
@@ -37,7 +37,7 @@ msgstr "Nein"
 msgid "Yes"
 msgstr "Ja"
 
-#: module/input:49 module/input:74 module/input:165
+#: module/input:49 module/input:74 module/input:178
 msgid "Disallowed answer"
 msgstr "Ungültige Antwort"
 
@@ -49,15 +49,23 @@ msgstr "Standard"
 msgid "Using default"
 msgstr "Standardantwort genutzt"
 
-#: module/input:138 module/input:209 module/remote:120 module/remote:275
+#: module/input:143 module/input:227 module/remote:120 module/remote:275
 #: module/mattermost:276 module/validator:36 module/software:91
 msgid "Unrecognized option: $1"
 msgstr "Unbekannte Option: $1"
 
-#: module/input:235
+#: module/input:253
 msgid "No tasks found to be executed."
 msgstr "Keine Aufgaben zum Ausführen gefunden."
 
-#: module/input:252
+#: module/input:270
 msgid "Exit"
 msgstr "Beenden"
+
+#: module/process:90
+msgid "Waiting"
+msgstr "Warten"
+
+#: module/process:92
+msgid "seconds"
+msgstr "Sekunden"

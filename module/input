@@ -38,7 +38,7 @@ ask_no() {
         read -r -n 1 -s -p "$text (n/J) " yn
         case $yn in
         "" | [Nn])
-            echo -e "$(gettext "No")${CC_RESET}" >/dev/tty
+            echo -e "$(gettext "No")${ET}" >/dev/tty
             return 1
             ;;
         [JjYy])
@@ -106,6 +106,7 @@ ask_input() {
 # Options:  -t, --title <title>         # display text line above selection
 #           -x, --exit <string>         # will add an exit option at the end -> return "exit"
 #           -d, --default <string|int>  # the command or number which will be returned on <enter>
+#           -T, --timeout <sec>         # timeout till default selection
 # Entry:    <entry> := <string> | <key> "|" <display> # whitespace arround values are removed
 # TTY:      [<title>]
 #           <list>
@@ -115,8 +116,8 @@ ask_input() {
 # TODO > 10 entries make two columns using mlr display
 choose() {
     # parameter parsing
-    local end default
-    eval set -- "$(option_parse $'t title +\nx exit +\nd default +' "$@")"
+    local end default readopt
+    eval set -- "$(option_parse $'t title +\nx exit +\nd default +\nT timeout +' "$@")"
     while true; do
         case "$1" in
         -t | --title)
@@ -131,6 +132,10 @@ choose() {
             end="$2"
             shift 2
             ;;
+        -T | --timeout)
+            readopt="-t $2"
+            shift 2
+            ;;
         --)
             shift
             break
@@ -140,7 +145,7 @@ choose() {
     done
     # processing
     local question="Wähle eine der obigen Optionen:"
-    [ -z "$default" ] || question="$question [$default]"
+    [ -z "$default" ] && readopt="" || question="$question [$default]"
     local list line key display num=0
     list="$(input_lines "$@")"
     list="$(trim "$list")"
@@ -151,14 +156,22 @@ choose() {
     done <<<"$list"
     [ -z "$end" ] || printf "%4s) ${end}\n" x >/dev/tty
     while true; do
-        read -r -p "$question " select </dev/tty
+        # shellcheck disable=SC2086
+        # shellcheck disable=SC2229
+        read $readopt -r -p "$question " select </dev/tty || true
         if [[ "$select" =~ ^[1-$num]$ ]]; then
             sed -n "${select}p" <<<"$list" | sed 's/|.*//'
             return
         elif [ -n "$default" ] && [ -z "$select" ]; then
-            is_integer "$default" && sed -n "${default}p" <<<"$list" | sed 's/|.*//' || echo "$default"
-            return
-        elif [ -n "$end" ] && [[ "$select" =~ [xXqQ] ]]; then
+            if is_integer "$default"; then
+                sed -n "${default}p" <<<"$list" | sed 's/|.*//'
+                return
+            else
+                select="$default"
+            fi
+        fi
+        if [ -n "$end" ] && [[ "$select" =~ [xXqQ] ]]; then
+            echo >/dev/tty
             echo exit
             return
         else
@@ -180,6 +193,7 @@ choose() {
 #           tasks <check-fn>                # add entries from function (dynamic)
 # Option    -t, --title <title>             # display text line above selection
 #           -d, --default <var> | <task-fn> | "x"   # default command to start
+#           -T, --timeout <sec>             # timeout till default selection
 # Files:    `/dev/shm/<program>_tasks_<pid>` will be used while dynamically generating the tasks list and removed afterwards
 # TTY:      Nächste Schritte
 #              1) Analyse einzelner Partitionen
@@ -190,8 +204,8 @@ choose() {
 # Example:  &tasks different possibilities
 tasks() {
     # parameter parsing
-    local end title _default
-    eval set -- "$(option_parse $'t title +\nd default +' "$@")"
+    local end title _default opt
+    eval set -- "$(option_parse $'t title +\nd default +\nT timeout +' "$@")"
     while true; do
         case "$1" in
         -t | --title)
@@ -202,6 +216,10 @@ tasks() {
             _default="$2" >/dev/tty
             shift 2
             ;;
+        -T | --timeout)
+            opt="-T $2 " >/dev/tty
+            shift 2
+            ;;
         --)
             shift
             break
@@ -210,7 +228,7 @@ tasks() {
         esac
     done
     # processing
-    local raw list task num newlist opt cmd name res
+    local raw list task num newlist cmd name
     find /dev/shm -regex ".*/$0_tasks_[0-9]*" -mmin +60 -delete 2>/dev/null || true # cleanup broken runs
     newlist="$(mktemp -m "tasks_$$")"
     raw="$(input_lines "$@" | grep -v '^[[:space:]]*#')"
@@ -236,24 +254,20 @@ tasks() {
                 return
             fi
         done
-        debug "$_default xxx ${!_default}"
         [ -z "$_default" ] || [ -z "${!_default}" ] || _default="${!_default}"
         if [ "$_default" = "x" ]; then
-            opt="-d x"
+            opt+="-d x "
         elif [ -n "$_default" ]; then
             num=0
             while IFS= read -r line; do
                 ((num++)) || true
                 IFS='|' read -r cmd name <<<"$line"
-                [ ! "$_default" = "$(trim "$cmd")" ] || opt="-d $num"
+                [ ! "$_default" = "$(trim "$cmd")" ] || opt+="-d $num "
             done <<<"$list"
         fi
         # shellcheck disable=SC2086
         task=$(choose "$title" -x "$(gettext "Exit")" $opt "$list")
-        if [[ "$task" == "exit" ]]; then
-            env_clean task
-            break
-        fi
+        [[ "$task" != "exit" ]] || break
         $task || error "Got error $? running: $task"
         echo ""
     done
