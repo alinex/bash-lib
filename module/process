@@ -465,7 +465,6 @@ ASYNC_QUEUE_MAX=2
 declare -a _queue
 declare _queue_control_pid
 
-env_store queue _queue _async_running # reset on each run
 _queue_control() {
     local name pid free first params
     while true; do
