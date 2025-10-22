@@ -23,7 +23,7 @@ echo "
 task_one   | First Task
 task_two   | Second Task
 task_three | Third Task
-" | tasks -t "Next step"
+" | tasks --title="Next step"
 ```
 
 ## Dynamic Entries
@@ -45,7 +45,7 @@ task_two() {
 }
 
 heading Test
-tasks -t "Nächste Schritte" list_tasks
+tasks --title="Next Steps" list_tasks
 ```
 
 And you can also mix dynamic detection and fixed calls.
@@ -75,7 +75,7 @@ check_one
 check_two
 #check_three
 remote_console | Open Remote Console (interactive)
-" | tasks -t "Nächste Schritte" -d task_one
+" | tasks --title="Next Steps" --default=task_one
 ```
 
 ## Dynamic Default Setting
@@ -95,7 +95,9 @@ task_one() {
 }
 
 # start the task loop
-tasks -t "Next Steps" -d default list_tasks
+tasks --title="Next Steps" --default=default --timeout=1m list_tasks
 ```
+
+> Additionally a timeout is set which will select the default after the amount of time.
 
 That's all, the [`tasks`](../function/tasks.md) function will do the rest.

@@ -2,6 +2,8 @@
 
 The use of shared memory is very simple through BashLib. Here we show some usage examples for it.
 
+Shared memory is used in Bash like access to files. Therefore the device `/dev/shm` is your shared memory which you can access. Using BashLib it is best to do so with the [`mktemp -m`](../function/mktemp.md) command which will create the file including the program name.
+
 ## Real Global Variables
 
 Because in Bash variables can only be global to the current process, you may get a copy of them in subshells. This means you have the variable and can work on it but if you change it you won't see the change in the parent function. An example which won't work is:
