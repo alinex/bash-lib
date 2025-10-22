@@ -60,6 +60,7 @@ fi
 set -eE
 set -o pipefail
 BASHLIB_HOME=${BASHLIB_HOME:-$HOME/bashlib}
+DEBUG=${DEBUG-}
 CC_RESET=$'\033[0m'
 CC_CRITICAL=$'\033[1;45m'
 CC_BLACK=$'\033[30m'
@@ -162,18 +163,23 @@ IFS=$' \t\n' read -r line func file <<<"$(caller 1)"
 die "DEPRECATED: ${FUNCNAME[0]} at $func in $file:$line please use [[ ... ]] instead"
 }
 debug(){
-local level=1
+local level=1 func
 if [[ $1 =~ ^-?[0-9]+$ ]];then
 level="$1"
 shift
 fi
-if [ -n "$DEBUG" ]&&((level<=DEBUG));then
-local text func
+IFS=$' \t\n' read -r _ func _ <<<"$(caller 1)"
+local text
 text="$(input "$@")"
 test -n "$text"||return 0
-IFS=$' \t\n' read -r _ func _ <<<"$(caller 1)"
-printf "$CC_BLACK%-20s %s$CC_RESET\n" "$func" "$text"
+if [[ $DEBUG =~ ^-?[0-9]+$ ]];then
+((level<=DEBUG))||return 0
+else
+[[ $func =~ ${input//, /|} ]]||return 0
 fi
+while IFS= read -r line;do
+printf "$CC_BLACK> %-20s %s$CC_RESET\n" "$func" "$line"
+done <<<"$text"
 }
 debug "Running in DEBUG=${DEBUG-} mode!"
 die(){

@@ -14,6 +14,9 @@ set -o pipefail # fail if any command in a pipeline fails
 # Set in the environment to where the BASHLIB is installed
 BASHLIB_HOME=${BASHLIB_HOME:-$HOME/bashlib}
 
+# Set to level 0..9 (higher is more verbose) or specify function patterns as comma separated list
+DEBUG=${DEBUG-}
+
 ######################################################################################
 ### Colors used in Core
 ######################################################################################

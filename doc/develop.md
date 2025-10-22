@@ -44,6 +44,16 @@ debug "calling xxx" # will be printed in any debug mode
 debug 3 "curl...."  # will only show with `DEBUG=3` or higher
 ```
 
+Level 9 is highest and will show all.
+
+But you can also select only specific functions to debug by specifiying a function pattern or list so your possibilities to debug are:
+
+- `DEBUG=` to not debug
+- `DEBUG=1` for minimal debugging
+- `DEBUG=9` for maximal debugging
+- `DEBUG=curl` to only debug one function
+- `DEBUG=curl,remote` for multiple functions
+
 ### Manual Debugger
 
 If you could not find the Problem in `DEBUG` mode, you can load the bash-lib directly into shell, but unset the exit on error, because it may close the shell:

@@ -46,6 +46,7 @@ The core configuration which is needed for the core functions.
 | Variable/Function | Description |
 | --- | --- |
 | ``$BASHLIB_HOME`` | Set in the environment to where the BASHLIB is installed |
+| ``$DEBUG`` | Set to level 0..9 (higher is more verbose) or specify function patterns as comma separated list |
 | ``$CC_RESET`` | Reset all |
 | ``$CC_CRITICAL`` | Set color for critical/disaster massages used by [`die`](function/die.md) |
 | ``$CC_BLACK`` | Set text color to black |

@@ -12,16 +12,37 @@ teardown_file() {
 }
 
 # bats test_tags=debug
-@test "debug: do nothing in normal mode" {
-    run debug Test
+@test "debug: do nothing if no debugging" {
+    DEBUG= run debug Test
     assert_output ""
-    assert_failure
+    assert_success
     echo $output # use --show-output-of-passing-tests to see it
 }
 # bats test_tags=debug
-@test "debug: output in debug mode" {
+@test "debug: show level 1" {
     DEBUG=1 run debug Test
-    assert_output Test
+    assert [ "$(uncolorize "$output")" = "> run                  Test" ]
+    assert_success
+    echo $output # use --show-output-of-passing-tests to see it
+}
+# bats test_tags=debug
+@test "debug: do not show level 2" {
+    DEBUG=1 run debug 2 Test
+    assert_output ""
+    assert_success
+    echo $output # use --show-output-of-passing-tests to see it
+}
+# bats test_tags=debug
+@test "debug: show func run" {
+    DEBUG=run run debug Test
+    assert [ "$(uncolorize "$output")" = "> run                  Test" ]
+    assert_success
+    echo $output # use --show-output-of-passing-tests to see it
+}
+# bats test_tags=debug
+@test "debug: do not show func test" {
+    DEBUG=test run debug Test
+    assert_output ""
     assert_success
     echo $output # use --show-output-of-passing-tests to see it
 }
