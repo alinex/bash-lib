@@ -63,10 +63,9 @@ Sometimes it is also a good idea to add this separator for easier reading.
 Further there are additional alternative Styles supported.
 
 - `-fdata` - short option with argument `data`
-- `-f=data` - the same but better to read
 - `--file=data` - long option with argument `data`
 
-> The first is not so easy to read but the latter both are perfect to better show that the argument belongs to the option. So for readiness use them.
+> The first is not so easy to read but the second is  perfect to better show that the argument belongs to the option. So for readiness use it.
 
 ### Combined Short Options
 
@@ -74,6 +73,5 @@ And at last multiple short options may be combined together:
 
 - `-vcd` is the same as `-v -c- d`
 - `-vfdata` is the same as `-v -f data`
-- `-vf=data` is the same as `-v -f data`
 
 But you can only have one option with argument at last, not multiple in one combination!
