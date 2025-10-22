@@ -54,10 +54,10 @@ function retry {
         wait=$((2 ** count))
         count=$((count + 1))
         if ((count < retries)); then
-            echo "Try $count/$retries exited $exit, retrying in $wait seconds..." >&2
+            debug "Try $count/$retries exited $exit, retrying in $wait seconds..."
             sleep "$wait"
         else
-            echo "Try $count/$retries exited $exit, no more retries left." >&2
+            debug "Try $count/$retries exited $exit, no more retries left."
             return "$exit"
         fi
     done
