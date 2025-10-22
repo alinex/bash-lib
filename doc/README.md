@@ -309,6 +309,7 @@ Module with remote calling/execution helpers.
 | [`boot_wait`](function/boot_wait.md) | Wait till reboot is finished |
 | [`curl`](function/curl.md) | Curl with added error handling |
 | [`mongosh`](function/mongosh.md) | Run command on Mongo DB |
+| [`postgres`](function/postgres.md) | Run command on postgres |
 
 ### Software Module
 

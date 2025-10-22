@@ -39,6 +39,11 @@ $ DEBUG=1 my-script
 
 Also the `DEBUG` mode will enable additional output which is invoked using the [`debug`](function/debug.md) function.
 
+```bash
+debug "calling xxx" # will be printed in any debug mode
+debug 3 "curl...."  # will only show with `DEBUG=3` or higher
+```
+
 ### Manual Debugger
 
 If you could not find the Problem in `DEBUG` mode, you can load the bash-lib directly into shell, but unset the exit on error, because it may close the shell:

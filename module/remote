@@ -335,9 +335,15 @@ curl() {
 # Global:   $server
 #           $MONGO_ADMIN_USERPASS
 mongosh() {
+    # TODO: rename as mongodb
     num_parameters --min 2 --max 2 --die "Mongosh needs two parameters: Usage mongosh <database> <command>" "$@"
     local cluster
     # shellcheck disable=SC2001
     cluster="$(sed 's/^[^.]*\.//' <<<"$server")"
     command mongosh "mongodb://${MONGO_ADMIN_USERPASS["$cluster"]}@$server:27017/$1" --eval "$2"
+}
+
+# Run command on postgres
+postgres() {
+    echo "TODO"
 }

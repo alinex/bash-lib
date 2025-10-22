@@ -162,10 +162,17 @@ IFS=$' \t\n' read -r line func file <<<"$(caller 1)"
 die "DEPRECATED: ${FUNCNAME[0]} at $func in $file:$line please use [[ ... ]] instead"
 }
 debug(){
-if [ -n "$DEBUG" ];then
-local text
+local level=1
+if [[ $1 =~ ^-?[0-9]+$ ]];then
+level="$1"
+shift
+fi
+if [ -n "$DEBUG" ]&&((level<=DEBUG));then
+local text func
 text="$(input "$@")"
-test -z "$text"||echo "$CC_BLACK$text$CC_RESET" >&2
+test -n "$text"||return 0
+IFS=$' \t\n' read -r _ func _ <<<"$(caller 1)"
+printf "$CC_BLACK%-20s %s$CC_RESET\n" "$func" "$text"
 fi
 }
 debug "Running in DEBUG=${DEBUG-} mode!"
