@@ -26,9 +26,9 @@ debug() {
         level="$1"
         shift
     fi
-    IFS=$' \t\n' read -r _ pfunc _ <<<"$(caller 2)"
-    IFS=$' \t\n' read -r _ func _ <<<"$(caller 1)"
-    [ -z "$pfunc" ] || func="$pfunc/$func"
+    IFS=$' \t\n' read -r _ pfunc _ <<<"$(caller 1)"
+    IFS=$' \t\n' read -r _ func _ <<<"$(caller 0)"
+    [ -z "$pfunc" ] || [ "$pfunc" = "$func" ] || func="$pfunc/$func"
     # collect text
     local text
     text="$(input "$@")"
@@ -44,7 +44,7 @@ debug() {
     fi
     # print each line separately
     while IFS= read -r line; do
-        printf "$CC_BLACK> %-20s %s$CC_RESET\n" "$func" "$line"
+        printf "$CC_BLACK> %-20s %s$CC_RESET\n" "$func" "$line" >&2
     done <<<"$text"
 }
 debug "Running in DEBUG=${DEBUG-} mode!"
@@ -154,13 +154,14 @@ mktemp() {
             result="$path/$(basename "$0")_$1$RANDOM$ext"
         done
     fi
+    [ ! -e "$result" ] || return 0
     if [ -n "$dir" ]; then
         mkdir -p "$result"
     else
         touch "$result"
     fi
     echo "$result"
-    debug "$result"
+    debug "File: $result"
     [ -z "$ttl" ] || (
         _rmtemp "$ttl" "$result" >/dev/null 2>&1 &
         disown
@@ -168,6 +169,7 @@ mktemp() {
 }
 _rmtemp() {
     local wait="$1" file="$2"
+    debug "Remove $file in ${wait}s"
     while [ -e "$result" ] && ((wait > 0)); do
         sleep 1
         debug "$wait"
