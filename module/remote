@@ -126,6 +126,7 @@ remote_console() {
     local ssh="${slogin:-operator}@${server}"
     ssh "$ssh" '(nohup touch .hushlogin && sleep 1 && rm .hushlogin) >/dev/null 2>&1 </dev/null &' # no banner
     # shellcheck disable=SC2248
+    # shellcheck disable=SC2029
     ssh $opt "$ssh" </dev/tty || rc=$?
     # shellcheck disable=SC2248
     return $rc

@@ -204,7 +204,7 @@ Using the Grafana/Prometheus APIs to get Monitoring information.
 | [`scrape`](function/scrape.md) | Scrape prometheus exporter url now |
 | [`alerts`](function/alerts.md) | Get grafana alerts |
 | [`prometheus`](function/prometheus.md) | Prom ql ausführen |
-| [`prometheus_scrape`](function/prometheus_scrape.md) | Change scrape interval to scrape now and set back |
+| [`prometheus_scrape_now`](function/prometheus_scrape_now.md) | Change scrape interval to scrape now and set back |
 
 ### Os Module
 

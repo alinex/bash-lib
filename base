@@ -168,14 +168,17 @@ if [[ $1 =~ ^-?[0-9]+$ ]];then
 level="$1"
 shift
 fi
+IFS=$' \t\n' read -r _ pfunc _ <<<"$(caller 2)"
 IFS=$' \t\n' read -r _ func _ <<<"$(caller 1)"
+[ -z "$pfunc" ]||func="$pfunc/$func"
 local text
 text="$(input "$@")"
 test -n "$text"||return 0
+[[ -n $DEBUG ]]||return 0
 if [[ $DEBUG =~ ^-?[0-9]+$ ]];then
 ((level<=DEBUG))||return 0
 else
-[[ $func =~ ${input//, /|} ]]||return 0
+[[ $func =~ ${DEBUG//, /|} ]]||return 0
 fi
 while IFS= read -r line;do
 printf "$CC_BLACK> %-20s %s$CC_RESET\n" "$func" "$line"
@@ -186,6 +189,7 @@ die(){
 echo -e "$CC_CRITICAL$(input "$@")$CC_RESET" >&2
 exit 1
 }
+[ -n "${BASH_VERSION:-}" ]||die "No bash CLI! This can only be run under bash"
 trap_add(){
 local new="$1"
 local sig="$2"

@@ -46,7 +46,7 @@ debug 3 "curl...."  # will only show with `DEBUG=3` or higher
 
 Level 9 is highest and will show all.
 
-But you can also select only specific functions to debug by specifiying a function pattern or list so your possibilities to debug are:
+But you can also select only specific functions to debug by specifying a function pattern or list so your possibilities to debug are:
 
 - `DEBUG=` to not debug
 - `DEBUG=1` for minimal debugging

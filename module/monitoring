@@ -192,8 +192,8 @@ prometheus() {
 }
 
 # Change scrape interval to scrape now and set back
-# Usage:    prometheus_scrape <job> [<timeout>]
-prometheus_scrape() {
+# Usage:    prometheus_scrape_now <job> [<timeout>]
+prometheus_scrape_now() {
     install yq
     local job=$1
     local -i seconds=${2:-60}
