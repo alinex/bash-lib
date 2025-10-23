@@ -100,17 +100,16 @@ As there are some **problems using bats with assoziative arrays and handling of 
 
 ### Style Guide
 
-- Variables intended for global use are in UPPER-CASE letters.
-- Internal functions or variables start with an `_` to indicate not to use it in the script.
-- Declare function variables as local.
-- Comment usage of each function in comments before code.
-- Test code below code to be enabled (see below).
-- Use named arguments if there are more than a few.
+- Variables intended for global use are in UPPER-CASE letters. Often also used to externally set them as environment.
+- Only internal functions or variables start with an `_` to indicate not to use it in the script.
+- Function variables should be declared as local.
+- Use options if there are more than a few arguments. The options should be in long form with an additional `=` sign for readability.
 - Use short names for functions but don't overwrite system commands if not intended.
-- Each outside usable function and variable should have it's documentation just before the code.
 - Each module contains a description as first comment line.
+- Full documentation using comments directly before the function or variable.
 - Try to use simple bash tools instead of sed as often as possible to get better performance.
-- The bash-lib itself is seldom used within itself.
+- The bash-lib itself is seldom used within itself to make the internal dependency level low.
+- Make all output translationable but not the debug messages.
 
 ### Best Practice
 
