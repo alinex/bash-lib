@@ -166,6 +166,10 @@ mattermost_post_ids=""
 # Usage:    mattermost <channel-name> <text> [<attachments>]
 # Stdout:   <postid list>
 mattermost() {
+    if [ -z "$MATTERMOST_API" ] || [ -z "$MATTERMOST_TOKEN" ]; then
+        debug "Disabled because MATTERMOST_API and MATTERMOST_TOKEN are not both set"
+        return 0
+    fi
     install jq
     local channels line main links link mainid postid result
     channels="$(_mattermost_find_channels "$1")" || exit 1
@@ -205,6 +209,10 @@ mattermost() {
 # Stdout:   <json> for this attachment
 # Find free linkable icons under https://icons8.de/icons/all
 mattermost_attachment() {
+    if [ -z "$MATTERMOST_API" ] || [ -z "$MATTERMOST_TOKEN" ]; then
+        debug "Disabled because MATTERMOST_API and MATTERMOST_TOKEN are not both set"
+        return 0
+    fi
     install jq
     local json="{}"
     local fields
@@ -288,6 +296,10 @@ mattermost_attachment() {
 # Usage:    mattermost_rteaction <emoji>
 # Options:  -l, --links     # also post this to the links
 mattermost_reaction() {
+    if [ -z "$MATTERMOST_API" ] || [ -z "$MATTERMOST_TOKEN" ]; then
+        debug "Disabled because MATTERMOST_API and MATTERMOST_TOKEN are not both set"
+        return 0
+    fi
     # parameter parsing
     local post_links emoji line main links link channel post
     eval set -- "$(option_parse $'l links -' "$@")"
@@ -327,6 +339,10 @@ mattermost_reaction() {
 # Add response to mattermost posting
 # Usage:    mattermost_response <text> [<attachments>]
 mattermost_repost() {
+    if [ -z "$MATTERMOST_API" ] || [ -z "$MATTERMOST_TOKEN" ]; then
+        debug "Disabled because MATTERMOST_API and MATTERMOST_TOKEN are not both set"
+        return 0
+    fi
     local line main channel post
     # for lines in channels
     while read -r line; do

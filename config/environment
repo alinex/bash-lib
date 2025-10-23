@@ -13,30 +13,60 @@ MOUNT_COLOR_LIMIT=(
 )
 
 ######################################################################################
-### Remote API
+### Mattermost
 ######################################################################################
 
-# That are only the APIs, the tokens has to be defined in the environment, typically in .bashrc
-
-# Mattermost API url
+# Mattermost API URL used together with $MATTERMOST_TOKEN and disables mattermost functions if not set
 MATTERMOST_API=
+# Mattermost API Token used in @mattermost @mattermost_repost @mattermost_reaction
+MATTERMOST_TOKEN=
+
+# Array: Channel per pattern (team regex channel) used in @mattermost ("-"" = no selection for team)
+MATTERMOST_CHANNEL_PATTERN=(
+    MyTeam ".*" "Town Square"
+)
+# Array: Link channel per pattern (team regex channel) used in @mattermost ("-"" = no selection for team)
+MATTERMOST_LINK_PATTERN=()
+
+######################################################################################
+### Monitoring
+######################################################################################
+
 # Grafana API url
 GRAFANA_API=
-# Atlassian confluence API url
-CONFLUENCE_API=
-# Atlassian jira API url
-JIRA_API=
 # Prometheus API urls
 PROMETHEUS_API=
 # Prometheus host names
 PROMETHEUS=
+# PowerDNS API url (only set if used)
+POWERDNS_API=
+GRAFANA_TOKEN=
+
+######################################################################################
+### Atlassian
+######################################################################################
+
+# Atlassian confluence API url
+CONFLUENCE_API=
+# Atlassian jira API url
+JIRA_API=
 
 # Atlassian confluence page id for outage information
 CONFLUENCE_OUTAGE=
 
-# Array: Channel per pattern (team regex channel) used in @mattermost, @mattermost_repost ("-"" = no selection for team)
-MATTERMOST_CHANNEL_PATTERN=(
-    MyTeam ".*" "Town Square"
-)
-# Array: Link channel per pattern (team regex channel) used in @mattermost, @mattermost_repost ("-"" = no selection for team)
-MATTERMOST_LINK_PATTERN=()
+######################################################################################
+### Remote
+######################################################################################
+
+ABUSEIPDB_TOKEN=
+NETLAS_TOKEN=
+ATLASSIAN_USER=
+ATLASSIAN_TOKEN=
+POWERDNS_TOKEN=
+declare -A MONGO_ADMIN_USERPASS=()
+
+######################################################################################
+### divibib
+######################################################################################
+
+export MIDDLEWARE_SWAGGER_PASSWORD=
