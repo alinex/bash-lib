@@ -2,8 +2,9 @@
 
 ## Create an attachment json to be used in post
 
-Stdout:   `<json>` for this attachment
 Find free linkable icons under https://icons8.de/icons/all
+Stdout:   `<json>` for this attachment
+Returns:  0 without action if no `$MATTERMOST_API` + `$MATTERMOST_TOKEN`
 
 
 ### Usage
@@ -29,3 +30,7 @@ mattermost_post `$channelid` "" "$(mattermost_attachment --color ...)"
 --footer <string>   # footer
 --logo <url>        # footer image
 ```
+
+### Globals
+
+- `$MATTERMOST_API` + `$MATTERMOST_TOKEN` to access API

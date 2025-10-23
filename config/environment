@@ -63,9 +63,13 @@ JIRA_API=
 # Hash: Mongo Admin User Logins <host> = <username>:<password>
 declare -A MONGO_ADMIN_USERPASS=()
 
-# PowerDNS API url (only set if used)
+# PowerDNS API URL used together with $POWERDNS_TOKEN and silently disables powerdns function if not set
 POWERDNS_API=
+# PowerDNS API Token used together with $POWERDNS_API in dns function
 POWERDNS_TOKEN=
+
+# Base URL for Portal to Provider Plusserver
+PLUSSERVER_PORTAL=
 
 ABUSEIPDB_TOKEN=
 NETLAS_TOKEN=

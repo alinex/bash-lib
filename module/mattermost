@@ -164,7 +164,9 @@ mattermost_post_ids=""
 
 # Send a message to Mattermost
 # Usage:    mattermost <channel-name> <text> [<attachments>]
+# Globals:  $MATTERMOST_API + $MATTERMOST_TOKEN to access API
 # Stdout:   <postid list>
+# Returns:  0 without action if no $MATTERMOST_API + $MATTERMOST_TOKEN
 mattermost() {
     if [ -z "$MATTERMOST_API" ] || [ -z "$MATTERMOST_TOKEN" ]; then
         debug "Disabled because MATTERMOST_API and MATTERMOST_TOKEN are not both set"
@@ -192,8 +194,10 @@ mattermost() {
 }
 
 # Create an attachment json to be used in post
+# Find free linkable icons under https://icons8.de/icons/all
 # Usage:    mattermost_attachment
 #           mattermost_post $channelid "" "$(mattermost_attachment --color ...)"
+# Globals:  $MATTERMOST_API + $MATTERMOST_TOKEN to access API
 # Options:  --color <hexcode>   # rgb color or names: critical, error, warning, ok, info, default
 #           --text <md>         # text content
 #           --author <name>     # author name
@@ -207,7 +211,7 @@ mattermost() {
 #           --footer <string>   # footer
 #           --logo <url>        # footer image
 # Stdout:   <json> for this attachment
-# Find free linkable icons under https://icons8.de/icons/all
+# Returns:  0 without action if no $MATTERMOST_API + $MATTERMOST_TOKEN
 mattermost_attachment() {
     if [ -z "$MATTERMOST_API" ] || [ -z "$MATTERMOST_TOKEN" ]; then
         debug "Disabled because MATTERMOST_API and MATTERMOST_TOKEN are not both set"
@@ -293,8 +297,11 @@ mattermost_attachment() {
 }
 
 # Add reaction to existing post
+# This can only be called if a @mattermost call was used previously.
 # Usage:    mattermost_rteaction <emoji>
+# Globals:  $MATTERMOST_API + $MATTERMOST_TOKEN to access API
 # Options:  -l, --links     # also post this to the links
+# Returns:  0 without action if no $MATTERMOST_API + $MATTERMOST_TOKEN
 mattermost_reaction() {
     if [ -z "$MATTERMOST_API" ] || [ -z "$MATTERMOST_TOKEN" ]; then
         debug "Disabled because MATTERMOST_API and MATTERMOST_TOKEN are not both set"
@@ -337,7 +344,10 @@ mattermost_reaction() {
 }
 
 # Add response to mattermost posting
+# This can only be called if a @mattermost call was used previously.
 # Usage:    mattermost_response <text> [<attachments>]
+# Globals:  $MATTERMOST_API + $MATTERMOST_TOKEN to access API
+# Returns:  0 without action if no $MATTERMOST_API + $MATTERMOST_TOKEN
 mattermost_repost() {
     if [ -z "$MATTERMOST_API" ] || [ -z "$MATTERMOST_TOKEN" ]; then
         debug "Disabled because MATTERMOST_API and MATTERMOST_TOKEN are not both set"

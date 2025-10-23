@@ -16,9 +16,13 @@ declare -F "curl" >/dev/null || source "$BASHLIB_HOME"/module/remote
 ######################################################################################
 
 # Get exporter list
+# The result can be filtered by additional argument specification.
 # Usage:    exporter [<field>=<value>]...
-# Stdout:   <url>\t<job>\t<label-values>
+# Globals:  $PROMETHEUS_HOST + $PROMETHEUS_API
+# Stdout:   Tab separated list without header:
+#           <url>   <job>   <label-values>
 #           ...
+# Return:   0 without output if no $PROMETHEUS_HOST + $PROMETHEUS_API
 exporter() {
     if [ -z "$PROMETHEUS_HOST" ] || [ -z "$PROMETHEUS_API" ]; then
         debug "Disabled because PROMETHEUS_HOST and PROMETHEUS_API are not both set"
@@ -67,8 +71,10 @@ exporter() {
 }
 
 # Scrape prometheus exporter url now
+# The metrics can be filtered by <pattern> argument.
 # Usage:    scrape <url> <pattern>
-# Stdout:   <metric>\t[<value>=<text>],...\t<value>
+# Stdout:   Tab separated list:
+#           <metric>    [<value>=<text>],...    <value>
 #           ...
 scrape() {
     num_parameters "$@" --min 1 --max 2 --die "Wrong number of parameters for scrape!"
@@ -81,18 +87,27 @@ scrape() {
 }
 
 # Get grafana alerts
-# Usage:    alerts [<format>]                       # json, console, mattermost
+# The list can be filtered by options and a specific output format can be selected.
+# Usage:    alerts [<format>]                       # tsv, json, console, mattermost
 #           alerts -i "^$server" console || echo "" # will print the alerts with an empty line if there are some
 # Options:  -a, --alertname <regexp>                # select alert name
 #           -n, --net <name>                        # select network name
 #           -i, --instance <regexp>                 # select only matching instances
 #           -s, --summary <regexp>                  # select by summary text
 #           -q, --quiet                             # return only status code
-# Stdout:   <header-line>
-#           <severity>\t<network>\t<instance>\t<decription>\t<time>
+# Stdout:   format=json: directly like in the Grafana API
+#
+#           format=mattermost - json in the format of mattermost attachements
+#
+#           format=tsv - Tab separated table:
+#           Severity    Network     Instance    Summary         Start
+#           <severity>  <network>   <instance>  <decription>    <time>
 #           ...
-# Return:   0 := no alerts
-#           0 := at least one alert
+#
+#           format=console - like tsv but colorized and fixed column width instead of tabs
+# Return:   0 - no alerts
+#           <num> - at least one alert
+#           0 - without output if no $GRAFANA_API + $GRAFANA_TOKEN
 alerts() {
     if [ -z "$GRAFANA_API" ] || [ -z "$GRAFANA_TOKEN" ]; then
         debug "Disabled because GRAFANA_API and GRAFANA_TOKEN are not both set"
@@ -127,7 +142,7 @@ alerts() {
             shift
             break
             ;;
-        *) die "Unerwartete option in: $1" ;;
+        *) die "$(gettext "Unrecognized option in"): $1" ;;
         esac
     done
     # processing
@@ -163,7 +178,8 @@ alerts() {
             }' <<<"$list" | jq -s .)"
         ;;
     *)
-        list=$'Severity\tNetz\tInstanz\tZusammenfassung\tStart          _\n'"$(jq -r '[.labels.severity, .labels.net, .labels.instance, .annotations.summary, (.startsAt| split(".")[0]| strptime("%Y-%m-%dT%H:%M:%S")| strftime("%Y-%m-%d %H:%M:%S"))] | @tsv' <<<"$list")"
+        header="$(echo -e "$(gettext "Severity\tNetwork\tInstance\tSummary\tStart")")"
+        list="$header"$'\n'"$(jq -r '[.labels.severity, .labels.net, .labels.instance, .annotations.summary, (.startsAt| split(".")[0]| strptime("%Y-%m-%dT%H:%M:%S")| strftime("%Y-%m-%d %H:%M:%S"))] | @tsv' <<<"$list")"
         ;;
     esac
     # final format
@@ -190,6 +206,8 @@ alerts() {
 
 # Prom ql ausführen
 # Usage:    prometheus <prom-ql>
+# Globals:  $PROMETHEUS_API to query
+# Returns:  0 - without output if no $PROMETHEUS_API
 prometheus() {
     if [ -z "$PROMETHEUS_API" ]; then
         debug "Disabled because PROMETHEUS_API is not set"
@@ -205,6 +223,8 @@ prometheus() {
 
 # Change scrape interval to scrape now and set back
 # Usage:    prometheus_scrape_now <job> [<timeout>]
+# Globals:  $PROMETHEUS_HOST to change config temporarily
+# Returns:  0 - without output if no $PROMETHEUS_HOST
 prometheus_scrape_now() {
     if [ -z "$PROMETHEUS_HOST" ]; then
         debug "Disabled because PROMETHEUS_HOST is not set"

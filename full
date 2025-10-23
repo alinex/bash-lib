@@ -902,7 +902,7 @@ shift
 --)shift
 break
 ;;
-*)die "Unerwartete option in: $1"
+*)die "$(gettext "Unrecognized option in"): $1"
 esac
 done
 install jq mlr
@@ -931,7 +931,8 @@ mattermost)list="$(jq -s '.[] | {
                 )
             }' <<<"$list"|jq -s .)"
 ;;
-*)list=$'Severity\tNetz\tInstanz\tZusammenfassung\tStart          _\n'"$(jq -r '[.labels.severity, .labels.net, .labels.instance, .annotations.summary, (.startsAt| split(".")[0]| strptime("%Y-%m-%dT%H:%M:%S")| strftime("%Y-%m-%d %H:%M:%S"))] | @tsv' <<<"$list")"
+*)header="$(echo -e "$(gettext "Severity\tNetwork\tInstance\tSummary\tStart")")"
+list="$header"$'\n'"$(jq -r '[.labels.severity, .labels.net, .labels.instance, .annotations.summary, (.startsAt| split(".")[0]| strptime("%Y-%m-%dT%H:%M:%S")| strftime("%Y-%m-%d %H:%M:%S"))] | @tsv' <<<"$list")"
 esac
 case $format in
 console)echo -e "$list"|tsv2table|while
@@ -1685,6 +1686,27 @@ command mongosh "mongodb://${MONGO_ADMIN_USERPASS["$cluster"]}@$server:27017/$1"
 }
 postgres(){
 echo "TODO"
+}
+dns(){
+echo $'NAME\tTYPE\tCONTENT\tTTL'
+powerdns|tail -n +2||true
+plusserver_dns|tail -n +2||true
+}
+powerdns(){
+if [ -z "$POWERDNS_API" ]||[ -z "$POWERDNS_TOKEN" ];then
+debug "Disabled because POWERDNS_API and POWERDNS_TOKEN are not both set"
+return 0
+fi
+echo $'NAME\tTYPE\tCONTENT\tTTL'
+curl -s -H "X-API-Key:$POWERDNS_TOKEN" "$POWERDNS_API/servers/localhost/search-data?q=*&max=10000"|jq -r '.[] | select(.object_type == "record" and .disabled == false) | [(.name | sub("\\.$"; "")), .type, (.content | sub("\\.$"; "")), .ttl] | @tsv'
+}
+plusserver_dns(){
+if [ -z "$PLUSSERVER_PORTAL" ];then
+debug "Disabled because PLUSSERVER_PORTAL is not set"
+return 0
+fi
+echo $'NAME\tTYPE\tCONTENT\tTTL'
+debug "TODO: Not implemented, yet."
 }
 declare -A _software_install
 install(){

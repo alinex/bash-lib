@@ -2,13 +2,17 @@
 
 ## Get grafana alerts
 
-Stdout:   `<header-line>`
+The list can be filtered by options and a specific output format can be selected.
+Stdout:   format=json: directly like in the Grafana API
+#
+#
+#
 
 
 ### Usage
 
 ```bash
-alerts [<format>]                       # json, console, mattermost
+alerts [<format>]                       # tsv, json, console, mattermost
 alerts -i "^`$server`" console || echo "" # will print the alerts with an empty line if there are some
 ```
 
@@ -20,11 +24,16 @@ alerts -i "^`$server`" console || echo "" # will print the alerts with an empty 
 -i, --instance <regexp>                 # select only matching instances
 -s, --summary <regexp>                  # select by summary text
 -q, --quiet                             # return only status code
-<severity>	<network>	<instance>	<decription>	<time>
+format=mattermost - json in the format of mattermost attachements
+format=tsv - Tab separated table:
+Severity    Network     Instance    Summary         Start
+<severity>  <network>   <instance>  <decription>    <time>
 ...
+format=console - like tsv but colorized and fixed column width instead of tabs
 ```
 
 ### Return (exit code)
 
-- 0 := no alerts
-- 0 := at least one alert
+- 0 - no alerts
+- `<num>` - at least one alert
+- 0 - without output if no `$GRAFANA_API` + `$GRAFANA_TOKEN`

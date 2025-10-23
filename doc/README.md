@@ -33,6 +33,8 @@ The configuration module contains a lot of general configuration settings for th
 | ``$ATLASSIAN_TOKEN`` | Atlassian password for API access in confluence and jira |
 | ``$CONFLUENCE_API`` | Atlassian confluence API URL used together with `$ATLASSIAN_USER` and `$ATLASSIAN_TOKEN` and silently disables [`confluence`](functionconfluence.md) functions if not set |
 | ``$JIRA_API`` | Atlassian jira API URL used together with `$ATLASSIAN_USER` and `$ATLASSIAN_TOKEN` and silently disables [`jira`](functionjira.md) functions if not set |
+| ``$MONGO_ADMIN_USERPASS`` | Hash: Mongo Admin User Logins <host> = <username>:<password> |
+| ``$POWERDNS_API`` | PowerDNS API URL used together with `$POWERDNS_TOKEN` and silently disables powerdns function if not set |
 
 ## Core
 
@@ -317,6 +319,9 @@ Module with remote calling/execution helpers.
 | [`curl`](function/curl.md) | Curl with added error handling |
 | [`mongosh`](function/mongosh.md) | Run command on Mongo DB |
 | [`postgres`](function/postgres.md) | Run command on postgres |
+| [`dns`](function/dns.md) | Query all possible DNS servers to get a complete list of managed domain names |
+| [`powerdns`](function/powerdns.md) | Query PowerDNS to get a list of managed domain names |
+| [`plusserver_dns`](function/plusserver_dns.md) | Query Plusserver DNS to get a list of managed domain names |
 
 ### Software Module
 
