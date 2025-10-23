@@ -1,0 +1,17 @@
+# Last Changes
+
+As this is not driven by releases and therefore tags are not used it is an ongoing update so we will divide the changelog into months. If you need a special version instead of the newest one, please select it in git by date.
+
+## October 2025
+
+- Complete rework of the BashLib as BashLib V2 New Generation
+- modular concept integrated
+- simplified usage by only including one line
+- added an installation script callable directly from the git url
+- unit testing integrated
+- multilingual support with EN, DE at first
+- remote capabilities integrated: ssh, curl, prometheus, grafana, confluence, jira, mattermost
+- completely documented with [API](doc/README.md)
+- enhanced and easy to use [debug](doc/function/debug.md) possibilities
+
+What was before was BashLib V1 and as everything is new it doesn't matter any more.
