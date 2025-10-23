@@ -1171,6 +1171,48 @@ tsv2md(){
 install mlr
 input "$@"|uncolorize|mlr -i tsv -o md cat
 }
+_spinner_pid=""
+spinner_start(){
+local format="${1:-simple}"
+local spinner
+local size=1
+local chars=1
+local delay=${2:-0.2}
+case $format in
+arrows)spinner='→↑←↓';;
+vertical)spinner='▏▎▍▌▋▊▉█▉▊▋▌▍▎▏';;
+bar)spinner='▏ ▎ ▍ ▌ ▋ ▊ ▉ █ █▏█▎█▍█▌█▋█▊█▉███▉█▊█▋█▌█▍█▎█▏█ ▉ ▊ ▋ ▌ ▍ ▎ ▏ '&&chars=2&&size=2;;
+fade)spinner=' ░▒▓█▓▒░';;
+braile)spinner='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏';;
+roll)spinner='⠋⠙⠚⠞⠖⠦⠴⠲⠳⠓';;
+moon)spinner='🌑🌒🌓🌔🌕🌖🌗🌘'&&size=2;;
+clock)spinner='🕐🕑🕒🕓🕔🕕🕖🕗🕘🕙🕚🕛'&&size=2;;
+weather)spinner='🌤🌥🌦🌧🌨🌩🌪';;
+*)spinner='-\|/'
+esac
+local back=$((size+1))
+tput civis
+(while
+true
+do
+for ((i=0; i<${#spinner}; i+=chars));do
+printf " %s%s" "${spinner:i:chars}" "$(printf '\b%.0s' $(seq 1 $back))"
+sleep "$delay"
+done
+done) \
+&
+_spinner_pid=$!
+disown
+}
+spinner_stop(){
+if [[ -n $_spinner_pid ]];then
+kill "$_spinner_pid" >/dev/null 2>&1
+wait "$_spinner_pid" 2>/dev/null
+_spinner_pid=""
+printf "    \b\b\b\b"
+tput cnorm
+fi
+}
 sudo_allow(){
 ((EUID!=0))||return 0
 sudo -v 2>/dev/null||die "For this call root rights are needed! Please use another user or allow sudo for user $(whoami)."

@@ -160,3 +160,59 @@ tsv2md() {
     install mlr
     input "$@" | uncolorize | mlr -i tsv -o md cat
 }
+
+######################################################################################
+# Visual effects
+######################################################################################
+
+_spinner_pid=""
+
+# Function to start the spinner in the background stop it with @spinner_stop
+# Usage:    spinner_start <format> <time>
+#           # <format> arrows, vertical, bar, fade, braile, roll, moon, clock, weather (default spinner)
+#           # <time> 0.1 or more seconds (default 0.2)
+# Output:   | / - \
+spinner_start() {
+    local format="${1:-simple}"
+    local spinner
+    local size=1
+    local chars=1
+    local delay=${2:-0.2}
+    case $format in
+    arrows) spinner='→↑←↓' ;;
+    vertical) spinner='▏▎▍▌▋▊▉█▉▊▋▌▍▎▏' ;;
+    bar) spinner='▏ ▎ ▍ ▌ ▋ ▊ ▉ █ █▏█▎█▍█▌█▋█▊█▉███▉█▊█▋█▌█▍█▎█▏█ ▉ ▊ ▋ ▌ ▍ ▎ ▏ ' && chars=2 && size=2 ;;
+    fade) spinner=' ░▒▓█▓▒░' ;;
+    braile) spinner='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏' ;;
+    roll) spinner='⠋⠙⠚⠞⠖⠦⠴⠲⠳⠓' ;;
+    moon) spinner='🌑🌒🌓🌔🌕🌖🌗🌘' && size=2 ;;
+    clock) spinner='🕐🕑🕒🕓🕔🕕🕖🕗🕘🕙🕚🕛' && size=2 ;;
+    weather) spinner='🌤🌥🌦🌧🌨🌩🌪' ;;
+    *) spinner='-\|/' ;;
+    esac
+    local back=$((size + 1))
+    # Spinner function running in background loop
+    tput civis
+    (
+        while true; do
+            for ((i = 0; i < ${#spinner}; i += chars)); do
+                printf " %s%s" "${spinner:i:$chars}" "$(printf '\b%.0s' $(seq 1 $back))"
+                sleep "$delay"
+            done
+        done
+    ) &
+    _spinner_pid=$!
+    disown
+}
+
+# Function to stop the spinner started using @spinner_start
+# Usage:    spinner_stop
+spinner_stop() {
+    if [[ -n $_spinner_pid ]]; then
+        kill "$_spinner_pid" >/dev/null 2>&1
+        wait "$_spinner_pid" 2>/dev/null
+        _spinner_pid=""
+        printf "    \b\b\b\b" # Clear spinner character
+        tput cnorm
+    fi
+}
