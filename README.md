@@ -45,20 +45,19 @@ The file structure will look like:
 
 ```bash
 bashlib/
-    # combination to load precompressed or dynamically
-    core            # only core functionality (minified)
+    # load minified version or load all single files
+    base            # only the base/core functionality (minified)
     full            # file with full functionality (minified)
     loader          # same as full but including all source files
-    base            # only the base/core functionality (minified)
-    configs         # load all configurations
     # module directories
-    core/           # core modules which always be needed
-    config/         # individual configuration (dynamically loaded in full)
+    core/           # core modules which always is needed (loaded by all of the above)
+    config/         # individual configuration (loaded by all of the above)
     module/         # additional modules but included in full
-    extra/          # special modules which always  eb loaded individually
+    extra/          # special modules which always has to be loaded individually
     # internal data
+    configs         # load all configurations (called from minified or loader)
     locale/         # translations
-    # tools to manage and develop bashlib
+    # tools to manage and develop bashlib (for developer)
     install         # setup bashlib on this host
     update          # script to regenerate full file and docs after update 
     test            # run all unit tests

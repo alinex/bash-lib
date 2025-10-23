@@ -27,6 +27,8 @@ This document outlines the process and best practices for contributing to the pr
 
 ## Users
 
+We will keep this as simple as possible for you. So we allow to contribute in this segment completely without git knowledge. The only thing you need is to register for free on GitLab to make the issues.
+
 ### 🐞 Reporting Bugs
 
 Found a bug?  
@@ -102,6 +104,10 @@ If you can help here, please do so and help us with:
 You can send in your changes in an [Issue](https://gitlab.com/alinex/bash-lib/-/issues) containing the link there to put it.
 
 ## Developers
+
+To help you getting started and keeping you in track for a fluent work we have collected some useful information.
+
+After contributing in a bigger part we will also consider to make you part of the team and give you write access to this project and mentioning you as co developer if you want.
 
 ### 📦 Fork, Clone and Merge Requests
 
