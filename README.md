@@ -24,6 +24,20 @@ The downside may be:
 
 If you already use it jump directly to the [module description](https://gitlab.com/alinex/bash-lib/-/blob/master/doc/README.md).
 
+## Table of Contents
+
+- [BASH-LIB Generation 2](#bash-lib-generation-2)
+  - [Table of Contents](#table-of-contents)
+  - [Architecture](#architecture)
+    - [Quality](#quality)
+    - [Version control](#version-control)
+  - [Installation](#installation)
+  - [Usage](#usage)
+  - [Configuration](#configuration)
+    - [Environment](#environment)
+  - [Latest Changes](#latest-changes)
+  - [Contributing](#contributing)
+
 ## Architecture
 
 It is a modular system with modules under: `core`, `config`, `module` and `extra`.
@@ -106,6 +120,8 @@ source $BASHLIB_HOME/configs        # load configuration
 
 For further assistance see the [Examples](./README.md#Examples) within the Modules API documentation.
 
+A [bash short reference](./bash-reference.md) is also available here.
+
 ## Configuration
 
 The configuration should be put under `config/` folder and will be loaded in alphabetically order in `full` or by using:
@@ -126,6 +142,13 @@ Ideally you will also switch to use the loader from your script if `DEBUG` is se
 test -z "${DEBUG-}" && source "$BASHLIB_HOME"/full || source "$BASHLIB_HOME"/loader
 ```
 
-## Development
+## Latest Changes
 
-If you plan to make patches or add new features please have a look at the [Developer Guide](./doc/develop.md).
+This will be shown in our [changelog](./CHANGELOG.md).
+
+## Contributing
+
+👋 Welcome, and thank you for your interest in contributing to **BashLib 2**!  
+We’re happy you’re here — whether you’re adding new ideas, make a translation, fixing bugs, improving scripts, or adding new utilities.
+
+Please have a look at the [contributing page](./CONTRIBUTING.md).

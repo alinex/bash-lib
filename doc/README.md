@@ -2,6 +2,36 @@
 
 This is a list of some examples and the reference documentation of all available modules.
 
+## Table of Contents
+
+- [BashLib API Documentation](#bashlib-api-documentation)
+  - [Table of Contents](#table-of-contents)
+  - [Examples](#examples)
+  - [Config](#config)
+    - [Environment Module](#environment-module)
+  - [Core](#core)
+    - [Arguments Module](#arguments-module)
+    - [Config Module](#config-module)
+    - [Date Module](#date-module)
+    - [Internal Module](#internal-module)
+    - [Misc Module](#misc-module)
+  - [Module](#module)
+    - [Array Module](#array-module)
+    - [Atlassian Module](#atlassian-module)
+    - [Color Module](#color-module)
+    - [File Module](#file-module)
+    - [Input Module](#input-module)
+    - [Mattermost Module](#mattermost-module)
+    - [Monitoring Module](#monitoring-module)
+    - [Os Module](#os-module)
+    - [Output Module](#output-module)
+    - [Process Module](#process-module)
+    - [Remote Module](#remote-module)
+    - [Software Module](#software-module)
+    - [Validator Module](#validator-module)
+  - [Extra](#extra)
+    - [Divibib Module](#divibib-module)
+
 ## Examples
 
 - [Base Script](./example/base_script.md)
