@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 BASHLIB_HOME="$(dirname "$(readlink -f "${BASH_SOURCE[0]:-$(pwd)/x}")")"
-LOCALES=de
+LOCALES="de en"
 
 echo -n "Update minimize bash-lib library... " >&2
 command -v shfmt >/dev/null || sudo apt install -y shfmt
@@ -30,7 +30,6 @@ echo
 echo -n "Update translations... "
 command -v xgettext &>/dev/null || sudo apt install gettext
 find core module extra -type f -not -name \*.\* -print0 | xargs -0 xgettext -L Shell -o locale/bashlib.pot
-#xgettext -L Shell -o locale/bashlib.pot _test
 sed -i 's/charset=CHARSET/charset=UTF-8/' locale/bashlib.pot
 for lang in $LOCALES; do
     mkdir -p locale/"$lang"/LC_MESSAGES
@@ -38,7 +37,7 @@ for lang in $LOCALES; do
         msgmerge --update locale/de/LC_MESSAGES/bashlib.po locale/bashlib.pot
     else
         cp locale/bashlib.pot locale/"$lang"/LC_MESSAGES/bashlib.po
-        sed "s/Language: \\n/Language: $lang\\n/" locale/LC_MESSAGES/"$lang"/bashlib.po
+        sed "s/Language: \\n/Language: $lang\\n/" locale/"$lang"/LC_MESSAGES/bashlib.po
     fi
     msgfmt locale/"$lang"/LC_MESSAGES/bashlib.po -o locale/"$lang"/LC_MESSAGES/bashlib.mo
 done
