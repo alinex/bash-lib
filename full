@@ -168,9 +168,9 @@ if [[ $1 =~ ^-?[0-9]+$ ]];then
 level="$1"
 shift
 fi
-IFS=$' \t\n' read -r _ pfunc _ <<<"$(caller 2)"
-IFS=$' \t\n' read -r _ func _ <<<"$(caller 1)"
-[ -z "$pfunc" ]||func="$pfunc/$func"
+IFS=$' \t\n' read -r _ pfunc _ <<<"$(caller 1)"
+IFS=$' \t\n' read -r _ func _ <<<"$(caller 0)"
+[ -z "$pfunc" ]||[ "$pfunc" = "$func" ]||func="$pfunc/$func"
 local text
 text="$(input "$@")"
 test -n "$text"||return 0
@@ -178,10 +178,10 @@ test -n "$text"||return 0
 if [[ $DEBUG =~ ^-?[0-9]+$ ]];then
 ((level<=DEBUG))||return 0
 else
-[[ $func =~ ${DEBUG//, /|} ]]||return 0
+[[ $func =~ .*(${DEBUG//, /|}) ]]||return 0
 fi
 while IFS= read -r line;do
-printf "$CC_BLACK> %-20s %s$CC_RESET\n" "$func" "$line"
+printf "$CC_BLACK> %-20s %s$CC_RESET\n" "$func" "$line" >&2
 done <<<"$text"
 }
 debug "Running in DEBUG=${DEBUG-} mode!"
@@ -245,18 +245,20 @@ while [ -e "$result" ];do
 result="$path/$(basename "$0")_$1$RANDOM$ext"
 done
 fi
+[ ! -e "$result" ]||return 0
 if [ -n "$dir" ];then
 mkdir -p "$result"
 else
 touch "$result"
 fi
 echo "$result"
-debug "$result"
+debug "File: $result"
 [ -z "$ttl" ]||(_rmtemp "$ttl" "$result" >/dev/null 2>&1&
 disown)
 }
 _rmtemp(){
 local wait="$1" file="$2"
+debug "Remove $file in ${wait}s"
 while [ -e "$result" ]&&((wait>0));do
 sleep 1
 debug "$wait"
@@ -679,6 +681,10 @@ shopt -s nocasematch
 }
 mattermost_post_ids=""
 mattermost(){
+if [ -z "$MATTERMOST_API" ]||[ -z "$MATTERMOST_TOKEN" ];then
+debug "Disabled because MATTERMOST_API and MATTERMOST_TOKEN are not both set"
+return 0
+fi
 install jq
 local channels line main links link mainid postid result
 channels="$(_mattermost_find_channels "$1")"||exit 1
@@ -699,6 +705,10 @@ done <<<"$channels"
 mattermost_post_ids="${result:2}"
 }
 mattermost_attachment(){
+if [ -z "$MATTERMOST_API" ]||[ -z "$MATTERMOST_TOKEN" ];then
+debug "Disabled because MATTERMOST_API and MATTERMOST_TOKEN are not both set"
+return 0
+fi
 install jq
 local json="{}"
 local fields
@@ -763,6 +773,10 @@ fi
 echo "$json"
 }
 mattermost_reaction(){
+if [ -z "$MATTERMOST_API" ]||[ -z "$MATTERMOST_TOKEN" ];then
+debug "Disabled because MATTERMOST_API and MATTERMOST_TOKEN are not both set"
+return 0
+fi
 local post_links emoji line main links link channel post
 eval set -- "$(option_parse $'l links -' "$@")"
 while true;do
@@ -795,6 +809,10 @@ fi
 done <<<"$mattermost_post_ids"
 }
 mattermost_repost(){
+if [ -z "$MATTERMOST_API" ]||[ -z "$MATTERMOST_TOKEN" ];then
+debug "Disabled because MATTERMOST_API and MATTERMOST_TOKEN are not both set"
+return 0
+fi
 local line main channel post
 while read -r line;do
 [ -n "$line" ]||continue
@@ -807,6 +825,10 @@ done <<<"$mattermost_post_ids"
 }
 declare -F "curl" >/dev/null||source "$BASHLIB_HOME"/module/remote
 exporter(){
+if [ -z "$PROMETHEUS_HOST" ]||[ -z "$PROMETHEUS_API" ];then
+debug "Disabled because PROMETHEUS_HOST and PROMETHEUS_API are not both set"
+return 0
+fi
 install jq yq
 local arg name value
 local filter=""
@@ -820,7 +842,7 @@ esac
 done
 local server api line
 local auth=""
-for server in $PROMETHEUS;do
+for server in $PROMETHEUS_HOST;do
 remote true 2>/dev/null||continue
 auth="$auth"$'\n'"$(remote cat /etc/prometheus/prometheus.yml|yq -r '.scrape_configs[] 
             | select(.basic_auth) 
@@ -854,6 +876,10 @@ echo "$metrics"|grep '{'|sed 's/,\?[{}] \?/\t/g'
 echo "$metrics"|grep -v '{'|sed 's/ /\t\t/g'
 }
 alerts(){
+if [ -z "$GRAFANA_API" ]||[ -z "$GRAFANA_TOKEN" ];then
+debug "Disabled because GRAFANA_API and GRAFANA_TOKEN are not both set"
+return 0
+fi
 local filter="" quiet
 eval set -- "$(option_parse $'a alertname +\ni instance +\nn net +\ns summary +\nq quiet -' "$@")"
 while true;do
@@ -925,15 +951,23 @@ esac
 return 1
 }
 prometheus(){
+if [ -z "$PROMETHEUS_API" ];then
+debug "Disabled because PROMETHEUS_API is not set"
+return 0
+fi
 local api
 api="${PROMETHEUS_API%% *}"
 curl "$api/query?query=$(echo "$1"|urlencode)"
 }
 prometheus_scrape_now(){
+if [ -z "$PROMETHEUS_HOST" ];then
+debug "Disabled because PROMETHEUS_HOST is not set"
+return 0
+fi
 install yq
 local job=$1
 local -i seconds=${2:-60}
-for server in $PROMETHEUS;do
+for server in $PROMETHEUS_HOST;do
 remote true 2>/dev/null||continue
 echo "Let $server scrape $job again, now."
 echo "yq '(.scrape_configs[] | select(.job_name == \"$job\")).scrape_interval = \"${seconds}s\" | (.scrape_configs[] | select(.job_name == \"$job\")).scrape_timeout = \"${seconds}s\"' </etc/prometheus/prometheus.yml | sponge /etc/prometheus/prometheus.yml"|remote
@@ -942,7 +976,7 @@ done
 echo "Wait $seconds seconds till scrape should be done..."
 sleep "$seconds"
 echo "Reset config back to default."
-for server in $PROMETHEUS;do
+for server in $PROMETHEUS_HOST;do
 remote true 2>/dev/null||continue
 remote /etc/prometheus/config-builder/update >/dev/null
 done

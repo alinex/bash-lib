@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-23 07:36+0200\n"
+"POT-Creation-Date: 2025-10-23 14:57+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -54,7 +54,7 @@ msgid "Using default"
 msgstr "Standardantwort genutzt"
 
 #: module/input:143 module/input:227 module/remote:120 module/remote:276
-#: module/mattermost:276 module/validator:36 module/software:91
+#: module/mattermost:284 module/validator:36 module/software:91
 msgid "Unrecognized option: $1"
 msgstr "Unbekannte Option: $1"
 

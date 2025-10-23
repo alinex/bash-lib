@@ -20,13 +20,19 @@ The configuration module contains a lot of general configuration settings for th
 
 | Variable/Function | Description |
 | --- | --- |
-| ``$MOUNT_COLOR_LIMIT`` | Array: Color limits per mount (regex critical error warn ok) used in [`remote_df`](function/remote_df.md) |
-| ``$MATTERMOST_API`` | Mattermost API url |
-| ``$GRAFANA_API`` | Grafana API url |
-| ``$CONFLUENCE_API`` | Atlassian confluence API url |
-| ``$JIRA_API`` | Atlassian jira API url |
-| ``$PROMETHEUS_API`` | Prometheus API urls |
-| ``$PROMETHEUS`` | Prometheus host names |
+| ``$MOUNT_COLOR_LIMIT`` | Array: Color limits per mount (regex critical error warn ok) used in [`remote_df`](functionremote_df.md) |
+| ``$MATTERMOST_API`` | Mattermost API URL used together with `$MATTERMOST_TOKEN` and silently disables mattermost functions if not set |
+| ``$MATTERMOST_TOKEN`` | Mattermost API Token used in [`mattermost`](functionmattermost.md) [`mattermost_repost`](functionmattermost_repost.md) [`mattermost_reaction`](functionmattermost_reaction.md) |
+| ``$MATTERMOST_CHANNEL_PATTERN`` | Array: Channel per pattern (team regex channel) used in [`mattermost`](functionmattermost.md) ("-"" = no selection for team) |
+| ``$MATTERMOST_LINK_PATTERN`` | Array: Link channel per pattern (team regex channel) used in [`mattermost`](functionmattermost.md) ("-"" = no selection for team) |
+| ``$GRAFANA_API`` | Grafana API URL used together with `$GRAFANA_TOKEN` and silently disables grafana functions if not set |
+| ``$GRAFANA_TOKEN`` | Grafana API Token used in [`alerts`](functionalerts.md) |
+| ``$PROMETHEUS_API`` | Prometheus API URLs as space separated list |
+| ``$PROMETHEUS`` | Prometheus host names as space separated list |
+| ``$ATLASSIAN_USER`` | Atlassian user for API access in confluence and jira |
+| ``$ATLASSIAN_TOKEN`` | Atlassian password for API access in confluence and jira |
+| ``$CONFLUENCE_API`` | Atlassian confluence API URL used together with `$ATLASSIAN_USER` and `$ATLASSIAN_TOKEN` and silently disables [`confluence`](functionconfluence.md) functions if not set |
+| ``$JIRA_API`` | Atlassian jira API URL used together with `$ATLASSIAN_USER` and `$ATLASSIAN_TOKEN` and silently disables [`jira`](functionjira.md) functions if not set |
 
 ## Core
 
@@ -48,7 +54,7 @@ The core configuration which is needed for the core functions.
 | ``$BASHLIB_HOME`` | Set in the environment to where the BASHLIB is installed |
 | ``$DEBUG`` | Set to level 0..9 (higher is more verbose) or specify function patterns as comma separated list |
 | ``$CC_RESET`` | Reset all |
-| ``$CC_CRITICAL`` | Set color for critical/disaster massages used by [`die`](function/die.md) |
+| ``$CC_CRITICAL`` | Set color for critical/disaster massages used by [`die`](functiondie.md) |
 | ``$CC_BLACK`` | Set text color to black |
 
 ### Date Module

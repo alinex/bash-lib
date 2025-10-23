@@ -20,6 +20,10 @@ declare -F "curl" >/dev/null || source "$BASHLIB_HOME"/module/remote
 # Stdout:   <url>\t<job>\t<label-values>
 #           ...
 exporter() {
+    if [ -z "$PROMETHEUS_HOST" ] || [ -z "$PROMETHEUS_API" ]; then
+        debug "Disabled because PROMETHEUS_HOST and PROMETHEUS_API are not both set"
+        return 0
+    fi
     install jq yq
     local arg name value
     local filter=""
@@ -33,7 +37,7 @@ exporter() {
     done
     local server api line
     local auth=""
-    for server in $PROMETHEUS; do
+    for server in $PROMETHEUS_HOST; do
         remote true 2>/dev/null || continue
         # shellcheck disable=SC2016
         auth="$auth"$'\n'"$(remote cat /etc/prometheus/prometheus.yml |
@@ -90,6 +94,10 @@ scrape() {
 # Return:   0 := no alerts
 #           0 := at least one alert
 alerts() {
+    if [ -z "$GRAFANA_API" ] || [ -z "$GRAFANA_TOKEN" ]; then
+        debug "Disabled because GRAFANA_API and GRAFANA_TOKEN are not both set"
+        return 0
+    fi
     # parameter parsing
     local filter="" quiet
     eval set -- "$(option_parse $'a alertname +\ni instance +\nn net +\ns summary +\nq quiet -' "$@")"
@@ -183,6 +191,10 @@ alerts() {
 # Prom ql ausführen
 # Usage:    prometheus <prom-ql>
 prometheus() {
+    if [ -z "$PROMETHEUS_API" ]; then
+        debug "Disabled because PROMETHEUS_API is not set"
+        return 0
+    fi
     local api
     api="${PROMETHEUS_API%% *}"
     curl "$api/query?query=$(echo "$1" | urlencode)"
@@ -194,10 +206,14 @@ prometheus() {
 # Change scrape interval to scrape now and set back
 # Usage:    prometheus_scrape_now <job> [<timeout>]
 prometheus_scrape_now() {
+    if [ -z "$PROMETHEUS_HOST" ]; then
+        debug "Disabled because PROMETHEUS_HOST is not set"
+        return 0
+    fi
     install yq
     local job=$1
     local -i seconds=${2:-60}
-    for server in $PROMETHEUS; do
+    for server in $PROMETHEUS_HOST; do
         remote true 2>/dev/null || continue # only work on reachable server
         echo "Let $server scrape $job again, now."
         echo "yq '(.scrape_configs[] | select(.job_name == \"$job\")).scrape_interval = \"${seconds}s\" | (.scrape_configs[] | select(.job_name == \"$job\")).scrape_timeout = \"${seconds}s\"' </etc/prometheus/prometheus.yml | sponge /etc/prometheus/prometheus.yml" | remote
@@ -206,7 +222,7 @@ prometheus_scrape_now() {
     echo "Wait $seconds seconds till scrape should be done..."
     sleep "$seconds"
     echo "Reset config back to default."
-    for server in $PROMETHEUS; do
+    for server in $PROMETHEUS_HOST; do
         remote true 2>/dev/null || continue # only work on reachable server
         remote /etc/prometheus/config-builder/update >/dev/null
     done

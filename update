@@ -90,7 +90,8 @@ for folder in config core module extra; do
                         }
                     }
                 }' "$file" |
-                sed -E 's#(^|[^[:alnum:]_.-])@([[:alnum:]_]+)#\1[`\2`](function/\2.md)#g' |
+                sed -E 's#(^|[^[:alnum:]_.-])@([[:alnum:]_]+)#\1[`\2`](function\2.md)#g' |
+                sed -E 's#(^|[^[:alnum:]_.-])&([[:alnum:]_]+)#\1[`\2`](example/\2.md)#g' |
                 sed -E 's#(^|[^[:alnum:]_.-])(\$[[:alnum:]_]+)#\1`\2`#g' \
                     >>"$BASHLIB_HOME"/doc/README.md
             if [ -z "$function_lines" ]; then
