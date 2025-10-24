@@ -184,7 +184,7 @@ _spinner_pid=""
 #           # <format> see above
 #           # <time> 0.1 or more seconds (default 0.2)
 # TTY:      <symbol> with back-space so that cursor is always before it
-# Returns:  0 without doing anything if no `tput` and terminal available
+# Returns:   0 without doing anything if no `tput` and terminal available
 spinner_start() {
     if ! command -v tput >/dev/null 2>&1 || [ ! -t 2 ]; then
         debug "Disabled because tput and terminal is needed"

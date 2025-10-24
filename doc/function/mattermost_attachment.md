@@ -4,7 +4,6 @@
 
 Find free linkable icons under https://icons8.de/icons/all
 Stdout:   `<json>` for this attachment
-Returns:  0 without action if no `$MATTERMOST_API` + `$MATTERMOST_TOKEN`
 
 
 ### Usage
@@ -34,3 +33,7 @@ mattermost_post `$channelid` "" "$(mattermost_attachment --color ...)"
 ### Globals
 
 - `$MATTERMOST_API` + `$MATTERMOST_TOKEN` to access API
+
+### Return (exit code)
+
+- 0 without action if no `$MATTERMOST_API` + `$MATTERMOST_TOKEN`

@@ -14,7 +14,6 @@ Some formats have multiple character width:
 - `moon`:     🌑 🌒 🌓 🌔 🌕 🌖 🌗 🌘
 - `clock`:    🕐 🕑 🕒 🕓 🕔 🕕 🕖 🕗 🕘 🕙 🕚 🕛
 - `weather`:  🌤 🌥 🌦 🌧 🌨 🌩 🌪
-Returns:  0 without doing anything if no `tput` and terminal available
 
 
 ### Usage
@@ -30,3 +29,7 @@ spinner_start <format> <time>
 ```bash
 <symbol> with back-space so that cursor is always before it
 ```
+
+### Return (exit code)
+
+- 0 without doing anything if no `tput` and terminal available

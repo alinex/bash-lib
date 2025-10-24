@@ -2,7 +2,6 @@
 
 ## Run command on Mongo DB
 
-Global:   `$server`
 
 
 ### Usage
@@ -10,5 +9,9 @@ Global:   `$server`
 ```bash
 mongosh "" <command>            # global command
 mongosh <database> <command>    # work in database
-`$MONGO_ADMIN_USERPASS`
 ```
+
+### Globals
+
+- `$server`
+- `$MONGO_ADMIN_USERPASS`

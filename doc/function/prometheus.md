@@ -2,7 +2,6 @@
 
 ## Prom ql ausführen
 
-Returns:  0 - without output if no `$PROMETHEUS_API`
 
 
 ### Usage
@@ -14,3 +13,7 @@ prometheus <prom-ql>
 ### Globals
 
 - `$PROMETHEUS_API` to query
+
+### Return (exit code)
+
+- 0 - without output if no `$PROMETHEUS_API`

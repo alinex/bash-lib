@@ -2,7 +2,6 @@
 
 ## Query PowerDNS to get a list of managed domain names
 
-Returns:  0 - without output if no `$POWERDNS_API` + `$POWERDNS_TOKEN`
 
 
 ### Usage
@@ -22,3 +21,7 @@ powerdns
 - `<dns-name>`  A                       `<seconds>`
 - `<dns-name>`  CNAME   `<destination>`   `<seconds>`
 - and more...
+
+### Return (exit code)
+
+- 0 - without output if no `$POWERDNS_API` + `$POWERDNS_TOKEN`
