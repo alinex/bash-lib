@@ -10,6 +10,7 @@ As this is not driven by releases and therefore tags are not used it is an ongoi
 - added an **installation** script callable directly from the git url
 - unit **testing** integrated
 - **multilingual** support with EN, DE at first
+- **interactive** support: pause, ask_string, ask_integer, ...
 - remote capabilities integrated: **ssh, curl, prometheus, grafana, confluence, jira, mattermost**
 - completely **documented** with [API](doc/README.md)
 - enhanced and easy to use [`debug`](doc/function/debug.md) possibilities

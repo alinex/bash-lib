@@ -219,7 +219,8 @@ Module with user interaction helpers.
 | [`pause`](function/pause.md) | Wait for user input |
 | [`ask_no`](function/ask_no.md) | Ask yes/no with default: no |
 | [`ask_yes`](function/ask_yes.md) | Ask yes/no with default: yes |
-| [`ask_input`](function/ask_input.md) | Ask for a text line |
+| [`ask_string`](function/ask_string.md) | Ask for a text line |
+| [`ask_integer`](function/ask_integer.md) | Ask for an integer number |
 | [`choose`](function/choose.md) | Select from list (extended version of native select) |
 | [`tasks`](function/tasks.md) | Run tasks as selected by user |
 

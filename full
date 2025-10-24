@@ -172,7 +172,7 @@ export TEXTDOMAINDIR=$BASHLIB_HOME/locale
 source gettext.sh
 _deprecated(){
 IFS=$' \t\n' read -r line func file <<<"$(caller 1)"
-die "DEPRECATED: ${FUNCNAME[0]} at $func in $file:$line please use [[ ... ]] instead"
+die "DEPRECATED: ${FUNCNAME[0]} at $func in $file:$line $1"
 }
 _stacktrace(){
 local level="${1:-5}"
@@ -460,6 +460,9 @@ echo "$yn -> $(gettext "Disallowed answer")" >/dev/tty
 done
 }
 ask_input(){
+_deprecated "please use ask_string"
+}
+ask_string(){
 local text
 text="$(input "$@")"
 local answer prompt
@@ -470,12 +473,38 @@ prompt="$text ($(gettext "default"): $2) "
 fi
 echo -ne "$CC_INFO" >/dev/tty
 read -rp "$prompt" answer </dev/tty
-echo -e "$CC_RESET" >/dev/tty
+echo -ne "$CC_RESET" >/dev/tty
 if [ -z "$answer" ]&&[ -n "$2" ];then
 answer="$2"
 echo -n "$(gettext "Using default"): $answer" >/dev/tty
 fi
 echo "$answer"
+}
+ask_integer(){
+local text
+text="$(input "$@")"
+local answer prompt
+if (($#<2));then
+prompt="$text "
+else
+prompt="$text ($(gettext "default"): $2) "
+fi
+while true;do
+echo -ne "$CC_INFO" >/dev/tty
+read -rp "$prompt" answer </dev/tty
+echo -ne "$CC_RESET" >/dev/tty
+if [ -z "$answer" ]&&[ -n "$2" ];then
+answer="$2"
+echo -n "$(gettext "Using default"): $answer" >/dev/tty
+return 0
+fi
+if [[ $answer =~ ^[0-9]+$ ]];then
+echo "$answer"
+return 0
+else
+echo -n "$(gettext "Only integer number possible"): " >/dev/tty
+fi
+done
 }
 choose(){
 local end default readopt
@@ -500,7 +529,7 @@ break
 *)die "$(gettext 'Unrecognized option: $1')"
 esac
 done
-local question="Wähle eine der obigen Optionen:"
+local question="$(gettext "Select one of the above options:")"
 [ -z "$default" ]&&readopt=""||question="$question [$default]"
 local list line key display num=0
 list="$(input_lines "$@")"
@@ -1932,7 +1961,7 @@ is_float(){
 num_parameters --min 1 --max 1 --die "Only one argument allowed, got: $#" -- "$@"
 [[ $1 =~ ^[-+]?[0-9]+([.][0-9]+)?$ ]]
 }
-compare(){ _deprecated;}
+compare(){ _deprecated "please use [[ ... ]] instead";}
 trim_start(){
 local str="${1-}"
 local char="${2:-[:space:]}"

@@ -1,6 +1,6 @@
-# ask_input
+# ask_integer
 
-## Ask for a text line
+## Ask for an integer number
 
 Stdin:    `<line>`
 Stdout:   `<answer>`
@@ -9,8 +9,8 @@ Stdout:   `<answer>`
 ### Usage
 
 ```bash
-ask_input <question> [<default>]
-<question> | ask_input
+ask_integer <question> [<default>]
+<question> | ask_integer
 ```
 
 ### TTY (direct)

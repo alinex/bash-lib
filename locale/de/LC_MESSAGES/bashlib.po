@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-24 22:15+0200\n"
+"POT-Creation-Date: 2025-10-24 22:42+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -53,28 +53,36 @@ msgstr "Nein"
 msgid "Yes"
 msgstr "Ja"
 
-#: module/input:49 module/input:74 module/input:178
+#: module/input:49 module/input:74 module/input:216
 msgid "Disallowed answer"
 msgstr "Ungültige Antwort"
 
-#: module/input:91
+#: module/input:95 module/input:120
 msgid "default"
 msgstr "Standard"
 
-#: module/input:98
+#: module/input:102 module/input:128
 msgid "Using default"
 msgstr "Standardantwort genutzt"
 
-#: module/input:143 module/input:227 module/remote:120 module/remote:276
+#: module/input:135
+msgid "Only integer number possible"
+msgstr "Nur ganzzahlige Werte erlaubt"
+
+#: module/input:180 module/input:265 module/remote:120 module/remote:276
 #: module/mattermost:288 module/validator:36 module/software:91
 msgid "Unrecognized option: $1"
 msgstr "Unbekannte Option: $1"
 
-#: module/input:253
+#: module/input:185
+msgid "Select one of the above options:"
+msgstr "Wähle eine der obigen Optionen:"
+
+#: module/input:291
 msgid "No tasks found to be executed."
 msgstr "Keine Aufgaben zum Ausführen gefunden."
 
-#: module/input:269
+#: module/input:307
 msgid "Exit"
 msgstr "Beenden"
 

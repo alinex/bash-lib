@@ -96,12 +96,45 @@ ask_string() {
     fi
     echo -ne "${CC_INFO}" >/dev/tty
     read -rp "$prompt" answer </dev/tty
-    echo -e "${CC_RESET}" >/dev/tty
+    echo -ne "${CC_RESET}" >/dev/tty
     if [ -z "$answer" ] && [ -n "$2" ]; then
         answer="$2"
         echo -n "$(gettext "Using default"): $answer" >/dev/tty
     fi
     echo "$answer"
+}
+
+# Ask for an integer number
+# Usage:    ask_integer <question> [<default>]
+#           <question> | ask_integer
+# TTY:      <question> <key>
+# Stdin:    <line>
+# Stdout:   <answer>
+ask_integer() {
+    local text
+    text="$(input "$@")"
+    local answer prompt
+    if (($# < 2)); then
+        prompt="$text "
+    else
+        prompt="$text ($(gettext "default"): $2) "
+    fi
+    while true; do
+        echo -ne "${CC_INFO}" >/dev/tty
+        read -rp "$prompt" answer </dev/tty
+        echo -ne "${CC_RESET}" >/dev/tty
+        if [ -z "$answer" ] && [ -n "$2" ]; then
+            answer="$2"
+            echo -n "$(gettext "Using default"): $answer" >/dev/tty
+            return 0
+        fi
+        if [[ $answer =~ ^[0-9]+$ ]]; then
+            echo "$answer"
+            return 0
+        else
+            echo -n "$(gettext "Only integer number possible"): " >/dev/tty
+        fi
+    done
 }
 
 # Select from list (extended version of native select)
@@ -148,7 +181,8 @@ choose() {
         esac
     done
     # processing
-    local question="Wähle eine der obigen Optionen:"
+    # shellcheck disable=SC2155
+    local question="$(gettext "Select one of the above options:")"
     [ -z "$default" ] && readopt="" || question="$question [$default]"
     local list line key display num=0
     list="$(input_lines "$@")"
