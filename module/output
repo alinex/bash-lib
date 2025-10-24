@@ -167,13 +167,30 @@ tsv2md() {
 
 _spinner_pid=""
 
-# Function to start the spinner in the background stop it with @spinner_stop
+# Function to start the spinner in the background
+# To stop it later call @spinner_stop.
+# Some formats have multiple character width:
+# - `simple`:   - \ | /
+# - `arrows`:   → ↑ ← ↓
+# - `vertical`: ▏ ▎ ▍ ▌ ▋ ▊ ▉ █ ▉ ▊ ▋ ▌ ▍ ▎ ▏
+# - `bar`:      (as `vertical` but two characters wide)
+# - `fade`:     ░ ▒ ▓ █ ▓ ▒ ░
+# - `braile`:   ⠋ ⠙ ⠹ ⠸ ⠼ ⠴ ⠦ ⠧ ⠇ ⠏ (default)
+# - `roll`:     ⠋ ⠙ ⠚ ⠞ ⠖ ⠦ ⠴ ⠲ ⠳ ⠓
+# - `moon`:     🌑 🌒 🌓 🌔 🌕 🌖 🌗 🌘
+# - `clock`:    🕐 🕑 🕒 🕓 🕔 🕕 🕖 🕗 🕘 🕙 🕚 🕛
+# - `weather`:  🌤 🌥 🌦 🌧 🌨 🌩 🌪
 # Usage:    spinner_start <format> <time>
-#           # <format> arrows, vertical, bar, fade, braile, roll, moon, clock, weather (default spinner)
+#           # <format> see above
 #           # <time> 0.1 or more seconds (default 0.2)
-# Output:   | / - \
+# TTY:      <symbol> with back-space so that cursor is always before it
+# Returns:  0 without doing anything if no `tput` and terminal available
 spinner_start() {
-    local format="${1:-simple}"
+    if ! command -v tput >/dev/null 2>&1 || [ ! -t 2 ]; then
+        debug "Disabled because tput and terminal is needed"
+        return 0
+    fi
+    local format="${1:-braile}"
     local spinner
     local size=1
     local chars=1
@@ -196,7 +213,7 @@ spinner_start() {
     (
         while true; do
             for ((i = 0; i < ${#spinner}; i += chars)); do
-                printf " %s%s" "${spinner:i:$chars}" "$(printf '\b%.0s' $(seq 1 $back))"
+                printf " %s%s" "${spinner:i:$chars}" "$(printf '\b%.0s' $(seq 1 $back))" >/dev/tty
                 sleep "$delay"
             done
         done
@@ -205,14 +222,14 @@ spinner_start() {
     disown
 }
 
-# Function to stop the spinner started using @spinner_start
+# Function to stop the spinner
+# Call this after @spinner_start to stop it. It has to be called within the same thread!
 # Usage:    spinner_stop
 spinner_stop() {
-    if [[ -n $_spinner_pid ]]; then
-        kill "$_spinner_pid" >/dev/null 2>&1
-        wait "$_spinner_pid" 2>/dev/null
-        _spinner_pid=""
-        printf "    \b\b\b\b" # Clear spinner character
-        tput cnorm
-    fi
+    [ -n "$_spinner_pid" ] || return # spinner not started
+    kill "$_spinner_pid" >/dev/null 2>&1
+    wait "$_spinner_pid" 2>/dev/null
+    _spinner_pid=""
+    printf "    \b\b\b\b" # Clear spinner character
+    tput cnorm
 }

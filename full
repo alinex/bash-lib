@@ -1173,7 +1173,11 @@ input "$@"|uncolorize|mlr -i tsv -o md cat
 }
 _spinner_pid=""
 spinner_start(){
-local format="${1:-simple}"
+if ! command -v tput >/dev/null 2>&1||[ ! -t 2 ];then
+debug "Disabled because tput and terminal is needed"
+return 0
+fi
+local format="${1:-braile}"
 local spinner
 local size=1
 local chars=1
@@ -1196,7 +1200,7 @@ tput civis
 true
 do
 for ((i=0; i<${#spinner}; i+=chars));do
-printf " %s%s" "${spinner:i:chars}" "$(printf '\b%.0s' $(seq 1 $back))"
+printf " %s%s" "${spinner:i:chars}" "$(printf '\b%.0s' $(seq 1 $back))" >/dev/tty
 sleep "$delay"
 done
 done) \
@@ -1205,13 +1209,12 @@ _spinner_pid=$!
 disown
 }
 spinner_stop(){
-if [[ -n $_spinner_pid ]];then
+[ -n "$_spinner_pid" ]||return
 kill "$_spinner_pid" >/dev/null 2>&1
 wait "$_spinner_pid" 2>/dev/null
 _spinner_pid=""
 printf "    \b\b\b\b"
 tput cnorm
-fi
 }
 sudo_allow(){
 ((EUID!=0))||return 0
