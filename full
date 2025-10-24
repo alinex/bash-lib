@@ -155,6 +155,18 @@ local out=""
 [[ -z $out ]]&&out="0s"&&sign=""
 echo "$sign$out"
 }
+_timer_start=0
+timer_start(){
+_timer_start=$(date +%s.%N)
+}
+timer_stop(){
+local seconds nano len
+IFS='.' read -r seconds nano <<<"$(echo "$(date +%s.%N) - $_timer_start"|bc)"
+len=$((4-${#seconds}))
+((len>=0))||len=0
+LANG=C printf "%0.${len}f\n" "$seconds.$nano"
+debug "Measurement: $seconds.$nano"
+}
 export TEXTDOMAIN=bashlib
 export TEXTDOMAINDIR=$BASHLIB_HOME/locale
 source gettext.sh
@@ -162,13 +174,23 @@ _deprecated(){
 IFS=$' \t\n' read -r line func file <<<"$(caller 1)"
 die "DEPRECATED: ${FUNCNAME[0]} at $func in $file:$line please use [[ ... ]] instead"
 }
+_stacktrace(){
+local level="${1:-5}"
+debug "$level" "Stack trace (most recent call last):"
+local i
+for ((i=${#FUNCNAME[@]}-1; i>=1; i--));do
+local func="${FUNCNAME[i]}"
+local line="${BASH_LINENO[i-1]}"
+local src="${BASH_SOURCE[i]}"
+printf "  at %s() in %s:%s\n" "$func" "$src" "$line"|debug "$level"
+done
+}
 debug(){
 local level=1 func
 if [[ $1 =~ ^-?[0-9]+$ ]];then
 level="$1"
 shift
 fi
-IFS=$' \t\n' read -r _ pfunc _ <<<"$(caller 1)"
 IFS=$' \t\n' read -r _ func _ <<<"$(caller 0)"
 [ -z "$pfunc" ]||[ "$pfunc" = "$func" ]||func="$pfunc/$func"
 local text
@@ -402,7 +424,7 @@ pause(){
 local text
 text="$(input "$@")"
 test -z "$text"||warn "$text"
-read -n 1 -s -r -p "Taste drücken um fortzufahren..." key
+read -n 1 -s -r -p "$(gettext 'Press any key to continue...')" key
 echo "" >/dev/tty
 }
 ask_no(){

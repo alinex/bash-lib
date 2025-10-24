@@ -20,5 +20,18 @@ source gettext.sh
 _deprecated() {
     # Define the calling function as deprecated and output this message if used
     IFS=$' \t\n' read -r line func file <<<"$(caller 1)"
-    die "DEPRECATED: ${FUNCNAME[0]} at ${func} in ${file}:${line} please use [[ ... ]] instead"
+    die "DEPRECATED: ${FUNCNAME[0]} at ${func} in ${file}:${line} $1"
+}
+
+_stacktrace() {
+    local level="${1:-5}"
+    debug "$level" "Stack trace (most recent call last):"
+    local i
+    # Skip this function itself and start from the caller
+    for ((i = ${#FUNCNAME[@]} - 1; i >= 1; i--)); do
+        local func="${FUNCNAME[i]}"
+        local line="${BASH_LINENO[i - 1]}"
+        local src="${BASH_SOURCE[i]}"
+        printf "  at %s() in %s:%s\n" "$func" "$src" "$line" | debug "$level"
+    done
 }

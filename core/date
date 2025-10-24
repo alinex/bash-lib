@@ -143,6 +143,7 @@ _format_duration() {
     local m=$(((total % 3600) / 60))
     local s=$((total % 60))
     # Build string
+    #local elements=0
     local out=""
     ((w)) && out+="${w}w"
     ((d)) && out+="${d}d"
@@ -152,4 +153,30 @@ _format_duration() {
     # If total was exactly 0
     [[ -z "$out" ]] && out="0s" && sign=""
     echo "${sign}${out}"
+}
+
+######################################################################################
+### Duration intervals
+######################################################################################
+
+_timer_start=0
+
+# Start the timer
+# Later use @timer_stop to get the elapsed time.
+# Usage:    timer_start
+timer_start() {
+    _timer_start=$(date +%s.%N)
+}
+
+# Stop the timer and calculate elapsed time
+# The timer has to be started before using @timer_start.
+# Usgae:    timer_stop
+# Output:   <seconds>.<milliseconds>
+timer_stop() {
+    local seconds nano len
+    IFS='.' read -r seconds nano <<<"$(echo "$(date +%s.%N) - $_timer_start" | bc)"
+    len=$((4 - ${#seconds}))
+    ((len >= 0)) || len=0
+    LANG=C printf "%0.${len}f\n" "$seconds.$nano"
+    debug "Measurement: $seconds.$nano"
 }

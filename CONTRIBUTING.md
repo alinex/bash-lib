@@ -261,6 +261,14 @@ But you can also select only specific functions to debug by specifying a functio
 - `DEBUG=curl` to only debug one function
 - `DEBUG=curl,remote` for multiple functions
 
+Further on, you can send stacktraces using `_stacktrace` which will be output as `DEBUG=5`.
+
+```text
+> _stacktrace          Stack trace (most recent call last):
+> _stacktrace            at main() in /home/alex/bin/dvb/_test:32
+> _stacktrace            at timer_start() in /home/alex/dvb/bash-lib/core/date:169
+```
+
 If you could not find the Problem in `DEBUG` mode, you can load the bash-lib directly into shell, but unset the exit on error, because it may close the shell:
 
 ```bash

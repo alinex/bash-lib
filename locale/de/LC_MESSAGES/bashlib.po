@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-23 16:54+0200\n"
+"POT-Creation-Date: 2025-10-24 22:15+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -40,6 +40,10 @@ msgstr "Unbekannte Option in"
 #: module/monitoring:181
 msgid "Severity\\tNetwork\\tInstance\\tSummary\\tStart"
 msgstr "Severity\\tNetz\\tInstanz\\tZusammenfassung\\tStart"
+
+#: module/input:24
+msgid "Press any key to continue..."
+msgstr "Taste drücken um fortzufahren..."
 
 #: module/input:41 module/input:66
 msgid "No"

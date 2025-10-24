@@ -15,5 +15,6 @@ As this is not driven by releases and therefore tags are not used it is an ongoi
 - enhanced and easy to use [`debug`](doc/function/debug.md) possibilities
 - add [`spinner_start`](doc/function/spinner_start.md) animation
 - [`dns-list`](doc/function/dns_list.md) to query self controlled dns servers
+- a new **timer** to measure elapsed time between two invocations
 
 What was before this, was BashLib V1 and as everything is new it doesn't matter any more.

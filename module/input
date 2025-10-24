@@ -21,7 +21,7 @@ pause() {
     local text
     text="$(input "$@")"
     test -z "$text" || warn "$text"
-    read -n 1 -s -r -p "Taste drücken um fortzufahren..." key
+    read -n 1 -s -r -p "$(gettext 'Press any key to continue...')" key
     echo "" >/dev/tty
 }
 
@@ -75,13 +75,17 @@ ask_yes() {
     done
 }
 
+ask_input() {
+    _deprecated "please use ask_string"
+}
+
 # Ask for a text line
-# Usage:    ask_input <question> [<default>]
-#           <question> | ask_input
+# Usage:    ask_string <question> [<default>]
+#           <question> | ask_string
 # TTY:      <question> <key>
 # Stdin:    <line>
 # Stdout:   <answer>
-ask_input() {
+ask_string() {
     local text
     text="$(input "$@")"
     local answer prompt

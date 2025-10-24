@@ -18,7 +18,7 @@ source /dev/null
 #           $DEBUG=<num> - only print messages with same or lower numeric level
 #           $DEBUG=<func>,... - only print if the function is matched
 #           $DEBUG=9 - to output all
-# Stderr:   > <parent>/<func>           <message>      # color: gray
+# Stderr:   > <func>           <message>      # color: gray
 debug() {
     # get level and function
     local level=1 func
@@ -26,7 +26,7 @@ debug() {
         level="$1"
         shift
     fi
-    IFS=$' \t\n' read -r _ pfunc _ <<<"$(caller 1)"
+    #IFS=$' \t\n' read -r _ pfunc _ <<<"$(caller 1)" # enable to show two levels
     IFS=$' \t\n' read -r _ func _ <<<"$(caller 0)"
     [ -z "$pfunc" ] || [ "$pfunc" = "$func" ] || func="$pfunc/$func"
     # collect text

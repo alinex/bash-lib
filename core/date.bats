@@ -173,3 +173,16 @@ setup() {
     assert_success
     echo $output # use --show-output-of-passing-tests to see it
 }
+
+# bats test_tags=timer_start
+@test "timer_start: start timer without error" {
+    run timer_start
+    assert_success
+    echo $output # use --show-output-of-passing-tests to see it
+}
+# bats test_tags=timer_stop
+@test "timer_stop: get time since start" {
+    run timer_stop
+    assert_success
+    echo $output # use --show-output-of-passing-tests to see it
+}
