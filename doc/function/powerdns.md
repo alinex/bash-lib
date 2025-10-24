@@ -7,7 +7,7 @@
 ### Usage
 
 ```bash
-powerdns
+powerdns <pattern>
 ```
 
 ### Globals

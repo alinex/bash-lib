@@ -351,7 +351,7 @@ Module with remote calling/execution helpers.
 | [`curl`](function/curl.md) | Curl with added error handling |
 | [`mongosh`](function/mongosh.md) | Run command on Mongo DB |
 | [`postgres`](function/postgres.md) | Run command on postgres |
-| [`dns`](function/dns.md) | Query all possible DNS servers to get a complete list of managed domain names |
+| [`dns_list`](function/dns_list.md) | Query all managed DNS servers to get a complete list of domain names |
 | [`powerdns`](function/powerdns.md) | Query PowerDNS to get a list of managed domain names |
 | [`plusserver_dns`](function/plusserver_dns.md) | Query Plusserver DNS to get a list of managed domain names |
 

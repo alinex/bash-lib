@@ -1,6 +1,6 @@
-# dns
+# dns_list
 
-## Query all possible DNS servers to get a complete list of managed domain names
+## Query all managed DNS servers to get a complete list of domain names
 
 It will output only the header line if no DNS system is available. Possible DNS systems are:
 - [`powerdns`](powerdns.md) - PowerDNS https://www.powerdns.com/
@@ -10,7 +10,7 @@ It will output only the header line if no DNS system is available. Possible DNS 
 ### Usage
 
 ```bash
-dns
+dns_list <pattern>
 ```
 
 ### Globals
