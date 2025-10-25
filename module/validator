@@ -33,7 +33,7 @@ num_parameters() {
             shift
             break
             ;;
-        *) die "$(gettext "Unrecognized option: \$1")" ;;
+        *) die "$(gettext "Unrecognized option"): $1" ;;
         esac
     done
     # processing

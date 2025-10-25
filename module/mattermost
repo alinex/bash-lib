@@ -285,7 +285,7 @@ mattermost_attachment() {
             shift
             break
             ;;
-        *) die "$(gettext "Unrecognized option: \$1")" ;;
+        *) die "$(gettext "Unrecognized option"): $1" ;;
         esac
     done
     # adding fields to json
@@ -320,7 +320,7 @@ mattermost_reaction() {
             shift
             break
             ;;
-        *) die "Unerwartete option in: $1" ;;
+        *) die "$(gettext "Unrecognized option"): $1" ;;
         esac
     done
     emoji=$1

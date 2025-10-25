@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-24 22:23+0200\n"
+"POT-Creation-Date: 2025-10-25 22:18+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -33,17 +33,41 @@ msgstr "Argument ist nicht ganzzahlig"
 msgid "Invalid duration unit"
 msgstr "Ungültige Einheit für Zeitdauer"
 
-#: module/monitoring:145
-msgid "Unrecognized option in"
-msgstr "Unbekannte Option in"
+#: module/monitoring:69
+msgid "Could not get exporters from prometheus!"
+msgstr "Es konnten keine Exporter von Prometheus ermittelt werden!"
 
-#: module/monitoring:181
+#: module/monitoring:84
+#, sh-format
+msgid "Could not scrape the prometheus exporter at $url!"
+msgstr "Der Prometheus Exporter unter $url konnte nicht abgefragt werden!"
+
+#: module/monitoring:146 module/input:117 module/input:249 module/input:334
+#: module/process:85 module/remote:120 module/remote:192 module/remote:276
+#: module/mattermost:288 module/mattermost:323 module/validator:36
+#: module/software:91
+msgid "Unrecognized option"
+msgstr "Unbekannte Option"
+
+#: module/monitoring:153
+msgid "Could not get alerts from Grafana!"
+msgstr "Es konnten keine Grafana Alerts abgerufen werden!"
+
+#: module/monitoring:154
+msgid "Parse error in Grafana alerts list with filter"
+msgstr "Fehler beim parsen der Grafana Alertliste mit Filter"
+
+#: module/monitoring:182
 msgid "Severity\\tNetwork\\tInstance\\tSummary\\tStart"
-msgstr "Severity\\tNetz\\tInstanz\\tZusammenfassung\\tStart"
+msgstr "Schweregrad\\tNetz\\tInstanz\\tZusammenfassung\\tStart"
 
 #: module/input:24
 msgid "Press any key to continue..."
 msgstr "Taste drücken um fortzufahren..."
+
+#: module/input:38
+msgid "n/Y"
+msgstr "n/J"
 
 #: module/input:41 module/input:66
 msgid "No"
@@ -53,34 +77,58 @@ msgstr "Nein"
 msgid "Yes"
 msgstr "Ja"
 
-#: module/input:49 module/input:74 module/input:182
+#: module/input:49 module/input:74 module/input:285
 msgid "Disallowed answer"
 msgstr "Ungültige Antwort"
 
-#: module/input:95
-msgid "default"
-msgstr "Standard"
+#: module/input:63
+msgid "N/y"
+msgstr "N/j"
 
-#: module/input:102
-msgid "Using default"
-msgstr "Standardantwort genutzt"
+#: module/input:124
+msgid "Enter integer number"
+msgstr "Gib eine Nummer ein"
 
-#: module/input:147 module/input:231 module/remote:120 module/remote:276
-#: module/mattermost:288 module/validator:36 module/software:91
-msgid "Unrecognized option: $1"
-msgstr "Unbekannte Option: $1"
+#: module/input:132
+msgid "Enter float number"
+msgstr "Gib eine Fließkommazahl ein"
+
+#: module/input:142
+msgid "Enter password"
+msgstr "Gib das Passwort ein"
+
+#: module/input:146
+msgid "Enter time"
+msgstr "Gib die Zeit an"
 
 #: module/input:151
+msgid "Enter short text"
+msgstr "Gib einen Kurztext ein"
+
+#: module/input:254
 msgid "Select one of the above options:"
 msgstr "Wähle eine der obigen Optionen:"
 
-#: module/input:257
+#: module/input:353
+msgid "Could not get task list from command"
+msgstr ""
+
+#: module/input:360
 msgid "No tasks found to be executed."
 msgstr "Keine Aufgaben zum Ausführen gefunden."
 
-#: module/input:273
+#: module/input:376
 msgid "Exit"
 msgstr "Beenden"
+
+#: module/input:380
+#, sh-format
+msgid "Got error $error running $task"
+msgstr "Beim Aufruf von $task kam es zum Fehler $error"
+
+#: module/process:78
+msgid "press any key to stop"
+msgstr "Taste drücken zum stoppen"
 
 #: module/process:90
 msgid "Waiting"
@@ -89,3 +137,119 @@ msgstr "Warten"
 #: module/process:92
 msgid "seconds"
 msgstr "Sekunden"
+
+#: module/process:114
+msgid "Failed to remove lockfile"
+msgstr "Lockfile konnte nicht entfernt werden"
+
+#: module/process:129 module/process:162
+msgid "Failed to create PID lockfile"
+msgstr "PID Lockfile konnte nicht erstellt werden"
+
+#: module/process:137
+#, sh-format
+msgid "Waiting for unlock in $lockfile by PID $pid"
+msgstr "Warten, bis zur Freigabe in $lockfile durch PID $pid"
+
+#: module/process:369
+msgid "Work steps are logged so that you can resume work mid-process"
+msgstr ""
+"Arbeitsschritte werden protokolliert um auch mittendrin wieder aufzusetzen"
+
+#: module/process:381
+#, sh-format
+msgid "Job $name already done in this run, skipping"
+msgstr "Der Job $name wurde bereits ausgeführt, überspringe diesen"
+
+#: module/process:400
+#, sh-format
+msgid "Finished: Step $name at $date"
+msgstr "Fertig: Schritt $name um $date"
+
+#: module/process:425
+#, sh-format
+msgid "Started: step $name at $date"
+msgstr "Start: Schritt $name um $date"
+
+#: module/remote:93
+#, sh-format
+msgid "No file to execute remotely under $file"
+msgstr "Keine Datei unter $file für Remote ausführen"
+
+#: module/remote:284
+#, sh-format
+msgid "Warten bis der Reboot fertig ist ($seconds Sekunden)"
+msgstr ""
+
+#: module/remote:415
+#, sh-format
+msgid ""
+"To update $PLUSSERVER_PORTAL/services/nameservers -> download CSV (manually)."
+msgstr ""
+"Für Update $PLUSSERVER_PORTAL/services/nameservers -> CSV herunterladen "
+"(manuell)."
+
+#: module/software:133
+msgid "are identical versions"
+msgstr "sind identische versionen"
+
+#: module/software:137 module/software:163
+#, sh-format
+msgid "is an upgrade of one major version"
+msgid_plural "is an upgrade of $step mayjor versions"
+msgstr[0] "ist ein upgrade von einer Hauptversion"
+msgstr[1] "ist ein upgrade von $step Hauptversionen"
+
+#: module/software:141 module/software:159
+#, sh-format
+msgid "is an upgrade of one minor version"
+msgid_plural "is an upgrade of $step minor versions"
+msgstr[0] "ist ein upgrade von einer Nebenversion"
+msgstr[1] "ist ein upgrade von $step Nebenversionen"
+
+#: module/software:145
+#, sh-format
+msgid "is an upgrade of one patch version"
+msgid_plural "is an upgrade of $step patch versions"
+msgstr[0] "ist ein upgrade von einer Patchversion"
+msgstr[1] "ist ein upgrade von $step Patchversionen"
+
+#: module/software:148
+msgid "is a developer upgrade"
+msgstr "ist ein entwickler Upgrade"
+
+#: module/software:151
+#, fuzzy
+msgid "is a developer downgrade"
+msgstr "ist ein entwickler Downgrade"
+
+#: module/software:155
+#, fuzzy, sh-format
+msgid "is an downgrade of one patch version"
+msgid_plural "is an downgrade of $step patch versions"
+msgstr[0] "ist ein downgrade von einer Patchversion"
+msgstr[1] "ist ein downgrade von $step Patchversionen"
+
+#, fuzzy, sh-format
+#~ msgid "is an downgrade of one minor version"
+#~ msgid_plural "is an downgrade of $step minor versions"
+#~ msgstr[0] "ist ein downgrade von einer Nebenversion"
+#~ msgstr[1] "ist ein downgrade von $step Nebenversionen"
+
+#, fuzzy, sh-format
+#~ msgid "is an downgrade of one major version"
+#~ msgid_plural "is an downgrade of $step mayjor versions"
+#~ msgstr[0] "ist ein downgrade von einer Hauptversion"
+#~ msgstr[1] "ist ein downgrade von $step Hauptversionen"
+
+#~ msgid "Unrecognized option in"
+#~ msgstr "Unbekannte Option in"
+
+#~ msgid "Unrecognized option: $1"
+#~ msgstr "Unbekannte Option: $1"
+
+#~ msgid "default"
+#~ msgstr "Standard"
+
+#~ msgid "Using default"
+#~ msgstr "Standardantwort genutzt"

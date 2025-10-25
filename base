@@ -176,13 +176,12 @@ die "DEPRECATED: ${FUNCNAME[0]} at $func in $file:$line $1"
 }
 _stacktrace(){
 local level="${1:-5}"
-debug "$level" "Stack trace (most recent call last):"
 local i
-for ((i=${#FUNCNAME[@]}-1; i>=1; i--));do
+for ((i=1; i<${#FUNCNAME[@]}; i++));do
 local func="${FUNCNAME[i]}"
 local line="${BASH_LINENO[i-1]}"
 local src="${BASH_SOURCE[i]}"
-printf "  at %s() in %s:%s\n" "$func" "$src" "$line"|debug "$level"
+printf "at %s() in %s:%s\n" "$func" "$src" "$line"|debug "$level"
 done
 }
 debug(){
@@ -209,6 +208,7 @@ done <<<"$text"
 debug "Running in DEBUG=${DEBUG-} mode!"
 die(){
 echo -e "$CC_CRITICAL$(input "$@")$CC_RESET" >&2
+_stacktrace
 exit 1
 }
 [ -n "${BASH_VERSION:-}" ]||die "No bash CLI! This can only be run under bash"

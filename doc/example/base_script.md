@@ -48,7 +48,7 @@ while true; do
         shift
         break
         ;;
-    *)  die "Unerwartete option: $1"
+        *) die "Unrecognized option: $1" ;;
         ;;
     esac
 done

@@ -35,7 +35,7 @@ ask_no() {
     text="$(input "$@")"
     while true; do
         echo -ne "${CC_INFO}" >/dev/tty
-        read -r -n 1 -s -p "$text (n/J) " yn
+        read -r -n 1 -s -p "$text ($(gettext "n/Y")) " yn
         case $yn in
         "" | [Nn])
             echo -e "$(gettext "No")${ET}" >/dev/tty
@@ -60,7 +60,7 @@ ask_yes() {
     text="$(input "$@")"
     while true; do
         echo -ne "${CC_INFO}" >/dev/tty
-        read -r -n 1 -s -p "$text (J/n) " yn
+        read -r -n 1 -s -p "$text ($(gettext "N/y")) " yn
         case $yn in
         [Nn])
             echo -e "$(gettext "No")${CC_RESET}" >/dev/tty
@@ -143,12 +143,12 @@ ask() {
         mask=1
         ;;
     time)
-        prompt="${2:-$(gettext "Enter a time")}"
+        prompt="${2:-$(gettext "Enter time")}"
         pattern="^([0-1]?[0-9]|2[0-3])(:([0-5]?[0-9])?)?$"
         final="^([0-1][0-9]|2[0-3]):[0-5][0-9]$"
         ;;
     *)
-        prompt="${2:-$(gettext "Enter a short text")}"
+        prompt="${2:-$(gettext "Enter short text")}"
         ;;
     esac
     local input="" char="" seq
@@ -350,7 +350,7 @@ tasks() {
                 if [ -n "$name" ]; then
                     echo "$line" >>"$newlist"
                 else
-                    $cmd </dev/null >>"$newlist" || die "Could not get task list from command: $cmd"
+                    $cmd </dev/null >>"$newlist" || die "$(gettext "Could not get task list from command"): $cmd"
                 fi
             done <<<"$list"
             list="$(sed '/^[[:space:]]*$/d' "$newlist")"
@@ -375,7 +375,9 @@ tasks() {
         # shellcheck disable=SC2086
         task=$(choose "$title" -x "$(gettext "Exit")" $opt "$list")
         [[ "$task" != "exit" ]] || break
-        $task || error "Got error $? running: $task"
+        # shellcheck disable=SC2034
+        local error=$?
+        $task || die "$(eval_gettext "Got error \$error running \$task")"
         echo ""
     done
 }

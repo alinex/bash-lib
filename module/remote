@@ -90,7 +90,7 @@ remote_file() {
     local file
     file="$(input "$@")"
     test "${file:0:1}" = "/" || file="$(path)/$file"
-    test -f "$file" || die "No file to execute remotely under $file"
+    test -f "$file" || die "$(eval_gettext "No file to execute remotely under \$file")"
     local ssh="${slogin:-operator}@${server}"
     ssh "$ssh" 'bash -s' <"$file"
 }
@@ -117,7 +117,7 @@ remote_console() {
             shift
             break
             ;;
-        *) die "$(gettext "Unrecognized option: \$1")" ;;
+        *) die "$(gettext "Unrecognized option"): $1" ;;
         esac
     done
     num_parameters "$@" --min 2 --max 2 --die "Need exactly two parameters: semver_diff [-h] <first> <second>"
@@ -189,7 +189,7 @@ remote_df() {
             shift
             break
             ;;
-        *) die "Unerwartete option in: $1" ;;
+        *) die "$(gettext "Unrecognized option"): $1" ;;
         esac
     done
     # collect specific limit
@@ -273,7 +273,7 @@ boot_wait() {
             shift
             break
             ;;
-        *) die "$(gettext "Unrecognized option: \$1")" ;;
+        *) die "$(gettext "Unrecognized option"): $1" ;;
         esac
     done
     # processing
@@ -281,7 +281,7 @@ boot_wait() {
     echo -ne "Warten bis der Reboot fertig ist" >&2
     sleep "$seconds"
     while true; do
-        [ -n "$quiet" ] || echo -ne "\rWarten bis der Reboot fertig ist ($seconds Sekunden)" >&2
+        [ -n "$quiet" ] || echo -ne "\r$(eval_gettext "Wait until the reboot is complete (\$seconds seconds)")" >&2
         uptime=$(remote cut -d"' '" -f1 /proc/uptime 2>/dev/null | sed 's/[ .].*//')
         if ((uptime > 0 && uptime < 300)); then
             break
@@ -408,9 +408,11 @@ plusserver_dns() {
     fi
     # check downloaded list
     local list time
+    # shellcheck disable=SC2012
     list="$(ls -lt ~/Downloads/csv_list*.csv | head -1 | cut -d' ' -f 9-)"
+    # shellcheck disable=SC2012
     time="$(ls -lt ~/Downloads/csv_list*.csv | head -1 | cut -d' ' -f 6-8)"
-    warn "Für Update $PLUSSERVER_PORTAL/services/nameservers -> CSV herunterladen (manuell)." >&2
+    warn "$(eval_gettext "To update \$PLUSSERVER_PORTAL/services/nameservers -> download CSV (manually).")" >&2
     test -n "$list" || die "Keine lokale DNS Liste gefunden, bitte herunterladen."
     echo "Benutze $list vom $time." >&2
     echo "" >&2

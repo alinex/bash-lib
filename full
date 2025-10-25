@@ -176,13 +176,12 @@ die "DEPRECATED: ${FUNCNAME[0]} at $func in $file:$line $1"
 }
 _stacktrace(){
 local level="${1:-5}"
-debug "$level" "Stack trace (most recent call last):"
 local i
-for ((i=${#FUNCNAME[@]}-1; i>=1; i--));do
+for ((i=1; i<${#FUNCNAME[@]}; i++));do
 local func="${FUNCNAME[i]}"
 local line="${BASH_LINENO[i-1]}"
 local src="${BASH_SOURCE[i]}"
-printf "  at %s() in %s:%s\n" "$func" "$src" "$line"|debug "$level"
+printf "at %s() in %s:%s\n" "$func" "$src" "$line"|debug "$level"
 done
 }
 debug(){
@@ -209,6 +208,7 @@ done <<<"$text"
 debug "Running in DEBUG=${DEBUG-} mode!"
 die(){
 echo -e "$CC_CRITICAL$(input "$@")$CC_RESET" >&2
+_stacktrace
 exit 1
 }
 [ -n "${BASH_VERSION:-}" ]||die "No bash CLI! This can only be run under bash"
@@ -432,7 +432,7 @@ local text
 text="$(input "$@")"
 while true;do
 echo -ne "$CC_INFO" >/dev/tty
-read -r -n 1 -s -p "$text (n/J) " yn
+read -r -n 1 -s -p "$text ($(gettext "n/Y")) " yn
 case $yn in
 ""|[Nn])echo -e "$(gettext "No")$ET" >/dev/tty
 return 1
@@ -448,7 +448,7 @@ local text
 text="$(input "$@")"
 while true;do
 echo -ne "$CC_INFO" >/dev/tty
-read -r -n 1 -s -p "$text (J/n) " yn
+read -r -n 1 -s -p "$text ($(gettext "N/y")) " yn
 case $yn in
 [Nn])echo -e "$(gettext "No")$CC_RESET" >/dev/tty
 return 1
@@ -460,51 +460,97 @@ echo "$yn -> $(gettext "Disallowed answer")" >/dev/tty
 done
 }
 ask_input(){
-_deprecated "please use ask_string"
+_deprecated "please use ask string"
 }
-ask_string(){
-local text
-text="$(input "$@")"
-local answer prompt
-if (($#<2));then
-prompt="$text "
-else
-prompt="$text ($(gettext "default"): $2) "
-fi
-echo -ne "$CC_INFO" >/dev/tty
-read -rp "$prompt" answer </dev/tty
-echo -ne "$CC_RESET" >/dev/tty
-if [ -z "$answer" ]&&[ -n "$2" ];then
-answer="$2"
-echo -n "$(gettext "Using default"): $answer" >/dev/tty
-fi
-echo "$answer"
-}
-ask_integer(){
-local text
-text="$(input "$@")"
-local answer prompt
-if (($#<2));then
-prompt="$text "
-else
-prompt="$text ($(gettext "default"): $2) "
-fi
+ask(){
+local default empty negative
+eval set -- "$(option_parse $'e empty -\nd default +' "$@")"
 while true;do
-echo -ne "$CC_INFO" >/dev/tty
-read -rp "$prompt" answer </dev/tty
-echo -ne "$CC_RESET" >/dev/tty
-if [ -z "$answer" ]&&[ -n "$2" ];then
-answer="$2"
-echo -n "$(gettext "Using default"): $answer" >/dev/tty
-return 0
-fi
-if [[ $answer =~ ^[0-9]+$ ]];then
-echo "$answer"
-return 0
+case "$1" in
+-e|--empty)empty=1
+shift
+;;
+-d|--default)default="$2"
+shift 2
+;;
+-n|--negative)negative=1
+shift
+;;
+--)shift
+break
+;;
+*)die "$(gettext "Unrecognized option"): $1"
+esac
+done
+local prompt pattern mask
+case $1 in
+integer|number)prompt="${2:-$(gettext "Enter integer number")}"
+if [ -n "$negative" ];then
+pattern="^-?[0-9]+$"
 else
-echo -n "$(gettext "Only integer number possible"): " >/dev/tty
+pattern="^[0-9]+$"
+fi
+;;
+float)prompt="${2:-$(gettext "Enter float number")}"
+if [ -n "$negative" ];then
+pattern="-?^[0-9]+(\.[0-9]?)?$"
+final="^-?[0-9]+(\.[0-9])?$"
+else
+pattern="^[0-9]+(\.[0-9]*?)?$"
+final="^[0-9]+(\.[0-9]+)?$"
+fi
+;;
+password)prompt="${2:-$(gettext "Enter password")}"
+mask=1
+;;
+time)prompt="${2:-$(gettext "Enter time")}"
+pattern="^([0-1]?[0-9]|2[0-3])(:([0-5]?[0-9])?)?$"
+final="^([0-1][0-9]|2[0-3]):[0-5][0-9]$"
+;;
+*)prompt="${2:-$(gettext "Enter short text")}"
+esac
+local input="" char="" seq
+[ -z "$default" ]||prompt="$prompt [$default]"
+echo -en "$CC_INFO$prompt:$CC_RESET " >/dev/tty
+while IFS= read -r -s -n 1 char </dev/tty;do
+if [[ $char == "" ]];then
+if [ -n "$final" ];then
+if [[ $input =~ $final ]];then
+echo >/dev/tty
+break
+fi
+elif [ -n "$input" ];then
+echo >/dev/tty
+break
+elif [ -n "$default" ];then
+input="$default"
+echo >/dev/tty
+break
+elif [ -n "$empty" ];then
+echo >/dev/tty
+break
+fi
+elif [[ $char == $'\177' ]];then
+if [ ${#input} -gt 0 ];then
+input=${input:0:-1}
+echo -ne "\b \b" >/dev/tty
+fi
+elif [[ $char == $'\033' ]];then
+read -r -s -n 1 -t 0.01 seq
+while [[ $seq == "[" || $seq =~ [0-9A-Za-z~] ]];do
+read -r -s -n 1 -t 0.01 seq||break
+done
+else
+if [ -n "$pattern" ];then
+debug 7 "$(od -An -to1 -v <<<"$char") [[ \"$input$char\" =~ $pattern ]] $([[ "$input$char" =~ $pattern ]]&&echo true||echo false)"
+[[ "$input$char" =~ $pattern ]]||continue
+fi
+input+="$char"
+[ -n "$mask" ]&&echo -n "*" >/dev/tty||echo -n "$char" >/dev/tty
 fi
 done
+debug 4 "Octal result: $(od -An -to1 -v <<<"$input")"
+echo "$input"
 }
 choose(){
 local end default readopt
@@ -526,7 +572,7 @@ shift 2
 --)shift
 break
 ;;
-*)die "$(gettext 'Unrecognized option: $1')"
+*)die "$(gettext "Unrecognized option"): $1"
 esac
 done
 local question="$(gettext "Select one of the above options:")"
@@ -579,7 +625,7 @@ shift 2
 --)shift
 break
 ;;
-*)die "$(gettext 'Unrecognized option: $1')"
+*)die "$(gettext "Unrecognized option"): $1"
 esac
 done
 local raw list task num newlist cmd name
@@ -595,7 +641,7 @@ IFS='|' read -r cmd name <<<"$line"
 if [ -n "$name" ];then
 echo "$line" >>"$newlist"
 else
-$cmd </dev/null >>"$newlist"||die "Could not get task list from command: $cmd"
+$cmd </dev/null >>"$newlist"||die "$(gettext "Could not get task list from command"): $cmd"
 fi
 done <<<"$list"
 list="$(sed '/^[[:space:]]*$/d' "$newlist")"
@@ -618,7 +664,8 @@ done <<<"$list"
 fi
 task=$(choose "$title" -x "$(gettext "Exit")" $opt "$list")
 [[ $task != "exit" ]]||break
-$task||error "Got error $? running: $task"
+local error=$?
+$task||die "$(eval_gettext 'Got error $error running $task')"
 echo ""
 done
 }
@@ -814,7 +861,7 @@ shift 2
 --)shift
 break
 ;;
-*)die "$(gettext 'Unrecognized option: $1')"
+*)die "$(gettext "Unrecognized option"): $1"
 esac
 done
 if [ -n "$fields" ];then
@@ -838,7 +885,7 @@ shift
 --)shift
 break
 ;;
-*)die "Unerwartete option in: $1"
+*)die "$(gettext "Unrecognized option"): $1"
 esac
 done
 emoji=$1
@@ -914,14 +961,15 @@ echo "$line"|cut -f1-3|sed "s#://#://$user:$pass@#"
 else
 echo "$line"|cut -f1-3
 fi
-done||die "Could not get exporters from prometheus!"
+done||die "$(gettext "Could not get exporters from prometheus!")"
 done
 }
 scrape(){
+local url="$1"
 num_parameters "$@" --min 1 --max 2 --die "Wrong number of parameters for scrape!"
 debug "Scrape the prometheus exporter at $1"
 local metrics
-metrics="$(curl "$1"|grep -E "$2"|grep -Ev '^($|#)'||die "Could not scrape the prometheus exporter at $1!")"
+metrics="$(curl "$url"|grep -E "$2"|grep -Ev '^($|#)'||die "$(eval_gettext 'Could not scrape the prometheus exporter at $url!')")"
 debug ">>> $metrics"
 echo "$metrics"|grep '{'|sed 's/,\?[{}] \?/\t/g'
 echo "$metrics"|grep -v '{'|sed 's/ /\t\t/g'
@@ -953,13 +1001,13 @@ shift
 --)shift
 break
 ;;
-*)die "$(gettext "Unrecognized option in"): $1"
+*)die "$(gettext "Unrecognized option"): $1"
 esac
 done
 install jq mlr
 local list
-list="$(curl -H "Authorization: Bearer $GRAFANA_TOKEN" "$GRAFANA_API/alertmanager/grafana/api/v2/alerts")"||die "Could not get alerts from Grafana!"
-list="$(jq 'sort_by(.startsAt) | .[] '"$filter" <<<"$list")"||die "Parse error in Grafana alerts list with filter: $filter"
+list="$(curl -H "Authorization: Bearer $GRAFANA_TOKEN" "$GRAFANA_API/alertmanager/grafana/api/v2/alerts")"||die "$(gettext "Could not get alerts from Grafana!")"
+list="$(jq 'sort_by(.startsAt) | .[] '"$filter" <<<"$list")"||die "$(gettext "Parse error in Grafana alerts list with filter"): $filter"
 local format=${1:-console}
 [ -n "$list" ]||return 0
 [ -z "$quiet" ]||return 1
@@ -1310,13 +1358,13 @@ local abort
 eval set -- "$(option_parse $'a abort -' "$@")"
 while true;do
 case "$1" in
--a|--abort)abort="(press any key to stop)"
+-a|--abort)abort="($(gettext "press any key to stop"))"
 shift
 ;;
 --)shift
 break
 ;;
-*)die "Unerwartete option in: $1"
+*)die "$(gettext "Unrecognized option"): $1"
 esac
 done
 local seconds=$1
@@ -1335,17 +1383,18 @@ echo ""
 LOCK_SLEEP=10
 _lock_remove(){
 pid=$(cat "$lockfile")||true
-([ -n "$pid" ]&&kill -0 "$pid" 2>/dev/null)||rm -f "$lockfile" "$lockfile.$pid"||die "Failed to remove lockfile: $lockfile"
+([ -n "$pid" ]&&kill -0 "$pid" 2>/dev/null)||rm -f "$lockfile" "$lockfile.$pid"||die "$(gettext "Failed to remove lockfile"): $lockfile"
 }
 lock(){
-local lockfile logged
+local lockfile logged pid
 lockfile="$(mktemp 'lockfile')"
-echo $$ >"$lockfile.$$" 2>/dev/null||die "Failed to create PID lockfile: $lockfile.$$"
+echo $$ >"$lockfile.$$" 2>/dev/null||die "$(gettext "Failed to create PID lockfile"): $lockfile.$$"
 _lock_remove
 logged=0
 while ! ln "$lockfile.$$" "$lockfile" 2>/dev/null;do
 if ((logged==0));then
-echo "Waiting for unlock in $lockfile by PID $(cat "$lockfile")..." >&1
+pid="$(cat "$lockfile")"
+echo "$(eval_gettext 'Waiting for unlock in $lockfile by PID $pid')..." >&1
 logged=1
 fi
 sleep "$LOCK_SLEEP"
@@ -1355,13 +1404,14 @@ done
 trap_add unlock EXIT
 }
 lock_exit(){
-local lockfile logged
+local lockfile logged pid
 lockfile="$(mktemp 'lockfile')"
-echo $$ >"$lockfile.$$" 2>/dev/null||die "Failed to create PID lockfile: $lockfile.$$"
+echo $$ >"$lockfile.$$" 2>/dev/null||die "$(gettext "Failed to create PID lockfile"): $lockfile.$$"
 _lock_remove
 if ! ln "$lockfile.$$" "$lockfile" 2>/dev/null;then
 unlock
-die "Stop processing because this is locked in $lockfile by PID $(cat "$lockfile")"
+pid="$(cat "$lockfile")"
+die "$(eval_gettext "Stop processing because this is locked in \$lockfile by PID $pid")"
 fi
 trap_add unlock EXIT
 }
@@ -1480,24 +1530,27 @@ declare -g -A _STEPS
 env_restore steps
 declare -p _STEPS
 env_store steps _STEPS "$STEPS_VARIABLES"
-echo "Arbeitsschritte werden protokolliert um auch mittendrin wieder aufzusetzen..." >&2
+echo "$(gettext "Work steps are logged so that you can resume work mid-process")..." >&2
 }
 steps_check(){
+local name="$1"
 num_parameters --min 1 --max 1 --die "Only an <ident> is needed, but must be there!" -- "$@"
 declare -p _STEPS 2>/dev/null|grep -q 'declare -A'||return 1
-if [ -n "${_STEPS["$1"]}" ];then
-echo "Job $1 already done in this run, skipping" >&2
+if [ -n "${_STEPS["$name"]}" ];then
+echo "$(eval_gettext 'Job $name already done in this run, skipping')" >&2
 return 0
 else
 return 1
 fi
 }
 steps_done(){
+local name="$1"
 num_parameters --min 0 --max 1 --die "Only an <ident> is needed!" -- "$@"
 declare -p _STEPS 2>/dev/null|grep -q 'declare -A'||return
 if [ -n "$1" ];then
-_STEPS["$1"]=1
-echo "Finished: Step $1 at $(date_format sql)" >&2
+_STEPS["$name"]=1
+local date="$(date_format sql)"
+echo "$(eval_gettext 'Finished: Step $name at $date')" >&2
 env_store steps _STEPS "$STEPS_VARIABLES"
 else
 env_clean steps
@@ -1512,7 +1565,8 @@ num_parameters --min 2 --die "At least a <name> and <command> is needed!" -- "$@
 local name=$1
 shift
 steps_check "$name"&&return||true
-declare -p _STEPS 2>/dev/null|grep -q 'declare -A'&&echo "Started: step $name at $(date_format sql)" >&2||true
+local date="$(date_format sql)"
+declare -p _STEPS 2>/dev/null|grep -q 'declare -A'&&echo "$(eval_gettext 'Started: step $name at $date')" >&2||true
 "$@"
 steps_done "$name"
 }
@@ -1625,7 +1679,7 @@ remote_file(){
 local file
 file="$(input "$@")"
 test "${file:0:1}" = "/"||file="$(path)/$file"
-test -f "$file"||die "No file to execute remotely under $file"
+test -f "$file"||die "$(eval_gettext 'No file to execute remotely under $file')"
 local ssh="${slogin:-operator}@$server"
 ssh "$ssh" 'bash -s' <"$file"
 }
@@ -1640,7 +1694,7 @@ shift
 --)shift
 break
 ;;
-*)die "$(gettext 'Unrecognized option: $1')"
+*)die "$(gettext "Unrecognized option"): $1"
 esac
 done
 num_parameters "$@" --min 2 --max 2 --die "Need exactly two parameters: semver_diff [-h] <first> <second>"
@@ -1677,7 +1731,7 @@ shift
 --)shift
 break
 ;;
-*)die "Unerwartete option in: $1"
+*)die "$(gettext "Unrecognized option"): $1"
 esac
 done
 if [ -n "$3" ]&&is_integer "$3";then
@@ -1739,14 +1793,14 @@ shift
 --)shift
 break
 ;;
-*)die "$(gettext 'Unrecognized option: $1')"
+*)die "$(gettext "Unrecognized option"): $1"
 esac
 done
 local uptime seconds=15
 echo -ne "Warten bis der Reboot fertig ist" >&2
 sleep "$seconds"
 while true;do
-[ -n "$quiet" ]||echo -ne "\rWarten bis der Reboot fertig ist ($seconds Sekunden)" >&2
+[ -n "$quiet" ]||echo -ne "\r$(eval_gettext 'Wait until the reboot is complete ($seconds seconds)')" >&2
 uptime=$(remote cut -d"' '" -f1 /proc/uptime 2>/dev/null|sed 's/[ .].*//')
 if ((uptime>0&&uptime<300));then
 break
@@ -1804,7 +1858,7 @@ fi
 local list time
 list="$(ls -lt ~/Downloads/csv_list*.csv|head -1|cut -d' ' -f 9-)"
 time="$(ls -lt ~/Downloads/csv_list*.csv|head -1|cut -d' ' -f 6-8)"
-warn "Für Update $PLUSSERVER_PORTAL/services/nameservers -> CSV herunterladen (manuell)." >&2
+warn "$(eval_gettext 'To update $PLUSSERVER_PORTAL/services/nameservers -> download CSV (manually).')" >&2
 test -n "$list"||die "Keine lokale DNS Liste gefunden, bitte herunterladen."
 echo "Benutze $list vom $time." >&2
 echo "" >&2
@@ -1853,7 +1907,7 @@ shift
 --)shift
 break
 ;;
-*)die "$(gettext 'Unrecognized option: $1')"
+*)die "$(gettext "Unrecognized option"): $1"
 esac
 done
 num_parameters "$@" --min 2 --max 2 --die "Need exactly two parameters: semver_diff [-h] <first> <second>"
@@ -1889,26 +1943,42 @@ num=1
 elif [[ $bld1 > $bld2 ]];then
 num=-1
 fi
+local step
 if [ -n "$human" ];then
 echo -n "$1 -> $2 "
 if ((num==0));then
-echo "sind identische Versionen"
+gettext "are identical versions"
+echo
 elif ((num>=1000000000));then
-echo "ist ein upgrade von $((num/1000000000)) Hauptversione(n)"
+step=$((num/1000000000))
+eval_ngettext "is an upgrade of one major version" 'is an upgrade of $step mayjor versions' "$step"
+echo
 elif ((num>=1000000));then
-echo "ist ein upgrade von $((num/1000000)) Nebenversione(n)"
+step=$((num/1000000))
+eval_ngettext "is an upgrade of one minor version" 'is an upgrade of $step minor versions' "$step"
+echo
 elif ((num>=1000));then
-echo "ist ein upgrade von $((num/1000)) Patch Level(n)"
+step=$((num/1000))
+eval_ngettext "is an upgrade of one patch version" 'is an upgrade of $step patch versions' "$step"
+echo
 elif ((num>=1));then
-echo "ist ein entwickler Upgrade)"
+gettext "is a developer upgrade"
+echo
 elif ((num>=-1000));then
-echo "ist ein entwickler Downgrade"
+gettext "is a developer downgrade"
+echo
 elif ((num>=1000000));then
-echo "ist ein downgrade von $((num/-1000)) Patch Level(n)"
+step=$((num/-1000))
+eval_ngettext "is an downgrade of one patch version" 'is an downgrade of $step patch versions' "$step"
+echo
 elif ((num>=1000000000));then
-echo "ist ein downgrade von $((num/-1000000)) Nebenversione(n)"
+step=$((num/-1000000))
+eval_ngettext "is an upgrade of one minor version" 'is an upgrade of $step minor versions' "$step"
+echo
 else
-echo "ist ein downgrade von $((num/-1000000000)) Hauptversione(n)"
+step=$((num/1000000000))
+eval_ngettext "is an upgrade of one major version" 'is an upgrade of $step mayjor versions' "$step"
+echo
 fi
 return 0
 else
@@ -1933,7 +2003,7 @@ shift 2
 --)shift
 break
 ;;
-*)die "$(gettext 'Unrecognized option: $1')"
+*)die "$(gettext "Unrecognized option"): $1"
 esac
 done
 _die(){

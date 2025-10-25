@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-25 21:09+0200\n"
+"POT-Creation-Date: 2025-10-25 22:32+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,6 +16,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
 
 #: core/arguments:57
 msgid "Options"
@@ -33,16 +34,40 @@ msgstr ""
 msgid "Invalid duration unit"
 msgstr ""
 
-#: module/monitoring:145
-msgid "Unrecognized option in"
+#: module/monitoring:69
+msgid "Could not get exporters from prometheus!"
 msgstr ""
 
-#: module/monitoring:181
+#: module/monitoring:84
+#, sh-format
+msgid "Could not scrape the prometheus exporter at $url!"
+msgstr ""
+
+#: module/monitoring:146 module/input:117 module/input:249 module/input:334
+#: module/process:85 module/remote:120 module/remote:192 module/remote:276
+#: module/mattermost:288 module/mattermost:323 module/validator:36
+#: module/software:91
+msgid "Unrecognized option"
+msgstr ""
+
+#: module/monitoring:153
+msgid "Could not get alerts from Grafana!"
+msgstr ""
+
+#: module/monitoring:154
+msgid "Parse error in Grafana alerts list with filter"
+msgstr ""
+
+#: module/monitoring:182
 msgid "Severity\\tNetwork\\tInstance\\tSummary\\tStart"
 msgstr ""
 
 #: module/input:24
 msgid "Press any key to continue..."
+msgstr ""
+
+#: module/input:38
+msgid "n/Y"
 msgstr ""
 
 #: module/input:41 module/input:66
@@ -57,8 +82,8 @@ msgstr ""
 msgid "Disallowed answer"
 msgstr ""
 
-#: module/input:117 module/input:249 module/input:334 module/remote:192
-msgid "Unrecognized option"
+#: module/input:63
+msgid "N/y"
 msgstr ""
 
 #: module/input:124
@@ -74,15 +99,19 @@ msgid "Enter password"
 msgstr ""
 
 #: module/input:146
-msgid "Enter a time"
+msgid "Enter time"
 msgstr ""
 
 #: module/input:151
-msgid "Enter a short text"
+msgid "Enter short text"
 msgstr ""
 
 #: module/input:254
 msgid "Select one of the above options:"
+msgstr ""
+
+#: module/input:353
+msgid "Could not get task list from command"
 msgstr ""
 
 #: module/input:360
@@ -93,6 +122,15 @@ msgstr ""
 msgid "Exit"
 msgstr ""
 
+#: module/input:380
+#, sh-format
+msgid "Got error $error running $task"
+msgstr ""
+
+#: module/process:78
+msgid "press any key to stop"
+msgstr ""
+
 #: module/process:90
 msgid "Waiting"
 msgstr ""
@@ -101,7 +139,90 @@ msgstr ""
 msgid "seconds"
 msgstr ""
 
-#: module/remote:120 module/remote:276 module/mattermost:288
-#: module/validator:36 module/software:91
-msgid "Unrecognized option: $1"
+#: module/process:114
+msgid "Failed to remove lockfile"
 msgstr ""
+
+#: module/process:129 module/process:162
+msgid "Failed to create PID lockfile"
+msgstr ""
+
+#: module/process:137
+#, sh-format
+msgid "Waiting for unlock in $lockfile by PID $pid"
+msgstr ""
+
+#: module/process:369
+msgid "Work steps are logged so that you can resume work mid-process"
+msgstr ""
+
+#: module/process:381
+#, sh-format
+msgid "Job $name already done in this run, skipping"
+msgstr ""
+
+#: module/process:400
+#, sh-format
+msgid "Finished: Step $name at $date"
+msgstr ""
+
+#: module/process:425
+#, sh-format
+msgid "Started: step $name at $date"
+msgstr ""
+
+#: module/remote:93
+#, sh-format
+msgid "No file to execute remotely under $file"
+msgstr ""
+
+#: module/remote:284
+#, sh-format
+msgid "Wait until the reboot is complete ($seconds seconds)"
+msgstr ""
+
+#: module/remote:415
+#, sh-format
+msgid ""
+"To update $PLUSSERVER_PORTAL/services/nameservers -> download CSV (manually)."
+msgstr ""
+
+#: module/software:133
+msgid "are identical versions"
+msgstr ""
+
+#: module/software:137 module/software:163
+#, sh-format
+msgid "is an upgrade of one major version"
+msgid_plural "is an upgrade of $step mayjor versions"
+msgstr[0] ""
+msgstr[1] ""
+
+#: module/software:141 module/software:159
+#, sh-format
+msgid "is an upgrade of one minor version"
+msgid_plural "is an upgrade of $step minor versions"
+msgstr[0] ""
+msgstr[1] ""
+
+#: module/software:145
+#, sh-format
+msgid "is an upgrade of one patch version"
+msgid_plural "is an upgrade of $step patch versions"
+msgstr[0] ""
+msgstr[1] ""
+
+#: module/software:148
+msgid "is a developer upgrade"
+msgstr ""
+
+#: module/software:151
+msgid "is a developer downgrade"
+msgstr ""
+
+#: module/software:155
+#, sh-format
+msgid "is an downgrade of one patch version"
+msgid_plural "is an downgrade of $step patch versions"
+msgstr[0] ""
+msgstr[1] ""

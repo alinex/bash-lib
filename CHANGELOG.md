@@ -1,8 +1,17 @@
-# Last Changes
+/# Last Changes
 
 As this is not driven by releases and therefore tags are not used it is an ongoing update so we will divide the changelog into months. If you need a special version instead of the newest one, please select it in git by date.
 
 ## October 2025
+
+- enhanced and easy to use [`debug`](doc/function/debug.md) possibilities
+- stacktrace in debug level 5 integrated to [`die`](doc/function/die.md)
+- add [`spinner_start`](doc/function/spinner_start.md) animation
+- [`dns-list`](doc/function/dns_list.md) to query self controlled dns servers
+- a new **timer** to measure elapsed time between two invocations
+- improved [`ask`](doc/function/ask.md) which allows only valid characters for specified input type
+
+## 20. October 2025 V2 Final
 
 - **Complete rework** of the BashLib as BashLib V2 New Generation
 - **modular** concept integrated
@@ -13,9 +22,5 @@ As this is not driven by releases and therefore tags are not used it is an ongoi
 - **interactive** support: pause, ask_string, ask_integer, ...
 - remote capabilities integrated: **ssh, curl, prometheus, grafana, confluence, jira, mattermost**
 - completely **documented** with [API](doc/README.md)
-- enhanced and easy to use [`debug`](doc/function/debug.md) possibilities
-- add [`spinner_start`](doc/function/spinner_start.md) animation
-- [`dns-list`](doc/function/dns_list.md) to query self controlled dns servers
-- a new **timer** to measure elapsed time between two invocations
 
 What was before this, was BashLib V1 and as everything is new it doesn't matter any more.

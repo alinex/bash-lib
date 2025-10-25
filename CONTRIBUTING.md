@@ -257,6 +257,7 @@ But you can also select only specific functions to debug by specifying a functio
 
 - `DEBUG=` to not debug
 - `DEBUG=1` for minimal debugging
+- `DEBUG=5` with stack traces on die
 - `DEBUG=9` for maximal debugging
 - `DEBUG=curl` to only debug one function
 - `DEBUG=curl,remote` for multiple functions

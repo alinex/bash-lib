@@ -66,7 +66,7 @@ exporter() {
                     echo "$line" | cut -f1-3
                 fi
             done ||
-            die "Could not get exporters from prometheus!"
+            die "$(gettext "Could not get exporters from prometheus!")"
     done
 }
 
@@ -77,10 +77,11 @@ exporter() {
 #           <metric>    [<value>=<text>],...    <value>
 #           ...
 scrape() {
+    local url="$1"
     num_parameters "$@" --min 1 --max 2 --die "Wrong number of parameters for scrape!"
     debug "Scrape the prometheus exporter at $1"
     local metrics
-    metrics="$(curl "$1" | grep -E "$2" | grep -Ev '^($|#)' || die "Could not scrape the prometheus exporter at $1!")"
+    metrics="$(curl "$url" | grep -E "$2" | grep -Ev '^($|#)' || die "$(eval_gettext "Could not scrape the prometheus exporter at \$url!")")"
     debug ">>> $metrics"
     echo "$metrics" | grep '{' | sed 's/,\?[{}] \?/\t/g'
     echo "$metrics" | grep -v '{' | sed 's/ /\t\t/g'
@@ -142,15 +143,15 @@ alerts() {
             shift
             break
             ;;
-        *) die "$(gettext "Unrecognized option in"): $1" ;;
+        *) die "$(gettext "Unrecognized option"): $1" ;;
         esac
     done
     # processing
     install jq mlr
     local list
     list="$(curl -H "Authorization: Bearer $GRAFANA_TOKEN" "$GRAFANA_API/alertmanager/grafana/api/v2/alerts")" ||
-        die "Could not get alerts from Grafana!"
-    list="$(jq 'sort_by(.startsAt) | .[] '"$filter" <<<"$list")" || die "Parse error in Grafana alerts list with filter: $filter"
+        die "$(gettext "Could not get alerts from Grafana!")"
+    list="$(jq 'sort_by(.startsAt) | .[] '"$filter" <<<"$list")" || die "$(gettext "Parse error in Grafana alerts list with filter"): $filter"
     local format=${1:-console}
     # empty list
     [ -n "$list" ] || return 0

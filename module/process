@@ -75,14 +75,14 @@ countdown() {
     while true; do
         case "$1" in
         -a | --abort)
-            abort="(press any key to stop)"
+            abort="($(gettext "press any key to stop"))"
             shift
             ;;
         --)
             shift
             break
             ;;
-        *) die "Unerwartete option in: $1" ;;
+        *) die "$(gettext "Unrecognized option"): $1" ;;
         esac
     done
     # processing
@@ -111,7 +111,7 @@ _lock_remove() {
     # Usage: _lock_remove
     pid=$(cat "$lockfile") || true
     ([ -n "$pid" ] && kill -0 "$pid" 2>/dev/null) ||
-        rm -f "$lockfile" "$lockfile.$pid" || die "Failed to remove lockfile: $lockfile"
+        rm -f "$lockfile" "$lockfile.$pid" || die "$(gettext "Failed to remove lockfile"): $lockfile"
 }
 
 # Set a lock or wait till it can be set
@@ -123,17 +123,18 @@ _lock_remove() {
 # process will wait on the lock statement till no other process with the same lock is running
 # before going on.
 lock() {
-    local lockfile logged
+    local lockfile logged pid
     lockfile="$(mktemp 'lockfile')"
     # make a file with our PID
-    echo $$ >"$lockfile.$$" 2>/dev/null || die "Failed to create PID lockfile: $lockfile.$$"
+    echo $$ >"$lockfile.$$" 2>/dev/null || die "$(gettext "Failed to create PID lockfile"): $lockfile.$$"
     # rmove old lock if no longer running
     _lock_remove
     # try it, till it works
     logged=0
     while ! ln "$lockfile.$$" "$lockfile" 2>/dev/null; do
         if ((logged == 0)); then # write message once
-            echo "Waiting for unlock in $lockfile by PID $(cat "$lockfile")..." >&1
+            pid="$(cat "$lockfile")"
+            echo "$(eval_gettext "Waiting for unlock in \$lockfile by PID \$pid")..." >&1
             logged=1
         fi
         # if the symlink failed, wait for the current lock holder to exit
@@ -155,16 +156,17 @@ lock() {
 # process will wait on the lock statement till no other process with the same lock is running
 # before going on.
 lock_exit() {
-    local lockfile logged
+    local lockfile logged pid
     lockfile="$(mktemp 'lockfile')"
     # make a file with our PID
-    echo $$ >"$lockfile.$$" 2>/dev/null || die "Failed to create PID lockfile: $lockfile.$$"
+    echo $$ >"$lockfile.$$" 2>/dev/null || die "$(gettext "Failed to create PID lockfile"): $lockfile.$$"
     # rmove old lock if no longer running
     _lock_remove
     # try to symlink it
     if ! ln "$lockfile.$$" "$lockfile" 2>/dev/null; then
         unlock
-        die "Stop processing because this is locked in $lockfile by PID $(cat "$lockfile")"
+        pid="$(cat "$lockfile")"
+        die "$(eval_gettext "Stop processing because this is locked in \$lockfile by PID $pid")"
     fi
     # if the locking process exits without unlocking, delete our lock
     trap_add unlock EXIT
@@ -364,17 +366,19 @@ steps_init() {
     env_restore steps
     declare -p _STEPS
     env_store steps _STEPS "$STEPS_VARIABLES" # initial store
-    echo "Arbeitsschritte werden protokolliert um auch mittendrin wieder aufzusetzen..." >&2
+    echo "$(gettext "Work steps are logged so that you can resume work mid-process")..." >&2
 }
 
 # Check if step already finished successful
 # Usage:    steps_done <name>
 # Exit:     0 if done else not done or with failure
 steps_check() {
+    local name="$1"
     num_parameters --min 1 --max 1 --die "Only an <ident> is needed, but must be there!" -- "$@"
     declare -p _STEPS 2>/dev/null | grep -q 'declare -A' || return 1 # return not found if no step control
-    if [ -n "${_STEPS["$1"]}" ]; then
-        echo "Job $1 already done in this run, skipping" >&2
+    if [ -n "${_STEPS["$name"]}" ]; then
+        # shellcheck disable=SC2005
+        echo "$(eval_gettext "Job \$name already done in this run, skipping")" >&2
         return 0
     else
         return 1
@@ -385,11 +389,15 @@ steps_check() {
 # Usage:    steps_done <name>   # finished one step
 #           steps_done          # completely finished -> cleanup
 steps_done() {
+    local name="$1"
     num_parameters --min 0 --max 1 --die "Only an <ident> is needed!" -- "$@"
     declare -p _STEPS 2>/dev/null | grep -q 'declare -A' || return # do nothin if no step control
     if [ -n "$1" ]; then
-        _STEPS["$1"]=1
-        echo "Finished: Step $1 at $(date_format sql)" >&2
+        _STEPS["$name"]=1
+        # shellcheck disable=SC2155
+        local date="$(date_format sql)"
+        # shellcheck disable=SC2005
+        echo "$(eval_gettext "Finished: Step \$name at \$date")" >&2
         env_store steps _STEPS "$STEPS_VARIABLES"
     else
         env_clean steps
@@ -412,7 +420,9 @@ sync_name() {
     local name=$1
     shift
     steps_check "$name" && return || true
-    declare -p _STEPS 2>/dev/null | grep -q 'declare -A' && echo "Started: step $name at $(date_format sql)" >&2 || true
+    local date="$(date_format sql)"
+    # shellcheck disable=SC2005
+    declare -p _STEPS 2>/dev/null | grep -q 'declare -A' && echo "$(eval_gettext "Started: step \$name at \$date")" >&2 || true
     "$@"
     steps_done "$name"
 }
