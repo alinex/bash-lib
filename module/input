@@ -76,65 +76,134 @@ ask_yes() {
 }
 
 ask_input() {
-    _deprecated "please use ask_string"
+    _deprecated "please use ask string"
 }
 
-# Ask for a text line
-# Usage:    ask_string <question> [<default>]
-#           <question> | ask_string
-# TTY:      <question> <key>
-# Stdin:    <line>
+# Ask for an input element
+# This will also validate while typing if you select the correct format. So you can only input characters matching the input format.
+# Possible formats are:
+# - `string` - (default) allow anything
+# - `integer` or `number` - only allow [0-9]
+# - `float` - allow number [0-9]+.[0-9]+
+# - `password` - will show only `*` characters to hide input
+# Usage:    ask <format> <question>
+# Options:  -e, --empty             # allowe empty value
+#           -d, --default <value>   # set default if none given
+#           -n, --allow-negative    # on number, integer, float
+# TTY:      <question> <valid characters>...
 # Stdout:   <answer>
-ask_string() {
-    local text
-    text="$(input "$@")"
-    local answer prompt
-    if (($# < 2)); then
-        prompt="$text "
-    else
-        prompt="$text ($(gettext "default"): $2) "
-    fi
-    echo -ne "${CC_INFO}" >/dev/tty
-    read -rp "$prompt" answer </dev/tty
-    echo -ne "${CC_RESET}" >/dev/tty
-    if [ -z "$answer" ] && [ -n "$2" ]; then
-        answer="$2"
-        echo -n "$(gettext "Using default"): $answer" >/dev/tty
-    fi
-    echo "$answer"
-}
-
-# Ask for an integer number
-# Usage:    ask_integer <question> [<default>]
-#           <question> | ask_integer
-# TTY:      <question> <key>
-# Stdin:    <line>
-# Stdout:   <answer>
-ask_integer() {
-    local text
-    text="$(input "$@")"
-    local answer prompt
-    if (($# < 2)); then
-        prompt="$text "
-    else
-        prompt="$text ($(gettext "default"): $2) "
-    fi
+ask() {
+    # parameter parsing
+    local default empty negative
+    eval set -- "$(option_parse $'e empty -\nd default +' "$@")"
     while true; do
-        echo -ne "${CC_INFO}" >/dev/tty
-        read -rp "$prompt" answer </dev/tty
-        echo -ne "${CC_RESET}" >/dev/tty
-        if [ -z "$answer" ] && [ -n "$2" ]; then
-            answer="$2"
-            echo -n "$(gettext "Using default"): $answer" >/dev/tty
-            return 0
-        fi
-        if [[ $answer =~ ^[0-9]+$ ]]; then
-            echo "$answer"
-            return 0
+        case "$1" in
+        -e | --empty)
+            empty=1
+            shift
+            ;;
+        -d | --default)
+            default="$2"
+            shift 2
+            ;;
+        -n | --negative)
+            negative=1
+            shift
+            ;;
+        --)
+            shift
+            break
+            ;;
+        *) die "$(gettext "Unrecognized option"): $1" ;;
+        esac
+    done
+    # processing
+    local prompt pattern mask
+    case $1 in
+    integer | number)
+        prompt="${2:-$(gettext "Enter integer number")}"
+        if [ -n "$negative" ]; then
+            pattern="^-?[0-9]+$"
         else
-            echo -n "$(gettext "Only integer number possible"): " >/dev/tty
+            pattern="^[0-9]+$"
+        fi
+        ;;
+    float)
+        prompt="${2:-$(gettext "Enter float number")}"
+        if [ -n "$negative" ]; then
+            pattern="-?^[0-9]+(\.[0-9]?)?$"
+            final="^-?[0-9]+(\.[0-9])?$"
+        else
+            pattern="^[0-9]+(\.[0-9]*?)?$"
+            final="^[0-9]+(\.[0-9]+)?$"
+        fi
+        ;;
+    password)
+        prompt="${2:-$(gettext "Enter password")}"
+        mask=1
+        ;;
+    time)
+        prompt="${2:-$(gettext "Enter a time")}"
+        pattern="^([0-1]?[0-9]|2[0-3])(:([0-5]?[0-9])?)?$"
+        final="^([0-1][0-9]|2[0-3]):[0-5][0-9]$"
+        ;;
+    *)
+        prompt="${2:-$(gettext "Enter a short text")}"
+        ;;
+    esac
+    local input="" char="" seq
+    [ -z "$default" ] || prompt="$prompt [$default]"
+    echo -en "${CC_INFO}$prompt:${CC_RESET} " >/dev/tty
+    # Read one character at a time silently (-s), without newline (-n 1)
+    while IFS= read -r -s -n 1 char </dev/tty; do
+        # stop maybe on enter (newline)
+        if [[ $char == "" ]]; then
+            # end if final pattern reached
+            if [ -n "$final" ]; then
+                if [[ "$input" =~ $final ]]; then
+                    echo >/dev/tty
+                    break
+                fi
+            # end if input done
+            elif [ -n "$input" ]; then
+                echo >/dev/tty
+                break
+            # end if default possible
+            elif [ -n "$default" ]; then
+                input="$default"
+                echo >/dev/tty
+                break
+            # end if empty allowed
+            elif [ -n "$empty" ]; then
+                echo >/dev/tty
+                break
+            fi
+        # Handle backspace
+        elif [[ $char == $'\177' ]]; then
+            if [ ${#input} -gt 0 ]; then
+                input=${input:0:-1}
+                echo -ne "\b \b" >/dev/tty
+            fi
+        # ignore escape sequences
+        elif [[ $char == $'\033' ]]; then
+            # Read next few characters non-blocking to drain escape sequence
+            read -r -s -n 1 -t 0.01 seq
+            while [[ $seq == "[" || $seq =~ [0-9A-Za-z~] ]]; do
+                read -r -s -n 1 -t 0.01 seq || break
+            done
+        # next character
+        else
+            if [ -n "$pattern" ]; then
+                debug 7 "$(od -An -to1 -v <<<"$char") [[ \"$input$char\" =~ $pattern ]] $([[ "$input$char" =~ $pattern ]] && echo true || echo false)"
+                [[ "$input$char" =~ $pattern ]] || continue
+            fi
+            input+="$char"
+            [ -n "$mask" ] && echo -n "*" >/dev/tty || echo -n "$char" >/dev/tty
         fi
     done
+    debug 4 "Octal result: $(od -An -to1 -v <<<"$input")"
+    # return input
+    echo "$input"
 }
 
 # Select from list (extended version of native select)
@@ -177,7 +246,7 @@ choose() {
             shift
             break
             ;;
-        *) die "$(gettext "Unrecognized option: \$1")" ;;
+        *) die "$(gettext "Unrecognized option"): $1" ;;
         esac
     done
     # processing
@@ -262,7 +331,7 @@ tasks() {
             shift
             break
             ;;
-        *) die "$(gettext "Unrecognized option: \$1")" ;;
+        *) die "$(gettext "Unrecognized option"): $1" ;;
         esac
     done
     # processing

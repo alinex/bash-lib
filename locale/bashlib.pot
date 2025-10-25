@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-24 22:43+0200\n"
+"POT-Creation-Date: 2025-10-25 21:09+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -53,36 +53,43 @@ msgstr ""
 msgid "Yes"
 msgstr ""
 
-#: module/input:49 module/input:74 module/input:216
+#: module/input:49 module/input:74 module/input:285
 msgid "Disallowed answer"
 msgstr ""
 
-#: module/input:95 module/input:120
-msgid "default"
+#: module/input:117 module/input:249 module/input:334 module/remote:192
+msgid "Unrecognized option"
 msgstr ""
 
-#: module/input:102 module/input:128
-msgid "Using default"
+#: module/input:124
+msgid "Enter integer number"
 msgstr ""
 
-#: module/input:135
-msgid "Only integer number possible"
+#: module/input:132
+msgid "Enter float number"
 msgstr ""
 
-#: module/input:180 module/input:265 module/remote:120 module/remote:276
-#: module/mattermost:288 module/validator:36 module/software:91
-msgid "Unrecognized option: $1"
+#: module/input:142
+msgid "Enter password"
 msgstr ""
 
-#: module/input:185
+#: module/input:146
+msgid "Enter a time"
+msgstr ""
+
+#: module/input:151
+msgid "Enter a short text"
+msgstr ""
+
+#: module/input:254
 msgid "Select one of the above options:"
 msgstr ""
 
-#: module/input:291
+#: module/input:360
 msgid "No tasks found to be executed."
 msgstr ""
 
-#: module/input:307
+#: module/input:376
 msgid "Exit"
 msgstr ""
 
@@ -92,4 +99,9 @@ msgstr ""
 
 #: module/process:92
 msgid "seconds"
+msgstr ""
+
+#: module/remote:120 module/remote:276 module/mattermost:288
+#: module/validator:36 module/software:91
+msgid "Unrecognized option: $1"
 msgstr ""
