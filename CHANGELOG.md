@@ -1,4 +1,4 @@
-/# Last Changes
+# Last Changes
 
 As this is not driven by releases and therefore tags are not used it is an ongoing update so we will divide the changelog into months. If you need a special version instead of the newest one, please select it in git by date.
 
@@ -9,7 +9,7 @@ As this is not driven by releases and therefore tags are not used it is an ongoi
 - add [`spinner_start`](doc/function/spinner_start.md) animation
 - [`dns-list`](doc/function/dns_list.md) to query self controlled dns servers
 - a new **timer** to measure elapsed time between two invocations
-- improved [`ask`](doc/function/ask.md) which allows only valid characters for specified input type
+- improved [`ask`](doc/function/ask.md) which allows only valid characters for specified input
 
 ## 20. October 2025 V2 Final
 
