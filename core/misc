@@ -56,6 +56,7 @@ debug "Running in DEBUG=${DEBUG-} mode!"
 # Return:   always 1 and try to exit script with status 1
 die() {
     echo -e "${CC_CRITICAL}$(input "$@")${CC_RESET}" >&2
+    _stacktrace
     # kill -s TERM "$PPID" # forcibly terminite the parent
     exit 1
 }
