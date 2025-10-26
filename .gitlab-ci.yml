@@ -1,19 +1,19 @@
 stages:
-  - Debian
+  - Debian Based
 
-test_debian:
-  stage: Debian
+Debian:
+  stage: Debian Based
   image: debian:$DEBIAN_VERSION
   parallel:
     matrix:
       - DEBIAN_VERSION: ["11", "12"]
   before_script:
-    #- apt-get update -qq
-    #- apt-get install -y git curl ca-certificates bats bats-assert bats-support
+    - apt-get update -qq
+    - apt-get install -y git curl ca-certificates bats
     - npm install
   script:
     - mkdir -p test-results
-    - npm run test-ci
+    - bats --formatter tap core/date.bats
   artifacts:
     when: always
     paths:
