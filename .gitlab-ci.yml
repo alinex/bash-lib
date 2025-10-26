@@ -1,5 +1,11 @@
 stages:
+  - Test
   - Debian Based
+
+sast:
+  stage: Test
+include:
+- template: Security/SAST.gitlab-ci.yml
 
 Debian:
   stage: Debian Based
@@ -23,3 +29,4 @@ Debian:
   only:
     - master
     - merge_requests
+
