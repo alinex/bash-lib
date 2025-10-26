@@ -10,6 +10,7 @@ As this is not driven by releases and therefore tags are not used it is an ongoi
 - [`dns-list`](doc/function/dns_list.md) to query self controlled dns servers
 - a new **timer** to measure elapsed time between two invocations
 - improved [`ask`](doc/function/ask.md) which allows only valid characters for specified input
+- operating system tests in local docker and using GitLab CI
 
 ## 20. October 2025 V2 Final
 

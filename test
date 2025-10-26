@@ -4,6 +4,11 @@ cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]:-$(pwd)/x}")")" || exit
 export BASHLIB_HOME
 BASHLIB_HOME="$(pwd)"
 
+# Reset all
+CC_RESET=$'\033[0m'
+# Set text color to bold cyan
+CC_CYAN_BOLD=$'\033[96m'
+
 # run within CI
 if [ "$1" = "ci" ]; then
   # create results folder
@@ -14,21 +19,43 @@ if [ "$1" = "ci" ]; then
     name=${file%.bats} # remove the .bats extension
     name=${name//\//-} # replace all / with -
     echo "Run $name tests..."
-    bats --formatter tap $file
-    echo "Run again for junit.xml files..."
     bats --formatter junit $file >test-results/$name.xml
   done
 # local test run
 else
-  for version in 11 12; do
-    echo
-    echo "Debian $version"
+  echo "Running multiple OS using local docker"
+  # Debian
+  for version in 11 12 13; do
+    echo -en "${CC_CYAN_BOLD}Debian $version${CC_RESET} "
     cmd="
     export BASHLIB_HOME=/mnt
-    apt-get update >/dev/null && apt-get install -y bats curl gettext >/dev/null
-    ln -fs /usr/share/zoneinfo/Europe/Berlin /etc/localtime && dpkg-reconfigure -f noninteractive tzdata
-    bats core/date.bats
+    echo \"tzdata tzdata/Areas select Europe\" | debconf-set-selections
+    echo \"tzdata tzdata/Zones/Europe select Berlin\" | debconf-set-selections
+    export DEBIAN_FRONTEND=noninteractive
+    apt-get update &>/dev/null && apt-get install -y git tzdata curl gettext &>/dev/null
+    ln -fs /usr/share/zoneinfo/Europe/Berlin /etc/localtime && dpkg-reconfigure -f noninteractive tzdata 2>/dev/null
+    git clone https://github.com/bats-core/bats-core.git
+    cd bats-core
+    ./install.sh /usr/local
+    cd /mnt
+    bats --tap core/date.bats core/misc.bats | grep -v ^ok
     "
+    echo -n "($(docker pull -q "debian:$version")) "
     docker run --rm -it -v "$PWD:/mnt" -w /mnt "debian:$version" bash -c "$cmd"
+  done
+  # Ubuntu
+  for version in 22.04 24.04; do
+    echo -en "${CC_CYAN_BOLD}Ubuntu $version${CC_RESET} "
+    cmd="
+    export BASHLIB_HOME=/mnt
+    echo \"tzdata tzdata/Areas select Europe\" | debconf-set-selections
+    echo \"tzdata tzdata/Zones/Europe select Berlin\" | debconf-set-selections
+    export DEBIAN_FRONTEND=noninteractive
+    apt-get update &>/dev/null && apt-get install -y tzdata bats curl gettext &>/dev/null
+    ln -fs /usr/share/zoneinfo/Europe/Berlin /etc/localtime && dpkg-reconfigure -f noninteractive tzdata 2>/dev/null
+    bats --tap core/date.bats | grep -v ^ok
+    "
+    echo -n "($(docker pull -q "ubuntu:$version")) "
+    docker run --rm -it -v "$PWD:/mnt" -w /mnt "ubuntu:$version" bash -c "$cmd"
   done
 fi

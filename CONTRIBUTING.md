@@ -329,7 +329,7 @@ _setup.bats
 2 tests, 0 failures
 ```
 
-Other possibilities to run the tests are:
+Other possibilities to run the local tests are:
 
 - `bats local/bash-lib` - run all tests
 - `bats local/bash-lib/_setup.bats` - run only tests in file
@@ -338,6 +338,14 @@ Other possibilities to run the tests are:
 - `DEBUG=1 bats --filter-tags mattermost local/bash-lib` - run in debug mode and display debug messages below result
 
 As there are some **problems using bats with assoziative arrays and handling of exit** it could not completely test the whole framework. We tried other shell unit test tools but got no better result of `bashunit` or `shellspec`. So for the time being unit testing is only applied there possible.
+
+Next step should be to run the tests on different operating systems. Therefor we use `docker` so have your environment running and accessible under your user.
+
+```bash
+./test
+```
+
+And the last test will be within the build pipeline after submitting something to gitlab.com.
 
 ### 📝 Linting with Shellcheck
 

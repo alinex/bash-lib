@@ -2,8 +2,8 @@
 
 # bats file_tags=misc
 setup() {
-    load "../bats-support/load"
-    load "../bats-assert/load"
+    load $BASHLIB_HOME/bats-support/load.bash
+    load $BASHLIB_HOME/bats-assert/load.bash
     load $BASHLIB_HOME/loader
 }
 teardown_file() {
