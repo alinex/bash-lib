@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+BASHLIB_HOME="$(pwd)"
+
 mkdir -p test-results
 rm -rf test-results/* 2>/dev/null || true
 

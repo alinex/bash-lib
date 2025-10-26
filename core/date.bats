@@ -2,8 +2,8 @@
 
 # bats file_tags=date
 setup() {
-    load "../bats-support/load"
-    load "../bats-assert/load"
+    load "../bats-support/load.bash"
+    load "../bats-assert/load.bash"
     load $BASHLIB_HOME/loader
 }
 
