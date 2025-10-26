@@ -1,8 +1,8 @@
 stages:
   - Debian
 
-bats_tests:
-  stage: test
+test_debian:
+  stage: Debian
   image: debian:$DEBIAN_VERSION
   parallel:
     matrix:
