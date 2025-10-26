@@ -10,10 +10,8 @@ Debian:
   before_script:
     - apt-get update -qq
     - apt-get install -y git curl ca-certificates bats
-    #- npm install
   script:
-    - mkdir -p test-results
-    - bats --formatter tap core/date.bats
+    - test
   artifacts:
     when: always
     paths:
