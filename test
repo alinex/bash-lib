@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 
 cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]:-$(pwd)/x}")")" || exit
-export BASHLIB_HOME="$(pwd)"
+export BASHLIB_HOME
+BASHLIB_HOME="$(pwd)"
 
 # run within CI
 if [ "$1" = "ci" ]; then
@@ -19,5 +20,15 @@ if [ "$1" = "ci" ]; then
   done
 # local test run
 else
-  echo "Not implemented, yet."
+  for version in 11 12; do
+    echo
+    echo "Debian $version"
+    cmd="
+    export BASHLIB_HOME=/mnt
+    apt-get update >/dev/null && apt-get install -y bats curl gettext >/dev/null
+    ln -fs /usr/share/zoneinfo/Europe/Berlin /etc/localtime && dpkg-reconfigure -f noninteractive tzdata
+    bats core/date.bats
+    "
+    docker run --rm -it -v "$PWD:/mnt" -w /mnt "debian:$version" bash -c "$cmd"
+  done
 fi

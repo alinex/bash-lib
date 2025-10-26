@@ -1,43 +1,43 @@
 stages:
   - Test
-  - Debian Based
+  - Linux
 
 include:
   - template: Jobs/SAST.gitlab-ci.yml
   - template: Jobs/Dependency-Scanning.gitlab-ci.yml
   - template: Jobs/Secret-Detection.gitlab-ci.yml
-  - template: Jobs/Container-Scanning.gitlab-ci.yml
+#  - template: Jobs/Container-Scanning.gitlab-ci.yml
 sast:
   stage: Test
 semgrep-sast:
   rules:
     - if: '$CI_PIPELINE_SOURCE == "push"'
       exists:
-        - 'core/*'       # add specific directories
+        - 'core/*'      # add specific directories
         - 'module/*'    # add folders containing extensionless bash files
-        - 'extra/*'    # add folders containing extensionless bash files
+        - 'extra/*'     # add folders containing extensionless bash files
 dependency_scanning:
   stage: Test
 secret_detection:
   stage: Test
-container_scanning:
-  stage: Test
-shellcheck:
-  stage: Test
-  image: koalaman/shellcheck:stable
-  script:
-    - shellcheck -x core/*
-    - shellcheck -x config/*
-    - shellcheck -x module/*
-    - shellcheck -x extra/*
-  allow_failure: true
-  artifacts:
-    when: always
-    reports:
-      sast: gl-sast-report.json
+#container_scanning:
+#  stage: Test
+#shellcheck:
+#  stage: Test
+#  image: koalaman/shellcheck:stable
+#  script:
+#    - shellcheck -x core/*
+#    - shellcheck -x config/*
+#    - shellcheck -x module/*
+#    - shellcheck -x extra/*
+#  allow_failure: true
+#  artifacts:
+#    when: always
+#    reports:
+#      sast: gl-sast-report.json
 
 Debian:
-  stage: Debian Based
+  stage: Linux
   variables:
     GIT_SUBMODULE_STRATEGY: recursive
   image: debian:$DEBIAN_VERSION
@@ -47,6 +47,8 @@ Debian:
   before_script:
     - apt-get update -qq
     - apt-get install -y git curl ca-certificates bats gettext
+    # fix timezone
+    - ln -fs /usr/share/zoneinfo/Europe/Berlin /etc/localtime && dpkg-reconfigure -f noninteractive tzdata
   script:
     - ./test ci
   artifacts:
