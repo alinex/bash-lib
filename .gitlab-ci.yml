@@ -4,8 +4,13 @@ stages:
 
 include:
   - template: Jobs/SAST.gitlab-ci.yml
-# override default stage for all SAST jobs
+  - template: Jobs/Dependency-Scanning.gitlab-ci.yml
+  - template: Jobs/Secret-Detection.gitlab-ci.yml
 sast:
+  stage: Test
+dependency_scanning:
+  stage: Test
+secret_detection:
   stage: Test
 
 Debian:
