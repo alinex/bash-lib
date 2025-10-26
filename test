@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 
-BASHLIB_HOME="$(pwd)"
+export BASHLIB_HOME="$(pwd)"
+
+echo "BASHLIB_HOME=$BASHLIB_HOME"
+echo "$pwd)"
 
 mkdir -p test-results
 rm -rf test-results/* 2>/dev/null || true
