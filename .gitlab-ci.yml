@@ -11,9 +11,9 @@ Debian:
       - DEBIAN_VERSION: ["11", "12"]
   before_script:
     - apt-get update -qq
-    - apt-get install -y git curl ca-certificates bats
+    - apt-get install -y git curl ca-certificates bats gettext
   script:
-    - ./test
+    - ./test ci
   artifacts:
     when: always
     paths:

@@ -46,6 +46,9 @@ touch "$config"/.bashlib-overwrite
 ln -s "$config"/.bashlib-overwrite "$path"/config/overwrite
 echo ""
 
+echo "Step 4: Install base tools."
+sudo apt install -y curl gettext
+
 echo "You could now use the bashlib by adding:
 source $BASHLIB_HOME/full
 "
