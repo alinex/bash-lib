@@ -6,14 +6,14 @@ test_debian:
   image: debian:$DEBIAN_VERSION
   parallel:
     matrix:
-      - DEBIAN_VERSION: ["10", "11", "12"]
+      - DEBIAN_VERSION: ["11", "12"]
   before_script:
-    - apt-get update -qq
-    - apt-get install -y git curl ca-certificates bats bats-assert bats-support
+    #- apt-get update -qq
+    #- apt-get install -y git curl ca-certificates bats bats-assert bats-support
+    - npm install
   script:
     - mkdir -p test-results
-    #- bats --tap test/*.bats
-    - bats --formatter junit --output test-results/ core/date.bats
+    - npm run test-ci
   artifacts:
     when: always
     paths:

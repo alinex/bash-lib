@@ -1,0 +1,11 @@
+{
+  "devDependencies": {
+    "bats": "^1.12.0",
+    "bats-assert": "github:ztombol/bats-assert",
+    "bats-support": "github:ztombol/bats-support"
+  },
+  "scripts": {
+    "test": "bats --formatter tap core/date.bats",
+    "test-ci": "bats --formatter junit --output test-results/ core/date.bats"
+  }
+}
