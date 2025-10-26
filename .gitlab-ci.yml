@@ -3,7 +3,7 @@ stages:
   - Debian Based
 
 include:
-  - template: Security/SAST.gitlab-ci.yml
+  - template: Jobs/SAST.gitlab-ci.yml
 # override default stage for all SAST jobs
 sast:
   stage: Test
