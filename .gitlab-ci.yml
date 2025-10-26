@@ -1,11 +1,10 @@
-variables:
-  GIT_SUBMODULE_STRATEGY: recursive
-
 stages:
   - Debian Based
 
 Debian:
   stage: Debian Based
+  variables:
+    GIT_SUBMODULE_STRATEGY: recursive
   image: debian:$DEBIAN_VERSION
   parallel:
     matrix:

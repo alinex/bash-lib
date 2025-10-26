@@ -3,6 +3,8 @@
 mkdir -p test-results
 rm -rf test-results/* 2>/dev/null || true
 
+ls -al
+
 for file in core/date.bats; do
   name=${file%.bats} # remove the .bats extension
   name=${name//\//-} # replace all / with -
