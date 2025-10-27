@@ -21,7 +21,7 @@ teardown_file() {
 # bats test_tags=debug
 @test "debug: show level 1" {
     DEBUG=1 run debug Test
-    assert [ "$(uncolorize "$output")" = "> run                  Test" ]
+    assert_output --partial "> bats_merge_stdout_and_stderr Test"
     assert_success
     echo $output # use --show-output-of-passing-tests to see it
 }
@@ -33,9 +33,16 @@ teardown_file() {
     echo $output # use --show-output-of-passing-tests to see it
 }
 # bats test_tags=debug
-@test "debug: show func run" {
-    DEBUG=run run debug Test
-    assert [ "$(uncolorize "$output")" = "> run                  Test" ]
+@test "debug: show func" {
+    DEBUG=bats_merge_stdout_and_stderr run debug Test
+    assert_output --partial "> bats_merge_stdout_and_stderr Test"
+    assert_success
+    echo $output # use --show-output-of-passing-tests to see it
+}
+# bats test_tags=debug
+@test "debug: show func with pattern" {
+    DEBUG="bats.*" run debug Test
+    assert_output --partial "> bats_merge_stdout_and_stderr Test"
     assert_success
     echo $output # use --show-output-of-passing-tests to see it
 }
