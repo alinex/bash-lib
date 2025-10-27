@@ -46,7 +46,7 @@ Debian:
       - DEBIAN_VERSION: ["11", "12", "13"]
   before_script:
     - apt-get update -qq
-    - apt-get install -y git curl ca-certificates bats locales gettext
+    - apt-get install -y git curl ca-certificates locales gettext
     # fix timezone
     - ln -fs /usr/share/zoneinfo/Europe/Berlin /etc/localtime && dpkg-reconfigure -f noninteractive tzdata
     # set language
@@ -56,6 +56,11 @@ Debian:
     - export LANG=de_DE.UTF-8
     - export LANGUAGE=de_DE.UTF-8
     - export LC_ALL=de_DE.UTF-8
+    # install newest bats
+    - git clone https://github.com/bats-core/bats-core.git 2>/dev/null
+    - cd bats-core || exit
+    - ./install.sh /usr/local >/dev/null
+    - cd .. || exit
   script:
     - ./test ci
   artifacts:
@@ -67,4 +72,11 @@ Debian:
   only:
     - master
     - merge_requests
+
+Ubuntu:
+  extends: Debian
+  image: ubuntu:$UBUNTU_VERSION
+  parallel:
+    matrix:
+      - UBUNTU_VERSION: ["22.04", "24.04"]
 

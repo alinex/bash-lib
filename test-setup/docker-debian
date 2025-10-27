@@ -24,4 +24,4 @@ export LC_ALL=de_DE.UTF-8
 git clone https://github.com/bats-core/bats-core.git 2>/dev/null
 cd bats-core || exit
 ./install.sh /usr/local >/dev/null
-cd /mnt || exit
+cd .. || exit
