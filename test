@@ -20,7 +20,7 @@ if [ "$1" = "ci" ]; then
   mkdir -p test-results
   rm -rf test-results/* 2>/dev/null || true
   # run all tests
-  bats --formatter junit --output test-result core
+  bats --formatter junit --output test-results core
   #for file in core/date.bats; do
   #  name=${file%.bats} # remove the .bats extension
   #  name=${name//\//-} # replace all / with -
