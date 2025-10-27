@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 
+# Usage:  ./test [<name> [<version>]]
+#         ./test ci         # for gitlab
+#         ./test            # for full run
+#         ./test debian     # run all debian
+#         ./test debian 11  # only run debian 11
 cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]:-$(pwd)/x}")")" || exit
 export BASHLIB_HOME
 BASHLIB_HOME="$(pwd)"
@@ -23,39 +28,22 @@ if [ "$1" = "ci" ]; then
   done
 # local test run
 else
-  echo "Running multiple OS using local docker"
+  [ -z "$2" ] || echo "Running multiple OS using local docker (that may take some time)"
   # Debian
-  for version in 11 12 13; do
-    echo -en "${CC_CYAN_BOLD}Debian $version${CC_RESET} "
-    cmd="
-    export BASHLIB_HOME=/mnt
-    echo \"tzdata tzdata/Areas select Europe\" | debconf-set-selections
-    echo \"tzdata tzdata/Zones/Europe select Berlin\" | debconf-set-selections
-    export DEBIAN_FRONTEND=noninteractive
-    apt-get update &>/dev/null && apt-get install -y git tzdata curl gettext &>/dev/null
-    ln -fs /usr/share/zoneinfo/Europe/Berlin /etc/localtime && dpkg-reconfigure -f noninteractive tzdata 2>/dev/null
-    git clone https://github.com/bats-core/bats-core.git
-    cd bats-core
-    ./install.sh /usr/local
-    cd /mnt
-    bats --tap core/date.bats core/misc.bats | grep -v ^ok
-    "
-    echo -n "($(docker pull -q "debian:$version")) "
-    docker run --rm -it -v "$PWD:/mnt" -w /mnt "debian:$version" bash -c "$cmd"
-  done
-  # Ubuntu
-  for version in 22.04 24.04; do
-    echo -en "${CC_CYAN_BOLD}Ubuntu $version${CC_RESET} "
-    cmd="
-    export BASHLIB_HOME=/mnt
-    echo \"tzdata tzdata/Areas select Europe\" | debconf-set-selections
-    echo \"tzdata tzdata/Zones/Europe select Berlin\" | debconf-set-selections
-    export DEBIAN_FRONTEND=noninteractive
-    apt-get update &>/dev/null && apt-get install -y tzdata bats curl gettext &>/dev/null
-    ln -fs /usr/share/zoneinfo/Europe/Berlin /etc/localtime && dpkg-reconfigure -f noninteractive tzdata 2>/dev/null
-    bats --tap core/date.bats | grep -v ^ok
-    "
-    echo -n "($(docker pull -q "ubuntu:$version")) "
-    docker run --rm -it -v "$PWD:/mnt" -w /mnt "ubuntu:$version" bash -c "$cmd"
+  for name in debian ubuntu; do
+    [ "$1" = "$name" ] || [ -z "$1" ] || continue
+    # set version list
+    case $name in
+    debian) versions="11 12 13" ;;
+    ubuntu) versions="22.04 24.04" ;;
+    esac
+    for version in $versions; do
+      [ "$2" = "$version" ] || [ -z "$2" ] || continue
+      echo -en "${CC_CYAN_BOLD}${name^} $version${CC_RESET} "
+      echo -n "($(docker pull -q "$name:$version")) "
+      docker run --rm -it -v "$PWD:/mnt" -w /mnt "$name:$version" bash -c \
+        "source test-setup/docker-debian
+        bats --tap core/date.bats core/date.bats | grep -v ^ok"
+    done
   done
 fi

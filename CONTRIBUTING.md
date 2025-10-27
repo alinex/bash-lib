@@ -337,15 +337,39 @@ Other possibilities to run the local tests are:
 - `bats --show-output-of-passing-tests local/bash-lib` - to show the output of succeeded tests
 - `DEBUG=1 bats --filter-tags mattermost local/bash-lib` - run in debug mode and display debug messages below result
 
-As there are some **problems using bats with assoziative arrays and handling of exit** it could not completely test the whole framework. We tried other shell unit test tools but got no better result of `bashunit` or `shellspec`. So for the time being unit testing is only applied there possible.
+> As there are some **problems using bats with assoziative arrays and handling of exit** it could not completely test the whole framework. We tried other shell unit test tools but got no better result of `bashunit` or `shellspec`. So for the time being unit testing is only applied there possible.
 
 Next step should be to run the tests on different operating systems. Therefor we use `docker` so have your environment running and accessible under your user.
 
 ```bash
-./test
+$ ./test
+Running multiple OS using local docker
+Debian 11 (docker.io/library/debian:11) 1..36
+not ok 26 debug: show level 1
+# tags: debug misc
+# (from function `assert' in file bats-assert/src/assert.bash, line 40,
+#  in test file core/misc.bats, line 24)
+#   `assert [ "$(uncolorize "$output")" = "> run                  Test" ]' failed
+#
+# -- assertion failed --
+# expression : [ > bats_merge_stdout_and_stderr Test = > run                  Test ]
+# --
+#
+Debian 12 (docker.io/library/debian:12) 1..36
+Debian 13 (docker.io/library/debian:13) 1..36
+...
 ```
 
-And the last test will be within the build pipeline after submitting something to gitlab.com.
+> You see the output how it will look if one test in debian 11 fails.
+
+You can also selectively run only one os type yb giving this a argument or a specific version. The names should be equal to the image name:
+
+```bash
+./test debian        # Test all valid debian versions
+./test debian 12     # Test only Debian 12
+```
+
+And the last test will be within the build pipeline after submitting something to gitlab.com. Therefor you have to do nothing gitlab-ci.yml will run `./test ci` for that and will write test results which will be shown in the GitLab pipeline under the "Test" tab.
 
 ### 📝 Linting with Shellcheck
 
