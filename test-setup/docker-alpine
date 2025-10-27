@@ -1,0 +1,21 @@
+#!/usr/bin/env sh
+
+export BASHLIB_HOME=/mnt
+
+# install needed packages
+apk add --no-cache bash tzdata musl-locales musl-locales-lang git curl gettext >/dev/null
+
+# set timezone (for date tests)
+ln -fs /usr/share/zoneinfo/Europe/Berlin /etc/localtime
+echo "Europe/Berlin" >/etc/timezone
+export TZ=Europe/Berlin
+
+# Set language
+export LANG=de_DE.UTF-8
+export LC_ALL=de_DE.UTF-8
+
+## install newest bats
+git clone https://github.com/bats-core/bats-core.git 2>/dev/null
+cd bats-core || exit
+./install.sh /usr/local >/dev/null
+cd .. || exit

@@ -45,6 +45,7 @@ Debian:
     matrix:
       - DEBIAN_VERSION: ["11", "12", "13"]
   before_script:
+    - export DEBIAN_FRONTEND=noninteractive
     - apt-get update -qq
     - apt-get install -y git tzdata curl ca-certificates locales gettext
     # fix timezone
@@ -78,5 +79,5 @@ Ubuntu:
   image: ubuntu:$UBUNTU_VERSION
   parallel:
     matrix:
-      - UBUNTU_VERSION: ["22.04", "24.04"]
+      - UBUNTU_VERSION: ["20.04" "22.04", "24.04"]
 

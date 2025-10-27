@@ -37,7 +37,7 @@ else
     # set version list
     case $name in
     debian) versions="11 12 13" ;;
-    ubuntu) versions="22.04 24.04" ;;
+    ubuntu) versions="20.04 22.04 24.04" ;;
     esac
     for version in $versions; do
       [ "$2" = "$version" ] || [ -z "$2" ] || continue
@@ -50,4 +50,26 @@ else
         bats --tap core | grep -v ^ok"
     done
   done
+  ## alpine
+  #for name in alpine; do
+  #  [ "$1" = "$name" ] || [ -z "$1" ] || continue
+  #  # set version list
+  #  for version in 3.19 3.20 3.21 3.22; do
+  #    [ "$2" = "$version" ] || [ -z "$2" ] || continue
+  #    echo -en "${CC_CYAN_BOLD}${name^} $version${CC_RESET} "
+  #    echo -n "($(docker pull -q "$name:$version")) "
+  #    docker run --rm -it -v "$PWD:/mnt" -w /mnt "$name:$version" sh -c \
+  #      "echo -n 'prepare'
+  #      source test-setup/docker-alpine
+  #      echo -n '; run '
+  #      bats --tap core | grep -v ^ok"
+  #  done
+  #done
+  # redhat fedora centos
+  # archlinux manjaro
+  # solaris
+  # mandriva
+  # freebsd openbsd
+  # opensuse
+  # Gentoo
 fi
