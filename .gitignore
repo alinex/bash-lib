@@ -1,3 +1,4 @@
 /oldlib
-/node_modules
+# will be created if needed
+/local/bashlib.pot
 /test-results

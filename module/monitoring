@@ -186,15 +186,22 @@ alerts() {
     # final format
     case $format in
     console)
+        local first=1
         echo -e "$list" |
             tsv2table |
             while read -r line; do
                 case $line in
-                Severity*) invers "$line" ;;
                 warning*) warn "$line" ;;
                 critical*) error "$line" ;;
                 disaster*) critical "$line" ;;
-                *) echo "$line" ;;
+                *)
+                    if [ -n "$first" ]; then
+                        invers "$line"
+                        first=""
+                    else
+                        echo "$line"
+                    fi
+                    ;;
                 esac
             done
         ;;

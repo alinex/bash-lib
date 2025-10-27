@@ -1034,15 +1034,20 @@ mattermost)list="$(jq -s '.[] | {
 list="$header"$'\n'"$(jq -r '[.labels.severity, .labels.net, .labels.instance, .annotations.summary, (.startsAt| split(".")[0]| strptime("%Y-%m-%dT%H:%M:%S")| strftime("%Y-%m-%d %H:%M:%S"))] | @tsv' <<<"$list")"
 esac
 case $format in
-console)echo -e "$list"|tsv2table|while
-read -r line
-do
+console)local first=1
+echo -e "$list"|tsv2table|while read -r line;do
 case $line in
-Severity*)invers "$line";;
 warning*)warn "$line";;
 critical*)error "$line";;
 disaster*)critical "$line";;
-*)echo "$line"
+*)if
+[ -n "$first" ]
+then
+invers "$line"
+first=""
+else
+echo "$line"
+fi
 esac
 done
 ;;
