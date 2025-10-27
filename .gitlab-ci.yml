@@ -46,7 +46,7 @@ Debian:
       - DEBIAN_VERSION: ["11", "12", "13"]
   before_script:
     - apt-get update -qq
-    - apt-get install -y git curl ca-certificates locales gettext
+    - apt-get install -y git tzdata curl ca-certificates locales gettext
     # fix timezone
     - ln -fs /usr/share/zoneinfo/Europe/Berlin /etc/localtime && dpkg-reconfigure -f noninteractive tzdata
     # set language

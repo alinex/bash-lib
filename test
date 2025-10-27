@@ -26,7 +26,7 @@ if [ "$1" = "ci" ]; then
       name=${file%.bats} # remove the .bats extension
       name=${name//\//-} # replace all / with -
       echo "Run $name tests..."
-      bats --formatter junit $file >test-results/$name.xml
+      bats --formatter junit $file >test-results/$name.xml </dev/null
     done
 # local test run
 else
