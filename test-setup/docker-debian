@@ -7,10 +7,18 @@ export DEBIAN_FRONTEND=noninteractive
 echo "tzdata tzdata/Areas select Europe" | debconf-set-selections
 echo "tzdata tzdata/Zones/Europe select Berlin" | debconf-set-selections
 apt-get update &>/dev/null
-apt-get install -y git tzdata curl gettext &>/dev/null
+apt-get install -y git tzdata curl locales gettext &>/dev/null
 
 # Set timezone (for date tests)
 ln -fs /usr/share/zoneinfo/Europe/Berlin /etc/localtime && dpkg-reconfigure -f noninteractive tzdata 2>/dev/null
+
+# Set language
+sed -i 's/# de_DE.UTF-8 UTF-8/de_DE.UTF-8 UTF-8/' /etc/locale.gen
+locale-gen >/dev/null
+update-locale LANG=de_DE.UTF-8 >/dev/null
+export LANG=de_DE.UTF-8
+export LANGUAGE=de_DE.UTF-8
+export LC_ALL=de_DE.UTF-8
 
 # install newest bats
 git clone https://github.com/bats-core/bats-core.git 2>/dev/null

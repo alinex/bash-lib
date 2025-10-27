@@ -42,8 +42,10 @@ else
       echo -en "${CC_CYAN_BOLD}${name^} $version${CC_RESET} "
       echo -n "($(docker pull -q "$name:$version")) "
       docker run --rm -it -v "$PWD:/mnt" -w /mnt "$name:$version" bash -c \
-        "source test-setup/docker-debian
-        bats --tap core/date.bats core/date.bats | grep -v ^ok"
+        "echo -n 'prepare'
+        source test-setup/docker-debian
+        echo -n '; run '
+        bats --tap core | grep -v ^ok"
     done
   done
 fi
