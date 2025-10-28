@@ -45,23 +45,7 @@ Debian:
     matrix:
       - DEBIAN_VERSION: ["11", "12", "13"]
   before_script:
-    - export DEBIAN_FRONTEND=noninteractive
-    - apt-get update -qq
-    - apt-get install -y git tzdata curl ca-certificates locales gettext
-    # fix timezone
-    - ln -fs /usr/share/zoneinfo/Europe/Berlin /etc/localtime && dpkg-reconfigure -f noninteractive tzdata
-    # set language
-    - sed -i 's/# de_DE.UTF-8 UTF-8/de_DE.UTF-8 UTF-8/' /etc/locale.gen
-    - locale-gen
-    - update-locale LANG=de_DE.UTF-8
-    - export LANG=de_DE.UTF-8
-    - export LANGUAGE=de_DE.UTF-8
-    - export LC_ALL=de_DE.UTF-8
-    # install newest bats
-    - git clone https://github.com/bats-core/bats-core.git 2>/dev/null
-    - cd bats-core || exit
-    - ./install.sh /usr/local >/dev/null
-    - cd .. || exit
+    - test-setup/docker-debian
   script:
     - ./test ci
   artifacts:
