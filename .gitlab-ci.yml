@@ -44,6 +44,7 @@ Debian:
   parallel:
     matrix:
       - DEBIAN_VERSION: ["11", "12", "13"]
+  needs: []
   before_script:
     - test-setup/docker-debian
   script:
