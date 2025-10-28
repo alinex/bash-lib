@@ -2,7 +2,7 @@
 
 This is the updated version of my personal library used to easily write powerful bash scripts which may work locally, partly remote or completely remote interactive or automatic.
 
-> It is aimed to be used mainly under Debian like operation systems. But with some minor tweaks it should also work on other Linux systems.
+> It is aimed to be used under any Linux like operation systems but primarily made for Debian, first. See the last [pipeline results](https://gitlab.com/alinex/bash-lib/-/pipelines) of how far we are in support.
 
 Version 2 is a complete rework of the library meaning it is another toolset and you could not upgrade to it.
 Some functionalities from the older version will no longer be available like logging while a lot of new possibilities are included.
@@ -58,21 +58,27 @@ bashlib/
     configs         # load all configurations (called from minified or loader)
     locale/         # translations
     # tools to manage and develop bashlib (for developer)
-    install         # setup bashlib on this host
-    update          # script to regenerate full file and docs after update 
-    test            # run all unit tests
+    install         # setup bashlib on your host
+    # all other files are not relevant for use, only for development
 ```
 
 The BashLib will be installed on the System with it's `BASHLIB_HOME` directory in the environment to let the scripts find it and load what they need.
 
 ### Quality
 
-The modules are as far as possible unit tested (using bats) and analyzed by the shellcheck static analysis and linting.
-Documentation of externally usable variables and functions is completely done inline and exported as markdown documentation.
+The modules are as far as possible 
+
+- unit tested (using bats) 
+- integration tested in different OS using docker
+- CI tested on different OS, too
+- and analyzed by the shellcheck static analysis and linting
+
+Documentation of externally usable variables and functions is completely done inline and exported as [markdown documentation](./doc/README.md).
 
 ### Version control
 
-In the moment it doesn't use fixed version numbers or release plans, use the git tags or date therefore. Also a changelog is not maintained separately, see the commit history therefore. That's because it is a side project and I minimize the effort to maintain it.
+As the project is in the moment more a single man show I will reduce the overhead of branching and work directly in the master branch, so see it as ongoing development.
+Tags will be set if specific milestones are reached and noted in the [changelog](./CHANGELOG.md).
 
 ## Installation
 

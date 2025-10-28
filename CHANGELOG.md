@@ -2,7 +2,7 @@
 
 As this is not driven by releases and therefore tags are not used it is an ongoing update so we will divide the changelog into months. If you need a special version instead of the newest one, please select it in git by date.
 
-## October 2025
+## 28. October 2025 - V2.0.0
 
 - enhanced and easy to use [`debug`](doc/function/debug.md) possibilities
 - stacktrace in debug level 5 integrated to [`die`](doc/function/die.md)
@@ -12,7 +12,7 @@ As this is not driven by releases and therefore tags are not used it is an ongoi
 - improved [`ask`](doc/function/ask.md) which allows only valid characters for specified input
 - operating system tests in local docker and using GitLab CI
 
-## 20. October 2025 V2 Final
+## 20. October 2025 - V2 Beta
 
 - **Complete rework** of the BashLib as BashLib V2 New Generation
 - **modular** concept integrated
