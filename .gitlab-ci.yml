@@ -1,6 +1,6 @@
 stages:
-  - Test
-  - Linux
+  - Code Analytics
+  - Test Core
 
 include:
   - template: Jobs/SAST.gitlab-ci.yml
@@ -8,7 +8,7 @@ include:
   - template: Jobs/Secret-Detection.gitlab-ci.yml
 #  - template: Jobs/Container-Scanning.gitlab-ci.yml
 sast:
-  stage: Test
+  stage: Code Analytics
 semgrep-sast:
   rules:
     - if: '$CI_PIPELINE_SOURCE == "push"'
@@ -17,11 +17,11 @@ semgrep-sast:
         - 'module/*'    # add folders containing extensionless bash files
         - 'extra/*'     # add folders containing extensionless bash files
 dependency_scanning:
-  stage: Test
+  stage: Code Analytics
 secret_detection:
-  stage: Test
+  stage: Code Analytics
 #container_scanning:
-#  stage: Test
+#  stage: Code Analytics
 #shellcheck:
 #  stage: Test
 #  image: koalaman/shellcheck:stable
@@ -37,7 +37,7 @@ secret_detection:
 #      sast: gl-sast-report.json
 
 Debian:
-  stage: Linux
+  stage: Test Core
   variables:
     GIT_SUBMODULE_STRATEGY: recursive
   image: debian:$DEBIAN_VERSION
