@@ -13,6 +13,7 @@ Main Goals are:
 - easier to use
 - more features
 - remote capabilities integrated
+- multilingual
 - unit tested and linted
 - completely documented with examples
 
