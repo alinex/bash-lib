@@ -47,6 +47,7 @@ Debian:
   needs: []
   before_script:
     - test-setup/docker-debian
+    - mkdir -p test-results
   script:
     - ./test ci
   artifacts:
