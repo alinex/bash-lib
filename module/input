@@ -21,8 +21,79 @@ pause() {
     local text
     text="$(input "$@")"
     test -z "$text" || warn "$text"
-    read -n 1 -s -r -p "$(gettext 'Press any key to continue...')" key
+    read -n 1 -s -r -p "$(gettext 'Press any key to continue...')" key </dev/tty
     echo "" >/dev/tty
+}
+
+# Ask a yes/no question.
+# The default can be yes or no and if a default is set <return> will use it.
+# Usage:    confirm <question>
+# Options:  -t, --true                  # default: yes
+#           -f, --false                 # default: no
+#           -t, --timeout <duration>    # time after which the default will be used
+# TTY:      <question> <key>
+confirm() {
+    # parameter parsing
+    local default timeout
+    eval set -- "$(option_parse $'e empty -\nd default +' "$@")"
+    while true; do
+        case "$1" in
+        -t | --true)
+            default=1
+            shift
+            ;;
+        -f | --false)
+            default=0
+            shift
+            ;;
+        -t | --timeout)
+            timeout="$(duration_format seconds "$2")"
+            shift 2
+            ;;
+        --)
+            shift
+            break
+            ;;
+        *) die "$(gettext "Unrecognized option"): $1" ;;
+        esac
+    done
+    # processing
+    local prompt
+    prompt="${2:-$(gettext "Should this be done")}"
+    local char="" seq
+    [ -z "$default" ] || prompt="$prompt [$default]"
+    echo -en "${CC_INFO}$prompt?${CC_RESET} " >/dev/tty
+    # read input
+    while IFS= read -r -s -n 1 char </dev/tty; do
+        # stop maybe on enter (newline)
+        if [[ $char == "" ]]; then
+            # end if default is set
+            if [ -n "$default" ]; then
+                if ((default == 1)); then
+                    echo -e "$(gettext "Yes")" >/dev/tty
+                    return 0
+                else
+                    echo -e "$(gettext "No")" >/dev/tty
+                    return 1
+                fi
+            fi
+        # ignore escape sequences
+        elif [[ $char == $'\033' ]]; then
+            # Read next few characters non-blocking to drain escape sequence
+            read -r -s -n 1 -t 0.01 seq
+            while [[ $seq == "[" || $seq =~ [0-9A-Za-z~] ]]; do
+                read -r -s -n 1 -t 0.01 seq || break
+            done
+        # yes
+        elif [[ $char =~ [JjYy] ]]; then
+            echo -e "$(gettext "Yes")" >/dev/tty
+            return 0
+        # no
+        elif [[ $char =~ [Nn] ]]; then
+            echo -e "$(gettext "No")" >/dev/tty
+            return 1
+        fi
+    done
 }
 
 # Ask yes/no with default: no
@@ -374,10 +445,11 @@ tasks() {
         fi
         # shellcheck disable=SC2086
         task=$(choose "$title" -x "$(gettext "Exit")" $opt "$list")
+        debug "choosen $task"
         [[ "$task" != "exit" ]] || break
         # shellcheck disable=SC2034
         local error=$?
-        $task || die "$(eval_gettext "Got error \$error running \$task")"
+        eval "$task" || die "$(eval_gettext "Got error \$error running \$task")"
         echo ""
     done
 }
