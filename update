@@ -42,6 +42,7 @@ for lang in $LOCALES; do
     fi
     msgfmt locale/"$lang"/LC_MESSAGES/bashlib.po -o locale/"$lang"/LC_MESSAGES/bashlib.mo
 done
+find locale -name \*~ -delete
 
 echo "Update documentation..."
 rm "$BASHLIB_HOME"/doc/function/* 2>/dev/null || true

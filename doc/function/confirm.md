@@ -22,5 +22,11 @@ confirm <question>
 ### TTY (direct)
 
 ```bash
-<question> <key>
+<question> [<default>]? <answer>
+# read single characters
 ```
+
+### Return (exit code)
+
+- 0 for true/yes
+- 1 for false/no

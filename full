@@ -487,7 +487,7 @@ ask_yes(){ _deprecated "use confirm --true <question>";}
 ask_input(){ _deprecated "use ask <question>";}
 ask(){
 local default empty negative
-eval set -- "$(option_parse $'e empty -\nd default +' "$@")"
+eval set -- "$(option_parse $'e empty -\nd default +\nn allow-negative -' "$@")"
 while true;do
 case "$1" in
 -e|--empty)empty=1
@@ -496,7 +496,10 @@ shift
 -d|--default)default="$2"
 shift 2
 ;;
--n|--negative)negative=1
+-T|--timeout)timeout="-t $(duration_format seconds "$2")"
+shift 2
+;;
+-n|--allow-negative)negative=1
 shift
 ;;
 --)shift
@@ -506,21 +509,23 @@ break
 esac
 done
 local prompt pattern mask
-case $1 in
+local format="$1"
+case $format in
 integer|number)prompt="${2:-$(gettext "Enter integer number")}"
 if [ -n "$negative" ];then
-pattern="^-?[0-9]+$"
+pattern="^(0|-?([1-9][0-9]*)?)$"
+final="^-?[0-9]+$"
 else
-pattern="^[0-9]+$"
+pattern="^(0|[1-9][0-9]*)$"
 fi
 ;;
 float)prompt="${2:-$(gettext "Enter float number")}"
 if [ -n "$negative" ];then
-pattern="-?^[0-9]+(\.[0-9]?)?$"
-final="^-?[0-9]+(\.[0-9])?$"
+pattern="^(0|-?([1-9][0-9]*)?)(\.[0-9]*)?$"
+final="^(0|-?[1-9][0-9]*)(\.[0-9]+)?$"
 else
-pattern="^[0-9]+(\.[0-9]*?)?$"
-final="^[0-9]+(\.[0-9]+)?$"
+pattern="^(0|[1-9][0-9]*)(\.[0-9]*)?$"
+final="^(0|[1-9][0-9]*)(\.[0-9]+)?$"
 fi
 ;;
 password)prompt="${2:-$(gettext "Enter password")}"
@@ -535,7 +540,7 @@ esac
 local input="" char="" seq
 [ -z "$default" ]||prompt="$prompt [$default]"
 echo -en "$CC_INFO$prompt:$CC_RESET " >/dev/tty
-while IFS= read -r -s -n 1 char </dev/tty;do
+while IFS= read -r $timeout -s -n 1 char </dev/tty||true;do
 if [[ $char == "" ]];then
 if [ -n "$final" ];then
 if [[ $input =~ $final ]];then
@@ -566,6 +571,9 @@ done
 else
 if [ -n "$pattern" ];then
 debug 7 "$(od -An -to1 -v <<<"$char") [[ \"$input$char\" =~ $pattern ]] $([[ "$input$char" =~ $pattern ]]&&echo true||echo false)"
+if [ "$format" = "float" ]&&[ "$char" = "," ];then
+char=.
+fi
 [[ "$input$char" =~ $pattern ]]||continue
 fi
 input+="$char"

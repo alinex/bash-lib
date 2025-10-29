@@ -238,3 +238,218 @@ setup() {
     echo "$output" # use --show-output-of-passing-tests to see it
 }
 
+# bats test_tags=ask
+@test "ask: default" {
+    run expect -c '
+        log_user 0
+        spawn bash -c "
+            source '$BASHLIB_HOME'/loader
+            ask
+        "
+        log_user 1
+        expect "Gib einen Kurztext ein:"
+        send "test\n"
+        expect eof
+    '
+    assert_success
+    assert_output -p "Gib einen Kurztext ein:"
+    assert_output -p "test"
+    echo "$output" # use --show-output-of-passing-tests to see it
+}
+# bats test_tags=ask
+@test "ask: string (not empty)" {
+    run expect -c '
+        log_user 0
+        spawn bash -c "
+            source '$BASHLIB_HOME'/loader
+            ask string
+        "
+        log_user 1
+        expect "Gib einen Kurztext ein:"
+        send "\ntest\n"
+        expect eof
+    '
+    assert_success
+    assert_output -p "Gib einen Kurztext ein:"
+    assert_output -p "test"
+    echo "$output" # use --show-output-of-passing-tests to see it
+}
+# bats test_tags=ask
+@test "ask: string (empty)" {
+    run expect -c '
+        log_user 0
+        spawn bash -c "
+            source '$BASHLIB_HOME'/loader
+            ask string --empty
+        "
+        log_user 1
+        expect "Gib einen Kurztext ein:"
+        send "\n"
+        expect eof
+    '
+    assert_success
+    assert_output -p "Gib einen Kurztext ein:"
+    echo "$output" # use --show-output-of-passing-tests to see it
+}
+# bats test_tags=ask
+@test "ask: string with custom question" {
+    run expect -c '
+        log_user 0
+        spawn bash -c "
+            source '$BASHLIB_HOME'/loader
+            ask string \"What to do?\"
+        "
+        log_user 1
+        expect "What to do?"
+        send "test\n"
+        expect eof
+    '
+    assert_success
+    assert_output -p "What to do?"
+    assert_output -p "test"
+    echo "$output" # use --show-output-of-passing-tests to see it
+}
+# bats test_tags=ask
+@test "ask: integer" {
+    run expect -c '
+        log_user 0
+        spawn bash -c "
+            source '$BASHLIB_HOME'/loader
+            ask integer
+        "
+        log_user 1
+        expect "Gib eine Nummer ein:"
+        send -- "-1g2h   3\n"
+        expect eof
+    '
+    assert_success
+    assert_output -p "Gib eine Nummer ein:"
+    assert_output -p "123"
+    echo "$output" # use --show-output-of-passing-tests to see it
+}
+# bats test_tags=ask
+@test "ask: integer with negative" {
+    run expect -c '
+        log_user 0
+        spawn bash -c "
+            source '$BASHLIB_HOME'/loader
+            ask integer --allow-negative
+        "
+        log_user 1
+        expect "Gib eine Nummer ein:"
+        send -- "-1g2h   3\n"
+        expect eof
+    '
+    assert_success
+    assert_output -p "Gib eine Nummer ein:"
+    assert_output -p "-123"
+    echo "$output" # use --show-output-of-passing-tests to see it
+}
+# bats test_tags=ask
+@test "ask: number (like integer)" {
+    run expect -c '
+        log_user 0
+        spawn bash -c "
+            source '$BASHLIB_HOME'/loader
+            ask number
+        "
+        log_user 1
+        expect "Gib eine Nummer ein:"
+        send -- "-1g2h   3\n"
+        expect eof
+    '
+    assert_success
+    assert_output -p "Gib eine Nummer ein:"
+    assert_output -p "123"
+    echo "$output" # use --show-output-of-passing-tests to see it
+}
+# bats test_tags=ask
+@test "ask: float with integer" {
+    run expect -c '
+        log_user 0
+        spawn bash -c "
+            source '$BASHLIB_HOME'/loader
+            ask float
+        "
+        log_user 1
+        expect "Gib eine Fließkommazahl ein:"
+        send -- "-1g2h   3\n"
+        expect eof
+    '
+    assert_success
+    assert_output -p "Gib eine Fließkommazahl ein:"
+    assert_output -p "123"
+    echo "$output" # use --show-output-of-passing-tests to see it
+}
+# bats test_tags=ask
+@test "ask: float" {
+    run expect -c '
+        log_user 0
+        spawn bash -c "
+            source '$BASHLIB_HOME'/loader
+            ask float
+        "
+        log_user 1
+        expect "Gib eine Fließkommazahl ein:"
+        send -- "-1.g2h   3\n"
+        expect eof
+    '
+    assert_success
+    assert_output -p "Gib eine Fließkommazahl ein:"
+    assert_output -p "1.23"
+    echo "$output" # use --show-output-of-passing-tests to see it
+}
+# bats test_tags=ask
+@test "ask: float (, as decimal separator)" {
+    run expect -c '
+        log_user 0
+        spawn bash -c "
+            source '$BASHLIB_HOME'/loader
+            ask float
+        "
+        log_user 1
+        expect "Gib eine Fließkommazahl ein:"
+        send -- "-1,,g2h   3\n"
+        expect eof
+    '
+    assert_success
+    assert_output -p "Gib eine Fließkommazahl ein:"
+    assert_output -p "1.23"
+    echo "$output" # use --show-output-of-passing-tests to see it
+}
+# bats test_tags=ask
+@test "ask: float (allow negative)" {
+    run expect -c '
+        log_user 0
+        spawn bash -c "
+            source '$BASHLIB_HOME'/loader
+            ask float --allow-negative
+        "
+        log_user 1
+        expect "Gib eine Fließkommazahl ein:"
+        send -- "-1,,g2h   3\n"
+        expect eof
+    '
+    assert_success
+    assert_output -p "Gib eine Fließkommazahl ein:"
+    assert_output -p "-1.23"
+    echo "$output" # use --show-output-of-passing-tests to see it
+}
+# bats test_tags=ask
+@test "ask: password" {
+    run expect -c '
+        log_user 0
+        spawn bash -c "
+            source '$BASHLIB_HOME'/loader
+            ask password
+        "
+        log_user 1
+        expect "Gib das Passwort ein:"
+        send -- "123456\n"
+        expect eof
+    '
+    assert_success
+    assert_output -p "Gib das Passwort ein:"
+    assert_output -p "******"
+    echo "$output" # use --show-output-of-passing-tests to see it
+}
