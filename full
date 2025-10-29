@@ -432,7 +432,7 @@ echo "" >/dev/tty
 }
 confirm(){
 local default timeout
-eval set -- "$(option_parse $'e empty -\nd default +' "$@")"
+eval set -- "$(option_parse $'t true -\nf false -\nT timeout +' "$@")"
 while true;do
 case "$1" in
 -t|--true)default=1
@@ -441,7 +441,7 @@ shift
 -f|--false)default=0
 shift
 ;;
--t|--timeout)timeout="$(duration_format seconds "$2")"
+-T|--timeout)timeout="-t $(duration_format seconds "$2")"
 shift 2
 ;;
 --)shift
@@ -451,11 +451,13 @@ break
 esac
 done
 local prompt
-prompt="${2:-$(gettext "Should this be done")}"
+prompt="${1:-$(gettext "Should this be done")}"
 local char="" seq
-[ -z "$default" ]||prompt="$prompt [$default]"
+if [ -n "$default" ];then
+((default==0))&&prompt="$prompt [$(gettext "No")]"||prompt="$prompt [$(gettext "Yes")]"
+fi
 echo -en "$CC_INFO$prompt?$CC_RESET " >/dev/tty
-while IFS= read -r -s -n 1 char </dev/tty;do
+while IFS= read -r $timeout -s -n 1 char </dev/tty||true;do
 if [[ $char == "" ]];then
 if [ -n "$default" ];then
 if ((default==1));then
@@ -480,41 +482,9 @@ return 1
 fi
 done
 }
-ask_no(){
-local text
-text="$(input "$@")"
-while true;do
-echo -ne "$CC_INFO" >/dev/tty
-read -r -n 1 -s -p "$text ($(gettext "n/Y")) " yn
-case $yn in
-""|[Nn])echo -e "$(gettext "No")$ET" >/dev/tty
-return 1
-;;
-[JjYy])echo -e "$(gettext "Yes")$CC_RESET" >/dev/tty
-return 0
-esac
-echo "$yn -> $(gettext "Disallowed answer")" >/dev/tty
-done
-}
-ask_yes(){
-local text
-text="$(input "$@")"
-while true;do
-echo -ne "$CC_INFO" >/dev/tty
-read -r -n 1 -s -p "$text ($(gettext "N/y")) " yn
-case $yn in
-[Nn])echo -e "$(gettext "No")$CC_RESET" >/dev/tty
-return 1
-;;
-""|[JjYy])echo -e "$(gettext "Yes")$CC_RESET" >/dev/tty
-return 0
-esac
-echo "$yn -> $(gettext "Disallowed answer")" >/dev/tty
-done
-}
-ask_input(){
-_deprecated "please use ask string"
-}
+ask_no(){ _deprecated "use confirm --false <question>";}
+ask_yes(){ _deprecated "use confirm --true <question>";}
+ask_input(){ _deprecated "use ask <question>";}
 ask(){
 local default empty negative
 eval set -- "$(option_parse $'e empty -\nd default +' "$@")"

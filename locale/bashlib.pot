@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-29 13:27+0100\n"
+"POT-Creation-Date: 2025-10-29 19:46+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -43,8 +43,8 @@ msgstr ""
 msgid "Could not scrape the prometheus exporter at $url!"
 msgstr ""
 
-#: module/monitoring:146 module/input:57 module/input:188 module/input:320
-#: module/input:405 module/process:85 module/remote:120 module/remote:192
+#: module/monitoring:146 module/input:57 module/input:142 module/input:274
+#: module/input:359 module/process:85 module/remote:120 module/remote:192
 #: module/remote:276 module/mattermost:288 module/mattermost:323
 #: module/validator:36 module/software:91
 msgid "Unrecognized option"
@@ -70,63 +70,55 @@ msgstr ""
 msgid "Should this be done"
 msgstr ""
 
-#: module/input:73 module/input:89 module/input:116 module/input:141
-msgid "Yes"
-msgstr ""
-
-#: module/input:76 module/input:93 module/input:112 module/input:137
+#: module/input:65 module/input:80 module/input:97
 msgid "No"
 msgstr ""
 
-#: module/input:109
-msgid "n/Y"
+#: module/input:65 module/input:77 module/input:93
+msgid "Yes"
 msgstr ""
 
-#: module/input:120 module/input:145 module/input:356
-msgid "Disallowed answer"
-msgstr ""
-
-#: module/input:134
-msgid "N/y"
-msgstr ""
-
-#: module/input:195
+#: module/input:149
 msgid "Enter integer number"
 msgstr ""
 
-#: module/input:203
+#: module/input:157
 msgid "Enter float number"
 msgstr ""
 
-#: module/input:213
+#: module/input:167
 msgid "Enter password"
 msgstr ""
 
-#: module/input:217
+#: module/input:171
 msgid "Enter time"
 msgstr ""
 
-#: module/input:222
+#: module/input:176
 msgid "Enter short text"
 msgstr ""
 
-#: module/input:325
+#: module/input:279
 msgid "Select one of the above options:"
 msgstr ""
 
-#: module/input:424
+#: module/input:310
+msgid "Disallowed answer"
+msgstr ""
+
+#: module/input:378
 msgid "Could not get task list from command"
 msgstr ""
 
-#: module/input:431
+#: module/input:385
 msgid "No tasks found to be executed."
 msgstr ""
 
-#: module/input:447
+#: module/input:401
 msgid "Exit"
 msgstr ""
 
-#: module/input:452
+#: module/input:406
 #, sh-format
 msgid "Got error $error running $task"
 msgstr ""

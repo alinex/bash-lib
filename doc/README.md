@@ -218,8 +218,6 @@ Module with user interaction helpers.
 | --- | --- |
 | [`pause`](function/pause.md) | Wait for user input |
 | [`confirm`](function/confirm.md) | Ask a yes/no question. |
-| [`ask_no`](function/ask_no.md) | Ask yes/no with default: no |
-| [`ask_yes`](function/ask_yes.md) | Ask yes/no with default: yes |
 | [`ask`](function/ask.md) | Ask for an input element |
 | [`choose`](function/choose.md) | Select from list (extended version of native select) |
 | [`tasks`](function/tasks.md) | Run tasks as selected by user |

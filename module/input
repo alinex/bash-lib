@@ -26,7 +26,7 @@ pause() {
 }
 
 # Ask a yes/no question.
-# The default can be yes or no and if a default is set <return> will use it.
+# The default can be yes or no and if a default is set <return> will use it. Additional to a default a timeout can be set meaning to use default if timeout is reached. If an invalid character is typed, the timeout will restart.
 # Usage:    confirm <question>
 # Options:  -t, --true                  # default: yes
 #           -f, --false                 # default: no
@@ -35,7 +35,7 @@ pause() {
 confirm() {
     # parameter parsing
     local default timeout
-    eval set -- "$(option_parse $'e empty -\nd default +' "$@")"
+    eval set -- "$(option_parse $'t true -\nf false -\nT timeout +' "$@")"
     while true; do
         case "$1" in
         -t | --true)
@@ -46,8 +46,8 @@ confirm() {
             default=0
             shift
             ;;
-        -t | --timeout)
-            timeout="$(duration_format seconds "$2")"
+        -T | --timeout)
+            timeout="-t $(duration_format seconds "$2")"
             shift 2
             ;;
         --)
@@ -59,12 +59,16 @@ confirm() {
     done
     # processing
     local prompt
-    prompt="${2:-$(gettext "Should this be done")}"
+    prompt="${1:-$(gettext "Should this be done")}"
     local char="" seq
-    [ -z "$default" ] || prompt="$prompt [$default]"
+    if [ -n "$default" ]; then
+        ((default == 0)) && prompt="$prompt [$(gettext "No")]" || prompt="$prompt [$(gettext "Yes")]"
+    fi
     echo -en "${CC_INFO}$prompt?${CC_RESET} " >/dev/tty
     # read input
-    while IFS= read -r -s -n 1 char </dev/tty; do
+    # shellcheck disable=SC2086
+    # shellcheck disable=SC2229
+    while IFS= read -r $timeout -s -n 1 char </dev/tty || true; do
         # stop maybe on enter (newline)
         if [[ $char == "" ]]; then
             # end if default is set
@@ -96,59 +100,9 @@ confirm() {
     done
 }
 
-# Ask yes/no with default: no
-# Usage:    ask_no <question>
-#           <question> | ask_no
-# TTY:      <question> <key>
-# Status:   0 || 1
-ask_no() {
-    local text
-    text="$(input "$@")"
-    while true; do
-        echo -ne "${CC_INFO}" >/dev/tty
-        read -r -n 1 -s -p "$text ($(gettext "n/Y")) " yn
-        case $yn in
-        "" | [Nn])
-            echo -e "$(gettext "No")${ET}" >/dev/tty
-            return 1
-            ;;
-        [JjYy])
-            echo -e "$(gettext "Yes")${CC_RESET}" >/dev/tty
-            return 0
-            ;;
-        esac
-        echo "$yn -> $(gettext "Disallowed answer")" >/dev/tty
-    done
-}
-
-# Ask yes/no with default: yes
-# Usage:    ask_yes <question>
-#           <question> | ask_yes
-# TTY:      <question> <key>
-# Status:   0 || 1
-ask_yes() {
-    local text
-    text="$(input "$@")"
-    while true; do
-        echo -ne "${CC_INFO}" >/dev/tty
-        read -r -n 1 -s -p "$text ($(gettext "N/y")) " yn
-        case $yn in
-        [Nn])
-            echo -e "$(gettext "No")${CC_RESET}" >/dev/tty
-            return 1
-            ;;
-        "" | [JjYy])
-            echo -e "$(gettext "Yes")${CC_RESET}" >/dev/tty
-            return 0
-            ;;
-        esac
-        echo "$yn -> $(gettext "Disallowed answer")" >/dev/tty
-    done
-}
-
-ask_input() {
-    _deprecated "please use ask string"
-}
+ask_no() { _deprecated "use confirm --false <question>"; }
+ask_yes() { _deprecated "use confirm --true <question>"; }
+ask_input() { _deprecated "use ask <question>"; }
 
 # Ask for an input element
 # This will also validate while typing if you select the correct format. So you can only input characters matching the input format.

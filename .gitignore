@@ -1,5 +1,6 @@
 # will be created if needed
 /local/bashlib.pot
+**/*~
 # test parts automatically created
 /tests/results
 /tests/bats-core
