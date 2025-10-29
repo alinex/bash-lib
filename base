@@ -172,7 +172,7 @@ export TEXTDOMAINDIR=$BASHLIB_HOME/locale
 source gettext.sh
 _deprecated(){
 IFS=$' \t\n' read -r line func file <<<"$(caller 1)"
-die "DEPRECATED: ${FUNCNAME[0]} at $func in $file:$line $1"
+die "DEPRECATED: ${FUNCNAME[1]} at $func in $file:$line $1"
 }
 _stacktrace(){
 local level="${1:-5}"
@@ -267,14 +267,18 @@ while [ -e "$result" ];do
 result="$path/$(basename "$0")_$1$RANDOM$ext"
 done
 fi
-[ ! -e "$result" ]||return 0
+if [ -e "$result" ];then
+debug "already exists $result"
+else
 if [ -n "$dir" ];then
+debug "create dir $result"
 mkdir -p "$result"
 else
+debug "create file $result"
 touch "$result"
 fi
+fi
 echo "$result"
-debug "File: $result"
 [ -z "$ttl" ]||(_rmtemp "$ttl" "$result" >/dev/null 2>&1&
 disown)
 }

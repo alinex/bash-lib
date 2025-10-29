@@ -217,6 +217,7 @@ Module with user interaction helpers.
 | Variable/Function | Description |
 | --- | --- |
 | [`pause`](function/pause.md) | Wait for user input |
+| [`confirm`](function/confirm.md) | Ask a yes/no question. |
 | [`ask_no`](function/ask_no.md) | Ask yes/no with default: no |
 | [`ask_yes`](function/ask_yes.md) | Ask yes/no with default: yes |
 | [`ask`](function/ask.md) | Ask for an input element |

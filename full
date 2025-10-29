@@ -172,7 +172,7 @@ export TEXTDOMAINDIR=$BASHLIB_HOME/locale
 source gettext.sh
 _deprecated(){
 IFS=$' \t\n' read -r line func file <<<"$(caller 1)"
-die "DEPRECATED: ${FUNCNAME[0]} at $func in $file:$line $1"
+die "DEPRECATED: ${FUNCNAME[1]} at $func in $file:$line $1"
 }
 _stacktrace(){
 local level="${1:-5}"
@@ -267,14 +267,18 @@ while [ -e "$result" ];do
 result="$path/$(basename "$0")_$1$RANDOM$ext"
 done
 fi
-[ ! -e "$result" ]||return 0
+if [ -e "$result" ];then
+debug "already exists $result"
+else
 if [ -n "$dir" ];then
+debug "create dir $result"
 mkdir -p "$result"
 else
+debug "create file $result"
 touch "$result"
 fi
+fi
 echo "$result"
-debug "File: $result"
 [ -z "$ttl" ]||(_rmtemp "$ttl" "$result" >/dev/null 2>&1&
 disown)
 }
@@ -424,8 +428,58 @@ pause(){
 local text
 text="$(input "$@")"
 test -z "$text"||warn "$text"
-read -n 1 -s -r -p "$(gettext 'Press any key to continue...')" key
+read -n 1 -s -r -p "$(gettext 'Press any key to continue...')" key </dev/tty
 echo "" >/dev/tty
+}
+confirm(){
+local default timeout
+eval set -- "$(option_parse $'e empty -\nd default +' "$@")"
+while true;do
+case "$1" in
+-t|--true)default=1
+shift
+;;
+-f|--false)default=0
+shift
+;;
+-t|--timeout)timeout="$(duration_format seconds "$2")"
+shift 2
+;;
+--)shift
+break
+;;
+*)die "$(gettext "Unrecognized option"): $1"
+esac
+done
+local prompt
+prompt="${2:-$(gettext "Should this be done")}"
+local char="" seq
+[ -z "$default" ]||prompt="$prompt [$default]"
+echo -en "$CC_INFO$prompt?$CC_RESET " >/dev/tty
+while IFS= read -r -s -n 1 char </dev/tty;do
+if [[ $char == "" ]];then
+if [ -n "$default" ];then
+if ((default==1));then
+echo -e "$(gettext "Yes")" >/dev/tty
+return 0
+else
+echo -e "$(gettext "No")" >/dev/tty
+return 1
+fi
+fi
+elif [[ $char == $'\033' ]];then
+read -r -s -n 1 -t 0.01 seq
+while [[ $seq == "[" || $seq =~ [0-9A-Za-z~] ]];do
+read -r -s -n 1 -t 0.01 seq||break
+done
+elif [[ $char =~ [JjYy] ]];then
+echo -e "$(gettext "Yes")" >/dev/tty
+return 0
+elif [[ $char =~ [Nn] ]];then
+echo -e "$(gettext "No")" >/dev/tty
+return 1
+fi
+done
 }
 ask_no(){
 local text
@@ -663,9 +717,10 @@ IFS='|' read -r cmd name <<<"$line"
 done <<<"$list"
 fi
 task=$(choose "$title" -x "$(gettext "Exit")" $opt "$list")
+debug "choosen $task"
 [[ $task != "exit" ]]||break
 local error=$?
-$task||die "$(eval_gettext 'Got error $error running $task')"
+eval "$task"||die "$(eval_gettext 'Got error $error running $task')"
 echo ""
 done
 }
@@ -1078,8 +1133,7 @@ echo "Let $server scrape $job again, now."
 echo "yq '(.scrape_configs[] | select(.job_name == \"$job\")).scrape_interval = \"${seconds}s\" | (.scrape_configs[] | select(.job_name == \"$job\")).scrape_timeout = \"${seconds}s\"' </etc/prometheus/prometheus.yml | sponge /etc/prometheus/prometheus.yml"|remote
 remote curl -sX POST http://localhost:9090/-/reload
 done
-echo "Wait $seconds seconds till scrape should be done..."
-sleep "$seconds"
+countdown "$seconds" "Wait till scrape should be done..."
 echo "Reset config back to default."
 for server in $PROMETHEUS_HOST;do
 remote true 2>/dev/null||continue

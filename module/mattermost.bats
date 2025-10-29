@@ -10,8 +10,8 @@ setup() {
     channel_spielwiese=stjt3yqjzf8o585e7z88xw3a7w
     post_id=n3ztukd9r78nuqzw56zxx8g91h
     SHARED_ENV="$BATS_FILE_TMPDIR/mattermost.env"
-    bats_load_library bats-support
-    bats_load_library bats-assert
+    load "../bats-support/load"
+    load "../bats-assert/load"
     load $BASHLIB_HOME/loader
 }
 

@@ -2,8 +2,8 @@
 
 # bats file_tags=remote
 setup() {
-    bats_load_library bats-support
-    bats_load_library bats-assert
+    load "../bats-support/load"
+    load "../bats-assert/load"
     load $BASHLIB_HOME/loader
     # test setup
     server=operations.host.cloud.dvb

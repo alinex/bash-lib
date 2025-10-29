@@ -67,14 +67,16 @@ The BashLib will be installed on the System with it's `BASHLIB_HOME` directory i
 
 ### Quality
 
-The modules are as far as possible 
+The modules are as far as possible:
 
-- unit tested (using bats) 
+- unit tested (using bats)
 - integration tested in different OS using docker
 - CI tested on different OS, too
 - and analyzed by the shellcheck static analysis and linting
 
 Documentation of externally usable variables and functions is completely done inline and exported as [markdown documentation](./doc/README.md).
+
+Management of bugs and issues will be done using [GitLab Issues](https://gitlab.com/alinex/bash-lib/-/issues) and also we use the milestones here. But also instant bug fixing of parts we find by ourself will be done directly in git without any message there.
 
 ### Version control
 

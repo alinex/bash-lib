@@ -2,18 +2,68 @@
 
 # bats file_tags=input
 setup() {
-    bats_load_library bats-support
-    bats_load_library bats-assert
+    load "../bats-support/load"
+    load "../bats-assert/load"
     load $BASHLIB_HOME/loader
 }
 
 # bats test_tags=pause
-@test "pause: should work by pressing any key" {
-    read() { key=""; } # mocking read
-    run pause
+@test "pause: continue with return" {
+    run expect -c '
+        log_user 0
+        spawn bash -c "
+            source '$BASHLIB_HOME'/loader
+            pause
+        "
+        log_user 1
+        expect "Taste drücken um fortzufahren..."
+        send "\n"
+        expect eof
+    '
     assert_success
+    assert_output -p "Taste drücken um fortzufahren..."
     echo $output # use --show-output-of-passing-tests to see it
 }
+# bats test_tags=pause
+@test "pause: continue with g key after 1 second" {
+    run expect -c '
+        log_user 0
+        spawn bash -c "
+            source '$BASHLIB_HOME'/loader
+            pause
+        "
+        log_user 1
+        expect "Taste drücken um fortzufahren..."
+        sleep 1
+        send "g"
+        expect eof
+    '
+    assert_success
+    assert_output -p "Taste drücken um fortzufahren..."
+    echo $output # use --show-output-of-passing-tests to see it
+}
+
+# bats test_tags=pause
+@test "pause: continue with g key" {
+    run expect -c '
+        log_user 0
+        spawn bash -c "
+            source '$BASHLIB_HOME'/loader
+            pause
+        "
+        log_user 1
+        expect "Taste drücken um fortzufahren..."
+        send "g"
+        expect eof
+    '
+    assert_success
+    assert_output -p "Taste drücken um fortzufahren..."
+    echo $output # use --show-output-of-passing-tests to see it
+}
+
+
+
+
 
 # bats test_tags=ask_no
 @test "ask_no: should work by pressing <return>" {
