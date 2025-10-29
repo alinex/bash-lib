@@ -155,14 +155,18 @@ mktemp() {
             result="$path/$(basename "$0")_$1$RANDOM$ext"
         done
     fi
-    [ ! -e "$result" ] || return 0
-    if [ -n "$dir" ]; then
-        mkdir -p "$result"
+    if [ -e "$result" ]; then
+        debug "already exists $result"
     else
-        touch "$result"
+        if [ -n "$dir" ]; then
+            debug "create dir $result"
+            mkdir -p "$result"
+        else
+            debug "create file $result"
+            touch "$result"
+        fi
     fi
     echo "$result"
-    debug "File: $result"
     [ -z "$ttl" ] || (
         _rmtemp "$ttl" "$result" >/dev/null 2>&1 &
         disown
