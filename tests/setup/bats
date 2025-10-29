@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+# install newest bats
+cd tests || exit
+if ! command -v bats >/dev/null 2>&1; then
+    git clone https://github.com/bats-core/bats-core.git 2>/dev/null
+    cd bats-core || exit
+    ./install.sh /usr/local >/dev/null
+    cd .. || exit
+fi
+# add support and assert modules
+[ -d bats-assert ] || git clone https://github.com/ztombol/bats-assert
+[ -d bats-support ] || git clone https://github.com/ztombol/bats-support
+# done
+cd .. || exit
+echo "bats, bats-support and bats-assert are installed"

@@ -19,3 +19,7 @@ git clone https://github.com/bats-core/bats-core.git 2>/dev/null
 cd bats-core || exit
 ./install.sh /usr/local >/dev/null
 cd .. || exit
+
+# install bats
+# shellcheck disable=SC1091
+. "$BASHLIB_HOME/tests/setup/bats" >/dev/null

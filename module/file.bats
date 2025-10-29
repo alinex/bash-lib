@@ -2,8 +2,8 @@
 
 # bats file_tags=file
 setup() {
-    load "../bats-support/load"
-    load "../bats-assert/load"
+    load "$BASHLIB_HOME/tests/bats-support/load"
+    load "$BASHLIB_HOME/tests/bats-assert/load"
     load $BASHLIB_HOME/loader
 }
 
@@ -12,5 +12,5 @@ setup() {
     run script_path
     assert_output "/usr/libexec/bats-core"
     assert_success
-    echo $output # use --show-output-of-passing-tests to see it
+    echo "$output" # use --show-output-of-passing-tests to see it
 }

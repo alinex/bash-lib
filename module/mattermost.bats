@@ -10,8 +10,8 @@ setup() {
     channel_spielwiese=stjt3yqjzf8o585e7z88xw3a7w
     post_id=n3ztukd9r78nuqzw56zxx8g91h
     SHARED_ENV="$BATS_FILE_TMPDIR/mattermost.env"
-    load "../bats-support/load"
-    load "../bats-assert/load"
+    load "$BASHLIB_HOME/tests/bats-support/load"
+    load "$BASHLIB_HOME/tests/bats-assert/load"
     load $BASHLIB_HOME/loader
 }
 
@@ -25,7 +25,7 @@ setup() {
     [ -z "$stderr" ] || echo "$stderr" | sed 's/^/   /' >&3
     assert_output $user_id
     assert_success
-    echo $output # use --show-output-of-passing-tests to see it
+    echo "$output" # use --show-output-of-passing-tests to see it
 }
 
 # bats test_tags=_mattermost_team
@@ -34,7 +34,7 @@ setup() {
     [ -z "$stderr" ] || echo "$stderr" | sed 's/^/   /' >&3
     assert_output $team_divibib
     assert_success
-    echo $output # use --show-output-of-passing-tests to see it
+    echo "$output" # use --show-output-of-passing-tests to see it
 }
 # bats test_tags=_mattermost_team
 @test "_mattermost_team: should get id for ekz" {
@@ -42,7 +42,7 @@ setup() {
     [ -z "$stderr" ] || echo "$stderr" | sed 's/^/   /' >&3
     assert_output $team_ekz
     assert_success
-    echo $output # use --show-output-of-passing-tests to see it
+    echo "$output" # use --show-output-of-passing-tests to see it
 }
 
 # bats test_tags=_mattermost_channel
@@ -51,7 +51,7 @@ setup() {
     [ -z "$stderr" ] || echo "$stderr" | sed 's/^/   /' >&3
     assert_output $channel_spielwiese
     assert_success
-    echo $output # use --show-output-of-passing-tests to see it
+    echo "$output" # use --show-output-of-passing-tests to see it
 }
 # bats test_tags=_mattermost_channel
 @test "_mattermost_channel: fail for wrong channel name" {
@@ -59,7 +59,7 @@ setup() {
     [ -z "$stderr" ] || echo "$stderr" | sed 's/^/   /' >&3
     assert_output ""
     assert_failure
-    echo $output # use --show-output-of-passing-tests to see it
+    echo "$output" # use --show-output-of-passing-tests to see it
 }
 
 # bats test_tags=_mattermost_channel_bypost
@@ -68,7 +68,7 @@ setup() {
     [ -z "$stderr" ] || echo "$stderr" | sed 's/^/   /' >&3
     assert_output $channel_spielwiese
     assert_success
-    echo $output # use --show-output-of-passing-tests to see it
+    echo "$output" # use --show-output-of-passing-tests to see it
 }
 
 # bats test_tags=_mattermost_post
@@ -77,7 +77,7 @@ setup() {
     [ -z "$stderr" ] || echo "$stderr" | sed 's/^/   /' >&3
     assert_output -e '.+'
     assert_success
-    echo $output # use --show-output-of-passing-tests to see it
+    echo "$output" # use --show-output-of-passing-tests to see it
     echo "postid=$output" >>$SHARED_ENV
 }
 # bats test_tags=_mattermost_post
@@ -87,7 +87,7 @@ setup() {
     [ -z "$stderr" ] || echo "$stderr" | sed 's/^/   /' >&3
     assert_output -e '.+'
     assert_success
-    echo $output # use --show-output-of-passing-tests to see it
+    echo "$output" # use --show-output-of-passing-tests to see it
     echo "postid=$output" >>$SHARED_ENV
 }
 # bats test_tags=_mattermost_post
@@ -98,7 +98,7 @@ setup() {
     [ -z "$stderr" ] || echo "$stderr" | sed 's/^/   /' >&3
     assert_output -e '.+'
     assert_success
-    echo $output # use --show-output-of-passing-tests to see it
+    echo "$output" # use --show-output-of-passing-tests to see it
     echo "postid=$output" >>$SHARED_ENV
 }
 # bats test_tags=_mattermost_post
@@ -108,7 +108,7 @@ setup() {
     [ -z "$stderr" ] || echo "$stderr" | sed 's/^/   /' >&3
     assert_output -e '.+'
     assert_success
-    echo $output # use --show-output-of-passing-tests to see it
+    echo "$output" # use --show-output-of-passing-tests to see it
     echo "postid=$output" >>$SHARED_ENV
 }
 # bats test_tags=_mattermost_post
@@ -118,7 +118,7 @@ setup() {
     [ -z "$stderr" ] || echo "$stderr" | sed 's/^/   /' >&3
     assert_output -e '.+'
     assert_success
-    echo $output # use --show-output-of-passing-tests to see it
+    echo "$output" # use --show-output-of-passing-tests to see it
     echo "postid=$output" >>$SHARED_ENV
 }
 # bats test_tags=_mattermost_post
@@ -128,7 +128,7 @@ setup() {
     [ -z "$stderr" ] || echo "$stderr" | sed 's/^/   /' >&3
     assert_output -e '.+'
     assert_success
-    echo $output # use --show-output-of-passing-tests to see it
+    echo "$output" # use --show-output-of-passing-tests to see it
     echo "postid=$output" >>$SHARED_ENV
 }
 # bats test_tags=_mattermost_post
@@ -138,7 +138,7 @@ setup() {
     [ -z "$stderr" ] || echo "$stderr" | sed 's/^/   /' >&3
     assert_output -e '.+'
     assert_success
-    echo $output # use --show-output-of-passing-tests to see it
+    echo "$output" # use --show-output-of-passing-tests to see it
     echo "postid=$output" >>$SHARED_ENV
 }
 # bats test_tags=_mattermost_post
@@ -148,7 +148,7 @@ setup() {
     [ -z "$stderr" ] || echo "$stderr" | sed 's/^/   /' >&3
     assert_output -e '.+'
     assert_success
-    echo $output # use --show-output-of-passing-tests to see it
+    echo "$output" # use --show-output-of-passing-tests to see it
     echo "postid=$output" >>$SHARED_ENV
 }
 
@@ -159,7 +159,7 @@ setup() {
     [ -z "$stderr" ] || echo "$stderr" | sed 's/^/   /' >&3
     assert_output -e '.+'
     assert_success
-    echo $output # use --show-output-of-passing-tests to see it
+    echo "$output" # use --show-output-of-passing-tests to see it
 }
 
 # bats test_tags=_mattermost_reaction
@@ -169,7 +169,7 @@ setup() {
     [ -z "$stderr" ] || echo "$stderr" | sed 's/^/   /' >&3
     assert_output ''
     assert_success
-    echo $output # use --show-output-of-passing-tests to see it
+    echo "$output" # use --show-output-of-passing-tests to see it
 }
 
 # bats test_tags=_mattermost_find_channels
@@ -178,7 +178,7 @@ setup() {
     [ -z "$stderr" ] || echo "$stderr" | sed 's/^/   /' >&3
     assert_output "$team_divibib/$channel_spielwiese "
     assert_success
-    echo $output # use --show-output-of-passing-tests to see it
+    echo "$output" # use --show-output-of-passing-tests to see it
 }
 # bats test_tags=_mattermost_find_channels
 @test "_mattermost_find_channels: should get one channel for server" {
@@ -188,7 +188,7 @@ setup() {
     [ -z "$stderr" ] || echo "$stderr" | sed 's/^/   /' >&3
     assert_output 'Status Produktiv'
     assert_success
-    echo $output # use --show-output-of-passing-tests to see it
+    echo "$output" # use --show-output-of-passing-tests to see it
 }
 
 ######################################################################################
@@ -205,5 +205,5 @@ setup() {
   "text": "This is the attachment text."
 }'
     assert_success
-    echo $output # use --show-output-of-passing-tests to see it
+    echo "$output" # use --show-output-of-passing-tests to see it
 }

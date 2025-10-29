@@ -2,8 +2,8 @@
 
 # bats file_tags=os
 setup() {
-    load "../bats-support/load"
-    load "../bats-assert/load"
+    load "$BASHLIB_HOME/tests/bats-support/load"
+    load "$BASHLIB_HOME/tests/bats-assert/load"
     load $BASHLIB_HOME/loader
 }
 
@@ -35,19 +35,19 @@ setup() {
 @test "system_info: should get timestamp" {
     run system_info
     assert_success
-    echo $output # use --show-output-of-passing-tests to see it
+    echo "$output" # use --show-output-of-passing-tests to see it
 }
 
 # bats test_tags=has_tty
 @test "has_tty: should get timestamp" {
     run has_tty
     assert_success
-    echo $output # use --show-output-of-passing-tests to see it
+    echo "$output" # use --show-output-of-passing-tests to see it
 }
 
 # bats test_tags=is_bash
 @test "is_bash: should get timestamp" {
     run is_bash
     assert_success
-    echo $output # use --show-output-of-passing-tests to see it
+    echo "$output" # use --show-output-of-passing-tests to see it
 }

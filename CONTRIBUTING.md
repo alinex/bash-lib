@@ -20,6 +20,9 @@ This document outlines the process and best practices for contributing to the pr
     - [🔍 Debugging](#-debugging)
     - [🌐 Internationalization](#-internationalization)
     - [📋 Run Unit Tests](#-run-unit-tests)
+      - [Local run](#local-run)
+      - [Docker based Tests](#docker-based-tests)
+      - [CI Run in GitLab](#ci-run-in-gitlab)
     - [📝 Linting with Shellcheck](#-linting-with-shellcheck)
     - [🧹 Code Guidelines](#-code-guidelines)
     - [🏁 Finalize](#-finalize)
@@ -311,33 +314,50 @@ To support more languages add them to `$LOCALES` within the `update` script.
 ### 📋 Run Unit Tests
 
 Tests make the code base more stable. To also get this in bash we use [Bats](https://bats-core.readthedocs.io/) (Bash Automated Testing System).
-To do so we write a test file beside the code. You can run the test within and see how it is used.
+To do so we write a test file beside the code.
 
-- https://github.com/ztombol/bats-support
-- https://github.com/ztombol/bats-assert
+#### Local run
 
-> sudo apt install -y bats bats-support bats-assert
+To use `bats` first install it by running: `sudo tests/setup/bats`
 
 To run all tests call it with the folder:
 
 ```bash
-$ bats local/bash-lib
-_setup.bats
- ✓ input as arguments into line
- ✓ input from stdin into line
+$ bats core
+arguments.bats
+ ✓ input: as arguments into line
+ ✓ input: from stdin into line
+ ✓ input_args: as arguments into line
+ ✓ input_args: from stdin into line
+ ✓ input_lines: as arguments into lines
+ ✓ input_lines: from stdin into lines
+ ✓ option_parse: parse example specification
+ ✓ option_parse: options at the end
+ ✓ option_parse: multiple short options together
+ ✓ option_parse: put name and value together
+ ✓ option_parse: with short spec
+ ✓ option_parse: without short name
+ ✓ option_help: print options from example specification
+date.bats
+ ✓ now: should get timestamp
+ ✓ date_diff: should get difference of timestamps
+ ✓ date_diff: should get difference of date strings
+ ...
 
-2 tests, 0 failures
+52 tests, 0 failures
 ```
 
 Other possibilities to run the local tests are:
 
-- `bats local/bash-lib` - run all tests
-- `bats local/bash-lib/_setup.bats` - run only tests in file
-- `bats local/bash-lib --filter-tags input` - run only tests of given module or function
-- `bats --show-output-of-passing-tests local/bash-lib` - to show the output of succeeded tests
-- `DEBUG=1 bats --filter-tags mattermost local/bash-lib` - run in debug mode and display debug messages below result
+- `bats core module extra` - run all tests
+- `bats core/date.bats` - run only tests in file
+- `bats core --filter-tags input` - run only tests of given module or function
+- `bats core --show-output-of-passing-tests` - to show the output of succeeded tests
+- `DEBUG=1 bats core --filter-tags mattermost` - run in debug mode and display debug messages below result
 
-> As there are some **problems using bats with assoziative arrays and handling of exit** it could not completely test the whole framework. We tried other shell unit test tools but got no better result of `bashunit` or `shellspec`. So for the time being unit testing is only applied there possible.
+> As there are some **problems using bats with assoziative arrays and handling of exit** it could not completely test the whole framework. We tried other shell unit test tools but got no better result of `bashunit` or `shellspec`. So for the time being unit testing is only applied there it is possible, but that's most of the functions.
+
+#### Docker based Tests
 
 Next step should be to run the tests on different operating systems. Therefor we use `docker` so have your environment running and accessible under your user.
 
@@ -368,6 +388,8 @@ You can also selectively run only one os type yb giving this a argument or a spe
 ./test debian        # Test all valid debian versions
 ./test debian 12     # Test only Debian 12
 ```
+
+#### CI Run in GitLab
 
 And the last test will be within the build pipeline after submitting something to gitlab.com. Therefor you have to do nothing gitlab-ci.yml will run `./test ci` for that and will write test results which will be shown in the GitLab pipeline under the "Test" tab.
 

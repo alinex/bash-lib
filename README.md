@@ -61,6 +61,10 @@ bashlib/
     # tools to manage and develop bashlib (for developer)
     install         # setup bashlib on your host
     # all other files are not relevant for use, only for development
+    test            # helper to run test on docker instances
+    tests/          # setup, installation and resources for this
+    doc/            # examples and auto generated api documentation available through GitLab Web UI
+    .*              # some developer setup files ;-)
 ```
 
 The BashLib will be installed on the System with it's `BASHLIB_HOME` directory in the environment to let the scripts find it and load what they need.

@@ -46,16 +46,16 @@ Debian:
       - DEBIAN_VERSION: ["11", "12", "13"]
   needs: []
   before_script:
-    - test-setup/docker-debian
-    - mkdir -p test-results
+    - tests/setup/docker-debian
+    - mkdir -p tests/results
   script:
     - ./test ci
   artifacts:
     when: always
     paths:
-      - test-results/
+      - tests/results/
     reports:
-      junit: test-results/*.xml
+      junit: tests/results/*.xml
   only:
     - master
     - merge_requests

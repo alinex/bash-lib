@@ -1,9 +1,10 @@
 #!/usr/bin/env bats
+# shellcheck disable=SC2154
 
 # bats file_tags=arguments
 setup() {
-    load "../bats-support/load"
-    load "../bats-assert/load"
+    load "$BASHLIB_HOME/tests/bats-support/load"
+    load "$BASHLIB_HOME/tests/bats-assert/load"
     load $BASHLIB_HOME/loader
 }
 teardown_file() {
@@ -16,7 +17,7 @@ teardown_file() {
     run input one two three
     assert_output 'one two three'
     assert_success
-    echo $output # use --show-output-of-passing-tests to see it
+    echo "$output" # use --show-output-of-passing-tests to see it
 }
 
 # bats test_tags=input
@@ -24,7 +25,7 @@ teardown_file() {
     run bats_pipe echo one two three \| input
     assert_output 'one two three'
     assert_success
-    echo $output # use --show-output-of-passing-tests to see it
+    echo "$output" # use --show-output-of-passing-tests to see it
 }
 
 # bats test_tags=input_args
@@ -32,14 +33,14 @@ teardown_file() {
     run input_args 1 title one two three
     assert_output 'one two three'
     assert_success
-    echo $output # use --show-output-of-passing-tests to see it
+    echo "$output" # use --show-output-of-passing-tests to see it
 }
 # bats test_tags=input_args
 @test "input_args: from stdin into line" {
     run bats_pipe echo one two three \| input_args 1 title
     assert_output 'one two three'
     assert_success
-    echo $output # use --show-output-of-passing-tests to see it
+    echo "$output" # use --show-output-of-passing-tests to see it
 }
 
 # bats test_tags=input_lines
@@ -47,14 +48,14 @@ teardown_file() {
     run input_lines one two three
     assert_output $'one\ntwo\nthree'
     assert_success
-    echo $output # use --show-output-of-passing-tests to see it
+    echo "$output" # use --show-output-of-passing-tests to see it
 }
 # bats test_tags=input_lines
 @test "input_lines: from stdin into lines" {
     run bats_pipe echo one two three \| input_lines
     assert_output 'one two three'
     assert_success
-    echo $output # use --show-output-of-passing-tests to see it
+    echo "$output" # use --show-output-of-passing-tests to see it
 }
 
 # bats test_tags=option_parse
@@ -65,7 +66,7 @@ a age   int     Age in years
 h help  -       Show Help Page" -n "Alfred" --age 34 -h captain
     assert_output " -n 'Alfred' --age '34' -h -- 'captain'"
     assert_success
-    echo $output # use --show-output-of-passing-tests to see it
+    echo "$output" # use --show-output-of-passing-tests to see it
 }
 # bats test_tags=option_parse
 @test "option_parse: options at the end" {
@@ -75,7 +76,7 @@ a age   int     Age in years
 h help  -       Show Help Page" captain -n "Alfred" --age 34 -h
     assert_output " -n 'Alfred' --age '34' -h -- 'captain'"
     assert_success
-    echo $output # use --show-output-of-passing-tests to see it
+    echo "$output" # use --show-output-of-passing-tests to see it
 }
 # bats test_tags=option_parse
 @test "option_parse: multiple short options together" {
@@ -85,7 +86,7 @@ a age   int     Age in years
 h help  -       Show Help Page" -hn "Alfred" --age 34 captain
     assert_output " -h -n 'Alfred' --age '34' -- 'captain'"
     assert_success
-    echo $output # use --show-output-of-passing-tests to see it
+    echo "$output" # use --show-output-of-passing-tests to see it
 }
 # bats test_tags=option_parse
 @test "option_parse: put name and value together" {
@@ -95,7 +96,7 @@ a age   int     Age in years
 h help  -       Show Help Page" -h -nAlfred --age=34 captain
     assert_output " -h -n 'Alfred' --age '34' -- 'captain'"
     assert_success
-    echo $output # use --show-output-of-passing-tests to see it
+    echo "$output" # use --show-output-of-passing-tests to see it
 }
 # bats test_tags=option_parse
 @test "option_parse: with short spec" {
@@ -103,7 +104,7 @@ h help  -       Show Help Page" -h -nAlfred --age=34 captain
     p1 p2 --min 5
     assert_output " --min '5' -- 'p1' 'p2'"
     assert_success
-    echo $output # use --show-output-of-passing-tests to see it
+    echo "$output" # use --show-output-of-passing-tests to see it
 }
 # bats test_tags=option_parse
 @test "option_parse: without short name" {
@@ -111,7 +112,7 @@ h help  -       Show Help Page" -h -nAlfred --age=34 captain
     p1 p2 --min 5
     assert_output " --min '5' -- 'p1' 'p2'"
     assert_success
-    echo $output # use --show-output-of-passing-tests to see it
+    echo "$output" # use --show-output-of-passing-tests to see it
 }
 
 # bats test_tags=option_help
@@ -122,5 +123,5 @@ a age   int     Age in years
 h help  -       Show Help Page"
     assert_output -p "Optionen:"
     assert_success
-    echo $output # use --show-output-of-passing-tests to see it
+    echo "$output" # use --show-output-of-passing-tests to see it
 }

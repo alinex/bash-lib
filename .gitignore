@@ -1,5 +1,11 @@
-/oldlib
 # will be created if needed
 /local/bashlib.pot
+# test parts automatically created
+/tests/results
+/tests/bats-core
+/tests/bats-assert
+/tests/bats-support
+# old directories
 /test-results
 /bats-core
+/oldlib

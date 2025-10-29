@@ -17,16 +17,16 @@ CC_CYAN_BOLD=$'\033[96m'
 # run within CI
 if [ "$1" = "ci" ]; then
   # create results folder
-  mkdir -p test-results
-  rm -rf test-results/* 2>/dev/null || true
+  mkdir -p tests/results
+  rm -rf tests/results/* 2>/dev/null || true
   ## run all tests
-  #bats --formatter junit --output test-results core
+  #bats --formatter junit --output tests/results core
   find core -name \*.bats |
     while read -r file; do
       name=${file%.bats} # remove the .bats extension
       name=${name//\//-} # replace all / with -
       echo "Run $name tests..."
-      bats --formatter junit $file >test-results/$name.xml </dev/null
+      bats --formatter junit $file >tests/results/$name.xml </dev/null
     done
 # local test run
 else
@@ -45,7 +45,7 @@ else
       echo -n "($(docker pull -q "$name:$version")) "
       docker run --rm -it -v "$PWD:/mnt" -w /mnt "$name:$version" bash -c \
         "echo -n 'prepare'
-        source test-setup/docker-debian
+        source tests/setup/docker-debian
         echo -n '; run '
         bats --tap core | grep -v ^ok"
     done
@@ -60,7 +60,7 @@ else
   #    echo -n "($(docker pull -q "$name:$version")) "
   #    docker run --rm -it -v "$PWD:/mnt" -w /mnt "$name:$version" sh -c \
   #      "echo -n 'prepare'
-  #      source test-setup/docker-alpine
+  #      source tests/setup/docker-alpine
   #      echo -n '; run '
   #      bats --tap core | grep -v ^ok"
   #  done
