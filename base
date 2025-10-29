@@ -284,11 +284,10 @@ disown)
 }
 _rmtemp(){
 local wait="$1" file="$2"
-debug "Remove $file in ${wait}s"
 while [ -e "$result" ]&&((wait>0));do
 sleep 1
-debug "$wait"
 ((wait--))
 done
 [ ! -e "$result" ]||rm -r "$result"
+debug "Removed $file after TTL $1 seconds"
 }

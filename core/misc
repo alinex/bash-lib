@@ -116,6 +116,8 @@ trap_remove() {
 #           -r, --random                # add a random (numeric) part to the identifier
 #           -T, --ttl <duration>        # duration to remove file again as seconds or duration @duration_format
 # Output:   <path>
+#           Debug: path and if it is created
+#           Debug: remove after TTL
 mktemp() {
     # parameter parsing
     eval set -- "$(option_parse $'d directory -\ne extension +\nm memory -\np path +\nr random -\nT ttl +' "$@")"
@@ -181,11 +183,10 @@ mktemp() {
 }
 _rmtemp() {
     local wait="$1" file="$2"
-    debug "Remove $file in ${wait}s"
     while [ -e "$result" ] && ((wait > 0)); do
         sleep 1
-        debug "$wait"
         ((wait--))
     done
     [ ! -e "$result" ] || rm -r "$result"
+    debug "Removed $file after TTL $1 seconds"
 }

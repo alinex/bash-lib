@@ -2,7 +2,6 @@
 
 ## Format date in different named versions or format string
 
-Stdout:   `<string>`
 
 
 ### Usage
@@ -21,3 +20,7 @@ date_format <format> [<value>] # use now if missing
             time-short  12:00
             +%Y         2025 (custom format)
 ```
+
+### Output (stdout)
+
+- `<string>` in selected format

@@ -48,7 +48,7 @@ date_diff() {
 #                       time        12:00:00
 #                       time-short  12:00
 #                       +%Y         2025 (custom format)
-# Stdout:   <string>
+# Output:   <string> in selected format
 date_format() {
     local value format
     # date_format <format> <value>
@@ -82,6 +82,7 @@ date_format() {
 #                       hours       # using floor
 #                       days        # using floor
 #                       human       # like 1h30m, 5w, 30s
+# Output:   <duration> in selected format
 duration_format() {
     local value
     is_integer "$2" && value="$2" || value="$(_parse_duration "$2")"

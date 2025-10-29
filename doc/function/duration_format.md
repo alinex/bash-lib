@@ -15,3 +15,7 @@ duration_format <format> <value>
             days        # using floor
             human       # like 1h30m, 5w, 30s
 ```
+
+### Output (stdout)
+
+- `<duration>` in selected format

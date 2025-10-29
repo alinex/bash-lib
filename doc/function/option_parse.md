@@ -3,7 +3,7 @@
 ## Parse arguments based on given specification
 
 This will parse the given options into a standardized form and validate them against the given specification.
-Options can be given in different forms: `-a 45`, `-a45`, `--age 45`, `--age=45` are all equal.
+Options can be given in different forms: `-a 45`, `-a45`, `--age 45`, `--age=45` are all equal. The last one is preferred because of readability.
 Also multiple short options can be put together with only the last may need a value.
 
 
