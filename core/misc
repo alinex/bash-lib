@@ -52,7 +52,14 @@ debug "Running in DEBUG=${DEBUG-} mode!"
 # Output error message and exit
 # Usage:    die <message>
 #           <message> | die
-# Error:    <message>
+# Error:    # Example if called for deprecated call:
+#           DEPRECATED: ask_input at task_find in /home/alex/bin/dvb/cleanup:206 please use ask string
+#           > _stacktrace          at die() in /home/alex/dvb/bash-lib/core/misc:59
+#           > _stacktrace          at _deprecated() in /home/alex/dvb/bash-lib/core/internal:23
+#           > _stacktrace          at ask_input() in /home/alex/dvb/bash-lib/module/input:150
+#           > _stacktrace          at task_find() in /home/alex/bin/dvb/cleanup:206
+#           > _stacktrace          at tasks() in /home/alex/dvb/bash-lib/module/input:451
+#           > _stacktrace          at main() in /home/alex/bin/dvb/cleanup:364
 # Return:   always 1 and try to exit script with status 1
 die() {
     echo -e "${CC_CRITICAL}$(input "$@")${CC_RESET}" >&2
@@ -98,9 +105,9 @@ trap_remove() {
 ######################################################################################
 
 # Make a temporary file, which is recognizable
-# As the same invocation from the same program will get the same file it can be called multiple times.
+# As the same invocation from the same program will get the same file it can be called multiple times, as long as no `--random` is set.
 # The file will be conducted out of the program name and the given <identifier>.
-# You should remove this file by yourself if no longer needed. The files will be available in `/tmp`` folder for about 3 unused days and in memory till the next reboot.
+# You should remove this file by yourself if no longer needed. The files will be available in `/tmp` folder for about 3 unused days (managed by your os) and in memory till the next reboot.
 # Usage:    mktemp [<identifier>]       # use default temp if no identifier given
 # Options:  -d, --directory             # to make a directorty instead of a file
 #           -m, --memory                # use shared memory
