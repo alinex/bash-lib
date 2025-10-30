@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-30 21:20+0100\n"
+"POT-Creation-Date: 2025-10-30 21:30+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -44,7 +44,7 @@ msgid "Could not scrape the prometheus exporter at $url!"
 msgstr ""
 
 #: module/monitoring:146 module/input:40 module/input:99 module/input:190
-#: module/input:335 module/input:477 module/remote:120 module/remote:192
+#: module/input:335 module/input:481 module/remote:120 module/remote:192
 #: module/remote:276 module/mattermost:288 module/mattermost:323
 #: module/validator:36 module/software:91
 msgid "Unrecognized option"
@@ -106,19 +106,19 @@ msgstr ""
 msgid "Select one of the above options"
 msgstr ""
 
-#: module/input:496
+#: module/input:500
 msgid "Could not get task list from command"
 msgstr ""
 
-#: module/input:503
+#: module/input:507
 msgid "No tasks found to be executed."
 msgstr ""
 
-#: module/input:509
+#: module/input:513
 msgid "Exit"
 msgstr ""
 
-#: module/input:516
+#: module/input:520
 #, sh-format
 msgid "Got error $error running $task"
 msgstr ""

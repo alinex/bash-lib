@@ -454,8 +454,8 @@ choose() {
 # Example:  &tasks different possibilities
 tasks() {
     # parameter parsing
-    local end title _default opt
-    eval set -- "$(option_parse $'t title +\nd default +\nT timeout +' "$@")"
+    local end title _default opt loop
+    eval set -- "$(option_parse $'t title +\nd default +\nT timeout +\nl loop -' "$@")"
     while true; do
         case "$1" in
         -t | --title)
@@ -469,6 +469,10 @@ tasks() {
         -T | --timeout)
             opt="-T $2 " >/dev/tty
             shift 2
+            ;;
+        -l | --loop)
+            loop=1
+            shift
             ;;
         --)
             shift
@@ -516,5 +520,6 @@ tasks() {
             die "$(eval_gettext "Got error \$error running \$task")"
         fi
         echo ""
+        [ -n "$loop" ] || break
     done
 }
