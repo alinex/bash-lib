@@ -484,12 +484,17 @@ esac
 done
 local prompt
 prompt="${1:-$(gettext "Should this be done")}"
-local char="" seq
+local char="" seq itext invalid
 if [ -n "$default" ];then
 ((default==0))&&prompt="$prompt [$(gettext "No")]"||prompt="$prompt [$(gettext "Yes")]"
 fi
 echo -en "$CC_INFO$prompt?$CC_RESET " >/dev/tty
 while IFS= read -r $timeout -s -n 1 char </dev/tty||true;do
+if [ -n "$invalid" ];then
+invalid=0
+printf ' %.0s' {1..30} >/dev/tty
+printf '\b%.0s' {1..30} >/dev/tty
+fi
 if [[ $char == "" ]];then
 if [ -n "$default" ];then
 if ((default==1));then
@@ -499,6 +504,11 @@ else
 echo -e "$(gettext "No")" >/dev/tty
 return 1
 fi
+else
+itext="$(gettext 'value needed')"
+echo -en "   $CC_RED$itext$CC_RESET" >/dev/tty
+printf '\b%.0s' $(seq 1 $((${#itext}+3))) >/dev/tty
+invalid=1
 fi
 elif [[ $char == $'\033' ]];then
 read -r -s -n 1 -t 0.01 seq
@@ -511,6 +521,11 @@ return 0
 elif [[ $char =~ [Nn] ]];then
 echo -e "$(gettext "No")" >/dev/tty
 return 1
+else
+itext="$(gettext 'invalid character')"
+echo -en "   $CC_RED$itext$CC_RESET" >/dev/tty
+printf '\b%.0s' $(seq 1 $((${#itext}+3))) >/dev/tty
+invalid=1
 fi
 done
 }
@@ -569,15 +584,25 @@ final="^([0-1][0-9]|2[0-3]):[0-5][0-9]$"
 ;;
 *)prompt="${2:-$(gettext "Enter short text")}"
 esac
-local input="" char="" seq
+local input="" char="" seq invalid itext
 [ -z "$default" ]&&timeout=""||prompt="$prompt [$default]"
 echo -en "$CC_INFO$prompt:$CC_RESET " >/dev/tty
 while IFS= read -r $timeout -s -n 1 char </dev/tty||true;do
+if [ -n "$invalid" ];then
+invalid=0
+printf ' %.0s' {1..30} >/dev/tty
+printf '\b%.0s' {1..30} >/dev/tty
+fi
 if [[ $char == "" ]];then
 if [ -n "$final" ];then
 if [[ $input =~ $final ]];then
 echo >/dev/tty
 break
+else
+itext="$(gettext 'incomplete')"
+echo -en "   $CC_RED$itext$CC_RESET" >/dev/tty
+printf '\b%.0s' $(seq 1 $((${#itext}+3))) >/dev/tty
+invalid=1
 fi
 elif [ -n "$input" ];then
 echo >/dev/tty
@@ -589,6 +614,11 @@ break
 elif [ -n "$empty" ];then
 echo >/dev/tty
 break
+else
+itext="$(gettext 'value needed')"
+echo -en "   $CC_RED$itext$CC_RESET" >/dev/tty
+printf '\b%.0s' $(seq 1 $((${#itext}+3))) >/dev/tty
+invalid=1
 fi
 elif [[ $char == $'\177' ]];then
 if [ ${#input} -gt 0 ];then
@@ -606,7 +636,13 @@ debug 7 "$(od -An -to1 -v <<<"$char") [[ \"$input$char\" =~ $pattern ]] $([[ "$i
 if [ "$format" = "float" ]&&[ "$char" = "," ];then
 char=.
 fi
-[[ "$input$char" =~ $pattern ]]||continue
+if [[ ! "$input$char" =~ $pattern ]];then
+itext="$(gettext 'invalid character')"
+echo -en "   $CC_RED$itext$CC_RESET" >/dev/tty
+printf '\b%.0s' $(seq 1 $((${#itext}+3))) >/dev/tty
+invalid=1
+continue
+fi
 fi
 input+="$char"
 [ -n "$mask" ]&&echo -n "*" >/dev/tty||echo -n "$char" >/dev/tty
@@ -670,11 +706,16 @@ fi
 ((length==1))||pattern="(0|$pattern)"
 [ -z "$end" ]||pattern="(x|$pattern)"
 pattern="^$pattern$"
-local input="" char=""
+local input="" char="" itext invalid
 local question="$(gettext "Select one of the above options")"
 [ -z "$default" ]&&timeout=""||question="$question [$default]"
 echo -n "$question: " >/dev/tty
 while read -r $timeout -s -n 1 char </dev/tty||true;do
+if [ -n "$invalid" ];then
+invalid=0
+printf ' %.0s' {1..30} >/dev/tty
+printf '\b%.0s' {1..30} >/dev/tty
+fi
 if [[ $char == "" ]];then
 if [ -n "$final" ];then
 echo >/dev/tty
@@ -686,6 +727,11 @@ elif [ -n "$default" ];then
 input="$default"
 echo >/dev/tty
 break
+else
+itext="$(gettext 'value needed')"
+echo -en "   $CC_RED$itext$CC_RESET" >/dev/tty
+printf '\b%.0s' $(seq 1 $((${#itext}+3))) >/dev/tty
+invalid=1
 fi
 elif [[ $char == $'\177' ]];then
 if [ ${#input} -gt 0 ];then
@@ -702,7 +748,13 @@ echo "$char" >/dev/tty
 echo "exit"
 return 0
 else
-[[ "$input$char" =~ $pattern ]]||continue
+if [[ ! "$input$char" =~ $pattern ]];then
+itext="$(gettext 'invalid character')"
+echo -en "   $CC_RED$itext$CC_RESET" >/dev/tty
+printf '\b%.0s' $(seq 1 $((${#itext}+3))) >/dev/tty
+invalid=1
+continue
+fi
 input+="$char"
 echo -n "$char" >/dev/tty
 if ((${#input}==length));then

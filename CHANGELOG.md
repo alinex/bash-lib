@@ -8,6 +8,11 @@ As this is not driven by releases and therefore tags are not used it is an ongoi
 - fix: `mktemp` if already existing to also return path
 - fix: `tasks` to work with quoted arguments in function calls
 - restructure tests folder for better overview
+- [`pause`](doc/function/pause.md) now also has timeout and abort
+- [`confirm`](doc/function/confirm.md) timeout and display of invalid input
+- [`ask`](doc/function/ask.md) invalid input, timeout
+- [`choose`](doc/function/choose.md) invalid input, `--timeout`, input format check, direct selection without `<return>`
+- [`tasks`](doc/function/tasks.md) with `--loop` option
 
 ## 28. October 2025 - V2.0.0
 

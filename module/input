@@ -102,7 +102,7 @@ confirm() {
     # processing
     local prompt
     prompt="${1:-$(gettext "Should this be done")}"
-    local char="" seq
+    local char="" seq itext invalid
     if [ -n "$default" ]; then
         ((default == 0)) && prompt="$prompt [$(gettext "No")]" || prompt="$prompt [$(gettext "Yes")]"
     fi
@@ -111,6 +111,12 @@ confirm() {
     # shellcheck disable=SC2086
     # shellcheck disable=SC2229
     while IFS= read -r $timeout -s -n 1 char </dev/tty || true; do
+        # remove error
+        if [ -n "$invalid" ]; then
+            invalid=0
+            printf ' %.0s' {1..30} >/dev/tty
+            printf '\b%.0s' {1..30} >/dev/tty
+        fi
         # stop maybe on enter (newline)
         if [[ $char == "" ]]; then
             # end if default is set
@@ -122,6 +128,11 @@ confirm() {
                     echo -e "$(gettext "No")" >/dev/tty
                     return 1
                 fi
+            else
+                itext="$(gettext 'value needed')"
+                echo -en "   ${CC_RED}$itext${CC_RESET}" >/dev/tty
+                printf '\b%.0s' $(seq 1 $((${#itext} + 3))) >/dev/tty
+                invalid=1
             fi
         # ignore escape sequences
         elif [[ $char == $'\033' ]]; then
@@ -138,6 +149,11 @@ confirm() {
         elif [[ $char =~ [Nn] ]]; then
             echo -e "$(gettext "No")" >/dev/tty
             return 1
+        else
+            itext="$(gettext 'invalid character')"
+            echo -en "   ${CC_RED}$itext${CC_RESET}" >/dev/tty
+            printf '\b%.0s' $(seq 1 $((${#itext} + 3))) >/dev/tty
+            invalid=1
         fi
     done
 }
@@ -226,13 +242,19 @@ ask() {
         prompt="${2:-$(gettext "Enter short text")}"
         ;;
     esac
-    local input="" char="" seq
+    local input="" char="" seq invalid itext
     [ -z "$default" ] && timeout="" || prompt="$prompt [$default]"
     echo -en "${CC_INFO}$prompt:${CC_RESET} " >/dev/tty
     # Read one character at a time silently (-s), without newline (-n 1)
     # shellcheck disable=SC2229
     # shellcheck disable=SC2086
     while IFS= read -r $timeout -s -n 1 char </dev/tty || true; do
+        # remove error
+        if [ -n "$invalid" ]; then
+            invalid=0
+            printf ' %.0s' {1..30} >/dev/tty
+            printf '\b%.0s' {1..30} >/dev/tty
+        fi
         # stop maybe on enter (newline)
         if [[ $char == "" ]]; then
             # end if final pattern reached
@@ -240,6 +262,11 @@ ask() {
                 if [[ "$input" =~ $final ]]; then
                     echo >/dev/tty
                     break
+                else
+                    itext="$(gettext 'incomplete')"
+                    echo -en "   ${CC_RED}$itext${CC_RESET}" >/dev/tty
+                    printf '\b%.0s' $(seq 1 $((${#itext} + 3))) >/dev/tty
+                    invalid=1
                 fi
             # end if input done
             elif [ -n "$input" ]; then
@@ -254,6 +281,11 @@ ask() {
             elif [ -n "$empty" ]; then
                 echo >/dev/tty
                 break
+            else
+                itext="$(gettext 'value needed')"
+                echo -en "   ${CC_RED}$itext${CC_RESET}" >/dev/tty
+                printf '\b%.0s' $(seq 1 $((${#itext} + 3))) >/dev/tty
+                invalid=1
             fi
         # Handle backspace
         elif [[ $char == $'\177' ]]; then
@@ -276,7 +308,13 @@ ask() {
                 if [ "$format" = "float" ] && [ "$char" = "," ]; then
                     char=.
                 fi
-                [[ "$input$char" =~ $pattern ]] || continue
+                if [[ ! "$input$char" =~ $pattern ]]; then
+                    itext="$(gettext 'invalid character')"
+                    echo -en "   ${CC_RED}$itext${CC_RESET}" >/dev/tty
+                    printf '\b%.0s' $(seq 1 $((${#itext} + 3))) >/dev/tty
+                    invalid=1
+                    continue
+                fi
             fi
             input+="$char"
             [ -n "$mask" ] && echo -n "*" >/dev/tty || echo -n "$char" >/dev/tty
@@ -373,7 +411,7 @@ choose() {
     [ -z "$end" ] || pattern="(x|$pattern)"
     pattern="^$pattern$"
     # question
-    local input="" char=""
+    local input="" char="" itext invalid
     # shellcheck disable=SC2155
     local question="$(gettext "Select one of the above options")"
     [ -z "$default" ] && timeout="" || question="$question [$default]"
@@ -381,6 +419,12 @@ choose() {
     # shellcheck disable=SC2086
     # shellcheck disable=SC2229
     while read -r $timeout -s -n 1 char </dev/tty || true; do
+        # remove error
+        if [ -n "$invalid" ]; then
+            invalid=0
+            printf ' %.0s' {1..30} >/dev/tty
+            printf '\b%.0s' {1..30} >/dev/tty
+        fi
         # stop maybe on enter (newline)
         if [[ $char == "" ]]; then
             # end if number completed TODO
@@ -396,6 +440,11 @@ choose() {
                 input="$default"
                 echo >/dev/tty
                 break
+            else
+                itext="$(gettext 'value needed')"
+                echo -en "   ${CC_RED}$itext${CC_RESET}" >/dev/tty
+                printf '\b%.0s' $(seq 1 $((${#itext} + 3))) >/dev/tty
+                invalid=1
             fi
         # Handle backspace
         elif [[ $char == $'\177' ]]; then
@@ -417,7 +466,13 @@ choose() {
             return 0
         # next character
         else
-            [[ "$input$char" =~ $pattern ]] || continue
+            if [[ ! "$input$char" =~ $pattern ]]; then
+                itext="$(gettext 'invalid character')"
+                echo -en "   ${CC_RED}$itext${CC_RESET}" >/dev/tty
+                printf '\b%.0s' $(seq 1 $((${#itext} + 3))) >/dev/tty
+                invalid=1
+                continue
+            fi
             input+="$char"
             echo -n "$char" >/dev/tty
             # completed number
