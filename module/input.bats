@@ -864,3 +864,10 @@ setup() {
     assert_output -p "task1"
     echo "$output" # use --show-output-of-passing-tests to see it
 }
+# bats test_tags=tasks
+@test "tasks: empty tasks will return" {
+    run tasks
+    assert_success
+    assert_output -p "Keine Aufgaben zum Ausführen gefunden."
+    echo "$output" # use --show-output-of-passing-tests to see it
+}

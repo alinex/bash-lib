@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-30 21:05+0100\n"
+"POT-Creation-Date: 2025-10-30 21:20+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -44,9 +44,9 @@ msgid "Could not scrape the prometheus exporter at $url!"
 msgstr ""
 
 #: module/monitoring:146 module/input:40 module/input:99 module/input:190
-#: module/input:335 module/input:477 module/process:85 module/remote:120
-#: module/remote:192 module/remote:276 module/mattermost:288
-#: module/mattermost:323 module/validator:36 module/software:91
+#: module/input:335 module/input:477 module/remote:120 module/remote:192
+#: module/remote:276 module/mattermost:288 module/mattermost:323
+#: module/validator:36 module/software:91
 msgid "Unrecognized option"
 msgstr ""
 
@@ -106,63 +106,51 @@ msgstr ""
 msgid "Select one of the above options"
 msgstr ""
 
-#: module/input:497
+#: module/input:496
 msgid "Could not get task list from command"
 msgstr ""
 
-#: module/input:504
+#: module/input:503
 msgid "No tasks found to be executed."
 msgstr ""
 
-#: module/input:510
+#: module/input:509
 msgid "Exit"
 msgstr ""
 
-#: module/input:517
+#: module/input:516
 #, sh-format
 msgid "Got error $error running $task"
 msgstr ""
 
-#: module/process:78
-msgid "press any key to stop"
-msgstr ""
-
-#: module/process:90
-msgid "Waiting"
-msgstr ""
-
-#: module/process:92
-msgid "seconds"
-msgstr ""
-
-#: module/process:114
+#: module/process:80
 msgid "Failed to remove lockfile"
 msgstr ""
 
-#: module/process:129 module/process:162
+#: module/process:95 module/process:128
 msgid "Failed to create PID lockfile"
 msgstr ""
 
-#: module/process:137
+#: module/process:103
 #, sh-format
 msgid "Waiting for unlock in $lockfile by PID $pid"
 msgstr ""
 
-#: module/process:369
+#: module/process:335
 msgid "Work steps are logged so that you can resume work mid-process"
 msgstr ""
 
-#: module/process:381
+#: module/process:347
 #, sh-format
 msgid "Job $name already done in this run, skipping"
 msgstr ""
 
-#: module/process:400
+#: module/process:366
 #, sh-format
 msgid "Finished: Step $name at $date"
 msgstr ""
 
-#: module/process:425
+#: module/process:391
 #, sh-format
 msgid "Started: step $name at $date"
 msgstr ""

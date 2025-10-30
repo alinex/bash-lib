@@ -216,7 +216,7 @@ Module with user interaction helpers.
 
 | Variable/Function | Description |
 | --- | --- |
-| [`pause`](function/pause.md) | Wait for user input |
+| [`pause`](function/pause.md) | Wait for some time or user input |
 | [`confirm`](function/confirm.md) | Ask a yes/no question. |
 | [`ask`](function/ask.md) | Ask for an input element |
 | [`choose`](function/choose.md) | Select from list (extended version of native select) |
@@ -312,7 +312,6 @@ Module for process control
 | [`sudo`](function/sudo.md) | Sudo overwrite to only use sudo if needed |
 | [`repeat`](function/repeat.md) | Execute command in N times |
 | [`retry`](function/retry.md) | Retry a command multiple times until it succeeds |
-| [`countdown`](function/countdown.md) | Sleep with countdown some seconds |
 | [`lock`](function/lock.md) | Set a lock or wait till it can be set |
 | [`lock_exit`](function/lock_exit.md) | Set the lock or exit with optional error message |
 | [`unlock`](function/unlock.md) | Remove the lock |

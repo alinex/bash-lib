@@ -1,6 +1,6 @@
 # pause
 
-## Wait for user input
+## Wait for some time or user input
 
 
 

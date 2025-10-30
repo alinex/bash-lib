@@ -481,8 +481,7 @@ tasks() {
     local raw list task num newlist cmd name
     find /dev/shm -regex ".*/$0_tasks_[0-9]*" -mmin +60 -delete 2>/dev/null || true # cleanup broken runs
     newlist="$(mktemp -m "tasks_$$")"
-    raw="$(input_lines "$@" | grep -v '^[[:space:]]*#')"
-    debug "default: $_default"
+    raw="$(input_lines "$@" | grep -v '^[[:space:]]*#')" || true
     # ask user to select
     while true; do
         list="$raw"
