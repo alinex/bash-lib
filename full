@@ -487,7 +487,7 @@ ask_yes(){ _deprecated "use confirm --true <question>";}
 ask_input(){ _deprecated "use ask <question>";}
 ask(){
 local default empty negative
-eval set -- "$(option_parse $'e empty -\nd default +\nn allow-negative -' "$@")"
+eval set -- "$(option_parse $'e empty -\nd default +\nT timeout +\nn allow-negative -' "$@")"
 while true;do
 case "$1" in
 -e|--empty)empty=1
@@ -606,17 +606,18 @@ break
 *)die "$(gettext "Unrecognized option"): $1"
 esac
 done
-local question="$(gettext "Select one of the above options:")"
-[ -z "$default" ]&&readopt=""||question="$question [$default]"
 local list line key display num=0
 list="$(input_lines "$@")"
 list="$(trim "$list")"
 while read -r line;do
 num=$((num+1))
 IFS="|" read -r key display <<<"$line"
+[ ! "$default" = "$key" ]&&[ ! "$default" = "$display" ]||default="$num"
 printf "%4d) $(trim "${display:-$key}")\n" "$num" >/dev/tty
 done <<<"$list"
 [ -z "$end" ]||printf "%4s) $end\n" x >/dev/tty
+local question="$(gettext "Select one of the above options:")"
+[ -z "$default" ]&&readopt=""||question="$question [$default]"
 while true;do
 read $readopt -r -p "$question " select </dev/tty||true
 if [[ $select =~ ^[1-$num]$ ]];then

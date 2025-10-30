@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-29 22:12+0100\n"
+"POT-Creation-Date: 2025-10-30 13:04+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -43,8 +43,8 @@ msgstr ""
 msgid "Could not scrape the prometheus exporter at $url!"
 msgstr ""
 
-#: module/monitoring:146 module/input:60 module/input:149 module/input:289
-#: module/input:374 module/process:85 module/remote:120 module/remote:192
+#: module/monitoring:146 module/input:60 module/input:151 module/input:292
+#: module/input:379 module/process:85 module/remote:120 module/remote:192
 #: module/remote:276 module/mattermost:288 module/mattermost:323
 #: module/validator:36 module/software:91
 msgid "Unrecognized option"
@@ -78,47 +78,47 @@ msgstr ""
 msgid "Yes"
 msgstr ""
 
-#: module/input:157
+#: module/input:159
 msgid "Enter integer number"
 msgstr ""
 
-#: module/input:166
+#: module/input:168
 msgid "Enter float number"
 msgstr ""
 
-#: module/input:176
+#: module/input:178
 msgid "Enter password"
 msgstr ""
 
-#: module/input:180
+#: module/input:182
 msgid "Enter time"
 msgstr ""
 
-#: module/input:185
+#: module/input:187
 msgid "Enter short text"
 msgstr ""
 
-#: module/input:294
+#: module/input:308
 msgid "Select one of the above options:"
 msgstr ""
 
-#: module/input:325
+#: module/input:330
 msgid "Disallowed answer"
 msgstr ""
 
-#: module/input:393
+#: module/input:398
 msgid "Could not get task list from command"
 msgstr ""
 
-#: module/input:400
+#: module/input:405
 msgid "No tasks found to be executed."
 msgstr ""
 
-#: module/input:416
+#: module/input:421
 msgid "Exit"
 msgstr ""
 
-#: module/input:421
+#: module/input:426
 #, sh-format
 msgid "Got error $error running $task"
 msgstr ""

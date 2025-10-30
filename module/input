@@ -292,19 +292,21 @@ choose() {
         *) die "$(gettext "Unrecognized option"): $1" ;;
         esac
     done
-    # processing
-    # shellcheck disable=SC2155
-    local question="$(gettext "Select one of the above options:")"
-    [ -z "$default" ] && readopt="" || question="$question [$default]"
+    # output list
     local list line key display num=0
     list="$(input_lines "$@")"
     list="$(trim "$list")"
     while read -r line; do
         num=$((num + 1))
         IFS="|" read -r key display <<<"$line"
+        [ ! "$default" = "$key" ] && [ ! "$default" = "$display" ] || default="$num"
         printf "%4d) $(trim "${display:-$key}")\n" "$num" >/dev/tty
     done <<<"$list"
     [ -z "$end" ] || printf "%4s) ${end}\n" x >/dev/tty
+    # question
+    # shellcheck disable=SC2155
+    local question="$(gettext "Select one of the above options:")"
+    [ -z "$default" ] && readopt="" || question="$question [$default]"
     while true; do
         # shellcheck disable=SC2086
         # shellcheck disable=SC2229
