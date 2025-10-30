@@ -239,7 +239,7 @@ setup() {
 }
 
 # bats test_tags=ask
-@test "ask: default" {
+@test "ask: default-format (string)" {
     run expect -c '
         log_user 0
         spawn bash -c "
@@ -306,6 +306,42 @@ setup() {
     '
     assert_success
     assert_output -p "What to do?"
+    assert_output -p "test"
+    echo "$output" # use --show-output-of-passing-tests to see it
+}
+# bats test_tags=ask
+@test "ask: with default value" {
+    run expect -c '
+        log_user 0
+        spawn bash -c "
+            source '$BASHLIB_HOME'/loader
+            ask string --default=test
+        "
+        log_user 1
+        expect "Gib einen Kurztext ein [test]:"
+        send "\n"
+        expect eof
+    '
+    assert_success
+    assert_output -p "Gib einen Kurztext ein [test]:"
+    assert_output -p "test"
+    echo "$output" # use --show-output-of-passing-tests to see it
+}
+# bats test_tags=ask
+@test "ask: with default value and timeout" {
+    run expect -c '
+        log_user 0
+        spawn bash -c "
+            source '$BASHLIB_HOME'/loader
+            ask string --default=test --timeout=1
+        "
+        log_user 1
+        expect "Gib einen Kurztext ein [test]:"
+        sleep 2
+        expect eof
+    '
+    assert_success
+    assert_output -p "Gib einen Kurztext ein [test]:"
     assert_output -p "test"
     echo "$output" # use --show-output-of-passing-tests to see it
 }
@@ -451,5 +487,103 @@ setup() {
     assert_success
     assert_output -p "Gib das Passwort ein:"
     assert_output -p "******"
+    echo "$output" # use --show-output-of-passing-tests to see it
+}
+
+# bats test_tags=choose
+@test "choose: list" {
+    run expect -c '
+        log_user 0
+        spawn bash -c "
+            source '$BASHLIB_HOME'/loader
+            choose one two three
+        "
+        log_user 1
+        expect "Wähle eine der obigen Optionen:"
+        send "1\n"
+        expect eof
+    '
+    assert_success
+    assert_output -p "1) one"
+    last="$(tail -1 <<<"$output" | nocr)"
+    assert [ "$last" = "one" ]
+    echo "$output" # use --show-output-of-passing-tests to see it
+}
+# bats test_tags=choose
+@test "choose: with title" {
+    run expect -c '
+        log_user 0
+        spawn bash -c "
+            source '$BASHLIB_HOME'/loader
+            choose one two three --title=Choose
+        "
+        log_user 1
+        expect "Wähle eine der obigen Optionen:"
+        send "1\n"
+        expect eof
+    '
+    assert_success
+    assert_output -p "Choose"
+    assert_output -p "1) one"
+    last="$(tail -1 <<<"$output" | nocr)"
+    assert [ "$last" = "one" ]
+    echo "$output" # use --show-output-of-passing-tests to see it
+}
+# bats test_tags=choose
+@test "choose: with exit option" {
+    run expect -c '
+        log_user 0
+        spawn bash -c "
+            source '$BASHLIB_HOME'/loader
+            choose one two three --exit=Close
+        "
+        log_user 1
+        expect "Wähle eine der obigen Optionen:"
+        send "x\n"
+        expect eof
+    '
+    assert_success
+    assert_output -p "1) one"
+    assert_output -p "x) Close"
+    last="$(tail -1 <<<"$output" | nocr)"
+    assert [ "$last" = "exit" ]
+    echo "$output" # use --show-output-of-passing-tests to see it
+}
+# bats test_tags=choose
+@test "choose: with default number" {
+    run expect -c '
+        log_user 0
+        spawn bash -c "
+            source '$BASHLIB_HOME'/loader
+            choose one two three --default=2
+        "
+        log_user 1
+        expect "Wähle eine der obigen Optionen:"
+        send "\n"
+        expect eof
+    '
+    assert_success
+    assert_output -p "1) one"
+    last="$(tail -1 <<<"$output" | nocr)"
+    assert [ "$last" = "two" ]
+    echo "$output" # use --show-output-of-passing-tests to see it
+}
+# bats test_tags=choose
+@test "choose: with default name" {
+    run expect -c '
+        log_user 0
+        spawn bash -c "
+            source '$BASHLIB_HOME'/loader
+            choose one two three --default=three
+        "
+        log_user 1
+        expect "Wähle eine der obigen Optionen:"
+        send "\n"
+        expect eof
+    '
+    assert_success
+    assert_output -p "1) one"
+    last="$(tail -1 <<<"$output" | nocr)"
+    assert [ "$last" = "three" ]
     echo "$output" # use --show-output-of-passing-tests to see it
 }

@@ -115,15 +115,17 @@ ask_input() { _deprecated "use ask <question>"; }
 # - `float` - allow number [0-9]+.[0-9]+ (alternative , is allowed as decimal separator)
 # - `password` - will show only `*` characters to hide input
 # Usage:    ask <format> <question>
-# Options:  -e, --empty             # allowe empty value
-#           -d, --default <value>   # set default if none given
-#           -n, --allow-negative    # on number, integer, float
+# Options:  -e, --empty                 # allowe empty value
+#           -n, --allow-negative        # on number, integer, float
+#           -d, --default <value>       # set default if none given
+#           -T, --timeout <duration>    # time till default is used
 # TTY:      <question> <valid characters>...
+#           # input <keys> printed if valid
 # Stdout:   <answer>
 ask() {
     # parameter parsing
     local default empty negative
-    eval set -- "$(option_parse $'e empty -\nd default +\nn allow-negative -' "$@")"
+    eval set -- "$(option_parse $'e empty -\nd default +\nT timeout +\nn allow-negative -' "$@")"
     while true; do
         case "$1" in
         -e | --empty)
@@ -259,6 +261,7 @@ ask() {
 #           ...
 #           <question> <key>
 # Stdout:   selected <line>
+#           exit # if run with --exit and this was choosen
 # TODO > 10 entries make two columns using mlr display
 choose() {
     # parameter parsing
