@@ -249,6 +249,10 @@ ask() {
 }
 
 # Select from list (extended version of native select)
+# The given list will be printed as numerical options from which you select one by typing it's number. Number validation is on, so you can only input a valid number. No return-lkey needed if the full number is given.
+# With the options a default can be given, which will be selected using return-key or a timeout till this is used.
+# Each list entry can be a single `<text>` or `<key>|<name>` while the `<name>` is shown the `<key>` will be returned if selected.
+# With the option `--exit` the additional entry will break by returning `exit`.
 # Usage:    choose [-t] <entry>...
 #           <list> | choose [-t]
 # Options:  -t, --title <title>         # display text line above selection
@@ -302,8 +306,8 @@ choose() {
         num=$((num + 1))
         IFS="|" read -r key display <<<"$line"
         if [ -n "$default" ]; then
-            [ "$default" = "$key" ] && default="$num" || true
-            [ "$default" = "$display" ] && default="$num" || true
+            [ "$default" = "$(trim "$key")" ] && default="$num" || true
+            [ "$default" = "$(trim "$display")" ] && default="$num" || true
         fi
         printf "  %0${length}d) $(trim "${display:-$key}")\n" "$num" >/dev/tty
     done <<<"$list"
@@ -329,7 +333,6 @@ choose() {
     ((length == 1)) || pattern="(0|$pattern)"
     [ -z "$end" ] || pattern="(x|$pattern)"
     pattern="^$pattern$"
-    debug "max=$max length=$length pattern: $pattern"
     # question
     local input="" char=""
     # shellcheck disable=SC2155
@@ -400,7 +403,7 @@ choose() {
 #           <task-lines> | tasks            # entries from pipe
 #           tasks <check-fn>                # add entries from function (dynamic)
 # Option    -t, --title <title>             # display text line above selection
-#           -d, --default <var> | <task-fn> | "x"   # default command to start
+#           -d, --default <string|int|variable>  # default command to start
 #           -T, --timeout <sec>             # timeout till default selection
 # Files:    `/dev/shm/<program>_tasks_<pid>` will be used while dynamically generating the tasks list and removed afterwards
 # TTY:      Nächste Schritte
@@ -440,6 +443,7 @@ tasks() {
     find /dev/shm -regex ".*/$0_tasks_[0-9]*" -mmin +60 -delete 2>/dev/null || true # cleanup broken runs
     newlist="$(mktemp -m "tasks_$$")"
     raw="$(input_lines "$@" | grep -v '^[[:space:]]*#')"
+    debug "default: $_default"
     # ask user to select
     while true; do
         list="$raw"
@@ -462,24 +466,17 @@ tasks() {
                 return
             fi
         done
-        [ -z "$_default" ] || [ -z "${!_default}" ] || _default="${!_default}"
-        if [ "$_default" = "x" ]; then
-            opt+="-d x "
-        elif [ -n "$_default" ]; then
-            num=0
-            while IFS= read -r line; do
-                ((num++)) || true
-                IFS='|' read -r cmd name <<<"$line"
-                [ ! "$_default" = "$(trim "$cmd")" ] || opt+="-d $num "
-            done <<<"$list"
-        fi
+        _default="$(value_if_variable "$_default")"
         # shellcheck disable=SC2086
-        task=$(choose "$title" -x "$(gettext "Exit")" $opt "$list")
+        task=$(choose "$title" -x "$(gettext "Exit")" $opt -d "$_default" <<<"$list")
         debug "choosen $task"
         [[ "$task" != "exit" ]] || break
+        local error
         # shellcheck disable=SC2034
-        local error=$?
-        eval "$task" || die "$(eval_gettext "Got error \$error running \$task")"
+        if ! eval "$task"; then
+            error=$?
+            die "$(eval_gettext "Got error \$error running \$task")"
+        fi
         echo ""
     done
 }

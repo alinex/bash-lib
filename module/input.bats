@@ -510,6 +510,25 @@ setup() {
     echo "$output" # use --show-output-of-passing-tests to see it
 }
 # bats test_tags=choose
+@test "choose: list through stdin" {
+    run expect -c '
+        log_user 0
+        spawn bash -c "
+            source '$BASHLIB_HOME'/loader
+            echo -e \"one\ntwo\nthree\" | choose
+        "
+        log_user 1
+        expect "Wähle eine der obigen Optionen:"
+        send "1"
+        expect eof
+    '
+    assert_success
+    assert_output -p "1) one"
+    last="$(tail -1 <<<"$output" | nocr)"
+    assert [ "$last" = "one" ]
+    echo "$output" # use --show-output-of-passing-tests to see it
+}
+# bats test_tags=choose
 @test "choose: with title" {
     run expect -c '
         log_user 0
@@ -642,5 +661,155 @@ setup() {
     assert_output -p "2) two"
     last="$(tail -1 <<<"$output" | nocr)"
     assert [ "$last" = "two" ]
+    echo "$output" # use --show-output-of-passing-tests to see it
+}
+
+# bats test_tags=tasks
+@test "tasks: fixed tasks" {
+    # shellcheck disable=SC2329
+    task1() { echo "task1"; }
+    # shellcheck disable=SC2329
+    task2() { echo "task2"; }
+    run expect -c '
+        log_user 0
+        spawn bash -c "
+            source '$BASHLIB_HOME'/loader
+            tasks \"task1|run tsask 1\" \"task2| run task 2\"
+        "
+        log_user 1
+        expect "Wähle eine der obigen Optionen"
+        send "1x"
+        expect eof
+    '
+    assert_success
+    assert_output -p "task1"
+    echo "$output" # use --show-output-of-passing-tests to see it
+}
+# bats test_tags=tasks
+@test "tasks: read from stdin" {
+    # shellcheck disable=SC2329
+    task1() { echo "task1"; }
+    # shellcheck disable=SC2329
+    task2() { echo "task2"; }
+    run expect -c '
+        log_user 0
+        spawn bash -c "
+            source '$BASHLIB_HOME'/loader
+            echo -e \"task1|run task 1\ntask2| run task 2\" | tasks
+        "
+        log_user 1
+        expect "Wähle eine der obigen Optionen"
+        send "1x"
+        expect eof
+    '
+    assert_success
+    assert_output -p "task1"
+    echo "$output" # use --show-output-of-passing-tests to see it
+}
+# bats test_tags=tasks
+@test "tasks: with title" {
+    # shellcheck disable=SC2329
+    task1() { echo "task1"; }
+    # shellcheck disable=SC2329
+    task2() { echo "task2"; }
+    run expect -c '
+        log_user 0
+        spawn bash -c "
+            source '$BASHLIB_HOME'/loader
+            tasks --title=ToDo \"task1|run tsask 1\" \"task2| run task 2\"
+        "
+        log_user 1
+        expect "Wähle eine der obigen Optionen"
+        send "1x"
+        expect eof
+    '
+    assert_success
+    assert_output -p "ToDo"
+    assert_output -p "task1"
+    echo "$output" # use --show-output-of-passing-tests to see it
+}
+# bats test_tags=tasks
+@test "tasks: with default as number" {
+    # shellcheck disable=SC2329
+    task1() { echo "task1"; }
+    # shellcheck disable=SC2329
+    task2() { echo "task2"; }
+    run expect -c '
+        log_user 0
+        spawn bash -c "
+            source '$BASHLIB_HOME'/loader
+            tasks --default=1 \"task1|run tsask 1\" \"task2| run task 2\"
+        "
+        log_user 1
+        expect "Wähle eine der obigen Optionen"
+        send "\nx"
+        expect eof
+    '
+    assert_success
+    assert_output -p "task1"
+    echo "$output" # use --show-output-of-passing-tests to see it
+}
+# bats test_tags=tasks
+@test "tasks: with default as key" {
+    # shellcheck disable=SC2329
+    task1() { echo "task1"; }
+    # shellcheck disable=SC2329
+    task2() { echo "task2"; }
+    run expect -c '
+        log_user 0
+        spawn bash -c "
+            source '$BASHLIB_HOME'/loader
+            tasks --default=task2 \"task1|run tsask 1\" \"task2| run task 2\"
+        "
+        log_user 1
+        expect "Wähle eine der obigen Optionen"
+        send "\nx"
+        expect eof
+    '
+    assert_success
+    assert_output -p "task2"
+    echo "$output" # use --show-output-of-passing-tests to see it
+}
+# bats test_tags=tasks
+@test "tasks: with default as name" {
+    # shellcheck disable=SC2329
+    task1() { echo "task1"; }
+    # shellcheck disable=SC2329
+    task2() { echo "task2"; }
+    run expect -c '
+        log_user 0
+        spawn bash -c "
+            source '$BASHLIB_HOME'/loader
+            tasks --default=\"run task 2\" \"task1|run tsask 1\" \"task2|run task 2\"
+        "
+        log_user 1
+        expect "Wähle eine der obigen Optionen"
+        send "\nx"
+        expect eof
+    '
+    assert_success
+    assert_output -p "task2"
+    echo "$output" # use --show-output-of-passing-tests to see it
+}
+# bats test_tags=tasks
+@test "tasks: with default after timeout" {
+    # shellcheck disable=SC2329
+    task1() { echo "task1"; }
+    # shellcheck disable=SC2329
+    task2() { echo "task2"; }
+    run expect -c '
+        log_user 0
+        spawn bash -c "
+            source '$BASHLIB_HOME'/loader
+            tasks --default=1 --timeout=1 \"task1|run tsask 1\" \"task2| run task 2\"
+        "
+        log_user 1
+        expect "Wähle eine der obigen Optionen"
+        sleep 2
+        send "x"
+        expect eof
+    '
+    assert_success
+    assert_output -p "task1"
     echo "$output" # use --show-output-of-passing-tests to see it
 }

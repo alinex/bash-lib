@@ -380,6 +380,7 @@ Validators to make this easier and more readable.
 | [`trim_start`](function/trim_start.md) | Trim leading whitespace or given character |
 | [`trim_end`](function/trim_end.md) | Trim trailing whitespace or given character |
 | [`trim`](function/trim.md) | Trim leading and trailing whitespace or given character |
+| [`value_if_variable`](function/value_if_variable.md) | Return the value or if it is a variable name which is not empty return it's value |
 
 ## Extra
 
