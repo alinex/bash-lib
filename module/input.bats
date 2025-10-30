@@ -500,7 +500,7 @@ setup() {
         "
         log_user 1
         expect "Wähle eine der obigen Optionen:"
-        send "1\n"
+        send "1"
         expect eof
     '
     assert_success
@@ -527,6 +527,25 @@ setup() {
     assert_output -p "1) one"
     last="$(tail -1 <<<"$output" | nocr)"
     assert [ "$last" = "one" ]
+    echo "$output" # use --show-output-of-passing-tests to see it
+}
+# bats test_tags=choose
+@test "choose: with additional name in entry" {
+    run expect -c '
+        log_user 0
+        spawn bash -c "
+            source '$BASHLIB_HOME'/loader
+            choose one two \"three|nr.3\"
+        "
+        log_user 1
+        expect "Wähle eine der obigen Optionen:"
+        send "3\n"
+        expect eof
+    '
+    assert_success
+    assert_output -p "3) nr.3"
+    last="$(tail -1 <<<"$output" | nocr)"
+    assert [ "$last" = "three" ]
     echo "$output" # use --show-output-of-passing-tests to see it
 }
 # bats test_tags=choose
@@ -558,7 +577,7 @@ setup() {
             choose one two three --default=2
         "
         log_user 1
-        expect "Wähle eine der obigen Optionen:"
+        expect "Wähle eine der obigen Optionen"
         send "\n"
         expect eof
     '
@@ -569,7 +588,7 @@ setup() {
     echo "$output" # use --show-output-of-passing-tests to see it
 }
 # bats test_tags=choose
-@test "choose: with default name" {
+@test "choose: with default key" {
     run expect -c '
         log_user 0
         spawn bash -c "
@@ -577,7 +596,7 @@ setup() {
             choose one two three --default=three
         "
         log_user 1
-        expect "Wähle eine der obigen Optionen:"
+        expect "Wähle eine der obigen Optionen"
         send "\n"
         expect eof
     '
@@ -585,5 +604,43 @@ setup() {
     assert_output -p "1) one"
     last="$(tail -1 <<<"$output" | nocr)"
     assert [ "$last" = "three" ]
+    echo "$output" # use --show-output-of-passing-tests to see it
+}
+# bats test_tags=choose
+@test "choose: with default name" {
+    run expect -c '
+        log_user 0
+        spawn bash -c "
+            source '$BASHLIB_HOME'/loader
+            choose one two \"three|nr.3\" --default=nr.3
+        "
+        log_user 1
+        expect "Wähle eine der obigen Optionen"
+        send "\n"
+        expect eof
+    '
+    assert_success
+    assert_output -p "3) nr.3"
+    last="$(tail -1 <<<"$output" | nocr)"
+    assert [ "$last" = "three" ]
+    echo "$output" # use --show-output-of-passing-tests to see it
+}
+# bats test_tags=choose
+@test "choose: with default after timeout" {
+    run expect -c '
+        log_user 0
+        spawn bash -c "
+            source '$BASHLIB_HOME'/loader
+            choose one two three --default=2 --timeout=1
+        "
+        log_user 1
+        expect "Wähle eine der obigen Optionen"
+        sleep 2
+        expect eof
+    '
+    assert_success
+    assert_output -p "2) two"
+    last="$(tail -1 <<<"$output" | nocr)"
+    assert [ "$last" = "two" ]
     echo "$output" # use --show-output-of-passing-tests to see it
 }

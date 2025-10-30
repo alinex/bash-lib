@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-30 13:04+0100\n"
+"POT-Creation-Date: 2025-10-30 15:39+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -43,7 +43,7 @@ msgid "Could not scrape the prometheus exporter at $url!"
 msgstr "Der Prometheus Exporter unter $url konnte nicht abgefragt werden!"
 
 #: module/monitoring:146 module/input:60 module/input:151 module/input:292
-#: module/input:379 module/process:85 module/remote:120 module/remote:192
+#: module/input:435 module/process:85 module/remote:120 module/remote:192
 #: module/remote:276 module/mattermost:288 module/mattermost:323
 #: module/validator:36 module/software:91
 msgid "Unrecognized option"
@@ -97,27 +97,23 @@ msgstr "Gib die Zeit an"
 msgid "Enter short text"
 msgstr "Gib einen Kurztext ein"
 
-#: module/input:308
-msgid "Select one of the above options:"
-msgstr "Wähle eine der obigen Optionen:"
+#: module/input:336
+msgid "Select one of the above options"
+msgstr "Wähle eine der obigen Optionen"
 
-#: module/input:330
-msgid "Disallowed answer"
-msgstr "Ungültige Antwort"
-
-#: module/input:398
+#: module/input:454
 msgid "Could not get task list from command"
 msgstr ""
 
-#: module/input:405
+#: module/input:461
 msgid "No tasks found to be executed."
 msgstr "Keine Aufgaben zum Ausführen gefunden."
 
-#: module/input:421
+#: module/input:477
 msgid "Exit"
 msgstr "Beenden"
 
-#: module/input:426
+#: module/input:482
 #, sh-format
 msgid "Got error $error running $task"
 msgstr "Beim Aufruf von $task kam es zum Fehler $error"
@@ -225,6 +221,9 @@ msgid "is an downgrade of one patch version"
 msgid_plural "is an downgrade of $step patch versions"
 msgstr[0] "ist ein downgrade von einer Patchversion"
 msgstr[1] "ist ein downgrade von $step Patchversionen"
+
+#~ msgid "Disallowed answer"
+#~ msgstr "Ungültige Antwort"
 
 #~ msgid "n/Y"
 #~ msgstr "n/J"
