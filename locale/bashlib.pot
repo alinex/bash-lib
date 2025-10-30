@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-30 20:29+0100\n"
+"POT-Creation-Date: 2025-10-30 21:05+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -43,10 +43,10 @@ msgstr ""
 msgid "Could not scrape the prometheus exporter at $url!"
 msgstr ""
 
-#: module/monitoring:146 module/input:60 module/input:151 module/input:296
-#: module/input:438 module/process:85 module/remote:120 module/remote:192
-#: module/remote:276 module/mattermost:288 module/mattermost:323
-#: module/validator:36 module/software:91
+#: module/monitoring:146 module/input:40 module/input:99 module/input:190
+#: module/input:335 module/input:477 module/process:85 module/remote:120
+#: module/remote:192 module/remote:276 module/mattermost:288
+#: module/mattermost:323 module/validator:36 module/software:91
 msgid "Unrecognized option"
 msgstr ""
 
@@ -62,59 +62,63 @@ msgstr ""
 msgid "Severity\\tNetwork\\tInstance\\tSummary\\tStart"
 msgstr ""
 
-#: module/input:24
+#: module/input:46
 msgid "Press any key to continue..."
 msgstr ""
 
-#: module/input:65
+#: module/input:55
+msgid "aborted by user"
+msgstr ""
+
+#: module/input:104
 msgid "Should this be done"
 msgstr ""
 
-#: module/input:68 module/input:83 module/input:100
+#: module/input:107 module/input:122 module/input:139
 msgid "No"
 msgstr ""
 
-#: module/input:68 module/input:80 module/input:96
+#: module/input:107 module/input:119 module/input:135
 msgid "Yes"
 msgstr ""
 
-#: module/input:159
+#: module/input:198
 msgid "Enter integer number"
 msgstr ""
 
-#: module/input:168
+#: module/input:207
 msgid "Enter float number"
 msgstr ""
 
-#: module/input:178
+#: module/input:217
 msgid "Enter password"
 msgstr ""
 
-#: module/input:182
+#: module/input:221
 msgid "Enter time"
 msgstr ""
 
-#: module/input:187
+#: module/input:226
 msgid "Enter short text"
 msgstr ""
 
-#: module/input:339
+#: module/input:378
 msgid "Select one of the above options"
 msgstr ""
 
-#: module/input:458
+#: module/input:497
 msgid "Could not get task list from command"
 msgstr ""
 
-#: module/input:465
+#: module/input:504
 msgid "No tasks found to be executed."
 msgstr ""
 
-#: module/input:471
+#: module/input:510
 msgid "Exit"
 msgstr ""
 
-#: module/input:478
+#: module/input:517
 #, sh-format
 msgid "Got error $error running $task"
 msgstr ""

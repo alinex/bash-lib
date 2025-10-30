@@ -16,7 +16,7 @@ confirm <question>
 ```bash
 -t, --true                  # default: yes
 -f, --false                 # default: no
--t, --timeout <duration>    # time after which the default will be used
+-T, --timeout <duration>    # time after which the default will be used
 ```
 
 ### TTY (direct)

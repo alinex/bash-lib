@@ -424,11 +424,43 @@ dirname "$(readlink -f "${BASH_SOURCE[-1]:-$(pwd)/x}")"
 }
 declare -F "color_256" >/dev/null||source "$BASHLIB_HOME"/module/color
 pause(){
-local text
+local timeout abort
+eval set -- "$(option_parse $'a abort -\nT timeout +' "$@")"
+while true;do
+case "$1" in
+-T|--timeout)timeout="$(duration_format seconds "$2")"
+shift 2
+;;
+-a|--abort)abort=1
+shift
+;;
+--)shift
+break
+;;
+*)die "$(gettext "Unrecognized option"): $1"
+esac
+done
+local text length
 text="$(input "$@")"
-test -z "$text"||warn "$text"
-read -n 1 -s -r -p "$(gettext 'Press any key to continue...')" key </dev/tty
-echo "" >/dev/tty
+test -n "$text"||text="$(gettext 'Press any key to continue...')"
+echo -en "$CC_INFO$text$CC_RESET "
+if [ -z "$timeout" ];then
+read -n 1 -s -r _ </dev/tty
+else
+while ((timeout>0));do
+echo -ne "\r$CC_INFO$text$CC_RESET $(duration_format human "$timeout")     "
+if [ -n "$abort" ];then
+if read -r -s -t 1 -n 1 _ </dev/tty;then
+echo -e "\b\b\b\b$(gettext 'aborted by user')    "
+return 1
+fi
+else
+sleep 1
+fi
+((timeout--))
+done
+fi
+echo ""
 }
 confirm(){
 local default timeout

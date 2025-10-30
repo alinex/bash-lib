@@ -64,41 +64,7 @@ function retry {
     return 0
 }
 
-# Sleep with countdown some seconds
-# Usage:    countdown <num> <text>
-# Options:  -a, --abort     # let the countdown abort by key press
-# Exit:     1 if aborted
-countdown() {
-    # parameter parsing
-    local abort
-    eval set -- "$(option_parse $'a abort -' "$@")"
-    while true; do
-        case "$1" in
-        -a | --abort)
-            abort="($(gettext "press any key to stop"))"
-            shift
-            ;;
-        --)
-            shift
-            break
-            ;;
-        *) die "$(gettext "Unrecognized option"): $1" ;;
-        esac
-    done
-    # processing
-    local seconds=$1
-    local text=${2:-$(gettext Waiting)}
-    while ((seconds > 0)); do
-        echo -ne "\r$text $seconds $(gettext seconds) $abort"
-        if [ -n "$abort" ]; then
-            read -r -t 1 -n 1 _ </dev/tty && return 1 || true
-        else
-            sleep 1
-        fi
-        ((seconds--))
-    done
-    echo ""
-}
+countdown() { _deprecate "use pause <text> --timeout=<duration> --abort"; }
 
 ######################################################################################
 # Locking

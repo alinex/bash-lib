@@ -59,6 +59,57 @@ setup() {
     assert_output -p "Taste drücken um fortzufahren..."
     echo "$output" # use --show-output-of-passing-tests to see it
 }
+# bats test_tags=pause
+@test "pause: with custom title" {
+    run expect -c '
+        log_user 0
+        spawn bash -c "
+            source '$BASHLIB_HOME'/loader
+            pause GoOn
+        "
+        log_user 1
+        expect "GoOn"
+        send "\n"
+        expect eof
+    '
+    assert_success
+    assert_output -p "GoOn"
+    echo "$output" # use --show-output-of-passing-tests to see it
+}
+# bats test_tags=pause
+@test "pause: with timeout" {
+    run expect -c '
+        log_user 0
+        spawn bash -c "
+            source '$BASHLIB_HOME'/loader
+            pause --timeout=1
+        "
+        log_user 1
+        expect "Taste drücken um fortzufahren..."
+        sleep 1
+        expect eof
+    '
+    assert_success
+    assert_output -p "Taste drücken um fortzufahren..."
+    echo "$output" # use --show-output-of-passing-tests to see it
+}
+# bats test_tags=pause
+@test "pause: with timeout and abort" {
+    run expect -c '
+        log_user 0
+        spawn bash -c "
+            source '$BASHLIB_HOME'/loader
+            pause --timeout=10 --abort
+        "
+        log_user 1
+        expect "Taste drücken um fortzufahren..."
+        send "g"
+        expect eof
+    '
+    assert_success
+    assert_output -p "Taste drücken um fortzufahren..."
+    echo "$output" # use --show-output-of-passing-tests to see it
+}
 
 # bats test_tags=confirm
 @test "confirm: answer y" {
