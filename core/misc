@@ -158,11 +158,13 @@ mktemp() {
         esac
     done
     # processing
-    result="$path/$(basename "$0")_$1$rand$ext"
+    local ident
+    [ -n "$1" ] && ident="_$1"
+    result="$path/$(basename "$0")$ident$rand$ext"
     if [ -n "$rand" ]; then
         # loop while already exists
         while [ -e "$result" ]; do
-            result="$path/$(basename "$0")_$1$RANDOM$ext"
+            result="$path/$(basename "$0")$ident$RANDOM$ext"
         done
     fi
     if [ -e "$result" ]; then

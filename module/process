@@ -84,8 +84,8 @@ _lock_remove() {
 
 # Set a lock or wait till it can be set
 # Usage:    lock
-# Files:    /tmp/<prog>-lockfile        # hard link to active process
-#           /tmp/<prog>-lockfile.<pid>  # active or waiting process
+# Files:    /tmp/<prog>_lockfile        # hard link to active process
+#           /tmp/<prog>_lockfile.<pid>  # active or waiting process
 # Stderr:   <wait message>
 # In any part of your script you can surround a block with lock and unlock statements. The
 # process will wait on the lock statement till no other process with the same lock is running
@@ -165,6 +165,7 @@ unlock() {
 #           env_store [<ident>] [<variable>]... # store only listed variables (ident can be empty string)
 # Options:  -d, --disk                          # store on disk in temporary folder
 #           -p, --path <base-dir>               # store on disk in given folder
+# Files:    `/dev/shm/<prog>[-<ident>].env`     # stored environment
 # Example:  env_restore
 #           ...<code>
 #           env_store # save changes
@@ -206,7 +207,8 @@ env_store() {
 # Usage:    env_restore [<ident>] [<variable>]...
 # Options:  -d, --disk                          # store on disk in temporary folder
 #           -p, --path <base-dir>               # store on disk in given folder
-# File:     `/dev/shm/<program>_<ident>_<sub-pid>.env.sub` very short temporary file to filter input
+# Files:    `/dev/shm/<prog>[-<ident>].env`     # stored environment
+#           `/dev/shm/<prog>[_<ident>]_<sub-pid>.env-sub` # very short temporary file to filter input
 env_restore() {
     debug "env_restore $*"
     # parameter parsing

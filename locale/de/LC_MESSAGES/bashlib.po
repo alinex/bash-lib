@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-31 14:13+0100\n"
+"POT-Creation-Date: 2025-10-31 19:41+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -150,35 +150,35 @@ msgstr "Beenden"
 msgid "Got error $error running $task"
 msgstr "Beim Aufruf von $task kam es zum Fehler $error"
 
-#: module/process:80
+#: module/process:82
 msgid "Failed to remove lockfile"
 msgstr "Lockfile konnte nicht entfernt werden"
 
-#: module/process:95 module/process:128
+#: module/process:97 module/process:130
 msgid "Failed to create PID lockfile"
 msgstr "PID Lockfile konnte nicht erstellt werden"
 
-#: module/process:103
+#: module/process:105
 #, sh-format
 msgid "Waiting for unlock in $lockfile by PID $pid"
 msgstr "Warten, bis zur Freigabe in $lockfile durch PID $pid"
 
-#: module/process:335
+#: module/process:337
 msgid "Work steps are logged so that you can resume work mid-process"
 msgstr ""
 "Arbeitsschritte werden protokolliert um auch mittendrin wieder aufzusetzen"
 
-#: module/process:347
+#: module/process:349
 #, sh-format
 msgid "Job $name already done in this run, skipping"
 msgstr "Der Job $name wurde bereits ausgeführt, überspringe diesen"
 
-#: module/process:366
+#: module/process:368
 #, sh-format
 msgid "Finished: Step $name at $date"
 msgstr "Fertig: Schritt $name um $date"
 
-#: module/process:391
+#: module/process:393
 #, sh-format
 msgid "Started: step $name at $date"
 msgstr "Start: Schritt $name um $date"
