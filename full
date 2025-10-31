@@ -1165,7 +1165,7 @@ echo "$line"|cut -f1-3|sed "s#://#://$user:$pass@#"
 else
 echo "$line"|cut -f1-3
 fi
-done||die "$(gettext "Could not get exporters from prometheus!")"
+done||(($?==141))||die "$(gettext "Could not get exporters from prometheus!")"
 done
 }
 scrape(){
@@ -1173,10 +1173,12 @@ local url="$1"
 num_parameters "$@" --min 1 --max 2 --die "Wrong number of parameters for scrape!"
 debug "Scrape the prometheus exporter at $1"
 local metrics
-metrics="$(curl "$url"|grep -E "$2"|grep -Ev '^($|#)'||die "$(eval_gettext 'Could not scrape the prometheus exporter at $url!')")"
+metrics="$(curl "$url"|grep -Ev '^($|#)'||die "$(eval_gettext 'Could not scrape the prometheus exporter at $url!')")"
 debug ">>> $metrics"
-echo "$metrics"|grep '{'|sed 's/,\?[{}] \?/\t/g'
-echo "$metrics"|grep -v '{'|sed 's/ /\t\t/g'
+local found=2
+echo "$metrics"|grep -E "$2"|grep '{'|sed 's/,\?[{}] \?/\t/g'||((found--))
+echo "$metrics"|grep -E "$2"|grep -v '{'|sed 's/ /\t\t/g'||((found--))
+((found>0))
 }
 alerts(){
 if [ -z "$GRAFANA_API" ]||[ -z "$GRAFANA_TOKEN" ];then
