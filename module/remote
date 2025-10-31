@@ -290,8 +290,8 @@ boot_wait() {
             ((seconds++))
         fi
     done
-    [ -n "$quiet" ] || recho ""
     [ -n "$quiet" ] || remote uptime --since
+    [ -n "$quiet" ] || recho ""
 }
 
 ######################################################################################
@@ -417,6 +417,7 @@ plusserver_dns() {
     echo "Benutze $list vom $time." >&2
     echo "" >&2
     # reformat csv -> tsv
+    # shellcheck disable=SC1010
     mlr --icsv --ifs ';' --otsv \
         put '$name = $record_name . "." . $zone; $record_data = substr($record_data,0,80)' then \
         cut -o -f name,record_type,record_data,record_ttl then \
