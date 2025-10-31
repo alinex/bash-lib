@@ -47,7 +47,7 @@ else
         "echo -n 'prepare'
         source tests/setup/docker-debian
         echo -n '; run '
-        bats --tap core | grep -v ^ok"
+        bats --tap core module | grep -v ^ok"
     done
   done
   ## alpine

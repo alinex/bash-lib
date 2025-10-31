@@ -3,6 +3,12 @@
 bats_require_minimum_version 1.5.0
 
 # bats file_tags=mattermost
+setup_file() {
+    load $BASHLIB_HOME/loader
+    if [ -z "$MATTERMOST_API" ] || [ -z "$MATTERMOST_TOKEN" ]; then
+        skip "Because mattermost access is not set."
+    fi
+}
 setup() {
     user_id=4ak3ax6gkf8cznkzsk3w9jp7zo
     team_divibib=47b4bd3qtb8ztpy9a64578h1go
