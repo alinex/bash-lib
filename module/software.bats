@@ -166,7 +166,7 @@ setup() {
     v1="3.8.14"
     v2="3.8.15"
     run semver_diff -h "$v1" "$v2"
-    assert_output "3.8.14 -> 3.8.15 ist ein upgrade von 1 Patch Level(n)"
-    assert_failure
+    assert_output "3.8.14 -> 3.8.15 ist ein upgrade von einer Patchversion"
+    assert_success
     echo "$output" # use --show-output-of-passing-tests to see it
 }
