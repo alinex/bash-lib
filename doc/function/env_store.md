@@ -19,6 +19,10 @@ env_store [<ident>] [<variable>]... # store only listed variables (ident can be 
 -p, --path <base-dir>               # store on disk in given folder
 ```
 
+### Files
+
+- `/dev/shm/`<prog>`[-`<ident>`].env`     # stored environment
+
 ### Examples
 
 - env_restore

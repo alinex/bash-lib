@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-31 19:41+0100\n"
+"POT-Creation-Date: 2025-10-31 20:58+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -164,21 +164,21 @@ msgstr ""
 msgid "Waiting for unlock in $lockfile by PID $pid"
 msgstr ""
 
-#: module/process:337
+#: module/process:339
 msgid "Work steps are logged so that you can resume work mid-process"
 msgstr ""
 
-#: module/process:349
+#: module/process:351
 #, sh-format
 msgid "Job $name already done in this run, skipping"
 msgstr ""
 
-#: module/process:368
+#: module/process:370
 #, sh-format
 msgid "Finished: Step $name at $date"
 msgstr ""
 
-#: module/process:393
+#: module/process:395
 #, sh-format
 msgid "Started: step $name at $date"
 msgstr ""

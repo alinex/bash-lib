@@ -149,7 +149,7 @@ urlencode() {
 # Stdout:   <table>
 tsv2table() {
     install mlr
-    input "$@" | mlr -i tsv -o pprint cat
+    input "$@" | mlr --csvlite --ifs '\t' -o pprint cat
 }
 
 # Convert TSV data into markdown table
@@ -158,7 +158,7 @@ tsv2table() {
 # Stdout:   <md>
 tsv2md() {
     install mlr
-    input "$@" | uncolorize | mlr -i tsv -o md cat
+    input "$@" | uncolorize | mlr --csvlite --ifs '\t' --omd cat
 }
 
 ######################################################################################

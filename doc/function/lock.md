@@ -16,5 +16,5 @@ lock
 
 ### Files
 
-- /tmp/`<prog>`-lockfile        # hard link to active process
-- /tmp/`<prog>`-lockfile.`<pid>`  # active or waiting process
+- /tmp/`<prog>`_lockfile        # hard link to active process
+- /tmp/`<prog>`_lockfile.`<pid>`  # active or waiting process

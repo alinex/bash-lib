@@ -20,4 +20,5 @@ env_restore [<ident>] [<variable>]...
 
 ### Files
 
-- `/dev/shm/`<program>`_`<ident>`_`<sub-pid>`.env.sub` very short temporary file to filter input
+- `/dev/shm/`<prog>`[-`<ident>`].env`     # stored environment
+- `/dev/shm/`<prog>`[_`<ident>`]_`<sub-pid>`.env-sub` # very short temporary file to filter input

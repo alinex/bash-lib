@@ -262,10 +262,12 @@ break
 *)shift
 esac
 done
-result="$path/$(basename "$0")_$1$rand$ext"
+local ident
+[ -n "$1" ]&&ident="_$1"
+result="$path/$(basename "$0")$ident$rand$ext"
 if [ -n "$rand" ];then
 while [ -e "$result" ];do
-result="$path/$(basename "$0")_$1$RANDOM$ext"
+result="$path/$(basename "$0")$ident$RANDOM$ext"
 done
 fi
 if [ -e "$result" ];then
@@ -1475,11 +1477,11 @@ input "$@"|jq -sRr @uri|sed 's/%0A$//'
 }
 tsv2table(){
 install mlr
-input "$@"|mlr -i tsv -o pprint cat
+input "$@"|mlr --csvlite --ifs '\t' -o pprint cat
 }
 tsv2md(){
 install mlr
-input "$@"|uncolorize|mlr -i tsv -o md cat
+input "$@"|uncolorize|mlr --csvlite --ifs '\t' --omd cat
 }
 _spinner_pid=""
 spinner_start(){
@@ -1995,8 +1997,8 @@ sleep 1
 ((seconds++))
 fi
 done
-[ -n "$quiet" ]||recho ""
 [ -n "$quiet" ]||remote uptime --since
+[ -n "$quiet" ]||recho ""
 }
 CURL_HTTP_CODE=""
 curl(){

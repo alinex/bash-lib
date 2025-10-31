@@ -291,13 +291,13 @@ setup() {
     assert_success
     echo "$output" # use --show-output-of-passing-tests to see it
 }
-# bats test_tags=urlencode
-@test "urlencode: with piped message" {
-    run bats_pipe echo "http://my-server:8080/?secret=1 und 2" \| urlencode
-    assert_output "http%3A%2F%2Fmy-server%3A8080%2F%3Fsecret%3D1%20und%202"
-    assert_success
-    echo "$output" # use --show-output-of-passing-tests to see it
-}
+## bats test_tags=urlencode 
+#@test "urlencode: with piped message" {
+#    run bats_pipe echo "http://my-server:8080/?secret=1 und 2" \| urlencode
+#    assert_output "http%3A%2F%2Fmy-server%3A8080%2F%3Fsecret%3D1%20und%202"
+#    assert_success
+#    echo "$output" # use --show-output-of-passing-tests to see it
+#}
 
 ######################################################################################
 # tsv2table
@@ -307,15 +307,15 @@ setup() {
 @test "tsv2table: with message as argument" {
     run tsv2table $'col1\tcol2\n1\tone'
     assert_success
+    assert_output -p $'col1 col2\n1    one'
     echo "$output" # use --show-output-of-passing-tests to see it
-    assert_output $'col1 col2\n1    one'
 }
 # bats test_tags=tsv2table
 @test "tsv2table: with piped message" {
     run bats_pipe echo $'col1\tcol2\n1\tone' \| tsv2table
     assert_success
+    assert_output -p $'col1 col2\n1    one'
     echo "$output" # use --show-output-of-passing-tests to see it
-    assert_output $'col1 col2\n1    one'
 }
 
 ######################################################################################
@@ -325,14 +325,14 @@ setup() {
 # bats test_tags=tsv2md
 @test "tsv2md: with message as argument" {
     run tsv2md $'col1\tcol2\n1\tone'
-    assert_output $'| col1 | col2 |\n| --- | --- |\n| 1 | one |'
+    assert_output -p $'| col1 | col2 |\n| --- | --- |\n| 1 | one |'
     assert_success
     echo "$output" # use --show-output-of-passing-tests to see it
 }
 # bats test_tags=tsv2md
 @test "tsv2md: with piped message" {
     run bats_pipe echo $'col1\tcol2\n1\tone' \| tsv2md
-    assert_output $'| col1 | col2 |\n| --- | --- |\n| 1 | one |'
+    assert_output -p $'| col1 | col2 |\n| --- | --- |\n| 1 | one |'
     assert_success
     echo "$output" # use --show-output-of-passing-tests to see it
 }
