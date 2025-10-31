@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-30 22:14+0100\n"
+"POT-Creation-Date: 2025-10-31 08:30+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -43,7 +43,7 @@ msgid "Could not scrape the prometheus exporter at $url!"
 msgstr "Der Prometheus Exporter unter $url konnte nicht abgefragt werden!"
 
 #: module/monitoring:146 module/input:40 module/input:99 module/input:206
-#: module/input:373 module/input:536 module/remote:120 module/remote:192
+#: module/input:426 module/input:589 module/remote:120 module/remote:192
 #: module/remote:276 module/mattermost:288 module/mattermost:323
 #: module/validator:36 module/software:91
 msgid "Unrecognized option"
@@ -81,11 +81,11 @@ msgstr "Nein"
 msgid "Yes"
 msgstr "Ja"
 
-#: module/input:132 module/input:285 module/input:444
+#: module/input:132 module/input:285 module/input:497
 msgid "value needed"
 msgstr "Wert notwendig"
 
-#: module/input:153 module/input:312 module/input:470
+#: module/input:153 module/input:312 module/input:523
 msgid "invalid character"
 msgstr "ungültiges Zeichen"
 
@@ -113,23 +113,39 @@ msgstr "Gib einen Kurztext ein"
 msgid "incomplete"
 msgstr "unvollständig"
 
-#: module/input:416
+#: module/input:324
+msgid "bad"
+msgstr "schlecht"
+
+#: module/input:326
+msgid "weak"
+msgstr "schwach"
+
+#: module/input:328
+msgid "good"
+msgstr "gut"
+
+#: module/input:330
+msgid "strong"
+msgstr "stark"
+
+#: module/input:469
 msgid "Select one of the above options"
 msgstr "Wähle eine der obigen Optionen"
 
-#: module/input:555
+#: module/input:608
 msgid "Could not get task list from command"
 msgstr "Befehlsliste konnte nicht von der Funktion gelesen werden"
 
-#: module/input:562
+#: module/input:615
 msgid "No tasks found to be executed."
 msgstr "Keine Aufgaben zum Ausführen gefunden."
 
-#: module/input:568
+#: module/input:621
 msgid "Exit"
 msgstr "Beenden"
 
-#: module/input:575
+#: module/input:628
 #, sh-format
 msgid "Got error $error running $task"
 msgstr "Beim Aufruf von $task kam es zum Fehler $error"

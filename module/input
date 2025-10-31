@@ -318,11 +318,64 @@ ask() {
             fi
             input+="$char"
             [ -n "$mask" ] && echo -n "*" >/dev/tty || echo -n "$char" >/dev/tty
+            if [ "$format" = "password" ]; then
+                local q=$(_password_strength "$input")
+                if ((q < 25)); then
+                    itext="${CC_RED}$(gettext 'bad')${CC_RESET}"
+                elif ((q < 50)); then
+                    itext="${CC_YELLOW}$(gettext 'weak')${CC_RESET}"
+                elif ((q < 75)); then
+                    itext="$(gettext 'good')"
+                else
+                    itext="${CC_GREEN}$(gettext 'strong')${CC_RESET}"
+                fi
+                echo -en "   $itext" >/dev/tty
+                itext="$(uncolorize "$itext")"
+                printf '\b%.0s' $(seq 1 $((${#itext} + 3))) >/dev/tty
+                invalid=1
+            fi
         fi
     done
     debug 4 "Octal result: $(od -An -to1 -v <<<"$input")"
     # return input
     echo "$input"
+}
+
+# Calculate password strength
+# Usage:    _password_strength <password>
+# Output:   <int> 0 (weakest) up to 100 (strongest)
+_password_strength() {
+    local password="$1"
+    local len=${#password}
+    local score=0
+    # +4 per char (up to 40 points)
+    ((score += len * 4))
+    ((score = score > 40 ? 40 : score))
+    debug 7 "len $score"
+    # character variety
+    [[ "$password" =~ [a-z] ]] && ((score += 5))
+    [[ "$password" =~ [A-Z] ]] && ((score += 5))
+    [[ "$password" =~ [0-9] ]] && ((score += 5))
+    [[ "$password" =~ [^a-zA-Z0-9] ]] && ((score += 5))
+    debug 7 "variety $score"
+    # uniqueness bonus - number of different characters
+    local unique
+    unique=$(echo "$password" | fold -w1 | sort -u | wc -l)
+    ((score += unique * 2))
+    ((score = score > 100 ? 100 : score))
+    debug 7 "uniqueness $score"
+    # penalties for patterns
+    local check
+    for check in password qwerty qwertz; do
+        [[ "${password,,}" =~ $check ]] && ((score -= 40))
+    done
+    for check in 123 456 789 abc def ghi jkl mno pqr stv xyz; do
+        [[ "${password,,}" =~ $check ]] && ((score -= 15))
+    done
+    [[ "$password" =~ (.)\1{2,} ]] && ((score -= 10))
+    ((score = score < 0 ? 0 : score))
+    debug 7 "penalties $score"
+    echo "$score"
 }
 
 # Select from list (extended version of native select)

@@ -111,6 +111,10 @@ setup() {
     echo "$output" # use --show-output-of-passing-tests to see it
 }
 
+###############################################################################
+###############################################################################
+###############################################################################
+
 # bats test_tags=confirm
 @test "confirm: answer y" {
     run expect -c '
@@ -288,6 +292,10 @@ setup() {
     assert_output -p "Nein"
     echo "$output" # use --show-output-of-passing-tests to see it
 }
+
+###############################################################################
+###############################################################################
+###############################################################################
 
 # bats test_tags=ask
 @test "ask: default-format (string)" {
@@ -541,6 +549,43 @@ setup() {
     echo "$output" # use --show-output-of-passing-tests to see it
 }
 
+###############################################################################
+###############################################################################
+###############################################################################
+
+# bats test_tags=_password_strength
+@test "_password_strength: 123 as bad" {
+    run _password_strength 123
+    assert_success
+    assert_output "8"
+    echo "$output" # use --show-output-of-passing-tests to see it
+}
+# bats test_tags=_password_strength
+@test "_password_strength: Password1 as weak" {
+    run _password_strength Password1
+    assert_success
+    assert_output "27"
+    echo "$output" # use --show-output-of-passing-tests to see it
+}
+# bats test_tags=_password_strength
+@test "_password_strength: AmEsadSsAdS as good" {
+    run _password_strength AmEsadSsAdS
+    assert_success
+    assert_output "64"
+    echo "$output" # use --show-output-of-passing-tests to see it
+}
+# bats test_tags=_password_strength
+@test "_password_strength: N!7rYxQ2#klOP as strong" {
+    run _password_strength N!7rYxQ2#klOP
+    assert_success
+    assert_output "86"
+    echo "$output" # use --show-output-of-passing-tests to see it
+}
+
+###############################################################################
+###############################################################################
+###############################################################################
+
 # bats test_tags=choose
 @test "choose: list" {
     run expect -c '
@@ -714,6 +759,10 @@ setup() {
     assert [ "$last" = "two" ]
     echo "$output" # use --show-output-of-passing-tests to see it
 }
+
+###############################################################################
+###############################################################################
+###############################################################################
 
 # bats test_tags=tasks
 @test "tasks: fixed tasks" {
