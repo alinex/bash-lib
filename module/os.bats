@@ -10,43 +10,38 @@ setup() {
 }
 
 ######################################################################################
-# OS
+# detect_os
 ######################################################################################
 
-# bats test_tags=OS
-@test "OS: should be defined" {
+# bats test_tags=detect_os
+@test "detect_os: OS should be defined" {
     detect_os
     assert [ -n "$OS" ]
 }
-
-######################################################################################
-# KERNEL
-######################################################################################
-
-# bats test_tags=KERNEL
-@test "KERNEL: should be defined" {
+# bats test_tags=detect_os
+@test "detect_os: KERNEL should be defined" {
     detect_os
     assert [ -n "$KERNEL" ]
 }
-
-######################################################################################
-# MACH
-######################################################################################
-
-# bats test_tags=MACH
-@test "MACH: should be defined" {
+# bats test_tags=detect_os
+@test "detect_os: MACH should be defined" {
     detect_os
     assert [ -n "$MACH" ]
 }
-
-######################################################################################
-# MACH_ID
-######################################################################################
-
-# bats test_tags=MACH_ID
-@test "MACH_ID: should be defined" {
+# bats test_tags=detect_os
+@test "detect_os: MACH_ID should be defined" {
     detect_os
     assert [ -n "$MACH_ID" ]
+}
+
+######################################################################################
+# detect_extern_ip
+######################################################################################
+
+# bats test_tags=detect_extern_ip
+@test "detect_extern_ip: should run" {
+    run detect_extern_ip
+    assert_success
 }
 
 ######################################################################################
