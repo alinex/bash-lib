@@ -66,6 +66,7 @@ exporter() {
                     echo "$line" | cut -f1-3
                 fi
             done ||
+            (($? == 141)) ||
             die "$(gettext "Could not get exporters from prometheus!")"
     done
 }
