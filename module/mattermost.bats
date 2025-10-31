@@ -15,7 +15,6 @@ setup() {
     channel_spielwiese=stjt3yqjzf8o585e7z88xw3a7w
     post_id=n3ztukd9r78nuqzw56zxx8g91h
     # shellcheck disable=SC2154
-    SHARED_ENV="$BATS_FILE_TMPDIR/mattermost.env"
     load "$BASHLIB_HOME/tests/bats-support/load"
     load "$BASHLIB_HOME/tests/bats-assert/load"
     load "$BASHLIB_HOME/loader"
@@ -40,16 +39,14 @@ setup() {
 # bats test_tags=_mattermost_team
 @test "_mattermost_team: should get id for divibib" {
     run _mattermost_team divibib
-    [ -z "$stderr" ] || echo "$stderr" | sed 's/^/   /' >&3
-    assert_output $team_divibib
+    assert_output "$team_divibib"
     assert_success
     echo "$output" # use --show-output-of-passing-tests to see it
 }
 # bats test_tags=_mattermost_team
 @test "_mattermost_team: should get id for ekz" {
     run _mattermost_team ekz
-    [ -z "$stderr" ] || echo "$stderr" | sed 's/^/   /' >&3
-    assert_output $team_ekz
+    assert_output "$team_ekz"
     assert_success
     echo "$output" # use --show-output-of-passing-tests to see it
 }
@@ -60,17 +57,14 @@ setup() {
 
 # bats test_tags=_mattermost_channel
 @test "_mattermost_channel: should get named channel" {
-    run _mattermost_channel $team_divibib Spielwiese
-    [ -z "$stderr" ] || echo "$stderr" | sed 's/^/   /' >&3
-    assert_output $channel_spielwiese
+    run _mattermost_channel "$team_divibib" Spielwiese
+    assert_output "$channel_spielwiese"
     assert_success
     echo "$output" # use --show-output-of-passing-tests to see it
 }
 # bats test_tags=_mattermost_channel
 @test "_mattermost_channel: fail for wrong channel name" {
-    run _mattermost_channel $team_divibib Quatsch
-    [ -z "$stderr" ] || echo "$stderr" | sed 's/^/   /' >&3
-    assert_output ""
+    run _mattermost_channel "$team_divibib" Quatsch
     assert_failure
     echo "$output" # use --show-output-of-passing-tests to see it
 }
@@ -81,9 +75,8 @@ setup() {
 
 # bats test_tags=_mattermost_channel_bypost
 @test "_mattermost_channel_bypost: for existing post" {
-    run _mattermost_channel_bypost $post_id
-    [ -z "$stderr" ] || echo "$stderr" | sed 's/^/   /' >&3
-    assert_output $channel_spielwiese
+    run _mattermost_channel_bypost "$post_id"
+    assert_output "$channel_spielwiese"
     assert_success
     echo "$output" # use --show-output-of-passing-tests to see it
 }
@@ -94,83 +87,79 @@ setup() {
 
 # bats test_tags=_mattermost_post
 @test "_mattermost_post: should make new message" {
-    run _mattermost_post $channel_spielwiese "BATS Test"
-    [ -z "$stderr" ] || echo "$stderr" | sed 's/^/   /' >&3
+    run _mattermost_post "$channel_spielwiese" "BATS Test"
     assert_output -e '.+'
     assert_success
     echo "$output" # use --show-output-of-passing-tests to see it
-    echo "postid=$output" >>$SHARED_ENV
 }
 # bats test_tags=_mattermost_post
 @test "_mattermost_post: should post an attachment" {
-    run _mattermost_post $channel_spielwiese "" \
+    run _mattermost_post "$channel_spielwiese" "" \
     '{ color: "#FF8000", title: "Test Alert", title_link: "http://grafana.service.cloud.dvb/", text: "This is the attachment text."}'
-    [ -z "$stderr" ] || echo "$stderr" | sed 's/^/   /' >&3
     assert_output -e '.+'
     assert_success
     echo "$output" # use --show-output-of-passing-tests to see it
-    echo "postid=$output" >>$SHARED_ENV
 }
 # bats test_tags=_mattermost_post
 @test "_mattermost_post: should post two attachments" {
-    run _mattermost_post $channel_spielwiese "" \
+    run _mattermost_post "$channel_spielwiese" "" \
     '[{ color: "#FF8000", title: "Test Alert", text: "This is the attachment text."},
     { color: "#00FF00", title: "System OK", text: "This is the attachment text."}]'
-    [ -z "$stderr" ] || echo "$stderr" | sed 's/^/   /' >&3
     assert_output -e '.+'
     assert_success
     echo "$output" # use --show-output-of-passing-tests to see it
-    echo "postid=$output" >>$SHARED_ENV
 }
 # bats test_tags=_mattermost_post
 @test "_mattermost_post: attachment with image" {
-    run _mattermost_post $channel_spielwiese "" \
+    run _mattermost_post "$channel_spielwiese" "" \
     '{ image_url: "https://img.icons8.com/?size=100&id=q7wteb2_yVxu&format=png&color=000000", text: "This is the attachment text."}'
-    [ -z "$stderr" ] || echo "$stderr" | sed 's/^/   /' >&3
     assert_output -e '.+'
     assert_success
     echo "$output" # use --show-output-of-passing-tests to see it
-    echo "postid=$output" >>$SHARED_ENV
 }
 # bats test_tags=_mattermost_post
 @test "_mattermost_post: attachment with author" {
-    run _mattermost_post $channel_spielwiese "" \
+    run _mattermost_post "$channel_spielwiese" "" \
     '{ color: "#FF8000", author_name: "Test BOT", author_icon: "https://img.icons8.com/?size=100&id=q7wteb2_yVxu&format=png&color=000000", author_link: "http://grafana.service.cloud.dvb/", title: "Test Alert", text: "This is the attachment text."}'
-    [ -z "$stderr" ] || echo "$stderr" | sed 's/^/   /' >&3
     assert_output -e '.+'
     assert_success
     echo "$output" # use --show-output-of-passing-tests to see it
-    echo "postid=$output" >>$SHARED_ENV
 }
 # bats test_tags=_mattermost_post
 @test "_mattermost_post: attachment with thumb image" {
-    run _mattermost_post $channel_spielwiese "" \
+    run _mattermost_post "$channel_spielwiese" "" \
     '{ color: "#FF8000", thumb_url: "https://img.icons8.com/?size=100&id=q7wteb2_yVxu&format=png&color=000000", title: "Test Alert", text: "This is the attachment text."}'
-    [ -z "$stderr" ] || echo "$stderr" | sed 's/^/   /' >&3
     assert_output -e '.+'
     assert_success
     echo "$output" # use --show-output-of-passing-tests to see it
-    echo "postid=$output" >>$SHARED_ENV
 }
 # bats test_tags=_mattermost_post
 @test "_mattermost_post: attachment with fields" {
-    run _mattermost_post $channel_spielwiese "" \
+    run _mattermost_post "$channel_spielwiese" "" \
     '{ color: "#FF8000", title: "Test Alert", text: "This is the attachment text.", "fields": [{"short":false, "title":"Long Field", "value":"Testing with a very long piece of text that will take up the whole width of the table. And then some more text to make it extra long." }, { "short":true, "title":"Column One", "value":"Testing" }, { "short":true, "title":"Column Two", "value":"Testing" }]}'
-    [ -z "$stderr" ] || echo "$stderr" | sed 's/^/   /' >&3
     assert_output -e '.+'
     assert_success
     echo "$output" # use --show-output-of-passing-tests to see it
-    echo "postid=$output" >>$SHARED_ENV
 }
 # bats test_tags=_mattermost_post
 @test "_mattermost_post: attachment with footer" {
-    run _mattermost_post $channel_spielwiese "" \
+    run _mattermost_post "$channel_spielwiese" "" \
     '{ text: "This is the attachment text.", footer: "Made by Bats Test Suite", footer_icon: "https://img.icons8.com/?size=100&id=q7wteb2_yVxu&format=png&color=000000" }'
-    [ -z "$stderr" ] || echo "$stderr" | sed 's/^/   /' >&3
     assert_output -e '.+'
     assert_success
     echo "$output" # use --show-output-of-passing-tests to see it
-    echo "postid=$output" >>$SHARED_ENV
+}
+
+######################################################################################
+# _mattermost_delete
+######################################################################################
+
+# bats test_tags=_mattermost_delete
+@test "_mattermost_delete: should make new message" {
+    pid="$(_mattermost_post "$channel_spielwiese" "BATS DELETE Test")"
+    run _mattermost_delete "${pid#*/}"
+    assert_success
+    echo "$output" # use --show-output-of-passing-tests to see it
 }
 
 ######################################################################################
@@ -179,11 +168,9 @@ setup() {
 
 # bats test_tags=_mattermost_repost
 @test "_mattermost_repost: answer to message" {
-    # shellcheck disable=SC1090
-    source "$SHARED_ENV"
+    pid="$(_mattermost_post "$channel_spielwiese" "BATS DELETE Test")"
     # shellcheck disable=SC2154
-    run _mattermost_repost $channel_spielwiese "$postid" "going on..."
-    [ -z "$stderr" ] || echo "$stderr" | sed 's/^/   /' >&3
+    run _mattermost_repost "$channel_spielwiese" "${pid#*/}" "going on..."
     assert_output -e '.+'
     assert_success
     echo "$output" # use --show-output-of-passing-tests to see it
@@ -195,10 +182,8 @@ setup() {
 
 # bats test_tags=_mattermost_reaction
 @test "_mattermost_reaction: should add reaction" {
-    # shellcheck disable=SC1090
-    source "$SHARED_ENV"
-    run _mattermost_reaction $postid white_check_mark
-    [ -z "$stderr" ] || echo "$stderr" | sed 's/^/   /' >&3
+    pid="$(_mattermost_post "$channel_spielwiese" "BATS DELETE Test")"
+    run _mattermost_reaction "${pid#*/}" white_check_mark
     assert_output ''
     assert_success
     echo "$output" # use --show-output-of-passing-tests to see it
@@ -211,19 +196,7 @@ setup() {
 # bats test_tags=_mattermost_find_channels
 @test "_mattermost_find_channels: should get named channel" {
     run _mattermost_find_channels Spielwiese
-    [ -z "$stderr" ] || echo "$stderr" | sed 's/^/   /' >&3
-    assert_output "$team_divibib/$channel_spielwiese "
-    assert_success
-    echo "$output" # use --show-output-of-passing-tests to see it
-}
-# bats test_tags=_mattermost_find_channels
-@test "_mattermost_find_channels: should get one channel for server" {
-    skip
-    # shellcheck disable=SC2034
-    server=media.host.office.dvb
-    run _mattermost_find_channels media.host.office.dvb
-    [ -z "$stderr" ] || echo "$stderr" | sed 's/^/   /' >&3
-    assert_output 'Status Produktiv'
+    assert_output -p "$team_divibib/$channel_spielwiese "
     assert_success
     echo "$output" # use --show-output-of-passing-tests to see it
 }
@@ -235,12 +208,46 @@ setup() {
 # bats test_tags=mattermost_attachment
 @test "mattermost_attachment: should make an attachment" {
     run mattermost_attachment --color "#FF8000" --title "Grafana Alert" --text "This is the attachment text."
-    [ -z "$stderr" ] || echo "$stderr" | sed 's/^/   /' >&3
     assert_output '{
   "color": "#FF8000",
   "title": "Grafana Alert",
   "text": "This is the attachment text."
 }'
+    assert_success
+    echo "$output" # use --show-output-of-passing-tests to see it
+}
+
+######################################################################################
+# mattermost
+######################################################################################
+
+# bats test_tags=mattermost
+@test "mattermost: should make new message" {
+    run mattermost Spielwiese "BATS Test"
+    assert_success
+    echo "$output" # use --show-output-of-passing-tests to see it
+}
+
+######################################################################################
+# mattermost_reaction
+######################################################################################
+
+# bats test_tags=mattermost_reaction
+@test "mattermost_reaction: should add a smiley" {
+    mattermost Spielwiese "BATS Test"
+    run mattermost_reaction white_check_mark
+    assert_success
+    echo "$output" # use --show-output-of-passing-tests to see it
+}
+
+######################################################################################
+# mattermost_repost
+######################################################################################
+
+# bats test_tags=mattermost_repost
+@test "mattermost_repost: should add text" {
+    mattermost Spielwiese "BATS Test"
+    run mattermost_repost "will work on it"
     assert_success
     echo "$output" # use --show-output-of-passing-tests to see it
 }

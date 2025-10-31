@@ -13,8 +13,10 @@ source /dev/null
 # Cache used to prevent multiple API calls for the same information in one run
 declare -A _mattermost_cache
 
+# Get my user id
+# Usage:    _mattermost_user
+# Output:   <user-id>
 _mattermost_user() {
-    # get my user id -> <user-id>
     if [[ ! -v _mattermost_cache["__u"] ]]; then
         debug "GET mattermost/users/me"
         _mattermost_cache["__u"]="$(
@@ -25,8 +27,11 @@ _mattermost_user() {
     fi
     echo "${_mattermost_cache["__u"]}"
 }
+
+# Get team id by name
+# Usage:    _mattermost_team <name>
+# Output:   <team-id>
 _mattermost_team() {
-    # get team <display_name> -> <team-id>
     if [[ ! -v _mattermost_cache["__t_$1"] ]]; then
         debug "GET mattermost/teams"
         _mattermost_cache["__t_$1"]="$(
@@ -38,8 +43,11 @@ _mattermost_team() {
     [ -n "${_mattermost_cache["__t_$1"]}" ] || die "Team $1 does not exist in mattermost."
     echo "${_mattermost_cache["__t_$1"]}"
 }
+
+# Get channel id by team-id and name
+# Usage:    channel <team-id> <display_name>
+# Output:   <channel-id>
 _mattermost_channel() {
-    # get channel <team-id> <display_name> -> <channel-id>
     if [[ ! -v _mattermost_cache["channel_$1_$2"] ]]; then
         debug "GET mattermost/users/me/teams/<team-id>/channels"
         _mattermost_cache["channel_$1_$2"]="$(
@@ -51,15 +59,21 @@ _mattermost_channel() {
     [ -n "${_mattermost_cache["channel_$1_$2"]}" ] || die "Channel $2 does not exist in mattermost (team $1)"
     echo "${_mattermost_cache["channel_$1_$2"]}"
 }
+
+# Get channel by <post-id>
+# Usgae:    _mattermost_channel_bypost <post-id>
+# Output:   <channel-id>
 _mattermost_channel_bypost() {
-    # get channel <postid>
     debug "GET mattermost/posts/<post-id>"
     curl -H "Authorization: Bearer $MATTERMOST_TOKEN" "$MATTERMOST_API"/posts/"$1" |
         jq '.channel_id' -r ||
         die "Could not get channel of post $1 in mattermost!"
 }
+
+# New post in channel
+# Usage:    _mattermost_post <channelid> <message> [<attachments>]
+# Output:   <channel-id>/<post-id>
 _mattermost_post() {
-    # post <channelid> <message> [<attachments>] -> <channel-id>/<post-id>
     local att=""
     if [ -n "$3" ]; then
         [[ "$3" == \[* ]] && att="$3" || att="[$3]"
@@ -77,8 +91,10 @@ _mattermost_post() {
     debug "-> $pid"
     echo "$1/$pid"
 }
+
+# Repost in channel
+# Usage:    _mattermost_repost <channelid> <postid> <message> [<attachments>] -> <channel-id>/<post-id>
 _mattermost_repost() {
-    # repost channel <channelid> <postid> <message> [<attachments>] -> <channel-id>/<post-id>
     local att=""
     if [ -n "$4" ]; then
         [[ "$4" == \[* ]] && att="$4" || att="[$4]"
@@ -95,8 +111,10 @@ _mattermost_repost() {
         die "Could not send repost to mattermost!"
     echo "$1/$pid"
 }
+
+# Add reaction to post
+# Usage:    _mattermost_reaction <postid> <smiley>
 _mattermost_reaction() {
-    # reaction <postid> <smiley>
     local json
     json="$(jq -n --arg u "$(_mattermost_user)" --arg p "$1" --arg t "$2" '{ user_id: $u, post_id: $p, emoji_name: $t }')"
     debug "POST mattermost/reactions"
@@ -104,6 +122,19 @@ _mattermost_reaction() {
         >/dev/null ||
         die "Could not add reaction to mattermost post!"
 }
+
+# Repost in channel
+# Usage:    _mattermost_delete <postid>
+_mattermost_delete() {
+    debug "DELETE mattermost/posts"
+    curl -H "Authorization: Bearer $MATTERMOST_TOKEN" -H 'Content-Type: application/json' -X DELETE "$MATTERMOST_API"/posts/"$1" ||
+        die "Could not send delete to mattermost!"
+}
+
+# Find channels by predefined pattern
+# Usage:    _mattermost_find_channels <name>
+# Output:   <team-id>/<channel-id> ... # first nmain, followig links
+#           <team-id>/<channel-id> ... # one line per team matching
 _mattermost_find_channels() {
     id() {
         local val
@@ -298,7 +329,7 @@ mattermost_attachment() {
 
 # Add reaction to existing post
 # This can only be called if a @mattermost call was used previously.
-# Usage:    mattermost_rteaction <emoji>
+# Usage:    mattermost_reaction <emoji>
 # Globals:  $MATTERMOST_API + $MATTERMOST_TOKEN to access API
 # Options:  -l, --links     # also post this to the links
 # Returns:  0 without action if no $MATTERMOST_API + $MATTERMOST_TOKEN

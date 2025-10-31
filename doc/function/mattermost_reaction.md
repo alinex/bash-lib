@@ -8,7 +8,7 @@ This can only be called if a [`mattermost`](mattermost.md) call was used previou
 ### Usage
 
 ```bash
-mattermost_rteaction <emoji>
+mattermost_reaction <emoji>
 ```
 
 ### Options

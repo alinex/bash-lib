@@ -931,6 +931,10 @@ debug "POST mattermost/reactions"
 curl -X POST -H "Authorization: Bearer $MATTERMOST_TOKEN" -H 'Content-Type: application/json' "$MATTERMOST_API"/reactions -d "$json" > \
 /dev/null||die "Could not add reaction to mattermost post!"
 }
+_mattermost_delete(){
+debug "DELETE mattermost/posts"
+curl -H "Authorization: Bearer $MATTERMOST_TOKEN" -H 'Content-Type: application/json' -X DELETE "$MATTERMOST_API"/posts/"$1"||die "Could not send delete to mattermost!"
+}
 _mattermost_find_channels(){
 id(){
 local val
