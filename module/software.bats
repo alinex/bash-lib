@@ -8,6 +8,10 @@ setup() {
     load "$BASHLIB_HOME/loader"
 }
 
+######################################################################################
+# semver
+######################################################################################
+
 # bats test_tags=semver
 @test "semver: should parse 2.8.3" {
     run semver 2.8.3
@@ -71,6 +75,10 @@ setup() {
     assert_success
     echo "$output" # use --show-output-of-passing-tests to see it
 }
+
+######################################################################################
+# semver_diff
+######################################################################################
 
 # bats test_tags=semver_diff
 @test "semver_diff: detect same version 3.8.14" {

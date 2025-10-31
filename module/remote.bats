@@ -10,6 +10,10 @@ setup() {
     server=operations.host.cloud.dvb
 }
 
+######################################################################################
+# remote
+######################################################################################
+
 # bats test_tags=remote
 @test "remote: should get hostname of remote host" {
     run remote hostname
@@ -30,6 +34,10 @@ setup() {
     assert_failure
     echo "$output" # use --show-output-of-passing-tests to see it
 }
+
+######################################################################################
+# remote_term
+######################################################################################
 
 # bats test_tags=remote_term
 @test "remote_term: should get hostname of remote host" {
@@ -52,6 +60,10 @@ setup() {
     echo "$output" # use --show-output-of-passing-tests to see it
 }
 
+######################################################################################
+# remote_term_line
+######################################################################################
+
 # bats test_tags=remote_term_line
 @test "remote_term_line: should get hostname of remote host" {
     run remote_term_line hostname
@@ -66,6 +78,10 @@ setup() {
     assert_success
     echo "$output" # use --show-output-of-passing-tests to see it
 }
+
+######################################################################################
+# remote_file
+######################################################################################
 
 # bats test_tags=remote_file
 @test "remote_file: with simple code" {
@@ -88,6 +104,10 @@ setup() {
     echo "$output" # use --show-output-of-passing-tests to see it
 }
 
+######################################################################################
+# upload
+######################################################################################
+
 # bats test_tags=upload
 @test "upload: with simple file" {
     file=$(mktemp)
@@ -100,6 +120,10 @@ setup() {
     remote rm /home/operator/test
     echo "$output" # use --show-output-of-passing-tests to see it
 }
+
+######################################################################################
+# download
+######################################################################################
 
 # bats test_tags=download
 @test "download: with simple file" {
@@ -115,6 +139,10 @@ setup() {
 #    echo "$output" # use --show-output-of-passing-tests to see it
 }
 
+######################################################################################
+# remote_install
+######################################################################################
+
 # bats test_tags=remote_install
 @test "remote_install: should do nothing if installed" {
     skip
@@ -123,6 +151,10 @@ setup() {
     assert_success
     echo "$output" # use --show-output-of-passing-tests to see it
 }
+
+######################################################################################
+# remote_df
+######################################################################################
 
 # bats test_tags=remote_df
 @test "remote_df: should display table" {

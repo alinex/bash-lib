@@ -8,6 +8,10 @@ setup() {
     load "$BASHLIB_HOME/loader"
 }
 
+######################################################################################
+# alerts
+######################################################################################
+
 # bats test_tags=alerts
 @test "alerts: should get empty list" {
     run alerts -i not-existing.host.microschrot.com

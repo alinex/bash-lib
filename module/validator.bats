@@ -8,6 +8,10 @@ setup() {
     load "$BASHLIB_HOME/loader"
 }
 
+######################################################################################
+# num_parameters
+######################################################################################
+
 # bats test_tags=num_parameters
 @test "num_parameters: should work if correct number" {
     run num_parameters p1 p2 --min 1
@@ -37,6 +41,10 @@ setup() {
     echo "$output" # use --show-output-of-passing-tests to see it
 }
 
+######################################################################################
+# is_success
+######################################################################################
+
 # bats test_tags=is_success
 @test "is_success: 0 should be ok" {
     run is_success 0
@@ -49,6 +57,10 @@ setup() {
     assert_failure
     echo "$output" # use --show-output-of-passing-tests to see it
 }
+
+######################################################################################
+# is_empty
+######################################################################################
 
 # bats test_tags=is_empty
 @test "is_empty: should work without argument" {
@@ -69,6 +81,10 @@ setup() {
     echo "$output" # use --show-output-of-passing-tests to see it
 }
 
+######################################################################################
+# is_integer
+######################################################################################
+
 # bats test_tags=is_integer
 @test "is_integer: should work with 234" {
     run is_integer 234
@@ -88,6 +104,10 @@ setup() {
     echo "$output" # use --show-output-of-passing-tests to see it
 }
 
+######################################################################################
+# is_float
+######################################################################################
+
 # bats test_tags=is_float
 @test "is_float: should work with 234.8" {
     run is_float 234.8
@@ -106,6 +126,10 @@ setup() {
     assert_success
     echo "$output" # use --show-output-of-passing-tests to see it
 }
+
+######################################################################################
+# trim_start
+######################################################################################
 
 # bats test_tags=trim_start
 @test "trim_start: should remove leading spaces" {
@@ -129,6 +153,10 @@ setup() {
     echo "$output" # use --show-output-of-passing-tests to see it
 }
 
+######################################################################################
+# trim_end
+######################################################################################
+
 # bats test_tags=trim_end
 @test "trim_end: should remove trailing spaces" {
     run trim_end "xx     "
@@ -143,6 +171,10 @@ setup() {
     assert_success
     echo "$output" # use --show-output-of-passing-tests to see it
 }
+
+######################################################################################
+# trim
+######################################################################################
 
 # bats test_tags=trim
 @test "trim: should remove spaces" {

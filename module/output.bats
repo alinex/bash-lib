@@ -8,6 +8,10 @@ setup() {
     load "$BASHLIB_HOME/loader"
 }
 
+######################################################################################
+# heading
+######################################################################################
+
 # bats test_tags=heading
 @test "heading: with message as argument" {
     run heading Test
@@ -30,6 +34,10 @@ setup() {
     echo "$output" # use --show-output-of-passing-tests to see it
 }
 
+######################################################################################
+# critical
+######################################################################################
+
 # bats test_tags=critical
 @test "critical: with message as argument" {
     run critical Test
@@ -44,6 +52,10 @@ setup() {
     assert_success
     echo "$output" # use --show-output-of-passing-tests to see it
 }
+
+######################################################################################
+# error
+######################################################################################
 
 # bats test_tags=error
 @test "error: with message as argument" {
@@ -60,6 +72,10 @@ setup() {
     assert_output -p "Test"
 }
 
+######################################################################################
+# warn
+######################################################################################
+
 # bats test_tags=warn
 @test "warn: with message as argument" {
     run warn Test
@@ -74,6 +90,10 @@ setup() {
     assert_success
     echo "$output" # use --show-output-of-passing-tests to see it
 }
+
+######################################################################################
+# info
+######################################################################################
 
 # bats test_tags=info
 @test "info: with message as argument" {
@@ -90,6 +110,10 @@ setup() {
     echo "$output" # use --show-output-of-passing-tests to see it
 }
 
+######################################################################################
+# ok
+######################################################################################
+
 # bats test_tags=ok
 @test "ok: with message as argument" {
     run ok Test
@@ -105,6 +129,10 @@ setup() {
     echo "$output" # use --show-output-of-passing-tests to see it
 }
 
+######################################################################################
+# invers
+######################################################################################
+
 # bats test_tags=invers
 @test "invers: with message as argument" {
     run invers Test
@@ -119,6 +147,10 @@ setup() {
     assert_success
     echo "$output" # use --show-output-of-passing-tests to see it
 }
+
+######################################################################################
+# color
+######################################################################################
 
 # bats test_tags=color
 @test "color: with message as argument" {
@@ -136,6 +168,10 @@ setup() {
     echo "$output" # use --show-output-of-passing-tests to see it
 }
 
+######################################################################################
+# uncolorize
+######################################################################################
+
 # bats test_tags=uncolorize
 @test "uncolorize: with message as argument" {
     # shellcheck disable=SC2154
@@ -151,6 +187,10 @@ setup() {
     assert_success
     echo "$output" # use --show-output-of-passing-tests to see it
 }
+
+######################################################################################
+# html2md
+######################################################################################
 
 # bats test_tags=html2md
 @test "html2md: with message as argument" {
@@ -209,6 +249,10 @@ setup() {
     echo "$output" # use --show-output-of-passing-tests to see it
 }
 
+######################################################################################
+# nocr
+######################################################################################
+
 # bats test_tags=nocr
 @test "nocr: with message as argument" {
     run nocr $'line1\r\nline2'
@@ -223,6 +267,10 @@ setup() {
     assert_success
     echo "$output" # use --show-output-of-passing-tests to see it
 }
+
+######################################################################################
+# urlencode
+######################################################################################
 
 # bats test_tags=urlencode
 @test "urlencode: with message as argument" {
@@ -239,6 +287,10 @@ setup() {
     echo "$output" # use --show-output-of-passing-tests to see it
 }
 
+######################################################################################
+# tsv2table
+######################################################################################
+
 # bats test_tags=tsv2table
 @test "tsv2table: with message as argument" {
     run tsv2table $'col1\tcol2\n1\tone'
@@ -253,6 +305,10 @@ setup() {
     echo "$output" # use --show-output-of-passing-tests to see it
     assert_output $'col1 col2\n1    one'
 }
+
+######################################################################################
+# tsv2md
+######################################################################################
 
 # bats test_tags=tsv2md
 @test "tsv2md: with message as argument" {
