@@ -2,15 +2,25 @@
 
 # bats file_tags=color
 setup() {
+    # shellcheck disable=SC2154
     load "$BASHLIB_HOME/tests/bats-support/load"
     load "$BASHLIB_HOME/tests/bats-assert/load"
-    load $BASHLIB_HOME/loader
+    load "$BASHLIB_HOME/loader"
 }
+
+######################################################################################
+# COLORS
+######################################################################################
 
 # bats test_tags=COLORS
 @test "COLORS: should be defined" {
+    # shellcheck disable=SC2154
     assert [ "$COLORS" -ge 0 ]
 }
+
+######################################################################################
+# color_table
+######################################################################################
 
 # bats test_tags=color_table
 @test "color_table: should succeed" {
@@ -19,6 +29,10 @@ setup() {
     echo "$output" # use --show-output-of-passing-tests to see it
 }
 
+######################################################################################
+# color_256
+######################################################################################
+
 # bats test_tags=color_256
 @test "color_256: should return color codes" {
     run color_256 40
@@ -26,6 +40,10 @@ setup() {
     assert_success
     echo "$output" # use --show-output-of-passing-tests to see it
 }
+
+######################################################################################
+# color_256_bg
+######################################################################################
 
 # bats test_tags=color_256_bg
 @test "color_256_bg: should return color codes" {

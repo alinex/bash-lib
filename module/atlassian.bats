@@ -2,7 +2,8 @@
 
 # bats file_tags=atlassian
 setup_file() {
-    load $BASHLIB_HOME/loader
+    # shellcheck disable=SC2154
+    load "$BASHLIB_HOME/loader"
     if [ -z "$ATLASSIAN_USER" ] || [ -z "$ATLASSIAN_TOKEN" ]; then
         skip "Because atlassian access is not set."
     fi
@@ -10,8 +11,12 @@ setup_file() {
 setup() {
     load "$BASHLIB_HOME/tests/bats-support/load"
     load "$BASHLIB_HOME/tests/bats-assert/load"
-    load $BASHLIB_HOME/loader
+    load "$BASHLIB_HOME/loader"
 }
+
+######################################################################################
+# confluence
+######################################################################################
 
 # bats test_tags=confluence
 @test "confluence: should find entry" {

@@ -5,12 +5,16 @@
 setup() {
     load "$BASHLIB_HOME/tests/bats-support/load"
     load "$BASHLIB_HOME/tests/bats-assert/load"
-    load $BASHLIB_HOME/loader
+    load "$BASHLIB_HOME/loader"
 }
 teardown_file() {
     rm -rf /tmp/bats-exec*
     rm -rf /dev/shm/bats-exec*
 }
+
+######################################################################################
+# input
+######################################################################################
 
 # bats test_tags=input
 @test "input: as arguments into line" {
@@ -28,6 +32,10 @@ teardown_file() {
     echo "$output" # use --show-output-of-passing-tests to see it
 }
 
+######################################################################################
+# input_args
+######################################################################################
+
 # bats test_tags=input_args
 @test "input_args: as arguments into line" {
     run input_args 1 title one two three
@@ -43,6 +51,10 @@ teardown_file() {
     echo "$output" # use --show-output-of-passing-tests to see it
 }
 
+######################################################################################
+# input_lines
+######################################################################################
+
 # bats test_tags=input_lines
 @test "input_lines: as arguments into lines" {
     run input_lines one two three
@@ -57,6 +69,10 @@ teardown_file() {
     assert_success
     echo "$output" # use --show-output-of-passing-tests to see it
 }
+
+######################################################################################
+# option_parse
+######################################################################################
 
 # bats test_tags=option_parse
 @test "option_parse: parse example specification" {
@@ -114,6 +130,10 @@ h help  -       Show Help Page" -h -nAlfred --age=34 captain
     assert_success
     echo "$output" # use --show-output-of-passing-tests to see it
 }
+
+######################################################################################
+# option_help
+######################################################################################
 
 # bats test_tags=option_help
 @test "option_help: print options from example specification" {

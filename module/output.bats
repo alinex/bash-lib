@@ -2,9 +2,10 @@
 
 # bats file_tags=output
 setup() {
+    # shellcheck disable=SC2154
     load "$BASHLIB_HOME/tests/bats-support/load"
     load "$BASHLIB_HOME/tests/bats-assert/load"
-    load $BASHLIB_HOME/loader
+    load "$BASHLIB_HOME/loader"
 }
 
 # bats test_tags=heading
@@ -121,14 +122,15 @@ setup() {
 
 # bats test_tags=color
 @test "color: with message as argument" {
-    run color $CC_RED Test
+    # shellcheck disable=SC2154
+    run color "$CC_RED" Test
     assert_success
     echo "$output" # use --show-output-of-passing-tests to see it
     assert_output -p "Test"
 }
 # bats test_tags=color
 @test "color: with piped message" {
-    run bats_pipe echo Test \| color $CC_RED
+    run bats_pipe echo Test \| color "$CC_RED"
     assert_output -p "Test"
     assert_success
     echo "$output" # use --show-output-of-passing-tests to see it
@@ -136,6 +138,7 @@ setup() {
 
 # bats test_tags=uncolorize
 @test "uncolorize: with message as argument" {
+    # shellcheck disable=SC2154
     run uncolorize "${CC_RED}Test${CC_RESET}"
     assert_output "Test"
     assert_success

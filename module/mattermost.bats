@@ -1,10 +1,9 @@
 #!/usr/bin/env bats
 
-bats_require_minimum_version 1.5.0
-
 # bats file_tags=mattermost
 setup_file() {
-    load $BASHLIB_HOME/loader
+    # shellcheck disable=SC2154
+    load "$BASHLIB_HOME"/loader
     if [ -z "$MATTERMOST_API" ] || [ -z "$MATTERMOST_TOKEN" ]; then
         skip "Because mattermost access is not set."
     fi
@@ -15,10 +14,11 @@ setup() {
     team_ekz=fthj1o37njdd3ptnd6fe9r3cty
     channel_spielwiese=stjt3yqjzf8o585e7z88xw3a7w
     post_id=n3ztukd9r78nuqzw56zxx8g91h
+    # shellcheck disable=SC2154
     SHARED_ENV="$BATS_FILE_TMPDIR/mattermost.env"
     load "$BASHLIB_HOME/tests/bats-support/load"
     load "$BASHLIB_HOME/tests/bats-assert/load"
-    load $BASHLIB_HOME/loader
+    load "$BASHLIB_HOME/loader"
 }
 
 ######################################################################################
@@ -27,9 +27,8 @@ setup() {
 
 # bats test_tags=_mattermost_user
 @test "_mattermost_user: should get current user id" {
-    run --separate-stderr _mattermost_user
-    [ -z "$stderr" ] || echo "$stderr" | sed 's/^/   /' >&3
-    assert_output $user_id
+    run _mattermost_user
+    assert_output "$user_id"
     assert_success
     echo "$output" # use --show-output-of-passing-tests to see it
 }
@@ -160,8 +159,10 @@ setup() {
 
 # bats test_tags=_mattermost_repost
 @test "_mattermost_repost: answer to message" {
-    source $SHARED_ENV
-    run --separate-stderr _mattermost_repost $channel_spielwiese $postid "going on..."
+    # shellcheck disable=SC1090
+    source "$SHARED_ENV"
+    # shellcheck disable=SC2154
+    run --separate-stderr _mattermost_repost $channel_spielwiese "$postid" "going on..."
     [ -z "$stderr" ] || echo "$stderr" | sed 's/^/   /' >&3
     assert_output -e '.+'
     assert_success
@@ -170,7 +171,8 @@ setup() {
 
 # bats test_tags=_mattermost_reaction
 @test "_mattermost_reaction: should add reaction" {
-    source $SHARED_ENV
+    # shellcheck disable=SC1090
+    source "$SHARED_ENV"
     run --separate-stderr _mattermost_reaction $postid white_check_mark
     [ -z "$stderr" ] || echo "$stderr" | sed 's/^/   /' >&3
     assert_output ''
@@ -189,6 +191,7 @@ setup() {
 # bats test_tags=_mattermost_find_channels
 @test "_mattermost_find_channels: should get one channel for server" {
     skip
+    # shellcheck disable=SC2034
     server=media.host.office.dvb
     run --separate-stderr _mattermost_find_channels media.host.office.dvb
     [ -z "$stderr" ] || echo "$stderr" | sed 's/^/   /' >&3

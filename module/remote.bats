@@ -2,9 +2,10 @@
 
 # bats file_tags=remote
 setup() {
+    # shellcheck disable=SC2154
     load "$BASHLIB_HOME/tests/bats-support/load"
     load "$BASHLIB_HOME/tests/bats-assert/load"
-    load $BASHLIB_HOME/loader
+    load "$BASHLIB_HOME/loader"
     # test setup
     server=operations.host.cloud.dvb
 }
@@ -12,14 +13,14 @@ setup() {
 # bats test_tags=remote
 @test "remote: should get hostname of remote host" {
     run remote hostname
-    assert_output $server
+    assert_output "$server"
     assert_success
     echo "$output" # use --show-output-of-passing-tests to see it
 }
 # bats test_tags=remote
 @test "remote: with piped message" {
     run bats_pipe echo hostname \| remote
-    assert_output $server
+    assert_output "$server"
     assert_success
     echo "$output" # use --show-output-of-passing-tests to see it
 }
@@ -33,14 +34,14 @@ setup() {
 # bats test_tags=remote_term
 @test "remote_term: should get hostname of remote host" {
     run remote_term hostname
-    assert_output -p $server
+    assert_output -p "$server"
     assert_success
     echo "$output" # use --show-output-of-passing-tests to see it
 }
 # bats test_tags=remote_term
 @test "remote_term: with piped message" {
     run bats_pipe echo hostname \| remote
-    assert_output -p $server
+    assert_output -p "$server"
     assert_success
     echo "$output" # use --show-output-of-passing-tests to see it
 }
@@ -54,14 +55,14 @@ setup() {
 # bats test_tags=remote_term_line
 @test "remote_term_line: should get hostname of remote host" {
     run remote_term_line hostname
-    assert_output -p $server
+    assert_output -p "$server"
     assert_success
     echo "$output" # use --show-output-of-passing-tests to see it
 }
 # bats test_tags=remote_term_line
 @test "remote_term_line: with piped message" {
     run bats_pipe echo hostname \| remote
-    assert_output -p $server
+    assert_output -p "$server"
     assert_success
     echo "$output" # use --show-output-of-passing-tests to see it
 }
@@ -69,31 +70,31 @@ setup() {
 # bats test_tags=remote_file
 @test "remote_file: with simple code" {
     file=$(mktemp)
-    echo "hostname" >$file
-    run remote_file $file
-    assert_output $server
+    echo "hostname" >"$file"
+    run remote_file "$file"
+    assert_output "$server"
     assert_success
-    rm $file
+    rm "$file"
     echo "$output" # use --show-output-of-passing-tests to see it
 }
 # bats test_tags=remote_file
 @test "remote_file: with piped filename" {
     file=$(mktemp)
-    echo "hostname" >$file
+    echo "hostname" >"$file"
     run bats_pipe echo "$file" \| remote_file
-    assert_output $server
+    assert_output "$server"
     assert_success
-    rm $file
+    rm "$file"
     echo "$output" # use --show-output-of-passing-tests to see it
 }
 
 # bats test_tags=upload
 @test "upload: with simple file" {
     file=$(mktemp)
-    echo "hostname" >$file
-    run upload $file /home/operator/test
+    echo "hostname" >"$file"
+    run upload "$file" /home/operator/test
     assert_success
-    rm $file
+    rm "$file"
     run remote cat /home/operator/test
     assert_output hostname
     remote rm /home/operator/test
@@ -106,7 +107,7 @@ setup() {
     run bats_pipe echo "hostname" \| remote tee /home/operator/test
     assert_success
     file=$(mktemp)
-    run download /home/operator/test $file
+    run download /home/operator/test "$file"
     assert_success
 #    assert [ -e "$file" ]
 #    rm $file

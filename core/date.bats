@@ -8,6 +8,10 @@ setup() {
     load "$BASHLIB_HOME"/loader
 }
 
+######################################################################################
+# now
+######################################################################################
+
 # bats test_tags=now
 @test "now: should get timestamp" {
     run now
@@ -17,10 +21,14 @@ setup() {
     echo "$output" # use --show-output-of-passing-tests to see it
 }
 
+######################################################################################
+# date_diff
+######################################################################################
+
 # bats test_tags=date_diff
 @test "date_diff: should get difference of timestamps" {
     start=$(now)
-    run date_diff $start $((start + 3))
+    run date_diff "$start" $((start + 3))
     assert_output 3
     assert_success
     echo "$output" # use --show-output-of-passing-tests to see it
@@ -33,6 +41,10 @@ setup() {
     assert_success
     echo "$output" # use --show-output-of-passing-tests to see it
 }
+
+######################################################################################
+# date_format
+######################################################################################
 
 # bats test_tags=date_format
 @test "date_format: format date as iso" {
@@ -82,6 +94,10 @@ setup() {
     assert_success
     echo "$output" # use --show-output-of-passing-tests to see it
 }
+
+######################################################################################
+# duration_format
+######################################################################################
 
 # bats test_tags=duration_format
 @test "duration_format: return number" {
@@ -175,12 +191,21 @@ setup() {
     echo "$output" # use --show-output-of-passing-tests to see it
 }
 
+######################################################################################
+# timer_start
+######################################################################################
+
 # bats test_tags=timer_start
 @test "timer_start: start timer without error" {
     run timer_start
     assert_success
     echo "$output" # use --show-output-of-passing-tests to see it
 }
+
+######################################################################################
+# timer_stop
+######################################################################################
+
 # bats test_tags=timer_stop
 @test "timer_stop: get time since start" {
     run timer_stop

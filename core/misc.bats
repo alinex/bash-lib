@@ -12,9 +12,13 @@ teardown_file() {
     rm -rf /dev/shm/bats-exec*
 }
 
+######################################################################################
+# debug
+######################################################################################
+
 # bats test_tags=debug
 @test "debug: do nothing if no debugging" {
-    DEBUG= run debug Test
+    DEBUG="" run debug Test
     assert_output ""
     assert_success
     echo "$output" # use --show-output-of-passing-tests to see it
@@ -55,6 +59,10 @@ teardown_file() {
     echo "$output" # use --show-output-of-passing-tests to see it
 }
 
+######################################################################################
+# die
+######################################################################################
+
 # bats test_tags=die
 @test "die: with message as argument" {
     run die Failed
@@ -69,6 +77,10 @@ teardown_file() {
     assert_failure
     echo "$output" # use --show-output-of-passing-tests to see it
 }
+
+######################################################################################
+# mktemp
+######################################################################################
 
 # bats test_tags=mktemp
 @test "mktemp: for file" {

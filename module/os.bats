@@ -1,10 +1,12 @@
 #!/usr/bin/env bats
+# shellcheck disable=SC2154
 
 # bats file_tags=os
 setup() {
+    # shellcheck disable=SC2154
     load "$BASHLIB_HOME/tests/bats-support/load"
     load "$BASHLIB_HOME/tests/bats-assert/load"
-    load $BASHLIB_HOME/loader
+    load "$BASHLIB_HOME/loader"
 }
 
 # bats test_tags=OS
