@@ -190,3 +190,31 @@ setup() {
     assert_success
     echo "$output" # use --show-output-of-passing-tests to see it
 }
+
+######################################################################################
+# value_if_variable
+######################################################################################
+
+# bats test_tags=value_if_variable
+@test "value_if_variable: use value if no variable" {
+    run value_if_variable "no_var"
+    assert_output "no_var"
+    assert_success
+    echo "$output" # use --show-output-of-passing-tests to see it
+}
+# bats test_tags=value_if_variable
+@test "value_if_variable: invalid variable name" {
+    run value_if_variable "this & that"
+    assert_output "this & that"
+    assert_success
+    echo "$output" # use --show-output-of-passing-tests to see it
+}
+# bats test_tags=value_if_variable
+@test "value_if_variable: use referenced variable" {
+    # shellcheck disable=SC2034
+    value=55
+    run value_if_variable "value"
+    assert_output "55"
+    assert_success
+    echo "$output" # use --show-output-of-passing-tests to see it
+}
