@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-31 13:45+0100\n"
+"POT-Creation-Date: 2025-10-31 14:13+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -34,31 +34,31 @@ msgstr ""
 msgid "Invalid duration unit"
 msgstr ""
 
-#: module/monitoring:69
+#: module/monitoring:70
 msgid "Could not get exporters from prometheus!"
 msgstr ""
 
-#: module/monitoring:84
+#: module/monitoring:87
 #, sh-format
 msgid "Could not scrape the prometheus exporter at $url!"
 msgstr ""
 
-#: module/monitoring:146 module/input:40 module/input:99 module/input:206
+#: module/monitoring:151 module/input:40 module/input:99 module/input:206
 #: module/input:426 module/input:589 module/remote:120 module/remote:192
 #: module/remote:276 module/mattermost:319 module/mattermost:354
 #: module/validator:36 module/software:91
 msgid "Unrecognized option"
 msgstr ""
 
-#: module/monitoring:153
+#: module/monitoring:158
 msgid "Could not get alerts from Grafana!"
 msgstr ""
 
-#: module/monitoring:154
+#: module/monitoring:159
 msgid "Parse error in Grafana alerts list with filter"
 msgstr ""
 
-#: module/monitoring:182
+#: module/monitoring:187
 msgid "Severity\\tNetwork\\tInstance\\tSummary\\tStart"
 msgstr ""
 
