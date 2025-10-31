@@ -9,6 +9,18 @@ setup() {
 }
 
 ######################################################################################
+# help
+######################################################################################
+
+# bats test_tags=help
+@test "help: show message" {
+    run help Test "help <heading>" "" "Some text"
+    assert_output -p "Test"
+    assert_success
+    echo "$output" # use --show-output-of-passing-tests to see it
+}
+
+######################################################################################
 # heading
 ######################################################################################
 
@@ -325,3 +337,13 @@ setup() {
     echo "$output" # use --show-output-of-passing-tests to see it
 }
 
+######################################################################################
+# spinner
+######################################################################################
+
+# bats test_tags=spinner
+@test "spinner: should work" {
+    run spinner_start 
+    assert_success
+    echo "$output" # use --show-output-of-passing-tests to see it
+}
