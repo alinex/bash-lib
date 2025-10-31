@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-export BASHLIB_HOME=/mnt
+# shellcheck disable=SC2155
+export BASHLIB_HOME="$(pwd)"
 
 # install needed packages
 export DEBIAN_FRONTEND=noninteractive

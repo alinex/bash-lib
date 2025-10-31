@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 
-export BASHLIB_HOME=/mnt
+export BASHLIB_HOME="${pwd}"
 
 # install needed packages
 apk add --no-cache bash tzdata musl-locales musl-locales-lang git curl gettext >/dev/null
