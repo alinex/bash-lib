@@ -10,16 +10,17 @@
 # This will @die if
 # Usage:    sudo_allow <command-line>
 # Return:   0 if allowed
+#           @die if not allowed
 sudo_allow() {
     ((EUID != 0)) || return 0
-    sudo -v 2>/dev/null || die "For this call root rights are needed! Please use another user or allow sudo for user $(whoami)."
-    sudo -l "$@" >/dev/null || die "User $(whoami) is not allowed to call 'sudo $*', but this is neccessary!"
+    command -v sudo >/dev/null || return 0
+    command sudo -ln "$@" >/dev/null || die "User $(whoami) is not allowed to call 'sudo $*', but this is neccessary!"
 }
 
 # Sudo overwrite to only use sudo if needed
 # Usage:    sudo <command-line>
 sudo() {
-    if ((EUID != 0)) && sudo -v 2>/dev/null; then
+    if ((EUID != 0)) && command -v sudo >/dev/null; then
         command sudo "$@"
     else
         "$@"
@@ -37,6 +38,7 @@ repeat() {
     ((n > 0)) || return
     shift
     for n in $(seq "$n"); do
+        debug 3 "call #$n: $*"
         "$@"
     done
 }
@@ -54,10 +56,10 @@ function retry {
         wait=$((2 ** count))
         count=$((count + 1))
         if ((count < retries)); then
-            debug "Try $count/$retries exited $exit, retrying in $wait seconds..."
+            debug 3 "Try $count/$retries exited $exit, retrying in $wait seconds..."
             sleep "$wait"
         else
-            debug "Try $count/$retries exited $exit, no more retries left."
+            debug 3 "Try $count/$retries exited $exit, no more retries left."
             return "$exit"
         fi
     done
@@ -147,9 +149,9 @@ unlock() {
     [ ! -e "$lockfile.$$" ] || rm -f "$lockfile.$$" 2>/dev/null
     # remove link if no pid or pointing to myself
     pid=$(cat "$lockfile") || true
-    [ -n "$pid" ] || [[ "$pid" != "$$" ]] || rm -r "$lockfile" 2>/dev/null
+    [ -z "$pid" ] || [[ "$pid" != "$$" ]] || rm -r "$lockfile" 2>/dev/null
     # remove the trap
-    trap_remove unlock
+    trap_remove unlock EXIT
     return 0
 }
 

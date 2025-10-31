@@ -227,6 +227,7 @@ trap_remove(){
 local remove="$1"
 local sig="$2"
 local current new
+debug 3 "remove $remove from $sig"
 current="$(trap -p "$sig"|awk -F"'" '{print $2}')"
 new="$(echo "$current"|sed "s#;* *$remove##")"
 trap "$new" "$sig"

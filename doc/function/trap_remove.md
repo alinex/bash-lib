@@ -8,5 +8,5 @@ Not the whole trap is removed, but only the given code.
 ### Usage
 
 ```bash
-trap_remove
+trap_remove <cmd> <signal>
 ```

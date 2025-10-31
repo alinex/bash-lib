@@ -88,11 +88,12 @@ trap_add() {
 
 # Remove a specific trap
 # Not the whole trap is removed, but only the given code.
-# Usage:    trap_remove
+# Usage:    trap_remove <cmd> <signal>
 trap_remove() {
     local remove="$1"
     local sig="$2"
     local current new
+    debug 3 "remove $remove from $sig"
     current="$(trap -p "$sig" | awk -F"'" '{print $2}')"
     # shellcheck disable=SC2001
     new="$(echo "$current" | sed "s#;* *$remove##")"
