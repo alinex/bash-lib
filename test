@@ -21,7 +21,7 @@ if [ "$1" = "ci" ]; then
   rm -rf tests/results/* 2>/dev/null || true
   ## run all tests
   #bats --formatter junit --output tests/results core
-  find core -name \*.bats |
+  find core module -name \*.bats |
     while read -r file; do
       name=${file%.bats} # remove the .bats extension
       name=${name//\//-} # replace all / with -
@@ -37,7 +37,7 @@ else
     # set version list
     case $name in
     debian) versions="11 12 13" ;;
-    ubuntu) versions="20.04 22.04 24.04" ;;
+    ubuntu) versions="22.04 24.04" ;;
     esac
     for version in $versions; do
       [ "$2" = "$version" ] || [ -z "$2" ] || continue

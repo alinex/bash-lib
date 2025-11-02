@@ -130,7 +130,7 @@ source $BASHLIB_HOME/module/output  # and then single modules
 source $BASHLIB_HOME/configs        # load configuration
 ```
 
-For further assistance see the [Examples](./README.md#Examples) within the Modules API documentation.
+For further assistance see the [Examples](./doc/README.md#Examples) within the Modules API documentation.
 
 A [bash short reference](./bash-reference.md) is also available here.
 

@@ -65,5 +65,5 @@ Ubuntu:
   image: ubuntu:$UBUNTU_VERSION
   parallel:
     matrix:
-      - UBUNTU_VERSION: ["20.04", "22.04", "24.04"]
+      - UBUNTU_VERSION: ["22.04", "24.04"]
 

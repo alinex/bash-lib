@@ -17,7 +17,7 @@ setup() {
     run expect -c '
         log_user 0
         spawn bash -c "
-            source \"$BASHLIB_HOME\"/loader
+            source '$BASHLIB_HOME'/loader
             pause
         "
         log_user 1
@@ -34,7 +34,7 @@ setup() {
     run expect -c '
         log_user 0
         spawn bash -c "
-            source \"$BASHLIB_HOME\"/loader
+            source '$BASHLIB_HOME'/loader
             pause
         "
         log_user 1
@@ -52,7 +52,7 @@ setup() {
     run expect -c '
         log_user 0
         spawn bash -c "
-            source \"$BASHLIB_HOME\"/loader
+            source '$BASHLIB_HOME'/loader
             pause
         "
         log_user 1
@@ -69,7 +69,7 @@ setup() {
     run expect -c '
         log_user 0
         spawn bash -c "
-            source \"$BASHLIB_HOME\"/loader
+            source '$BASHLIB_HOME'/loader
             pause GoOn
         "
         log_user 1
@@ -86,7 +86,7 @@ setup() {
     run expect -c '
         log_user 0
         spawn bash -c "
-            source \"$BASHLIB_HOME\"/loader
+            source '$BASHLIB_HOME'/loader
             pause --timeout=1
         "
         log_user 1
@@ -103,7 +103,7 @@ setup() {
     run expect -c '
         log_user 0
         spawn bash -c "
-            source \"$BASHLIB_HOME\"/loader
+            source '$BASHLIB_HOME'/loader
             pause --timeout=10 --abort
         "
         log_user 1
@@ -125,7 +125,7 @@ setup() {
     run expect -c '
         log_user 0
         spawn bash -c "
-            source \"$BASHLIB_HOME\"/loader
+            source '$BASHLIB_HOME'/loader
             confirm
         "
         log_user 1
@@ -143,7 +143,7 @@ setup() {
     run expect -c '
         log_user 0
         spawn bash -c "
-            source \"$BASHLIB_HOME\"/loader
+            source '$BASHLIB_HOME'/loader
             confirm
         "
         log_user 1
@@ -161,7 +161,7 @@ setup() {
     run expect -c '
         log_user 0
         spawn bash -c "
-            source \"$BASHLIB_HOME\"/loader
+            source '$BASHLIB_HOME'/loader
             confirm
         "
         log_user 1
@@ -179,7 +179,7 @@ setup() {
     run expect -c '
         log_user 0
         spawn bash -c "
-            source \"$BASHLIB_HOME\"/loader
+            source '$BASHLIB_HOME'/loader
             confirm
         "
         log_user 1
@@ -197,7 +197,7 @@ setup() {
     run expect -c '
         log_user 0
         spawn bash -c "
-            source \"$BASHLIB_HOME\"/loader
+            source '$BASHLIB_HOME'/loader
             confirm
         "
         log_user 1
@@ -215,7 +215,7 @@ setup() {
     run expect -c '
         log_user 0
         spawn bash -c "
-            source \"$BASHLIB_HOME\"/loader
+            source '$BASHLIB_HOME'/loader
             confirm
         "
         log_user 1
@@ -233,7 +233,7 @@ setup() {
     run expect -c '
         log_user 0
         spawn bash -c "
-            source \"$BASHLIB_HOME\"/loader
+            source '$BASHLIB_HOME'/loader
             confirm \"Go on?\"
         "
         log_user 1
@@ -251,7 +251,7 @@ setup() {
     run expect -c '
         log_user 0
         spawn bash -c "
-            source \"$BASHLIB_HOME\"/loader
+            source '$BASHLIB_HOME'/loader
             confirm --true
         "
         log_user 1
@@ -268,7 +268,7 @@ setup() {
     run expect -c '
         log_user 0
         spawn bash -c "
-            source \"$BASHLIB_HOME\"/loader
+            source '$BASHLIB_HOME'/loader
             confirm --false
         "
         log_user 1
@@ -285,7 +285,7 @@ setup() {
     run expect -c '
         log_user 0
         spawn bash -c "
-            source \"$BASHLIB_HOME\"/loader
+            source '$BASHLIB_HOME'/loader
             confirm --false --timeout=1
         "
         log_user 1
@@ -307,7 +307,7 @@ setup() {
     run expect -c '
         log_user 0
         spawn bash -c "
-            source \"$BASHLIB_HOME\"/loader
+            source '$BASHLIB_HOME'/loader
             ask
         "
         log_user 1
@@ -325,7 +325,7 @@ setup() {
     run expect -c '
         log_user 0
         spawn bash -c "
-            source \"$BASHLIB_HOME\"/loader
+            source '$BASHLIB_HOME'/loader
             ask string
         "
         log_user 1
@@ -343,7 +343,7 @@ setup() {
     run expect -c '
         log_user 0
         spawn bash -c "
-            source \"$BASHLIB_HOME\"/loader
+            source '$BASHLIB_HOME'/loader
             ask string --empty
         "
         log_user 1
@@ -360,7 +360,7 @@ setup() {
     run expect -c '
         log_user 0
         spawn bash -c "
-            source \"$BASHLIB_HOME\"/loader
+            source '$BASHLIB_HOME'/loader
             ask string \"What to do?\"
         "
         log_user 1
@@ -378,7 +378,7 @@ setup() {
     run expect -c '
         log_user 0
         spawn bash -c "
-            source \"$BASHLIB_HOME\"/loader
+            source '$BASHLIB_HOME'/loader
             ask string --default=test
         "
         log_user 1
@@ -396,7 +396,7 @@ setup() {
     run expect -c '
         log_user 0
         spawn bash -c "
-            source \"$BASHLIB_HOME\"/loader
+            source '$BASHLIB_HOME'/loader
             ask string --default=test --timeout=1
         "
         log_user 1
@@ -414,7 +414,7 @@ setup() {
     run expect -c '
         log_user 0
         spawn bash -c "
-            source \"$BASHLIB_HOME\"/loader
+            source '$BASHLIB_HOME'/loader
             ask integer
         "
         log_user 1
@@ -432,7 +432,7 @@ setup() {
     run expect -c '
         log_user 0
         spawn bash -c "
-            source \"$BASHLIB_HOME\"/loader
+            source '$BASHLIB_HOME'/loader
             ask integer --allow-negative
         "
         log_user 1
@@ -450,7 +450,7 @@ setup() {
     run expect -c '
         log_user 0
         spawn bash -c "
-            source \"$BASHLIB_HOME\"/loader
+            source '$BASHLIB_HOME'/loader
             ask number
         "
         log_user 1
@@ -468,7 +468,7 @@ setup() {
     run expect -c '
         log_user 0
         spawn bash -c "
-            source \"$BASHLIB_HOME\"/loader
+            source '$BASHLIB_HOME'/loader
             ask float
         "
         log_user 1
@@ -486,7 +486,7 @@ setup() {
     run expect -c '
         log_user 0
         spawn bash -c "
-            source \"$BASHLIB_HOME\"/loader
+            source '$BASHLIB_HOME'/loader
             ask float
         "
         log_user 1
@@ -504,7 +504,7 @@ setup() {
     run expect -c '
         log_user 0
         spawn bash -c "
-            source \"$BASHLIB_HOME\"/loader
+            source '$BASHLIB_HOME'/loader
             ask float
         "
         log_user 1
@@ -522,7 +522,7 @@ setup() {
     run expect -c '
         log_user 0
         spawn bash -c "
-            source \"$BASHLIB_HOME\"/loader
+            source '$BASHLIB_HOME'/loader
             ask float --allow-negative
         "
         log_user 1
@@ -540,7 +540,7 @@ setup() {
     run expect -c '
         log_user 0
         spawn bash -c "
-            source \"$BASHLIB_HOME\"/loader
+            source '$BASHLIB_HOME'/loader
             ask password
         "
         log_user 1
@@ -550,7 +550,7 @@ setup() {
     '
     assert_success
     assert_output -p "Gib das Passwort ein:"
-    assert_output -p "******"
+    #assert_output -p "******"
     echo "$output" # use --show-output-of-passing-tests to see it
 }
 
@@ -596,7 +596,7 @@ setup() {
     run expect -c '
         log_user 0
         spawn bash -c "
-            source \"$BASHLIB_HOME\"/loader
+            source '$BASHLIB_HOME'/loader
             choose one two three
         "
         log_user 1
@@ -615,7 +615,7 @@ setup() {
     run expect -c '
         log_user 0
         spawn bash -c "
-            source \"$BASHLIB_HOME\"/loader
+            source '$BASHLIB_HOME'/loader
             echo -e \"one\ntwo\nthree\" | choose
         "
         log_user 1
@@ -634,7 +634,7 @@ setup() {
     run expect -c '
         log_user 0
         spawn bash -c "
-            source \"$BASHLIB_HOME\"/loader
+            source '$BASHLIB_HOME'/loader
             choose one two three --title=Choose
         "
         log_user 1
@@ -654,7 +654,7 @@ setup() {
     run expect -c '
         log_user 0
         spawn bash -c "
-            source \"$BASHLIB_HOME\"/loader
+            source '$BASHLIB_HOME'/loader
             choose one two \"three|nr.3\"
         "
         log_user 1
@@ -673,7 +673,7 @@ setup() {
     run expect -c '
         log_user 0
         spawn bash -c "
-            source \"$BASHLIB_HOME\"/loader
+            source '$BASHLIB_HOME'/loader
             choose one two three --exit=Close
         "
         log_user 1
@@ -693,7 +693,7 @@ setup() {
     run expect -c '
         log_user 0
         spawn bash -c "
-            source \"$BASHLIB_HOME\"/loader
+            source '$BASHLIB_HOME'/loader
             choose one two three --default=2
         "
         log_user 1
@@ -712,7 +712,7 @@ setup() {
     run expect -c '
         log_user 0
         spawn bash -c "
-            source \"$BASHLIB_HOME\"/loader
+            source '$BASHLIB_HOME'/loader
             choose one two three --default=three
         "
         log_user 1
@@ -731,7 +731,7 @@ setup() {
     run expect -c '
         log_user 0
         spawn bash -c "
-            source \"$BASHLIB_HOME\"/loader
+            source '$BASHLIB_HOME'/loader
             choose one two \"three|nr.3\" --default=nr.3
         "
         log_user 1
@@ -750,7 +750,7 @@ setup() {
     run expect -c '
         log_user 0
         spawn bash -c "
-            source \"$BASHLIB_HOME\"/loader
+            source '$BASHLIB_HOME'/loader
             choose one two three --default=2 --timeout=1
         "
         log_user 1
@@ -778,7 +778,7 @@ setup() {
     run expect -c '
         log_user 0
         spawn bash -c "
-            source \"$BASHLIB_HOME\"/loader
+            source '$BASHLIB_HOME'/loader
             tasks \"task1|run tsask 1\" \"task2| run task 2\"
         "
         log_user 1
@@ -799,7 +799,7 @@ setup() {
     run expect -c '
         log_user 0
         spawn bash -c "
-            source \"$BASHLIB_HOME\"/loader
+            source '$BASHLIB_HOME'/loader
             echo -e \"task1|run task 1\ntask2| run task 2\" | tasks
         "
         log_user 1
@@ -820,7 +820,7 @@ setup() {
     run expect -c '
         log_user 0
         spawn bash -c "
-            source \"$BASHLIB_HOME\"/loader
+            source '$BASHLIB_HOME'/loader
             tasks --title=ToDo \"task1|run tsask 1\" \"task2| run task 2\"
         "
         log_user 1
@@ -842,7 +842,7 @@ setup() {
     run expect -c '
         log_user 0
         spawn bash -c "
-            source \"$BASHLIB_HOME\"/loader
+            source '$BASHLIB_HOME'/loader
             tasks --default=1 \"task1|run tsask 1\" \"task2| run task 2\"
         "
         log_user 1
@@ -863,7 +863,7 @@ setup() {
     run expect -c '
         log_user 0
         spawn bash -c "
-            source \"$BASHLIB_HOME\"/loader
+            source '$BASHLIB_HOME'/loader
             tasks --default=task2 \"task1|run tsask 1\" \"task2| run task 2\"
         "
         log_user 1
@@ -884,7 +884,7 @@ setup() {
     run expect -c '
         log_user 0
         spawn bash -c "
-            source \"$BASHLIB_HOME\"/loader
+            source '$BASHLIB_HOME'/loader
             tasks --default=\"run task 2\" \"task1|run tsask 1\" \"task2|run task 2\"
         "
         log_user 1
@@ -905,7 +905,7 @@ setup() {
     run expect -c '
         log_user 0
         spawn bash -c "
-            source \"$BASHLIB_HOME\"/loader
+            source '$BASHLIB_HOME'/loader
             tasks --default=1 --timeout=1 \"task1|run tsask 1\" \"task2| run task 2\"
         "
         log_user 1

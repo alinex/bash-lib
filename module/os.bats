@@ -16,21 +16,25 @@ setup() {
 # bats test_tags=detect_os
 @test "detect_os: OS should be defined" {
     detect_os
+    assert_success
     assert [ -n "$OS" ]
 }
 # bats test_tags=detect_os
 @test "detect_os: KERNEL should be defined" {
     detect_os
+    assert_success
     assert [ -n "$KERNEL" ]
 }
 # bats test_tags=detect_os
 @test "detect_os: MACH should be defined" {
     detect_os
+    assert_success
     assert [ -n "$MACH" ]
 }
 # bats test_tags=detect_os
 @test "detect_os: MACH_ID should be defined" {
     detect_os
+    assert_success
     assert [ -n "$MACH_ID" ]
 }
 

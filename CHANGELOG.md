@@ -13,6 +13,7 @@ As this is not driven by releases and therefore tags are not used it is an ongoi
 - [`ask`](doc/function/ask.md) invalid input, timeout
 - [`choose`](doc/function/choose.md) invalid input, `--timeout`, input format check, direct selection without `<return>`
 - [`tasks`](doc/function/tasks.md) with `--loop` option
+- [`ask password`](doc/function/ask.md) input with strength display while typing
 
 ## 28. October 2025 - V2.0.0
 

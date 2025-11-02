@@ -1322,6 +1322,7 @@ case "$(uname -s)" in
 "CYGWIN"*|"MSYS"*|"MINGW"*)OS=Windows;;
 *)OS=Unknown
 esac
+echo "---------1" >&3
 KERNEL=$(uname -r)
 MACH=$(uname -m)
 DIST_BASE=
@@ -1329,6 +1330,7 @@ DIST_BASE_REV=
 DIST=
 REV_NAME=
 REV=
+echo "---------2" >&3
 case $OS in
 Solaris)MACH=$(uname -p)
 ;;
@@ -1357,20 +1359,26 @@ DIST_BASE='Mandrake'
 REV_NAME=$(cat /etc/mandrake-release|sed s/.*\(//|sed s/\)//)
 REV=$(cat /etc/mandrake-release|sed s/.*release\ //|sed s/\ .*//)
 elif [ -f /etc/debian_version ];then
+echo "---------3" >&3
 DIST_BASE='Debian'
 DIST_BASE_REV=$(cat /etc/debian_version|sed -e 's/\([0-9]*\)\..*/\1/;s/\/.*//')
+echo "---------5" >&3
 if [[ $DIST_BASE_REV =~ [a-z] ]];then
 [ -e /etc/debian_version_number ]||curl -s https://ftp.debian.org/debian/dists/"$DIST_BASE_REV"/Release|grep Version|cut -d' ' -f2|sed 's/\..*//'|sudo tee /etc/debian_version_number >/dev/null
 DIST_BASE_REV=$(cat /etc/debian_version_number)
 fi
-DIST=$(grep '^DISTRIB_ID=' /etc/lsb-release /etc/os-release 2>/dev/null|head -n 1|awk -F= '{ print $2 }')
+echo "---------6" >&3
+DIST=$(grep '^DISTRIB_ID=' /etc/lsb-release /etc/os-release 2>/dev/null|head -n 1|awk -F= '{ print $2 }'||true)
 [ -z "$DIST" ]&&DIST=$(grep '^NAME=' /etc/lsb-release /etc/os-release 2>/dev/null|head -n 1|awk -F= '{ print $2 }'|sed 's/"//g')
-REV_NAME=$(grep '^DISTRIB_CODENAME=' /etc/lsb-release /etc/os-release 2>/dev/null|head -n 1|awk -F= '{ print $2 }')
+echo "---------7" >&3
+REV_NAME=$(grep '^DISTRIB_CODENAME=' /etc/lsb-release /etc/os-release 2>/dev/null|head -n 1|awk -F= '{ print $2 }'||true)
 [ -z "$REV_NAME" ]&&REV_NAME=$(grep '^VERSION=' /etc/lsb-release /etc/os-release 2>/dev/null|head -n 1|awk -F= '{ print $2 }'|sed 's/^.*(\(.*\)).*/\1/g')
-REV=$(grep '^DISTRIB_RELEASE=' /etc/lsb-release /etc/os-release 2>/dev/null|head -n 1|awk -F= '{ print $2 }')
+echo "---------8" >&3
+REV=$(grep '^DISTRIB_RELEASE=' /etc/lsb-release /etc/os-release 2>/dev/null|head -n 1|awk -F= '{ print $2 }'||true)
 [ -z "$REV" ]&&REV=$(cat /etc/debian_version)
 fi
 esac
+echo "---------9" >&3
 MACH_ID=$(cat /etc/machine-id /var/lib/dbus/machine-id /var/db/dbus/machine-id /sys/class/dmi/id/board_serial 2>/dev/null|head -n 1||true)
 IS_VIRTUAL=
 grep -q '^flags.* hypervisor' /proc/cpuinfo&&IS_VIRTUAL=1||IS_VIRTUAL=""
