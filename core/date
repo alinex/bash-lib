@@ -76,12 +76,12 @@ date_format() {
 
 # Format duration in different numbers or human readable
 # This function can convert into seconds and back into human format as you like. Months or years are not possible because they are not accurately better use 30d or 365 d for that.
-# Usage:    duration_format <format> <value>
+# Usage:    duration_format <format> <value|human format>
 #           <format>:   seconds
 #                       minutes     # using floor 110s = 1
 #                       hours       # using floor
 #                       days        # using floor
-#                       human       # like 1h30m, 5w, 30s
+#                       human       # like 1h 30m, 5w, 30s # spaces between different units are optional
 # Output:   <duration> in selected format
 duration_format() {
     local value
@@ -146,14 +146,14 @@ _format_duration() {
     # Build string
     #local elements=0
     local out=""
-    ((w)) && out+="${w}w"
-    ((d)) && out+="${d}d"
-    ((h)) && out+="${h}h"
-    ((m)) && out+="${m}m"
-    ((s)) && out+="${s}s"
+    ((w)) && out+="${w}w "
+    ((d)) && out+="${d}d "
+    ((h)) && out+="${h}h "
+    ((m)) && out+="${m}m "
+    ((s)) && out+="${s}s "
     # If total was exactly 0
     [[ -z "$out" ]] && out="0s" && sign=""
-    echo "${sign}${out}"
+    echo "${sign}${out% }"
 }
 
 ######################################################################################

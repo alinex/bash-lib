@@ -147,13 +147,13 @@ local h=$(((total%86400)/3600))
 local m=$(((total%3600)/60))
 local s=$((total%60))
 local out=""
-((w))&&out+="${w}w"
-((d))&&out+="${d}d"
-((h))&&out+="${h}h"
-((m))&&out+="${m}m"
-((s))&&out+="${s}s"
+((w))&&out+="${w}w "
+((d))&&out+="${d}d "
+((h))&&out+="${h}h "
+((m))&&out+="${m}m "
+((s))&&out+="${s}s "
 [[ -z $out ]]&&out="0s"&&sign=""
-echo "$sign$out"
+echo "$sign${out% }"
 }
 _timer_start=0
 timer_start(){

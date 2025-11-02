@@ -179,14 +179,21 @@ setup() {
 # bats test_tags=duration_format
 @test "duration_format: formats as human for combined" {
     run duration_format human 5400
-    assert_output "1h30m"
+    assert_output "1h 30m"
     assert_success
     echo "$output" # use --show-output-of-passing-tests to see it
 }
 # bats test_tags=duration_format
 @test "duration_format: formats as human for negative" {
     run duration_format human -5400
-    assert_output "-1h30m"
+    assert_output "-1h 30m"
+    assert_success
+    echo "$output" # use --show-output-of-passing-tests to see it
+}
+# bats test_tags=duration_format
+@test "duration_format: parse combined with spaces" {
+    run duration_format seconds "1h 30m"
+    assert_output 5400
     assert_success
     echo "$output" # use --show-output-of-passing-tests to see it
 }
