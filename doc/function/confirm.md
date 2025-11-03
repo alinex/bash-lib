@@ -30,3 +30,7 @@ confirm <question>
 
 - 0 for true/yes
 - 1 for false/no
+
+### Examples
+
+- [`input`](../example/input.md#confirm) shows all possible use cases

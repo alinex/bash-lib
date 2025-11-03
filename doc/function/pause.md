@@ -23,3 +23,7 @@ pause <message>
 ```bash
 <question> <key>
 ```
+
+### Examples
+
+- [`input`](../example/input.md#pause) shows all possible use cases

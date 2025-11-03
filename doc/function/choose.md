@@ -36,3 +36,7 @@ choose [-t] <entry>...
 <question> <key>
 exit # if run with --exit and this was choosen
 ```
+
+### Examples
+
+- [`input`](../example/input.md#choose) shows all possible use cases

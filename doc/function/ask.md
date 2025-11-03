@@ -32,3 +32,7 @@ ask <format> <question>
 <question> <valid characters>...
 # input <keys> printed if valid
 ```
+
+### Examples
+
+- [`input`](../example/input.md#ask) shows all possible use cases

@@ -1,5 +1,5 @@
 # will be created if needed
-/local/bashlib.pot
+/locale/bashlib.pot
 **/*~
 # test parts automatically created
 /tests/results

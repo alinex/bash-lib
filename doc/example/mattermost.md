@@ -5,15 +5,16 @@ The following examples shows how to interact with Mattermost.
 A simple information will look like:
 
 ```bash
+$ source $BASHLIB_HOME/full
 # Make a first post to the channel associated with the server name
-mattermost $server "**KeyCloak wird aktualisiert und fällt gleich ganz kurz aus...**"
+$ mattermost $server "**KeyCloak wird aktualisiert und fällt gleich ganz kurz aus...**"
 # Directly extend the posting with a sub post
-mattermost_repost "$(alerts -i $server md)"
+$ mattermost_repost "$(alerts -i $server md)"
 # do something
 ....
 # Mark post as done
-mattermost_repost "Fertig."
-mattermost_reaction check
+$ mattermost_repost "Fertig."
+$ mattermost_reaction check
 ```
 
 > ['mattermost'](../function/mattermost.md) will make the post
@@ -45,7 +46,7 @@ MATTERMOST_LINK_PATTERN=(
 If you want to add attachments to initial mattermost post or repost add another argument with the json:
 
 ```bash
-json=<<EOT
+$ json=<<EOT
 [
   {
     "color": "#0000FF",
@@ -69,12 +70,12 @@ Siehe hierzu mehr unter https://status.plusserver.com//api/v2/summary.json",
   }
 ]
 EOT
-mattermost $server "Alert on Server" "$json"
+$ mattermost $server "Alert on Server" "$json"
 ```
 
 The attachment can also be made using a helper ['mattermost_attachment'](../function/mattermost_attachment.md) so you don't have to write the text yourself:
 
 ```bash
-mattermost $server "Alert on Server" \
+$ mattermost $server "Alert on Server" \
     "$(mattermost_attachment --color "#FF8000" --title "Grafana Alert" --text "This is the attachment text.")"
 ```

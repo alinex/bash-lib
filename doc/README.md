@@ -34,9 +34,12 @@ This is a list of some examples and the reference documentation of all available
 
 ## Examples
 
+The examples should be a good start to see what and how it is possible:
+
 - [Base Script](./example/base_script.md)
 - [Parameters and Options](./example/options.md)
 - [Shared Memory](./example/shared_memory.md)
+- [User Interaction][text](example/input.md)
 - [Tasks](./example/tasks.md)
 - [Mattermost](./example/mattermost.md)
 
