@@ -50,16 +50,16 @@ pause() {
     else
         while ((timeout > 0)); do
             echo -ne "\r${CC_INFO}$text${CC_RESET} $(duration_format human "$timeout")     "
-            if [ -n "$abort" ]; then
-                if read -r -s -t 1 -n 1 _ </dev/tty; then
+            if read -r -s -t 1 -n 1 _ </dev/tty; then
+                if [ -n "$abort" ]; then
                     echo -e "\b\b\b\b$(gettext 'aborted by user')    "
                     return 1
                 fi
-            else
-                sleep 1
             fi
             ((timeout--))
+            ((timeout > 0)) || echo -ne "\r${CC_INFO}$text${CC_RESET} 0s      "
         done
+
     fi
     echo ""
 }
