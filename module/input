@@ -19,6 +19,7 @@ declare -F "color_256" >/dev/null || source "$BASHLIB_HOME"/module/color
 # Options:  -T, --timeout <duration>    # time after which the default will be used
 # Options:  -a, --abort                 # let the timeout abort by key press
 # TTY:      <question> <key>
+# Example:  &input#pause shows all possible use cases
 pause() {
     # parameter parsing
     local timeout abort
@@ -245,7 +246,7 @@ ask() {
         ;;
     esac
     local input="" char="" seq invalid itext
-    [ -z "$default" ] && timeout="" || prompt="$prompt [$default]"
+    [ -z "$default" ] && [ -z "$empty" ] || prompt="$prompt [$default]"
     echo -en "${CC_INFO}$prompt:${CC_RESET} " >/dev/tty
     # Read one character at a time silently (-s), without newline (-n 1)
     # shellcheck disable=SC2229
