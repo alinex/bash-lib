@@ -452,17 +452,20 @@ echo -en "$CC_INFO$text$CC_RESET "
 if [ -z "$timeout" ];then
 read -n 1 -s -r _ </dev/tty
 else
+stty -echo
 while ((timeout>0));do
 echo -ne "\r$CC_INFO$text$CC_RESET $(duration_format human "$timeout")     "
 if read -r -s -t 1 -n 1 _ </dev/tty;then
 if [ -n "$abort" ];then
 echo -e "\b\b\b\b$(gettext 'aborted by user')    "
+stty echo
 return 1
 fi
 fi
 ((timeout--))
 ((timeout>0))||echo -ne "\r$CC_INFO$text$CC_RESET 0s      "
 done
+stty echo
 fi
 echo ""
 }
@@ -493,6 +496,7 @@ if [ -n "$default" ];then
 ((default==0))&&prompt="$prompt [$(gettext "No")]"||prompt="$prompt [$(gettext "Yes")]"
 fi
 echo -en "$CC_INFO$prompt?$CC_RESET " >/dev/tty
+stty -echo
 while IFS= read -r $timeout -s -n 1 char </dev/tty||true;do
 if [ -n "$invalid" ];then
 invalid=0
@@ -503,9 +507,11 @@ if [[ $char == "" ]];then
 if [ -n "$default" ];then
 if ((default==1));then
 echo -e "$(gettext "Yes")" >/dev/tty
+stty echo
 return 0
 else
 echo -e "$(gettext "No")" >/dev/tty
+stty echo
 return 1
 fi
 else
@@ -521,9 +527,11 @@ read -r -s -n 1 -t 0.01 seq||break
 done
 elif [[ $char =~ [JjYy] ]];then
 echo -e "$(gettext "Yes")" >/dev/tty
+stty echo
 return 0
 elif [[ $char =~ [Nn] ]];then
 echo -e "$(gettext "No")" >/dev/tty
+stty echo
 return 1
 else
 itext="$(gettext 'invalid character')"
@@ -532,6 +540,7 @@ printf '\b%.0s' $(seq 1 $((${#itext}+3))) >/dev/tty
 invalid=1
 fi
 done
+stty echo
 }
 ask_no(){ _deprecated "use confirm --false <question>";}
 ask_yes(){ _deprecated "use confirm --true <question>";}
@@ -591,6 +600,7 @@ esac
 local input="" char="" seq invalid itext
 [ -z "$default" ]&&[ -z "$empty" ]||prompt="$prompt [$default]"
 echo -en "$CC_INFO$prompt:$CC_RESET " >/dev/tty
+stty -echo
 while IFS= read -r $timeout -s -n 1 char </dev/tty||true;do
 if [ -n "$invalid" ];then
 invalid=0
@@ -668,6 +678,7 @@ invalid=1
 fi
 fi
 done
+stty echo
 debug 4 "Octal result: $(od -An -to1 -v <<<"$input")"
 echo "$input"
 }
@@ -759,6 +770,7 @@ local input="" char="" itext invalid
 local question="$(gettext "Select one of the above options")"
 [ -z "$default" ]&&timeout=""||question="$question [$default]"
 echo -n "$question: " >/dev/tty
+stty -echo
 while read -r $timeout -s -n 1 char </dev/tty||true;do
 if [ -n "$invalid" ];then
 invalid=0
@@ -795,6 +807,7 @@ done
 elif [ -n "$end" ]&&[[ $char =~ [xX] ]];then
 echo "$char" >/dev/tty
 echo "exit"
+stty echo
 return 0
 else
 if [[ ! "$input$char" =~ $pattern ]];then
@@ -812,6 +825,7 @@ break
 fi
 fi
 done
+stty echo
 sed -n "${input}p" <<<"$list"|sed 's/\s*|.*//'
 }
 tasks(){
