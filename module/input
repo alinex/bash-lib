@@ -219,7 +219,7 @@ ask() {
             shift 2
             ;;
         -T | --timeout)
-            timeout="-t $(duration_format seconds "$2")"
+            timeout="$(duration_format seconds "$2")"
             shift 2
             ;;
         -n | --allow-negative)
@@ -270,25 +270,39 @@ ask() {
         ;;
     esac
     local input="" char="" seq invalid itext
+    local countdown="$timeout"
     [ -z "$default" ] && [ -z "$empty" ] || prompt="$prompt [$default]"
     echo -en "${CC_INFO}$prompt:${CC_RESET} " >/dev/tty
     # Read one character at a time silently (-s), without newline (-n 1)
     stty -echo
     # shellcheck disable=SC2229
     # shellcheck disable=SC2086
-    while IFS= read -r $timeout -s -n 1 char </dev/tty || true; do
+    while IFS= read -r -s -t 1 -n 1 char </dev/tty || rc=$?; do
         # remove error
         if [ -n "$invalid" ]; then
             invalid=0
             printf ' %.0s' {1..30} >/dev/tty
             printf '\b%.0s' {1..30} >/dev/tty
         fi
+        # check for countdown if timeout of read reached
+        if ((rc == 142)); then
+            rc=0
+            if [ -n "$timeout" ]; then
+                ((countdown--))
+                if ((countdown > 0)); then
+                    itext="  $(duration_format human "$countdown")     "
+                    echo -ne "$itext" >/dev/tty
+                    printf '\b%.0s' $(seq 1 ${#itext}) >/dev/tty
+                    continue
+                fi
+            fi
+        fi
         # stop maybe on enter (newline)
         if [[ $char == "" ]]; then
             # end if final pattern reached
             if [ -n "$final" ]; then
                 if [[ "$input" =~ $final ]]; then
-                    echo >/dev/tty
+                    echo "          " >/dev/tty
                     break
                 else
                     itext="$(gettext 'incomplete')"
@@ -298,12 +312,12 @@ ask() {
                 fi
             # end if input done
             elif [ -n "$input" ]; then
-                echo >/dev/tty
+                echo "          " >/dev/tty
                 break
             # end if default possible
             elif [ -n "$default" ]; then
                 input="$default"
-                echo >/dev/tty
+                echo "          " >/dev/tty
                 break
             # end if empty allowed
             elif [ -n "$empty" ]; then
