@@ -43,7 +43,9 @@ pause() {
     # processing
     local text length
     text="$(input "$@")"
-    test -n "$text" || text="$(gettext 'Press any key to continue...')"
+    if [ -z "$text" ]; then
+        [ -n "$timeout" ] && [ -z "$abort" ] && text="$(gettext 'Please wait to go on')" || text="$(gettext 'Press any key to continue...')"
+    fi
     echo -en "${CC_INFO}$text${CC_RESET} "
     if [ -z "$timeout" ]; then
         read -n 1 -s -r _ </dev/tty
