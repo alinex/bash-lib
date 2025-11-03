@@ -95,7 +95,7 @@ confirm() {
             shift
             ;;
         -T | --timeout)
-            timeout="-t $(duration_format seconds "$2")"
+            timeout="$(duration_format seconds "$2")"
             shift 2
             ;;
         --)
@@ -108,7 +108,8 @@ confirm() {
     # processing
     local prompt
     prompt="${1:-$(gettext "Should this be done")}"
-    local char="" seq itext invalid
+    local char="" seq itext invalid rc
+    local countdown="$timeout"
     if [ -n "$default" ]; then
         ((default == 0)) && prompt="$prompt [$(gettext "No")]" || prompt="$prompt [$(gettext "Yes")]"
     fi
@@ -117,23 +118,36 @@ confirm() {
     stty -echo
     # shellcheck disable=SC2086
     # shellcheck disable=SC2229
-    while IFS= read -r $timeout -s -n 1 char </dev/tty || true; do
+    while IFS= read -s -t 1 -n 1 char </dev/tty || rc=$?; do
         # remove error
         if [ -n "$invalid" ]; then
             invalid=0
             printf ' %.0s' {1..30} >/dev/tty
             printf '\b%.0s' {1..30} >/dev/tty
         fi
+        # check for countdown if timeout of read reached
+        if ((rc == 142)); then
+            rc=0
+            if [ -n "$timeout" ]; then
+                ((countdown--))
+                if ((countdown > 0)); then
+                    itext="  $(duration_format human "$countdown")     "
+                    echo -ne "$itext" >/dev/tty
+                    printf '\b%.0s' $(seq 1 ${#itext}) >/dev/tty
+                    continue
+                fi
+            fi
+        fi
         # stop maybe on enter (newline)
         if [[ $char == "" ]]; then
             # end if default is set
             if [ -n "$default" ]; then
                 if ((default == 1)); then
-                    echo -e "$(gettext "Yes")" >/dev/tty
+                    echo -e "$(gettext "Yes")     " >/dev/tty
                     stty echo
                     return 0
                 else
-                    echo -e "$(gettext "No")" >/dev/tty
+                    echo -e "$(gettext "No")     " >/dev/tty
                     stty echo
                     return 1
                 fi

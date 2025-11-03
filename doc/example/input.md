@@ -138,7 +138,6 @@ Now you can also ask for numeric formats which will be checked while typing. So 
 ![`ask-number`](images/ask-number.gif)
 
 > As shown any invalid character will not be accepted and a warning is shown.
-> If you type very fast maybe a invalid character my be visible on the input line but neither it would be going into the value.
 
 The possible characters vary if you set `--negative` a `-` in front is also possible but nowhere else.
 
