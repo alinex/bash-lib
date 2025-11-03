@@ -2,7 +2,8 @@
 
 The library contains some powerful input methods which you can use for user interaction.
 
-We only show the part of the script which will do the tasks, see [Base Script](./base_script.md) for the start of the script.
+> We only show the part of the script which will do the tasks, see [Base Script](./base_script.md) for the start of the script.
+> Also I work on a german machine so I get the output in german by default. For the examples here I switch to english using `LANG=en_EN.UTF-8` which is not shown in the examples.
 
 ## Pause
 
@@ -18,7 +19,13 @@ So the simplest call will be:
 ```bash
 $ source $BASHLIB_HOME/full
 $ pause
-Taste drücken um fortzufahren... 
+Press any key to continue...
+
+# with my own title
+$ pause "If you are ready, hit any key..."
+If you are ready, hit any key... 
+
+# and 
 ```
 
 

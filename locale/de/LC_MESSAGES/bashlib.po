@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-31 20:52+0100\n"
+"POT-Creation-Date: 2025-11-03 09:58+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -42,8 +42,8 @@ msgstr "Es konnten keine Exporter von Prometheus ermittelt werden!"
 msgid "Could not scrape the prometheus exporter at $url!"
 msgstr "Der Prometheus Exporter unter $url konnte nicht abgefragt werden!"
 
-#: module/monitoring:151 module/input:40 module/input:99 module/input:206
-#: module/input:426 module/input:589 module/remote:120 module/remote:192
+#: module/monitoring:151 module/input:40 module/input:101 module/input:208
+#: module/input:428 module/input:591 module/remote:120 module/remote:192
 #: module/remote:276 module/mattermost:319 module/mattermost:354
 #: module/validator:36 module/software:91
 msgid "Unrecognized option"
@@ -61,91 +61,95 @@ msgstr "Fehler beim parsen der Grafana Alertliste mit Filter"
 msgid "Severity\\tNetwork\\tInstance\\tSummary\\tStart"
 msgstr "Schweregrad\\tNetz\\tInstanz\\tZusammenfassung\\tStart"
 
-#: module/input:46
+#: module/input:47
+msgid "Please wait to go on"
+msgstr "Warte bis es weiter geht"
+
+#: module/input:47
 msgid "Press any key to continue..."
 msgstr "Taste drücken um fortzufahren..."
 
-#: module/input:55
+#: module/input:57
 msgid "aborted by user"
 msgstr "Abbruch durch Benutzer"
 
-#: module/input:104
+#: module/input:106
 msgid "Should this be done"
 msgstr "Soll dies durchgeführt werden"
 
-#: module/input:107 module/input:128 module/input:150
+#: module/input:109 module/input:130 module/input:152
 msgid "No"
 msgstr "Nein"
 
-#: module/input:107 module/input:125 module/input:146
+#: module/input:109 module/input:127 module/input:148
 msgid "Yes"
 msgstr "Ja"
 
-#: module/input:132 module/input:285 module/input:497
+#: module/input:134 module/input:287 module/input:499
 msgid "value needed"
 msgstr "Wert notwendig"
 
-#: module/input:153 module/input:312 module/input:523
+#: module/input:155 module/input:314 module/input:525
 msgid "invalid character"
 msgstr "ungültiges Zeichen"
 
-#: module/input:214
+#: module/input:216
 msgid "Enter integer number"
 msgstr "Gib eine Nummer ein"
 
-#: module/input:223
+#: module/input:225
 msgid "Enter float number"
 msgstr "Gib eine Fließkommazahl ein"
 
-#: module/input:233
+#: module/input:235
 msgid "Enter password"
 msgstr "Gib das Passwort ein"
 
-#: module/input:237
+#: module/input:239
 msgid "Enter time"
 msgstr "Gib die Zeit an"
 
-#: module/input:242
+#: module/input:244
 msgid "Enter short text"
 msgstr "Gib einen Kurztext ein"
 
-#: module/input:266
+#: module/input:268
 msgid "incomplete"
 msgstr "unvollständig"
 
-#: module/input:324
+#: module/input:326
 msgid "bad"
 msgstr "schlecht"
 
-#: module/input:326
+#: module/input:328
 msgid "weak"
 msgstr "schwach"
 
-#: module/input:328
+#: module/input:330
 msgid "good"
 msgstr "gut"
 
-#: module/input:330
+#: module/input:332
 msgid "strong"
 msgstr "stark"
 
-#: module/input:469
+#: module/input:471
 msgid "Select one of the above options"
 msgstr "Wähle eine der obigen Optionen"
 
-#: module/input:608
+#: module/input:610
 msgid "Could not get task list from command"
 msgstr "Befehlsliste konnte nicht von der Funktion gelesen werden"
 
-#: module/input:615
+#: module/input:617
 msgid "No tasks found to be executed."
 msgstr "Keine Aufgaben zum Ausführen gefunden."
 
-#: module/input:621
+#: module/input:623
 msgid "Exit"
 msgstr "Beenden"
 
-#: module/input:628
+#: module/input:630
 #, sh-format
 msgid "Got error $error running $task"
 msgstr "Beim Aufruf von $task kam es zum Fehler $error"
