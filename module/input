@@ -151,7 +151,7 @@ confirm() {
                     stty echo
                     return 1
                 fi
-            else
+            elif [ -n "$itext" ]; then
                 itext="$(gettext 'value needed')"
                 echo -en "   ${CC_RED}$itext${CC_RESET}" >/dev/tty
                 printf '\b%.0s' $(seq 1 $((${#itext} + 3))) >/dev/tty
@@ -180,6 +180,7 @@ confirm() {
             printf '\b%.0s' $(seq 1 $((${#itext} + 3))) >/dev/tty
             invalid=1
         fi
+        itext=""
     done
     stty echo
 }
@@ -296,6 +297,7 @@ ask() {
                     continue
                 fi
             fi
+            continue
         fi
         # stop maybe on enter (newline)
         if [[ $char == "" ]]; then
@@ -323,7 +325,7 @@ ask() {
             elif [ -n "$empty" ]; then
                 echo >/dev/tty
                 break
-            else
+            elif [ -n "$itext" ]; then
                 itext="$(gettext 'value needed')"
                 echo -en "   ${CC_RED}$itext${CC_RESET}" >/dev/tty
                 printf '\b%.0s' $(seq 1 $((${#itext} + 3))) >/dev/tty
@@ -377,6 +379,7 @@ ask() {
                 invalid=1
             fi
         fi
+        itext=""
     done
     stty echo
     debug 4 "Octal result: $(od -An -to1 -v <<<"$input")"
@@ -460,7 +463,7 @@ choose() {
             shift 2
             ;;
         -T | --timeout)
-            timeout="-t $(duration_format seconds "$2")"
+            timeout="$(duration_format seconds "$2")"
             shift 2
             ;;
         --)
@@ -509,6 +512,7 @@ choose() {
     pattern="^$pattern$"
     # question
     local input="" char="" itext invalid
+    local countdown="$timeout"
     # shellcheck disable=SC2155
     local question="$(gettext "Select one of the above options")"
     [ -z "$default" ] && timeout="" || question="$question [$default]"
@@ -516,27 +520,40 @@ choose() {
     stty -echo
     # shellcheck disable=SC2086
     # shellcheck disable=SC2229
-    while read -r $timeout -s -n 1 char </dev/tty || true; do
+    while read -r -s -t 1 -n 1 char </dev/tty || rc=$?; do
         # remove error
         if [ -n "$invalid" ]; then
             invalid=0
             printf ' %.0s' {1..30} >/dev/tty
             printf '\b%.0s' {1..30} >/dev/tty
         fi
+        # check for countdown if timeout of read reached
+        if ((rc == 142)); then
+            rc=0
+            if [ -n "$timeout" ]; then
+                ((countdown--))
+                if ((countdown > 0)); then
+                    itext="  $(duration_format human "$countdown")     "
+                    echo -ne "$itext" >/dev/tty
+                    printf '\b%.0s' $(seq 1 ${#itext}) >/dev/tty
+                    continue
+                fi
+            fi
+        fi
         # stop maybe on enter (newline)
         if [[ $char == "" ]]; then
             # end if number completed TODO
             if [ -n "$final" ]; then
-                echo >/dev/tty
+                echo "          " >/dev/tty
                 break
             # end if input done
             elif [ -n "$input" ]; then
-                echo >/dev/tty
+                echo "          " >/dev/tty
                 break
             # end if default possible
             elif [ -n "$default" ]; then
                 input="$default"
-                echo >/dev/tty
+                echo "          " >/dev/tty
                 break
             else
                 itext="$(gettext 'value needed')"

@@ -527,7 +527,7 @@ echo -e "$(gettext "No")     " >/dev/tty
 stty echo
 return 1
 fi
-else
+elif [ -n "$itext" ];then
 itext="$(gettext 'value needed')"
 echo -en "   $CC_RED$itext$CC_RESET" >/dev/tty
 printf '\b%.0s' $(seq 1 $((${#itext}+3))) >/dev/tty
@@ -552,6 +552,7 @@ echo -en "   $CC_RED$itext$CC_RESET" >/dev/tty
 printf '\b%.0s' $(seq 1 $((${#itext}+3))) >/dev/tty
 invalid=1
 fi
+itext=""
 done
 stty echo
 }
@@ -569,7 +570,7 @@ shift
 -d|--default)default="$2"
 shift 2
 ;;
--T|--timeout)timeout="-t $(duration_format seconds "$2")"
+-T|--timeout)timeout="$(duration_format seconds "$2")"
 shift 2
 ;;
 -n|--allow-negative)negative=1
@@ -611,19 +612,33 @@ final="^([0-1][0-9]|2[0-3]):[0-5][0-9]$"
 *)prompt="${2:-$(gettext "Enter short text")}"
 esac
 local input="" char="" seq invalid itext
+local countdown="$timeout"
 [ -z "$default" ]&&[ -z "$empty" ]||prompt="$prompt [$default]"
 echo -en "$CC_INFO$prompt:$CC_RESET " >/dev/tty
 stty -echo
-while IFS= read -r $timeout -s -n 1 char </dev/tty||true;do
+while IFS= read -r -s -t 1 -n 1 char </dev/tty||rc=$?;do
 if [ -n "$invalid" ];then
 invalid=0
 printf ' %.0s' {1..30} >/dev/tty
 printf '\b%.0s' {1..30} >/dev/tty
 fi
+if ((rc==142));then
+rc=0
+if [ -n "$timeout" ];then
+((countdown--))
+if ((countdown>0));then
+itext="  $(duration_format human "$countdown")     "
+echo -ne "$itext" >/dev/tty
+printf '\b%.0s' $(seq 1 ${#itext}) >/dev/tty
+continue
+fi
+fi
+continue
+fi
 if [[ $char == "" ]];then
 if [ -n "$final" ];then
 if [[ $input =~ $final ]];then
-echo >/dev/tty
+echo "          " >/dev/tty
 break
 else
 itext="$(gettext 'incomplete')"
@@ -632,16 +647,16 @@ printf '\b%.0s' $(seq 1 $((${#itext}+3))) >/dev/tty
 invalid=1
 fi
 elif [ -n "$input" ];then
-echo >/dev/tty
+echo "          " >/dev/tty
 break
 elif [ -n "$default" ];then
 input="$default"
-echo >/dev/tty
+echo "          " >/dev/tty
 break
 elif [ -n "$empty" ];then
 echo >/dev/tty
 break
-else
+elif [ -n "$itext" ];then
 itext="$(gettext 'value needed')"
 echo -en "   $CC_RED$itext$CC_RESET" >/dev/tty
 printf '\b%.0s' $(seq 1 $((${#itext}+3))) >/dev/tty
@@ -690,6 +705,7 @@ printf '\b%.0s' $(seq 1 $((${#itext}+3))) >/dev/tty
 invalid=1
 fi
 fi
+itext=""
 done
 stty echo
 debug 4 "Octal result: $(od -An -to1 -v <<<"$input")"
@@ -738,7 +754,7 @@ shift 2
 -x|--exit)end="$2"
 shift 2
 ;;
--T|--timeout)timeout="-t $(duration_format seconds "$2")"
+-T|--timeout)timeout="$(duration_format seconds "$2")"
 shift 2
 ;;
 --)shift
@@ -780,26 +796,39 @@ fi
 [ -z "$end" ]||pattern="(x|$pattern)"
 pattern="^$pattern$"
 local input="" char="" itext invalid
+local countdown="$timeout"
 local question="$(gettext "Select one of the above options")"
 [ -z "$default" ]&&timeout=""||question="$question [$default]"
 echo -n "$question: " >/dev/tty
 stty -echo
-while read -r $timeout -s -n 1 char </dev/tty||true;do
+while read -r -s -t 1 -n 1 char </dev/tty||rc=$?;do
 if [ -n "$invalid" ];then
 invalid=0
 printf ' %.0s' {1..30} >/dev/tty
 printf '\b%.0s' {1..30} >/dev/tty
 fi
+if ((rc==142));then
+rc=0
+if [ -n "$timeout" ];then
+((countdown--))
+if ((countdown>0));then
+itext="  $(duration_format human "$countdown")     "
+echo -ne "$itext" >/dev/tty
+printf '\b%.0s' $(seq 1 ${#itext}) >/dev/tty
+continue
+fi
+fi
+fi
 if [[ $char == "" ]];then
 if [ -n "$final" ];then
-echo >/dev/tty
+echo "          " >/dev/tty
 break
 elif [ -n "$input" ];then
-echo >/dev/tty
+echo "          " >/dev/tty
 break
 elif [ -n "$default" ];then
 input="$default"
-echo >/dev/tty
+echo "          " >/dev/tty
 break
 else
 itext="$(gettext 'value needed')"
