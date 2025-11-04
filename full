@@ -452,20 +452,20 @@ echo -en "$CC_INFO$text$CC_RESET "
 if [ -z "$timeout" ];then
 read -n 1 -s -r _ </dev/tty
 else
-stty -echo
+stty -echo </dev/tty
 while ((timeout>0));do
 echo -ne "\r$CC_INFO$text$CC_RESET $(duration_format human "$timeout")     "
 if read -r -s -t 1 -n 1 _ </dev/tty;then
 if [ -n "$abort" ];then
 echo -e "\b\b\b\b$(gettext 'aborted by user')    "
-stty echo
+stty echo </dev/tty
 return 1
 fi
 fi
 ((timeout--))
 ((timeout>0))||echo -ne "\r$CC_INFO$text$CC_RESET 0s      "
 done
-stty echo
+stty echo </dev/tty
 fi
 echo ""
 }
@@ -497,7 +497,7 @@ if [ -n "$default" ];then
 ((default==0))&&prompt="$prompt [$(gettext "No")]"||prompt="$prompt [$(gettext "Yes")]"
 fi
 echo -en "$CC_INFO$prompt?$CC_RESET " >/dev/tty
-stty -echo
+stty -echo </dev/tty
 while IFS= read -s -t 1 -n 1 char </dev/tty||rc=$?;do
 if [ -n "$invalid" ];then
 invalid=0
@@ -510,8 +510,7 @@ if [ -n "$timeout" ];then
 ((countdown--))
 if ((countdown>0));then
 itext="  $(duration_format human "$countdown")     "
-echo -ne "$itext" >/dev/tty
-printf '\b%.0s' $(seq 1 ${#itext}) >/dev/tty
+echo -ne "$itext$(printf '\b%.0s' $(seq 1 ${#itext}))" >/dev/tty
 continue
 fi
 fi
@@ -520,17 +519,16 @@ if [[ $char == "" ]];then
 if [ -n "$default" ];then
 if ((default==1));then
 echo -e "$(gettext "Yes")     " >/dev/tty
-stty echo
+stty echo </dev/tty
 return 0
 else
 echo -e "$(gettext "No")     " >/dev/tty
-stty echo
+stty echo </dev/tty
 return 1
 fi
 elif [ -n "$itext" ];then
 itext="$(gettext 'value needed')"
-echo -en "   $CC_RED$itext$CC_RESET" >/dev/tty
-printf '\b%.0s' $(seq 1 $((${#itext}+3))) >/dev/tty
+echo -en "   $CC_RED$itext$CC_RESET$(printf '\b%.0s' $(seq 1 $((${#itext}+3))))" >/dev/tty
 invalid=1
 fi
 elif [[ $char == $'\033' ]];then
@@ -540,21 +538,20 @@ read -r -s -n 1 -t 0.01 seq||break
 done
 elif [[ $char =~ [JjYy] ]];then
 echo -e "$(gettext "Yes")" >/dev/tty
-stty echo
+stty echo </dev/tty
 return 0
 elif [[ $char =~ [Nn] ]];then
 echo -e "$(gettext "No")" >/dev/tty
-stty echo
+stty echo </dev/tty
 return 1
 else
 itext="$(gettext 'invalid character')"
-echo -en "   $CC_RED$itext$CC_RESET" >/dev/tty
-printf '\b%.0s' $(seq 1 $((${#itext}+3))) >/dev/tty
+echo -en "   $CC_RED$itext$CC_RESET$(printf '\b%.0s' $(seq 1 $((${#itext}+3))))" >/dev/tty
 invalid=1
 fi
 itext=""
 done
-stty echo
+stty echo </dev/tty
 }
 ask_no(){ _deprecated "use confirm --false <question>";}
 ask_yes(){ _deprecated "use confirm --true <question>";}
@@ -611,11 +608,11 @@ final="^([0-1][0-9]|2[0-3]):[0-5][0-9]$"
 ;;
 *)prompt="${2:-$(gettext "Enter short text")}"
 esac
-local input="" char="" seq invalid itext
+local input="" char="" seq invalid itext utext
 local countdown="$timeout"
 [ -z "$default" ]&&[ -z "$empty" ]||prompt="$prompt [$default]"
 echo -en "$CC_INFO$prompt:$CC_RESET " >/dev/tty
-stty -echo
+stty -echo </dev/tty
 while IFS= read -r -s -t 1 -n 1 char </dev/tty||rc=$?;do
 if [ -n "$invalid" ];then
 invalid=0
@@ -628,8 +625,7 @@ if [ -n "$timeout" ];then
 ((countdown--))
 if ((countdown>0));then
 itext="  $(duration_format human "$countdown")     "
-echo -ne "$itext" >/dev/tty
-printf '\b%.0s' $(seq 1 ${#itext}) >/dev/tty
+echo -ne "$itext$(printf '\b%.0s' $(seq 1 ${#itext}))" >/dev/tty
 continue
 fi
 fi
@@ -642,8 +638,7 @@ echo "          " >/dev/tty
 break
 else
 itext="$(gettext 'incomplete')"
-echo -en "   $CC_RED$itext$CC_RESET" >/dev/tty
-printf '\b%.0s' $(seq 1 $((${#itext}+3))) >/dev/tty
+echo -en "   $CC_RED$itext$CC_RESET$(printf '\b%.0s' $(seq 1 $((${#itext}+3))))" >/dev/tty
 invalid=1
 fi
 elif [ -n "$input" ];then
@@ -658,8 +653,7 @@ echo >/dev/tty
 break
 elif [ -n "$itext" ];then
 itext="$(gettext 'value needed')"
-echo -en "   $CC_RED$itext$CC_RESET" >/dev/tty
-printf '\b%.0s' $(seq 1 $((${#itext}+3))) >/dev/tty
+echo -en "   $CC_RED$itext$CC_RESET$(printf '\b%.0s' $(seq 1 $((${#itext}+3))))" >/dev/tty
 invalid=1
 fi
 elif [[ $char == $'\177' ]];then
@@ -680,8 +674,7 @@ char=.
 fi
 if [[ ! "$input$char" =~ $pattern ]];then
 itext="$(gettext 'invalid character')"
-echo -en "   $CC_RED$itext$CC_RESET" >/dev/tty
-printf '\b%.0s' $(seq 1 $((${#itext}+3))) >/dev/tty
+echo -en "   $CC_RED$itext$CC_RESET$(printf '\b%.0s' $(seq 1 $((${#itext}+3))))" >/dev/tty
 invalid=1
 continue
 fi
@@ -699,15 +692,14 @@ itext="$(gettext 'good')"
 else
 itext="$CC_GREEN$(gettext 'strong')$CC_RESET"
 fi
-echo -en "   $itext" >/dev/tty
-itext="$(uncolorize "$itext")"
-printf '\b%.0s' $(seq 1 $((${#itext}+3))) >/dev/tty
+utext="$(uncolorize "$itext")"
+echo -en "   $itext$(printf '\b%.0s' $(seq 1 $((${#utext}+3))))" >/dev/tty
 invalid=1
 fi
 fi
 itext=""
 done
-stty echo
+stty echo </dev/tty
 debug 4 "Octal result: $(od -An -to1 -v <<<"$input")"
 echo "$input"
 }
@@ -800,7 +792,7 @@ local countdown="$timeout"
 local question="$(gettext "Select one of the above options")"
 [ -z "$default" ]&&timeout=""||question="$question [$default]"
 echo -n "$question: " >/dev/tty
-stty -echo
+stty -echo </dev/tty
 while read -r -s -t 1 -n 1 char </dev/tty||rc=$?;do
 if [ -n "$invalid" ];then
 invalid=0
@@ -813,8 +805,7 @@ if [ -n "$timeout" ];then
 ((countdown--))
 if ((countdown>0));then
 itext="  $(duration_format human "$countdown")     "
-echo -ne "$itext" >/dev/tty
-printf '\b%.0s' $(seq 1 ${#itext}) >/dev/tty
+echo -ne "$itext$(printf '\b%.0s' $(seq 1 ${#itext}))" >/dev/tty
 continue
 fi
 fi
@@ -832,8 +823,7 @@ echo "          " >/dev/tty
 break
 else
 itext="$(gettext 'value needed')"
-echo -en "   $CC_RED$itext$CC_RESET" >/dev/tty
-printf '\b%.0s' $(seq 1 $((${#itext}+3))) >/dev/tty
+echo -en "   $CC_RED$itext$CC_RESET$(printf '\b%.0s' $(seq 1 $((${#itext}+3))))" >/dev/tty
 invalid=1
 fi
 elif [[ $char == $'\177' ]];then
@@ -849,13 +839,12 @@ done
 elif [ -n "$end" ]&&[[ $char =~ [xX] ]];then
 echo "$char" >/dev/tty
 echo "exit"
-stty echo
+stty echo </dev/tty
 return 0
 else
 if [[ ! "$input$char" =~ $pattern ]];then
 itext="$(gettext 'invalid character')"
-echo -en "   $CC_RED$itext$CC_RESET" >/dev/tty
-printf '\b%.0s' $(seq 1 $((${#itext}+3))) >/dev/tty
+echo -en "   $CC_RED$itext$CC_RESET$(printf '\b%.0s' $(seq 1 $((${#itext}+3))))" >/dev/tty
 invalid=1
 continue
 fi
@@ -867,7 +856,7 @@ break
 fi
 fi
 done
-stty echo
+stty echo </dev/tty
 sed -n "${input}p" <<<"$list"|sed 's/\s*|.*//'
 }
 tasks(){

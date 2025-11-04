@@ -132,8 +132,7 @@ confirm() {
                 ((countdown--))
                 if ((countdown > 0)); then
                     itext="  $(duration_format human "$countdown")     "
-                    echo -ne "$itext" >/dev/tty
-                    printf '\b%.0s' $(seq 1 ${#itext}) >/dev/tty
+                    echo -ne "$itext$(printf '\b%.0s' $(seq 1 ${#itext}))" >/dev/tty
                     continue
                 fi
             fi
@@ -153,8 +152,7 @@ confirm() {
                 fi
             elif [ -n "$itext" ]; then
                 itext="$(gettext 'value needed')"
-                echo -en "   ${CC_RED}$itext${CC_RESET}" >/dev/tty
-                printf '\b%.0s' $(seq 1 $((${#itext} + 3))) >/dev/tty
+                echo -en "   ${CC_RED}$itext${CC_RESET}$(printf '\b%.0s' $(seq 1 $((${#itext} + 3))))" >/dev/tty
                 invalid=1
             fi
         # ignore escape sequences
@@ -176,8 +174,7 @@ confirm() {
             return 1
         else
             itext="$(gettext 'invalid character')"
-            echo -en "   ${CC_RED}$itext${CC_RESET}" >/dev/tty
-            printf '\b%.0s' $(seq 1 $((${#itext} + 3))) >/dev/tty
+            echo -en "   ${CC_RED}$itext${CC_RESET}$(printf '\b%.0s' $(seq 1 $((${#itext} + 3))))" >/dev/tty
             invalid=1
         fi
         itext=""
@@ -270,7 +267,7 @@ ask() {
         prompt="${2:-$(gettext "Enter short text")}"
         ;;
     esac
-    local input="" char="" seq invalid itext
+    local input="" char="" seq invalid itext utext
     local countdown="$timeout"
     [ -z "$default" ] && [ -z "$empty" ] || prompt="$prompt [$default]"
     echo -en "${CC_INFO}$prompt:${CC_RESET} " >/dev/tty
@@ -292,8 +289,7 @@ ask() {
                 ((countdown--))
                 if ((countdown > 0)); then
                     itext="  $(duration_format human "$countdown")     "
-                    echo -ne "$itext" >/dev/tty
-                    printf '\b%.0s' $(seq 1 ${#itext}) >/dev/tty
+                    echo -ne "$itext$(printf '\b%.0s' $(seq 1 ${#itext}))" >/dev/tty
                     continue
                 fi
             fi
@@ -308,8 +304,7 @@ ask() {
                     break
                 else
                     itext="$(gettext 'incomplete')"
-                    echo -en "   ${CC_RED}$itext${CC_RESET}" >/dev/tty
-                    printf '\b%.0s' $(seq 1 $((${#itext} + 3))) >/dev/tty
+                    echo -en "   ${CC_RED}$itext${CC_RESET}$(printf '\b%.0s' $(seq 1 $((${#itext} + 3))))" >/dev/tty
                     invalid=1
                 fi
             # end if input done
@@ -327,8 +322,7 @@ ask() {
                 break
             elif [ -n "$itext" ]; then
                 itext="$(gettext 'value needed')"
-                echo -en "   ${CC_RED}$itext${CC_RESET}" >/dev/tty
-                printf '\b%.0s' $(seq 1 $((${#itext} + 3))) >/dev/tty
+                echo -en "   ${CC_RED}$itext${CC_RESET}$(printf '\b%.0s' $(seq 1 $((${#itext} + 3))))" >/dev/tty
                 invalid=1
             fi
         # Handle backspace
@@ -354,8 +348,7 @@ ask() {
                 fi
                 if [[ ! "$input$char" =~ $pattern ]]; then
                     itext="$(gettext 'invalid character')"
-                    echo -en "   ${CC_RED}$itext${CC_RESET}" >/dev/tty
-                    printf '\b%.0s' $(seq 1 $((${#itext} + 3))) >/dev/tty
+                    echo -en "   ${CC_RED}$itext${CC_RESET}$(printf '\b%.0s' $(seq 1 $((${#itext} + 3))))" >/dev/tty
                     invalid=1
                     continue
                 fi
@@ -373,9 +366,8 @@ ask() {
                 else
                     itext="${CC_GREEN}$(gettext 'strong')${CC_RESET}"
                 fi
-                echo -en "   $itext" >/dev/tty
-                itext="$(uncolorize "$itext")"
-                printf '\b%.0s' $(seq 1 $((${#itext} + 3))) >/dev/tty
+                utext="$(uncolorize "$itext")"
+                echo -en "   $itext$(printf '\b%.0s' $(seq 1 $((${#utext} + 3))))" >/dev/tty
                 invalid=1
             fi
         fi
@@ -534,8 +526,7 @@ choose() {
                 ((countdown--))
                 if ((countdown > 0)); then
                     itext="  $(duration_format human "$countdown")     "
-                    echo -ne "$itext" >/dev/tty
-                    printf '\b%.0s' $(seq 1 ${#itext}) >/dev/tty
+                    echo -ne "$itext$(printf '\b%.0s' $(seq 1 ${#itext}))" >/dev/tty
                     continue
                 fi
             fi
@@ -557,8 +548,7 @@ choose() {
                 break
             else
                 itext="$(gettext 'value needed')"
-                echo -en "   ${CC_RED}$itext${CC_RESET}" >/dev/tty
-                printf '\b%.0s' $(seq 1 $((${#itext} + 3))) >/dev/tty
+                echo -en "   ${CC_RED}$itext${CC_RESET}$(printf '\b%.0s' $(seq 1 $((${#itext} + 3))))" >/dev/tty
                 invalid=1
             fi
         # Handle backspace
@@ -584,8 +574,7 @@ choose() {
         else
             if [[ ! "$input$char" =~ $pattern ]]; then
                 itext="$(gettext 'invalid character')"
-                echo -en "   ${CC_RED}$itext${CC_RESET}" >/dev/tty
-                printf '\b%.0s' $(seq 1 $((${#itext} + 3))) >/dev/tty
+                echo -en "   ${CC_RED}$itext${CC_RESET}$(printf '\b%.0s' $(seq 1 $((${#itext} + 3))))" >/dev/tty
                 invalid=1
                 continue
             fi
