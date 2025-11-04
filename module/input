@@ -481,6 +481,7 @@ choose() {
         fi
         printf "  %0${length}d) $(trim "${display:-$key}")\n" "$num" >/dev/tty
     done <<<"$list"
+    [ -z "$default" ] || is_integer "$default" || die "Default option $default not recognized."
     [ -z "$end" ] || printf "  %${length}s) ${end}\n" x >/dev/tty
     # Pattern example parts:
     # 8      [1-8]

@@ -628,8 +628,9 @@ itext="  $(duration_format human "$countdown")     "
 echo -ne "$itext$(printf '\b%.0s' $(seq 1 ${#itext}))" >/dev/tty
 continue
 fi
-fi
+else
 continue
+fi
 fi
 if [[ $char == "" ]];then
 if [ -n "$final" ];then
@@ -806,6 +807,7 @@ if [ -n "$timeout" ];then
 if ((countdown>0));then
 itext="  $(duration_format human "$countdown")     "
 echo -ne "$itext$(printf '\b%.0s' $(seq 1 ${#itext}))" >/dev/tty
+continue
 fi
 else
 continue

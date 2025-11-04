@@ -42,7 +42,7 @@ while true; do
         ;;
     -h|--help)  
         help "$TITLE" "$USAGE" "$OPTIONS" "$DESCRIPTION"
-        shift
+        exit
         ;;
     --) 
         shift

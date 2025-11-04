@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-11-04 09:09+0100\n"
+"POT-Creation-Date: 2025-11-04 09:10+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -43,7 +43,7 @@ msgid "Could not scrape the prometheus exporter at $url!"
 msgstr "Der Prometheus Exporter unter $url konnte nicht abgefragt werden!"
 
 #: module/monitoring:151 module/input:41 module/input:105 module/input:231
-#: module/input:465 module/input:643 module/remote:120 module/remote:192
+#: module/input:466 module/input:645 module/remote:120 module/remote:192
 #: module/remote:276 module/mattermost:319 module/mattermost:354
 #: module/validator:36 module/software:91
 msgid "Unrecognized option"
@@ -85,11 +85,11 @@ msgstr "Nein"
 msgid "Yes"
 msgstr "Ja"
 
-#: module/input:154 module/input:324 module/input:551
+#: module/input:154 module/input:325 module/input:553
 msgid "value needed"
 msgstr "Wert notwendig"
 
-#: module/input:176 module/input:350 module/input:577
+#: module/input:176 module/input:351 module/input:579
 msgid "invalid character"
 msgstr "ungültiges Zeichen"
 
@@ -113,43 +113,43 @@ msgstr "Gib die Zeit an"
 msgid "Enter short text"
 msgstr "Gib einen Kurztext ein"
 
-#: module/input:306
+#: module/input:307
 msgid "incomplete"
 msgstr "unvollständig"
 
-#: module/input:361
+#: module/input:362
 msgid "bad"
 msgstr "schlecht"
 
-#: module/input:363
+#: module/input:364
 msgid "weak"
 msgstr "schwach"
 
-#: module/input:365
+#: module/input:366
 msgid "good"
 msgstr "gut"
 
-#: module/input:367
+#: module/input:368
 msgid "strong"
 msgstr "stark"
 
-#: module/input:509
+#: module/input:510
 msgid "Select one of the above options"
 msgstr "Wähle eine der obigen Optionen"
 
-#: module/input:662
+#: module/input:664
 msgid "Could not get task list from command"
 msgstr "Befehlsliste konnte nicht von der Funktion gelesen werden"
 
-#: module/input:669
+#: module/input:671
 msgid "No tasks found to be executed."
 msgstr "Keine Aufgaben zum Ausführen gefunden."
 
-#: module/input:675
+#: module/input:677
 msgid "Exit"
 msgstr "Beenden"
 
-#: module/input:682
+#: module/input:684
 #, sh-format
 msgid "Got error $error running $task"
 msgstr "Beim Aufruf von $task kam es zum Fehler $error"
