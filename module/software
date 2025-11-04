@@ -15,32 +15,47 @@ install() {
     # collect what to be needed
     local apt=""
     local snap=""
+    local apk=""
     local reload=""
     # check what is needed
     for cmd in "$@"; do
         if [[ ! -v _software_install["$cmd"] ]]; then
             PATH="$PATH:/usr/local/sbin:/usr/sbin:/sbin" which "$cmd" >/dev/null ||
-                case $cmd in
-                yq) snap="$snap $cmd" ;;
-                mlr) apt="$apt miller" ;;
-                *) apt="$apt $cmd" ;;
-                esac
+                # debian
+                if command -v apt-get >/dev/null; then
+                    case $cmd in
+                    yq) snap+=" $cmd" ;;
+                    mlr) apt+=" miller" ;;
+                    *) apt+=" $cmd" ;;
+                    esac
+                # alpine
+                else
+                    case $cmd in
+                    mlr) apk+=" miller" ;;
+                    *) apk+=" $cmd" ;;
+                    esac
+                fi
             _software_install["$cmd"]=1
         fi
     done
     if test -n "$snap" && ! command -v snapd >/dev/null; then
         apt="$apt snapd"
         snap="$snap snapd"
-        reload=1
+        reload+=" ~/.bashrc"
     fi
     # install
     # shellcheck disable=SC2086
     test -z "$apt" || sudo apt-get install -y $apt
     # shellcheck disable=SC2086
     test -z "$snap" || sudo apt snap install $snap
+    # shellcheck disable=SC2086
+    test -z "$apk" || sudo apk update && sudo apk add $apk
     # reload possibly changed config
     # shellcheck disable=SC1090
-    test -z "$reload" || source ~/.bashrc
+    for file in $reload; do
+        # shellcheck disable=SC2086
+        source $file
+    done
 }
 
 ######################################################################################
