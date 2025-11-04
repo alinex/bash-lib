@@ -292,8 +292,9 @@ ask() {
                     echo -ne "$itext$(printf '\b%.0s' $(seq 1 ${#itext}))" >/dev/tty
                     continue
                 fi
+            else
+                continue
             fi
-            continue
         fi
         # stop maybe on enter (newline)
         if [[ $char == "" ]]; then
@@ -529,6 +530,8 @@ choose() {
                     echo -ne "$itext$(printf '\b%.0s' $(seq 1 ${#itext}))" >/dev/tty
                     continue
                 fi
+            else
+                continue
             fi
         fi
         # stop maybe on enter (newline)
