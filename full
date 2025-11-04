@@ -770,6 +770,7 @@ if [ -n "$default" ];then
 fi
 printf "  %0${length}d) $(trim "${display:-$key}")\n" "$num" >/dev/tty
 done <<<"$list"
+[ -z "$default" ]||is_integer "$default"||die "Default option $default not recognized."
 [ -z "$end" ]||printf "  %${length}s) $end\n" x >/dev/tty
 if ((length==1));then
 pattern="[1-$max]"
@@ -1956,6 +1957,12 @@ remote_install(){
 cat "$BASHLIB_HOME"/base
 cat "$BASHLIB_HOME"/module/software
 echo install "$@")|shfmt -mn|remote
+}
+remote_system_info(){
+(echo "DEBUG=${DEBUG:-}"
+cat "$BASHLIB_HOME"/base
+cat "$BASHLIB_HOME"/module/os
+echo system_info)|shfmt -mn|remote
 }
 remote_df(){
 local opt=""

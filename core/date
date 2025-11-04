@@ -4,9 +4,6 @@ source /dev/null
 
 # Some helpers to work easier with dates.
 
-# load other modules if not already done
-declare -F "is_integer" >/dev/null || source "$BASHLIB_HOME"/module/validator
-
 ######################################################################################
 ### Timestamp
 ######################################################################################
@@ -28,9 +25,9 @@ now() {
 date_diff() {
     local start end
     num_parameters "$@" --min 2 --max 2 --die "Need exactly two parameters: diff_sec <start> <end>"
-    is_integer "$1" && start=${1-} || start=$(date -d "$1" +%s) ||
+    [[ "$1" =~ ^-?[0-9]+$ ]] && start=${1-} || start=$(date -d "$1" +%s) ||
         die "Date format '$1' not parsable!"
-    is_integer "$2" && end=${2-} || end=$(date -d "$2" +%s) ||
+    [[ "$2" =~ ^-?[0-9]+$ ]] && end=${2-} || end=$(date -d "$2" +%s) ||
         die "Date format '$2' not parsable!"
     echo $((end - start))
 }
@@ -66,7 +63,7 @@ date_format() {
     *) format="$1" ;;
     esac
     [ -n "$2" ] && value="${2-}" || value=$(now)
-    is_integer "$value" && eval "date -d @$value $format" || eval "date -d \"$value\" $format" ||
+    [[ "$value" =~ ^-?[0-9]+$ ]] && eval "date -d @$value $format" || eval "date -d \"$value\" $format" ||
         die "Date format '$value' not parsable!"
 }
 
@@ -85,7 +82,7 @@ date_format() {
 # Output:   <duration> in selected format
 duration_format() {
     local value
-    is_integer "$2" && value="$2" || value="$(_parse_duration "$2")"
+    [[ "$2" =~ ^-?[0-9]+$ ]] && value="$2" || value="$(_parse_duration "$2")"
     case $1 in
     seconds) echo "$value" ;;
     minutes) echo $((value / 60)) ;;

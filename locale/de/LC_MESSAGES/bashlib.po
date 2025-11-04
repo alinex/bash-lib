@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-11-04 09:10+0100\n"
+"POT-Creation-Date: 2025-11-04 10:45+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -43,8 +43,8 @@ msgid "Could not scrape the prometheus exporter at $url!"
 msgstr "Der Prometheus Exporter unter $url konnte nicht abgefragt werden!"
 
 #: module/monitoring:151 module/input:41 module/input:105 module/input:231
-#: module/input:466 module/input:645 module/remote:120 module/remote:192
-#: module/remote:276 module/mattermost:319 module/mattermost:354
+#: module/input:466 module/input:646 module/remote:120 module/remote:201
+#: module/remote:285 module/mattermost:319 module/mattermost:354
 #: module/validator:36 module/software:91
 msgid "Unrecognized option"
 msgstr "Unbekannte Option"
@@ -85,11 +85,11 @@ msgstr "Nein"
 msgid "Yes"
 msgstr "Ja"
 
-#: module/input:154 module/input:325 module/input:553
+#: module/input:154 module/input:325 module/input:554
 msgid "value needed"
 msgstr "Wert notwendig"
 
-#: module/input:176 module/input:351 module/input:579
+#: module/input:176 module/input:351 module/input:580
 msgid "invalid character"
 msgstr "ungültiges Zeichen"
 
@@ -133,23 +133,23 @@ msgstr "gut"
 msgid "strong"
 msgstr "stark"
 
-#: module/input:510
+#: module/input:511
 msgid "Select one of the above options"
 msgstr "Wähle eine der obigen Optionen"
 
-#: module/input:664
+#: module/input:665
 msgid "Could not get task list from command"
 msgstr "Befehlsliste konnte nicht von der Funktion gelesen werden"
 
-#: module/input:671
+#: module/input:672
 msgid "No tasks found to be executed."
 msgstr "Keine Aufgaben zum Ausführen gefunden."
 
-#: module/input:677
+#: module/input:678
 msgid "Exit"
 msgstr "Beenden"
 
-#: module/input:684
+#: module/input:685
 #, sh-format
 msgid "Got error $error running $task"
 msgstr "Beim Aufruf von $task kam es zum Fehler $error"
@@ -192,12 +192,12 @@ msgstr "Start: Schritt $name um $date"
 msgid "No file to execute remotely under $file"
 msgstr "Keine Datei unter $file für Remote ausführen"
 
-#: module/remote:284
+#: module/remote:293
 #, sh-format
 msgid "Wait until the reboot is complete ($seconds seconds)"
 msgstr "Warten bis der Reboot fertig ist ($seconds Sekunden)"
 
-#: module/remote:415
+#: module/remote:424
 #, sh-format
 msgid ""
 "To update $PLUSSERVER_PORTAL/services/nameservers -> download CSV (manually)."
