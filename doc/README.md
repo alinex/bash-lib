@@ -348,6 +348,7 @@ Module with remote calling/execution helpers.
 | [`upload`](function/upload.md) | Upload file |
 | [`download`](function/download.md) | Download file |
 | [`remote_install`](function/remote_install.md) | Remote install package like @install |
+| [`remote_system_info`](function/remote_system_info.md) | Display the system description (from remote) |
 | [`remote_df`](function/remote_df.md) | Remote df with visual display |
 | [`remote_lvm`](function/remote_lvm.md) | Remote check if LVM is used |
 | [`boot_wait`](function/boot_wait.md) | Wait till reboot is finished |

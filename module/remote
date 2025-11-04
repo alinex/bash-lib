@@ -170,6 +170,9 @@ remote_install() {
     ) | shfmt -mn | remote #> remote.sh
 }
 
+# Display the system description (from remote)
+# Usage:    system_info
+# Stdout:   <text> system info lines
 remote_system_info() {
     (
         echo "DEBUG=${DEBUG:-}"
