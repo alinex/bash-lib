@@ -51,20 +51,20 @@ pause() {
     if [ -z "$timeout" ]; then
         read -n 1 -s -r _ </dev/tty
     else
-        stty -echo
+        stty -echo </dev/tty
         while ((timeout > 0)); do
             echo -ne "\r${CC_INFO}$text${CC_RESET} $(duration_format human "$timeout")     "
             if read -r -s -t 1 -n 1 _ </dev/tty; then
                 if [ -n "$abort" ]; then
                     echo -e "\b\b\b\b$(gettext 'aborted by user')    "
-                    stty echo
+                    stty echo </dev/tty
                     return 1
                 fi
             fi
             ((timeout--))
             ((timeout > 0)) || echo -ne "\r${CC_INFO}$text${CC_RESET} 0s      "
         done
-        stty echo
+        stty echo </dev/tty
     fi
     echo ""
 }
@@ -115,7 +115,7 @@ confirm() {
     fi
     echo -en "${CC_INFO}$prompt?${CC_RESET} " >/dev/tty
     # read input
-    stty -echo
+    stty -echo </dev/tty
     # shellcheck disable=SC2086
     # shellcheck disable=SC2229
     while IFS= read -s -t 1 -n 1 char </dev/tty || rc=$?; do
@@ -144,11 +144,11 @@ confirm() {
             if [ -n "$default" ]; then
                 if ((default == 1)); then
                     echo -e "$(gettext "Yes")     " >/dev/tty
-                    stty echo
+                    stty echo </dev/tty
                     return 0
                 else
                     echo -e "$(gettext "No")     " >/dev/tty
-                    stty echo
+                    stty echo </dev/tty
                     return 1
                 fi
             elif [ -n "$itext" ]; then
@@ -167,12 +167,12 @@ confirm() {
         # yes
         elif [[ $char =~ [JjYy] ]]; then
             echo -e "$(gettext "Yes")" >/dev/tty
-            stty echo
+            stty echo </dev/tty
             return 0
         # no
         elif [[ $char =~ [Nn] ]]; then
             echo -e "$(gettext "No")" >/dev/tty
-            stty echo
+            stty echo </dev/tty
             return 1
         else
             itext="$(gettext 'invalid character')"
@@ -182,7 +182,7 @@ confirm() {
         fi
         itext=""
     done
-    stty echo
+    stty echo </dev/tty
 }
 
 ask_no() { _deprecated "use confirm --false <question>"; }
@@ -275,7 +275,7 @@ ask() {
     [ -z "$default" ] && [ -z "$empty" ] || prompt="$prompt [$default]"
     echo -en "${CC_INFO}$prompt:${CC_RESET} " >/dev/tty
     # Read one character at a time silently (-s), without newline (-n 1)
-    stty -echo
+    stty -echo </dev/tty
     # shellcheck disable=SC2229
     # shellcheck disable=SC2086
     while IFS= read -r -s -t 1 -n 1 char </dev/tty || rc=$?; do
@@ -381,7 +381,7 @@ ask() {
         fi
         itext=""
     done
-    stty echo
+    stty echo </dev/tty
     debug 4 "Octal result: $(od -An -to1 -v <<<"$input")"
     # return input
     echo "$input"
@@ -517,7 +517,7 @@ choose() {
     local question="$(gettext "Select one of the above options")"
     [ -z "$default" ] && timeout="" || question="$question [$default]"
     echo -n "$question: " >/dev/tty
-    stty -echo
+    stty -echo </dev/tty
     # shellcheck disable=SC2086
     # shellcheck disable=SC2229
     while read -r -s -t 1 -n 1 char </dev/tty || rc=$?; do
@@ -578,7 +578,7 @@ choose() {
         elif [ -n "$end" ] && [[ "$char" =~ [xX] ]]; then
             echo "$char" >/dev/tty
             echo "exit"
-            stty echo
+            stty echo </dev/tty
             return 0
         # next character
         else
@@ -598,7 +598,7 @@ choose() {
             fi
         fi
     done
-    stty echo
+    stty echo </dev/tty
     sed -n "${input}p" <<<"$list" | sed 's/\s*|.*//'
 }
 
