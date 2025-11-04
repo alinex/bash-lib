@@ -111,7 +111,7 @@ detect_os() {
 }
 
 # Internal IP
-IP_INTERN=$(hostname -I | cut -d' ' -f1)
+IP_INTERN=$(ip route get 1 | awk '{print $7; exit}')
 # External IP (set in detect_extern_ip)
 IP_EXTERN=
 # Country (set in detect_extern_ip)
