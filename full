@@ -77,8 +77,8 @@ echo $((end-start))
 date_format(){
 local value format
 case $1 in
-iso)format="--iso-8601=seconds";;
-iso-date)format="--iso-8601";;
+iso)format="-Iseconds";;
+iso-date)format="-I";;
 zulu)format="-u +%Y-%m-%dT%H:%M:%SZ";;
 sql)format='+"%Y-%m-%d %H:%M:%S"';;
 unix)format="+%s";;
@@ -540,7 +540,7 @@ if [ -n "$default" ];then
 fi
 echo -en "$CC_INFO$prompt?$CC_RESET " >/dev/tty
 stty -echo </dev/tty
-while IFS= read -s -t 1 -n 1 char </dev/tty||rc=$?;do
+while IFS= read -r -s -t 1 -n 1 char </dev/tty||rc=$?;do
 if [ -n "$invalid" ];then
 invalid=0
 printf ' %.0s' {1..30} >/dev/tty
@@ -652,7 +652,7 @@ final="^([0-1][0-9]|2[0-3]):[0-5][0-9]$"
 ;;
 *)prompt="${2:-$(gettext "Enter short text")}"
 esac
-local input="" char="" seq invalid itext utext
+local input="" char="" seq invalid itext utext q
 local countdown="$timeout"
 [ -z "$default" ]&&[ -z "$empty" ]||prompt="$prompt [$default]"
 echo -en "$CC_INFO$prompt:$CC_RESET " >/dev/tty
@@ -727,7 +727,7 @@ fi
 input+="$char"
 [ -n "$mask" ]&&echo -n "*" >/dev/tty||echo -n "$char" >/dev/tty
 if [ "$format" = "password" ];then
-local q=$(_password_strength "$input")
+q=$(_password_strength "$input")
 if ((q<25));then
 itext="$CC_RED$(gettext 'bad')$CC_RESET"
 elif ((q<50));then
@@ -1471,7 +1471,7 @@ grep -q '^flags.* hypervisor' /proc/cpuinfo&&IS_VIRTUAL=1||IS_VIRTUAL=""
 CPU_NUM=$(grep -c ^processor /proc/cpuinfo)
 CPU_MODEL="$(grep 'model name' /proc/cpuinfo|head -n 1|sed 's/^.*: //')"
 }
-IP_INTERN=$(hostname -I|cut -d' ' -f1)
+IP_INTERN=$(ip route get 1|awk '{print $7; exit}')
 IP_EXTERN=
 IP_COUNTRY=
 IP_COUNTRY_CODE=
@@ -2115,47 +2115,6 @@ jq . "$file" >&2 2>/dev/null||cat "$file" >&2
 rm "$file"
 return 1
 fi
-}
-mongosh(){
-num_parameters --min 2 --max 2 --die "Mongosh needs two parameters: Usage mongosh <database> <command>" "$@"
-local cluster
-cluster="$(sed 's/^[^.]*\.//' <<<"$server")"
-command mongosh "mongodb://${MONGO_ADMIN_USERPASS["$cluster"]}@$server:27017/$1" --eval "$2"
-}
-postgres(){
-echo "TODO"
-}
-dns_list(){
-echo $'NAME\tTYPE\tCONTENT\tTTL'
-powerdns "$1"|tail -n +2||true
-plusserver_dns "$1"|tail -n +2||true
-}
-powerdns(){
-if [ -z "$POWERDNS_API" ]||[ -z "$POWERDNS_TOKEN" ];then
-debug "Disabled because POWERDNS_API and POWERDNS_TOKEN are not both set"
-return 0
-fi
-echo $'NAME\tTYPE\tCONTENT\tTTL'
-curl -s -H "X-API-Key:$POWERDNS_TOKEN" "$POWERDNS_API/servers/localhost/search-data?q=*&max=10000"|jq -r '.[] | select(.object_type == "record" and .disabled == false) | [(.name | sub("\\.$"; "")), .type, (.content | sub("\\.$"; "")), .ttl] | @tsv'|grep -E "$1"
-}
-plusserver_dns(){
-if [ -z "$PLUSSERVER_PORTAL" ];then
-debug "Disabled because PLUSSERVER_PORTAL is not set"
-return 0
-fi
-local list time
-list="$(ls -lt ~/Downloads/csv_list*.csv|head -1|cut -d' ' -f 9-)"
-time="$(ls -lt ~/Downloads/csv_list*.csv|head -1|cut -d' ' -f 6-8)"
-warn "$(eval_gettext 'To update $PLUSSERVER_PORTAL/services/nameservers -> download CSV (manually).')" >&2
-test -n "$list"||die "Keine lokale DNS Liste gefunden, bitte herunterladen."
-echo "Benutze $list vom $time." >&2
-echo "" >&2
-mlr --icsv --ifs ';' --otsv \
-put '$name = $record_name . "." . $zone; $record_data = substr($record_data,0,80)' then \
-cut -o -f name,record_type,record_data,record_ttl then \
-sort -f name then \
-rename name,NAME,record_type,TYPE,record_data,CONTENT,record_ttl,TTL \
-"$list"|awk 'NR == 1 || /'"$1"'/'
 }
 declare -A _software_install
 install(){

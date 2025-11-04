@@ -26,14 +26,14 @@ if [ "$1" = "ci" ]; then
       name=${file%.bats} # remove the .bats extension
       name=${name//\//-} # replace all / with -
       echo "Run $name tests..."
-      bats --formatter junit $file >tests/results/$name.xml </dev/null
+      bats --formatter junit "$file" >tests/results/"$name".xml </dev/null
     done
 # local test run
 else
   [ -z "$2" ] || echo "Running multiple OS using local docker (that may take some time)"
-  rm -rf /tmp/bashlib-docker 2>/dev/null
+  sudo rm -rf /tmp/bashlib-docker 2>/dev/null
   mkdir /tmp/bashlib-docker
-  cp -rL * /tmp/bashlib-docker
+  cp -rL ./* /tmp/bashlib-docker
   # Run each distribution
   for name in debian ubuntu alpine; do
     [ "$1" = "$name" ] || [ -z "$1" ] || continue
@@ -48,9 +48,9 @@ else
       [ "$2" = "$version" ] || [ -z "$2" ] || continue
       echo -en "${CC_CYAN_BOLD}${name^} $version${CC_RESET} "
       echo -n "($(docker pull -q "$name:$version")) "
-      docker run --rm -it -v "/tmp/bashlib-docker:/mnt" -w /mnt "$name:$version" bash -c \
+      docker run --rm -it -v "/tmp/bashlib-docker:/mnt" -w /mnt "$name:$version" sh -c \
         "echo -n 'prepare'
-        source tests/setup/docker-$name
+        . tests/setup/docker-$name
         echo -n '; run '
         bats --tap core module | grep -v ^ok"
     done

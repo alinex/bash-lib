@@ -47,28 +47,6 @@ The BashLib contains some core functionality and optional modules which are list
 
 ## Config
 
-### Environment Module
-
-The configuration module contains a lot of general configuration settings for the bash-lib modules itself. Most of them are specific to the individual environment so they need to be set in the local `overwrite` config.
-
-| Variable/Function | Description |
-| --- | --- |
-| ``$MOUNT_COLOR_LIMIT`` | Array: Color limits per mount (regex critical error warn ok) used in [`remote_df`](functionremote_df.md) |
-| ``$MATTERMOST_API`` | Mattermost API URL used together with `$MATTERMOST_TOKEN` and silently disables mattermost functions if not set |
-| ``$MATTERMOST_TOKEN`` | Mattermost API Token used in [`mattermost`](functionmattermost.md) [`mattermost_repost`](functionmattermost_repost.md) [`mattermost_reaction`](functionmattermost_reaction.md) |
-| ``$MATTERMOST_CHANNEL_PATTERN`` | Array: Channel per pattern (team regex channel) used in [`mattermost`](functionmattermost.md) ("-"" = no selection for team) |
-| ``$MATTERMOST_LINK_PATTERN`` | Array: Link channel per pattern (team regex channel) used in [`mattermost`](functionmattermost.md) ("-"" = no selection for team) |
-| ``$GRAFANA_API`` | Grafana API URL used together with `$GRAFANA_TOKEN` and silently disables grafana functions if not set |
-| ``$GRAFANA_TOKEN`` | Grafana API Token used in [`alerts`](functionalerts.md) |
-| ``$PROMETHEUS_API`` | Prometheus API URLs as space separated list |
-| ``$PROMETHEUS`` | Prometheus host names as space separated list |
-| ``$ATLASSIAN_USER`` | Atlassian user for API access in confluence and jira |
-| ``$ATLASSIAN_TOKEN`` | Atlassian password for API access in confluence and jira |
-| ``$CONFLUENCE_API`` | Atlassian confluence API URL used together with `$ATLASSIAN_USER` and `$ATLASSIAN_TOKEN` and silently disables [`confluence`](functionconfluence.md) functions if not set |
-| ``$JIRA_API`` | Atlassian jira API URL used together with `$ATLASSIAN_USER` and `$ATLASSIAN_TOKEN` and silently disables [`jira`](functionjira.md) functions if not set |
-| ``$MONGO_ADMIN_USERPASS`` | Hash: Mongo Admin User Logins <host> = <username>:<password> |
-| ``$POWERDNS_API`` | PowerDNS API URL used together with `$POWERDNS_TOKEN` and silently disables powerdns function if not set |
-
 ## Core
 
 ### Arguments Module
@@ -372,11 +350,6 @@ Module with remote calling/execution helpers.
 | [`remote_lvm`](function/remote_lvm.md) | Remote check if LVM is used |
 | [`boot_wait`](function/boot_wait.md) | Wait till reboot is finished |
 | [`curl`](function/curl.md) | Curl with added error handling |
-| [`mongosh`](function/mongosh.md) | Run command on Mongo DB |
-| [`postgres`](function/postgres.md) | Run command on postgres |
-| [`dns_list`](function/dns_list.md) | Query all managed DNS servers to get a complete list of domain names |
-| [`powerdns`](function/powerdns.md) | Query PowerDNS to get a list of managed domain names |
-| [`plusserver_dns`](function/plusserver_dns.md) | Query Plusserver DNS to get a list of managed domain names |
 
 ### Software Module
 

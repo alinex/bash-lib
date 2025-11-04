@@ -1,9 +1,10 @@
 #!/usr/bin/env sh
 
-export BASHLIB_HOME="${pwd}"
+# shellcheck disable=SC2155
+export BASHLIB_HOME="$(pwd)"
 
 # install needed packages
-apk add --no-cache bash tzdata musl-locales musl-locales-lang git curl gettext >/dev/null
+apk add --no-cache bash tzdata musl-locales musl-locales-lang git curl coreutils gettext expect jq >/dev/null
 
 # set timezone (for date tests)
 ln -fs /usr/share/zoneinfo/Europe/Berlin /etc/localtime

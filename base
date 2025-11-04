@@ -77,8 +77,8 @@ echo $((end-start))
 date_format(){
 local value format
 case $1 in
-iso)format="--iso-8601=seconds";;
-iso-date)format="--iso-8601";;
+iso)format="-Iseconds";;
+iso-date)format="-I";;
 zulu)format="-u +%Y-%m-%dT%H:%M:%SZ";;
 sql)format='+"%Y-%m-%d %H:%M:%S"';;
 unix)format="+%s";;
