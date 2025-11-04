@@ -23,5 +23,4 @@ setup() {
     fi
     run confluence 677347344
     assert_success
-    echo "$output" # use --show-output-of-passing-tests to see it
 }

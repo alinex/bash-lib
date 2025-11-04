@@ -54,7 +54,6 @@ setup() {
 @test "system_info: should get timestamp" {
     run system_info
     assert_success
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 
 ######################################################################################
@@ -65,7 +64,6 @@ setup() {
 @test "has_tty: should get timestamp" {
     run has_tty
     assert_success
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 
 ######################################################################################
@@ -76,5 +74,4 @@ setup() {
 @test "is_bash: should get timestamp" {
     run is_bash
     assert_success
-    echo "$output" # use --show-output-of-passing-tests to see it
 }

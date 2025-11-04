@@ -15,7 +15,6 @@ setup() {
     DEBUG="" run _deprecated "no longer used"
     assert_output  --regexp "DEPRECATED: bats_merge_stdout_and_stderr at run in .* no longer used"
     assert_failure
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 
 ######################################################################################
@@ -27,5 +26,4 @@ setup() {
     DEBUG="" run _stacktrace
     assert_output ""
     assert_success
-    echo "$output" # use --show-output-of-passing-tests to see it
 }

@@ -14,7 +14,6 @@ setup() {
 @test "sudo_allow: check call" {
     run sudo_allow date
     assert_success
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 
 ######################################################################################
@@ -25,7 +24,6 @@ setup() {
 @test "sudo: call date" {
     run sudo date
     assert_success
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 
 ######################################################################################
@@ -37,14 +35,12 @@ setup() {
     run repeat 1 echo -n "1"
     assert_success
     assert_output "1"
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 # bats test_tags=repeat
 @test "repeat: call multiple times" {
     run repeat 4 echo -n "1"
     assert_success
     assert_output "1111"
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 
 ######################################################################################
@@ -58,7 +54,6 @@ setup() {
     run retry 1 t
     assert_failure
     assert_output "1"
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 # bats test_tags=retry
 @test "retry: retry 3 times" {
@@ -66,7 +61,6 @@ setup() {
     run retry 3 t
     assert_failure
     assert_output "111"
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 
 ######################################################################################
@@ -79,7 +73,6 @@ setup() {
     assert [ -e "/tmp/$(basename "$0")_lockfile" ]
     unlock
     assert_success
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 
 ######################################################################################
@@ -92,7 +85,6 @@ setup() {
     assert [ -e "/tmp/$(basename "$0")_lockfile" ]
     unlock
     assert_success
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 
 ######################################################################################
@@ -104,6 +96,5 @@ setup() {
     run env_store
     assert [ -e "/dev/shm/$(basename "$0").env" ]
     assert_success
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 

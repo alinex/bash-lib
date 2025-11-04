@@ -27,7 +27,6 @@ setup() {
     run _mattermost_user
     assert_output "$user_id"
     assert_success
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 
 ######################################################################################
@@ -39,14 +38,12 @@ setup() {
     run _mattermost_team divibib
     assert_output "$team_divibib"
     assert_success
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 # bats test_tags=_mattermost_team
 @test "_mattermost_team: should get id for ekz" {
     run _mattermost_team ekz
     assert_output "$team_ekz"
     assert_success
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 
 ######################################################################################
@@ -58,13 +55,11 @@ setup() {
     run _mattermost_channel "$team_divibib" Spielwiese
     assert_output "$channel_spielwiese"
     assert_success
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 # bats test_tags=_mattermost_channel
 @test "_mattermost_channel: fail for wrong channel name" {
     run _mattermost_channel "$team_divibib" Quatsch
     assert_failure
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 
 ######################################################################################
@@ -76,7 +71,6 @@ setup() {
     run _mattermost_channel_bypost "$post_id"
     assert_output "$channel_spielwiese"
     assert_success
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 
 ######################################################################################
@@ -88,7 +82,6 @@ setup() {
     run _mattermost_post "$channel_spielwiese" "BATS Test"
     assert_output -e '.+'
     assert_success
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 # bats test_tags=_mattermost_post
 @test "_mattermost_post: should post an attachment" {
@@ -96,7 +89,6 @@ setup() {
     '{ color: "#FF8000", title: "Test Alert", title_link: "http://grafana.service.cloud.dvb/", text: "This is the attachment text."}'
     assert_output -e '.+'
     assert_success
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 # bats test_tags=_mattermost_post
 @test "_mattermost_post: should post two attachments" {
@@ -105,7 +97,6 @@ setup() {
     { color: "#00FF00", title: "System OK", text: "This is the attachment text."}]'
     assert_output -e '.+'
     assert_success
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 # bats test_tags=_mattermost_post
 @test "_mattermost_post: attachment with image" {
@@ -113,7 +104,6 @@ setup() {
     '{ image_url: "https://img.icons8.com/?size=100&id=q7wteb2_yVxu&format=png&color=000000", text: "This is the attachment text."}'
     assert_output -e '.+'
     assert_success
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 # bats test_tags=_mattermost_post
 @test "_mattermost_post: attachment with author" {
@@ -121,7 +111,6 @@ setup() {
     '{ color: "#FF8000", author_name: "Test BOT", author_icon: "https://img.icons8.com/?size=100&id=q7wteb2_yVxu&format=png&color=000000", author_link: "http://grafana.service.cloud.dvb/", title: "Test Alert", text: "This is the attachment text."}'
     assert_output -e '.+'
     assert_success
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 # bats test_tags=_mattermost_post
 @test "_mattermost_post: attachment with thumb image" {
@@ -129,7 +118,6 @@ setup() {
     '{ color: "#FF8000", thumb_url: "https://img.icons8.com/?size=100&id=q7wteb2_yVxu&format=png&color=000000", title: "Test Alert", text: "This is the attachment text."}'
     assert_output -e '.+'
     assert_success
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 # bats test_tags=_mattermost_post
 @test "_mattermost_post: attachment with fields" {
@@ -137,7 +125,6 @@ setup() {
     '{ color: "#FF8000", title: "Test Alert", text: "This is the attachment text.", "fields": [{"short":false, "title":"Long Field", "value":"Testing with a very long piece of text that will take up the whole width of the table. And then some more text to make it extra long." }, { "short":true, "title":"Column One", "value":"Testing" }, { "short":true, "title":"Column Two", "value":"Testing" }]}'
     assert_output -e '.+'
     assert_success
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 # bats test_tags=_mattermost_post
 @test "_mattermost_post: attachment with footer" {
@@ -145,7 +132,6 @@ setup() {
     '{ text: "This is the attachment text.", footer: "Made by Bats Test Suite", footer_icon: "https://img.icons8.com/?size=100&id=q7wteb2_yVxu&format=png&color=000000" }'
     assert_output -e '.+'
     assert_success
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 
 ######################################################################################
@@ -157,7 +143,6 @@ setup() {
     pid="$(_mattermost_post "$channel_spielwiese" "BATS DELETE Test")"
     run _mattermost_delete "${pid#*/}"
     assert_success
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 
 ######################################################################################
@@ -171,7 +156,6 @@ setup() {
     run _mattermost_repost "$channel_spielwiese" "${pid#*/}" "going on..."
     assert_output -e '.+'
     assert_success
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 
 ######################################################################################
@@ -184,7 +168,6 @@ setup() {
     run _mattermost_reaction "${pid#*/}" white_check_mark
     assert_output ''
     assert_success
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 
 ######################################################################################
@@ -196,7 +179,6 @@ setup() {
     run _mattermost_find_channels Spielwiese
     assert_output -p "$team_divibib/$channel_spielwiese "
     assert_success
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 
 ######################################################################################
@@ -212,7 +194,6 @@ setup() {
   "text": "This is the attachment text."
 }'
     assert_success
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 
 ######################################################################################
@@ -223,7 +204,6 @@ setup() {
 @test "mattermost: should make new message" {
     run mattermost Spielwiese "BATS Test"
     assert_success
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 
 ######################################################################################
@@ -235,7 +215,6 @@ setup() {
     mattermost Spielwiese "BATS Test"
     run mattermost_reaction white_check_mark
     assert_success
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 
 ######################################################################################
@@ -247,5 +226,4 @@ setup() {
     mattermost Spielwiese "BATS Test"
     run mattermost_repost "will work on it"
     assert_success
-    echo "$output" # use --show-output-of-passing-tests to see it
 }

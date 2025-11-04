@@ -15,5 +15,4 @@ setup() {
     run script_path
     assert_output -p "libexec/bats-core"
     assert_success
-    echo "$output" # use --show-output-of-passing-tests to see it
 }

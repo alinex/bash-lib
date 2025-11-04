@@ -24,7 +24,6 @@ setup() {
 @test "color_table: should succeed" {
     run color_table
     assert_success
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 
 ######################################################################################
@@ -36,7 +35,6 @@ setup() {
     run color_256 40
     assert [ "$output" = $'\033[38;5;40m' ]
     assert_success
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 
 ######################################################################################
@@ -48,5 +46,4 @@ setup() {
     run color_256_bg 40
     assert [ "$output" = $'\033[48;5;40m' ]
     assert_success
-    echo "$output" # use --show-output-of-passing-tests to see it
 }

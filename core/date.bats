@@ -16,7 +16,6 @@ setup() {
     assert [ "$output" -gt 1759080122 ]
     assert [ "$output" -lt 4102441200 ]
     assert_success
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 
 ######################################################################################
@@ -29,7 +28,6 @@ setup() {
     run date_diff "$start" $((start + 3))
     assert_output 3
     assert_success
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 # bats test_tags=date_diff
 @test "date_diff: should get difference of date strings" {
@@ -37,7 +35,6 @@ setup() {
     run date_diff "2025-10-01 12:00" "2025-10-01 13:00"
     assert_output 3600
     assert_success
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 
 ######################################################################################
@@ -50,7 +47,6 @@ setup() {
     run date_format iso-date "2025-10-01 12:00"
     assert_output "2025-10-01"
     assert_success
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 # bats test_tags=date_format
 @test "date_format: format date as full iso with seconds" {
@@ -58,7 +54,6 @@ setup() {
     run date_format iso "2025-10-01 12:00"
     assert_output "2025-10-01T12:00:00+02:00"
     assert_success
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 # bats test_tags=date_format
 @test "date_format: format date with custom format" {
@@ -66,7 +61,6 @@ setup() {
     run date_format +%Y "2025-10-01 12:00"
     assert_output "2025"
     assert_success
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 # bats test_tags=date_format
 @test "date_format: format date as UTC ISO" {
@@ -74,7 +68,6 @@ setup() {
     run date_format zulu "2025-10-01 12:00 CEST"
     assert_output "2025-10-01T10:00:00Z"
     assert_success
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 # bats test_tags=date_format
 @test "date_format: format date as sql (iso with spaces)" {
@@ -82,7 +75,6 @@ setup() {
     run date_format sql "2025-10-01 12:00"
     assert_output "2025-10-01 12:00:00"
     assert_success
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 # bats test_tags=date_format
 @test "date_format: format date as unix timestamp" {
@@ -90,7 +82,6 @@ setup() {
     run date_format unix "2025-10-01 12:00"
     assert_output 1759312800
     assert_success
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 
 ######################################################################################
@@ -102,98 +93,84 @@ setup() {
     run duration_format seconds "5"
     assert_output 5
     assert_success
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 # bats test_tags=duration_format
 @test "duration_format: parse seconds" {
     run duration_format seconds "5s"
     assert_output 5
     assert_success
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 # bats test_tags=duration_format
 @test "duration_format: parse minutes" {
     run duration_format seconds "5m"
     assert_output 300
     assert_success
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 # bats test_tags=duration_format
 @test "duration_format: parse hours" {
     run duration_format seconds "1h"
     assert_output 3600
     assert_success
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 # bats test_tags=duration_format
 @test "duration_format: parse days" {
     run duration_format seconds "1d"
     assert_output 86400
     assert_success
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 # bats test_tags=duration_format
 @test "duration_format: parse weeks" {
     run duration_format seconds "1w"
     assert_output 604800
     assert_success
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 # bats test_tags=duration_format
 @test "duration_format: parse combined" {
     run duration_format seconds "1h30m"
     assert_output 5400
     assert_success
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 # bats test_tags=duration_format
 @test "duration_format: parse ignore +" {
     run duration_format seconds "+1h30m"
     assert_output 5400
     assert_success
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 # bats test_tags=duration_format
 @test "duration_format: parse negative" {
     run duration_format seconds "-5"
     assert_output -5
     assert_success
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 # bats test_tags=duration_format
 @test "duration_format: parse cnegative ombined" {
     run duration_format seconds "-1h30m"
     assert_output -5400
     assert_success
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 # bats test_tags=duration_format
 @test "duration_format: formats as human for seconds" {
     run duration_format human 5
     assert_output "5s"
     assert_success
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 # bats test_tags=duration_format
 @test "duration_format: formats as human for combined" {
     run duration_format human 5400
     assert_output "1h 30m"
     assert_success
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 # bats test_tags=duration_format
 @test "duration_format: formats as human for negative" {
     run duration_format human -5400
     assert_output "-1h 30m"
     assert_success
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 # bats test_tags=duration_format
 @test "duration_format: parse combined with spaces" {
     run duration_format seconds "1h 30m"
     assert_output 5400
     assert_success
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 
 ######################################################################################
@@ -204,7 +181,6 @@ setup() {
 @test "timer_start: start timer without error" {
     run timer_start
     assert_success
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 
 ######################################################################################
@@ -215,5 +191,4 @@ setup() {
 @test "timer_stop: get time since start" {
     run timer_stop
     assert_success
-    echo "$output" # use --show-output-of-passing-tests to see it
 }

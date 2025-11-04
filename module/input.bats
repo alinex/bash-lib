@@ -25,7 +25,6 @@ setup() {
     '
     assert_success
     assert_output -p "Taste drücken um fortzufahren..."
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 # bats test_tags=pause
 @test "pause: continue with g key after 1 second" {
@@ -43,7 +42,6 @@ setup() {
     '
     assert_success
     assert_output -p "Taste drücken um fortzufahren..."
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 # bats test_tags=pause
 @test "pause: continue with g key" {
@@ -60,7 +58,6 @@ setup() {
     '
     assert_success
     assert_output -p "Taste drücken um fortzufahren..."
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 # bats test_tags=pause
 @test "pause: with custom title" {
@@ -77,7 +74,6 @@ setup() {
     '
     assert_success
     assert_output -p "GoOn"
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 # bats test_tags=pause
 @test "pause: with timeout" {
@@ -94,7 +90,6 @@ setup() {
     '
     assert_success
     assert_output -p "Taste drücken um fortzufahren..."
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 # bats test_tags=pause
 @test "pause: with timeout and abort" {
@@ -111,7 +106,6 @@ setup() {
     '
     assert_success
     assert_output -p "Taste drücken um fortzufahren..."
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 
 ######################################################################################
@@ -134,7 +128,6 @@ setup() {
     assert_success
     assert_output -p "Soll dies durchgeführt werden?"
     assert_output -p "Ja"
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 # bats test_tags=confirm
 @test "confirm: answer Y" {
@@ -152,7 +145,6 @@ setup() {
     assert_success
     assert_output -p "Soll dies durchgeführt werden?"
     assert_output -p "Ja"
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 # bats test_tags=confirm
 @test "confirm: answer j" {
@@ -170,7 +162,6 @@ setup() {
     assert_success
     assert_output -p "Soll dies durchgeführt werden?"
     assert_output -p "Ja"
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 # bats test_tags=confirm
 @test "confirm: answer J" {
@@ -188,7 +179,6 @@ setup() {
     assert_success
     assert_output -p "Soll dies durchgeführt werden?"
     assert_output -p "Ja"
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 # bats test_tags=confirm
 @test "confirm: answer n" {
@@ -206,7 +196,6 @@ setup() {
     assert_success
     assert_output -p "Soll dies durchgeführt werden?"
     assert_output -p "Nein"
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 # bats test_tags=confirm
 @test "confirm: answer N" {
@@ -224,7 +213,6 @@ setup() {
     assert_success
     assert_output -p "Soll dies durchgeführt werden?"
     assert_output -p "Nein"
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 # bats test_tags=confirm
 @test "confirm: with custom prompt" {
@@ -242,7 +230,6 @@ setup() {
     assert_success
     assert_output -p "Go on?"
     assert_output -p "Ja"
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 # bats test_tags=confirm
 @test "confirm: with default yes" {
@@ -259,7 +246,6 @@ setup() {
     '
     assert_success
     assert_output -p "Ja"
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 # bats test_tags=confirm
 @test "confirm: with default no" {
@@ -276,7 +262,6 @@ setup() {
     '
     assert_success
     assert_output -p "Nein"
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 # bats test_tags=confirm
 @test "confirm: with default no after timeout" {
@@ -293,7 +278,6 @@ setup() {
     '
     assert_success
     assert_output -p "Nein"
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 
 ######################################################################################
@@ -316,7 +300,6 @@ setup() {
     assert_success
     assert_output -p "Gib einen Kurztext ein:"
     assert_output -p "test"
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 # bats test_tags=ask
 @test "ask: string (not empty)" {
@@ -334,7 +317,6 @@ setup() {
     assert_success
     assert_output -p "Gib einen Kurztext ein:"
     assert_output -p "test"
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 # bats test_tags=ask
 @test "ask: string (empty)" {
@@ -351,7 +333,6 @@ setup() {
     '
     assert_success
     assert_output -p "Gib einen Kurztext ein:"
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 # bats test_tags=ask
 @test "ask: string with custom question" {
@@ -369,7 +350,6 @@ setup() {
     assert_success
     assert_output -p "What to do?"
     assert_output -p "test"
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 # bats test_tags=ask
 @test "ask: with default value" {
@@ -387,7 +367,6 @@ setup() {
     assert_success
     assert_output -p "Gib einen Kurztext ein [test]:"
     assert_output -p "test"
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 # bats test_tags=ask
 @test "ask: with default value and timeout" {
@@ -405,7 +384,6 @@ setup() {
     assert_success
     assert_output -p "Gib einen Kurztext ein [test]:"
     assert_output -p "test"
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 # bats test_tags=ask
 @test "ask: integer" {
@@ -423,7 +401,6 @@ setup() {
     assert_success
     assert_output -p "Gib eine Nummer ein:"
     assert_output -p "123"
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 # bats test_tags=ask
 @test "ask: integer with negative" {
@@ -441,7 +418,6 @@ setup() {
     assert_success
     assert_output -p "Gib eine Nummer ein:"
     assert_output -p "-123"
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 # bats test_tags=ask
 @test "ask: number (like integer)" {
@@ -459,7 +435,6 @@ setup() {
     assert_success
     assert_output -p "Gib eine Nummer ein:"
     assert_output -p "123"
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 # bats test_tags=ask
 @test "ask: float with integer" {
@@ -477,7 +452,6 @@ setup() {
     assert_success
     assert_output -p "Gib eine Fließkommazahl ein:"
     assert_output -p "123"
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 # bats test_tags=ask
 @test "ask: float" {
@@ -495,7 +469,6 @@ setup() {
     assert_success
     assert_output -p "Gib eine Fließkommazahl ein:"
     assert_output -p "1.23"
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 # bats test_tags=ask
 @test "ask: float (, as decimal separator)" {
@@ -513,7 +486,6 @@ setup() {
     assert_success
     assert_output -p "Gib eine Fließkommazahl ein:"
     assert_output -p "1.23"
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 # bats test_tags=ask
 @test "ask: float (allow negative)" {
@@ -531,7 +503,6 @@ setup() {
     assert_success
     assert_output -p "Gib eine Fließkommazahl ein:"
     assert_output -p "-1.23"
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 # bats test_tags=ask
 @test "ask: password" {
@@ -549,7 +520,6 @@ setup() {
     assert_success
     assert_output -p "Gib das Passwort ein:"
     #assert_output -p "******"
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 
 ######################################################################################
@@ -561,28 +531,24 @@ setup() {
     run _password_strength 123
     assert_success
     assert_output "8"
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 # bats test_tags=_password_strength
 @test "_password_strength: Password1 as weak" {
     run _password_strength Password1
     assert_success
     assert_output "27"
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 # bats test_tags=_password_strength
 @test "_password_strength: AmEsadSsAdS as good" {
     run _password_strength AmEsadSsAdS
     assert_success
     assert_output "64"
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 # bats test_tags=_password_strength
 @test "_password_strength: N!7rYxQ2#klOP as strong" {
     run _password_strength N!7rYxQ2#klOP
     assert_success
     assert_output "86"
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 
 ######################################################################################
@@ -606,7 +572,6 @@ setup() {
     assert_output -p "1) one"
     last="$(tail -1 <<<"$output" | nocr)"
     assert [ "$last" = "one" ]
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 # bats test_tags=choose
 @test "choose: list through stdin" {
@@ -625,7 +590,6 @@ setup() {
     assert_output -p "1) one"
     last="$(tail -1 <<<"$output" | nocr)"
     assert [ "$last" = "one" ]
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 # bats test_tags=choose
 @test "choose: with title" {
@@ -645,7 +609,6 @@ setup() {
     assert_output -p "1) one"
     last="$(tail -1 <<<"$output" | nocr)"
     assert [ "$last" = "one" ]
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 # bats test_tags=choose
 @test "choose: with additional name in entry" {
@@ -664,7 +627,6 @@ setup() {
     assert_output -p "3) nr.3"
     last="$(tail -1 <<<"$output" | nocr)"
     assert [ "$last" = "three" ]
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 # bats test_tags=choose
 @test "choose: with exit option" {
@@ -684,7 +646,6 @@ setup() {
     assert_output -p "x) Close"
     last="$(tail -1 <<<"$output" | nocr)"
     assert [ "$last" = "exit" ]
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 # bats test_tags=choose
 @test "choose: with default number" {
@@ -703,7 +664,6 @@ setup() {
     assert_output -p "1) one"
     last="$(tail -1 <<<"$output" | nocr)"
     assert [ "$last" = "two" ]
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 # bats test_tags=choose
 @test "choose: with default key" {
@@ -722,7 +682,6 @@ setup() {
     assert_output -p "1) one"
     last="$(tail -1 <<<"$output" | nocr)"
     assert [ "$last" = "three" ]
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 # bats test_tags=choose
 @test "choose: with default name" {
@@ -741,7 +700,6 @@ setup() {
     assert_output -p "3) nr.3"
     last="$(tail -1 <<<"$output" | nocr)"
     assert [ "$last" = "three" ]
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 # bats test_tags=choose
 @test "choose: with default after timeout" {
@@ -760,7 +718,6 @@ setup() {
     assert_output -p "2) two"
     last="$(tail -1 <<<"$output" | nocr)"
     assert [ "$last" = "two" ]
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 
 ######################################################################################
@@ -786,7 +743,6 @@ setup() {
     '
     assert_success
     assert_output -p "task1"
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 # bats test_tags=tasks
 @test "tasks: read from stdin" {
@@ -807,7 +763,6 @@ setup() {
     '
     assert_success
     assert_output -p "task1"
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 # bats test_tags=tasks
 @test "tasks: with title" {
@@ -829,7 +784,6 @@ setup() {
     assert_success
     assert_output -p "ToDo"
     assert_output -p "task1"
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 # bats test_tags=tasks
 @test "tasks: with default as number" {
@@ -850,7 +804,6 @@ setup() {
     '
     assert_success
     assert_output -p "task1"
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 # bats test_tags=tasks
 @test "tasks: with default as key" {
@@ -871,7 +824,6 @@ setup() {
     '
     assert_success
     assert_output -p "task2"
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 # bats test_tags=tasks
 @test "tasks: with default as name" {
@@ -892,7 +844,6 @@ setup() {
     '
     assert_success
     assert_output -p "task2"
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 # bats test_tags=tasks
 @test "tasks: with default after timeout" {
@@ -914,12 +865,10 @@ setup() {
     '
     assert_success
     assert_output -p "task1"
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
 # bats test_tags=tasks
 @test "tasks: empty tasks will return" {
     run tasks
     assert_success
     assert_output -p "Keine Aufgaben zum Ausführen gefunden."
-    echo "$output" # use --show-output-of-passing-tests to see it
 }
