@@ -3,9 +3,7 @@
 # bats file_tags=array
 setup() {
     # shellcheck disable=SC2154
-    load "$BASHLIB_HOME/tests/bats-support/load"
-    load "$BASHLIB_HOME/tests/bats-assert/load"
-    load "$BASHLIB_HOME/loader"
+    load "$BASHLIB_HOME/tests/bats"
 }
 
 ######################################################################################

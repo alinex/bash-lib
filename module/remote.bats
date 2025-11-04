@@ -3,18 +3,15 @@
 # bats file_tags=remote
 setup_file() {
     # shellcheck disable=SC2154
-    load "$BASHLIB_HOME"/loader
-    if [ -z "$SERVER" ] || [ -z "$GRAFANA_API" ] || [ -z "$GRAFANA_TOKEN" ]; then
-        skip "Because a remote server is needed."
-    fi
+    load "$BASHLIB_HOME/tests/bats"
+    # check if it should completely skip
+    [ -n "$TEST_SERVER" ] || skip "Because a remote TEST_SERVER is needed."
+    timeout 2 nc -zv "$TEST_SERVER" 22 &>/dev/null || skip "Because the remote $TEST_SERVER:22 is not reachable."
+    # setup
+    export server=${TEST_SERVER:-}
 }
 setup() {
-    # shellcheck disable=SC2154
-    load "$BASHLIB_HOME/tests/bats-support/load"
-    load "$BASHLIB_HOME/tests/bats-assert/load"
-    load "$BASHLIB_HOME/loader"
-    # test setup
-    server=operations.host.cloud.dvb
+    load "$BASHLIB_HOME/tests/bats"
 }
 
 ######################################################################################

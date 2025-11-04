@@ -3,7 +3,7 @@
 # bats file_tags=mattermost
 setup_file() {
     # shellcheck disable=SC2154
-    load "$BASHLIB_HOME"/loader
+    load "$BASHLIB_HOME/tests/bats"
     if [ -z "$MATTERMOST_API" ] || [ -z "$MATTERMOST_TOKEN" ]; then
         skip "Because mattermost access is not set."
     fi
@@ -15,9 +15,7 @@ setup() {
     channel_spielwiese=stjt3yqjzf8o585e7z88xw3a7w
     post_id=n3ztukd9r78nuqzw56zxx8g91h
     # shellcheck disable=SC2154
-    load "$BASHLIB_HOME/tests/bats-support/load"
-    load "$BASHLIB_HOME/tests/bats-assert/load"
-    load "$BASHLIB_HOME/loader"
+    load "$BASHLIB_HOME/tests/bats"
 }
 
 ######################################################################################

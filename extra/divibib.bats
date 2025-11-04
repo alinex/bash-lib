@@ -2,8 +2,7 @@
 
 # bats file_tags=divibib
 setup() {
-    bats_load_library bats-support
-    bats_load_library bats-assert
-    load $BASHLIB_HOME/loader
+    # shellcheck disable=SC2154
+    load "$BASHLIB_HOME/tests/bats"
 }
 

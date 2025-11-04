@@ -118,7 +118,7 @@ confirm() {
     stty -echo </dev/tty
     # shellcheck disable=SC2086
     # shellcheck disable=SC2229
-    while IFS= read -s -t 1 -n 1 char </dev/tty || rc=$?; do
+    while IFS= read -r -s -t 1 -n 1 char </dev/tty || rc=$?; do
         # remove error
         if [ -n "$invalid" ]; then
             invalid=0
@@ -269,7 +269,7 @@ ask() {
         prompt="${2:-$(gettext "Enter short text")}"
         ;;
     esac
-    local input="" char="" seq invalid itext utext
+    local input="" char="" seq invalid itext utext q
     local countdown="$timeout"
     [ -z "$default" ] && [ -z "$empty" ] || prompt="$prompt [$default]"
     echo -en "${CC_INFO}$prompt:${CC_RESET} " >/dev/tty
@@ -359,7 +359,7 @@ ask() {
             input+="$char"
             [ -n "$mask" ] && echo -n "*" >/dev/tty || echo -n "$char" >/dev/tty
             if [ "$format" = "password" ]; then
-                local q=$(_password_strength "$input")
+                q=$(_password_strength "$input")
                 if ((q < 25)); then
                     itext="${CC_RED}$(gettext 'bad')${CC_RESET}"
                 elif ((q < 50)); then

@@ -3,16 +3,14 @@
 # bats file_tags=monitoring
 setup_file() {
     # shellcheck disable=SC2154
-    load "$BASHLIB_HOME"/loader
+    load "$BASHLIB_HOME/tests/bats"
     if [ -z "$PROMETHEUS_API" ] || [ -z "$PROMETHEUS_HOST" ] || [ -z "$GRAFANA_API" ] || [ -z "$GRAFANA_TOKEN" ]; then
         skip "Because prometheus + grafana not set."
     fi
 }
 setup() {
     # shellcheck disable=SC2154
-    load "$BASHLIB_HOME/tests/bats-support/load"
-    load "$BASHLIB_HOME/tests/bats-assert/load"
-    load "$BASHLIB_HOME/loader"
+    load "$BASHLIB_HOME/tests/bats"
 }
 
 ######################################################################################

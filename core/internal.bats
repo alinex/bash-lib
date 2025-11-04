@@ -3,9 +3,7 @@
 
 # bats file_tags=internal
 setup() {
-    load "$BASHLIB_HOME"/tests/bats-support/load.bash
-    load "$BASHLIB_HOME"/tests/bats-assert/load.bash
-    load "$BASHLIB_HOME"/loader
+    load "$BASHLIB_HOME/tests/bats"
 }
 
 ######################################################################################

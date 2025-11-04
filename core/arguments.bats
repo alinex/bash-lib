@@ -3,13 +3,7 @@
 
 # bats file_tags=arguments
 setup() {
-    load "$BASHLIB_HOME/tests/bats-support/load"
-    load "$BASHLIB_HOME/tests/bats-assert/load"
-    load "$BASHLIB_HOME/loader"
-}
-teardown_file() {
-    rm -rf /tmp/bats-exec*
-    rm -rf /dev/shm/bats-exec*
+    load "$BASHLIB_HOME/tests/bats"
 }
 
 ######################################################################################
