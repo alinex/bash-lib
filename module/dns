@@ -1,0 +1,90 @@
+#!/usr/bin/env bash
+# shellcheck source=base
+source /dev/null
+# shellcheck source=config/environment
+source /dev/null
+# shellcheck source=config/secrets
+source /dev/null
+
+# Module with DNS methods.
+
+# load other modules if not already done
+declare -F "num_parameters" >/dev/null || source "$BASHLIB_HOME"/module/validator
+
+######################################################################################
+# DNS
+######################################################################################
+
+# Query all managed DNS servers to get a complete list of domain names
+# It will output only the header line if no DNS system is available. Possible DNS systems are:
+# - @powerdns - PowerDNS https://www.powerdns.com/
+# - @plusserver_dns - the DNS in the Plusserver Cloud https://www.plusserver.com/
+# Usage:    dns_list <pattern>
+# Globals:  $POWERDNS_API + $POWERDNS_TOKEN if powerdns is possible
+#           $PLUSSERVER_PORTAL              if plusserver as provider is used
+# Output:   Tab separated table:
+#           NAME        TYPE    CONTENT         TTL
+#           <dns-name>  A                       <seconds>
+#           <dns-name>  CNAME   <destination>   <seconds>
+#           and more...
+dns_list() {
+    echo $'NAME\tTYPE\tCONTENT\tTTL'
+    powerdns "$1" | tail -n +2 || true
+    plusserver_dns "$1" | tail -n +2 || true
+}
+
+# Query PowerDNS to get a list of managed domain names
+# Usage:    powerdns <pattern>
+# Globals:  $POWERDNS_API + $POWERDNS_TOKEN if powerdns is possible
+# Output:   Tab separated table:
+#           NAME        TYPE    CONTENT         TTL
+#           <dns-name>  A                       <seconds>
+#           <dns-name>  CNAME   <destination>   <seconds>
+#           and more...
+# Returns:  0 - without output if no $POWERDNS_API + $POWERDNS_TOKEN
+powerdns() {
+    if [ -z "$POWERDNS_API" ] || [ -z "$POWERDNS_TOKEN" ]; then
+        debug "Disabled because POWERDNS_API and POWERDNS_TOKEN are not both set"
+        return 0
+    fi
+    echo $'NAME\tTYPE\tCONTENT\tTTL'
+    curl -s -H "X-API-Key:$POWERDNS_TOKEN" "$POWERDNS_API/servers/localhost/search-data?q=*&max=10000" |
+        jq -r '.[] | select(.object_type == "record" and .disabled == false) | [(.name | sub("\\.$"; "")), .type, (.content | sub("\\.$"; "")), .ttl] | @tsv' |
+        grep -E "$1"
+}
+
+# Query Plusserver DNS to get a list of managed domain names
+# Because there is no API at plusserver this will work on previously downloaded file. It will give a hint there to download it, which should be done regularly to be up to date.
+# Usage:    powerdns <pattern>
+# Globals:  $PLUSSERVER_PORTAL              if plusserver as provider is used
+# Output:   Tab separated table:
+#           NAME        TYPE    CONTENT         TTL
+#           <dns-name>  A                       <seconds>
+#           <dns-name>  CNAME   <destination>   <seconds>
+#           and more...
+# Returns:  0 - without output if no $PLUSSERVER_PORTAL
+plusserver_dns() {
+    if [ -z "$PLUSSERVER_PORTAL" ]; then
+        debug "Disabled because PLUSSERVER_PORTAL is not set"
+        return 0
+    fi
+    # check downloaded list
+    local list time
+    # shellcheck disable=SC2012
+    list="$(ls -lt ~/Downloads/csv_list*.csv | head -1 | cut -d' ' -f 9-)"
+    # shellcheck disable=SC2012
+    time="$(ls -lt ~/Downloads/csv_list*.csv | head -1 | cut -d' ' -f 6-8)"
+    warn "$(eval_gettext "To update \$PLUSSERVER_PORTAL/services/nameservers -> download CSV (manually).")" >&2
+    test -n "$list" || die "Keine lokale DNS Liste gefunden, bitte herunterladen."
+    echo "Benutze $list vom $time." >&2
+    echo "" >&2
+    # reformat csv -> tsv
+    # shellcheck disable=SC1010
+    mlr --icsv --ifs ';' --otsv \
+        put '$name = $record_name . "." . $zone; $record_data = substr($record_data,0,80)' then \
+        cut -o -f name,record_type,record_data,record_ttl then \
+        sort -f name then \
+        rename name,NAME,record_type,TYPE,record_data,CONTENT,record_ttl,TTL \
+        "$list" |
+        awk 'NR == 1 || /'"$1"'/'
+}

@@ -421,6 +421,49 @@ echo -e "\t${CC_OK}CC_OK$CC_RESET"
 echo -e "\t${CC_HEADING}CC_HEADING$CC_RESET"
 echo -e "\t${CC_INVERS}CC_INVERS$CC_RESET"
 }
+declare -F "num_parameters" >/dev/null||source "$BASHLIB_HOME"/module/validator
+mongosh(){
+num_parameters --min 2 --max 2 --die "Mongosh needs two parameters: Usage mongosh <database> <command>" "$@"
+local cluster
+cluster="$(sed 's/^[^.]*\.//' <<<"$server")"
+command mongosh "mongodb://${MONGO_ADMIN_USERPASS["$cluster"]}@$server:27017/$1" --eval "$2"
+}
+postgres(){
+echo "TODO"
+}
+declare -F "num_parameters" >/dev/null||source "$BASHLIB_HOME"/module/validator
+dns_list(){
+echo $'NAME\tTYPE\tCONTENT\tTTL'
+powerdns "$1"|tail -n +2||true
+plusserver_dns "$1"|tail -n +2||true
+}
+powerdns(){
+if [ -z "$POWERDNS_API" ]||[ -z "$POWERDNS_TOKEN" ];then
+debug "Disabled because POWERDNS_API and POWERDNS_TOKEN are not both set"
+return 0
+fi
+echo $'NAME\tTYPE\tCONTENT\tTTL'
+curl -s -H "X-API-Key:$POWERDNS_TOKEN" "$POWERDNS_API/servers/localhost/search-data?q=*&max=10000"|jq -r '.[] | select(.object_type == "record" and .disabled == false) | [(.name | sub("\\.$"; "")), .type, (.content | sub("\\.$"; "")), .ttl] | @tsv'|grep -E "$1"
+}
+plusserver_dns(){
+if [ -z "$PLUSSERVER_PORTAL" ];then
+debug "Disabled because PLUSSERVER_PORTAL is not set"
+return 0
+fi
+local list time
+list="$(ls -lt ~/Downloads/csv_list*.csv|head -1|cut -d' ' -f 9-)"
+time="$(ls -lt ~/Downloads/csv_list*.csv|head -1|cut -d' ' -f 6-8)"
+warn "$(eval_gettext 'To update $PLUSSERVER_PORTAL/services/nameservers -> download CSV (manually).')" >&2
+test -n "$list"||die "Keine lokale DNS Liste gefunden, bitte herunterladen."
+echo "Benutze $list vom $time." >&2
+echo "" >&2
+mlr --icsv --ifs ';' --otsv \
+put '$name = $record_name . "." . $zone; $record_data = substr($record_data,0,80)' then \
+cut -o -f name,record_type,record_data,record_ttl then \
+sort -f name then \
+rename name,NAME,record_type,TYPE,record_data,CONTENT,record_ttl,TTL \
+"$list"|awk 'NR == 1 || /'"$1"'/'
+}
 script_path(){
 dirname "$(readlink -f "${BASH_SOURCE[-1]:-$(pwd)/x}")"
 }

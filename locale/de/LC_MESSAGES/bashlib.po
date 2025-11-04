@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-11-04 11:35+0100\n"
+"POT-Creation-Date: 2025-11-04 14:55+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -32,6 +32,14 @@ msgstr "Argument ist nicht ganzzahlig"
 #: core/date:123
 msgid "Invalid duration unit"
 msgstr "Ungültige Einheit für Zeitdauer"
+
+#: module/dns:77 module/remote:427
+#, sh-format
+msgid ""
+"To update $PLUSSERVER_PORTAL/services/nameservers -> download CSV (manually)."
+msgstr ""
+"Für Update $PLUSSERVER_PORTAL/services/nameservers -> CSV herunterladen "
+"(manuell)."
 
 #: module/monitoring:70
 msgid "Could not get exporters from prometheus!"
@@ -196,14 +204,6 @@ msgstr "Keine Datei unter $file für Remote ausführen"
 #, sh-format
 msgid "Wait until the reboot is complete ($seconds seconds)"
 msgstr "Warten bis der Reboot fertig ist ($seconds Sekunden)"
-
-#: module/remote:427
-#, sh-format
-msgid ""
-"To update $PLUSSERVER_PORTAL/services/nameservers -> download CSV (manually)."
-msgstr ""
-"Für Update $PLUSSERVER_PORTAL/services/nameservers -> CSV herunterladen "
-"(manuell)."
 
 #: module/software:133
 msgid "are identical versions"

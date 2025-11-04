@@ -205,6 +205,25 @@ This module contains color specifications to be used in console output.
 | [`color_256_bg`](function/color_256_bg.md) | Get color code for background color number |
 | [`color_table`](function/color_table.md) | Show complete color table |
 
+### Database Module
+
+Module with database access helpers.
+
+| Variable/Function | Description |
+| --- | --- |
+| [`mongosh`](function/mongosh.md) | Run command on Mongo DB |
+| [`postgres`](function/postgres.md) | Run command on postgres |
+
+### Dns Module
+
+Module with DNS methods.
+
+| Variable/Function | Description |
+| --- | --- |
+| [`dns_list`](function/dns_list.md) | Query all managed DNS servers to get a complete list of domain names |
+| [`powerdns`](function/powerdns.md) | Query PowerDNS to get a list of managed domain names |
+| [`plusserver_dns`](function/plusserver_dns.md) | Query Plusserver DNS to get a list of managed domain names |
+
 ### File Module
 
 File and directory helpers.
