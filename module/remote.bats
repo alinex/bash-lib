@@ -126,10 +126,7 @@ setup() {
     file=$(mktemp)
     run download /home/operator/test "$file"
     assert_success
-#    assert [ -e "$file" ]
-#    rm $file
-#    remote rm /home/operator/test
-#}
+}
 
 ######################################################################################
 # remote_install

@@ -31,40 +31,30 @@ if [ "$1" = "ci" ]; then
 # local test run
 else
   [ -z "$2" ] || echo "Running multiple OS using local docker (that may take some time)"
-  # Debian
-  for name in debian ubuntu; do
+  rm -rf /tmp/bashlib-docker 2>/dev/null
+  mkdir /tmp/bashlib-docker
+  cp -rL * /tmp/bashlib-docker
+  # Run each distribution
+  for name in debian ubuntu alpine; do
     [ "$1" = "$name" ] || [ -z "$1" ] || continue
     # set version list
     case $name in
     debian) versions="11 12 13" ;;
     ubuntu) versions="22.04 24.04" ;;
+    alpine) versions="3.19 3.20 3.21 3.22" ;;
     esac
+    # loop over versions
     for version in $versions; do
       [ "$2" = "$version" ] || [ -z "$2" ] || continue
       echo -en "${CC_CYAN_BOLD}${name^} $version${CC_RESET} "
       echo -n "($(docker pull -q "$name:$version")) "
-      docker run --rm -it -v "$PWD:/mnt" -w /mnt "$name:$version" bash -c \
+      docker run --rm -it -v "/tmp/bashlib-docker:/mnt" -w /mnt "$name:$version" bash -c \
         "echo -n 'prepare'
-        source tests/setup/docker-debian
+        source tests/setup/docker-$name
         echo -n '; run '
         bats --tap core module | grep -v ^ok"
     done
   done
-  ## alpine
-  #for name in alpine; do
-  #  [ "$1" = "$name" ] || [ -z "$1" ] || continue
-  #  # set version list
-  #  for version in 3.19 3.20 3.21 3.22; do
-  #    [ "$2" = "$version" ] || [ -z "$2" ] || continue
-  #    echo -en "${CC_CYAN_BOLD}${name^} $version${CC_RESET} "
-  #    echo -n "($(docker pull -q "$name:$version")) "
-  #    docker run --rm -it -v "$PWD:/mnt" -w /mnt "$name:$version" sh -c \
-  #      "echo -n 'prepare'
-  #      source tests/setup/docker-alpine
-  #      echo -n '; run '
-  #      bats --tap core | grep -v ^ok"
-  #  done
-  #done
   # redhat fedora centos
   # archlinux manjaro
   # solaris

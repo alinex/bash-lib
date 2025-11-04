@@ -84,12 +84,12 @@ setup() {
             pause --timeout=1
         "
         log_user 1
-        expect "Taste drücken um fortzufahren..."
+        expect "Warte bis es weiter geht"
         sleep 1
         expect eof
     '
     assert_success
-    assert_output -p "Taste drücken um fortzufahren..."
+    assert_output -p "Warte bis es weiter geht"
 }
 # bats test_tags=pause
 @test "pause: with timeout and abort" {
@@ -327,12 +327,12 @@ setup() {
             ask string --empty
         "
         log_user 1
-        expect "Gib einen Kurztext ein:"
+        expect "Gib einen Kurztext ein []:"
         send "\n"
         expect eof
     '
     assert_success
-    assert_output -p "Gib einen Kurztext ein:"
+    assert_output -p "Gib einen Kurztext ein []:"
 }
 # bats test_tags=ask
 @test "ask: string with custom question" {
