@@ -4,7 +4,9 @@ As this is not driven by releases and therefore tags are not used it is an ongoi
 
 ## Ongoing
 
-- Comming soon
+- Deprecated as warning and die possible
+- integrate ip pattern mapping to detect provider, network segment or vmware link
+- simplified remote invocation using [`remote_bashlib`](doc/function/remote_bashlib.md)
 
 ## 05. November 2025 - V2.0.1
 

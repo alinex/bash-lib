@@ -160,7 +160,10 @@ download() {
 # Run bashlib command on remote.
 # The `modules` are a comma separated list of module names like network os and if they are not in `module/` please add the parent folder.
 # Usage:    remote_bashlib <modules> <command> [<args>...]
-remote_bashlib2() {
+#           <command> [<args>...] | remote_bashlib <modules>
+# Globals:  $server
+#           $login - default is "operator"
+remote_bashlib() {
     local modules
     IFS=',' read -ra modules <<<"${1-}"
     shift
@@ -171,48 +174,23 @@ remote_bashlib2() {
             [[ "$module" =~ .*/.* ]] || module="module/$module"
             cat "$BASHLIB_HOME/$module"
         done
-        echo "$*"
-    ) | shfmt -mn | remote
-}
-# Run bashlib command on remote.
-# The `modules` are a list of module names like network os to load and if they are not in `module/` please add the parent folder, too.
-# Usage:    <command> [<args>...] | remote_bashlib <modules>
-remote_bashlib() {
-    (
-        echo "DEBUG=${DEBUG:-}"
-        cat "$BASHLIB_HOME"/base
-        for module in "$@"; do
-            [[ "$module" =~ .*/.* ]] || module="module/$module"
-            cat "$BASHLIB_HOME/$module"
-        done
-        cat </dev/stdin
+        (($# == 0)) || echo "$*"
+        [ ! -p /dev/stdin ] || cat </dev/stdin
     ) | shfmt -mn | remote
 }
 
-# Remote install package like @install
-# It will also transfer the $DEBUG state to the remote machine.
-# Usage:    install <pack>...
-# Globals:  $server
-#           $login - default is "operator"
+# Deprecated: Remote install package like @install
+# Use `remote_bashlib software install`
 remote_install() {
-    (
-        echo "DEBUG=${DEBUG:-}"
-        cat "$BASHLIB_HOME"/base
-        cat "$BASHLIB_HOME"/module/software
-        echo install "$@"
-    ) | shfmt -mn | remote #> remote.sh
+    _deprecated "use remote_bashlib software install" warn
+    remote_bashlib software install
 }
 
-# Display the system description (from remote)
-# Usage:    system_info
-# Stdout:   <text> system info lines
+# Deprecated: Display the system description (from remote)
+# Use `remote_bashlib os system_info``
 remote_system_info() {
-    (
-        echo "DEBUG=${DEBUG:-}"
-        cat "$BASHLIB_HOME"/base
-        cat "$BASHLIB_HOME"/module/os
-        echo system_info
-    ) | shfmt -mn | remote #> remote.sh
+    _deprecated "use remote_bashlib os system_info" warn
+    remote_bashlib os system_info
 }
 
 # Remote df with visual display

@@ -18,7 +18,7 @@ source gettext.sh
 ######################################################################################
 
 # Define the calling function as deprecated and output this message if used
-# Usage:    _deprecated
+# Usage:    _deprecated [<warn>]   if `<warn>` is set go on, else die
 # Error:    DEPRECATED: ask_input at task_find in /home/alex/bin/dvb/cleanup:206 please use ask string
 #           > _stacktrace          at die() in /home/alex/dvb/bash-lib/core/misc:59
 #           > _stacktrace          at _deprecated() in /home/alex/dvb/bash-lib/core/internal:23
@@ -26,10 +26,12 @@ source gettext.sh
 #           > _stacktrace          at task_find() in /home/alex/bin/dvb/cleanup:206
 #           > _stacktrace          at tasks() in /home/alex/dvb/bash-lib/module/input:451
 #           > _stacktrace          at main() in /home/alex/bin/dvb/cleanup:364
-# Return:   always 1 and try to exit script with status 1
+# Return:   1 and try to exit script with status 1 if not in warn state
 _deprecated() {
     IFS=$' \t\n' read -r line func file <<<"$(caller 1)"
-    die "DEPRECATED: ${FUNCNAME[1]} at ${func} in ${file}:${line} $1"
+    local message="DEPRECATED: ${FUNCNAME[1]} at ${func} in ${file}:${line} $1"
+    # shellcheck disable=SC2015
+    [ -n "$2" ] && echo -e $'\033[1;31m'"$message (update it)${CC_RESET}" >&2 || die "$message"
 }
 
 # Display stack trace from called position upwards

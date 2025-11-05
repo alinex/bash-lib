@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-11-05 14:52+0100\n"
+"POT-Creation-Date: 2025-11-05 17:23+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -55,9 +55,9 @@ msgid "Could not scrape the prometheus exporter at $url!"
 msgstr "Der Prometheus Exporter unter $url konnte nicht abgefragt werden!"
 
 #: module/monitoring:151 module/input:41 module/input:105 module/input:234
-#: module/input:469 module/input:649 module/remote:120 module/remote:204
-#: module/remote:288 module/mattermost:319 module/mattermost:354
-#: module/validator:36 module/software:106
+#: module/input:469 module/input:649 module/remote:120 module/remote:215
+#: module/remote:299 module/mattermost:319 module/mattermost:354
+#: module/validator:36 module/software:107
 msgid "Unrecognized option"
 msgstr "Unbekannte Option"
 
@@ -204,46 +204,46 @@ msgstr "Start: Schritt $name um $date"
 msgid "No file to execute remotely under $file"
 msgstr "Keine Datei unter $file für Remote ausführen"
 
-#: module/remote:296
+#: module/remote:307
 #, sh-format
 msgid "Wait until the reboot is complete ($seconds seconds)"
 msgstr "Warten bis der Reboot fertig ist ($seconds Sekunden)"
 
-#: module/software:148
+#: module/software:149
 msgid "are identical versions"
 msgstr "sind identische versionen"
 
-#: module/software:152 module/software:178
+#: module/software:153 module/software:179
 #, sh-format
 msgid "is an upgrade of one major version"
 msgid_plural "is an upgrade of $step mayjor versions"
 msgstr[0] "ist ein upgrade von einer Hauptversion"
 msgstr[1] "ist ein upgrade von $step Hauptversionen"
 
-#: module/software:156 module/software:174
+#: module/software:157 module/software:175
 #, sh-format
 msgid "is an upgrade of one minor version"
 msgid_plural "is an upgrade of $step minor versions"
 msgstr[0] "ist ein upgrade von einer Nebenversion"
 msgstr[1] "ist ein upgrade von $step Nebenversionen"
 
-#: module/software:160
+#: module/software:161
 #, sh-format
 msgid "is an upgrade of one patch version"
 msgid_plural "is an upgrade of $step patch versions"
 msgstr[0] "ist ein upgrade von einer Patchversion"
 msgstr[1] "ist ein upgrade von $step Patchversionen"
 
-#: module/software:163
+#: module/software:164
 msgid "is a developer upgrade"
 msgstr "ist ein entwickler Upgrade"
 
-#: module/software:166
+#: module/software:167
 #, fuzzy
 msgid "is a developer downgrade"
 msgstr "ist ein entwickler Downgrade"
 
-#: module/software:170
+#: module/software:171
 #, fuzzy, sh-format
 msgid "is an downgrade of one patch version"
 msgid_plural "is an downgrade of $step patch versions"

@@ -374,8 +374,9 @@ Module with remote calling/execution helpers.
 | [`remote_console`](function/remote_console.md) | Open an interactive console on remote host |
 | [`upload`](function/upload.md) | Upload file |
 | [`download`](function/download.md) | Download file |
-| [`remote_install`](function/remote_install.md) | Remote install package like @install |
-| [`remote_system_info`](function/remote_system_info.md) | Display the system description (from remote) |
+| [`remote_bashlib`](function/remote_bashlib.md) | Run bashlib command on remote. |
+| [`remote_install`](function/remote_install.md) | Deprecated: Remote install package like @install |
+| [`remote_system_info`](function/remote_system_info.md) | Deprecated: Display the system description (from remote) |
 | [`remote_df`](function/remote_df.md) | Remote df with visual display |
 | [`remote_lvm`](function/remote_lvm.md) | Remote check if LVM is used |
 | [`boot_wait`](function/boot_wait.md) | Wait till reboot is finished |

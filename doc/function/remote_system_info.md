@@ -1,12 +1,6 @@
 # remote_system_info
 
-## Display the system description (from remote)
+## Deprecated: Display the system description (from remote)
 
-Stdout:   `<text>` system info lines
+Use `remote_bashlib os system_info``
 
-
-### Usage
-
-```bash
-system_info
-```

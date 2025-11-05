@@ -171,7 +171,8 @@ export TEXTDOMAINDIR=$BASHLIB_HOME/locale
 source gettext.sh
 _deprecated(){
 IFS=$' \t\n' read -r line func file <<<"$(caller 1)"
-die "DEPRECATED: ${FUNCNAME[1]} at $func in $file:$line $1"
+local message="DEPRECATED: ${FUNCNAME[1]} at $func in $file:$line $1"
+[ -n "$2" ]&&echo -e $'\033[1;31m'"$message (update it)$CC_RESET" >&2||die "$message"
 }
 _stacktrace(){
 local level="${1:-5}"
@@ -1953,7 +1954,7 @@ fi
 }
 declare -F "num_parameters" >/dev/null||source "$BASHLIB_HOME"/module/validator
 remote(){
-local ssh="${slogin:-operator}@${server-}"
+local ssh="${login:-operator}@${server-}"
 if [ -p /dev/stdin ]&&(($#==0));then
 ssh "$ssh" bash -s
 return ${PIPESTATUS[0]}
@@ -1963,7 +1964,7 @@ return ${PIPESTATUS[0]}
 fi
 }
 remote_term(){
-local ssh="${slogin:-operator}@$server"
+local ssh="${login:-operator}@$server"
 if [ -p /dev/stdin ];then
 ssh -t "$ssh" bash -s
 return ${PIPESTATUS[0]}
@@ -1973,7 +1974,7 @@ return ${PIPESTATUS[0]}
 fi
 }
 remote_term_line(){
-local ssh="${slogin:-operator}@$server"
+local ssh="${login:-operator}@$server"
 if [ -p /dev/stdin ];then
 ssh -t "$ssh" bash -s 2> >(grep -v '^Connection to .* closed\.' >&2)|nocr
 return ${PIPESTATUS[0]}
@@ -1987,7 +1988,7 @@ local file
 file="$(input "$@")"
 test "${file:0:1}" = "/"||file="$(path)/$file"
 test -f "$file"||die "$(eval_gettext 'No file to execute remotely under $file')"
-local ssh="${slogin:-operator}@$server"
+local ssh="${login:-operator}@$server"
 ssh "$ssh" 'bash -s' <"$file"
 }
 remote_console(){
@@ -2006,32 +2007,42 @@ esac
 done
 num_parameters "$@" --min 2 --max 2 --die "Need exactly two parameters: semver_diff [-h] <first> <second>"
 local rc
-local ssh="${slogin:-operator}@$server"
+local ssh="${login:-operator}@$server"
 ssh "$ssh" '(nohup touch .hushlogin && sleep 1 && rm .hushlogin) >/dev/null 2>&1 </dev/null &'
 ssh $opt "$ssh" </dev/tty||rc=$?
 return $rc
 }
 upload(){
-local ssh="${slogin:-operator}@$server"
+local ssh="${login:-operator}@$server"
 local dir=${2:-~}
+debug "rsync -av $1 $ssh:$dir"
 rsync -av "$1" "$ssh:$dir"
 }
 download(){
-local ssh="${slogin:-operator}@$server"
+local ssh="${login:-operator}@$server"
 local dir=${2:-.}
 rsync -av "$ssh:$1" "$dir"
 }
-remote_install(){
+remote_bashlib(){
+local modules
+IFS=',' read -ra modules <<<"${1-}"
+shift
 (echo "DEBUG=${DEBUG:-}"
 cat "$BASHLIB_HOME"/base
-cat "$BASHLIB_HOME"/module/software
-echo install "$@")|shfmt -mn|remote
+for module in "${modules[@]}";do
+[[ $module =~ .*/.* ]]||module="module/$module"
+cat "$BASHLIB_HOME/$module"
+done
+(($#==0))||echo "$*"
+[ ! -p /dev/stdin ]||cat </dev/stdin)|shfmt -mn|remote
+}
+remote_install(){
+_deprecated "use remote_bashlib software install" warn
+remote_bashlib software install
 }
 remote_system_info(){
-(echo "DEBUG=${DEBUG:-}"
-cat "$BASHLIB_HOME"/base
-cat "$BASHLIB_HOME"/module/os
-echo system_info)|shfmt -mn|remote
+_deprecated "use remote_bashlib os system_info" warn
+remote_bashlib os system_info
 }
 remote_df(){
 local opt=""
@@ -2155,7 +2166,7 @@ yq)snap+=" $cmd";;
 mlr)apt+=" miller";;
 *)apt+=" $cmd"
 esac
-else
+elif command -v apkt >/dev/null;then
 case $cmd in
 mlr)apk+=" miller";;
 *)apk+=" $cmd"
@@ -2171,7 +2182,8 @@ reload+=" ~/.bashrc"
 fi
 test -z "$apt"||sudo apt-get install -y $apt
 test -z "$snap"||sudo apt snap install $snap
-test -z "$apk"||sudo apk update&&sudo apk add $apk
+test -z "$apk"||sudo apk update
+test -z "$apk"||sudo apk add $apk
 for file in $reload;do
 source $file
 done
