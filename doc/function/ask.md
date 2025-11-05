@@ -8,6 +8,7 @@ Possible formats are:
 - `integer` or `number` - only allow [0-9]
 - `float` - allow number [0-9]+.[0-9]+ (alternative , is allowed as decimal separator)
 - `password` - will show only `*` characters to hide input
+If another format is needed, you can fall back to string and vaildate on your own after you got the response.
 Stdout:   `<answer>`
 
 

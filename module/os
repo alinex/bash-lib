@@ -110,34 +110,6 @@ detect_os() {
     CPU_MODEL="$(grep 'model name' /proc/cpuinfo | head -n 1 | sed 's/^.*: //')"
 }
 
-# Internal IP
-IP_INTERN=$(ip route get 1 | awk '{print $7; exit}')
-# External IP (set in detect_extern_ip)
-IP_EXTERN=
-# Country (set in detect_extern_ip)
-IP_COUNTRY=
-# Country Code (set in detect_extern_ip)
-IP_COUNTRY_CODE=
-# Region Code (set in detect_extern_ip)
-IP_REGION_CODE=
-# City (set in detect_extern_ip)
-IP_CITY=
-# Internet Provider (set in detect_extern_ip)
-IP_PROVIDER=
-
-# Run  os detection and set the constants
-# Usage:    detect_extern_ip
-detect_extern_ip() {
-    local data
-    data="$(curl http://ip-api.com/json)"
-    IP_EXTERN=$(jq -r .query <<<"$data")
-    IP_COUNTRY=$(jq -r .country <<<"$data")
-    IP_COUNTRY_CODE=$(jq -r .countryCode <<<"$data")
-    IP_REGION_CODE=$(jq -r .region <<<"$data")
-    IP_CITY=$(jq -r .city <<<"$data")
-    IP_PROVIDER=$(jq -r .isp <<<"$data")
-}
-
 # Display the system description
 # Usage:    system_info
 # Stdout:   <text> system info lines

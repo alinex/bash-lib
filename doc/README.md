@@ -47,6 +47,28 @@ The BashLib contains some core functionality and optional modules which are list
 
 ## Config
 
+### Environment Module
+
+The configuration module contains a lot of general configuration settings for the bash-lib modules itself. Most of them are specific to the individual environment so they need to be set in the local `overwrite` config.
+
+| Variable/Function | Description |
+| --- | --- |
+| ``$MOUNT_COLOR_LIMIT`` | Array: Color limits per mount (regex critical error warn ok) used in [`remote_df`](functionremote_df.md) |
+| ``$MATTERMOST_API`` | Mattermost API URL used together with `$MATTERMOST_TOKEN` and silently disables mattermost functions if not set |
+| ``$MATTERMOST_TOKEN`` | Mattermost API Token used in [`mattermost`](functionmattermost.md) [`mattermost_repost`](functionmattermost_repost.md) [`mattermost_reaction`](functionmattermost_reaction.md) |
+| ``$MATTERMOST_CHANNEL_PATTERN`` | Array: Channel per pattern (team regex channel) used in [`mattermost`](functionmattermost.md) ("-"" = no selection for team) |
+| ``$MATTERMOST_LINK_PATTERN`` | Array: Link channel per pattern (team regex channel) used in [`mattermost`](functionmattermost.md) ("-"" = no selection for team) |
+| ``$GRAFANA_API`` | Grafana API URL used together with `$GRAFANA_TOKEN` and silently disables grafana functions if not set |
+| ``$GRAFANA_TOKEN`` | Grafana API Token used in [`alerts`](functionalerts.md) |
+| ``$PROMETHEUS_API`` | Prometheus API URLs as space separated list |
+| ``$PROMETHEUS`` | Prometheus host names as space separated list |
+| ``$ATLASSIAN_USER`` | Atlassian user for API access in confluence and jira |
+| ``$ATLASSIAN_TOKEN`` | Atlassian password for API access in confluence and jira |
+| ``$CONFLUENCE_API`` | Atlassian confluence API URL used together with `$ATLASSIAN_USER` and `$ATLASSIAN_TOKEN` and silently disables [`confluence`](functionconfluence.md) functions if not set |
+| ``$JIRA_API`` | Atlassian jira API URL used together with `$ATLASSIAN_USER` and `$ATLASSIAN_TOKEN` and silently disables [`jira`](functionjira.md) functions if not set |
+| ``$MONGO_ADMIN_USERPASS`` | Hash: Mongo Admin User Logins <host> = <username>:<password> |
+| ``$POWERDNS_API`` | PowerDNS API URL used together with `$POWERDNS_TOKEN` and silently disables powerdns function if not set |
+
 ## Core
 
 ### Arguments Module
@@ -245,6 +267,22 @@ Using the Grafana/Prometheus APIs to get Monitoring information.
 | [`prometheus`](function/prometheus.md) | Prom ql ausführen |
 | [`prometheus_scrape_now`](function/prometheus_scrape_now.md) | Change scrape interval to scrape now and set back |
 
+### Network Module
+
+Module with network functions.
+
+| Variable/Function | Description |
+| --- | --- |
+| ``$IP_EXTERN`` | External IP (set in detect_extern_ip) |
+| ``$IP_COUNTRY`` | Country (set in detect_extern_ip) |
+| ``$IP_COUNTRY_CODE`` | Country Code (set in detect_extern_ip) |
+| ``$IP_REGION_CODE`` | Region Code (set in detect_extern_ip) |
+| ``$IP_CITY`` | City (set in detect_extern_ip) |
+| ``$IP_PROVIDER`` | Internet Provider (set in detect_extern_ip) |
+| [`ip_intern`](function/ip_intern.md) | Show the IP adresses. |
+| [`ip_pattern`](function/ip_pattern.md) | Find info about IP by configured patterns. |
+| [`detect_extern_ip`](function/detect_extern_ip.md) | Run  os detection and set the constants |
+
 ### Os Module
 
 Module with operating system specific helper functions.
@@ -263,15 +301,7 @@ Module with operating system specific helper functions.
 | ``$IS_VIRTUAL`` | Is a virtual machine (set in detect_os) |
 | ``$CPU_NUM`` | Number of CPU cores (set in detect_os) |
 | ``$CPU_MODEL`` | CPU Model description (set in detect_os) |
-| ``$IP_INTERN`` | Internal IP |
-| ``$IP_EXTERN`` | External IP (set in detect_extern_ip) |
-| ``$IP_COUNTRY`` | Country (set in detect_extern_ip) |
-| ``$IP_COUNTRY_CODE`` | Country Code (set in detect_extern_ip) |
-| ``$IP_REGION_CODE`` | Region Code (set in detect_extern_ip) |
-| ``$IP_CITY`` | City (set in detect_extern_ip) |
-| ``$IP_PROVIDER`` | Internet Provider (set in detect_extern_ip) |
 | [`detect_os`](function/detect_os.md) | Run  os detection and set the constants |
-| [`detect_extern_ip`](function/detect_extern_ip.md) | Run  os detection and set the constants |
 | [`system_info`](function/system_info.md) | Display the system description |
 | [`has_tty`](function/has_tty.md) | Has tty present |
 | [`is_bash`](function/is_bash.md) | Is running with bash console |

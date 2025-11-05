@@ -1,0 +1,80 @@
+#!/usr/bin/env bash
+# shellcheck disable=SC2034
+
+# Module with network functions.
+
+######################################################################################
+### IP handling
+######################################################################################
+
+# Show the IP adresses.
+# The possible response formats are:
+# - main - (default) to return only the main IP
+# - data - complete data table tab separated
+# Usage:    ip_intern <format>
+# Output:   <ip>
+ip_intern() {
+    case ${1-} in
+    data)
+        echo -e "$(gettext "IP\tInterface")"
+        ip -o addr show | awk 'BEGIN { OFS="\t" } $2 != "lo" {print $4, $2}'
+        ;;
+    *) ip route get 1 | awk '{print $7; exit}' ;;
+    esac
+}
+
+# Find info about IP by configured patterns.
+# Possible types are like in the configuration:
+# - provider
+# - segment
+# - vmware
+# If no pattern matches there won't be any rteturn value
+# Usage:    ip_pattern <type> [<ip>]
+# Output:   <value> of first matching line
+# Return:   1 if no match found
+ip_pattern() {
+    num_parameters --min 1 --max 2 --die "A type has to be defined, an ip is optional." -- "$@"
+    local type=$1
+    local ip=${2-}
+    [ -n "$ip" ] || ip="$(ip_intern)"
+    # use refertenced array
+    local name="IP_${type^^}_PATTERN"
+    declare -p "$name" 2>/dev/null | grep -q 'declare \-a' || die "No configuration array $name defined."
+    debug "checking $ip against $name"
+    declare -n lookup="$name"
+    # find pattern
+    for ((i = 0; i < ${#lookup[@]}; i += 2)); do
+        if [[ "$ip" =~ ${lookup[i]} ]]; then
+            echo "${lookup[i + 1]}"
+            return 0
+        fi
+        debug 7 "$ip =~ ${lookup[i]} => false"
+    done
+    return 1
+}
+
+# Run  os detection and set the constants
+# Usage:    detect_extern_ip
+detect_extern_ip() {
+    local data
+    data="$(curl http://ip-api.com/json)"
+    IP_EXTERN=$(jq -r .query <<<"$data")
+    IP_COUNTRY=$(jq -r .country <<<"$data")
+    IP_COUNTRY_CODE=$(jq -r .countryCode <<<"$data")
+    IP_REGION_CODE=$(jq -r .region <<<"$data")
+    IP_CITY=$(jq -r .city <<<"$data")
+    IP_PROVIDER=$(jq -r .isp <<<"$data")
+}
+
+# External IP (set in detect_extern_ip)
+IP_EXTERN=
+# Country (set in detect_extern_ip)
+IP_COUNTRY=
+# Country Code (set in detect_extern_ip)
+IP_COUNTRY_CODE=
+# Region Code (set in detect_extern_ip)
+IP_REGION_CODE=
+# City (set in detect_extern_ip)
+IP_CITY=
+# Internet Provider (set in detect_extern_ip)
+IP_PROVIDER=
