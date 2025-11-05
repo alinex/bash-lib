@@ -390,7 +390,9 @@ sync_name() {
     local name=$1
     shift
     steps_check "$name" && return || true
-    local date="$(date_format sql)"
+    local date
+    # shellcheck disable=SC2034
+    date="$(date_format sql)"
     # shellcheck disable=SC2005
     declare -p _STEPS 2>/dev/null | grep -q 'declare -A' && echo "$(eval_gettext "Started: step \$name at \$date")" >&2 || true
     "$@"

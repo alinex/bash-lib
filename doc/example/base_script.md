@@ -9,9 +9,9 @@ test -z "${DEBUG-}" && source "$BASHLIB_HOME"/full || source "$BASHLIB_HOME"/loa
 ```
 
 > Use `#!/usr/bin/env bash` because it is more portable than direct bash path. The env command locates bash in your system’s PATH, so the script works regardless of where bash is installed. For example, on some systems, bash might be in `/bin/bash`, on others in `/usr/bin/bash`, or even `/usr/local/bin/bash`.
-
+>
 > Next line 2 is only needed if you use shellcheck also within your script.
-
+>
 > The last line is the only thing you really need specifically to use the BashLib. If the BashLib is correctly installed it will find it and select the `full` (compressed code) or `loader` (all modules dynamically) if run in `DEBUG` mode.
 
 Next you may have some argument parsing and validation:

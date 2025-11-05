@@ -32,13 +32,13 @@ And the first match for each team will define the channel. Also the `MATTERMOST_
 ```bash
 # Array: Channel per pattern (team regex channel) used in @mattermost, @mattermost_repost ("-"" = no selection for team)
 MATTERMOST_CHANNEL_PATTERN=(
-    divibib Entwicklung "Entwicklung"
-    divibib Spielwiese "Spielwiese"
+    myTeam Entwicklung "Entwicklung"
+    myTeam Spielwiese "Spielwiese"
     ...
 )
 # Array: Link channel per pattern (team regex channel) used in @mattermost, @mattermost_repost ("-"" = no selection for team)
 MATTERMOST_LINK_PATTERN=(
-    divibib Entwicklung "Spielwiese"
+    myTeam Entwicklung "Spielwiese"
     ...
 )
 ```
@@ -51,8 +51,8 @@ $ json=<<EOT
   {
     "color": "#0000FF",
     "title": "Info: Partner Problem",
-    "linktitle_link": "http://grafana.service.cloud.dvb/alerting/grafana/fevrx0146bn5se/view",
-    "text": "**Plusserver hat derzeit maintenance Probleme**
+    "title_link": "http://grafana.service.cloud.dvb/alerting/grafana/fevrx0146bn5se/view",
+    "text": "**Provider hat derzeit maintenance Probleme**
 Siehe hierzu mehr unter https://status.plusserver.com//api/v2/summary.json",
     "footer": "Grafana Alerts",
     "fields": [
@@ -63,7 +63,7 @@ Siehe hierzu mehr unter https://status.plusserver.com//api/v2/summary.json",
       },
       {
         "title": "Instanz",
-        "value": "status.plusserver.com",
+        "value": "status.provider.com",
         "short": true
       }
     ]

@@ -50,7 +50,7 @@ install() {
     test -z "$snap" || sudo apt snap install $snap
     # shellcheck disable=SC2086
     test -z "$apk" || sudo apk update
-    test -z "$apk" || sudo apk add $apk
+    test -z "$apk" || sudo apk add "$apk"
     # reload possibly changed config
     # shellcheck disable=SC1090
     for file in $reload; do

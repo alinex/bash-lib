@@ -213,7 +213,7 @@ spinner_start() {
     (
         while true; do
             for ((i = 0; i < ${#spinner}; i += chars)); do
-                printf " %s%s" "${spinner:i:$chars}" "$(printf '\b%.0s' $(seq 1 $back))" >/dev/tty
+                printf " %s%s" "${spinner:i:$chars}" "$(printf '\b%.0s' $(seq 1 "$back"))" >/dev/tty
                 sleep "$delay"
             done
         done

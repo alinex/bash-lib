@@ -145,20 +145,15 @@ The same goes for `float` where a single `.` within the value is also possible.
 
 A special thing is `password` which will show you how strong it is and only display stars while the real value is returned:
 
-![`ask-passowrd`](images/ask-passowrd.gif)
+![`ask-password`](images/ask-password.gif)
 
 > The last character was really a `*` ;-)
 
-And at last it provides also a `time` fromat where you can type `hh:mm` and nothing else.
+And at last it provides also a `time` format where you can type `hh:mm` and nothing else.
 
 ## Choose
 
 The [`choose`](../function/choose.md) function will give you a selection list from which to decide what you want (single choice).
-
-
-
-
-
 
 ## Tasks
 

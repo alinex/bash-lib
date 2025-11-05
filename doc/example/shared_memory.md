@@ -6,7 +6,7 @@ Shared memory is used in Bash like access to files. Therefore the device `/dev/s
 
 ## Real Global Variables
 
-Because in Bash variables can only be global to the current process, you may get a copy of them in subshells. This means you have the variable and can work on it but if you change it you won't see the change in the parent function. An example which won't work is:
+Because in Bash variables can only be global to the current process, you may get a copy of them in sub shells. This means you have the variable and can work on it but if you change it you won't see the change in the parent function. An example which won't work is:
 
 ```bash
 $ default="init"
@@ -39,7 +39,6 @@ $ set_default() {
   }
 
 default="task_increase $device"
-maxfree="$free"
 env_restore task # all that is contained
 
 # running in a subshell
