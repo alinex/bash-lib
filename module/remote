@@ -23,7 +23,7 @@ declare -F "num_parameters" >/dev/null || source "$BASHLIB_HOME"/module/validato
 #           $login - default is "operator"
 # Output:   passed through
 remote() {
-    local ssh="${slogin:-operator}@${server-}"
+    local ssh="${login:-operator}@${server-}"
     if [ -p /dev/stdin ] && (($# == 0)); then
         ssh "$ssh" bash -s
         # shellcheck disable=SC2086
@@ -46,7 +46,7 @@ remote() {
 #           $login - default is "operator"
 # Output:   passed through
 remote_term() {
-    local ssh="${slogin:-operator}@${server}"
+    local ssh="${login:-operator}@${server}"
     if [ -p /dev/stdin ]; then
         ssh -t "$ssh" bash -s
         # shellcheck disable=SC2086
@@ -66,7 +66,7 @@ remote_term() {
 #           $login - default is "operator"
 # Output:   passed through
 remote_term_line() {
-    local ssh="${slogin:-operator}@${server}"
+    local ssh="${login:-operator}@${server}"
     if [ -p /dev/stdin ]; then
         ssh -t "$ssh" bash -s 2> >(grep -v '^Connection to .* closed\.' >&2) | nocr
         # shellcheck disable=SC2086
@@ -91,7 +91,7 @@ remote_file() {
     file="$(input "$@")"
     test "${file:0:1}" = "/" || file="$(path)/$file"
     test -f "$file" || die "$(eval_gettext "No file to execute remotely under \$file")"
-    local ssh="${slogin:-operator}@${server}"
+    local ssh="${login:-operator}@${server}"
     ssh "$ssh" 'bash -s' <"$file"
 }
 
@@ -123,7 +123,7 @@ remote_console() {
     num_parameters "$@" --min 2 --max 2 --die "Need exactly two parameters: semver_diff [-h] <first> <second>"
     # processing
     local rc
-    local ssh="${slogin:-operator}@${server}"
+    local ssh="${login:-operator}@${server}"
     ssh "$ssh" '(nohup touch .hushlogin && sleep 1 && rm .hushlogin) >/dev/null 2>&1 </dev/null &' # no banner
     # shellcheck disable=SC2248
     # shellcheck disable=SC2029
@@ -137,8 +137,9 @@ remote_console() {
 # Globals:  $server
 #           $login - default is "operator"
 upload() {
-    local ssh="${slogin:-operator}@${server}"
+    local ssh="${login:-operator}@${server}"
     local dir=${2:-~}
+    debug "rsync -av $1 $ssh:$dir"
     rsync -av "$1" "$ssh:$dir"
 }
 
@@ -147,7 +148,7 @@ upload() {
 # Globals:  $server
 #           $login - default is "operator"
 download() {
-    local ssh="${slogin:-operator}@${server}"
+    local ssh="${login:-operator}@${server}"
     local dir=${2:-.}
     rsync -av "$ssh:$1" "$dir"
 }
@@ -155,6 +156,38 @@ download() {
 ######################################################################################
 ### Extended remote commands
 ######################################################################################
+
+# Run bashlib command on remote.
+# The `modules` are a comma separated list of module names like network os and if they are not in `module/` please add the parent folder.
+# Usage:    remote_bashlib <modules> <command> [<args>...]
+remote_bashlib2() {
+    local modules
+    IFS=',' read -ra modules <<<"${1-}"
+    shift
+    (
+        echo "DEBUG=${DEBUG:-}"
+        cat "$BASHLIB_HOME"/base
+        for module in "${modules[@]}"; do
+            [[ "$module" =~ .*/.* ]] || module="module/$module"
+            cat "$BASHLIB_HOME/$module"
+        done
+        echo "$*"
+    ) | shfmt -mn | remote
+}
+# Run bashlib command on remote.
+# The `modules` are a list of module names like network os to load and if they are not in `module/` please add the parent folder, too.
+# Usage:    <command> [<args>...] | remote_bashlib <modules>
+remote_bashlib() {
+    (
+        echo "DEBUG=${DEBUG:-}"
+        cat "$BASHLIB_HOME"/base
+        for module in "$@"; do
+            [[ "$module" =~ .*/.* ]] || module="module/$module"
+            cat "$BASHLIB_HOME/$module"
+        done
+        cat </dev/stdin
+    ) | shfmt -mn | remote
+}
 
 # Remote install package like @install
 # It will also transfer the $DEBUG state to the remote machine.
