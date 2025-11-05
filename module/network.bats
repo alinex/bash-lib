@@ -66,11 +66,19 @@ setup() {
 }
 
 ######################################################################################
-# detect_extern_ip
+# ip_extern
 ######################################################################################
 
-# bats test_tags=detect_extern_ip
-@test "detect_extern_ip: should run" {
-    run detect_extern_ip
+# bats test_tags=ip_extern
+@test "ip_extern: get ip" {
+    run ip_extern ip
+    assert_output -e "."
+    assert_success
+}
+# bats test_tags=ip_extern
+@test "ip_extern: get all data" {
+    run ip_extern data
+    assert_output -p "ip"
+    assert_output -p "city"
     assert_success
 }

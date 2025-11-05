@@ -1424,22 +1424,16 @@ debug 7 "$ip =~ ${lookup[i]} => false"
 done
 return 1
 }
-detect_extern_ip(){
-local data
-data="$(curl http://ip-api.com/json)"
-IP_EXTERN=$(jq -r .query <<<"$data")
-IP_COUNTRY=$(jq -r .country <<<"$data")
-IP_COUNTRY_CODE=$(jq -r .countryCode <<<"$data")
-IP_REGION_CODE=$(jq -r .region <<<"$data")
-IP_CITY=$(jq -r .city <<<"$data")
-IP_PROVIDER=$(jq -r .isp <<<"$data")
+ip_extern(){
+num_parameters --min 1 --max 1 --die "A format is needed." -- "$@"
+[ -n "$_ip_extern_json" ]||_ip_extern_json="$(curl http://ip-api.com/json)"
+case ${1-} in
+data)jq -r 'with_entries(if .key == "query" then .key = "ip" else . end) | to_entries[] | "\(.key)\t\(.value)"' <<<"$_ip_extern_json";;
+ip)jq -r .query <<<"$_ip_extern_json";;
+*)jq -r ".$1" <<<"$_ip_extern_json"
+esac
 }
-IP_EXTERN=
-IP_COUNTRY=
-IP_COUNTRY_CODE=
-IP_REGION_CODE=
-IP_CITY=
-IP_PROVIDER=
+detect_extern_ip(){ _deprecated "use ip_extern instead";}
 _os_detected=""
 OS=
 KERNEL=
@@ -1641,7 +1635,7 @@ tput civis
 true
 do
 for ((i=0; i<${#spinner}; i+=chars));do
-printf " %s%s" "${spinner:i:chars}" "$(printf '\b%.0s' $(seq 1 $back))" >/dev/tty
+printf " %s%s" "${spinner:i:chars}" "$(printf '\b%.0s' $(seq 1 "$back"))" >/dev/tty
 sleep "$delay"
 done
 done) \
@@ -1882,7 +1876,8 @@ num_parameters --min 2 --die "At least a <name> and <command> is needed!" -- "$@
 local name=$1
 shift
 steps_check "$name"&&return||true
-local date="$(date_format sql)"
+local date
+date="$(date_format sql)"
 declare -p _STEPS 2>/dev/null|grep -q 'declare -A'&&echo "$(eval_gettext 'Started: step $name at $date')" >&2||true
 "$@"
 steps_done "$name"
@@ -2192,7 +2187,7 @@ fi
 test -z "$apt"||sudo apt-get install -y $apt
 test -z "$snap"||sudo apt snap install $snap
 test -z "$apk"||sudo apk update
-test -z "$apk"||sudo apk add $apk
+test -z "$apk"||sudo apk add "$apk"
 for file in $reload;do
 source $file
 done
@@ -2321,7 +2316,7 @@ return 1
 }
 is_success(){
 num_parameters --min 1 --max 1 --die "Only one argument allowed, got: $#" -- "$@"
-return $1
+return "$1"
 }
 is_empty(){
 num_parameters --max 1 --die "Only one argument allowed, got: $#" -- "$@"
@@ -2338,12 +2333,12 @@ num_parameters --min 1 --max 1 --die "Only one argument allowed, got: $#" -- "$@
 trim_start(){
 local str="${1-}"
 local char="${2:-[:space:]}"
-echo "${str#"${str%%[!$char]*}"}"
+echo "${str#"${str%%[!"$char"]*}"}"
 }
 trim_end(){
 local str="${1:-}"
 local char="${2:-[:space:]}"
-echo "${str%"${str##*[!$char]}"}"
+echo "${str%"${str##*[!"$char"]}"}"
 }
 trim(){
 trim_end "$(trim_start "$1" "$2")" "$2"

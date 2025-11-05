@@ -54,27 +54,32 @@ ip_pattern() {
 }
 
 # Run  os detection and set the constants
-# Usage:    detect_extern_ip
-detect_extern_ip() {
-    local data
-    data="$(curl http://ip-api.com/json)"
-    IP_EXTERN=$(jq -r .query <<<"$data")
-    IP_COUNTRY=$(jq -r .country <<<"$data")
-    IP_COUNTRY_CODE=$(jq -r .countryCode <<<"$data")
-    IP_REGION_CODE=$(jq -r .region <<<"$data")
-    IP_CITY=$(jq -r .city <<<"$data")
-    IP_PROVIDER=$(jq -r .isp <<<"$data")
+# The following formats are possible:
+# - data - all values with `<name>\t<value>`
+# - country
+# - countryCode
+# - region
+# - regionName
+# - city
+# - zip
+# - lat
+# - lon
+# - timezone
+# - isp
+# - org
+# - as
+# - ip
+# Usage:    ip_extern <format>
+# Output:   <tsv-table> for data
+#           <value> else
+ip_extern() {
+    num_parameters --min 1 --max 1 --die "A format is needed." -- "$@"
+    [ -n "$_ip_extern_json" ] || _ip_extern_json="$(curl http://ip-api.com/json)"
+    case ${1-} in
+    data) jq -r 'with_entries(if .key == "query" then .key = "ip" else . end) | to_entries[] | "\(.key)\t\(.value)"' <<<"$_ip_extern_json" ;;
+    ip) jq -r .query <<<"$_ip_extern_json" ;;
+    *) jq -r ".$1" <<<"$_ip_extern_json" ;;
+    esac
 }
 
-# External IP (set in detect_extern_ip)
-IP_EXTERN=
-# Country (set in detect_extern_ip)
-IP_COUNTRY=
-# Country Code (set in detect_extern_ip)
-IP_COUNTRY_CODE=
-# Region Code (set in detect_extern_ip)
-IP_REGION_CODE=
-# City (set in detect_extern_ip)
-IP_CITY=
-# Internet Provider (set in detect_extern_ip)
-IP_PROVIDER=
+detect_extern_ip() { _deprecated "use ip_extern instead"; }

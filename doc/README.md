@@ -276,15 +276,9 @@ Module with network functions.
 
 | Variable/Function | Description |
 | --- | --- |
-| ``$IP_EXTERN`` | External IP (set in detect_extern_ip) |
-| ``$IP_COUNTRY`` | Country (set in detect_extern_ip) |
-| ``$IP_COUNTRY_CODE`` | Country Code (set in detect_extern_ip) |
-| ``$IP_REGION_CODE`` | Region Code (set in detect_extern_ip) |
-| ``$IP_CITY`` | City (set in detect_extern_ip) |
-| ``$IP_PROVIDER`` | Internet Provider (set in detect_extern_ip) |
 | [`ip_intern`](function/ip_intern.md) | Show the IP adresses. |
 | [`ip_pattern`](function/ip_pattern.md) | Find info about IP by configured patterns. |
-| [`detect_extern_ip`](function/detect_extern_ip.md) | Run  os detection and set the constants |
+| [`ip_extern`](function/ip_extern.md) | Run  os detection and set the constants |
 
 ### Os Module
 
