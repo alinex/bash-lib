@@ -240,6 +240,9 @@ Module with user interaction helpers.
 | --- | --- |
 | [`pause`](function/pause.md) | Wait for some time or user input |
 | [`confirm`](function/confirm.md) | Ask a yes/no question. |
+| [`ask_no`](function/ask_no.md) | Deprecated: Ask yes/no question with default to no. |
+| [`ask_yes`](function/ask_yes.md) | Deprecated: Ask yes/no question with default to yes. |
+| [`ask_input`](function/ask_input.md) | Deprecated: Ask a free question. |
 | [`ask`](function/ask.md) | Ask for an input element |
 | [`choose`](function/choose.md) | Select from list (extended version of native select) |
 | [`tasks`](function/tasks.md) | Run tasks as selected by user |

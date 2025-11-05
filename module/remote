@@ -180,14 +180,14 @@ remote_bashlib() {
 }
 
 # Deprecated: Remote install package like @install
-# Use `remote_bashlib software install`
+# Use `remote_bashlib software install`, see @remote_bashlib.
 remote_install() {
     _deprecated "use remote_bashlib software install" warn
     remote_bashlib software install
 }
 
 # Deprecated: Display the system description (from remote)
-# Use `remote_bashlib os system_info``
+# Use `remote_bashlib os system_info`, see @remote_bashlib.
 remote_system_info() {
     _deprecated "use remote_bashlib os system_info" warn
     remote_bashlib os system_info

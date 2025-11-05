@@ -598,9 +598,18 @@ itext=""
 done
 stty echo </dev/tty
 }
-ask_no(){ _deprecated "use confirm --false <question>";}
-ask_yes(){ _deprecated "use confirm --true <question>";}
-ask_input(){ _deprecated "use ask <question>";}
+ask_no(){
+_deprecated "use confirm --false <question>" warn
+confirm --false "$1"
+}
+ask_yes(){
+_deprecated "use confirm --true <question>"
+confirm --true "$1"
+}
+ask_input(){
+_deprecated "use ask <question>"
+ask "$@"
+}
 ask(){
 local default empty negative timeout
 eval set -- "$(option_parse $'e empty -\nd default +\nT timeout +\nn allow-negative -' "$@")"
@@ -2326,7 +2335,6 @@ is_float(){
 num_parameters --min 1 --max 1 --die "Only one argument allowed, got: $#" -- "$@"
 [[ $1 =~ ^[-+]?[0-9]+([.][0-9]+)?$ ]]
 }
-compare(){ _deprecated "please use [[ ... ]] instead";}
 trim_start(){
 local str="${1-}"
 local char="${2:-[:space:]}"

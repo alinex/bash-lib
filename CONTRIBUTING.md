@@ -26,6 +26,7 @@ This document outlines the process and best practices for contributing to the pr
     - [📝 Linting with Shellcheck](#-linting-with-shellcheck)
     - [🧹 Code Guidelines](#-code-guidelines)
     - [🏁 Finalize](#-finalize)
+    - [🚫 Deprecation](#-deprecation)
   - [❤️ Thank You](#️-thank-you)
 
 ## Users
@@ -483,6 +484,37 @@ This will:
 - recreate the API Documentation
 
 > If you run in `DEBUG` mode with the loader you don't need to run the update to test the changes.
+
+### 🚫 Deprecation
+
+As the library progresses, it will change and sometimes older functions are replaced or removed. Therefor we use three steps:
+
+1. **Mark as deprecated:**
+   Here we only add the `_deprecated` warning with `warn` as second parameter to only show the message but go on in the program. As the replacement function will work identical in the example below we directly call it. And we show the deprecation in the documentation.
+
+      ```bash
+      # Deprecated: Remote install package like @install
+      # Use `remote_bashlib software install`, see @remote_bashlib.
+      remote_install() {
+         _deprecated "use remote_bashlib software install" warn
+         remote_bashlib software install
+      }
+      ```
+
+2. **Later we will break on a call:**
+   So if it is used the deprecation warning will be displayed and the process will stop. That is done without the `warn` flag, the code and documentation removed. Now to work again the calling script has to be changed.
+
+      ```bash
+      remote_install() {
+         _deprecated "use remote_bashlib software install"
+      }
+      ```
+
+3. **And in the last step we clean up:**
+   The method will be completely be removed.
+
+We try to always show the deprecation for a longer time and let it work. The step from (1) to (2) should be done on at least a minor version change. The same goes for the change from (2) to (3).\
+The goal is to keep the code clean and short.
 
 ## ❤️ Thank You
 

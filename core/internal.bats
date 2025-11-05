@@ -16,6 +16,12 @@ setup() {
     assert_output  --regexp "DEPRECATED: bats_merge_stdout_and_stderr at run in .* no longer used"
     assert_failure
 }
+# bats test_tags=_deprecated
+@test "_deprecated: with only warning" {
+    DEBUG="" run _deprecated "no longer used" warn
+    assert_output  --regexp "DEPRECATED: bats_merge_stdout_and_stderr at run in .* no longer used"
+    assert_success
+}
 
 ######################################################################################
 # _stacktrace
