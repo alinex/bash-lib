@@ -4,6 +4,10 @@ As this is not driven by releases and therefore tags are not used it is an ongoi
 
 ## Ongoing
 
+- Comming soon
+
+## 05. November 2025 - V2.0.1
+
 - fix: `_deprecated` display correct function
 - fix: `mktemp` if already existing to also return path
 - fix: `tasks` to work with quoted arguments in function calls
@@ -14,6 +18,7 @@ As this is not driven by releases and therefore tags are not used it is an ongoi
 - [`choose`](doc/function/choose.md) invalid input, `--timeout`, input format check, direct selection without `<return>`
 - [`tasks`](doc/function/tasks.md) with `--loop` option
 - [`ask password`](doc/function/ask.md) input with strength display while typing
+- test suite now runs in debian/ubuntu completely and the core in alpine, too
 
 ## 28. October 2025 - V2.0.0
 

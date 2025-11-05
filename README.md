@@ -7,17 +7,18 @@ This is the updated version of my personal library used to easily write powerful
 Version 2 is a complete rework of the library meaning it is another toolset and you could not upgrade to it.
 Some functionalities from the older version will no longer be available like logging while a lot of new possibilities are included.
 
-Main Goals are:
+What BashLib 2 brings:
 
-- more modulare
-- easier to use
-- more features
+- modulare, easier to use
+- easy expandable feature set
 - remote capabilities integrated
-- multilingual
+- lots of api integrations
+- multilingual (de, en at the moment)
+- running in different unix operating systems (debian, ubuntu, alpine)
 - unit tested and linted
 - completely documented with examples
 
-The downside may be:
+The downside against Version 1 may be:
 
 - no backward compatibility - everything is new
 - the logging library is not included (at the moment)
