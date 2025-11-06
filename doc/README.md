@@ -66,6 +66,7 @@ The configuration module contains a lot of general configuration settings for th
 | ``$ATLASSIAN_TOKEN`` | Atlassian password for API access in confluence and jira |
 | ``$CONFLUENCE_API`` | Atlassian confluence API URL used together with `$ATLASSIAN_USER` and `$ATLASSIAN_TOKEN` and silently disables [`confluence`](functionconfluence.md) functions if not set |
 | ``$JIRA_API`` | Atlassian jira API URL used together with `$ATLASSIAN_USER` and `$ATLASSIAN_TOKEN` and silently disables [`jira`](functionjira.md) functions if not set |
+| ``$REMOTE_LOGIN_DEFAULT`` | Default login if no `--login` or ``$login`` available |
 | ``$MONGO_ADMIN_USERPASS`` | Hash: Mongo Admin User Logins <host> = <username>:<password> |
 | ``$POWERDNS_API`` | PowerDNS API URL used together with `$POWERDNS_TOKEN` and silently disables powerdns function if not set |
 

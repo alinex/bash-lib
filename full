@@ -1982,7 +1982,7 @@ break
 *)die "$(gettext "Unrecognized option"): $1"
 esac
 done
-_login=${login:-operator}
+_login=${_login:-${login:-$REMOTE_LOGIN_DEFAULT}}
 host=${host:-$server}
 local ssh="$_login@$host"
 [ -z "$jump" ]||ssh="-J $jump $ssh"
@@ -2014,7 +2014,7 @@ break
 *)die "$(gettext "Unrecognized option"): $1"
 esac
 done
-_login=${login:-operator}
+_login=${_login:-${login:-$REMOTE_LOGIN_DEFAULT}}
 host=${host:-$server}
 local ssh="$_login@$host"
 [ -z "$jump" ]||ssh="-J $jump $ssh"
@@ -2046,7 +2046,7 @@ break
 *)die "$(gettext "Unrecognized option"): $1"
 esac
 done
-_login=${login:-operator}
+_login=${_login:-${login:-$REMOTE_LOGIN_DEFAULT}}
 host=${host:-$server}
 local ssh="$_login@$host"
 [ -z "$jump" ]||ssh="-J $jump $ssh"
@@ -2078,7 +2078,7 @@ break
 *)die "$(gettext "Unrecognized option"): $1"
 esac
 done
-_login=${login:-operator}
+_login=${_login:-${login:-$REMOTE_LOGIN_DEFAULT}}
 host=${host:-$server}
 local ssh="$_login@$host"
 [ -z "$jump" ]||ssh="-J $jump $ssh"
@@ -2112,7 +2112,7 @@ break
 esac
 done
 num_parameters "$@" --min 2 --max 2 --die "Need exactly two parameters: semver_diff [-h] <first> <second>"
-_login=${login:-operator}
+_login=${_login:-${login:-$REMOTE_LOGIN_DEFAULT}}
 host=${host:-$server}
 local ssh="$_login@$host"
 [ -z "$jump" ]||ssh="-J $jump $ssh"
@@ -2141,7 +2141,7 @@ break
 *)die "$(gettext "Unrecognized option"): $1"
 esac
 done
-_login=${login:-operator}
+_login=${_login:-${login:-$REMOTE_LOGIN_DEFAULT}}
 host=${host:-$server}
 local ssh="$_login@$host"
 [ -z "$jump" ]||ssh="-J $jump $ssh"
@@ -2169,7 +2169,7 @@ break
 *)die "$(gettext "Unrecognized option"): $1"
 esac
 done
-_login=${login:-operator}
+_login=${_login:-${login:-$REMOTE_LOGIN_DEFAULT}}
 host=${host:-$server}
 local ssh="$_login@$host"
 [ -z "$jump" ]||ssh="-J $jump $ssh"

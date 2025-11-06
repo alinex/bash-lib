@@ -52,7 +52,7 @@ remote() {
         esac
     done
     # processing
-    _login=${login:-operator}
+    _login=${_login:-${login:-$REMOTE_LOGIN_DEFAULT}}
     host=${host:-$server}
     local ssh="${_login}@${host}"
     [ -z "$jump" ] || ssh="-J $jump $ssh"
@@ -107,7 +107,7 @@ remote_term() {
         esac
     done
     # processing
-    _login=${login:-operator}
+    _login=${_login:-${login:-$REMOTE_LOGIN_DEFAULT}}
     host=${host:-$server}
     local ssh="${_login}@${host}"
     [ -z "$jump" ] || ssh="-J $jump $ssh"
@@ -159,7 +159,7 @@ remote_term_line() {
         esac
     done
     # processing
-    _login=${login:-operator}
+    _login=${_login:-${login:-$REMOTE_LOGIN_DEFAULT}}
     host=${host:-$server}
     local ssh="${_login}@${host}"
     [ -z "$jump" ] || ssh="-J $jump $ssh"
@@ -212,7 +212,7 @@ remote_file() {
         esac
     done
     # processing
-    _login=${login:-operator}
+    _login=${_login:-${login:-$REMOTE_LOGIN_DEFAULT}}
     host=${host:-$server}
     local ssh="${_login}@${host}"
     [ -z "$jump" ] || ssh="-J $jump $ssh"
@@ -266,7 +266,7 @@ remote_console() {
     done
     # processing
     num_parameters "$@" --min 2 --max 2 --die "Need exactly two parameters: semver_diff [-h] <first> <second>"
-    _login=${login:-operator}
+    _login=${_login:-${login:-$REMOTE_LOGIN_DEFAULT}}
     host=${host:-$server}
     local ssh="${_login}@${host}"
     [ -z "$jump" ] || ssh="-J $jump $ssh"
@@ -313,7 +313,7 @@ upload() {
         esac
     done
     # processing
-    _login=${login:-operator}
+    _login=${_login:-${login:-$REMOTE_LOGIN_DEFAULT}}
     host=${host:-$server}
     local ssh="${_login}@${host}"
     [ -z "$jump" ] || ssh="-J $jump $ssh"
@@ -357,7 +357,7 @@ download() {
         esac
     done
     # processing
-    _login=${login:-operator}
+    _login=${_login:-${login:-$REMOTE_LOGIN_DEFAULT}}
     host=${host:-$server}
     local ssh="${_login}@${host}"
     [ -z "$jump" ] || ssh="-J $jump $ssh"
