@@ -1,6 +1,10 @@
+workflow:
+  auto_cancel:
+    on_new_commit: interruptible
+
 stages:
   - Code Analytics
-  - Test Core
+  - Test Distributions
 
 include:
   - template: Jobs/SAST.gitlab-ci.yml
@@ -9,17 +13,25 @@ include:
 #  - template: Jobs/Container-Scanning.gitlab-ci.yml
 sast:
   stage: Code Analytics
-semgrep-sast:
   rules:
-    - if: '$CI_PIPELINE_SOURCE == "push"'
-      exists:
-        - 'core/*'      # add specific directories
-        - 'module/*'    # add folders containing extensionless bash files
-        - 'extra/*'     # add folders containing extensionless bash files
+    - if: '$CI_COMMIT_TAG'
+      when: always
+    - when: never
+  interruptible: true
 dependency_scanning:
   stage: Code Analytics
+  rules:
+    - if: '$CI_COMMIT_TAG'
+      when: always
+    - when: never
+  interruptible: true
 secret_detection:
   stage: Code Analytics
+  rules:
+    - if: '$CI_COMMIT_TAG'
+      when: always
+    - when: never
+  interruptible: true
 #container_scanning:
 #  stage: Code Analytics
 #shellcheck:
@@ -37,7 +49,12 @@ secret_detection:
 #      sast: gl-sast-report.json
 
 Debian:
-  stage: Test Core
+  stage: Test Distributions
+  rules:
+    - if: '$CI_COMMIT_TAG'
+      when: always
+    - when: never
+  interruptible: true
   variables:
     GIT_SUBMODULE_STRATEGY: recursive
   image: debian:$DEBIAN_VERSION
