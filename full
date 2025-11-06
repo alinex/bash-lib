@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 option_parse(){
 local opt name type desc short="" long=""
+local spec="$1" permut
+if [[ $spec =~ ^\+ ]];then
+permut=+
+spec="${spec:1}"
+fi
 while IFS=$' \t\n' read -r opt name type desc;do
 [[ $opt =~ ^# ]]&&continue
 [[ -z $opt ]]&&continue
@@ -11,9 +16,9 @@ else
 [ "$opt" = "-" ]||short+="$opt"
 long+="$name,"
 fi
-done <<<"$1"
+done <<<"$spec"
 shift
-getopt -o "$short" --long "$long" -n "$0" -- "$@"
+getopt -o "$permut$short" --long "$long" -n "$0" -- "$@"
 }
 option_help(){
 declare opt name type desc
@@ -1958,48 +1963,145 @@ fi
 }
 declare -F "num_parameters" >/dev/null||source "$BASHLIB_HOME"/module/validator
 remote(){
-local ssh="${login:-operator}@${server-}"
+local _login host jump
+eval set -- "$(option_parse $'+l login +\nh host +\nj jump +' "$@")"
+while true;do
+case "$1" in
+-l|--login)_login="$2"
+shift 2
+;;
+-h|--host)host="$2"
+shift 2
+;;
+-j|--jump)jump="$2"
+shift 2
+;;
+--)shift
+break
+;;
+*)die "$(gettext "Unrecognized option"): $1"
+esac
+done
+_login=${login:-operator}
+host=${host:-$server}
+local ssh="$_login@$host"
+[ -z "$jump" ]||ssh="-J $jump $ssh"
 if [ -p /dev/stdin ]&&(($#==0));then
-ssh "$ssh" bash -s
-return ${PIPESTATUS[0]}
+ssh $ssh bash -s
+return "${PIPESTATUS[0]}"
 else
-ssh "$ssh" "$@"
-return ${PIPESTATUS[0]}
+ssh $ssh "$@"
+return "${PIPESTATUS[0]}"
 fi
 }
 remote_term(){
-local ssh="${login:-operator}@$server"
+local _login host jump
+eval set -- "$(option_parse $'+l login +\nh host +\nj jump +' "$@")"
+while true;do
+case "$1" in
+-l|--login)_login="$2"
+shift 2
+;;
+-h|--host)host="$2"
+shift 2
+;;
+-j|--jump)jump="$2"
+shift 2
+;;
+--)shift
+break
+;;
+*)die "$(gettext "Unrecognized option"): $1"
+esac
+done
+_login=${login:-operator}
+host=${host:-$server}
+local ssh="$_login@$host"
+[ -z "$jump" ]||ssh="-J $jump $ssh"
 if [ -p /dev/stdin ];then
-ssh -t "$ssh" bash -s
-return ${PIPESTATUS[0]}
+ssh -t $ssh bash -s
+return "${PIPESTATUS[0]}"
 else
-ssh -t "$ssh" "$@"
-return ${PIPESTATUS[0]}
+ssh -t $ssh "$@"
+return "${PIPESTATUS[0]}"
 fi
 }
 remote_term_line(){
-local ssh="${login:-operator}@$server"
+local _login host jump
+eval set -- "$(option_parse $'+l login +\nh host +\nj jump +' "$@")"
+while true;do
+case "$1" in
+-l|--login)_login="$2"
+shift 2
+;;
+-h|--host)host="$2"
+shift 2
+;;
+-j|--jump)jump="$2"
+shift 2
+;;
+--)shift
+break
+;;
+*)die "$(gettext "Unrecognized option"): $1"
+esac
+done
+_login=${login:-operator}
+host=${host:-$server}
+local ssh="$_login@$host"
+[ -z "$jump" ]||ssh="-J $jump $ssh"
 if [ -p /dev/stdin ];then
-ssh -t "$ssh" bash -s 2> >(grep -v '^Connection to .* closed\.' >&2)|nocr
-return ${PIPESTATUS[0]}
+ssh -t $ssh bash -s 2> >(grep -v '^Connection to .* closed\.' >&2)|nocr
+return "${PIPESTATUS[0]}"
 else
-ssh -t "$ssh" "$@" 2> >(grep -v '^Connection to .* closed\.' >&2)|nocr
-return ${PIPESTATUS[0]}
+ssh -t $ssh "$@" 2> >(grep -v '^Connection to .* closed\.' >&2)|nocr
+return "${PIPESTATUS[0]}"
 fi
 }
 remote_file(){
+local _login host jump
+eval set -- "$(option_parse $'+l login +\nh host +\nj jump +' "$@")"
+while true;do
+case "$1" in
+-l|--login)_login="$2"
+shift 2
+;;
+-h|--host)host="$2"
+shift 2
+;;
+-j|--jump)jump="$2"
+shift 2
+;;
+--)shift
+break
+;;
+*)die "$(gettext "Unrecognized option"): $1"
+esac
+done
+_login=${login:-operator}
+host=${host:-$server}
+local ssh="$_login@$host"
+[ -z "$jump" ]||ssh="-J $jump $ssh"
 local file
 file="$(input "$@")"
 test "${file:0:1}" = "/"||file="$(path)/$file"
 test -f "$file"||die "$(eval_gettext 'No file to execute remotely under $file')"
-local ssh="${login:-operator}@$server"
-ssh "$ssh" 'bash -s' <"$file"
+ssh $ssh 'bash -s' <"$file"
 }
 remote_console(){
-eval set -- "$(option_parse "A forward-agent -" "$@")"
-local opt
+local _login host jump opt
+eval set -- "$(option_parse $'+l login +\nh host +\nj jump +\nA forward-agent -' "$@")"
 while true;do
 case "$1" in
+-l|--login)_login="$2"
+shift 2
+;;
+-h|--host)host="$2"
+shift 2
+;;
+-j|--jump)jump="$2"
+shift 2
+;;
 -A|--forward-agent)opt="-A"
 shift
 ;;
@@ -2010,24 +2112,84 @@ break
 esac
 done
 num_parameters "$@" --min 2 --max 2 --die "Need exactly two parameters: semver_diff [-h] <first> <second>"
+_login=${login:-operator}
+host=${host:-$server}
+local ssh="$_login@$host"
+[ -z "$jump" ]||ssh="-J $jump $ssh"
 local rc
-local ssh="${login:-operator}@$server"
-ssh "$ssh" '(nohup touch .hushlogin && sleep 1 && rm .hushlogin) >/dev/null 2>&1 </dev/null &'
-ssh $opt "$ssh" </dev/tty||rc=$?
-return $rc
+ssh $ssh '(nohup touch .hushlogin && sleep 1 && rm .hushlogin) >/dev/null 2>&1 </dev/null &'
+ssh $opt $ssh </dev/tty||rc=$?
+return "$rc"
 }
 upload(){
-local ssh="${login:-operator}@$server"
+local _login host jump
+eval set -- "$(option_parse $'+l login +\nh host +\nj jump +' "$@")"
+while true;do
+case "$1" in
+-l|--login)_login="$2"
+shift 2
+;;
+-h|--host)host="$2"
+shift 2
+;;
+-j|--jump)jump="$2"
+shift 2
+;;
+--)shift
+break
+;;
+*)die "$(gettext "Unrecognized option"): $1"
+esac
+done
+_login=${login:-operator}
+host=${host:-$server}
+local ssh="$_login@$host"
+[ -z "$jump" ]||ssh="-J $jump $ssh"
 local dir=${2:-~}
 debug "rsync -av $1 $ssh:$dir"
-rsync -av "$1" "$ssh:$dir"
+rsync -av "$1" $ssh:"$dir"
 }
 download(){
-local ssh="${login:-operator}@$server"
+local _login host jump
+eval set -- "$(option_parse $'+l login +\nh host +\nj jump +' "$@")"
+while true;do
+case "$1" in
+-l|--login)_login="$2"
+shift 2
+;;
+-h|--host)host="$2"
+shift 2
+;;
+-j|--jump)jump="$2"
+shift 2
+;;
+--)shift
+break
+;;
+*)die "$(gettext "Unrecognized option"): $1"
+esac
+done
+_login=${login:-operator}
+host=${host:-$server}
+local ssh="$_login@$host"
+[ -z "$jump" ]||ssh="-J $jump $ssh"
 local dir=${2:-.}
-rsync -av "$ssh:$1" "$dir"
+rsync -av $ssh:"$1" "$dir"
 }
 remote_bashlib(){
+local opt
+eval set -- "$(option_parse $'+l login +\nh host +\nj jump +' "$@")"
+while true;do
+case "$1" in
+-l|--login|-h|--host|-j|--jump)opt+=" $1 $2"
+shift 2
+;;
+--)shift
+break
+;;
+*)die "$(gettext "Unrecognized option"): $1"
+esac
+done
 local modules
 IFS=',' read -ra modules <<<"${1-}"
 shift
@@ -2051,7 +2213,7 @@ cat "$BASHLIB_HOME/$module"
 fi
 done
 (($#==0))||echo "$*"
-[ ! -p /dev/stdin ]||cat </dev/stdin)|shfmt -mn|remote
+[ ! -p /dev/stdin ]||cat </dev/stdin)|shfmt -mn|remote $opt
 }
 remote_install(){
 _deprecated "use remote_bashlib software install" warn

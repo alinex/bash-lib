@@ -7,8 +7,17 @@
 ### Usage
 
 ```bash
-remote_file <file>
-<file> | remote_file
+remote_file [<options>] <file>
+<file> | remote_file [<options>]
+```
+
+### Options
+
+```bash
+# following options, only before `<file>`
+-l, --login <user>
+-h, --host <host>
+-j, --jump <user>@<host>
 ```
 
 ### Globals

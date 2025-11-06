@@ -10,8 +10,17 @@
 ### Usage
 
 ```bash
-remote <command>... # special characters have to be masked: | & * > <
-<title> | remote
+remote_term [<options>] <command>... # special characters have to be masked: | & * > <
+<title> | remote_term [<options>]
+```
+
+### Options
+
+```bash
+# following options, only before `<command>`
+-l, --login <user>
+-h, --host <host>
+-j, --jump <user>@<host>
 ```
 
 ### Globals

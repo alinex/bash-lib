@@ -12,12 +12,19 @@ source /dev/null
 # This will parse the given options into a standardized form and validate them against the given specification.
 # Options can be given in different forms: `-a 45`, `-a45`, `--age 45`, `--age=45` are all equal. The last one is preferred because of readability.
 # Also multiple short options can be put together with only the last may need a value.
+# Permutation, reordering and giving options after arguments, is possible by default but can be removed if `<spec>` begins with `+`.
 # Usage:        eval set -- "$(option_parse <spec> "$@")"
 #               <spec> lines := <short-letter>|- <long-word> <type>|- <description>
 # Output:       parsed options <string>
 # Example:      &base_script includes a simple example
 option_parse() {
     local opt name type desc short="" long=""
+    local spec="$1" permut
+    # check permutation
+    if [[ "$spec" =~ ^\+ ]]; then
+        permut=+
+        spec="${spec:1}"
+    fi
     # read spec lines
     while IFS=$' \t\n' read -r opt name type desc; do
         [[ "$opt" =~ ^# ]] && continue # skip comments
@@ -29,10 +36,10 @@ option_parse() {
             [ "${opt}" = "-" ] || short+="${opt}"
             long+="${name},"
         fi
-    done <<<"$1"
+    done <<<"$spec"
     shift
     # parse
-    getopt -o "$short" --long "$long" -n "$0" -- "$@"
+    getopt -o "$permut$short" --long "$long" -n "$0" -- "$@"
 }
 
 # Print help for options defined in options specification

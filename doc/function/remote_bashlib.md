@@ -15,9 +15,17 @@ The modules can be:
 ### Usage
 
 ```bash
-remote_bashlib <module>[,<module>...] <command> [<args>...]
-<command> [<args>...] | remote_bashlib <module>[,<module>...]
-remote_bashlib full[,extra/<module>...] <command> [<args>...]
+remote_bashlib [<options>] <module>[,<module>...] <command> [<args>...]
+<command> [<args>...] | remote_bashlib [<options>] <module>[,<module>...]
+```
+
+### Options
+
+```bash
+# following options, only before `<module>`
+-l, --login <user>
+-h, --host <host>
+-j, --jump <user>@<host>
 ```
 
 ### Globals

@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 option_parse(){
 local opt name type desc short="" long=""
+local spec="$1" permut
+if [[ $spec =~ ^\+ ]];then
+permut=+
+spec="${spec:1}"
+fi
 while IFS=$' \t\n' read -r opt name type desc;do
 [[ $opt =~ ^# ]]&&continue
 [[ -z $opt ]]&&continue
@@ -11,9 +16,9 @@ else
 [ "$opt" = "-" ]||short+="$opt"
 long+="$name,"
 fi
-done <<<"$1"
+done <<<"$spec"
 shift
-getopt -o "$short" --long "$long" -n "$0" -- "$@"
+getopt -o "$permut$short" --long "$long" -n "$0" -- "$@"
 }
 option_help(){
 declare opt name type desc

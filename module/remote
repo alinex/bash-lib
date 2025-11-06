@@ -16,99 +16,243 @@ declare -F "num_parameters" >/dev/null || source "$BASHLIB_HOME"/module/validato
 ######################################################################################
 
 # Run command on remote host
-# Usage:    remote <command>... # special characters in command masked with backslash
-#           #                     <special char> := | & * > < $
-#           <commands> | remote
+# Usage:    remote [<options>] <command>... # special characters in command masked with backslash
+#           # <special char> := | & * > < $
+#           <commands> | remote [<options>]
+# Options:  # following options, only before `<command>`
+#           -l, --login <user>
+#           -h, --host <host>
+#           -j, --jump <user>@<host>
 # Globals:  $server
 #           $login - default is "operator"
 # Output:   passed through
 remote() {
-    local ssh="${login:-operator}@${server-}"
+    # parameter parsing
+    local _login host jump
+    eval set -- "$(option_parse $'+l login +\nh host +\nj jump +' "$@")"
+    while true; do
+        case "$1" in
+        -l | --login)
+            _login="$2"
+            shift 2
+            ;;
+        -h | --host)
+            host="$2"
+            shift 2
+            ;;
+        -j | --jump)
+            jump="$2"
+            shift 2
+            ;;
+        --)
+            shift
+            break
+            ;;
+        *) die "$(gettext "Unrecognized option"): $1" ;;
+        esac
+    done
+    # processing
+    _login=${login:-operator}
+    host=${host:-$server}
+    local ssh="${_login}@${host}"
+    [ -z "$jump" ] || ssh="-J $jump $ssh"
     if [ -p /dev/stdin ] && (($# == 0)); then
-        ssh "$ssh" bash -s
         # shellcheck disable=SC2086
-        return ${PIPESTATUS[0]}
+        ssh $ssh bash -s
+        return "${PIPESTATUS[0]}"
     else
         # this allows interactivity
-        # shellcheck disable=SC2029
-        ssh "$ssh" "$@"
         # shellcheck disable=SC2086
-        return ${PIPESTATUS[0]}
+        # shellcheck disable=SC2029
+        ssh $ssh "$@"
+        return "${PIPESTATUS[0]}"
     fi
 }
 
 # Run remote command with pseudo terminal
 # \r\n my be contained, remove with nocr
 # "Connection ... closed" in stderr: remove using: 2> >(grep -v '^Connection to .* closed\.' >&2)
-# Usage:    remote <command>... # special characters have to be masked: | & * > <
-#           <title> | remote
+# Usage:    remote_term [<options>] <command>... # special characters have to be masked: | & * > <
+#           <title> | remote_term [<options>]
+# Options:  # following options, only before `<command>`
+#           -l, --login <user>
+#           -h, --host <host>
+#           -j, --jump <user>@<host>
 # Globals:  $server
 #           $login - default is "operator"
 # Output:   passed through
 remote_term() {
-    local ssh="${login:-operator}@${server}"
+    # parameter parsing
+    local _login host jump
+    eval set -- "$(option_parse $'+l login +\nh host +\nj jump +' "$@")"
+    while true; do
+        case "$1" in
+        -l | --login)
+            _login="$2"
+            shift 2
+            ;;
+        -h | --host)
+            host="$2"
+            shift 2
+            ;;
+        -j | --jump)
+            jump="$2"
+            shift 2
+            ;;
+        --)
+            shift
+            break
+            ;;
+        *) die "$(gettext "Unrecognized option"): $1" ;;
+        esac
+    done
+    # processing
+    _login=${login:-operator}
+    host=${host:-$server}
+    local ssh="${_login}@${host}"
+    [ -z "$jump" ] || ssh="-J $jump $ssh"
     if [ -p /dev/stdin ]; then
-        ssh -t "$ssh" bash -s
         # shellcheck disable=SC2086
-        return ${PIPESTATUS[0]}
+        ssh -t $ssh bash -s
+        return "${PIPESTATUS[0]}"
     else
         # this allows interactivity
-        ssh -t "$ssh" "$@"
         # shellcheck disable=SC2086
-        return ${PIPESTATUS[0]}
+        ssh -t $ssh "$@"
+        return "${PIPESTATUS[0]}"
     fi
 }
 
 # Run remote command with pseudo terminal but line based output (problematic with questions)
-# Usage:    remote <command>... # special characters have to be masked: | & * > <
-#           <title> | remote
+# Usage:    remote_term_line [<options>] <command>... # special characters have to be masked: | & * > <
+#           <title> | remote_term_line [<options>]
+# Options:  # following options, only before `<command>`
+#           -l, --login <user>
+#           -h, --host <host>
+#           -j, --jump <user>@<host>
 # Globals:  $server
 #           $login - default is "operator"
 # Output:   passed through
 remote_term_line() {
-    local ssh="${login:-operator}@${server}"
+    # parameter parsing
+    local _login host jump
+    eval set -- "$(option_parse $'+l login +\nh host +\nj jump +' "$@")"
+    while true; do
+        case "$1" in
+        -l | --login)
+            _login="$2"
+            shift 2
+            ;;
+        -h | --host)
+            host="$2"
+            shift 2
+            ;;
+        -j | --jump)
+            jump="$2"
+            shift 2
+            ;;
+        --)
+            shift
+            break
+            ;;
+        *) die "$(gettext "Unrecognized option"): $1" ;;
+        esac
+    done
+    # processing
+    _login=${login:-operator}
+    host=${host:-$server}
+    local ssh="${_login}@${host}"
+    [ -z "$jump" ] || ssh="-J $jump $ssh"
     if [ -p /dev/stdin ]; then
-        ssh -t "$ssh" bash -s 2> >(grep -v '^Connection to .* closed\.' >&2) | nocr
         # shellcheck disable=SC2086
-        return ${PIPESTATUS[0]}
+        ssh -t $ssh bash -s 2> >(grep -v '^Connection to .* closed\.' >&2) | nocr
+        return "${PIPESTATUS[0]}"
     else
         # this allows interactivity
-        ssh -t "$ssh" "$@" 2> >(grep -v '^Connection to .* closed\.' >&2) | nocr
         # shellcheck disable=SC2086
-        return ${PIPESTATUS[0]}
+        ssh -t $ssh "$@" 2> >(grep -v '^Connection to .* closed\.' >&2) | nocr
+        return "${PIPESTATUS[0]}"
     fi
 }
 # STDERR_CLEANUP="2> >(grep -v '^Connection to .* closed\.' >&2)"
 
 # Run local script on remote
-# Usage:    remote_file <file>
-#           <file> | remote_file
+# Usage:    remote_file [<options>] <file>
+#           <file> | remote_file [<options>]
+# Options:  # following options, only before `<file>`
+#           -l, --login <user>
+#           -h, --host <host>
+#           -j, --jump <user>@<host>
 # Globals:  $server
 #           $login - default is "operator"
 # Output:   passed through
 remote_file() {
+    # parameter parsing
+    local _login host jump
+    eval set -- "$(option_parse $'+l login +\nh host +\nj jump +' "$@")"
+    while true; do
+        case "$1" in
+        -l | --login)
+            _login="$2"
+            shift 2
+            ;;
+        -h | --host)
+            host="$2"
+            shift 2
+            ;;
+        -j | --jump)
+            jump="$2"
+            shift 2
+            ;;
+        --)
+            shift
+            break
+            ;;
+        *) die "$(gettext "Unrecognized option"): $1" ;;
+        esac
+    done
+    # processing
+    _login=${login:-operator}
+    host=${host:-$server}
+    local ssh="${_login}@${host}"
+    [ -z "$jump" ] || ssh="-J $jump $ssh"
     local file
     file="$(input "$@")"
     test "${file:0:1}" = "/" || file="$(path)/$file"
     test -f "$file" || die "$(eval_gettext "No file to execute remotely under \$file")"
-    local ssh="${login:-operator}@${server}"
-    ssh "$ssh" 'bash -s' <"$file"
+    # shellcheck disable=SC2086
+    ssh $ssh 'bash -s' <"$file"
 }
 
 # Open an interactive console on remote host
 # The motd and banner are prevented by touching .hushlogin on the server.
-# Usage:    remote_console
-# Options:  -A, --forward-agent     # use local ssh-agent also on remote host for authentication.
+# Usage:    remote_console [<options>]
+# Options:  -l, --login <user>
+#           -h, --host <host>
+#           -j, --jump <user>@<host>
+#           -A, --forward-agent     # use local ssh-agent also on remote host for authentication.
 # Globals:  $server
 #           $login - default is "operator"
 # Output:   passed through
 # Return:   passed through
 remote_console() {
     # parameter parsing
-    eval set -- "$(option_parse "A forward-agent -" "$@")"
-    local opt
+    local _login host jump opt
+    eval set -- "$(option_parse $'+l login +\nh host +\nj jump +\nA forward-agent -' "$@")"
     while true; do
         case "$1" in
+        -l | --login)
+            _login="$2"
+            shift 2
+            ;;
+        -h | --host)
+            host="$2"
+            shift 2
+            ;;
+        -j | --jump)
+            jump="$2"
+            shift 2
+            ;;
         -A | --forward-agent)
             opt="-A"
             shift
@@ -120,37 +264,106 @@ remote_console() {
         *) die "$(gettext "Unrecognized option"): $1" ;;
         esac
     done
-    num_parameters "$@" --min 2 --max 2 --die "Need exactly two parameters: semver_diff [-h] <first> <second>"
     # processing
+    num_parameters "$@" --min 2 --max 2 --die "Need exactly two parameters: semver_diff [-h] <first> <second>"
+    _login=${login:-operator}
+    host=${host:-$server}
+    local ssh="${_login}@${host}"
+    [ -z "$jump" ] || ssh="-J $jump $ssh"
     local rc
-    local ssh="${login:-operator}@${server}"
-    ssh "$ssh" '(nohup touch .hushlogin && sleep 1 && rm .hushlogin) >/dev/null 2>&1 </dev/null &' # no banner
+    # shellcheck disable=SC2086
+    ssh $ssh '(nohup touch .hushlogin && sleep 1 && rm .hushlogin) >/dev/null 2>&1 </dev/null &' # no banner
+    # shellcheck disable=SC2086
     # shellcheck disable=SC2248
-    # shellcheck disable=SC2029
-    ssh $opt "$ssh" </dev/tty || rc=$?
-    # shellcheck disable=SC2248
-    return $rc
+    ssh $opt $ssh </dev/tty || rc=$?
+    return "$rc"
 }
 
 # Upload file
-# Usage:    upload <source> <dest>
+# Usage:    upload [<options>] <source> <dest>
+# Options:  # following options, only before `<source>`
+#           -l, --login <user>
+#           -h, --host <host>
+#           -j, --jump <user>@<host>
 # Globals:  $server
 #           $login - default is "operator"
 upload() {
-    local ssh="${login:-operator}@${server}"
+    # parameter parsing
+    local _login host jump
+    eval set -- "$(option_parse $'+l login +\nh host +\nj jump +' "$@")"
+    while true; do
+        case "$1" in
+        -l | --login)
+            _login="$2"
+            shift 2
+            ;;
+        -h | --host)
+            host="$2"
+            shift 2
+            ;;
+        -j | --jump)
+            jump="$2"
+            shift 2
+            ;;
+        --)
+            shift
+            break
+            ;;
+        *) die "$(gettext "Unrecognized option"): $1" ;;
+        esac
+    done
+    # processing
+    _login=${login:-operator}
+    host=${host:-$server}
+    local ssh="${_login}@${host}"
+    [ -z "$jump" ] || ssh="-J $jump $ssh"
     local dir=${2:-~}
     debug "rsync -av $1 $ssh:$dir"
-    rsync -av "$1" "$ssh:$dir"
+    # shellcheck disable=SC2086
+    rsync -av "$1" $ssh:"$dir"
 }
 
 # Download file
-# Usage:    download <source> <dest>
+# Usage:    download [<options>] <source> <dest>
+# Options:  # following options, only before `<source>`
+#           -l, --login <user>
+#           -h, --host <host>
+#           -j, --jump <user>@<host>
 # Globals:  $server
 #           $login - default is "operator"
 download() {
-    local ssh="${login:-operator}@${server}"
+    # parameter parsing
+    local _login host jump
+    eval set -- "$(option_parse $'+l login +\nh host +\nj jump +' "$@")"
+    while true; do
+        case "$1" in
+        -l | --login)
+            _login="$2"
+            shift 2
+            ;;
+        -h | --host)
+            host="$2"
+            shift 2
+            ;;
+        -j | --jump)
+            jump="$2"
+            shift 2
+            ;;
+        --)
+            shift
+            break
+            ;;
+        *) die "$(gettext "Unrecognized option"): $1" ;;
+        esac
+    done
+    # processing
+    _login=${login:-operator}
+    host=${host:-$server}
+    local ssh="${_login}@${host}"
+    [ -z "$jump" ] || ssh="-J $jump $ssh"
     local dir=${2:-.}
-    rsync -av "$ssh:$1" "$dir"
+    # shellcheck disable=SC2086
+    rsync -av $ssh:"$1" "$dir"
 }
 
 ######################################################################################
@@ -166,16 +379,37 @@ download() {
 # - `configs` to also transfer all the configurations
 # - `config/<name>` to load only one config
 # - any other name will be interpreted as `module/<name>` (short form)
-# Usage:    remote_bashlib <module>[,<module>...] <command> [<args>...]
-#           <command> [<args>...] | remote_bashlib <module>[,<module>...]
-#           remote_bashlib full[,extra/<module>...] <command> [<args>...]
+# Usage:    remote_bashlib [<options>] <module>[,<module>...] <command> [<args>...]
+#           <command> [<args>...] | remote_bashlib [<options>] <module>[,<module>...]
+# Options:  # following options, only before `<module>`
+#           -l, --login <user>
+#           -h, --host <host>
+#           -j, --jump <user>@<host>
 # Globals:  $server
 #           $login - default is "operator"
 # Examples: IP="$(remote_bashlib ip ip_intern)"
 remote_bashlib() {
+    # parameter parsing
+    local opt
+    eval set -- "$(option_parse $'+l login +\nh host +\nj jump +' "$@")"
+    while true; do
+        case "$1" in
+        -l | --login | -h | --host | -j | --jump)
+            opt+=" $1 $2"
+            shift 2
+            ;;
+        --)
+            shift
+            break
+            ;;
+        *) die "$(gettext "Unrecognized option"): $1" ;;
+        esac
+    done
+    # processing
     local modules
     IFS=',' read -ra modules <<<"${1-}"
     shift
+    # shellcheck disable=SC2086
     (
         echo "DEBUG=${DEBUG:-}"
         # load base
@@ -200,7 +434,7 @@ remote_bashlib() {
         done
         (($# == 0)) || echo "$*"
         [ ! -p /dev/stdin ] || cat </dev/stdin
-    ) | shfmt -mn | remote
+    ) | shfmt -mn | remote $opt
 }
 
 # Deprecated: Remote install package like @install
@@ -301,8 +535,11 @@ remote_lvm() {
 }
 
 # Wait till reboot is finished
-# Usage:    boot_wait
-# Options:  -q, --quiet
+# Usage:    boot_wait [<options>]
+# Options:  -l, --login <user>
+#           -h, --host <host>
+#           -j, --jump <user>@<host>
+#           -q, --quiet
 # Globals:  $server
 #           $login - default is "operator"
 # Error:    <sql-time>
@@ -342,7 +579,7 @@ boot_wait() {
 }
 
 ######################################################################################
-# Remote HTTP
+# HTTP/HTTPS
 ######################################################################################
 
 # Last HTTP return code from curl

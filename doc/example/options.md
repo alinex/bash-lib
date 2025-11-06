@@ -34,15 +34,26 @@ my_function --alpha --file=input.txt arg1 arg2
 # arg1 arg2         command arguments
 ```
 
-### Mixed Option Types
+### Mixed Option Types (Permutation)
 
-You can also mix everything together in any order for short, long options and arguments:
+This is an optional feature which is by default enabled. But if the `<spec>` starts with `+` the option processing stops as soon as the first non-option argument is found all behind are arguments.
+
+If perumtation is allowed (default) you can also mix everything together in any order for short, long options and arguments:
 
 ```bash
-my_function arg1 -a arg2 --file input.txt
+my_function -a cmd arg1 --file input.txt
 # -a                short option flag
 # --file input.txt  long option with an argument
-# arg1 arg2         command arguments
+# cmd arg1          command arguments
+```
+
+If it is not allowed, `<spec>` starts with `+`:
+
+```bash
+my_function -a cmd arg1 --file input.txt
+# -a                short option flag
+# cmd arg1          command arguments (from this scope)
+# --file input.txt  is seen as argument here, but maybe an option under `cmd`
 ```
 
 ### Argument Separation

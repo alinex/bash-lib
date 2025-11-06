@@ -7,12 +7,15 @@
 ### Usage
 
 ```bash
-boot_wait
+boot_wait [<options>]
 ```
 
 ### Options
 
 ```bash
+-l, --login <user>
+-h, --host <host>
+-j, --jump <user>@<host>
 -q, --quiet
 ```
 

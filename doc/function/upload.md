@@ -7,7 +7,16 @@
 ### Usage
 
 ```bash
-upload <source> <dest>
+upload [<options>] <source> <dest>
+```
+
+### Options
+
+```bash
+# following options, only before `<source>`
+-l, --login <user>
+-h, --host <host>
+-j, --jump <user>@<host>
 ```
 
 ### Globals
