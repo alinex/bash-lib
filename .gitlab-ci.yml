@@ -73,9 +73,6 @@ Debian:
       - tests/results/
     reports:
       junit: tests/results/*.xml
-  only:
-    - master
-    - merge_requests
 
 Ubuntu:
   extends: Debian
