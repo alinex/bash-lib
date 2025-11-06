@@ -2032,10 +2032,23 @@ local modules
 IFS=',' read -ra modules <<<"${1-}"
 shift
 (echo "DEBUG=${DEBUG:-}"
+if [[ ${modules[0]} =~ full|base ]];then
+cat "$BASHLIB_HOME/${modules[0]}"
+modules=("${modules[@]:1}")
+else
 cat "$BASHLIB_HOME"/base
+fi
 for module in "${modules[@]}";do
+if [ "$module" = "configs" ];then
+for f in "$BASHLIB_HOME"/config/*;do
+if [[ -f $f && $f != *.* ]];then
+cat "$f"
+fi
+done
+else
 [[ $module =~ .*/.* ]]||module="module/$module"
 cat "$BASHLIB_HOME/$module"
+fi
 done
 (($#==0))||echo "$*"
 [ ! -p /dev/stdin ]||cat </dev/stdin)|shfmt -mn|remote

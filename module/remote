@@ -158,21 +158,45 @@ download() {
 ######################################################################################
 
 # Run bashlib command on remote.
-# The `modules` are a comma separated list of module names like network os and if they are not in `module/` please add the parent folder.
-# Usage:    remote_bashlib <modules> <command> [<args>...]
-#           <command> [<args>...] | remote_bashlib <modules>
+# The `modules` are a comma separated list of module names like network os.
+# The modules can be:
+# - `base` or `full` as first element
+# - `module/<name>` to load the named module (if not full is used)
+# - `extra/<name>` to load an extra module
+# - `configs` to also transfer all the configurations
+# - `config/<name>` to load only one config
+# - any other name will be interpreted as `module/<name>` (short form)
+# Usage:    remote_bashlib <module>[,<module>...] <command> [<args>...]
+#           <command> [<args>...] | remote_bashlib <module>[,<module>...]
+#           remote_bashlib full[,extra/<module>...] <command> [<args>...]
 # Globals:  $server
 #           $login - default is "operator"
+# Examples: IP="$(remote_bashlib ip ip_intern)"
 remote_bashlib() {
     local modules
     IFS=',' read -ra modules <<<"${1-}"
     shift
     (
         echo "DEBUG=${DEBUG:-}"
-        cat "$BASHLIB_HOME"/base
+        # load base
+        if [[ "${modules[0]}" =~ full|base ]]; then
+            cat "$BASHLIB_HOME/${modules[0]}"
+            modules=("${modules[@]:1}")
+        else
+            cat "$BASHLIB_HOME"/base
+        fi
+        # load modules
         for module in "${modules[@]}"; do
-            [[ "$module" =~ .*/.* ]] || module="module/$module"
-            cat "$BASHLIB_HOME/$module"
+            if [ "$module" = "configs" ]; then
+                for f in "$BASHLIB_HOME"/config/*; do
+                    if [[ -f "$f" && "$f" != *.* ]]; then
+                        cat "$f"
+                    fi
+                done
+            else
+                [[ "$module" =~ .*/.* ]] || module="module/$module"
+                cat "$BASHLIB_HOME/$module"
+            fi
         done
         (($# == 0)) || echo "$*"
         [ ! -p /dev/stdin ] || cat </dev/stdin

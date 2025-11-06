@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-11-05 21:30+0100\n"
+"POT-Creation-Date: 2025-11-06 07:43+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -55,8 +55,8 @@ msgid "Could not scrape the prometheus exporter at $url!"
 msgstr "Der Prometheus Exporter unter $url konnte nicht abgefragt werden!"
 
 #: module/monitoring:151 module/input:41 module/input:105 module/input:251
-#: module/input:486 module/input:666 module/remote:120 module/remote:215
-#: module/remote:299 module/mattermost:319 module/mattermost:354
+#: module/input:486 module/input:666 module/remote:120 module/remote:239
+#: module/remote:323 module/mattermost:319 module/mattermost:354
 #: module/validator:36 module/software:107
 msgid "Unrecognized option"
 msgstr "Unbekannte Option"
@@ -204,7 +204,7 @@ msgstr "Start: Schritt $name um $date"
 msgid "No file to execute remotely under $file"
 msgstr "Keine Datei unter $file für Remote ausführen"
 
-#: module/remote:307
+#: module/remote:331
 #, sh-format
 msgid "Wait until the reboot is complete ($seconds seconds)"
 msgstr "Warten bis der Reboot fertig ist ($seconds Sekunden)"
