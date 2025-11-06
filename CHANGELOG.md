@@ -7,6 +7,8 @@ As this is not driven by releases and therefore tags are not used it is an ongoi
 - Deprecated as warning and die possible
 - integrate ip pattern mapping to detect provider, network segment or vmware link
 - simplified remote invocation using [`remote_bashlib`](doc/function/remote_bashlib.md)
+- [options](doc/function/option_parse.md) can now also work without permutation
+- all ['remote`](doc/function/remote.md) functions now support a jump host
 
 ## 05. November 2025 - V2.0.1
 
