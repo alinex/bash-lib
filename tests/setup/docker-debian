@@ -7,8 +7,8 @@ export BASHLIB_HOME="$(pwd)"
 export DEBIAN_FRONTEND=noninteractive
 echo "tzdata tzdata/Areas select Europe" | debconf-set-selections
 echo "tzdata tzdata/Zones/Europe select Berlin" | debconf-set-selections
-apt-get update &>/dev/null
-apt-get install -y git tzdata curl locales gettext expect jq &>/dev/null </dev/null
+apt-get update >/dev/null 2>/dev/null
+apt-get install -y bash git tzdata curl locales gettext expect jq >/dev/null 2>/dev/null </dev/null
 
 # Set timezone (for date tests)
 ln -fs /usr/share/zoneinfo/Europe/Berlin /etc/localtime && dpkg-reconfigure -f noninteractive tzdata 2>/dev/null
@@ -23,4 +23,4 @@ export LC_ALL=de_DE.UTF-8
 
 # install bats
 # shellcheck disable=SC1091
-source "$BASHLIB_HOME/tests/setup/bats" >/dev/null
+. "$BASHLIB_HOME/tests/setup/bats" >/dev/null
