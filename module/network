@@ -53,6 +53,8 @@ ip_pattern() {
     return 1
 }
 
+_ip_extern_json=
+
 # Run  os detection and set the constants
 # The following formats are possible:
 # - data - all values with `<name>\t<value>`

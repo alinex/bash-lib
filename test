@@ -52,7 +52,7 @@ else
         "echo -n 'prepare'
         . tests/setup/docker-$name
         echo -n '; run '
-        bats --tap core module | grep -v ^ok"
+        bats --tap core module #| grep -v ^ok"
     done
   done
   # redhat fedora centos

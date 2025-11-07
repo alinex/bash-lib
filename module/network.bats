@@ -5,6 +5,8 @@
 setup() {
     # shellcheck disable=SC2154
     load "$BASHLIB_HOME/tests/bats"
+    # declare global used variables
+    declare -g _ip_extern_json
 }
 
 ######################################################################################
@@ -26,7 +28,7 @@ setup() {
 # bats test_tags=ip_intern
 @test "ip_intern: with data format" {
     run ip_intern data
-    assert_output -p $'ip\tinterface'
+    assert_output -p $'IP\tSchnittstelle'
     assert_output -e "[0-9]+\.[0-9]+.[0-9]+.[0-9]+"
     assert_success
 }

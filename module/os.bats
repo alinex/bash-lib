@@ -5,6 +5,8 @@
 setup() {
     # shellcheck disable=SC2154
     load "$BASHLIB_HOME/tests/bats"
+    # declare global used variables
+    declare -Ag _os_detected
 }
 
 ######################################################################################
@@ -15,6 +17,12 @@ setup() {
 @test "os_detect: detect data" {
     run os_detect data
     assert_output -p "os"
+    assert_success
+}
+# bats test_tags=os_detect
+@test "os_detect: detect info" {
+    run os_detect info
+    assert_output -e ".+"
     assert_success
 }
 # bats test_tags=os_detect
@@ -74,12 +82,6 @@ setup() {
 # bats test_tags=os_detect
 @test "os_detect: detect virtual_machine" {
     run os_detect virtual_machine
-    assert_output -e ".+"
-    assert_success
-}
-# bats test_tags=os_detect
-@test "os_detect: detect info" {
-    run os_detect info
     assert_output -e ".+"
     assert_success
 }

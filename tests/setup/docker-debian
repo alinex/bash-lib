@@ -8,7 +8,7 @@ export DEBIAN_FRONTEND=noninteractive
 echo "tzdata tzdata/Areas select Europe" | debconf-set-selections
 echo "tzdata tzdata/Zones/Europe select Berlin" | debconf-set-selections
 apt-get update >/dev/null 2>/dev/null
-apt-get install -y bash git tzdata curl locales gettext expect jq >/dev/null 2>/dev/null </dev/null
+apt-get install -y bash iproute2 git tzdata curl locales gettext expect jq >/dev/null 2>/dev/null </dev/null
 
 # Set timezone (for date tests)
 ln -fs /usr/share/zoneinfo/Europe/Berlin /etc/localtime && dpkg-reconfigure -f noninteractive tzdata 2>/dev/null
