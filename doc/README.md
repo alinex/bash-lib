@@ -287,20 +287,7 @@ Module with operating system specific helper functions.
 
 | Variable/Function | Description |
 | --- | --- |
-| ``$OS`` | Operation System like: Linux, MacOS... (set in detect_os) |
-| ``$KERNEL`` | Kernel version number (set in detect_os) |
-| ``$MACH`` | CPU type (set in detect_os) |
-| ``$DIST_BASE`` | Base distribution type like Debian (set in detect_os) |
-| ``$DIST_BASE_REV`` | Base distributions number like 13 (set in detect_os) |
-| ``$DIST`` | Distribution name like Ubuntu (set in detect_os) |
-| ``$REV_NAME`` | Distributions revision name like noble (set in detect_os) |
-| ``$REV`` | Distribution revision version number like 14.04 (set in detect_os) |
-| ``$MACH_ID`` | CPU identifier (set in detect_os) |
-| ``$IS_VIRTUAL`` | Is a virtual machine (set in detect_os) |
-| ``$CPU_NUM`` | Number of CPU cores (set in detect_os) |
-| ``$CPU_MODEL`` | CPU Model description (set in detect_os) |
-| [`detect_os`](function/detect_os.md) | Run  os detection and set the constants |
-| [`system_info`](function/system_info.md) | Display the system description |
+| [`os_detect`](function/os_detect.md) | Detect OS settings |
 | [`has_tty`](function/has_tty.md) | Has tty present |
 | [`is_bash`](function/is_bash.md) | Is running with bash console |
 

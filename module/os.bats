@@ -8,41 +8,79 @@ setup() {
 }
 
 ######################################################################################
-# detect_os
+# os_detect
 ######################################################################################
 
-# bats test_tags=detect_os
-@test "detect_os: OS should be defined" {
-    detect_os
+# bats test_tags=os_detect
+@test "os_detect: detect data" {
+    run os_detect data
+    assert_output -p "os"
     assert_success
-    assert [ -n "$OS" ]
 }
-# bats test_tags=detect_os
-@test "detect_os: KERNEL should be defined" {
-    detect_os
+# bats test_tags=os_detect
+@test "os_detect: detect base" {
+    run os_detect base
+    assert_output -e ".+"
     assert_success
-    assert [ -n "$KERNEL" ]
 }
-# bats test_tags=detect_os
-@test "detect_os: MACH should be defined" {
-    detect_os
+# bats test_tags=os_detect
+@test "os_detect: detect distribution" {
+    run os_detect distribution
+    assert_output -e ".+"
     assert_success
-    assert [ -n "$MACH" ]
 }
-# bats test_tags=detect_os
-@test "detect_os: MACH_ID should be defined" {
-    detect_os
+# bats test_tags=os_detect
+@test "os_detect: detect revision_number" {
+    run os_detect revision_number
+    assert_output -e ".+"
     assert_success
-    assert [ -n "$MACH_ID" ]
 }
-
-######################################################################################
-# system_info
-######################################################################################
-
-# bats test_tags=system_info
-@test "system_info: should get timestamp" {
-    run system_info
+# bats test_tags=os_detect
+@test "os_detect: detect revision_name" {
+    run os_detect revision_name
+    assert_output -e ".+"
+    assert_success
+}
+# bats test_tags=os_detect
+@test "os_detect: detect kernel" {
+    run os_detect kernel
+    assert_output -e ".+"
+    assert_success
+}
+# bats test_tags=os_detect
+@test "os_detect: detect cpu_model" {
+    run os_detect cpu_model
+    assert_output -e ".+"
+    assert_success
+}
+# bats test_tags=os_detect
+@test "os_detect: detect cpu_num" {
+    run os_detect cpu_num
+    assert_output -e ".+"
+    assert_success
+}
+# bats test_tags=os_detect
+@test "os_detect: detect architecture" {
+    run os_detect architecture
+    assert_output -e ".+"
+    assert_success
+}
+# bats test_tags=os_detect
+@test "os_detect: detect machine_id" {
+    run os_detect machine_id
+    assert_output -e ".+"
+    assert_success
+}
+# bats test_tags=os_detect
+@test "os_detect: detect virtual_machine" {
+    run os_detect virtual_machine
+    assert_output -e ".+"
+    assert_success
+}
+# bats test_tags=os_detect
+@test "os_detect: detect info" {
+    run os_detect info
+    assert_output -e ".+"
     assert_success
 }
 
