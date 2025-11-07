@@ -9,6 +9,10 @@
 
 _os_detected=""
 
+os_detect() {
+    true
+}
+
 # Operation System like: Linux, MacOS... (set in detect_os)
 OS=
 # Kernel version number (set in detect_os)
