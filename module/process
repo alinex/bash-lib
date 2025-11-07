@@ -66,7 +66,7 @@ function retry {
     return 0
 }
 
-countdown() { _deprecate "use pause <text> --timeout=<duration> --abort"; }
+countdown() { _deprecated "use pause <text> --timeout=<duration> --abort"; }
 
 ######################################################################################
 # Locking
