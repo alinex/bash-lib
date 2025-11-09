@@ -231,6 +231,7 @@ File and directory helpers.
 
 | Variable/Function | Description |
 | --- | --- |
+| [`basename`](function/basename.md) | Strip directory and suffix from filenames |
 | [`script_path`](function/script_path.md) | Get the path from the called command |
 
 ### Input Module

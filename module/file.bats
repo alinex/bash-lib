@@ -7,6 +7,29 @@ setup() {
 }
 
 ######################################################################################
+# basename
+######################################################################################
+
+# bats test_tags=basename
+@test "basename: should get file" {
+    run basename /my/file
+    assert_output "file"
+    assert_success
+}
+# bats test_tags=basename
+@test "basename: should also remove ending slash" {
+    run basename /my/file/
+    assert_output "file"
+    assert_success
+}
+# bats test_tags=basename
+@test "basename: pipe path" {
+    run bats_pipe echo /my/file \| basename
+    assert_output "file"
+    assert_success
+}
+
+######################################################################################
 # script_path
 ######################################################################################
 

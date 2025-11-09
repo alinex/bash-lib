@@ -470,6 +470,12 @@ sort -f name then \
 rename name,NAME,record_type,TYPE,record_data,CONTENT,record_ttl,TTL \
 "$list"|awk 'NR == 1 || /'"$1"'/'
 }
+basename(){
+local path
+path="$(input "$@")"
+path="${path%/}"
+echo "${path##*/}"
+}
 script_path(){
 dirname "$(readlink -f "${BASH_SOURCE[-1]:-$(pwd)/x}")"
 }
