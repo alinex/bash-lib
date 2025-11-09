@@ -23,3 +23,22 @@ setup() {
     run contains x ten
     assert_failure
 }
+
+######################################################################################
+# join
+######################################################################################
+
+# bats test_tags=join
+@test "join: use default separator" {
+    x=( one two three )
+    run join x
+    assert_output "one,two,three"
+    assert_success
+}
+# bats test_tags=join
+@test "join: use custom separator" {
+    x=( one two three )
+    run join x ", "
+    assert_output "one, two, three"
+    assert_success
+}

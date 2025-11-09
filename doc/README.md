@@ -131,6 +131,7 @@ Array helpers.
 | Variable/Function | Description |
 | --- | --- |
 | [`contains`](function/contains.md) | Check if value is contained in array |
+| [`join`](function/join.md) | Join array elements by delimiter. |
 
 ### Atlassian Module
 

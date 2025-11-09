@@ -308,6 +308,15 @@ for e in "${array[@]}";do
 done
 return 1
 }
+join(){
+local -n array=$1
+local sep="${2:-,}"
+local joined="${array[0]}"
+for element in "${array[@]:1}";do
+joined+="$sep$element"
+done
+echo "$joined"
+}
 confluence(){
 install jq
 curl -H "Content-Type: application/json" -u "$ATLASSIAN_USER:$ATLASSIAN_TOKEN" "$CONFLUENCE_API/content/$1?expand=body.storage"|jq .body.storage.value -r||die "Could not read confluence page!"

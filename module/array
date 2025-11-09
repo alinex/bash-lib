@@ -19,3 +19,21 @@ contains() {
     done
     return 1
 }
+
+######################################################################################
+### Join
+######################################################################################
+
+# Join array elements by delimiter.
+# Convert all elements in array into a string separated by delimiter.
+# Usage:    join <array-name> [<delimiter>=,]
+# Output:   <string>
+join() {
+    local -n array=$1
+    local sep="${2:-,}"
+    local joined="${array[0]}"
+    for element in "${array[@]:1}"; do
+        joined+="${sep}${element}"
+    done
+    echo "$joined"
+}
