@@ -1,6 +1,6 @@
 # basename
 
-## Strip directory and suffix from filenames
+## Strip directory from filepath
 
 This is a much faster implementation as the basename command because it is using shell parameter expansion.
 It will remove the directory and output only the filename.

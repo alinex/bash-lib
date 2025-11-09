@@ -476,6 +476,16 @@ path="$(input "$@")"
 path="${path%/}"
 echo "${path##*/}"
 }
+dirname(){
+local path
+path="$(input "$@")"
+if [[ $path != */* ]];then
+echo "."
+else
+path="${path%/}"
+echo "${path%/*}"
+fi
+}
 script_path(){
 dirname "$(readlink -f "${BASH_SOURCE[-1]:-$(pwd)/x}")"
 }

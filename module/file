@@ -8,7 +8,7 @@ source /dev/null
 ### Path
 ######################################################################################
 
-# Strip directory and suffix from filenames
+# Strip directory from filepath
 # This is a much faster implementation as the basename command because it is using shell parameter expansion.
 # It will remove the directory and output only the filename.
 # Usage:    basename <path>
@@ -19,6 +19,26 @@ basename() {
     path="$(input "$@")"
     path="${path%/}"
     echo "${path##*/}"
+}
+
+# Strip last component from file path
+# This is a much faster implementation as the dirname command because it is using shell parameter expansion.
+# It will remove the last element in path.
+# Usage:    dirname <path>
+#           <path> | dirname
+# Output:   <base-path>
+dirname() {
+    local path
+    path="$(input "$@")"
+    # If no slash in path, return "."
+    if [[ "$path" != */* ]]; then
+        echo "."
+    else
+        # Remove trailing slashes
+        path="${path%/}"
+        # Remove last / and tail
+        echo "${path%/*}"
+    fi
 }
 
 # Get the path from the called command
