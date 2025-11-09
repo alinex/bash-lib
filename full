@@ -484,6 +484,13 @@ path="$(input "$@")"
 [[ ! $path =~ / ]]&&echo '.'&&return 0
 echo "${path%/*}"
 }
+extname(){
+local path
+path="$(input "$@")"
+[[ $path =~ ^\. ]]&&echo ''&&return
+[[ ! $path =~ \. ]]&&echo ''&&return
+echo ".${path##*.}"
+}
 script_path(){
 dirname "$(readlink -f "${BASH_SOURCE[-1]:-$(pwd)/x}")"
 }

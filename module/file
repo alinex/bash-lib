@@ -36,6 +36,19 @@ dirname() {
     echo "${path%/*}"
 }
 
+# Returns the extension of the path
+# From the last occurrence of the . (period) character to end of string in the last portion of the path. If there is no . in the last portion of the path, or if the first character of the basename of path (see path.basename()) is ., then an empty string is returned.
+# Usage:    extname <path>
+#           <path> | extname
+# Output:   <extension>
+extname() {
+    local path
+    path="$(input "$@")"
+    [[ $path =~ ^\. ]] && echo '' && return
+    [[ ! $path =~ \. ]] && echo '' && return
+    echo ".${path##*.}"
+}
+
 # Get the path from the called command
 # Usage:    script_path
 # Output:   full real directory path to script

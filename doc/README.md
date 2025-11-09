@@ -233,6 +233,7 @@ File and directory helpers.
 | --- | --- |
 | [`basename`](function/basename.md) | Strip directory from filepath |
 | [`dirname`](function/dirname.md) | Strip last component from file path |
+| [`extname`](function/extname.md) | Returns the extension of the path |
 | [`script_path`](function/script_path.md) | Get the path from the called command |
 
 ### Input Module

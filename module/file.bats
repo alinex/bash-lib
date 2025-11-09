@@ -47,6 +47,23 @@ setup() {
 }
 
 ######################################################################################
+# extname
+######################################################################################
+
+# bats test_tags=extname
+@test "extname: should get path" {
+    run extname /my/file.config
+    assert_output ".config"
+    assert_success
+}
+# bats test_tags=extname
+@test "extname: pipe path" {
+    run bats_pipe echo /my/file.config \| extname
+    assert_output ".config"
+    assert_success
+}
+
+######################################################################################
 # script_path
 ######################################################################################
 
