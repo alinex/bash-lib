@@ -165,6 +165,13 @@ tsv2md() {
 # Visual effects
 ######################################################################################
 
+# Remove current line
+# When printed to a terminal, it will erase everything from the current cursor position backward to the beginning of the line.
+# Usage:    erase_line
+erase_line() {
+    printf '%b' $'\e[1K\r'
+}
+
 _spinner_pid=""
 
 # Function to start the spinner in the background

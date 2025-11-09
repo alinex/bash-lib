@@ -30,15 +30,10 @@ basename() {
 dirname() {
     local path
     path="$(input "$@")"
-    # If no slash in path, return "."
-    if [[ "$path" != */* ]]; then
-        echo "."
-    else
-        # Remove trailing slashes
-        path="${path%/}"
-        # Remove last / and tail
-        echo "${path%/*}"
-    fi
+    [[ $path == '/' ]] && echo '/' && return 0
+    [[ $path =~ ^'../' ]] && echo '.' && return 0
+    [[ ! $path =~ / ]] && echo '.' && return 0
+    echo "${path%/*}"
 }
 
 # Get the path from the called command

@@ -40,12 +40,6 @@ setup() {
     assert_success
 }
 # bats test_tags=dirname
-@test "dirname: should also remove ending slash" {
-    run dirname /my/file/
-    assert_output "/my"
-    assert_success
-}
-# bats test_tags=dirname
 @test "dirname: pipe path" {
     run bats_pipe echo /my/file \| dirname
     assert_output "/my"

@@ -314,6 +314,7 @@ Module with output and user interaction helpers.
 | [`urlencode`](function/urlencode.md) | Encode message to be used within the url |
 | [`tsv2table`](function/tsv2table.md) | Convert TSV data into visual table |
 | [`tsv2md`](function/tsv2md.md) | Convert TSV data into markdown table |
+| [`erase_line`](function/erase_line.md) | Remove current line |
 | [`spinner_start`](function/spinner_start.md) | Function to start the spinner in the background |
 | [`spinner_stop`](function/spinner_stop.md) | Function to stop the spinner |
 

@@ -479,12 +479,10 @@ echo "${path##*/}"
 dirname(){
 local path
 path="$(input "$@")"
-if [[ $path != */* ]];then
-echo "."
-else
-path="${path%/}"
+[[ $path == '/' ]]&&echo '/'&&return 0
+[[ $path =~ ^'../' ]]&&echo '.'&&return 0
+[[ ! $path =~ / ]]&&echo '.'&&return 0
 echo "${path%/*}"
-fi
 }
 script_path(){
 dirname "$(readlink -f "${BASH_SOURCE[-1]:-$(pwd)/x}")"
@@ -1617,6 +1615,9 @@ input "$@"|mlr --csvlite --ifs '\t' -o pprint cat
 tsv2md(){
 install mlr
 input "$@"|uncolorize|mlr --csvlite --ifs '\t' --omd cat
+}
+erase_line(){
+printf '%b' $'\e[1K\r'
 }
 _spinner_pid=""
 spinner_start(){
