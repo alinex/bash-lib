@@ -42,3 +42,20 @@ setup() {
     assert_output "one, two, three"
     assert_success
 }
+
+######################################################################################
+# split
+######################################################################################
+
+# bats test_tags=split
+@test "split: use default separator" {
+    x=()
+    split "one,two,three" x
+    assert [ "${x[*]}" = "one two three" ]
+}
+# bats test_tags=split
+@test "split: use custom separator" {
+    x=()
+    split "one, two, three" x ", "
+    assert [ "${x[*]}" = "one two three" ]
+}

@@ -317,6 +317,12 @@ joined+="$sep$element"
 done
 echo "$joined"
 }
+split(){
+local string="$1"
+local -n array=$2
+local sep="${3:-,}"
+IFS="$sep" read -ra array <<<"$string"
+}
 confluence(){
 install jq
 curl -H "Content-Type: application/json" -u "$ATLASSIAN_USER:$ATLASSIAN_TOKEN" "$CONFLUENCE_API/content/$1?expand=body.storage"|jq .body.storage.value -r||die "Could not read confluence page!"

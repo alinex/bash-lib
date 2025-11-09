@@ -21,12 +21,12 @@ contains() {
 }
 
 ######################################################################################
-### Join
+### Join/Split
 ######################################################################################
 
 # Join array elements by delimiter.
-# Convert all elements in array into a string separated by delimiter.
-# Usage:    join <array-name> [<delimiter>=,]
+# Convert all elements in array into a string separated by delimiter (default is `,`).
+# Usage:    join <array-name> [<delimiter>]
 # Output:   <string>
 join() {
     local -n array=$1
@@ -36,4 +36,16 @@ join() {
         joined+="${sep}${element}"
     done
     echo "$joined"
+}
+
+# Splits string by delimiter into array
+# The delimiter defaults to `,`.
+# Usage:    split <atring> <array-name> [<delimiter>]
+# Output:   <string>
+split() {
+    local string="$1"
+    local -n array=$2
+    local sep="${3:-,}"
+    # Set IFS to the separator and read into array
+    IFS="$sep" read -ra array <<<"$string"
 }
