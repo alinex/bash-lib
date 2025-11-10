@@ -68,6 +68,8 @@ die() {
     exit 1
 }
 [ -n "${BASH_VERSION:-}" ] || die "No bash CLI! This can only be run under bash"
+((BASH_VERSINFO[0] > 4 || (BASH_VERSINFO[0] == 4 && BASH_VERSINFO[1] >= 2))) ||
+    die "No bash CLI! This can only be run under bash >=4.2!"
 
 # Set or add an additional trap without overwriting existing ones
 # This is done by adding the new code as additional command before the existing ones if the trap is already set.
