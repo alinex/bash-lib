@@ -201,7 +201,9 @@ horizontal_line() {
     full) char="█" ;;
     *) char="─" ;;
     esac
-    printf "%.0s$char" $(seq 1 "$(tput cols)")
+    local cols
+    read _ cols < <(stty size)
+    printf "%.0s$char" $(seq 1 "$cols")
 }
 
 _spinner_pid=""
@@ -248,7 +250,7 @@ spinner_start() {
     esac
     local back=$((size + 1))
     # Spinner function running in background loop
-    tput civis
+    printf '\e[?25l' # make cursor invisible
     (
         while true; do
             for ((i = 0; i < ${#spinner}; i += chars)); do
@@ -270,5 +272,5 @@ spinner_stop() {
     wait "$_spinner_pid" 2>/dev/null
     _spinner_pid=""
     printf "    \b\b\b\b" # Clear spinner character
-    tput cnorm
+    printf '\e[?25h'      # make cursor visible again
 }
