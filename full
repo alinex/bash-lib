@@ -1497,7 +1497,7 @@ _os_detected["base"]=ArchLinux
 _os_detected["distribution"]="ArchLinux"
 _os_detected["revision_name"]="Rolling"
 _os_detected["revision_number"]="$(grep base /var/log/pacman.log|tail -n 1)"
-elif grep -q '^ID=alpine$' /etc/os-release 2>/dev/null;then
+elif [ -f /etc/alpine-release ];then
 _os_detected["base"]=Alpine
 _os_detected["distribution"]=Alpine
 _os_detected["revision_number"]="$(grep '^VERSION_ID=' /etc/os-release|head -n 1|awk -F= '{ print $2 }'|sed 's/"//g')"

@@ -22,7 +22,7 @@ if ((BASH_VERSINFO[0] < 4 || (BASH_VERSINFO[0] == 4 && BASH_VERSINFO[1] < 2))); 
     exit 1
 fi
 # detect os
-if grep -q '^ID=alpine$' /etc/os-release 2>/dev/null; then
+if [ -f /etc/alpine-release ]; then
     OS=alpine
 elif [ -f /etc/debian_version ]; then
     OS=debian
