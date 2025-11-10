@@ -87,6 +87,32 @@ setup() {
 }
 
 ######################################################################################
+# disk_free
+######################################################################################
+
+# bats test_tags=disk_free
+@test "disk_free: should display" {
+    run disk_free
+    assert_success
+}
+# bats test_tags=disk_free
+@test "disk_free: should dosplay root only" {
+    run bats_pipe disk_free / \| wc -l
+    assert_output "2"
+    assert_success
+}
+# bats test_tags=disk_free
+@test "disk_free: should dosplay root local" {
+    run disk_free -l
+    assert_success
+}
+# bats test_tags=disk_free
+@test "disk_free: collect free percent" {
+    run disk_free --collect=array --free="<99%"
+    assert_success
+}
+
+######################################################################################
 # has_tty
 ######################################################################################
 

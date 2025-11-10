@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-11-06 14:13+0100\n"
+"POT-Creation-Date: 2025-11-10 14:24+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -41,6 +41,15 @@ msgstr ""
 "Für Update $PLUSSERVER_PORTAL/services/nameservers -> CSV herunterladen "
 "(manuell)."
 
+#: module/os:168 module/monitoring:151 module/input:41 module/input:105
+#: module/input:251 module/input:486 module/input:666 module/remote:51
+#: module/remote:106 module/remote:158 module/remote:211 module/remote:264
+#: module/remote:312 module/remote:356 module/remote:406 module/remote:474
+#: module/remote:561 module/mattermost:319 module/mattermost:354
+#: module/validator:36 module/software:107
+msgid "Unrecognized option"
+msgstr "Unbekannte Option"
+
 #: module/network:19
 msgid "IP\\tInterface"
 msgstr "IP\\tSchnittstelle"
@@ -53,15 +62,6 @@ msgstr "Es konnten keine Exporter von Prometheus ermittelt werden!"
 #, sh-format
 msgid "Could not scrape the prometheus exporter at $url!"
 msgstr "Der Prometheus Exporter unter $url konnte nicht abgefragt werden!"
-
-#: module/monitoring:151 module/input:41 module/input:105 module/input:251
-#: module/input:486 module/input:666 module/remote:51 module/remote:106
-#: module/remote:158 module/remote:211 module/remote:264 module/remote:312
-#: module/remote:356 module/remote:405 module/remote:473 module/remote:560
-#: module/mattermost:319 module/mattermost:354 module/validator:36
-#: module/software:107
-msgid "Unrecognized option"
-msgstr "Unbekannte Option"
 
 #: module/monitoring:158
 msgid "Could not get alerts from Grafana!"
@@ -206,7 +206,7 @@ msgstr "Start: Schritt $name um $date"
 msgid "No file to execute remotely under $file"
 msgstr "Keine Datei unter $file für Remote ausführen"
 
-#: module/remote:568
+#: module/remote:569
 #, sh-format
 msgid "Wait until the reboot is complete ($seconds seconds)"
 msgstr "Warten bis der Reboot fertig ist ($seconds Sekunden)"

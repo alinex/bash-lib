@@ -1560,6 +1560,77 @@ esac
 }
 detect_os(){ _deprecated "use os_detect data";}
 system_info(){ deprected "use os_detect info";}
+disk_free(){
+local opt="" free_operator free_percent free_bytes collect
+eval set -- "$(option_parse $'l locale -\nc collect +\nf free +' "$@")"
+while true;do
+case "$1" in
+-l|--locale)opt="-l"
+shift
+;;
+-f|--free)local text="$2"
+if [[ $text =~ ^([<>]=?|==|!=)?(([0-9]+)[%bB]?)$ ]];then
+read -r _ free_operator val num <<<"${BASH_REMATCH[@]}"
+free_operator="${free_operator:-<}"
+[[ $val =~ ^[0-9]+%$ ]]&&free_percent="$num"||free_bytes="$(numfmt --from=iec <<<"${num^^}")"
+else
+die "Option value --free=$2 not supported!"
+fi
+shift 2
+;;
+-c|--collect)declare -n collect="$2"
+shift 2
+;;
+--)shift
+break
+;;
+*)die "$(gettext "Unrecognized option"): $1"
+esac
+done
+debug "collect into $collect ($free_operator $free_percent%/${free_bytes}B)"
+local firstline="" percent mount device limit_c limit_e limit_w limit_o
+IFS=$'\n'
+for line in $(df -h $opt -x tmpfs -x efivarfs -x devtmpfs -x squashfs "$@");do
+if [ -z "$firstline" ];then
+firstline=1
+invers "$line"
+else
+percent=$(echo "$line"|xargs echo|cut -d' ' -f5|sed 's/%//')
+bytes=$(echo "$line"|xargs echo|cut -d' ' -f4)
+mount=$(echo "$line"|xargs echo|cut -d' ' -f6|nocr)
+device=$(echo "$line"|xargs echo|cut -d' ' -f1)
+for ((i=0; i<${#MOUNT_COLOR_LIMIT[@]}; i+=5));do
+pattern="${MOUNT_COLOR_LIMIT[i]}"
+if [[ $device =~ $pattern ]];then
+limit_c="${MOUNT_COLOR_LIMIT[i+1]}"
+limit_e="${MOUNT_COLOR_LIMIT[i+2]}"
+limit_w="${MOUNT_COLOR_LIMIT[i+3]}"
+limit_o="${MOUNT_COLOR_LIMIT[i+4]}"
+break
+fi
+done
+if ((percent==limit_c));then
+critical "$line"
+elif ((percent==limit_e));then
+error "$line"
+elif ((percent==limit_w));then
+warn "$line"
+elif ((percent==limit_o));then
+ok "$line"
+else
+echo "$line"
+fi
+if [ -n "$free_operator" ];then
+if [ -n "$free_percent" ]&&eval "(( 100 - percent $free_operator free_percent ))";then
+collect+="$mount "
+elif [ -n "$free_bytes" ]&&eval "(( bytes $free_operator free_bytes ))";then
+collect+="$mount "
+fi
+fi
+fi
+done
+unset IFS
+}
 has_tty(){
 { : >/dev/tty;} &>/dev/null
 }
@@ -2233,6 +2304,7 @@ local dir=${2:-.}
 rsync -av $ssh:"$1" "$dir"
 }
 remote_bashlib(){
+_deprecated "use remote_bashlib os disk_free instead" warn
 local opt
 eval set -- "$(option_parse $'+l login +\nh host +\nj jump +' "$@")"
 while true;do

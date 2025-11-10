@@ -370,7 +370,7 @@ download() {
 ### Extended remote commands
 ######################################################################################
 
-# Run bashlib command on remote.
+# Deprected: Run bashlib command on remote.
 # The `modules` are a comma separated list of module names like network os.
 # The modules can be:
 # - `base` or `full` as first element
@@ -389,6 +389,7 @@ download() {
 #           $login - default is "operator"
 # Examples: IP="$(remote_bashlib ip ip_intern)"
 remote_bashlib() {
+    _deprecated "use remote_bashlib os disk_free instead" warn
     # parameter parsing
     local opt
     eval set -- "$(option_parse $'+l login +\nh host +\nj jump +' "$@")"
