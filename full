@@ -1991,6 +1991,32 @@ _queue_control&
 _queue_control_pid=$!
 fi
 }
+random(){
+num_parameters --min 1 --die "At least a <pattern> is needed!" -- "$@"
+local pattern="$1"
+local length=${2:-16}
+local result=""
+local umlaut UMLAUT
+if [[ $LANG =~ ^de ]];then
+umlaut="äöüß€"
+UMLAUT="ÄÖÜ"
+fi
+case $pattern in
+num)pattern="0-9";;
+letters)pattern="a-z";;
+LETTERS)pattern="A-Z";;
+alpha)pattern="a-zA-Z";;
+alphanum)pattern="a-zA-Z0-9";;
+base64)pattern="a-zA-Z0-9+/";;
+printable)pattern="a-zA-Z0-9!@#$%^&*()-_=+[](){}|;:,.<>?/$umlaut$UMLAUT";;
+hex)pattern="0-9a-f";;
+HEX)pattern="0-9A-F"
+esac
+while ((${#result}<length));do
+result+="$(head /dev/urandom|tr -dc "$pattern")"
+done
+echo "${result:0:length}"
+}
 declare -F "num_parameters" >/dev/null||source "$BASHLIB_HOME"/module/validator
 remote(){
 local _login host jump

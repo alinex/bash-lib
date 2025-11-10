@@ -98,3 +98,72 @@ setup() {
     assert_success
 }
 
+######################################################################################
+# random
+######################################################################################
+
+# bats test_tags=random
+@test "random: number" {
+    run random num
+    assert_output -e "^[0-9]{16}$"
+    assert_success
+}
+# bats test_tags=random
+@test "random: with specified length" {
+    run random num 4
+    assert_output -e "^[0-9]{4}$"
+    assert_success
+}
+# bats test_tags=random
+@test "random: letters" {
+    run random letters
+    assert_output -e "^[a-z]{16}$"
+    assert_success
+}
+# bats test_tags=random
+@test "random: LETTERS" {
+    run random LETTERS
+    assert_output -e "^[A-Z]{16}$"
+    assert_success
+}
+# bats test_tags=random
+@test "random: alpha" {
+    run random alpha
+    assert_output -e "^[a-zA-Z]{16}$"
+    assert_success
+}
+# bats test_tags=random
+@test "random: alphanum" {
+    run random alphanum
+    assert_output -e "^[a-zA-Z0-9]{16}$"
+    assert_success
+}
+# bats test_tags=random
+@test "random: base64" {
+    run random base64
+    assert_output -e "^[a-zA-Z0-9+/]{16}$"
+    assert_success
+}
+# bats test_tags=random
+@test "random: printable" {
+    run random printable
+    assert_success
+}
+# bats test_tags=random
+@test "random: hex" {
+    run random hex
+    assert_output -e "^[0-9a-f]{16}$"
+    assert_success
+}
+# bats test_tags=random
+@test "random: HEX" {
+    run random HEX
+    assert_output -e "^[0-9A-F]{16}$"
+    assert_success
+}
+# bats test_tags=random
+@test "random: custom pattern" {
+    run random "01"
+    assert_output -e "^[01]{16}$"
+    assert_success
+}

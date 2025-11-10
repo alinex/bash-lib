@@ -515,3 +515,48 @@ queue_name() {
         _queue_control_pid=$!
     fi
 }
+
+######################################################################################
+# Random string
+######################################################################################
+
+# Return a random string in specific length
+# The default length is 16.
+# The `<pattern>` is a list of allowed characters in range:
+# - num - `0-9`
+# - letters - 'a-z'
+# - LETTERS - 'A-Z'
+# - alpha - `a-zA-Z`
+# - alphanum - `a-zA-Z0-9`
+# - base64 - `a-zA-Z0-9+/`
+# - printable - `a-zA-Z0-9!@#$%^&*()-_=+[](){}|;:,.<>?/` (in german including umlaut)
+# - hex - `0-9a-f`
+# - HEX - `0-9A-F`
+# - directly give pattern
+# Usage:    random <pattern> [<length>]
+random() {
+    num_parameters --min 1 --die "At least a <pattern> is needed!" -- "$@"
+    local pattern="$1"
+    local length=${2:-16}
+    local result=""
+    local umlaut UMLAUT
+    if [[ "$LANG" =~ ^de ]]; then
+        umlaut="äöüß€"
+        UMLAUT="ÄÖÜ"
+    fi
+    case $pattern in
+    num) pattern="0-9" ;;
+    letters) pattern="a-z" ;;
+    LETTERS) pattern="A-Z" ;;
+    alpha) pattern="a-zA-Z" ;;
+    alphanum) pattern="a-zA-Z0-9" ;;
+    base64) pattern="a-zA-Z0-9+/" ;;
+    printable) pattern="a-zA-Z0-9!@#$%^&*()-_=+[](){}|;:,.<>?/$umlaut$UMLAUT" ;;
+    hex) pattern="0-9a-f" ;;
+    HEX) pattern="0-9A-F" ;;
+    esac
+    while ((${#result} < length)); do
+        result+="$(head /dev/urandom | tr -dc "$pattern")"
+    done
+    echo "${result:0:$length}"
+}
