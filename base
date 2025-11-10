@@ -217,6 +217,7 @@ _stacktrace
 exit 1
 }
 [ -n "${BASH_VERSION:-}" ]||die "No bash CLI! This can only be run under bash"
+((BASH_VERSINFO[0]>4||(BASH_VERSINFO[0]==4&&BASH_VERSINFO[1]>=2)))||die "No bash CLI! This can only be run under bash >=4.2!"
 trap_add(){
 local new="$1"
 local sig="$2"

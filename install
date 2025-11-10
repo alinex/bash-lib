@@ -12,8 +12,38 @@ set -o pipefail # fail if any command in a pipeline fails
 
 echo "This will setup the bashlib on this host if not already done..."
 echo ""
+# check bash version
+if [ -n "${BASH_VERSION:-}" ]; then
+    echo "No bash CLI! This can only be run under bash >=4.2!"
+    exit 1
+fi
+if ((BASH_VERSINFO[0] < 4 || (BASH_VERSINFO[0] == 4 && BASH_VERSINFO[1] < 2))); then
+    echo "No bash CLI! This can only be run under bash >=4.2!"
+    exit 1
+fi
+# detect os
+if grep -q '^ID=alpine$' /etc/os-release 2>/dev/null; then
+    OS=alpine
+elif [ -f /etc/debian_version ]; then
+    OS=debian
+else
+    echo "This operating system is currently not supported, please install on your own."
+    exit 1
+fi
 
-echo "Step 1: Download bashlib to your system"
+echo "Step 1: Install packages"
+case $OS in
+debian)
+    sudo apt update
+    sudo apt install -y bash iproute2 git tzdata curl locales gettext expect jq
+    ;;
+alpine)
+    sudo apk update
+    sudo apk add bash tzdata musl-locales musl-locales-lang git curl coreutils gettext expect sed jq
+    ;;
+esac
+
+echo "Step 2: Download bashlib to your system"
 # shellcheck disable=SC2015
 [ -n "$1" ] && path="$1" || read -rp "Where to put it: [$HOME/bashlib] " path </dev/tty
 path="${path:-$HOME/bashlib}"
@@ -23,7 +53,7 @@ tar -xzf /tmp/bashlib.tgz -C "$path"
 rm /tmp/bashlib.tgz
 echo ""
 
-echo "Step 2: Setup BASHLIB_HOME in your environment."
+echo "Step 3: Setup BASHLIB_HOME in your environment."
 # shellcheck disable=SC2015
 [ -n "$2" ] && yn="$2" || read -r -n 1 -s -p "Should the bashlib path be added to $HOME/.bashrc (J/n) " yn
 case $yn in
@@ -34,7 +64,7 @@ case $yn in
 esac
 echo ""
 
-echo "Step 3: Update configuration links."
+echo "Step 4: Update configuration links."
 # shellcheck disable=SC2015
 [ -n "$3" ] && config="$3" || read -rp "Where to put local configuration: [$HOME] " config </dev/tty
 config="${config:-$HOME}"
@@ -45,9 +75,6 @@ ln -s "$config"/.bashlib-secrets "$path"/config/secrets
 touch "$config"/.bashlib-overwrite
 ln -s "$config"/.bashlib-overwrite "$path"/config/overwrite
 echo ""
-
-echo "Step 4: Install base tools."
-sudo apt install -y curl gettext
 
 echo "You could now use the bashlib by adding:
 source $BASHLIB_HOME/full

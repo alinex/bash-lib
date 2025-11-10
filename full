@@ -217,6 +217,7 @@ _stacktrace
 exit 1
 }
 [ -n "${BASH_VERSION:-}" ]||die "No bash CLI! This can only be run under bash"
+((BASH_VERSINFO[0]>4||(BASH_VERSINFO[0]==4&&BASH_VERSINFO[1]>=2)))||die "No bash CLI! This can only be run under bash >=4.2!"
 trap_add(){
 local new="$1"
 local sig="$2"
@@ -1496,6 +1497,10 @@ _os_detected["base"]=ArchLinux
 _os_detected["distribution"]="ArchLinux"
 _os_detected["revision_name"]="Rolling"
 _os_detected["revision_number"]="$(grep base /var/log/pacman.log|tail -n 1)"
+elif grep -q '^ID=alpine$' /etc/os-release 2>/dev/null;then
+_os_detected["base"]=Alpine
+_os_detected["distribution"]=Alpine
+_os_detected["revision_number"]="$(grep '^VERSION_ID=' /etc/os-release|head -n 1|awk -F= '{ print $2 }'|sed 's/"//g')"
 elif [ -f /etc/gentoo-release ];then
 _os_detected["base"]=Gentoo
 _os_detected["distribution"]="$(cat /etc/gentoo-release|sed s/\ release.*//)"

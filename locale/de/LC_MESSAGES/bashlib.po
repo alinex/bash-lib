@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-11-10 14:24+0100\n"
+"POT-Creation-Date: 2025-11-10 19:45+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -41,7 +41,7 @@ msgstr ""
 "Für Update $PLUSSERVER_PORTAL/services/nameservers -> CSV herunterladen "
 "(manuell)."
 
-#: module/os:168 module/monitoring:151 module/input:41 module/input:105
+#: module/os:172 module/monitoring:151 module/input:41 module/input:105
 #: module/input:251 module/input:486 module/input:666 module/remote:51
 #: module/remote:106 module/remote:158 module/remote:211 module/remote:264
 #: module/remote:312 module/remote:356 module/remote:406 module/remote:474

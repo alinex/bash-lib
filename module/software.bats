@@ -10,7 +10,7 @@ setup() {
 # semver
 ######################################################################################
 
-# bats test_tags=semver
+# bats test_tags=semver1
 @test "semver: should parse 2.8.3" {
     run semver 2.8.3
     assert_output $'2\n8\n3'
