@@ -30,7 +30,7 @@ help() {
 heading() {
     local prefix=""
     test -z "${server-}" || prefix="${server-} "
-    echo -e "\n${CC_INVERS}$prefix${CC_RESET}${CC_HEADING}$(input "$@")...${CC_RESET}\n"
+    printf "\n%s\n\n" "${CC_INVERS}$prefix${CC_RESET}${CC_HEADING}$(input "$@")...${CC_RESET}"
 }
 
 # Print critical/disaster message
@@ -40,7 +40,7 @@ heading() {
 critical() {
     local text
     text="$(input "$@")"
-    test -z "$text" || echo -e "${CC_CRITICAL}$text${CC_RESET}"
+    test -z "$text" || printf "%s\n" "${CC_CRITICAL}$text${CC_RESET}"
 }
 
 # Print error message
@@ -50,7 +50,7 @@ critical() {
 error() {
     local text
     text="$(input "$@")"
-    test -z "$text" || echo -e "${CC_ERROR}$text${CC_RESET}"
+    test -z "$text" || printf "%s\n" "${CC_ERROR}$text${CC_RESET}"
 }
 
 # Print warning message
@@ -60,7 +60,17 @@ error() {
 warn() {
     local text
     text="$(input "$@")"
-    test -z "$text" || echo -e "${CC_WARN}$text${CC_RESET}"
+    test -z "$text" || printf "%s\n" "${CC_WARN}$text${CC_RESET}"
+}
+
+# Print special information message
+# Usage:    info <message>
+#           <message> | info
+# Stdout:   colored <string>
+notice() {
+    local text
+    text="$(input "$@")"
+    test -z "$text" || printf "%s\n" "${CC_NOTICE}$text${CC_RESET}"
 }
 
 # Print special information message
@@ -70,7 +80,7 @@ warn() {
 info() {
     local text
     text="$(input "$@")"
-    test -z "$text" || echo -e "${CC_INFO}$text${CC_RESET}"
+    test -z "$text" || printf "%s\n" "$text"
 }
 
 # Print success message

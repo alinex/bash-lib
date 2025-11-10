@@ -92,6 +92,23 @@ setup() {
 }
 
 ######################################################################################
+# notice
+######################################################################################
+
+# bats test_tags=notice
+@test "notice: with message as argument" {
+    run notice Test
+    assert_output -p "Test"
+    assert_success
+}
+# bats test_tags=notice
+@test "notice: with piped message" {
+    run bats_pipe echo Test \| notice
+    assert_output -p "Test"
+    assert_success
+}
+
+######################################################################################
 # info
 ######################################################################################
 

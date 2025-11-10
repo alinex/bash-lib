@@ -397,7 +397,7 @@ echo $'\033[48;5;'"${num:-0}"'m'
 CC_CRITICAL=$'\033[1;45m'
 CC_ERROR=$'\033[1;31m'
 CC_WARN=$'\033[1;33m'
-CC_INFO=$'\033[1;34m'
+CC_NOTICE=$'\033[1;34m'
 CC_OK=$'\033[1;32m'
 CC_HEADING=$'\033[44m'
 CC_INVERS=$'\033[7m'
@@ -437,7 +437,7 @@ echo "Context specific colors:"
 echo -e "\t${CC_CRITICAL}CC_CRITICAL$CC_RESET"
 echo -e "\t${CC_ERROR}CC_ERROR$CC_RESET"
 echo -e "\t${CC_WARN}CC_WARN$CC_RESET"
-echo -e "\t${CC_INFO}CC_INFO$CC_RESET"
+echo -e "\t${CC_NOTICE}CC_NOTICE$CC_RESET"
 echo -e "\t${CC_OK}CC_OK$CC_RESET"
 echo -e "\t${CC_HEADING}CC_HEADING$CC_RESET"
 echo -e "\t${CC_INVERS}CC_INVERS$CC_RESET"
@@ -532,13 +532,13 @@ text="$(input "$@")"
 if [ -z "$text" ];then
 [ -n "$timeout" ]&&[ -z "$abort" ]&&text="$(gettext 'Please wait to go on')"||text="$(gettext 'Press any key to continue...')"
 fi
-echo -en "$CC_INFO$text$CC_RESET "
+echo -en "$CC_NOTICE$text$CC_RESET "
 if [ -z "$timeout" ];then
 read -n 1 -s -r _ </dev/tty
 else
 stty -echo </dev/tty
 while ((timeout>0));do
-echo -ne "\r$CC_INFO$text$CC_RESET $(duration_format human "$timeout")     "
+echo -ne "\r$CC_NOTICE$text$CC_RESET $(duration_format human "$timeout")     "
 if read -r -s -t 1 -n 1 _ </dev/tty;then
 if [ -n "$abort" ];then
 echo -e "\b\b\b\b$(gettext 'aborted by user')    "
@@ -547,7 +547,7 @@ return 1
 fi
 fi
 ((timeout--))
-((timeout>0))||echo -ne "\r$CC_INFO$text$CC_RESET 0s      "
+((timeout>0))||echo -ne "\r$CC_NOTICE$text$CC_RESET 0s      "
 done
 stty echo </dev/tty
 fi
@@ -580,7 +580,7 @@ local countdown="$timeout"
 if [ -n "$default" ];then
 ((default==0))&&prompt="$prompt [$(gettext "No")]"||prompt="$prompt [$(gettext "Yes")]"
 fi
-echo -en "$CC_INFO$prompt?$CC_RESET " >/dev/tty
+echo -en "$CC_NOTICE$prompt?$CC_RESET " >/dev/tty
 stty -echo </dev/tty
 while IFS= read -r -s -t 1 -n 1 char </dev/tty||rc=$?;do
 if [ -n "$invalid" ];then
@@ -706,7 +706,7 @@ esac
 local input="" char="" seq invalid itext utext q
 local countdown="$timeout"
 [ -z "$default" ]&&[ -z "$empty" ]||prompt="$prompt [$default]"
-echo -en "$CC_INFO$prompt:$CC_RESET " >/dev/tty
+echo -en "$CC_NOTICE$prompt:$CC_RESET " >/dev/tty
 stty -echo </dev/tty
 while IFS= read -r -s -t 1 -n 1 char </dev/tty||rc=$?;do
 if [ -n "$invalid" ];then
@@ -833,7 +833,7 @@ local end default timeout
 eval set -- "$(option_parse $'t title +\nx exit +\nd default +\nT timeout +' "$@")"
 while true;do
 case "$1" in
--t|--title)info "$2" >/dev/tty
+-t|--title)notice "$2" >/dev/tty
 shift 2
 ;;
 -d|--default)default="$2"
@@ -1651,27 +1651,32 @@ exit 0
 heading(){
 local prefix=""
 test -z "${server-}"||prefix="${server-} "
-echo -e "\n$CC_INVERS$prefix$CC_RESET$CC_HEADING$(input "$@")...$CC_RESET\n"
+printf "\n%s\n\n" "$CC_INVERS$prefix$CC_RESET$CC_HEADING$(input "$@")...$CC_RESET"
 }
 critical(){
 local text
 text="$(input "$@")"
-test -z "$text"||echo -e "$CC_CRITICAL$text$CC_RESET"
+test -z "$text"||printf "%s\n" "$CC_CRITICAL$text$CC_RESET"
 }
 error(){
 local text
 text="$(input "$@")"
-test -z "$text"||echo -e "$CC_ERROR$text$CC_RESET"
+test -z "$text"||printf "%s\n" "$CC_ERROR$text$CC_RESET"
 }
 warn(){
 local text
 text="$(input "$@")"
-test -z "$text"||echo -e "$CC_WARN$text$CC_RESET"
+test -z "$text"||printf "%s\n" "$CC_WARN$text$CC_RESET"
+}
+notice(){
+local text
+text="$(input "$@")"
+test -z "$text"||printf "%s\n" "$CC_NOTICE$text$CC_RESET"
 }
 info(){
 local text
 text="$(input "$@")"
-test -z "$text"||echo -e "$CC_INFO$text$CC_RESET"
+test -z "$text"||printf "%s\n" "$text"
 }
 ok(){
 local text

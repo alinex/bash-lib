@@ -200,7 +200,7 @@ This module contains color specifications to be used in console output.
 | ``$CC_CRITICAL`` | Set color for critical/disaster massages |
 | ``$CC_ERROR`` | Set color for error messages and failures |
 | ``$CC_WARN`` | Set color for warnings |
-| ``$CC_INFO`` | Set color for highlighted information |
+| ``$CC_NOTICE`` | Set color for highlighted information |
 | ``$CC_OK`` | Set color for success messages |
 | ``$CC_HEADING`` | Set color for block headings |
 | ``$CC_INVERS`` | Set color for highlighted parts like table header |
@@ -308,6 +308,7 @@ Module with output and user interaction helpers.
 | [`critical`](function/critical.md) | Print critical/disaster message |
 | [`error`](function/error.md) | Print error message |
 | [`warn`](function/warn.md) | Print warning message |
+| [`notice`](function/notice.md) | Print special information message |
 | [`info`](function/info.md) | Print special information message |
 | [`ok`](function/ok.md) | Print success message |
 | [`invers`](function/invers.md) | Print special marked message like table header |
