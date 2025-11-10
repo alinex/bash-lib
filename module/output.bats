@@ -317,6 +317,41 @@ setup() {
 }
 
 ######################################################################################
+# horizontal_line
+######################################################################################
+
+# bats test_tags=horizontal_line
+@test "horizontal_line: light" {
+    run horizontal_line
+    assert_output -p "──────────"
+    assert_success
+}
+# bats test_tags=horizontal_line
+@test "horizontal_line: bold" {
+    run horizontal_line bold
+    assert_output -p "━━━━━━━━━━"
+    assert_success
+}
+# bats test_tags=horizontal_line
+@test "horizontal_line: double" {
+    run horizontal_line double
+    assert_output -p "══════════"
+    assert_success
+}
+# bats test_tags=horizontal_line
+@test "horizontal_line: half" {
+    run horizontal_line half
+    assert_output -p "▄▄▄▄▄▄▄▄▄▄"
+    assert_success
+}
+# bats test_tags=horizontal_line
+@test "horizontal_line: full" {
+    run horizontal_line full
+    assert_output -p "██████████"
+    assert_success
+}
+
+######################################################################################
 # spinner
 ######################################################################################
 

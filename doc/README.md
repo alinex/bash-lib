@@ -320,6 +320,7 @@ Module with output and user interaction helpers.
 | [`tsv2table`](function/tsv2table.md) | Convert TSV data into visual table |
 | [`tsv2md`](function/tsv2md.md) | Convert TSV data into markdown table |
 | [`erase_line`](function/erase_line.md) | Remove current line |
+| [`horizontal_line`](function/horizontal_line.md) | Show a horizontal line |
 | [`spinner_start`](function/spinner_start.md) | Function to start the spinner in the background |
 | [`spinner_stop`](function/spinner_stop.md) | Function to stop the spinner |
 

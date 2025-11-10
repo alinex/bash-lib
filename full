@@ -1717,6 +1717,18 @@ input "$@"|uncolorize|mlr --csvlite --ifs '\t' --omd cat
 erase_line(){
 printf '%b' $'\e[1K\r'
 }
+horizontal_line(){
+local char
+case $1 in
+light)char="─";;
+bold)char="━";;
+double)char="═";;
+half)char="▄";;
+full)char="█";;
+*)char="─"
+esac
+printf "%.0s$char" $(seq 1 "$(tput cols)")
+}
 _spinner_pid=""
 spinner_start(){
 if ! command -v tput >/dev/null 2>&1||[ ! -t 2 ];then

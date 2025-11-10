@@ -182,6 +182,28 @@ erase_line() {
     printf '%b' $'\e[1K\r'
 }
 
+# Show a horizontal line
+# Format can be:
+# - light (default) ──────────
+# - bold ━━━━━━━━━━
+# - double ══════════
+# - half ▄▄▄▄▄▄▄▄▄▄
+# - full ██████████
+# Usage:    horizontal_line [<format>]
+# Output:   ────────── # over full width of terminal
+horizontal_line() {
+    local char
+    case $1 in
+    light) char="─" ;;
+    bold) char="━" ;;
+    double) char="═" ;;
+    half) char="▄" ;;
+    full) char="█" ;;
+    *) char="─" ;;
+    esac
+    printf "%.0s$char" $(seq 1 "$(tput cols)")
+}
+
 _spinner_pid=""
 
 # Function to start the spinner in the background
