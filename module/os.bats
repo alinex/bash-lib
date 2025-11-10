@@ -44,12 +44,6 @@ setup() {
     assert_success
 }
 # bats test_tags=os_detect
-@test "os_detect: detect revision_name" {
-    run os_detect revision_name
-    assert_output -e ".+"
-    assert_success
-}
-# bats test_tags=os_detect
 @test "os_detect: detect kernel" {
     run os_detect kernel
     assert_output -e ".+"

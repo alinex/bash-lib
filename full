@@ -702,10 +702,15 @@ time)prompt="${2:-$(gettext "Enter time")}"
 pattern="^([0-1]?[0-9]|2[0-3])(:([0-5]?[0-9])?)?$"
 final="^([0-1][0-9]|2[0-3]):[0-5][0-9]$"
 ;;
-*)prompt="${2:-$(gettext "Enter short text")}"
+text)prompt="${2:-$(gettext "Enter short text (end with empty line)")}"
+;;
+editor)prompt="${2:-$(gettext "Input through system editor")}"
+;;
+*)prompt="${2:-$(gettext "Enter short line")}"
 esac
 local input="" char="" seq invalid itext utext q
 local countdown="$timeout"
+local nl=$'\n'
 [ -z "$default" ]&&[ -z "$empty" ]||prompt="$prompt [$default]"
 echo -en "$CC_NOTICE$prompt:$CC_RESET " >/dev/tty
 stty -echo </dev/tty
@@ -729,7 +734,10 @@ continue
 fi
 fi
 if [[ $char == "" ]];then
-if [ -n "$final" ];then
+if [ -n "$input" ]&&[ "$format" = "text" ]&&[[ $input != *"$nl" ]];then
+input+=$'\n'
+echo
+elif [ -n "$final" ];then
 if [[ $input =~ $final ]];then
 echo "          " >/dev/tty
 break
@@ -798,6 +806,7 @@ itext=""
 done
 stty echo </dev/tty
 debug 4 "Octal result: $(od -An -to1 -v <<<"$input")"
+[ "$format" != "text" ]||input="$(grep -v '^[[:space:]]*$' <<<"$input")"
 echo "$input"
 }
 _password_strength(){
@@ -1732,7 +1741,9 @@ half)char="▄";;
 full)char="█";;
 *)char="─"
 esac
-printf "%.0s$char" $(seq 1 "$(tput cols)")
+local cols
+read _ cols < <(stty size)
+printf "%.0s$char" $(seq 1 "$cols")
 }
 _spinner_pid=""
 spinner_start(){
@@ -1758,7 +1769,7 @@ weather)spinner='🌤🌥🌦🌧🌨🌩🌪';;
 *)spinner='-\|/'
 esac
 local back=$((size+1))
-tput civis
+printf '\e[?25l'
 (while
 true
 do
@@ -1777,7 +1788,7 @@ kill "$_spinner_pid" >/dev/null 2>&1
 wait "$_spinner_pid" 2>/dev/null
 _spinner_pid=""
 printf "    \b\b\b\b"
-tput cnorm
+printf '\e[?25h'
 }
 sudo_allow(){
 ((EUID!=0))||return 0
