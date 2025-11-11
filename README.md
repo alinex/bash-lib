@@ -30,6 +30,7 @@ If you already use it jump directly to the [module description](https://gitlab.c
 
 - [BASH-LIB Generation 2](#bash-lib-generation-2)
   - [Table of Contents](#table-of-contents)
+  - [Distributions](#distributions)
   - [Architecture](#architecture)
     - [Quality](#quality)
     - [Version control](#version-control)
@@ -39,6 +40,25 @@ If you already use it jump directly to the [module description](https://gitlab.c
     - [Environment](#environment)
   - [Latest Changes](#latest-changes)
   - [Contributing](#contributing)
+
+## Distributions
+
+The support is divided into: 
+✅ fully supported
+🟡 mostly supported
+⏳ support comming soon
+❔ no interest at the moment
+⛔ could not be supported
+
+| Distribution | Versions |         |      |
+| ------------ | -------- | ------- | ---- |
+| Debian       | ✅ 11     | ✅ 12    | ✅ 13 |
+| ⤷ Ubuntu     | ✅  22.04 | ✅ 24.04 |
+| ⤷ Mint       | ⏳        |
+| ⤷ MX Linux   | ⏳        |
+| ArchLinux    | ⏳        |
+| ⤷ Manjaro    | ⏳        |
+| Alpine       | 🟡 3.22   |
 
 ## Architecture
 

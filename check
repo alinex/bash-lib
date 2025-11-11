@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+
+CC_ERROR=$'\033[1;31m'
+CC_WARN=$'\033[1;33m'
+CC_NOTICE=$'\033[1;34m'
+CC_OK=$'\033[1;32m'
+CC_RESET=$'\033[0m'
+
+docker_results=/tmp/bashlib-docker/tests/results
+while true; do
+  for dir in $docker_results/*; do
+    dist="$(basename "$dir")"
+    total="$(grep -E "^([0-9]+\.\.[0-9]+)" "$dir"/* | sed 's/.*\.//' | awk '{sum += $1} END {print sum}')"
+    # shellcheck disable=SC2126
+    ok="$(grep -h "^ok" "$dir"/* | wc -l)"
+    # shellcheck disable=SC2126
+    skip="$(grep -h "# skip" "$dir"/* | wc -l)"
+    # shellcheck disable=SC2126
+    fail="$(grep -h "^not ok" "$dir"/* | wc -l)"
+    ((total > ok + skip + fail)) || total="${CC_NOTICE}${total}${CC_RESET}"
+    ((ok == 0)) || ok="${CC_OK}${ok}${CC_RESET}"
+    ((fail == 0)) || fail="${CC_ERROR}${fail}${CC_RESET}"
+    echo -en "$dist ${total}/$ok/$fail "
+  done
+  sleep 2
+  printf '%b' $'\e[1K\r'
+done

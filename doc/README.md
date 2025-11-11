@@ -353,6 +353,7 @@ Module for process control
 | [`async_wait`](function/async_wait.md) | Check if the command is done or wait here till it is so |
 | [`queue`](function/queue.md) | Add command to process queue |
 | [`queue_name`](function/queue_name.md) | Add command to process queue |
+| [`queue_running`](function/queue_running.md) | Is a queue running |
 | [`random`](function/random.md) | Return a random string in specific length |
 
 ### Remote Module

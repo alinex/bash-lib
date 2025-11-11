@@ -37,8 +37,6 @@ else
   sudo rm -rf /tmp/bashlib-docker 2>/dev/null
   mkdir /tmp/bashlib-docker
   cp -rL ./* /tmp/bashlib-docker
-  rm -rf /tmp/bashlib-docker/tests/results 2>/dev/null || true
-  mkdir /tmp/bashlib-docker/tests/results
   # Run each distribution
   for name in debian ubuntu alpine; do
     [ "$1" = "$name" ] || [ -z "$1" ] || continue
@@ -52,43 +50,40 @@ else
     for version in $versions; do
       [ "$2" = "$version" ] || [ -z "$2" ] || continue
       echo "Loading $(docker pull -q "$name:$version")"
-      container="$(docker run --rm -it -v "/tmp/bashlib-docker:/mnt" -w /mnt -d "$name:$version" sh -c \
+      echo "Start tests on ${CC_CYAN_BOLD}${name^} $version${CC_RESET}..."
+      queue docker run --rm -it -v "/tmp/bashlib-docker:/mnt" -w /mnt -d "$name:$version" sh -c \
         ". tests/setup/docker-$name
         rm -rf tests/results/${name}-${version} 2>/dev/null || true
         mkdir -p tests/results/${name}-${version} || true
-        for dir in core module; do
+        for dir in core; do
           for file in \$dir/*.bats; do
             name=\$(basename \$file)
             bats \$file >tests/results/${name}-${version}/\$dir_\$name
           done
-        done")"
-      # analyze results while running
-      dir=/tmp/bashlib-docker/tests/results/${name}-${version}
-      while [ -n "$(docker ps -q --filter "id=$container")" ]; do
-        if [ -e "$dir" ]; then
-          total="$(grep -E "^([0-9]+\.\.[0-9]+)" "$dir"/* | sed 's/.*\.//' | awk '{sum += $1} END {print sum}')" || true
-          # shellcheck disable=SC2126
-          ok="$(grep -h "^ok" "$dir"/* | wc -l)" || true
-          # shellcheck disable=SC2126
-          skip="$(grep -h "# skip" "$dir"/* | wc -l)" || true
-          # shellcheck disable=SC2126
-          fail="$(grep -h "^not ok" "$dir"/* | wc -l)" || true
-          ((total > ok + skip + fail)) || total="${CC_NOTICE}${total}${CC_RESET}"
-          ((ok == 0)) || ok="${CC_OK}${ok}${CC_RESET}"
-          ((fail == 0)) || fail="${CC_ERROR}${fail}${CC_RESET}"
-          printf '%b' $'\e[1K\r'
-          echo -n "Running ${CC_CYAN_BOLD}${name^} $version${CC_RESET}... "
-          echo -en "${total}/$ok/$fail "
-        else
-          printf '%b' $'\e[1K\rinitializin...'
-        fi
-        sleep 2
-      done
-      printf '%b' $'\e[1K\r'
-      echo "Finished ${CC_CYAN_BOLD}${name^} $version${CC_RESET} with ${total}/$ok/$fail "
-      rm -rf tests/results/${name}-${version} 2>/dev/null || true
-      cp -r /tmp/bashlib-docker/tests/results/${name}-${version} tests/results
+        done"
+      #rm -rf tests/results/${name}-${version} 2>/dev/null || true
+      #cp -r /tmp/bashlib-docker/tests/results/${name}-${version} tests/results
     done
+  done
+  # analyze results while running
+  docker_results=/tmp/bashlib-docker/tests/results
+  while queue_running; do
+    for dir in "$docker_results"/*; do
+      dist="$(basename "$dir")"
+      total="$(grep -E "^([0-9]+\.\.[0-9]+)" "$dir"/* | sed 's/.*\.//' | awk '{sum += $1} END {print sum}')"
+      # shellcheck disable=SC2126
+      ok="$(grep -h "^ok" "$dir"/* | wc -l)"
+      # shellcheck disable=SC2126
+      skip="$(grep -h "# skip" "$dir"/* | wc -l)"
+      # shellcheck disable=SC2126
+      fail="$(grep -h "^not ok" "$dir"/* | wc -l)"
+      ((total > ok + skip + fail)) || total="${CC_NOTICE}${total}${CC_RESET}"
+      ((ok == 0)) || ok="${CC_OK}${ok}${CC_RESET}"
+      ((fail == 0)) || fail="${CC_ERROR}${fail}${CC_RESET}"
+      echo -en "$dist ${total}/$ok/$fail "
+    done
+    sleep 2
+    printf '%b' $'\e[1K\r'
   done
 
   # redhat fedora centos
