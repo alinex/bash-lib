@@ -704,7 +704,7 @@ final="^([0-1][0-9]|2[0-3]):[0-5][0-9]$"
 ;;
 text)prompt="${2:-$(gettext "Enter short text (end with empty line)")}"
 ;;
-editor)prompt="${2:-$(gettext "Input through system editor")}"
+editor)prompt="${2:-$(gettext "Enter short text here.")}"
 ;;
 *)prompt="${2:-$(gettext "Enter short line")}"
 esac
@@ -712,6 +712,34 @@ local input="" char="" seq invalid itext utext q
 local countdown="$timeout"
 local nl=$'\n'
 [ -z "$default" ]&&[ -z "$empty" ]||prompt="$prompt [$default]"
+if [ "$format" = "editor" ];then
+notice "$(gettext "Input through system editor...")"
+while true;do
+sleep 2
+local answer
+answer="$(mktemp --random editor)"
+echo "$prompt" >"$answer"
+if [ -n "$timeout" ];then
+debug timeout "$timeout" ${EDITOR:-vi} "$answer"
+${EDITOR:-vi} "$answer"&
+sleep "$timeout"
+pkill -TERM -P $!||true
+stty sane
+debug "------"
+else
+${EDITOR:-vi} "$answer"
+fi
+input=$(grep -v -F "$prompt" "$answer")||true
+rm "$answer"
+debug "got: $input"
+[ -n "$input" ]||[ -z "$default" ]||input="$default"
+debug "maybe use default: $input"
+[ -z "$empty" ]||break
+[ -z "$input" ]||break
+done
+echo "$input"
+return 0
+fi
 echo -en "$CC_NOTICE$prompt:$CC_RESET " >/dev/tty
 stty -echo </dev/tty
 while IFS= read -r -s -t 1 -n 1 char </dev/tty||rc=$?;do

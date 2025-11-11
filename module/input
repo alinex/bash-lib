@@ -290,7 +290,7 @@ ask() {
         prompt="${2:-$(gettext "Enter short text (end with empty line)")}"
         ;;
     editor)
-        prompt="${2:-$(gettext "Input through system editor")}"
+        prompt="${2:-$(gettext "Enter short text here.")}"
         ;;
     *)
         prompt="${2:-$(gettext "Enter short line")}"
@@ -300,8 +300,37 @@ ask() {
     local countdown="$timeout"
     local nl=$'\n'
     [ -z "$default" ] && [ -z "$empty" ] || prompt="$prompt [$default]"
-    echo -en "${CC_NOTICE}$prompt:${CC_RESET} " >/dev/tty
+    # external editor
+    if [ "$format" = "editor" ]; then
+        notice "$(gettext "Input through system editor...")"
+        while true; do
+            sleep 2
+            local answer
+            answer="$(mktemp --random editor)"
+            echo "$prompt" >"$answer"
+            if [ -n "$timeout" ]; then
+                debug timeout "$timeout" ${EDITOR:-vi} "$answer"
+                ${EDITOR:-vi} "$answer" &
+                sleep "$timeout"
+                pkill -TERM -P $! || true
+                stty sane
+                debug "------"
+            else
+                ${EDITOR:-vi} "$answer"
+            fi
+            input=$(grep -v -F "$prompt" "$answer") || true
+            rm "$answer"
+            debug "got: $input"
+            [ -n "$input" ] || [ -z "$default" ] || input="$default"
+            debug "maybe use default: $input"
+            [ -z "$empty" ] || break
+            [ -z "$input" ] || break
+        done
+        echo "$input"
+        return 0
+    fi
     # Read one character at a time silently (-s), without newline (-n 1)
+    echo -en "${CC_NOTICE}$prompt:${CC_RESET} " >/dev/tty
     stty -echo </dev/tty
     # shellcheck disable=SC2229
     # shellcheck disable=SC2086
