@@ -2123,6 +2123,9 @@ _queue_control&
 _queue_control_pid=$!
 fi
 }
+queue_running(){
+[ -n "$_queue_control_pid" ]&&kill -0 "$_queue_control_pid"
+}
 random(){
 num_parameters --min 1 --die "At least a <pattern> is needed!" -- "$@"
 local pattern="$1"

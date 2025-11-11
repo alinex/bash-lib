@@ -516,6 +516,13 @@ queue_name() {
     fi
 }
 
+# Is a queue running
+# Usage:    queue_runnung
+# Return:   0 if still running
+queue_running() {
+    [ -n "$_queue_control_pid" ] && kill -0 "$_queue_control_pid"
+}
+
 ######################################################################################
 # Random string
 ######################################################################################
