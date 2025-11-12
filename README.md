@@ -45,7 +45,7 @@ If you already use it jump directly to the [module description](https://gitlab.c
 
 The support is divided into: 
 ✅ fully supported
-🟢 should also work (based on tested one)
+🟢 should also work (but not tested)
 🟡 mostly supported
 ⏳ support comming soon
 ❔ no interest at the moment
@@ -56,10 +56,15 @@ The support is divided into:
 | Debian         | ✅ 11     | ✅ 12    | ✅ 13   |
 | ⤷ Ubuntu       | ✅  22.04 | ✅ 24.04 |
 | ⤷   Linux Mint | ✅ 21     | ✅ 22    |
-| ⤷ MX Linux     | ⏳        |
-| ArchLinux      | ⏳        |
-| ⤷ Manjaro      | ⏳        |
+| ⤷   KDE Neon   | ⏳        |
+| ⤷ MX Linux     | 🟢 23     |
+| ⤷ AntiX        | 🟢 23     |
 | Alpine         | 🟡 3.19   | 🟡 3.21  | 🟡 3.22 |
+| Arch Linux     | ⏳        |
+| ⤷ Manjaro      | ⏳ 25     |
+| ⤷ EndeavourOS  | ⏳        |
+| ⤷ Garuda Linux | ⏳        |
+| ⤷ CachyOS      | ⏳        |
 
 ## Architecture
 

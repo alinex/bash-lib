@@ -32,7 +32,7 @@ if [ "$1" = "ci" ]; then
     done
 # local test run
 else
-  [ -z "$2" ] || echo "Running multiple OS using local docker (that may take some time)"
+  [ -n "$1" ] || echo "Running multiple OS using local docker (that may take some time)"
   [ -z "$3" ] || echo "Only run $3 tests!"
   [ -z "$3" ] || filter="--filter-tags $3"
   # shellcheck disable=SC2086

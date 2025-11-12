@@ -6,11 +6,21 @@ ubuntu      22.04   debian      ubuntu:22.04
 ubuntu      24.04   debian      ubuntu:22.04
 linuxmint   21      debian      linuxmintd/mint21-amd64
 linuxmint   22      debian      linuxmintd/mint22-amd64
-#mxlinux    
-# redhat fedora centos
-# archlinux manjaro
-# solaris
-# mandriva
-# freebsd openbsd
-# opensuse
-# Gentoo
+kdeneon     stable  debian      kdeneon/all:stable
+#mxlinux    23      debian      ???
+#antix      23      debian      ???
+alpine      3.19    alpine      alpine:3.19
+alpine      3.20    alpine      alpine:3.20
+alpine      3.21    alpine      alpine:3.21
+#arch       rolling arch         
+#manjaro    25      arch
+#EndeavourOS
+#Garuda
+#CachyOS
+# ------------------------
+#redhat fedora centos
+#solaris
+#mandriva
+#freebsd openbsd
+#opensuse
+#Gentoo
