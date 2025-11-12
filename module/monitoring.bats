@@ -2,6 +2,7 @@
 
 # bats file_tags=monitoring
 setup_file() {
+    skip "Skipping to not make so much noise in channel."
     # shellcheck disable=SC2154
     load "$BASHLIB_HOME/tests/bats"
     if [ -z "$PROMETHEUS_API" ] || [ -z "$PROMETHEUS_HOST" ] || [ -z "$GRAFANA_API" ] || [ -z "$GRAFANA_TOKEN" ]; then

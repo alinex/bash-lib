@@ -55,7 +55,7 @@ else
     # loop over versions
     for version in $versions; do
       [ "$2" = "$version" ] || [ -z "$2" ] || continue
-      echo "Loading $(docker pull -q "$name:$version")"
+      echo -n "Loading $(docker pull -q "$name:$version")"
       container="$(docker run --rm -it -v "/tmp/bashlib-docker:/mnt" -w /mnt -d "$name:$version" sh -c \
         ". tests/setup/docker-$name
         rm -rf tests/results/${name}-${version} 2>/dev/null || true
@@ -83,16 +83,18 @@ else
           ((fail == 0)) || fail="${CC_ERROR}${fail}${CC_RESET}"
           printf '%b' $'\e[1K\r'
           echo -n "Running ${CC_CYAN_BOLD}${name^} $version${CC_RESET}... "
-          echo -en "${total}/$ok/$fail ${CC_ERROR}$(grep -l "^not ok" "$dir"/* | sed 's#.*/##;s#\..*##' | xargs echo || true)${CC_RESET}"
+          # shellcheck disable=SC2012
+          echo -en "${total}/$ok/$skip/$fail ${CC_ERROR}$(grep -l "^not ok" "$dir"/* | sed 's#.*/##;s#\..*##' | xargs echo || true)${CC_RESET} ($(ls -t1 "$dir"/* | head -1 | sed 's#.*/##;s#\..*##'))"
         else
-          printf '%b' $'\e[1K\rinitializing...'
+          printf '%b' $'\e[1K\r'
+          echo -n "Initializing ${CC_CYAN_BOLD}${name^} $version${CC_RESET}... "
         fi
         sleep 2
       done
       printf '%b' $'\e[1K\r'
-      echo "Finished ${CC_CYAN_BOLD}${name^} $version${CC_RESET} with ${total}/$ok/$fail ${CC_ERROR}$(grep -l "^not ok" "$dir"/* | sed 's#.*/##;s#\..*##' | xargs echo || true)${CC_RESET}"
+      echo "Finished ${CC_CYAN_BOLD}${name^} $version${CC_RESET} with ${total}/$ok/$skip/$fail ${CC_ERROR}$(grep -l "^not ok" "$dir"/* | sed 's#.*/##;s#\..*##' | xargs echo || true)${CC_RESET}"
       #rm -rf tests/results/${name}-${version} 2>/dev/null || true
-      cp -r /tmp/bashlib-docker/tests/results/${name}-${version} tests/results
+      cp -r /tmp/bashlib-docker/tests/results/"${name}-${version}" tests/results
     done
   done
 
