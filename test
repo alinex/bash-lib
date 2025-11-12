@@ -83,14 +83,14 @@ else
           ((fail == 0)) || fail="${CC_ERROR}${fail}${CC_RESET}"
           printf '%b' $'\e[1K\r'
           echo -n "Running ${CC_CYAN_BOLD}${name^} $version${CC_RESET}... "
-          echo -en "${total}/$ok/$fail "
+          echo -en "${total}/$ok/$fail ${CC_ERROR}$(grep -l "^not ok" "$dir"/* | sed 's#.*/##;s#\..*##' | xargs echo || true)${CC_RESET}"
         else
           printf '%b' $'\e[1K\rinitializing...'
         fi
         sleep 2
       done
       printf '%b' $'\e[1K\r'
-      echo "Finished ${CC_CYAN_BOLD}${name^} $version${CC_RESET} with ${total}/$ok/$fail "
+      echo "Finished ${CC_CYAN_BOLD}${name^} $version${CC_RESET} with ${total}/$ok/$fail ${CC_ERROR}$(grep -l "^not ok" "$dir"/* | sed 's#.*/##;s#\..*##' | xargs echo || true)${CC_RESET}"
       #rm -rf tests/results/${name}-${version} 2>/dev/null || true
       cp -r /tmp/bashlib-docker/tests/results/${name}-${version} tests/results
     done

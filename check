@@ -20,7 +20,7 @@ while true; do
     ((total > ok + skip + fail)) || total="${CC_NOTICE}${total}${CC_RESET}"
     ((ok == 0)) || ok="${CC_OK}${ok}${CC_RESET}"
     ((fail == 0)) || fail="${CC_ERROR}${fail}${CC_RESET}"
-    echo -en "$dist ${total}/$ok/$fail "
+    echo -en "$dist ${total}/$ok/$fail ${CC_ERROR}$(grep -l "^not ok" "$dir"/* | sed 's#.*/##;s#\..*##' | xargs echo || true)${CC_RESET}"
   done
   sleep 2
   printf '%b' $'\e[1K\r'
