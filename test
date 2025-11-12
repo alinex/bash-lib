@@ -55,6 +55,7 @@ else
     # loop over versions
     for version in $versions; do
       [ "$2" = "$version" ] || [ -z "$2" ] || continue
+      start=$(now)
       echo -n "Loading $(docker pull -q "$name:$version")"
       container="$(docker run --rm -it -v "/tmp/bashlib-docker:/mnt" -w /mnt -d "$name:$version" sh -c \
         ". tests/setup/docker-$name
@@ -92,8 +93,9 @@ else
         sleep 2
       done
       sleep 2
+      duration="$(duration_format human "$(date_diff "$start" "$(now)")")"
       printf '%b' $'\e[1K\r'
-      echo "Finished ${CC_CYAN_BOLD}${name^} $version${CC_RESET} with ${total}/$ok/$skip/$fail ${CC_ERROR}$(grep -l "^not ok" "$dir"/* | sed 's#.*/##;s#\..*##' | xargs echo || true)${CC_RESET}"
+      echo "Finished ${CC_CYAN_BOLD}${name^} $version${CC_RESET} with ${total}/$ok/$skip/$fail ${CC_ERROR}$(grep -l "^not ok" "$dir"/* | sed 's#.*/##;s#\..*##' | xargs echo || true)${CC_RESET} that took $duration"
       #rm -rf tests/results/${name}-${version} 2>/dev/null || true
       cp -r /tmp/bashlib-docker/tests/results/"${name}-${version}" tests/results
     done
