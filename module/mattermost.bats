@@ -2,6 +2,7 @@
 
 # bats file_tags=mattermost
 setup_file() {
+    skip "Skipping to not make so much noise in channel."
     # shellcheck disable=SC2154
     load "$BASHLIB_HOME/tests/bats"
     if [ -z "$MATTERMOST_API" ] || [ -z "$MATTERMOST_TOKEN" ]; then
