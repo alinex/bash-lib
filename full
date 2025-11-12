@@ -1771,6 +1771,7 @@ full)char="█";;
 esac
 local cols
 read _ cols < <(stty size)
+((cols>60))||cols=60
 printf "%.0s$char" $(seq 1 "$cols")
 }
 _spinner_pid=""

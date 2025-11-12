@@ -87,10 +87,11 @@ else
           echo -en "${total}/$ok/$skip/$fail ${CC_ERROR}$(grep -l "^not ok" "$dir"/* | sed 's#.*/##;s#\..*##' | xargs echo || true)${CC_RESET} ($(ls -t1 "$dir"/* | head -1 | sed 's#.*/##;s#\..*##'))"
         else
           printf '%b' $'\e[1K\r'
-          echo -n "Initializing ${CC_CYAN_BOLD}${name^} $version${CC_RESET}... "
+          echo -n "Setup ${CC_CYAN_BOLD}${name^} $version${CC_RESET}... "
         fi
         sleep 2
       done
+      sleep 2
       printf '%b' $'\e[1K\r'
       echo "Finished ${CC_CYAN_BOLD}${name^} $version${CC_RESET} with ${total}/$ok/$skip/$fail ${CC_ERROR}$(grep -l "^not ok" "$dir"/* | sed 's#.*/##;s#\..*##' | xargs echo || true)${CC_RESET}"
       #rm -rf tests/results/${name}-${version} 2>/dev/null || true

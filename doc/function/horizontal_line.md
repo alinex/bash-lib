@@ -2,6 +2,7 @@
 
 ## Show a horizontal line
 
+It will go over the full width of terminal, but be at least 60 characters wide.
 Format can be:
 - light (default) ──────────
 - bold ━━━━━━━━━━

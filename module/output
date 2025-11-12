@@ -183,6 +183,7 @@ erase_line() {
 }
 
 # Show a horizontal line
+# It will go over the full width of terminal, but be at least 60 characters wide.
 # Format can be:
 # - light (default) ──────────
 # - bold ━━━━━━━━━━
@@ -203,6 +204,7 @@ horizontal_line() {
     esac
     local cols
     read _ cols < <(stty size)
+    ((cols > 60)) || cols=60
     printf "%.0s$char" $(seq 1 "$cols")
 }
 
