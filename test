@@ -44,21 +44,17 @@ else
   rm -rf /tmp/bashlib-docker/tests/results 2>/dev/null || true
   mkdir /tmp/bashlib-docker/tests/results
   # Run each distribution
-  for name in debian ubuntu alpine; do
+  matrix="./tests/docker.matrix"
+  for name in $(tail -n +2 "$matrix" | grep -v ^# | awk '{print $1}' | uniq); do
     [ "$1" = "$name" ] || [ -z "$1" ] || continue
-    # set version list
-    case $name in
-    debian) versions="11 12 13" ;;
-    ubuntu) versions="22.04 24.04" ;;
-    alpine) versions="3.19 3.20 3.21 3.22" ;;
-    esac
     # loop over versions
-    for version in $versions; do
+    while read -r version setup image; do
       [ "$2" = "$version" ] || [ -z "$2" ] || continue
       start=$(now)
-      echo -n "Loading $(docker pull -q "$name:$version")"
-      container="$(docker run --rm -it -v "/tmp/bashlib-docker:/mnt" -w /mnt -d "$name:$version" sh -c \
-        ". tests/setup/docker-$name
+      echo -n "Loading $name:$version ($image)"
+      docker pull -q "$image" >/dev/null
+      container="$(docker run --rm -it -v "/tmp/bashlib-docker:/mnt" -w /mnt -d "$image" sh -c \
+        ". tests/setup/docker-$setup
         rm -rf tests/results/${name}-${version} 2>/dev/null || true
         mkdir -p tests/results/${name}-${version} || true
         for dir in core module; do
@@ -74,12 +70,12 @@ else
         if [ -e "$dir" ]; then
           total="$(grep -E "^([0-9]+\.\.[0-9]+)" "$dir"/* | sed 's/.*\.//' | awk '{sum += $1} END {print sum}')" || true
           # shellcheck disable=SC2126
-          ok="$(grep -h "^ok" "$dir"/* | wc -l)" || true
+          ok="$(grep -h "^ok" "$dir"/* | grep -v "# skip" | wc -l)" || true
           # shellcheck disable=SC2126
           skip="$(grep -h "# skip" "$dir"/* | wc -l)" || true
           # shellcheck disable=SC2126
           fail="$(grep -h "^not ok" "$dir"/* | wc -l)" || true
-          ((total > ok + skip + fail)) || total="${CC_NOTICE}${total}${CC_RESET}"
+          ((total > ok + skip + fail)) || total="${CC_INTENSITY_BOLD}${total}${CC_RESET}"
           ((ok == 0)) || ok="${CC_OK}${ok}${CC_RESET}"
           ((fail == 0)) || fail="${CC_ERROR}${fail}${CC_RESET}"
           printf '%b' $'\e[1K\r'
@@ -94,18 +90,20 @@ else
       done
       sleep 2
       duration="$(duration_format human "$(date_diff "$start" "$(now)")")"
+      total="$(grep -E "^([0-9]+\.\.[0-9]+)" "$dir"/* | sed 's/.*\.//' | awk '{sum += $1} END {print sum}')" || true
+      # shellcheck disable=SC2126
+      ok="$(grep -h "^ok" "$dir"/* | grep -v "# skip" | wc -l)" || true
+      # shellcheck disable=SC2126
+      skip="$(grep -h "# skip" "$dir"/* | wc -l)" || true
+      # shellcheck disable=SC2126
+      fail="$(grep -h "^not ok" "$dir"/* | wc -l)" || true
+      ((total > ok + skip + fail)) || total="${CC_INTENSITY_BOLD}${total}${CC_RESET}"
+      ((ok == 0)) || ok="${CC_OK}${ok}${CC_RESET}"
+      ((fail == 0)) || fail="${CC_ERROR}${fail}${CC_RESET}"
       printf '%b' $'\e[1K\r'
       echo "Finished ${CC_CYAN_BOLD}${name^} $version${CC_RESET} with ${total}/$ok/$skip/$fail ${CC_ERROR}$(grep -l "^not ok" "$dir"/* | sed 's#.*/##;s#\..*##' | xargs echo || true)${CC_RESET} that took $duration"
       #rm -rf tests/results/${name}-${version} 2>/dev/null || true
       cp -r /tmp/bashlib-docker/tests/results/"${name}-${version}" tests/results
-    done
+    done < <(tail -n +2 "$matrix" | grep -v ^# | awk '$1 == "'"$name"'" {print $2 " " $3 " " $4}')
   done
-
-  # redhat fedora centos
-  # archlinux manjaro
-  # solaris
-  # mandriva
-  # freebsd openbsd
-  # opensuse
-  # Gentoo
 fi

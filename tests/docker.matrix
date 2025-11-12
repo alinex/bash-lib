@@ -1,0 +1,16 @@
+NAME        VERSION SETUP       IMAGE
+debian      11      debian      debian:11
+debian      12      debian      debian:12
+debian      13      debian      debian:13
+ubuntu      22.04   debian      ubuntu:22.04
+ubuntu      24.04   debian      ubuntu:22.04
+linuxmint   21      debian      linuxmintd/mint21-amd64
+linuxmint   22      debian      linuxmintd/mint22-amd64
+#mxlinux    
+# redhat fedora centos
+# archlinux manjaro
+# solaris
+# mandriva
+# freebsd openbsd
+# opensuse
+# Gentoo

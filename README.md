@@ -45,20 +45,21 @@ If you already use it jump directly to the [module description](https://gitlab.c
 
 The support is divided into: 
 ✅ fully supported
+🟢 should also work (based on tested one)
 🟡 mostly supported
 ⏳ support comming soon
 ❔ no interest at the moment
 ⛔ could not be supported
 
-| Distribution | Versions |         |      |
-| ------------ | -------- | ------- | ---- |
-| Debian       | ✅ 11     | ✅ 12    | ✅ 13 |
-| ⤷ Ubuntu     | ✅  22.04 | ✅ 24.04 |
-| ⤷ Mint       | ⏳        |
-| ⤷ MX Linux   | ⏳        |
-| ArchLinux    | ⏳        |
-| ⤷ Manjaro    | ⏳        |
-| Alpine       | 🟡 3.22   |
+| Distribution   | Versions |         |        |
+| -------------- | -------- | ------- | ------ |
+| Debian         | ✅ 11     | ✅ 12    | ✅ 13   |
+| ⤷ Ubuntu       | ✅  22.04 | ✅ 24.04 |
+| ⤷   Linux Mint | ✅ 21     | ✅ 22    |
+| ⤷ MX Linux     | ⏳        |
+| ArchLinux      | ⏳        |
+| ⤷ Manjaro      | ⏳        |
+| Alpine         | 🟡 3.19   | 🟡 3.21  | 🟡 3.22 |
 
 ## Architecture
 
