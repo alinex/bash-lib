@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-11-11 09:26+0100\n"
+"POT-Creation-Date: 2025-11-12 16:35+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -124,22 +124,20 @@ msgid "Enter time"
 msgstr "Gib die Zeit an"
 
 #: module/input:290
-msgid "Enter short text (end with empty line)"
-msgstr ""
+msgid "Enter text (end with empty line)"
+msgstr "Gib einen Text ein (Beenden mit Leerzeile)"
 
 #: module/input:293
-#, fuzzy
-msgid "Enter short text here."
-msgstr "Gib einen Kurztext ein"
+msgid "Enter text here"
+msgstr "Gib einen Text ein"
 
 #: module/input:296
-#, fuzzy
 msgid "Enter short line"
-msgstr "Gib einen Kurztext ein"
+msgstr "Gib eine kurze Zeile ein"
 
 #: module/input:305
 msgid "Input through system editor..."
-msgstr ""
+msgstr "Eingabe mit dem Systemeditor..."
 
 #: module/input:370
 msgid "incomplete"
@@ -265,21 +263,3 @@ msgid "is an downgrade of one patch version"
 msgid_plural "is an downgrade of $step patch versions"
 msgstr[0] "ist ein downgrade von einer Patchversion"
 msgstr[1] "ist ein downgrade von $step Patchversionen"
-
-#~ msgid "press any key to stop"
-#~ msgstr "Taste drücken zum stoppen"
-
-#~ msgid "Waiting"
-#~ msgstr "Warten"
-
-#~ msgid "seconds"
-#~ msgstr "Sekunden"
-
-#~ msgid "Disallowed answer"
-#~ msgstr "Ungültige Antwort"
-
-#~ msgid "n/Y"
-#~ msgstr "n/J"
-
-#~ msgid "N/y"
-#~ msgstr "N/j"

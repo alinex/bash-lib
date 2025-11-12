@@ -293,12 +293,12 @@ setup() {
             ask
         "
         log_user 1
-        expect "Gib einen Kurztext ein:"
+        expect "Gib eine kurze Zeile ein:"
         send "test\n"
         expect eof
     '
     assert_success
-    assert_output -p "Gib einen Kurztext ein:"
+    assert_output -p "Gib eine kurze Zeile ein:"
     assert_output -p "test"
 }
 # bats test_tags=ask
@@ -310,12 +310,12 @@ setup() {
             ask string
         "
         log_user 1
-        expect "Gib einen Kurztext ein:"
+        expect "Gib eine kurze Zeile ein:"
         send "\ntest\n"
         expect eof
     '
     assert_success
-    assert_output -p "Gib einen Kurztext ein:"
+    assert_output -p "Gib eine kurze Zeile ein:"
     assert_output -p "test"
 }
 # bats test_tags=ask
@@ -327,12 +327,12 @@ setup() {
             ask string --empty
         "
         log_user 1
-        expect "Gib einen Kurztext ein []:"
+        expect "Gib eine kurze Zeile ein []:"
         send "\n"
         expect eof
     '
     assert_success
-    assert_output -p "Gib einen Kurztext ein []:"
+    assert_output -p "Gib eine kurze Zeile ein []:"
 }
 # bats test_tags=ask
 @test "ask: string with custom question" {
