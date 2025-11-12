@@ -1,10 +1,12 @@
 #!/usr/bin/env bash
 
-# Usage:  ./test [<name> [<version>]]
-#         ./test ci         # for gitlab
-#         ./test            # for full run
-#         ./test debian     # run all debian
-#         ./test debian 11  # only run debian 11
+# Usage:  ./test [<name>] [<version>] [<tag>]
+#         ./test ci           # for gitlab
+#         ./test              # for full run
+#         ./test debian       # run all debian
+#         ./test debian 11    # only run debian 11
+#         ./test debian 11 os # only run debian 11 with filter tag os
+
 cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]:-$(pwd)/x}")")" || exit
 export BASHLIB_HOME
 BASHLIB_HOME="$(pwd)"
@@ -31,6 +33,8 @@ if [ "$1" = "ci" ]; then
 # local test run
 else
   [ -z "$2" ] || echo "Running multiple OS using local docker (that may take some time)"
+  [ -z "$3" ] || echo "Only run $3 tests!"
+  [ -z "$3" ] || filter="--filter-tags $3"
   # shellcheck disable=SC2086
   source "$BASHLIB_HOME"/full
   # prepare
@@ -59,7 +63,8 @@ else
         for dir in core module; do
           for file in \$dir/*.bats; do
             name=\$(basename \$file)
-            bats \$file >tests/results/${name}-${version}/\$dir_\$name
+            # shellcheck disable=SC2154
+            bats \$file $filter >tests/results/${name}-${version}/\$dir_\$name
           done
         done")"
       # analyze results while running
@@ -80,13 +85,13 @@ else
           echo -n "Running ${CC_CYAN_BOLD}${name^} $version${CC_RESET}... "
           echo -en "${total}/$ok/$fail "
         else
-          printf '%b' $'\e[1K\rinitializin...'
+          printf '%b' $'\e[1K\rinitializing...'
         fi
         sleep 2
       done
       printf '%b' $'\e[1K\r'
       echo "Finished ${CC_CYAN_BOLD}${name^} $version${CC_RESET} with ${total}/$ok/$fail "
-      rm -rf tests/results/${name}-${version} 2>/dev/null || true
+      #rm -rf tests/results/${name}-${version} 2>/dev/null || true
       cp -r /tmp/bashlib-docker/tests/results/${name}-${version} tests/results
     done
   done
