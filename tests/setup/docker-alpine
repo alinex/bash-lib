@@ -4,11 +4,11 @@
 export BASHLIB_HOME="$(pwd)"
 
 # install needed packages
-apk add --no-cache bash tzdata musl-locales musl-locales-lang git curl coreutils gettext expect sed jq >/dev/null
+apk add --no-cache bash tzdata musl-locales musl-locales-lang git curl coreutils gettext expect sed jq
 
 # set timezone (for date tests)
 ln -fs /usr/share/zoneinfo/Europe/Berlin /etc/localtime
-echo "Europe/Berlin" >/etc/timezone
+echo "Europe/Berlin"
 export TZ=Europe/Berlin
 
 # Set language
@@ -16,11 +16,11 @@ export LANG=de_DE.UTF-8
 export LC_ALL=de_DE.UTF-8
 
 ## install newest bats
-git clone https://github.com/bats-core/bats-core.git 2>/dev/null
+git clone https://github.com/bats-core/bats-core.git
 cd bats-core || exit
-./install.sh /usr/local >/dev/null
+./install.sh /usr/local
 cd .. || exit
 
 # install bats
 # shellcheck disable=SC1091
-. "$BASHLIB_HOME/tests/setup/bats" >/dev/null
+. "$BASHLIB_HOME/tests/setup/bats"

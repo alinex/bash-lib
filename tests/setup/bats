@@ -3,9 +3,9 @@
 # install newest bats
 cd tests || exit
 if ! command -v bats >/dev/null 2>&1; then
-    git clone https://github.com/bats-core/bats-core.git 2>/dev/null
+    git clone https://github.com/bats-core/bats-core.git
     cd bats-core || exit
-    ./install.sh /usr/local >/dev/null
+    sudo ./install.sh /usr/local
     cd .. || exit
 fi
 # add support and assert modules

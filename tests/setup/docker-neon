@@ -3,17 +3,12 @@
 # shellcheck disable=SC2155
 export BASHLIB_HOME="$(pwd)"
 
-# allow to always use sudo, also if not needed
-if [ "$(id -u)" -eq 0 ] && command -v sudo >/dev/null 2>&1; then
-    alias sudo='sudo'
-else
-    alias sudo=''
-fi
-
 # install needed packages
 export DEBIAN_FRONTEND=noninteractive
 sudo apt-get update
-sudo apt-get install -y bash iproute2 git tzdata curl locales gettext expect jq </dev/null
+sudo apt-get install -y locales bash iproute2 git tzdata curl locales gettext expect jq </dev/null
+sudo locale-gen de_DE.UTF-8
+sudo update-locale LANG=de_DE.UTF-8 LANGUAGE=de_DE.UTF-8 LC_ALL=de_DE.UTF-8
 echo "tzdata tzdata/Areas select Europe" | sudo debconf-set-selections
 echo "tzdata tzdata/Zones/Europe select Berlin" | sudo debconf-set-selections
 

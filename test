@@ -51,12 +51,12 @@ else
     while read -r version setup image; do
       [ "$2" = "$version" ] || [ -z "$2" ] || continue
       start=$(now)
+      rm -rf /tmp/bashlib-docker/tests/results/${name}-${version} 2>/dev/null || true
+      mkdir -p -m 777 /tmp/bashlib-docker/tests/results/${name}-${version} || true
       echo -n "Loading $name:$version ($image)"
       docker pull -q "$image" >/dev/null
       container="$(docker run --rm -it -v "/tmp/bashlib-docker:/mnt" -w /mnt -d "$image" sh -c \
-        ". tests/setup/docker-$setup
-        rm -rf tests/results/${name}-${version} 2>/dev/null || true
-        mkdir -p tests/results/${name}-${version} || true
+        ". tests/setup/docker-$setup >/dev/null 2>/dev/null
         for dir in core module; do
           for file in \$dir/*.bats; do
             name=\$(basename \$file)
@@ -67,7 +67,7 @@ else
       # analyze results while running
       dir=/tmp/bashlib-docker/tests/results/${name}-${version}
       while [ -n "$(docker ps -q --filter "id=$container")" ]; do
-        if [ -e "$dir" ]; then
+        if [ "$(ls -A "$dir")" ]; then
           total="$(grep -E "^([0-9]+\.\.[0-9]+)" "$dir"/* | sed 's/.*\.//' | awk '{sum += $1} END {print sum}')" || true
           # shellcheck disable=SC2126
           ok="$(grep -h "^ok" "$dir"/* | grep -v "# skip" | wc -l)" || true
