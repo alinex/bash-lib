@@ -44,12 +44,14 @@ else
   rm -rf /tmp/bashlib-docker/tests/results 2>/dev/null || true
   mkdir /tmp/bashlib-docker/tests/results
   # Run each distribution
+  dist_num=0
   matrix="./tests/docker.matrix"
   for name in $(tail -n +2 "$matrix" | grep -v ^# | awk '{print $1}' | uniq); do
     [ "$1" = "$name" ] || [ -z "$1" ] || continue
     # loop over versions
     while read -r version setup image; do
       [ "$2" = "$version" ] || [ -z "$2" ] || continue
+      ((distnum++))
       start=$(now)
       rm -rf /tmp/bashlib-docker/tests/results/${name}-${version} 2>/dev/null || true
       mkdir -p -m 777 /tmp/bashlib-docker/tests/results/${name}-${version} || true
@@ -106,4 +108,7 @@ else
       cp -r /tmp/bashlib-docker/tests/results/"${name}-${version}" tests/results
     done < <(tail -n +2 "$matrix" | grep -v ^# | awk '$1 == "'"$name"'" {print $2 " " $3 " " $4}')
   done
+  if ((distnum == 0)); then
+    echo "There was no matching distribution in $matrix for $1 $2"
+  fi
 fi

@@ -14,6 +14,9 @@ fi
 export DEBIAN_FRONTEND=noninteractive
 sudo apt-get update
 sudo apt-get install -y bash iproute2 git tzdata curl locales gettext expect jq </dev/null
+#sudo apt-get install -y locales bash iproute2 git tzdata curl locales gettext expect jq </dev/null
+#sudo locale-gen de_DE.UTF-8
+#sudo update-locale LANG=de_DE.UTF-8 LANGUAGE=de_DE.UTF-8 LC_ALL=de_DE.UTF-8
 echo "tzdata tzdata/Areas select Europe" | sudo debconf-set-selections
 echo "tzdata tzdata/Zones/Europe select Berlin" | sudo debconf-set-selections
 
