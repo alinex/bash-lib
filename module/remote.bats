@@ -3,7 +3,7 @@
 # bats file_tags=remote
 setup_file() {
     # shellcheck disable=SC2154
-    load "$BASHLIB_HOME/tests/bats"
+    load "$BASHLIB_HOME/tests/bats-library-loader"
     # check if it should completely skip
     [ -n "$TEST_SERVER" ] || skip "Because a remote TEST_SERVER is needed."
     timeout 2 nc -zv "$TEST_SERVER" 22 &>/dev/null || skip "Because the remote $TEST_SERVER:22 is not reachable."
@@ -11,7 +11,7 @@ setup_file() {
     export server=${TEST_SERVER:-}
 }
 setup() {
-    load "$BASHLIB_HOME/tests/bats"
+    load "$BASHLIB_HOME/tests/bats-library-loader"
 }
 
 ######################################################################################

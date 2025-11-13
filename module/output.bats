@@ -3,7 +3,7 @@
 # bats file_tags=output
 setup() {
     # shellcheck disable=SC2154
-    load "$BASHLIB_HOME/tests/bats"
+    load "$BASHLIB_HOME/tests/bats-library-loader"
 }
 
 ######################################################################################

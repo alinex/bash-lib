@@ -3,7 +3,7 @@
 
 # bats file_tags=misc
 setup() {
-    load "$BASHLIB_HOME/tests/bats"
+    load "$BASHLIB_HOME/tests/bats-library-loader"
 }
 teardown_file() {
     rm -rf /tmp/bats-exec*
