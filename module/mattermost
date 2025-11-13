@@ -48,16 +48,18 @@ _mattermost_team() {
 # Usage:    channel <team-id> <display_name>
 # Output:   <channel-id>
 _mattermost_channel() {
-    if [[ ! -v _mattermost_cache["channel_$1_$2"] ]]; then
+    local cache="channel_$1_$2"
+    cache=${cache//[^a-zA-Z0-9_]/}
+    if [[ ! -v _mattermost_cache[$cache] ]]; then
         debug "GET mattermost/users/me/teams/<team-id>/channels"
-        _mattermost_cache["channel_$1_$2"]="$(
+        _mattermost_cache[$cache]="$(
             curl -H "Authorization: Bearer $MATTERMOST_TOKEN" "$MATTERMOST_API"/users/me/teams/"$1"/channels |
                 jq '.[] | select(.display_name == "'"$2"'") | .id' -r
         )" ||
             die "Could not get ID of channel $1/$2 in mattermost!"
     fi
-    [ -n "${_mattermost_cache["channel_$1_$2"]}" ] || die "Channel $2 does not exist in mattermost (team $1)"
-    echo "${_mattermost_cache["channel_$1_$2"]}"
+    [ -n "${_mattermost_cache[$cache]}" ] || die "Channel $2 does not exist in mattermost (team $1)"
+    echo "${_mattermost_cache[$cache]}"
 }
 
 # Get channel by <post-id>

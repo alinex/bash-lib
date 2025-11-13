@@ -7,20 +7,31 @@ ubuntu      24.04   debian      ubuntu:22.04
 linuxmint   21      debian      linuxmintd/mint21-amd64
 linuxmint   22      debian      linuxmintd/mint22-amd64
 kdeneon     stable  debian      kdeneon/all:stable
-#mxlinux    23      debian      ???
-#antix      23      debian      ???
+#mxlinux    23      debian      -
+#antix      23      debian      -
 alpine      3.19    alpine      alpine:3.19
 alpine      3.20    alpine      alpine:3.20
 alpine      3.21    alpine      alpine:3.21
-#arch       rolling arch         
-#manjaro    25      arch
-#EndeavourOS
-#Garuda
-#CachyOS
+#arch       rolling arch        archlinux
+#manjaro    25      arch        manjarolinux/base
+#EndeavourOS rolling arch       -
+#Garuda             arch        -
+#CachyOS            arch        -
 # ------------------------
-#redhat fedora centos
+#redhat         https://hub.docker.com/r/redhat
+#  fedora       https://hub.docker.com/_/fedora
+#  centos       https://hub.docker.com/_/centos
 #solaris
 #mandriva
 #freebsd openbsd
 #opensuse
 #Gentoo
+#busybox    https://hub.docker.com/_/busybox
+#amazonlinux    https://hub.docker.com/_/amazonlinux
+#oraclelinux    https://hub.docker.com/_/oraclelinux
+#rockylinux     https://hub.docker.com/_/rockylinux
+#photon         https://hub.docker.com/_/photon
+#almalinux      https://hub.docker.com/_/almalinux
+#mageia         https://hub.docker.com/_/mageia
+#kalilinux      https://hub.docker.com/r/kalilinux/kali-rolling
+#macos          https://hub.docker.com/r/dockurr/macos
