@@ -252,7 +252,7 @@ prometheus_scrape_now() {
         echo "yq '(.scrape_configs[] | select(.job_name == \"$job\")).scrape_interval = \"${seconds}s\" | (.scrape_configs[] | select(.job_name == \"$job\")).scrape_timeout = \"${seconds}s\"' </etc/prometheus/prometheus.yml | sponge /etc/prometheus/prometheus.yml" | remote
         remote curl -sX POST http://localhost:9090/-/reload
     done
-    countdown "$seconds" "Wait till scrape should be done..."
+    pause --timeout="$seconds" "Wait till scrape should be done..."
     echo "Reset config back to default."
     for server in $PROMETHEUS_HOST; do
         remote true 2>/dev/null || continue # only work on reachable server
