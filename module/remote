@@ -389,7 +389,6 @@ download() {
 #           $login - default is "operator"
 # Examples: IP="$(remote_bashlib ip ip_intern)"
 remote_bashlib() {
-    _deprecated "use remote_bashlib os disk_free instead" warn
     # parameter parsing
     local opt
     eval set -- "$(option_parse $'+l login +\nh host +\nj jump +' "$@")"
@@ -442,97 +441,35 @@ remote_bashlib() {
 # Use `remote_bashlib software install`, see @remote_bashlib.
 remote_install() {
     _deprecated "use remote_bashlib software install" warn
-    remote_bashlib software install
+    remote_bashlib software install "$@"
 }
 
 # Deprecated: Display the system description (from remote)
 # Use `remote_bashlib os system_info`, see @remote_bashlib.
 remote_system_info() {
     _deprecated "use remote_bashlib os system_info" warn
-    remote_bashlib os system_info
+    remote_bashlib os system_info "$@"
 }
 
-# Remote df with visual display
+# Deprectaed: Remote df with visual display
+# Use `remote_bashlib os disk_free` instead.
 # The lines will be colorized based on $MOUNT_COLOR_LIMIT setting, which contains sets of 5 entries (pattern critical error warn ok). The first matching pattern will decide the color limits.
 # Usage:    remote_df [<mount>...]                              # show table
 #           remote_df <var> <operator> <limit%> [<mount>...]    # additionaly collect specific volumes
 # Options:  -l, --local     # only list local devices
 remote_df() {
-    # parameter parsing
-    local opt=""
-    eval set -- "$(option_parse $'l locale -' "$@")"
-    while true; do
-        case "$1" in
-        -l | --locale)
-            opt="-l"
-            shift
-            ;;
-        --)
-            shift
-            break
-            ;;
-        *) die "$(gettext "Unrecognized option"): $1" ;;
-        esac
-    done
-    # collect specific limit
-    if [ -n "$3" ] && is_integer "$3"; then
-        declare -n ref="$1"
-        local op="$2"
-        local limit=$3
-        shift 3
-    fi
-    # processing
-    local firstline="" percent mount device limit_c limit_e limit_w limit_o
-    # display
-    IFS=$'\n'
-    # shellcheck disable=SC2248
-    for line in $(remote df -h $opt -x tmpfs -x efivarfs -x devtmpfs -x squashfs "$@"); do
-        if [ -z "$firstline" ]; then
-            firstline=1
-            invers "$line"
-        else
-            percent=$(echo "$line" | xargs echo | cut -d' ' -f5 | sed 's/%//')
-            mount=$(echo "$line" | xargs echo | cut -d' ' -f6 | nocr)
-            # get color limits
-            device=$(echo "$line" | xargs echo | cut -d' ' -f1)
-            for ((i = 0; i < ${#MOUNT_COLOR_LIMIT[@]}; i += 5)); do
-                pattern="${MOUNT_COLOR_LIMIT[i]}"
-                if [[ "$device" =~ $pattern ]]; then
-                    limit_c="${MOUNT_COLOR_LIMIT[i + 1]}"
-                    limit_e="${MOUNT_COLOR_LIMIT[i + 2]}"
-                    limit_w="${MOUNT_COLOR_LIMIT[i + 3]}"
-                    limit_o="${MOUNT_COLOR_LIMIT[i + 4]}"
-                    break
-                fi
-            done
-            # display
-            if ((percent == limit_c)); then
-                critical "$line"
-            elif ((percent == limit_e)); then
-                error "$line"
-            elif ((percent == limit_w)); then
-                warn "$line"
-            elif ((percent == limit_o)); then
-                ok "$line"
-            else
-                echo "$line"
-            fi
-            # shellcheck disable=SC1105
-            if [ -n "$limit" ] && eval "(( percent $op limit ))"; then
-                ref="${ref}${mount} "
-            fi
-        fi
-    done
-    unset IFS
-    echo ""
+    _deprecated "use remote_bashlib os disk_free" warn
+    remote_bashlib os disk_free "$@"
 }
 
-# Remote check if LVM is used
+# Deprecated: Remote check if LVM is used
+# Use `remote_bashlib os uses_lvm` instead.
 # Usage:    remote_lvm
 # Return:   0 for uses LVM
 #           1 if not
 remote_lvm() {
-    remote sudo vgs --noheadings \&\& [ -n "$(sudo vgs --noheadings 2>/dev/null)" ] &>/dev/null
+    _deprecated "use remote_bashlib os uses_lvm" warn
+    remote_bashlib os uses_lvm "$@"
 }
 
 # Wait till reboot is finished

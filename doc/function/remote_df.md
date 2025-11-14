@@ -1,7 +1,8 @@
 # remote_df
 
-## Remote df with visual display
+## Deprectaed: Remote df with visual display
 
+Use `remote_bashlib os disk_free` instead.
 The lines will be colorized based on `$MOUNT_COLOR_LIMIT` setting, which contains sets of 5 entries (pattern critical error warn ok). The first matching pattern will decide the color limits.
 
 

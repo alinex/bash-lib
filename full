@@ -62,6 +62,107 @@ else
 for arg in "$@";do echo "$arg";done
 fi
 }
+COLORS=$(tput colors 2>/dev/null||echo 0)
+CC_RESET=$'\033[0m'
+CC_RESET_FG=$'\033[39m'
+CC_RESET_BG=$'\033[49m'
+CC_INTENSITY_BOLD=$'\033[1m'
+CC_INTENSITY_LIGHT=$'\033[2m'
+CC_INTENSITY_OFF=$'\033[22m'
+CC_ITALIC=$'\033[3m'
+CC_ITALIC_OFF=$'\033[23m'
+CC_UNDERLINE=$'\033[4m'
+CC_UNDERLINE_OFF=$'\033[24m'
+CC_INVERSE=$'\033[7m'
+CC_INVERSE_OFF=$'\033[27m'
+CC_DASHED=$'\033[9m'
+CC_DASHED_OFF=$'\033[29m'
+CC_BLACK=$'\033[30m'
+CC_RED=$'\033[31m'
+CC_GREEN=$'\033[32m'
+CC_YELLOW=$'\033[33m'
+CC_BLUE=$'\033[34m'
+CC_MAGENTA=$'\033[35m'
+CC_CYAN=$'\033[36m'
+CC_WHITE=$'\033[37m'
+CC_BLACK_BOLD=$'\033[90m'
+CC_RED_BOLD=$'\033[91m'
+CC_GREEN_BOLD=$'\033[92m'
+CC_YELLOW_BOLD=$'\033[93m'
+CC_BLUE_BOLD=$'\033[94m'
+CC_MAGENTA_BOLD=$'\033[95m'
+CC_CYAN_BOLD=$'\033[96m'
+CC_WHITE_BOLD=$'\033[97m'
+CC_BLACK_BG=$'\033[40m'
+CC_RED_BG=$'\033[41m'
+CC_GREEN_BG=$'\033[42m'
+CC_YELLOW_BG=$'\033[43m'
+CC_BLUE_BG=$'\033[44m'
+CC_MAGENTA_BG=$'\033[45m'
+CC_CYAN_BG=$'\033[46m'
+CC_BLACK_BOLD_BG=$'\033[100m'
+CC_RED_BOLD_BG=$'\033[101m'
+CC_GREEN_BOLD_BG=$'\033[102m'
+CC_YELLOW_BOLD_BG=$'\033[103m'
+CC_BLUE_BOLD_BG=$'\033[104m'
+CC_MAGENTA_BOLD_BG=$'\033[105m'
+CC_CYAN_BOLD_BG=$'\033[106m'
+color_256(){
+local num="${1//[!0-9]/}"
+echo $'\033[38;5;'"${num:-0}"'m'
+}
+color_256_bg(){
+local num="${1//[!0-9]/}"
+echo $'\033[48;5;'"${num:-0}"'m'
+}
+CC_CRITICAL=$'\033[1;45m'
+CC_ERROR=$'\033[1;31m'
+CC_WARN=$'\033[1;33m'
+CC_NOTICE=$'\033[1;34m'
+CC_OK=$'\033[1;32m'
+CC_HEADING=$'\033[44m'
+CC_INVERS=$'\033[7m'
+color_table(){
+echo "Basic Colors:"
+echo -e "\t${CC_BLACK}CC_BLACK\t${CC_BLACK_BOLD}CC_BLACK_BOLD\t${CC_BLACK_BG}CC_BLACK_BG\t${CC_BLACK_BOLD_BG}CC_BLACK_BOLD_BG$CC_RESET"
+echo -e "\t${CC_RED}CC_RED\t\t${CC_RED_BOLD}CC_RED_BOLD\t${CC_RED_BG}CC_RED_BG\t${CC_RED_BOLD_BG}CC_RED_BOLD_BG$CC_RESET"
+echo -e "\t${CC_GREEN}CC_GREEN\t${CC_GREEN_BOLD}CC_GREEN_BOLD\t${CC_GREEN_BG}CC_GREEN_BG\t${CC_GREEN_BOLD_BG}CC_GREEN_BOLD_BG$CC_RESET"
+echo -e "\t${CC_YELLOW}CC_YELLOW\t${CC_YELLOW_BOLD}CC_YELLOW_BOLD\t${CC_YELLOW_BG}CC_YELLOW_BG\t${CC_YELLOW_BOLD_BG}CC_YELLOW_BOLD_BG$CC_RESET"
+echo -e "\t${CC_BLUE}CC_BLUE\t\t${CC_BLUE_BOLD}CC_BLUE_BOLD\t${CC_BLUE_BG}CC_BLUE_BG\t${CC_BLUE_BOLD_BG}CC_BLUE_BOLD_BG$CC_RESET"
+echo -e "\t${CC_MAGENTA}CC_MAGENTA\t${CC_MAGENTA_BOLD}CC_MAGENTA_BOLD\t${CC_MAGENTA_BG}CC_MAGENTA_BG\t${CC_MAGENTA_BOLD_BG}CC_MAGENTA_BOLD_BG$CC_RESET"
+echo -e "\t${CC_CYAN}CC_CYAN\t\t${CC_CYAN_BOLD}CC_CYAN_BOLD\t${CC_CYAN_BG}CC_CYAN_BG\t${CC_CYAN_BOLD_BG}CC_CYAN_BOLD_BG$CC_RESET"
+echo "Special Formats:"
+echo -e "\t${CC_INTENSITY_BOLD}CC_INTENSITY_BOLD\t${CC_INTENSITY_LIGHT}CC_INTENSITY_LIGHT$CC_RESET"
+echo -e "\t${CC_ITALIC}CC_ITALIC$CC_RESET"
+echo -e "\t${CC_UNDERLINE}CC_UNDERLINE$CC_RESET"
+echo -e "\t${CC_DASHED}CC_DASHED$CC_RESET"
+echo -e "\t${CC_INVERSE}CC_INVERSE$CC_RESET"
+echo "256 Color palette:"
+local cols=15
+local rows=15
+for c in $(seq 0 "$cols");do
+for r in $(seq 0 "$rows");do
+num=$((r*cols+c))
+echo -ne "\t$(color_256 "$num")FG $num"
+done
+echo ""
+done
+for c in $(seq 0 "$cols");do
+for r in $(seq 0 "$rows");do
+num=$((r*cols+c))
+echo -ne "\t$(color_256_bg "$num")BG $num$CC_RESET"
+done
+echo ""
+done
+echo "Context specific colors:"
+echo -e "\t${CC_CRITICAL}CC_CRITICAL$CC_RESET"
+echo -e "\t${CC_ERROR}CC_ERROR$CC_RESET"
+echo -e "\t${CC_WARN}CC_WARN$CC_RESET"
+echo -e "\t${CC_NOTICE}CC_NOTICE$CC_RESET"
+echo -e "\t${CC_OK}CC_OK$CC_RESET"
+echo -e "\t${CC_HEADING}CC_HEADING$CC_RESET"
+echo -e "\t${CC_INVERS}CC_INVERS$CC_RESET"
+}
 set -eE
 set -o pipefail
 BASHLIB_HOME=${BASHLIB_HOME:-$HOME/bashlib}
@@ -341,107 +442,6 @@ curl -u "$ATLASSIAN_USER:$ATLASSIAN_TOKEN" -H "Content-Type: application/json" -
 }
 jira_update(){
 curl -u "$ATLASSIAN_USER:$ATLASSIAN_TOKEN" -H "Content-Type: application/json" -X PUT "$JIRA_API/issue/$1" -d "$1"||die "Could not update Jira issue $1!"
-}
-COLORS=$(tput colors 2>/dev/null||echo 0)
-CC_RESET=$'\033[0m'
-CC_RESET_FG=$'\033[39m'
-CC_RESET_BG=$'\033[49m'
-CC_INTENSITY_BOLD=$'\033[1m'
-CC_INTENSITY_LIGHT=$'\033[2m'
-CC_INTENSITY_OFF=$'\033[22m'
-CC_ITALIC=$'\033[3m'
-CC_ITALIC_OFF=$'\033[23m'
-CC_UNDERLINE=$'\033[4m'
-CC_UNDERLINE_OFF=$'\033[24m'
-CC_INVERSE=$'\033[7m'
-CC_INVERSE_OFF=$'\033[27m'
-CC_DASHED=$'\033[9m'
-CC_DASHED_OFF=$'\033[29m'
-CC_BLACK=$'\033[30m'
-CC_RED=$'\033[31m'
-CC_GREEN=$'\033[32m'
-CC_YELLOW=$'\033[33m'
-CC_BLUE=$'\033[34m'
-CC_MAGENTA=$'\033[35m'
-CC_CYAN=$'\033[36m'
-CC_WHITE=$'\033[37m'
-CC_BLACK_BOLD=$'\033[90m'
-CC_RED_BOLD=$'\033[91m'
-CC_GREEN_BOLD=$'\033[92m'
-CC_YELLOW_BOLD=$'\033[93m'
-CC_BLUE_BOLD=$'\033[94m'
-CC_MAGENTA_BOLD=$'\033[95m'
-CC_CYAN_BOLD=$'\033[96m'
-CC_WHITE_BOLD=$'\033[97m'
-CC_BLACK_BG=$'\033[40m'
-CC_RED_BG=$'\033[41m'
-CC_GREEN_BG=$'\033[42m'
-CC_YELLOW_BG=$'\033[43m'
-CC_BLUE_BG=$'\033[44m'
-CC_MAGENTA_BG=$'\033[45m'
-CC_CYAN_BG=$'\033[46m'
-CC_BLACK_BOLD_BG=$'\033[100m'
-CC_RED_BOLD_BG=$'\033[101m'
-CC_GREEN_BOLD_BG=$'\033[102m'
-CC_YELLOW_BOLD_BG=$'\033[103m'
-CC_BLUE_BOLD_BG=$'\033[104m'
-CC_MAGENTA_BOLD_BG=$'\033[105m'
-CC_CYAN_BOLD_BG=$'\033[106m'
-color_256(){
-local num="${1//[!0-9]/}"
-echo $'\033[38;5;'"${num:-0}"'m'
-}
-color_256_bg(){
-local num="${1//[!0-9]/}"
-echo $'\033[48;5;'"${num:-0}"'m'
-}
-CC_CRITICAL=$'\033[1;45m'
-CC_ERROR=$'\033[1;31m'
-CC_WARN=$'\033[1;33m'
-CC_NOTICE=$'\033[1;34m'
-CC_OK=$'\033[1;32m'
-CC_HEADING=$'\033[44m'
-CC_INVERS=$'\033[7m'
-color_table(){
-echo "Basic Colors:"
-echo -e "\t${CC_BLACK}CC_BLACK\t${CC_BLACK_BOLD}CC_BLACK_BOLD\t${CC_BLACK_BG}CC_BLACK_BG\t${CC_BLACK_BOLD_BG}CC_BLACK_BOLD_BG$CC_RESET"
-echo -e "\t${CC_RED}CC_RED\t\t${CC_RED_BOLD}CC_RED_BOLD\t${CC_RED_BG}CC_RED_BG\t${CC_RED_BOLD_BG}CC_RED_BOLD_BG$CC_RESET"
-echo -e "\t${CC_GREEN}CC_GREEN\t${CC_GREEN_BOLD}CC_GREEN_BOLD\t${CC_GREEN_BG}CC_GREEN_BG\t${CC_GREEN_BOLD_BG}CC_GREEN_BOLD_BG$CC_RESET"
-echo -e "\t${CC_YELLOW}CC_YELLOW\t${CC_YELLOW_BOLD}CC_YELLOW_BOLD\t${CC_YELLOW_BG}CC_YELLOW_BG\t${CC_YELLOW_BOLD_BG}CC_YELLOW_BOLD_BG$CC_RESET"
-echo -e "\t${CC_BLUE}CC_BLUE\t\t${CC_BLUE_BOLD}CC_BLUE_BOLD\t${CC_BLUE_BG}CC_BLUE_BG\t${CC_BLUE_BOLD_BG}CC_BLUE_BOLD_BG$CC_RESET"
-echo -e "\t${CC_MAGENTA}CC_MAGENTA\t${CC_MAGENTA_BOLD}CC_MAGENTA_BOLD\t${CC_MAGENTA_BG}CC_MAGENTA_BG\t${CC_MAGENTA_BOLD_BG}CC_MAGENTA_BOLD_BG$CC_RESET"
-echo -e "\t${CC_CYAN}CC_CYAN\t\t${CC_CYAN_BOLD}CC_CYAN_BOLD\t${CC_CYAN_BG}CC_CYAN_BG\t${CC_CYAN_BOLD_BG}CC_CYAN_BOLD_BG$CC_RESET"
-echo "Special Formats:"
-echo -e "\t${CC_INTENSITY_BOLD}CC_INTENSITY_BOLD\t${CC_INTENSITY_LIGHT}CC_INTENSITY_LIGHT$CC_RESET"
-echo -e "\t${CC_ITALIC}CC_ITALIC$CC_RESET"
-echo -e "\t${CC_UNDERLINE}CC_UNDERLINE$CC_RESET"
-echo -e "\t${CC_DASHED}CC_DASHED$CC_RESET"
-echo -e "\t${CC_INVERSE}CC_INVERSE$CC_RESET"
-echo "256 Color palette:"
-local cols=15
-local rows=15
-for c in $(seq 0 "$cols");do
-for r in $(seq 0 "$rows");do
-num=$((r*cols+c))
-echo -ne "\t$(color_256 "$num")FG $num"
-done
-echo ""
-done
-for c in $(seq 0 "$cols");do
-for r in $(seq 0 "$rows");do
-num=$((r*cols+c))
-echo -ne "\t$(color_256_bg "$num")BG $num$CC_RESET"
-done
-echo ""
-done
-echo "Context specific colors:"
-echo -e "\t${CC_CRITICAL}CC_CRITICAL$CC_RESET"
-echo -e "\t${CC_ERROR}CC_ERROR$CC_RESET"
-echo -e "\t${CC_WARN}CC_WARN$CC_RESET"
-echo -e "\t${CC_NOTICE}CC_NOTICE$CC_RESET"
-echo -e "\t${CC_OK}CC_OK$CC_RESET"
-echo -e "\t${CC_HEADING}CC_HEADING$CC_RESET"
-echo -e "\t${CC_INVERS}CC_INVERS$CC_RESET"
 }
 declare -F "num_parameters" >/dev/null||source "$BASHLIB_HOME"/module/validator
 mongosh(){
@@ -1472,7 +1472,7 @@ echo "Let $server scrape $job again, now."
 echo "yq '(.scrape_configs[] | select(.job_name == \"$job\")).scrape_interval = \"${seconds}s\" | (.scrape_configs[] | select(.job_name == \"$job\")).scrape_timeout = \"${seconds}s\"' </etc/prometheus/prometheus.yml | sponge /etc/prometheus/prometheus.yml"|remote
 remote curl -sX POST http://localhost:9090/-/reload
 done
-countdown "$seconds" "Wait till scrape should be done..."
+pause --timeout="$seconds" "Wait till scrape should be done..."
 echo "Reset config back to default."
 for server in $PROMETHEUS_HOST;do
 remote true 2>/dev/null||continue
@@ -1637,11 +1637,11 @@ IFS=$'\n'
 for line in $(df -h $opt -x tmpfs -x efivarfs -x devtmpfs -x squashfs "$@");do
 if [ -z "$firstline" ];then
 firstline=1
-invers "$line"
+echo -e "$CC_INVERSE$line$CC_RESET"
 else
 percent=$(echo "$line"|xargs echo|cut -d' ' -f5|sed 's/%//')
 bytes=$(echo "$line"|xargs echo|cut -d' ' -f4)
-mount=$(echo "$line"|xargs echo|cut -d' ' -f6|nocr)
+mount=$(echo "$line"|xargs echo|cut -d' ' -f6|sed 's/\r$//')
 device=$(echo "$line"|xargs echo|cut -d' ' -f1)
 for ((i=0; i<${#MOUNT_COLOR_LIMIT[@]}; i+=5));do
 pattern="${MOUNT_COLOR_LIMIT[i]}"
@@ -1674,6 +1674,9 @@ fi
 fi
 done
 unset IFS
+}
+uses_lvm(){
+command -v vgs >/dev/null&&sudo vgs --noheadings >/dev/null&&[ -n "$(sudo vgs --noheadings)" ] &>/dev/null
 }
 has_tty(){
 { : >/dev/tty;} &>/dev/null
@@ -2371,7 +2374,6 @@ local dir=${2:-.}
 rsync -av $ssh:"$1" "$dir"
 }
 remote_bashlib(){
-_deprecated "use remote_bashlib os disk_free instead" warn
 local opt
 eval set -- "$(option_parse $'+l login +\nh host +\nj jump +' "$@")"
 while true;do
@@ -2412,73 +2414,19 @@ done
 }
 remote_install(){
 _deprecated "use remote_bashlib software install" warn
-remote_bashlib software install
+remote_bashlib software install "$@"
 }
 remote_system_info(){
 _deprecated "use remote_bashlib os system_info" warn
-remote_bashlib os system_info
+remote_bashlib os system_info "$@"
 }
 remote_df(){
-local opt=""
-eval set -- "$(option_parse $'l locale -' "$@")"
-while true;do
-case "$1" in
--l|--locale)opt="-l"
-shift
-;;
---)shift
-break
-;;
-*)die "$(gettext "Unrecognized option"): $1"
-esac
-done
-if [ -n "$3" ]&&is_integer "$3";then
-declare -n ref="$1"
-local op="$2"
-local limit=$3
-shift 3
-fi
-local firstline="" percent mount device limit_c limit_e limit_w limit_o
-IFS=$'\n'
-for line in $(remote df -h $opt -x tmpfs -x efivarfs -x devtmpfs -x squashfs "$@");do
-if [ -z "$firstline" ];then
-firstline=1
-invers "$line"
-else
-percent=$(echo "$line"|xargs echo|cut -d' ' -f5|sed 's/%//')
-mount=$(echo "$line"|xargs echo|cut -d' ' -f6|nocr)
-device=$(echo "$line"|xargs echo|cut -d' ' -f1)
-for ((i=0; i<${#MOUNT_COLOR_LIMIT[@]}; i+=5));do
-pattern="${MOUNT_COLOR_LIMIT[i]}"
-if [[ $device =~ $pattern ]];then
-limit_c="${MOUNT_COLOR_LIMIT[i+1]}"
-limit_e="${MOUNT_COLOR_LIMIT[i+2]}"
-limit_w="${MOUNT_COLOR_LIMIT[i+3]}"
-limit_o="${MOUNT_COLOR_LIMIT[i+4]}"
-break
-fi
-done
-if ((percent==limit_c));then
-critical "$line"
-elif ((percent==limit_e));then
-error "$line"
-elif ((percent==limit_w));then
-warn "$line"
-elif ((percent==limit_o));then
-ok "$line"
-else
-echo "$line"
-fi
-if [ -n "$limit" ]&&eval "(( percent $op limit ))";then
-ref="$ref$mount "
-fi
-fi
-done
-unset IFS
-echo ""
+_deprecated "use remote_bashlib os disk_free" warn
+remote_bashlib os disk_free "$@"
 }
 remote_lvm(){
-remote sudo vgs --noheadings \&\& [ -n "$(sudo vgs --noheadings 2>/dev/null)" ] &>/dev/null
+_deprecated "use remote_bashlib os uses_lvm" warn
+remote_bashlib os uses_lvm "$@"
 }
 boot_wait(){
 eval set -- "$(option_parse $'q quiet -' "$@")"

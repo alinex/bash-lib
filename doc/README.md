@@ -81,6 +81,68 @@ This should help to read function parameters/arguments in different ways.
 | [`input_args`](function/input_args.md) | Collect string from stdin (not more than defined parameters) or concatenate the parameters |
 | [`input_lines`](function/input_lines.md) | Collect string from stdin (no parameters) or parameters each as a line |
 
+### Color Module
+
+This module contains color specifications to be used in console output.
+
+| Variable/Function | Description |
+| --- | --- |
+| ``$COLORS`` | Number of colors possible on terminal |
+| ``$CC_RESET`` | Reset all |
+| ``$CC_RESET_FG`` | Reset text color |
+| ``$CC_RESET_BG`` | Reset background color |
+| ``$CC_INTENSITY_BOLD`` | Set intensity to bold |
+| ``$CC_INTENSITY_LIGHT`` | Set intensity to light |
+| ``$CC_INTENSITY_OFF`` | Set intensity back to normal |
+| ``$CC_ITALIC`` | Set italic mode |
+| ``$CC_ITALIC_OFF`` | Unset italic mode |
+| ``$CC_UNDERLINE`` | Set underline mode |
+| ``$CC_UNDERLINE_OFF`` | Unset underline mode |
+| ``$CC_INVERSE`` | Set inverse mode (change text color and background color) |
+| ``$CC_INVERSE_OFF`` | Unset inverse mode |
+| ``$CC_DASHED`` | Set strike through mode |
+| ``$CC_DASHED_OFF`` | Unset strike through mode |
+| ``$CC_BLACK`` | Set text color to black |
+| ``$CC_RED`` | Set text color to red |
+| ``$CC_GREEN`` | Set text color to green |
+| ``$CC_YELLOW`` | Set text color to yellow |
+| ``$CC_BLUE`` | Set text color to blue |
+| ``$CC_MAGENTA`` | Set text color to magenta |
+| ``$CC_CYAN`` | Set text color to cyan |
+| ``$CC_WHITE`` | Set text color to white |
+| ``$CC_BLACK_BOLD`` | Set text color to bold black |
+| ``$CC_RED_BOLD`` | Set text color to bold red |
+| ``$CC_GREEN_BOLD`` | Set text color to bold green |
+| ``$CC_YELLOW_BOLD`` | Set text color to bold yellow |
+| ``$CC_BLUE_BOLD`` | Set text color to bold blue |
+| ``$CC_MAGENTA_BOLD`` | Set text color to bold magenta |
+| ``$CC_CYAN_BOLD`` | Set text color to bold cyan |
+| ``$CC_WHITE_BOLD`` | Set text color to gray |
+| ``$CC_BLACK_BG`` | Set background color to black |
+| ``$CC_RED_BG`` | Set background color to red |
+| ``$CC_GREEN_BG`` | Set background color to green |
+| ``$CC_YELLOW_BG`` | Set background color to yellow |
+| ``$CC_BLUE_BG`` | Set background color to blue |
+| ``$CC_MAGENTA_BG`` | Set background color to magenat |
+| ``$CC_CYAN_BG`` | Set background color to white |
+| ``$CC_BLACK_BOLD_BG`` | Set background color to bold black |
+| ``$CC_RED_BOLD_BG`` | Set background color to bold red |
+| ``$CC_GREEN_BOLD_BG`` | Set background color to bold green |
+| ``$CC_YELLOW_BOLD_BG`` | Set background color to bold yellow |
+| ``$CC_BLUE_BOLD_BG`` | Set background color to bold blue |
+| ``$CC_MAGENTA_BOLD_BG`` | Set background color to bold magenta |
+| ``$CC_CYAN_BOLD_BG`` | Set background color to bold cyan |
+| ``$CC_CRITICAL`` | Set color for critical/disaster massages |
+| ``$CC_ERROR`` | Set color for error messages and failures |
+| ``$CC_WARN`` | Set color for warnings |
+| ``$CC_NOTICE`` | Set color for highlighted information |
+| ``$CC_OK`` | Set color for success messages |
+| ``$CC_HEADING`` | Set color for block headings |
+| ``$CC_INVERS`` | Set color for highlighted parts like table header |
+| [`color_256`](function/color_256.md) | Get color code for text color number |
+| [`color_256_bg`](function/color_256_bg.md) | Get color code for background color number |
+| [`color_table`](function/color_table.md) | Show complete color table |
+
 ### Config Module
 
 The core configuration which is needed for the core functions.
@@ -145,68 +207,6 @@ This covers atlassian API for Jira and confluence.
 | [`jira_get`](function/jira_get.md) | Get jira ticket details |
 | [`jira_create`](function/jira_create.md) | Create jira tickets |
 | [`jira_update`](function/jira_update.md) | Update jira tickets |
-
-### Color Module
-
-This module contains color specifications to be used in console output.
-
-| Variable/Function | Description |
-| --- | --- |
-| ``$COLORS`` | Number of colors possible on terminal |
-| ``$CC_RESET`` | Reset all |
-| ``$CC_RESET_FG`` | Reset text color |
-| ``$CC_RESET_BG`` | Reset background color |
-| ``$CC_INTENSITY_BOLD`` | Set intensity to bold |
-| ``$CC_INTENSITY_LIGHT`` | Set intensity to light |
-| ``$CC_INTENSITY_OFF`` | Set intensity back to normal |
-| ``$CC_ITALIC`` | Set italic mode |
-| ``$CC_ITALIC_OFF`` | Unset italic mode |
-| ``$CC_UNDERLINE`` | Set underline mode |
-| ``$CC_UNDERLINE_OFF`` | Unset underline mode |
-| ``$CC_INVERSE`` | Set inverse mode (change text color and background color) |
-| ``$CC_INVERSE_OFF`` | Unset inverse mode |
-| ``$CC_DASHED`` | Set strike through mode |
-| ``$CC_DASHED_OFF`` | Unset strike through mode |
-| ``$CC_BLACK`` | Set text color to black |
-| ``$CC_RED`` | Set text color to red |
-| ``$CC_GREEN`` | Set text color to green |
-| ``$CC_YELLOW`` | Set text color to yellow |
-| ``$CC_BLUE`` | Set text color to blue |
-| ``$CC_MAGENTA`` | Set text color to magenta |
-| ``$CC_CYAN`` | Set text color to cyan |
-| ``$CC_WHITE`` | Set text color to white |
-| ``$CC_BLACK_BOLD`` | Set text color to bold black |
-| ``$CC_RED_BOLD`` | Set text color to bold red |
-| ``$CC_GREEN_BOLD`` | Set text color to bold green |
-| ``$CC_YELLOW_BOLD`` | Set text color to bold yellow |
-| ``$CC_BLUE_BOLD`` | Set text color to bold blue |
-| ``$CC_MAGENTA_BOLD`` | Set text color to bold magenta |
-| ``$CC_CYAN_BOLD`` | Set text color to bold cyan |
-| ``$CC_WHITE_BOLD`` | Set text color to gray |
-| ``$CC_BLACK_BG`` | Set background color to black |
-| ``$CC_RED_BG`` | Set background color to red |
-| ``$CC_GREEN_BG`` | Set background color to green |
-| ``$CC_YELLOW_BG`` | Set background color to yellow |
-| ``$CC_BLUE_BG`` | Set background color to blue |
-| ``$CC_MAGENTA_BG`` | Set background color to magenat |
-| ``$CC_CYAN_BG`` | Set background color to white |
-| ``$CC_BLACK_BOLD_BG`` | Set background color to bold black |
-| ``$CC_RED_BOLD_BG`` | Set background color to bold red |
-| ``$CC_GREEN_BOLD_BG`` | Set background color to bold green |
-| ``$CC_YELLOW_BOLD_BG`` | Set background color to bold yellow |
-| ``$CC_BLUE_BOLD_BG`` | Set background color to bold blue |
-| ``$CC_MAGENTA_BOLD_BG`` | Set background color to bold magenta |
-| ``$CC_CYAN_BOLD_BG`` | Set background color to bold cyan |
-| ``$CC_CRITICAL`` | Set color for critical/disaster massages |
-| ``$CC_ERROR`` | Set color for error messages and failures |
-| ``$CC_WARN`` | Set color for warnings |
-| ``$CC_NOTICE`` | Set color for highlighted information |
-| ``$CC_OK`` | Set color for success messages |
-| ``$CC_HEADING`` | Set color for block headings |
-| ``$CC_INVERS`` | Set color for highlighted parts like table header |
-| [`color_256`](function/color_256.md) | Get color code for text color number |
-| [`color_256_bg`](function/color_256_bg.md) | Get color code for background color number |
-| [`color_table`](function/color_table.md) | Show complete color table |
 
 ### Database Module
 
@@ -294,6 +294,7 @@ Module with operating system specific helper functions.
 | --- | --- |
 | [`os_detect`](function/os_detect.md) | Detect OS settings |
 | [`disk_free`](function/disk_free.md) | Disk free with visual display |
+| [`uses_lvm`](function/uses_lvm.md) | Check if LVM is used |
 | [`has_tty`](function/has_tty.md) | Has tty present |
 | [`is_bash`](function/is_bash.md) | Is running with bash console |
 
@@ -373,8 +374,8 @@ Module with remote calling/execution helpers.
 | [`remote_bashlib`](function/remote_bashlib.md) | Deprected: Run bashlib command on remote. |
 | [`remote_install`](function/remote_install.md) | Deprecated: Remote install package like @install |
 | [`remote_system_info`](function/remote_system_info.md) | Deprecated: Display the system description (from remote) |
-| [`remote_df`](function/remote_df.md) | Remote df with visual display |
-| [`remote_lvm`](function/remote_lvm.md) | Remote check if LVM is used |
+| [`remote_df`](function/remote_df.md) | Deprectaed: Remote df with visual display |
+| [`remote_lvm`](function/remote_lvm.md) | Deprecated: Remote check if LVM is used |
 | [`boot_wait`](function/boot_wait.md) | Wait till reboot is finished |
 | [`curl`](function/curl.md) | Curl with added error handling |
 

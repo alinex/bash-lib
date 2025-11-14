@@ -1,7 +1,8 @@
 # remote_lvm
 
-## Remote check if LVM is used
+## Deprecated: Remote check if LVM is used
 
+Use `remote_bashlib os uses_lvm` instead.
 
 
 ### Usage

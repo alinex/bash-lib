@@ -56,8 +56,9 @@ else
       [ "$select_version" = "$version" ] || [ -z "$select_version" ] || continue
       ((dist_num++)) || true
       start=$(now)
-      rm -rf /tmp/bashlib-docker/tests/results/${name}-${version} 2>/dev/null || true
-      mkdir -p -m 777 /tmp/bashlib-docker/tests/results/${name}-${version} || true
+      rm -rf /tmp/bashlib-docker/tests/results/"${name}-${version}" 2>/dev/null || true
+      # shellcheck disable=SC2174
+      mkdir -p -m 777 /tmp/bashlib-docker/tests/results/"${name}-${version}" || true
       echo -n "Loading $name:$version ($image)"
       docker pull -q "$image" >/dev/null
       container="$(docker run --rm -it -v "/tmp/bashlib-docker:/mnt" -w /mnt -d "$image" sh -c \

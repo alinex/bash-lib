@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 # shellcheck disable=SC2034
+# shellcheck source=base
+source /dev/null
 
 # Module with operating system specific helper functions.
 
@@ -180,11 +182,11 @@ disk_free() {
     for line in $(df -h $opt -x tmpfs -x efivarfs -x devtmpfs -x squashfs "$@"); do
         if [ -z "$firstline" ]; then
             firstline=1
-            invers "$line"
+            echo -e "${CC_INVERSE}$line${CC_RESET}"
         else
             percent=$(echo "$line" | xargs echo | cut -d' ' -f5 | sed 's/%//')
             bytes=$(echo "$line" | xargs echo | cut -d' ' -f4)
-            mount=$(echo "$line" | xargs echo | cut -d' ' -f6 | nocr)
+            mount=$(echo "$line" | xargs echo | cut -d' ' -f6 | sed 's/\r$//')
             # get color limits
             device=$(echo "$line" | xargs echo | cut -d' ' -f1)
             # shellcheck disable=SC2154
@@ -224,6 +226,16 @@ disk_free() {
         fi
     done
     unset IFS
+}
+
+# Check if LVM is used
+# Usage:    uses_lvm
+# Return:   0 for uses LVM
+#           1 if not
+uses_lvm() {
+    command -v vgs >/dev/null &&                      # installed
+        sudo vgs --noheadings >/dev/null &&           # vgs returns ok
+        [ -n "$(sudo vgs --noheadings)" ] &>/dev/null # vgs returns at least one group
 }
 
 ######################################################################################
