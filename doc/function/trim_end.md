@@ -2,7 +2,6 @@
 
 ## Trim trailing whitespace or given character
 
-Stdout:   `<string>`
 See:      https://stackoverflow.com/a/3352015
 
 
@@ -11,3 +10,7 @@ See:      https://stackoverflow.com/a/3352015
 ```bash
 trim_end <value> [<characters>]
 ```
+
+### Output (stdout)
+
+- `<string>`

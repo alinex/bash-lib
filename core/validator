@@ -89,7 +89,7 @@ is_float() {
 
 # Trim leading whitespace or given character
 # Usage:    trim_start <value> [<characters>]
-# Stdout:   <string>
+# Output:   <string>
 # See:      https://stackoverflow.com/a/3352015
 trim_start() {
     local str="${1-}"
@@ -100,7 +100,7 @@ trim_start() {
 
 # Trim trailing whitespace or given character
 # Usage:    trim_end <value> [<characters>]
-# Stdout:   <string>
+# Output:   <string>
 # See:      https://stackoverflow.com/a/3352015
 trim_end() {
     local str="${1:-}"
@@ -111,10 +111,21 @@ trim_end() {
 
 # Trim leading and trailing whitespace or given character
 # Usage:    trim <value> [<characters>]
-# Stdout:   <string>
+# Output:   <string>
 # See:      https://stackoverflow.com/a/3352015
 trim() {
     trim_end "$(trim_start "$1" "$2")" "$2"
+}
+
+# Convert string into only alphanumeric values
+# This is needed to use it as a key in associative arrays. All other characters are converted into underscore.
+# Usage:    to_alphanum <string>
+#           <string> | to_alphanum
+# Output:   <alnum>
+to_alphanum() {
+    local text
+    text="$(input "$@")"
+    echo "${text//[^a-zA-Z0-9_]/_}"
 }
 
 # Return the value or if it is a variable name which is not empty return it's value
