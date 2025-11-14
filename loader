@@ -2,6 +2,9 @@
 # shellcheck source=base
 source /dev/null
 
+# shellcheck disable=SC2034
+BASHLIB_LOADER=loader
+
 for folder in core module; do
     for f in "$BASHLIB_HOME/$folder"/*; do
         if [[ -f "$f" && "$f" != *.* ]]; then

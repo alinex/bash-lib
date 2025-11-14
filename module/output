@@ -1,8 +1,11 @@
 #!/usr/bin/env bash
-# shellcheck source=module/color
+# shellcheck source=base
 source /dev/null
 
 # Module with output and user interaction helpers.
+
+# Load dependent modules if not done
+_load_module module/software
 
 ######################################################################################
 # Context
@@ -203,7 +206,7 @@ horizontal_line() {
     *) char="─" ;;
     esac
     local cols
-    read _ cols < <(stty size)
+    read -r _ cols < <(stty size)
     ((cols > 60)) || cols=60
     printf "%.0s$char" $(seq 1 "$cols")
 }

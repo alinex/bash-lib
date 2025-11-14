@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+BASHLIB_LOADER=base
 option_parse(){
 local opt name type desc short="" long=""
 local spec="$1" permut
@@ -289,6 +290,16 @@ local line="${BASH_LINENO[i-1]}"
 local src="${BASH_SOURCE[i]}"
 printf "at %s() in %s:%s\n" "$func" "$src" "$line"|debug "$level"
 done
+}
+_load_module(){
+local module=$1
+local path
+path="$(dirname "$module")"
+case $path in
+core)return 0;;
+module)[[ ! $BASHLIB_LOADER =~ loader|full|remote ]]||return 0
+esac
+source "$module"
 }
 debug(){
 local level=1 func

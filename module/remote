@@ -409,9 +409,16 @@ remote_bashlib() {
     local modules
     IFS=',' read -ra modules <<<"${1-}"
     shift
+    # add needed modules
+    for e in "${modules[@]}"; do
+        case $e in
+        output) modules+=(software) ;;
+        esac
+    done
     # shellcheck disable=SC2086
     (
         echo "DEBUG=${DEBUG:-}"
+        echo "BASHLIB_LOADER=remote"
         # load base
         if [[ "${modules[0]}" =~ full|base ]]; then
             cat "$BASHLIB_HOME/${modules[0]}"

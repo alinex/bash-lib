@@ -7,6 +7,7 @@ echo "Update minimize bash-lib library... "
 command -v shfmt >/dev/null || sudo apt install -y shfmt
 
 echo "#!/usr/bin/env bash" >"$BASHLIB_HOME/full"
+echo "BASHLIB_LOADER=full" >>"$BASHLIB_HOME/full"
 echo -n "- full "
 for folder in core module; do
     echo -n "$folder "
@@ -19,6 +20,7 @@ done
 echo "fertig."
 echo "source $BASHLIB_HOME/configs" >>"$BASHLIB_HOME/full" # load configs
 echo "#!/usr/bin/env bash" >"$BASHLIB_HOME/base"
+echo "BASHLIB_LOADER=base" >>"$BASHLIB_HOME/base"
 echo -n "- base (core) "
 for f in "$BASHLIB_HOME"/core/*; do
     if [[ -f "$f" && "$f" != *.* ]]; then

@@ -55,3 +55,17 @@ _stacktrace() {
         printf "at %s() in %s:%s\n" "$func" "$src" "$line" | debug "$level"
     done
 }
+
+# Load bashlib module
+# Usage:    _load_module <path>/<module>
+_load_module() {
+    local module=$1
+    local path
+    path="$(dirname "$module")"
+    # shellcheck disable=SC2154
+    case $path in
+    core) return 0 ;;
+    module) [[ ! "$BASHLIB_LOADER" =~ loader|full|remote ]] || return 0 ;;
+    esac
+    source "$module"
+}

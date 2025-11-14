@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+BASHLIB_LOADER=full
 option_parse(){
 local opt name type desc short="" long=""
 local spec="$1" permut
@@ -290,6 +291,16 @@ local src="${BASH_SOURCE[i]}"
 printf "at %s() in %s:%s\n" "$func" "$src" "$line"|debug "$level"
 done
 }
+_load_module(){
+local module=$1
+local path
+path="$(dirname "$module")"
+case $path in
+core)return 0;;
+module)[[ ! $BASHLIB_LOADER =~ loader|full|remote ]]||return 0
+esac
+source "$module"
+}
 debug(){
 local level=1 func
 if [[ $1 =~ ^-?[0-9]+$ ]];then
@@ -444,11 +455,16 @@ jira_update(){
 curl -u "$ATLASSIAN_USER:$ATLASSIAN_TOKEN" -H "Content-Type: application/json" -X PUT "$JIRA_API/issue/$1" -d "$1"||die "Could not update Jira issue $1!"
 }
 declare -F "num_parameters" >/dev/null||source "$BASHLIB_HOME"/module/validator
-mongosh(){
-num_parameters --min 2 --max 2 --die "Mongosh needs two parameters: Usage mongosh <database> <command>" "$@"
+mongo(){
+num_parameters --min 2 --max 2 --die "Mongo needs two parameters: Usage mongo <database> <command>" "$@"
 local cluster
 cluster="$(sed 's/^[^.]*\.//' <<<"$server")"
-command mongosh "mongodb://${MONGO_ADMIN_USERPASS["$cluster"]}@$server:27017/$1" --eval "$2"
+command mongosh "mongodb://${MONGO_ADMIN_USERPASS["$cluster"]}@$server:27017/$1" \
+--eval "print(EJSON.stringify($2))"
+}
+mongosh(){
+_deprecated "Use $(mongo) now." warn
+mongo "$@"
 }
 postgres(){
 echo "TODO"
@@ -1684,6 +1700,7 @@ has_tty(){
 is_bash(){
 [[ -n ${BASH_VERSION:-} ]]
 }
+_load_module module/software
 help(){
 heading "Hilfe: $1"
 info "Usage: $2"
@@ -1775,7 +1792,7 @@ full)char="█";;
 *)char="─"
 esac
 local cols
-read _ cols < <(stty size)
+read -r _ cols < <(stty size)
 ((cols>60))||cols=60
 printf "%.0s$char" $(seq 1 "$cols")
 }
@@ -2390,7 +2407,13 @@ done
 local modules
 IFS=',' read -ra modules <<<"${1-}"
 shift
+for e in "${modules[@]}";do
+case $e in
+output)modules+=(software)
+esac
+done
 (echo "DEBUG=${DEBUG:-}"
+echo "BASHLIB_LOADER=remote"
 if [[ ${modules[0]} =~ full|base ]];then
 cat "$BASHLIB_HOME/${modules[0]}"
 modules=("${modules[@]:1}")
@@ -2482,13 +2505,14 @@ local apk=""
 local reload=""
 for cmd in "$@";do
 if [[ ! -v _software_install["$cmd"] ]];then
+debug "search how to add $cmd"
 PATH="$PATH:/usr/local/sbin:/usr/sbin:/sbin" which "$cmd" >/dev/null||if command -v apt-get >/dev/null;then
 case $cmd in
 yq)snap+=" $cmd";;
 mlr)apt+=" miller";;
 *)apt+=" $cmd"
 esac
-elif command -v apkt >/dev/null;then
+elif command -v apk >/dev/null;then
 case $cmd in
 mlr)apk+=" miller";;
 *)apk+=" $cmd"
@@ -2505,7 +2529,7 @@ fi
 test -z "$apt"||sudo apt-get install -y $apt
 test -z "$snap"||sudo apt snap install $snap
 test -z "$apk"||sudo apk update
-test -z "$apk"||sudo apk add "$apk"
+test -z "$apk"||sudo apk add $apk
 for file in $reload;do
 source $file
 done
