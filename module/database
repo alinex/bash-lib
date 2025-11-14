@@ -25,7 +25,7 @@ mongo() {
     local cluster
     # shellcheck disable=SC2001
     # shellcheck disable=SC2154
-    cluster="$(sed 's/^[^.]*\.//;s/\./_/g' <<<"$server")"
+    cluster="$(sed 's/^[^.]*\.//;s/[^a-zA-Z0-9_]/_/g' <<<"$server")"
     debug "Use settings for $cluster"
     command mongosh "mongodb://${MONGO_ADMIN_USERPASS["$cluster"]}@$server:27017/$1" \
         --eval "print(EJSON.stringify($2))"
