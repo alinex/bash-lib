@@ -214,7 +214,8 @@ Module with database access helpers.
 
 | Variable/Function | Description |
 | --- | --- |
-| [`mongosh`](function/mongosh.md) | Run command on Mongo DB |
+| [`mongo`](function/mongo.md) | Run command on Mongo DB |
+| [`mongosh`](function/mongosh.md) | Deprectaed: Run command on Mongo DB |
 | [`postgres`](function/postgres.md) | Run command on postgres |
 
 ### Dns Module

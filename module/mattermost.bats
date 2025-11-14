@@ -1,5 +1,6 @@
 #!/usr/bin/env bats
-# shellcheck disable=SC2154
+# shellcheck source=config/test-setup.conf
+source /dev/null
 
 # bats file_tags=mattermost
 setup_file() {

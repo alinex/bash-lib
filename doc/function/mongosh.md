@@ -1,7 +1,8 @@
 # mongosh
 
-## Run command on Mongo DB
+## Deprectaed: Run command on Mongo DB
 
+Use `mongo` now.
 
 
 ### Usage
