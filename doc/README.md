@@ -67,7 +67,7 @@ The configuration module contains a lot of general configuration settings for th
 | ``$CONFLUENCE_API`` | Atlassian confluence API URL used together with `$ATLASSIAN_USER` and `$ATLASSIAN_TOKEN` and silently disables [`confluence`](functionconfluence.md) functions if not set |
 | ``$JIRA_API`` | Atlassian jira API URL used together with `$ATLASSIAN_USER` and `$ATLASSIAN_TOKEN` and silently disables [`jira`](functionjira.md) functions if not set |
 | ``$REMOTE_LOGIN_DEFAULT`` | Default login if no `--login` or ``$login`` available |
-| ``$MONGO_ADMIN_USERPASS`` | Hash: Mongo Admin User Logins <host> = <username>:<password> |
+| ``$MONGO_ADMIN_USERPASS`` | Hash: Mongo Admin User Logins <host> = <username>:<password> but use _ instead of . in hostname |
 | ``$POWERDNS_API`` | PowerDNS API URL used together with `$POWERDNS_TOKEN` and silently disables powerdns function if not set |
 
 ## Core
@@ -183,6 +183,22 @@ The core functions contains essential parts which may also be used while loading
 | [`trap_add`](function/trap_add.md) | Set or add an additional trap without overwriting existing ones |
 | [`trap_remove`](function/trap_remove.md) | Remove a specific trap |
 | [`mktemp`](function/mktemp.md) | Make a temporary file, which is recognizable |
+
+### Validator Module
+
+Validators to make this easier and more readable.
+
+| Variable/Function | Description |
+| --- | --- |
+| [`num_parameters`](function/num_parameters.md) | Check that a specific number of parameters are given |
+| [`is_success`](function/is_success.md) | Test if given value is an exit/return success |
+| [`is_empty`](function/is_empty.md) | Test if given value is an empty string or undefined |
+| [`is_integer`](function/is_integer.md) | Test if given value is an integer |
+| [`is_float`](function/is_float.md) | Test if given value is an float |
+| [`trim_start`](function/trim_start.md) | Trim leading whitespace or given character |
+| [`trim_end`](function/trim_end.md) | Trim trailing whitespace or given character |
+| [`trim`](function/trim.md) | Trim leading and trailing whitespace or given character |
+| [`value_if_variable`](function/value_if_variable.md) | Return the value or if it is a variable name which is not empty return it's value |
 
 ## Module
 
@@ -389,22 +405,6 @@ Software management functions.
 | [`install`](function/install.md) | Install software package |
 | [`semver`](function/semver.md) | Parse semantic version number |
 | [`semver_diff`](function/semver_diff.md) | Calculate difference |
-
-### Validator Module
-
-Validators to make this easier and more readable.
-
-| Variable/Function | Description |
-| --- | --- |
-| [`num_parameters`](function/num_parameters.md) | Check that a specific number of parameters are given |
-| [`is_success`](function/is_success.md) | Test if given value is an exit/return success |
-| [`is_empty`](function/is_empty.md) | Test if given value is an empty string or undefined |
-| [`is_integer`](function/is_integer.md) | Test if given value is an integer |
-| [`is_float`](function/is_float.md) | Test if given value is an float |
-| [`trim_start`](function/trim_start.md) | Trim leading whitespace or given character |
-| [`trim_end`](function/trim_end.md) | Trim trailing whitespace or given character |
-| [`trim`](function/trim.md) | Trim leading and trailing whitespace or given character |
-| [`value_if_variable`](function/value_if_variable.md) | Return the value or if it is a variable name which is not empty return it's value |
 
 ## Extra
 

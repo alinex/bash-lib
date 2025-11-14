@@ -412,3 +412,69 @@ done
 [ ! -e "$result" ]||rm -r "$result"
 debug "Removed $file after TTL $1 seconds"
 }
+num_parameters(){
+eval set -- "$(option_parse $'- min +\n- max +\n- die +' "$@")"
+local min max die
+while true;do
+case "$1" in
+--min)min=$2
+shift 2
+;;
+--max)max=$2
+shift 2
+;;
+--die)die=$2
+shift 2
+;;
+--)shift
+break
+;;
+*)die "$(gettext "Unrecognized option"): $1"
+esac
+done
+_die(){
+read -r line func file <<<"$(caller 1)"
+echo "Check ${FUNCNAME[1]}: $1 ($func in $file:$line)" >&2
+[ -z "$die" ]||die "$die"
+return 1
+}
+[ -z "$min" ]||(($#>=min))||_die "[$*] $# < $min (min)"||return 1
+[ -z "$max" ]||(($#<=max))||_die "[$*] $# > $max (max)"||return 1
+}
+is_success(){
+num_parameters --min 1 --max 1 --die "Only one argument allowed, got: $#" -- "$@"
+return "$1"
+}
+is_empty(){
+num_parameters --max 1 --die "Only one argument allowed, got: $#" -- "$@"
+[ -z "$1" ]
+}
+is_integer(){
+num_parameters --min 1 --max 1 --die "Only one argument allowed, got: $#" -- "$@"
+[[ $1 =~ ^-?[0-9]+$ ]]
+}
+is_float(){
+num_parameters --min 1 --max 1 --die "Only one argument allowed, got: $#" -- "$@"
+[[ $1 =~ ^[-+]?[0-9]+([.][0-9]+)?$ ]]
+}
+trim_start(){
+local str="${1-}"
+local char="${2:-[:space:]}"
+echo "${str#"${str%%[!$char]*}"}"
+}
+trim_end(){
+local str="${1:-}"
+local char="${2:-[:space:]}"
+echo "${str%"${str##*[!$char]}"}"
+}
+trim(){
+trim_end "$(trim_start "$1" "$2")" "$2"
+}
+value_if_variable(){
+local _name="$1"
+if [[ $_name =~ ^[a-zA-Z_][a-zA-Z0-9_]*$ ]]&&[ -n "${!_name-}" ];then
+echo "${!_name}"
+else
+echo "$_name"
+fi
+}

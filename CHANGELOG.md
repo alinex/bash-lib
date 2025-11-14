@@ -11,6 +11,11 @@ As this is not driven by releases and therefore tags are not used it is an ongoi
 - all ['remote`](doc/function/remote.md) functions now support a jump host
 - restructure network and os module and its functions
 - [`ask`](doc/function/ask.md) now with multiline and external editor support
+- add [remote_bashlib](doc/function/remote_bashlib.md) to run any bashlib command on remote host
+- add [mongo](doc/function/mongo.md) connection
+- move `remote_df` and `remote_lvm` into os module
+- move color module into core
+- support alpine
 
 ## 05. November 2025 - V2.0.1
 

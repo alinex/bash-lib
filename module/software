@@ -7,7 +7,7 @@
 ######################################################################################
 
 # Cache used to prevent multiple install calls for the same information in one run
-declare -A _software_install
+declare -Ag _software_install
 
 # Install software package
 # Usage:    install <pack>...
@@ -17,9 +17,11 @@ install() {
     local snap=""
     local apk=""
     local reload=""
+    local key
     # check what is needed
     for cmd in "$@"; do
-        if [[ ! -v _software_install["$cmd"] ]]; then
+        key="${cmd//[^a-zA-Z0-9_]/_}"
+        if [[ ! -v _software_install["$key"] ]] && ! command -v "$cmd" >/dev/null; then
             debug "search how to add $cmd"
             PATH="$PATH:/usr/local/sbin:/usr/sbin:/sbin" which "$cmd" >/dev/null ||
                 # debian
@@ -27,16 +29,33 @@ install() {
                     case $cmd in
                     yq) snap+=" $cmd" ;;
                     mlr) apt+=" miller" ;;
+                    mongosh)
+                        curl -fsSL https://pgp.mongodb.com/server-8.0.asc | sudo gpg --dearmor -o /usr/share/keyrings/mongodb-server-8.0.gpg
+                        codename=$(grep VERSION_CODENAME /etc/os-release | cut -d= -f2)
+                        dist="$(head -1 /etc/issue | cut -d' ' -f1)"
+                        [ "$dist" = "Ubuntu" ] && type=multiverse || type=main
+                        echo "deb [ signed-by=/usr/share/keyrings/mongodb-server-8.0.gpg ] https://repo.mongodb.org/apt/${dist,,} $codename/mongodb-org/8.0 $type" | sudo tee /etc/apt/sources.list.d/mongodb-org-8.0.list
+                        apt+=" mongodb-org-shell"
+                        ;;
                     *) apt+=" $cmd" ;;
                     esac
                 # alpine
                 elif command -v apk >/dev/null; then
                     case $cmd in
                     mlr) apk+=" miller" ;;
+                    mongosh)
+                        local url
+                        url="$(curl -s https://www.mongodb.com/try/download/compass | tr ',' '\n' | grep mongosh | grep 'Linux x64' | sed 's/.*"https/https/;s/tgz.*/tgz/')"
+                        curl -s "$url" >/tmp/mongosh.tgz
+                        mkdir /tmp/mongosh
+                        tar -zxvf mongosh.tgz -C /tmp/mongosh
+                        sudo cp /tmp/mongosh/bin/mongosh /usr/local/bin/
+                        rm /tmp/mongosh*
+                        ;;
                     *) apk+=" $cmd" ;;
                     esac
                 fi
-            _software_install["$cmd"]=1
+            _software_install["$key"]=1
         fi
     done
     if test -n "$snap" && ! command -v snapd >/dev/null; then
@@ -45,6 +64,7 @@ install() {
         reload+=" ~/.bashrc"
     fi
     # install
+    test -z "$apt" || sudo apt-get update
     # shellcheck disable=SC2086
     test -z "$apt" || sudo apt-get install -y $apt
     # shellcheck disable=SC2086

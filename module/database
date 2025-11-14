@@ -8,8 +8,8 @@ source /dev/null
 
 # Module with database access helpers.
 
-# load other modules if not already done
-declare -F "num_parameters" >/dev/null || source "$BASHLIB_HOME"/module/validator
+# Load dependent modules if not done
+_load_module module/software
 
 ######################################################################################
 # Mongo
@@ -22,12 +22,14 @@ declare -F "num_parameters" >/dev/null || source "$BASHLIB_HOME"/module/validato
 #           $MONGO_ADMIN_USERPASS
 mongo() {
     num_parameters --min 2 --max 2 --die "Mongo needs two parameters: Usage mongo <database> <command>" "$@"
-    local cluster
+    local cluster key
+    install mongosh
     # shellcheck disable=SC2001
     # shellcheck disable=SC2154
-    cluster="$(sed 's/^[^.]*\.//;s/[^a-zA-Z0-9_]/_/g' <<<"$server")"
+    cluster="$(sed 's/^[^.]*\.//' <<<"$server")"
+    key="${cluster//[^a-zA-Z0-9_]/_}"
     debug "Use settings for $cluster"
-    command mongosh "mongodb://${MONGO_ADMIN_USERPASS["$cluster"]}@$server:27017/$1" \
+    command mongosh "mongodb://${MONGO_ADMIN_USERPASS["$key"]}@$server:27017/$1" \
         --eval "print(EJSON.stringify($2))"
 }
 

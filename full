@@ -412,6 +412,72 @@ done
 [ ! -e "$result" ]||rm -r "$result"
 debug "Removed $file after TTL $1 seconds"
 }
+num_parameters(){
+eval set -- "$(option_parse $'- min +\n- max +\n- die +' "$@")"
+local min max die
+while true;do
+case "$1" in
+--min)min=$2
+shift 2
+;;
+--max)max=$2
+shift 2
+;;
+--die)die=$2
+shift 2
+;;
+--)shift
+break
+;;
+*)die "$(gettext "Unrecognized option"): $1"
+esac
+done
+_die(){
+read -r line func file <<<"$(caller 1)"
+echo "Check ${FUNCNAME[1]}: $1 ($func in $file:$line)" >&2
+[ -z "$die" ]||die "$die"
+return 1
+}
+[ -z "$min" ]||(($#>=min))||_die "[$*] $# < $min (min)"||return 1
+[ -z "$max" ]||(($#<=max))||_die "[$*] $# > $max (max)"||return 1
+}
+is_success(){
+num_parameters --min 1 --max 1 --die "Only one argument allowed, got: $#" -- "$@"
+return "$1"
+}
+is_empty(){
+num_parameters --max 1 --die "Only one argument allowed, got: $#" -- "$@"
+[ -z "$1" ]
+}
+is_integer(){
+num_parameters --min 1 --max 1 --die "Only one argument allowed, got: $#" -- "$@"
+[[ $1 =~ ^-?[0-9]+$ ]]
+}
+is_float(){
+num_parameters --min 1 --max 1 --die "Only one argument allowed, got: $#" -- "$@"
+[[ $1 =~ ^[-+]?[0-9]+([.][0-9]+)?$ ]]
+}
+trim_start(){
+local str="${1-}"
+local char="${2:-[:space:]}"
+echo "${str#"${str%%[!$char]*}"}"
+}
+trim_end(){
+local str="${1:-}"
+local char="${2:-[:space:]}"
+echo "${str%"${str##*[!$char]}"}"
+}
+trim(){
+trim_end "$(trim_start "$1" "$2")" "$2"
+}
+value_if_variable(){
+local _name="$1"
+if [[ $_name =~ ^[a-zA-Z_][a-zA-Z0-9_]*$ ]]&&[ -n "${!_name-}" ];then
+echo "${!_name}"
+else
+echo "$_name"
+fi
+}
 contains(){
 local -n array=$1
 local value=$2
@@ -454,12 +520,15 @@ curl -u "$ATLASSIAN_USER:$ATLASSIAN_TOKEN" -H "Content-Type: application/json" -
 jira_update(){
 curl -u "$ATLASSIAN_USER:$ATLASSIAN_TOKEN" -H "Content-Type: application/json" -X PUT "$JIRA_API/issue/$1" -d "$1"||die "Could not update Jira issue $1!"
 }
-declare -F "num_parameters" >/dev/null||source "$BASHLIB_HOME"/module/validator
+_load_module module/software
 mongo(){
 num_parameters --min 2 --max 2 --die "Mongo needs two parameters: Usage mongo <database> <command>" "$@"
-local cluster
+local cluster key
+install mongosh
 cluster="$(sed 's/^[^.]*\.//' <<<"$server")"
-command mongosh "mongodb://${MONGO_ADMIN_USERPASS["$cluster"]}@$server:27017/$1" \
+key="${cluster//[^a-zA-Z0-9_]/_}"
+debug "Use settings for $cluster"
+command mongosh "mongodb://${MONGO_ADMIN_USERPASS["$key"]}@$server:27017/$1" \
 --eval "print(EJSON.stringify($2))"
 }
 mongosh(){
@@ -2409,10 +2478,11 @@ IFS=',' read -ra modules <<<"${1-}"
 shift
 for e in "${modules[@]}";do
 case $e in
+database)modules+=(software);;
 output)modules+=(software)
 esac
 done
-locale pattern='^#!/usr/bin/env'" bash|source "'/dev/null'
+local pattern='^#!/usr/bin/env'" bash|source "'/dev/null'
 (echo "#!/usr/bin/env" bash
 echo "DEBUG=${DEBUG:-}"
 echo "BASHLIB_LOADER=remote"
@@ -2499,28 +2569,45 @@ rm "$file"
 return 1
 fi
 }
-declare -A _software_install
+declare -Ag _software_install
 install(){
 local apt=""
 local snap=""
 local apk=""
 local reload=""
+local key
 for cmd in "$@";do
-if [[ ! -v _software_install["$cmd"] ]];then
+key="${cmd//[^a-zA-Z0-9_]/_}"
+if [[ ! -v _software_install["$key"] ]]&&! command -v "$cmd" >/dev/null;then
 debug "search how to add $cmd"
 PATH="$PATH:/usr/local/sbin:/usr/sbin:/sbin" which "$cmd" >/dev/null||if command -v apt-get >/dev/null;then
 case $cmd in
 yq)snap+=" $cmd";;
 mlr)apt+=" miller";;
+mongosh)curl -fsSL https://pgp.mongodb.com/server-8.0.asc|sudo gpg --dearmor -o /usr/share/keyrings/mongodb-server-8.0.gpg
+codename=$(grep VERSION_CODENAME /etc/os-release|cut -d= -f2)
+dist="$(head -1 /etc/issue|cut -d' ' -f1)"
+[ "$dist" = "Ubuntu" ]&&type=multiverse||type=main
+echo "deb [ signed-by=/usr/share/keyrings/mongodb-server-8.0.gpg ] https://repo.mongodb.org/apt/${dist,,} $codename/mongodb-org/8.0 $type"|sudo tee /etc/apt/sources.list.d/mongodb-org-8.0.list
+apt+=" mongodb-org-shell"
+;;
 *)apt+=" $cmd"
 esac
 elif command -v apk >/dev/null;then
 case $cmd in
 mlr)apk+=" miller";;
+mongosh)local url
+url="$(curl -s https://www.mongodb.com/try/download/compass|tr ',' '\n'|grep mongosh|grep 'Linux x64'|sed 's/.*"https/https/;s/tgz.*/tgz/')"
+curl -s "$url" >/tmp/mongosh.tgz
+mkdir /tmp/mongosh
+tar -zxvf mongosh.tgz -C /tmp/mongosh
+sudo cp /tmp/mongosh/bin/mongosh /usr/local/bin/
+rm /tmp/mongosh*
+;;
 *)apk+=" $cmd"
 esac
 fi
-_software_install["$cmd"]=1
+_software_install["$key"]=1
 fi
 done
 if test -n "$snap"&&! command -v snapd >/dev/null;then
@@ -2528,6 +2615,7 @@ apt="$apt snapd"
 snap="$snap snapd"
 reload+=" ~/.bashrc"
 fi
+test -z "$apt"||sudo apt-get update
 test -z "$apt"||sudo apt-get install -y $apt
 test -z "$snap"||sudo apt snap install $snap
 test -z "$apk"||sudo apk update
@@ -2628,71 +2716,5 @@ else
 echo "$num"
 fi
 ((num==0))&&return 0||return 1
-}
-num_parameters(){
-eval set -- "$(option_parse $'- min +\n- max +\n- die +' "$@")"
-local min max die
-while true;do
-case "$1" in
---min)min=$2
-shift 2
-;;
---max)max=$2
-shift 2
-;;
---die)die=$2
-shift 2
-;;
---)shift
-break
-;;
-*)die "$(gettext "Unrecognized option"): $1"
-esac
-done
-_die(){
-read -r line func file <<<"$(caller 1)"
-echo "Check ${FUNCNAME[1]}: $1 ($func in $file:$line)" >&2
-[ -z "$die" ]||die "$die"
-return 1
-}
-[ -z "$min" ]||(($#>=min))||_die "[$*] $# < $min (min)"||return 1
-[ -z "$max" ]||(($#<=max))||_die "[$*] $# > $max (max)"||return 1
-}
-is_success(){
-num_parameters --min 1 --max 1 --die "Only one argument allowed, got: $#" -- "$@"
-return "$1"
-}
-is_empty(){
-num_parameters --max 1 --die "Only one argument allowed, got: $#" -- "$@"
-[ -z "$1" ]
-}
-is_integer(){
-num_parameters --min 1 --max 1 --die "Only one argument allowed, got: $#" -- "$@"
-[[ $1 =~ ^-?[0-9]+$ ]]
-}
-is_float(){
-num_parameters --min 1 --max 1 --die "Only one argument allowed, got: $#" -- "$@"
-[[ $1 =~ ^[-+]?[0-9]+([.][0-9]+)?$ ]]
-}
-trim_start(){
-local str="${1-}"
-local char="${2:-[:space:]}"
-echo "${str#"${str%%[!$char]*}"}"
-}
-trim_end(){
-local str="${1:-}"
-local char="${2:-[:space:]}"
-echo "${str%"${str##*[!$char]}"}"
-}
-trim(){
-trim_end "$(trim_start "$1" "$2")" "$2"
-}
-value_if_variable(){
-local _name="$1"
-if [[ $_name =~ ^[a-zA-Z_][a-zA-Z0-9_]*$ ]]&&[ -n "${!_name-}" ];then
-echo "${!_name}"
-else
-echo "$_name"
-fi
 }
 source /home/alex/dvb/bash-lib/configs

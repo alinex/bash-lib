@@ -412,6 +412,7 @@ remote_bashlib() {
     # add needed modules
     for e in "${modules[@]}"; do
         case $e in
+        database) modules+=(software) ;;
         output) modules+=(software) ;;
         esac
     done
