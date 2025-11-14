@@ -165,7 +165,7 @@ setup() {
 # bats test_tags=_mattermost_find_channels
 @test "_mattermost_find_channels: should get named channel" {
     run _mattermost_find_channels "$TEST_MM_CHANNEL_NAME"
-    assert_output -p "$TEST_MM_TEAM_ID/$TEST_MM_FIND_ID "
+    assert_output -p "$TEST_MM_TEAM_ID/$TEST_MM_CHANNEL_ID "
     assert_success
 }
 
