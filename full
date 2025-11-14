@@ -2412,24 +2412,26 @@ case $e in
 output)modules+=(software)
 esac
 done
-(echo "DEBUG=${DEBUG:-}"
+locale pattern='^#!/usr/bin/env'" bash|source "'/dev/null'
+(echo "#!/usr/bin/env" bash
+echo "DEBUG=${DEBUG:-}"
 echo "BASHLIB_LOADER=remote"
 if [[ ${modules[0]} =~ full|base ]];then
-cat "$BASHLIB_HOME/${modules[0]}"
+grep -Ev "$pattern" "$BASHLIB_HOME/${modules[0]}"
 modules=("${modules[@]:1}")
 else
-cat "$BASHLIB_HOME"/base
+grep -Ev "$pattern" "$BASHLIB_HOME"/base
 fi
 for module in "${modules[@]}";do
 if [ "$module" = "configs" ];then
 for f in "$BASHLIB_HOME"/config/*;do
 if [[ -f $f && $f != *.* ]];then
-cat "$f"
+grep -Ev "$pattern" "$f"
 fi
 done
 else
 [[ $module =~ .*/.* ]]||module="module/$module"
-cat "$BASHLIB_HOME/$module"
+grep -Ev "$pattern" "$BASHLIB_HOME/$module"
 fi
 done
 (($#==0))||echo "$*"

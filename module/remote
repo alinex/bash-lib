@@ -415,29 +415,30 @@ remote_bashlib() {
         output) modules+=(software) ;;
         esac
     done
+    locale pattern='^#!/usr/bin/env'" bash|source "'/dev/null'
     # shellcheck disable=SC2086
     (
-        echo "#!/usr/bin/env bash"
+        echo "#!/usr/bin/env" bash
         echo "DEBUG=${DEBUG:-}"
         echo "BASHLIB_LOADER=remote"
         # load base
         if [[ "${modules[0]}" =~ full|base ]]; then
-            grep -Ev '^#!/usr/bin/env bash|source /dev/null' "$BASHLIB_HOME/${modules[0]}"
+            grep -Ev "$pattern" "$BASHLIB_HOME/${modules[0]}"
             modules=("${modules[@]:1}")
         else
-            grep -Ev '^#!/usr/bin/env bash|source /dev/null' "$BASHLIB_HOME"/base
+            grep -Ev "$pattern" "$BASHLIB_HOME"/base
         fi
         # load modules
         for module in "${modules[@]}"; do
             if [ "$module" = "configs" ]; then
                 for f in "$BASHLIB_HOME"/config/*; do
                     if [[ -f "$f" && "$f" != *.* ]]; then
-                        grep -Ev '^#!/usr/bin/env bash|source /dev/null' "$f"
+                        grep -Ev "$pattern" "$f"
                     fi
                 done
             else
                 [[ "$module" =~ .*/.* ]] || module="module/$module"
-                grep -Ev '^#!/usr/bin/env bash|source /dev/null' "$BASHLIB_HOME/$module"
+                grep -Ev "$pattern" "$BASHLIB_HOME/$module"
             fi
         done
         (($# == 0)) || echo "$*"

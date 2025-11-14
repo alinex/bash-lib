@@ -1,6 +1,5 @@
 #!/usr/bin/env bats
 # shellcheck source=config/test-setup.conf
-
 source /dev/null
 
 # bats file_tags=database
@@ -14,7 +13,7 @@ setup() {
 ######################################################################################
 
 # bats test_tags=mongo
-@test "mongo: should get path" {
+@test "mongo: should ping" {
     # shellcheck disable=SC2034
     server="$TEST_SERVER_MONGO"
     run mongo "" "db.runCommand({ ping: 1 })"

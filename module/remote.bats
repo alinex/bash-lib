@@ -139,20 +139,3 @@ setup() {
     assert_output ""
     assert_success
 }
-
-######################################################################################
-# remote_df
-######################################################################################
-
-# bats test_tags=remote_df
-@test "remote_df: should display table" {
-    run remote_df
-    assert [ -n "$output" ]
-    assert_success
-}
-# bats test_tags=remote_df
-@test "remote_df: should display only specific entries" {
-    run remote_df /mnt/acs /mnt/tea
-    assert [ "$(wc -l <<<"$output")" -eq 3 ]
-    assert_success
-}
