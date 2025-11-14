@@ -20,6 +20,7 @@ install() {
     # check what is needed
     for cmd in "$@"; do
         if [[ ! -v _software_install["$cmd"] ]]; then
+            debug "search how to add $cmd"
             PATH="$PATH:/usr/local/sbin:/usr/sbin:/sbin" which "$cmd" >/dev/null ||
                 # debian
                 if command -v apt-get >/dev/null; then
@@ -29,7 +30,7 @@ install() {
                     *) apt+=" $cmd" ;;
                     esac
                 # alpine
-                elif command -v apkt >/dev/null; then
+                elif command -v apk >/dev/null; then
                     case $cmd in
                     mlr) apk+=" miller" ;;
                     *) apk+=" $cmd" ;;
@@ -48,9 +49,9 @@ install() {
     test -z "$apt" || sudo apt-get install -y $apt
     # shellcheck disable=SC2086
     test -z "$snap" || sudo apt snap install $snap
-    # shellcheck disable=SC2086
     test -z "$apk" || sudo apk update
-    test -z "$apk" || sudo apk add "$apk"
+    # shellcheck disable=SC2086
+    test -z "$apk" || sudo apk add $apk
     # reload possibly changed config
     # shellcheck disable=SC1090
     for file in $reload; do
