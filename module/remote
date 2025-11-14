@@ -415,7 +415,7 @@ remote_bashlib() {
         output) modules+=(software) ;;
         esac
     done
-    locale pattern='^#!/usr/bin/env'" bash|source "'/dev/null'
+    local pattern='^#!/usr/bin/env'" bash|source "'/dev/null'
     # shellcheck disable=SC2086
     (
         echo "#!/usr/bin/env" bash
