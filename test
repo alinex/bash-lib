@@ -32,9 +32,12 @@ if [ "$1" = "ci" ]; then
     done
 # local test run
 else
-  [ -n "$1" ] || echo "Running multiple OS using local docker (that may take some time)"
-  [ -z "$3" ] || echo "Only run $3 tests!"
-  [ -z "$3" ] || filter="--filter-tags $3"
+  select_name="$1"
+  select_version="$2"
+  select_tag="$3"
+  [ -n "$select_name" ] || echo "Running multiple OS using local docker (that may take some time)"
+  [ -z "$select_tag" ] || echo "Only run $select_tag tests!"
+  [ -z "$select_tag" ] || filter="--filter-tags $select_tag"
   # shellcheck disable=SC2086
   source "$BASHLIB_HOME"/full
   # prepare
@@ -47,11 +50,11 @@ else
   dist_num=0
   matrix="./tests/docker.matrix"
   for name in $(tail -n +2 "$matrix" | grep -v ^# | awk '{print $1}' | uniq); do
-    [ "$1" = "$name" ] || [ -z "$1" ] || continue
+    [ "$select_name" = "$name" ] || [ -z "$select_name" ] || continue
     # loop over versions
     while read -r version setup image; do
-      [ "$2" = "$version" ] || [ -z "$2" ] || continue
-      ((distnum++))
+      [ "$select_version" = "$version" ] || [ -z "$select_version" ] || continue
+      ((dist_num++)) || true
       start=$(now)
       rm -rf /tmp/bashlib-docker/tests/results/${name}-${version} 2>/dev/null || true
       mkdir -p -m 777 /tmp/bashlib-docker/tests/results/${name}-${version} || true
@@ -79,6 +82,7 @@ else
           fail="$(grep -h "^not ok" "$dir"/* | wc -l)" || true
           ((total > ok + skip + fail)) || total="${CC_INTENSITY_BOLD}${total}${CC_RESET}"
           ((ok == 0)) || ok="${CC_OK}${ok}${CC_RESET}"
+          ((skip == 0)) || skip="${CC_WARN}${skip}${CC_RESET}"
           ((fail == 0)) || fail="${CC_ERROR}${fail}${CC_RESET}"
           printf '%b' $'\e[1K\r'
           echo -n "Running ${CC_CYAN_BOLD}${name^} $version${CC_RESET}... "
@@ -101,6 +105,7 @@ else
       fail="$(grep -h "^not ok" "$dir"/* | wc -l)" || true
       ((total > ok + skip + fail)) || total="${CC_INTENSITY_BOLD}${total}${CC_RESET}"
       ((ok == 0)) || ok="${CC_OK}${ok}${CC_RESET}"
+      ((skip == 0)) || skip="${CC_WARN}${skip}${CC_RESET}"
       ((fail == 0)) || fail="${CC_ERROR}${fail}${CC_RESET}"
       printf '%b' $'\e[1K\r'
       echo "Finished ${CC_CYAN_BOLD}${name^} $version${CC_RESET} with ${total}/$ok/$skip/$fail ${CC_ERROR}$(grep -l "^not ok" "$dir"/* | sed 's#.*/##;s#\..*##' | xargs echo || true)${CC_RESET} that took $duration"
@@ -108,7 +113,7 @@ else
       cp -r /tmp/bashlib-docker/tests/results/"${name}-${version}" tests/results
     done < <(tail -n +2 "$matrix" | grep -v ^# | awk '$1 == "'"$name"'" {print $2 " " $3 " " $4}')
   done
-  if ((distnum == 0)); then
+  if ((dist_num == 0)); then
     echo "There was no matching distribution in $matrix for $1 $2"
   fi
 fi
