@@ -63,6 +63,30 @@ else
 for arg in "$@";do echo "$arg";done
 fi
 }
+contains(){
+local -n array=$1
+local value=$2
+local e
+for e in "${array[@]}";do
+[[ $e != "$value" ]]||return 0
+done
+return 1
+}
+join(){
+local -n array=$1
+local sep="${2:-,}"
+local joined="${array[0]}"
+for element in "${array[@]:1}";do
+joined+="$sep$element"
+done
+echo "$joined"
+}
+split(){
+local string="$1"
+local -n array=$2
+local sep="${3:-,}"
+IFS="$sep" read -ra array <<<"$string"
+}
 COLORS=$(tput colors 2>/dev/null||echo 0)
 CC_RESET=$'\033[0m'
 CC_RESET_FG=$'\033[39m'
@@ -482,30 +506,6 @@ echo "${!_name}"
 else
 echo "$_name"
 fi
-}
-contains(){
-local -n array=$1
-local value=$2
-local e
-for e in "${array[@]}";do
-[[ $e != "$value" ]]||return 0
-done
-return 1
-}
-join(){
-local -n array=$1
-local sep="${2:-,}"
-local joined="${array[0]}"
-for element in "${array[@]:1}";do
-joined+="$sep$element"
-done
-echo "$joined"
-}
-split(){
-local string="$1"
-local -n array=$2
-local sep="${3:-,}"
-IFS="$sep" read -ra array <<<"$string"
 }
 confluence(){
 install jq

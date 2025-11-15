@@ -81,6 +81,16 @@ This should help to read function parameters/arguments in different ways.
 | [`input_args`](function/input_args.md) | Collect string from stdin (not more than defined parameters) or concatenate the parameters |
 | [`input_lines`](function/input_lines.md) | Collect string from stdin (no parameters) or parameters each as a line |
 
+### Array Module
+
+Array helpers.
+
+| Variable/Function | Description |
+| --- | --- |
+| [`contains`](function/contains.md) | Check if value is contained in array |
+| [`join`](function/join.md) | Join array elements by delimiter. |
+| [`split`](function/split.md) | Splits string by delimiter into array |
+
 ### Color Module
 
 This module contains color specifications to be used in console output.
@@ -202,16 +212,6 @@ Validators to make this easier and more readable.
 | [`value_if_variable`](function/value_if_variable.md) | Return the value or if it is a variable name which is not empty return it's value |
 
 ## Module
-
-### Array Module
-
-Array helpers.
-
-| Variable/Function | Description |
-| --- | --- |
-| [`contains`](function/contains.md) | Check if value is contained in array |
-| [`join`](function/join.md) | Join array elements by delimiter. |
-| [`split`](function/split.md) | Splits string by delimiter into array |
 
 ### Atlassian Module
 

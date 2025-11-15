@@ -14,7 +14,7 @@ As this is not driven by releases and therefore tags are not used it is an ongoi
 - add [remote_bashlib](doc/function/remote_bashlib.md) to run any bashlib command on remote host
 - add [mongo](doc/function/mongo.md) connection
 - move `remote_df` and `remote_lvm` into os module
-- move color and validator module into core
+- move color, array and validator module into core
 - add [to_alphanum](doc/function/to_alphanum.md) to make possible hash keys
 - support alpine
 
