@@ -87,6 +87,20 @@ local -n array=$2
 local sep="${3:-,}"
 IFS="$sep" read -ra array <<<"$string"
 }
+hash(){
+num_parameters --min 3 --max 4 --die "Hash needs two to three parameters: Usage hash <array-name> <cmd> <key> [<value>]" "$@"
+declare -n arr="$1"
+local cmd=$2
+local key="${3//[^a-zA-Z0-9_]/_}"
+local value=$4
+case "$cmd" in
+set)arr["$key"]="$value";;
+get)echo "${arr[$key]}";;
+unset)unset 'arr[$key]';;
+has)[[ -v arr[$key] ]];;
+*)die "Usage: hash <array_name> {set|get|unset|has} <key> [value]"
+esac
+}
 COLORS=$(tput colors 2>/dev/null||echo 0)
 CC_RESET=$'\033[0m'
 CC_RESET_FG=$'\033[39m'

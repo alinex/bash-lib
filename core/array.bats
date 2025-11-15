@@ -59,3 +59,51 @@ setup() {
     split "one, two, three" x ", "
     assert [ "${x[*]}" = "one two three" ]
 }
+
+######################################################################################
+# hash
+######################################################################################
+
+# bats test_tags=hash
+@test "hash: set value" {
+    declare -Ag test_array
+    run hash test_array set one 1
+    assert_success
+}
+# bats test_tags=hash
+@test "hash: get value" {
+    declare -Ag test_array
+    test_array["one"]=1
+    run hash test_array get one
+    assert_output "1"
+    assert_success
+}
+# bats test_tags=hash
+@test "hash: has value" {
+    declare -Ag test_array
+    test_array["one"]=1
+    run hash test_array has one
+    assert_success
+}
+# bats test_tags=hash
+@test "hash: has no value" {
+    declare -Ag test_array
+    test_array["one"]=1
+    run hash test_array has ninetynine
+    assert_failure
+}
+# bats test_tags=hash
+@test "hash: unset value" {
+    declare -Ag test_array
+    test_array["one"]=1
+    hash test_array unset one
+    run hash test_array has one   
+    assert_failure
+}
+# bats test_tags=hash
+@test "hash: complex key" {
+    declare -Ag test_array
+    test_array["o_n_e"]=1
+    run hash test_array has "o n%e"   
+    assert_success
+}

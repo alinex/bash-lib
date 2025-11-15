@@ -90,6 +90,7 @@ Array helpers.
 | [`contains`](function/contains.md) | Check if value is contained in array |
 | [`join`](function/join.md) | Join array elements by delimiter. |
 | [`split`](function/split.md) | Splits string by delimiter into array |
+| [`hash`](function/hash.md) | After declaring a variable as associative array: `declare -A <arrax-name>` |
 
 ### Color Module
 

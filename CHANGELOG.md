@@ -16,6 +16,7 @@ As this is not driven by releases and therefore tags are not used it is an ongoi
 - move `remote_df` and `remote_lvm` into os module
 - move color, array and validator module into core
 - add [to_alphanum](doc/function/to_alphanum.md) to make possible hash keys
+- add [hash](doc/function/hash.md) function
 - support alpine
 
 ## 05. November 2025 - V2.0.1

@@ -21,7 +21,7 @@ contains() {
 }
 
 ######################################################################################
-### Join/Split
+### Join/Split array
 ######################################################################################
 
 # Join array elements by delimiter.
@@ -48,4 +48,29 @@ split() {
     local sep="${3:-,}"
     # Set IFS to the separator and read into array
     IFS="$sep" read -ra array <<<"$string"
+}
+
+######################################################################################
+### Hash
+######################################################################################
+
+# After declaring a variable as associative array: `declare -A <arrax-name>`
+# Usage:    hash <array-name> {set|get|unset|has} <key> [<value>]
+# Example:  hash cache set "myname" "any value"
+#           hash cache get "myname"
+#           hash cache has "myname"
+#           hash cache unset "myname"
+hash() {
+    num_parameters --min 3 --max 4 --die "Hash needs two to three parameters: Usage hash <array-name> <cmd> <key> [<value>]" "$@"
+    declare -n arr="$1"
+    local cmd=$2
+    local key="${3//[^a-zA-Z0-9_]/_}" # only a-zA-Z0-9_ allowed
+    local value=$4
+    case "$cmd" in
+    set) arr["$key"]="$value" ;;
+    get) echo "${arr[$key]}" ;;
+    unset) unset 'arr[$key]' ;;
+    has) [[ -v arr[$key] ]] ;;
+    *) die "Usage: hash <array_name> {set|get|unset|has} <key> [value]" ;;
+    esac
 }
