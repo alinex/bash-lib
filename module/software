@@ -25,7 +25,6 @@ installed() {
 install() {
     # collect what to be needed
     local apt=""
-    local snap=""
     local apk=""
     local reload=""
     # check what is needed
@@ -36,8 +35,11 @@ install() {
                 # debian
                 if command -v apt-get >/dev/null; then
                     case $cmd in
-                    yq) snap+=" $cmd" ;;
                     mlr) apt+=" miller" ;;
+                    yq)
+                        curl -sL https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 >/usr/local/bin/yq
+                        chmod +x /usr/local/bin/yq
+                        ;;
                     mongosh)
                         local url
                         url="$(curl -s https://www.mongodb.com/try/download/bi-connector | tr ',' '\n' | grep /mongosh- | grep 'Linux x64' | sed 's/"[}]*$//;s/.*"//')"
@@ -75,8 +77,6 @@ install() {
     test -z "$apt" || sudo apt-get update
     # shellcheck disable=SC2086
     test -z "$apt" || sudo apt-get install -y $apt
-    # shellcheck disable=SC2086
-    test -z "$snap" || sudo snap install $snap
     test -z "$apk" || sudo apk update
     # shellcheck disable=SC2086
     test -z "$apk" || sudo apk add $apk
