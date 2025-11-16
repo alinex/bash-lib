@@ -39,12 +39,12 @@ install() {
                     yq) snap+=" $cmd" ;;
                     mlr) apt+=" miller" ;;
                     mongosh)
-                        curl -fsSL https://pgp.mongodb.com/server-8.0.asc | sudo gpg --dearmor -o /usr/share/keyrings/mongodb-server-8.0.gpg
-                        codename=$(grep VERSION_CODENAME /etc/os-release | cut -d= -f2)
-                        dist="$(head -1 /etc/issue | cut -d' ' -f1)"
-                        [ "$dist" = "Ubuntu" ] && type=multiverse || type=main
-                        echo "deb [ signed-by=/usr/share/keyrings/mongodb-server-8.0.gpg ] https://repo.mongodb.org/apt/${dist,,} $codename/mongodb-org/8.0 $type" | sudo tee /etc/apt/sources.list.d/mongodb-org-8.0.list
-                        apt+=" mongodb-org-shell"
+                        local url
+                        url="$(curl -s https://www.mongodb.com/try/download/bi-connector | tr ',' '\n' | grep /mongosh- | grep 'Linux x64' | sed 's/"[}]*$//;s/.*"//')"
+                        curl -s "$url" >mongosh.tgz
+                        tar -xzvf mongosh.tgz
+                        sudo mv mongosh-*/bin/mongosh /usr/bin
+                        rm -r mongosh-* mongosh.tgz
                         ;;
                     *) apt+=" $cmd" ;;
                     esac
@@ -54,12 +54,11 @@ install() {
                     mlr) apk+=" miller" ;;
                     mongosh)
                         local url
-                        url="$(curl -s https://www.mongodb.com/try/download/compass | tr ',' '\n' | grep mongosh | grep 'Linux x64' | sed 's/.*"https/https/;s/tgz.*/tgz/')"
-                        curl -s "$url" >/tmp/mongosh.tgz
-                        mkdir /tmp/mongosh
-                        tar -zxvf mongosh.tgz -C /tmp/mongosh
-                        sudo cp /tmp/mongosh/bin/mongosh /usr/local/bin/
-                        rm /tmp/mongosh*
+                        url="$(curl -s https://www.mongodb.com/try/download/bi-connector | tr ',' '\n' | grep /mongosh- | grep 'Linux x64' | sed 's/"[}]*$//;s/.*"//')"
+                        curl -s "$url" >mongosh.tgz
+                        tar -xzvf mongosh.tgz
+                        sudo mv mongosh-*/bin/mongosh /usr/bin
+                        rm -r mongosh-* mongosh.tgz
                         ;;
                     *) apk+=" $cmd" ;;
                     esac

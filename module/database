@@ -27,21 +27,9 @@ mongo() {
     # shellcheck disable=SC2001
     # shellcheck disable=SC2154
     cluster="$(sed 's/^[^.]*\.//' <<<"$server")"
-    key="${cluster//[^a-zA-Z0-9_]/_}"
     debug "Use settings for $cluster"
-    command mongosh "mongodb://${MONGO_ADMIN_USERPASS["$key"]}@$server:27017/$1" \
+    command mongosh "mongodb://$(hash MONGO_ADMIN_USERPASS get "$cluster")@$server:27017/$1" \
         --eval "print(EJSON.stringify($2))"
-}
-
-# Deprectaed: Run command on Mongo DB
-# Use `mongo` now.
-# Usage:    mongosh "" <command>            # global command
-#           mongosh <database> <command>    # work in database
-# Global:   $server
-#           $MONGO_ADMIN_USERPASS
-mongosh() {
-    _deprecated "Use $(mongo) now." warn
-    mongo "$@"
 }
 
 ######################################################################################
