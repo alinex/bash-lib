@@ -8,7 +8,7 @@ The delimiter defaults to `,`.
 ### Usage
 
 ```bash
-split <atring> <array-name> [<delimiter>]
+split <string> <array-name> [<delimiter>]
 ```
 
 ### Output (stdout)

@@ -2589,15 +2589,19 @@ return 1
 fi
 }
 declare -Ag _software_install
+installed(){
+for cmd in "$@";do
+command -v "$cmd" >/dev/null||return 1
+done
+return 0
+}
 install(){
 local apt=""
 local snap=""
 local apk=""
 local reload=""
-local key
 for cmd in "$@";do
-key="${cmd//[^a-zA-Z0-9_]/_}"
-if [[ ! -v _software_install["$key"] ]]&&! command -v "$cmd" >/dev/null;then
+if ! hash _software_install has "$cmd"&&! command -v "$cmd" >/dev/null;then
 debug "search how to add $cmd"
 PATH="$PATH:/usr/local/sbin:/usr/sbin:/sbin" which "$cmd" >/dev/null||if command -v apt-get >/dev/null;then
 case $cmd in
@@ -2626,7 +2630,7 @@ rm /tmp/mongosh*
 *)apk+=" $cmd"
 esac
 fi
-_software_install["$key"]=1
+hash _software_install set "$cmd" 1
 fi
 done
 if test -n "$snap"&&! command -v snapd >/dev/null;then

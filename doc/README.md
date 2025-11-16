@@ -404,6 +404,7 @@ Software management functions.
 
 | Variable/Function | Description |
 | --- | --- |
+| [`installed`](function/installed.md) | Check for installed commands |
 | [`install`](function/install.md) | Install software package |
 | [`semver`](function/semver.md) | Parse semantic version number |
 | [`semver_diff`](function/semver_diff.md) | Calculate difference |

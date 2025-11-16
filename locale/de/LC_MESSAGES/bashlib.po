@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-11-14 22:27+0100\n"
+"POT-Creation-Date: 2025-11-16 16:45+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -38,7 +38,7 @@ msgstr "Ungültige Einheit für Zeitdauer"
 #: module/remote:51 module/remote:106 module/remote:158 module/remote:211
 #: module/remote:264 module/remote:312 module/remote:356 module/remote:405
 #: module/remote:508 module/mattermost:321 module/mattermost:356
-#: module/software:128
+#: module/software:137
 msgid "Unrecognized option"
 msgstr "Unbekannte Option"
 
@@ -223,41 +223,41 @@ msgstr "Keine Datei unter $file für Remote ausführen"
 msgid "Wait until the reboot is complete ($seconds seconds)"
 msgstr "Warten bis der Reboot fertig ist ($seconds Sekunden)"
 
-#: module/software:170
+#: module/software:179
 msgid "are identical versions"
 msgstr "sind identische versionen"
 
-#: module/software:174 module/software:200
+#: module/software:183 module/software:209
 #, sh-format
 msgid "is an upgrade of one major version"
 msgid_plural "is an upgrade of $step mayjor versions"
 msgstr[0] "ist ein upgrade von einer Hauptversion"
 msgstr[1] "ist ein upgrade von $step Hauptversionen"
 
-#: module/software:178 module/software:196
+#: module/software:187 module/software:205
 #, sh-format
 msgid "is an upgrade of one minor version"
 msgid_plural "is an upgrade of $step minor versions"
 msgstr[0] "ist ein upgrade von einer Nebenversion"
 msgstr[1] "ist ein upgrade von $step Nebenversionen"
 
-#: module/software:182
+#: module/software:191
 #, sh-format
 msgid "is an upgrade of one patch version"
 msgid_plural "is an upgrade of $step patch versions"
 msgstr[0] "ist ein upgrade von einer Patchversion"
 msgstr[1] "ist ein upgrade von $step Patchversionen"
 
-#: module/software:185
+#: module/software:194
 msgid "is a developer upgrade"
 msgstr "ist ein entwickler Upgrade"
 
-#: module/software:188
+#: module/software:197
 #, fuzzy
 msgid "is a developer downgrade"
 msgstr "ist ein entwickler Downgrade"
 
-#: module/software:192
+#: module/software:201
 #, fuzzy, sh-format
 msgid "is an downgrade of one patch version"
 msgid_plural "is an downgrade of $step patch versions"

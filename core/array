@@ -40,7 +40,7 @@ join() {
 
 # Splits string by delimiter into array
 # The delimiter defaults to `,`.
-# Usage:    split <atring> <array-name> [<delimiter>]
+# Usage:    split <string> <array-name> [<delimiter>]
 # Output:   <string>
 split() {
     local string="$1"

@@ -9,19 +9,28 @@
 # Cache used to prevent multiple install calls for the same information in one run
 declare -Ag _software_install
 
+# Check for installed commands
+# Usage:    installed <command>...
+# Return:   0 if all installed
+#           1 if missing at least one
+installed() {
+    for cmd in "$@"; do
+        command -v "$cmd" >/dev/null || return 1
+    done
+    return 0
+}
+
 # Install software package
-# Usage:    install <pack>...
+# Usage:    install <command>...
 install() {
     # collect what to be needed
     local apt=""
     local snap=""
     local apk=""
     local reload=""
-    local key
     # check what is needed
     for cmd in "$@"; do
-        key="${cmd//[^a-zA-Z0-9_]/_}"
-        if [[ ! -v _software_install["$key"] ]] && ! command -v "$cmd" >/dev/null; then
+        if ! hash _software_install has "$cmd" && ! command -v "$cmd" >/dev/null; then
             debug "search how to add $cmd"
             PATH="$PATH:/usr/local/sbin:/usr/sbin:/sbin" which "$cmd" >/dev/null ||
                 # debian
@@ -55,7 +64,7 @@ install() {
                     *) apk+=" $cmd" ;;
                     esac
                 fi
-            _software_install["$key"]=1
+            hash _software_install set "$cmd" 1
         fi
     done
     if test -n "$snap" && ! command -v snapd >/dev/null; then

@@ -7,5 +7,5 @@
 ### Usage
 
 ```bash
-install <pack>...
+install <command>...
 ```
