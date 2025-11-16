@@ -144,3 +144,14 @@ h help  -       Show Help Page"
     assert_output 'one two three'
     assert_success
 }
+
+######################################################################################
+# escape_args
+######################################################################################
+
+# bats test_tags=escape_args
+@test "escape_args: add backslashes" {
+    run escape_args "--free=<6%"
+    assert_output "--free=\\<6%"
+    assert_success
+}

@@ -118,3 +118,18 @@ input_lines() {
         for arg in "$@"; do echo "$arg"; done
     fi
 }
+
+######################################################################################
+### Arguments Encoding
+######################################################################################
+
+# Escape all args
+# Usgae:    escape_args "$@"
+# Output:   <args> with backslash escapes
+escape_args() {
+    local escaped_args=()
+    for arg in "$@"; do
+        escaped_args+=("$(printf '%q' "$arg")")
+    done
+    echo "${escaped_args[*]}"
+}

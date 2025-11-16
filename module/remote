@@ -442,7 +442,7 @@ remote_bashlib() {
                 grep -Ev "$pattern" "$BASHLIB_HOME/$module"
             fi
         done
-        (($# == 0)) || echo "$*"
+        (($# == 0)) || escape_args "$@"
         [ ! -p /dev/stdin ] || cat </dev/stdin
     ) | shfmt -mn | remote $opt
 }
