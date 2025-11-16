@@ -8,9 +8,6 @@ source /dev/null
 
 # Using the Grafana/Prometheus APIs to get Monitoring information.
 
-# load other modules if not already done
-declare -F "curl" >/dev/null || source "$BASHLIB_HOME"/module/remote
-
 ######################################################################################
 # Monitoring
 ######################################################################################

@@ -72,7 +72,7 @@ install() {
         snap="$snap snapd"
         reload+=" ~/.bashrc"
     fi
-    # install
+    # install all in one through package managers
     test -z "$apt" || sudo apt-get update
     # shellcheck disable=SC2086
     test -z "$apt" || sudo apt-get install -y $apt

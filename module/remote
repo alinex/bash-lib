@@ -525,35 +525,3 @@ boot_wait() {
     [ -n "$quiet" ] || remote uptime --since
     [ -n "$quiet" ] || echo ""
 }
-
-######################################################################################
-# HTTP/HTTPS
-######################################################################################
-
-# Last HTTP return code from curl
-CURL_HTTP_CODE=""
-
-# Curl with added error handling
-# This will load the content into a temporary shared memory file while running.
-# Usage:    like curl
-# Globals:  $server
-#           $login - default is "operator"
-#           CURL_HTTP_CODE set with last code
-# Error:    <text> if not RC:2xx
-# Return:   0 if RC:2xx
-#           1 if not
-curl() {
-    local file res
-    file=$(mktemp -m -r)
-    res=$(command curl -s -w "Error: %{method} %{url_effective} with RC:%{http_code}" -o "$file" -L "$@")
-    CURL_HTTP_CODE=${res:(-3)}
-    if [[ "$CURL_HTTP_CODE" =~ ^2[0-9]{2}$ ]]; then
-        cat "$file"
-        rm "$file"
-    else
-        error "$res" >&2
-        jq . "$file" >&2 2>/dev/null || cat "$file" >&2
-        rm "$file"
-        return 1
-    fi
-}
