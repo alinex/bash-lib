@@ -63,6 +63,13 @@ else
 for arg in "$@";do echo "$arg";done
 fi
 }
+escape_args(){
+local escaped_args=()
+for arg in "$@";do
+escaped_args+=("$(printf '%q' "$arg")")
+done
+echo "${escaped_args[*]}"
+}
 contains(){
 local -n array=$1
 local value=$2
@@ -449,6 +456,22 @@ sleep 1
 done
 [ ! -e "$result" ]||rm -r "$result"
 debug "Removed $file after TTL $1 seconds"
+}
+CURL_HTTP_CODE=""
+curl(){
+local file res
+file=$(mktemp -m -r)
+res=$(command curl -s -w "Error: %{method} %{url_effective} with RC:%{http_code}" -o "$file" -L "$@")
+CURL_HTTP_CODE=${res: -3}
+if [[ $CURL_HTTP_CODE =~ ^2[0-9]{2}$ ]];then
+cat "$file"
+rm "$file"
+else
+error "$res" >&2
+jq . "$file" >&2 2>/dev/null||cat "$file" >&2
+rm "$file"
+return 1
+fi
 }
 num_parameters(){
 eval set -- "$(option_parse $'- min +\n- max +\n- die +' "$@")"
@@ -1417,7 +1440,6 @@ debug "channel $channel post $post"
 _mattermost_repost "$channel" "$post" "$1" "$2" >/dev/null
 done <<<"$mattermost_post_ids"
 }
-declare -F "curl" >/dev/null||source "$BASHLIB_HOME"/module/remote
 exporter(){
 if [ -z "$PROMETHEUS_HOST" ]||[ -z "$PROMETHEUS_API" ];then
 debug "Disabled because PROMETHEUS_HOST and PROMETHEUS_API are not both set"
@@ -2523,7 +2545,7 @@ else
 grep -Ev "$pattern" "$BASHLIB_HOME/$module"
 fi
 done
-(($#==0))||echo "$*"
+(($#==0))||escape_args "$@"
 [ ! -p /dev/stdin ]||cat </dev/stdin)|shfmt -mn|remote $opt
 }
 remote_install(){
@@ -2571,22 +2593,6 @@ fi
 done
 [ -n "$quiet" ]||remote uptime --since
 [ -n "$quiet" ]||echo ""
-}
-CURL_HTTP_CODE=""
-curl(){
-local file res
-file=$(mktemp -m -r)
-res=$(command curl -s -w "Error: %{method} %{url_effective} with RC:%{http_code}" -o "$file" -L "$@")
-CURL_HTTP_CODE=${res: -3}
-if [[ $CURL_HTTP_CODE =~ ^2[0-9]{2}$ ]];then
-cat "$file"
-rm "$file"
-else
-error "$res" >&2
-jq . "$file" >&2 2>/dev/null||cat "$file" >&2
-rm "$file"
-return 1
-fi
 }
 declare -Ag _software_install
 installed(){
@@ -2740,4 +2746,4 @@ echo "$num"
 fi
 ((num==0))&&return 0||return 1
 }
-source /home/alex/dvb/bash-lib/configs
+source $BASHLIB_HOME/configs

@@ -141,7 +141,6 @@ system_info() { deprected "use os_detect info"; }
 #           -f, --free [<operator>]<percent%|bytes>
 # Output:   # same as `df` command but colorized
 disk_free() {
-    debug "------"
     # parameter parsing
     local opt="" free_operator free_percent free_bytes collect
     eval set -- "$(option_parse $'l locale -\nc collect +\nf free +' "$@")"

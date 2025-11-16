@@ -63,6 +63,13 @@ else
 for arg in "$@";do echo "$arg";done
 fi
 }
+escape_args(){
+local escaped_args=()
+for arg in "$@";do
+escaped_args+=("$(printf '%q' "$arg")")
+done
+echo "${escaped_args[*]}"
+}
 contains(){
 local -n array=$1
 local value=$2
@@ -449,6 +456,22 @@ sleep 1
 done
 [ ! -e "$result" ]||rm -r "$result"
 debug "Removed $file after TTL $1 seconds"
+}
+CURL_HTTP_CODE=""
+curl(){
+local file res
+file=$(mktemp -m -r)
+res=$(command curl -s -w "Error: %{method} %{url_effective} with RC:%{http_code}" -o "$file" -L "$@")
+CURL_HTTP_CODE=${res: -3}
+if [[ $CURL_HTTP_CODE =~ ^2[0-9]{2}$ ]];then
+cat "$file"
+rm "$file"
+else
+error "$res" >&2
+jq . "$file" >&2 2>/dev/null||cat "$file" >&2
+rm "$file"
+return 1
+fi
 }
 num_parameters(){
 eval set -- "$(option_parse $'- min +\n- max +\n- die +' "$@")"

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-11-16 16:45+0100\n"
+"POT-Creation-Date: 2025-11-16 20:34+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -33,7 +33,7 @@ msgstr "Argument ist nicht ganzzahlig"
 msgid "Invalid duration unit"
 msgstr "Ungültige Einheit für Zeitdauer"
 
-#: core/validator:36 module/os:174 module/monitoring:151 module/input:41
+#: core/validator:36 module/os:174 module/monitoring:148 module/input:41
 #: module/input:105 module/input:254 module/input:530 module/input:710
 #: module/remote:51 module/remote:106 module/remote:158 module/remote:211
 #: module/remote:264 module/remote:312 module/remote:356 module/remote:405
@@ -54,24 +54,24 @@ msgstr ""
 msgid "IP\\tInterface"
 msgstr "IP\\tSchnittstelle"
 
-#: module/monitoring:70
+#: module/monitoring:67
 msgid "Could not get exporters from prometheus!"
 msgstr "Es konnten keine Exporter von Prometheus ermittelt werden!"
 
-#: module/monitoring:87
+#: module/monitoring:84
 #, sh-format
 msgid "Could not scrape the prometheus exporter at $url!"
 msgstr "Der Prometheus Exporter unter $url konnte nicht abgefragt werden!"
 
-#: module/monitoring:158
+#: module/monitoring:155
 msgid "Could not get alerts from Grafana!"
 msgstr "Es konnten keine Grafana Alerts abgerufen werden!"
 
-#: module/monitoring:159
+#: module/monitoring:156
 msgid "Parse error in Grafana alerts list with filter"
 msgstr "Fehler beim parsen der Grafana Alertliste mit Filter"
 
-#: module/monitoring:187
+#: module/monitoring:184
 msgid "Severity\\tNetwork\\tInstance\\tSummary\\tStart"
 msgstr "Schweregrad\\tNetz\\tInstanz\\tZusammenfassung\\tStart"
 

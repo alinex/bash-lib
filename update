@@ -18,7 +18,7 @@ for folder in core module; do
     done
 done
 echo "fertig."
-echo "source $BASHLIB_HOME/configs" >>"$BASHLIB_HOME/full" # load configs
+echo "source \$BASHLIB_HOME/configs" >>"$BASHLIB_HOME/full" # load configs
 echo "#!/usr/bin/env bash" >"$BASHLIB_HOME/base"
 echo "BASHLIB_LOADER=base" >>"$BASHLIB_HOME/base"
 echo -n "- base (core) "

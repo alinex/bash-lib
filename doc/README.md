@@ -80,6 +80,7 @@ This should help to read function parameters/arguments in different ways.
 | [`input`](function/input.md) | Collect string from stdin (no parameters) or concatenate the parameters |
 | [`input_args`](function/input_args.md) | Collect string from stdin (not more than defined parameters) or concatenate the parameters |
 | [`input_lines`](function/input_lines.md) | Collect string from stdin (no parameters) or parameters each as a line |
+| [`escape_args`](function/escape_args.md) | Escape all args |
 
 ### Array Module
 
@@ -189,11 +190,13 @@ The core functions contains essential parts which may also be used while loading
 
 | Variable/Function | Description |
 | --- | --- |
+| ``$CURL_HTTP_CODE`` | Last HTTP return code from curl |
 | [`debug`](function/debug.md) | Write message to STDERR if in DEBUG mode else do nothing |
 | [`die`](function/die.md) | Output error message and exit |
 | [`trap_add`](function/trap_add.md) | Set or add an additional trap without overwriting existing ones |
 | [`trap_remove`](function/trap_remove.md) | Remove a specific trap |
 | [`mktemp`](function/mktemp.md) | Make a temporary file, which is recognizable |
+| [`curl`](function/curl.md) | Curl with added error handling |
 
 ### Validator Module
 
@@ -382,7 +385,6 @@ Module with remote calling/execution helpers.
 
 | Variable/Function | Description |
 | --- | --- |
-| ``$CURL_HTTP_CODE`` | Last HTTP return code from curl |
 | [`remote`](function/remote.md) | Run command on remote host |
 | [`remote_term`](function/remote_term.md) | Run remote command with pseudo terminal |
 | [`remote_term_line`](function/remote_term_line.md) | Run remote command with pseudo terminal but line based output (problematic with questions) |
@@ -396,7 +398,6 @@ Module with remote calling/execution helpers.
 | [`remote_df`](function/remote_df.md) | Deprectaed: Remote df with visual display |
 | [`remote_lvm`](function/remote_lvm.md) | Deprecated: Remote check if LVM is used |
 | [`boot_wait`](function/boot_wait.md) | Wait till reboot is finished |
-| [`curl`](function/curl.md) | Curl with added error handling |
 
 ### Software Module
 
