@@ -76,7 +76,7 @@ install() {
     # shellcheck disable=SC2086
     test -z "$apt" || sudo apt-get install -y $apt
     # shellcheck disable=SC2086
-    test -z "$snap" || sudo apt snap install $snap
+    test -z "$snap" || sudo snap install $snap
     test -z "$apk" || sudo apk update
     # shellcheck disable=SC2086
     test -z "$apk" || sudo apk add $apk
