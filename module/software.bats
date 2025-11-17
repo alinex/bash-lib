@@ -7,10 +7,48 @@ setup() {
 }
 
 ######################################################################################
+# install
+######################################################################################
+
+# bats test_tags=install
+@test "install: should install mlr" {
+    run install mlr
+    assert command -v mlr >/dev/null
+    assert_success
+}
+# bats test_tags=install
+@test "install: should install yq" {
+    run install yq
+    assert command -v yq >/dev/null
+    assert_success
+}
+# bats test_tags=install
+@test "install: should install mongosh" {
+    run install mongosh
+    assert command -v mongosh >/dev/null
+    assert_success
+}
+
+######################################################################################
+# installed
+######################################################################################
+
+# bats test_tags=installed
+@test "installed: should find date" {
+    run install date
+    assert_success
+}
+# bats test_tags=installed
+@test "installed: should fail on date_which_is_not_installed" {
+    run installed date_which_is_not_installed
+    assert_failure
+}
+
+######################################################################################
 # semver
 ######################################################################################
 
-# bats test_tags=semver1
+# bats test_tags=semver
 @test "semver: should parse 2.8.3" {
     run semver 2.8.3
     assert_output $'2\n8\n3'

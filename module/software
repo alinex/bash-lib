@@ -9,17 +9,6 @@
 # Cache used to prevent multiple install calls for the same information in one run
 declare -Ag _software_install
 
-# Check for installed commands
-# Usage:    installed <command>...
-# Return:   0 if all installed
-#           1 if missing at least one
-installed() {
-    for cmd in "$@"; do
-        command -v "$cmd" >/dev/null || return 1
-    done
-    return 0
-}
-
 # Install software package
 # Usage:    install <command>...
 install() {
@@ -86,6 +75,17 @@ install() {
         # shellcheck disable=SC2086
         source $file
     done
+}
+
+# Check for installed commands
+# Usage:    installed <command>...
+# Return:   0 if all installed
+#           1 if missing at least one
+installed() {
+    for cmd in "$@"; do
+        command -v "$cmd" >/dev/null || return 1
+    done
+    return 0
 }
 
 ######################################################################################
