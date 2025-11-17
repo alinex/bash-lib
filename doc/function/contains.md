@@ -1,6 +1,6 @@
 # contains
 
-## Check if value is contained in array
+## Deprecated: Check if value is contained in array
 
 
 

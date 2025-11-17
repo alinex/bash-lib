@@ -6,18 +6,39 @@
 ### Array analyzing
 ######################################################################################
 
-# Check if value is contained in array
+# Deprecated: Check if value is contained in array
 # Usage:    contains <array-name> <match>
 # Example:  x=( one two three )
 #           contains x two && echo YES || echo NO
 contains() {
-    local -n array=$1
-    local value=$2
-    local e
-    for e in "${array[@]}"; do
-        [[ "$e" != "$value" ]] || return 0
-    done
-    return 1
+    _deprecated "use array <array-name> has <value>" warn
+    array "$1" has "$2"
+}
+
+# Array analayzation.
+# Usage:    array <array-name> {has|indexof} [<value>]
+array() {
+    declare -n arr="$1"
+    local cmd=$2
+    local value="$3"
+    case "$cmd" in
+    has)
+        for e in "${arr[@]}"; do
+            [ ! "$e" = "$value" ] || return 0
+        done
+        return 1
+        ;;
+    indexof)
+        for i in "${!arr[@]}"; do
+            if [ "${arr[i]}" = "$value" ]; then
+                echo "$i"
+                return 0
+            fi
+        done
+        return 1
+        ;;
+    *) die "Usage: array <array_name> {has|index} [<value>]" ;;
+    esac
 }
 
 ######################################################################################
@@ -71,6 +92,6 @@ hash() {
     get) echo "${arr[$key]}" ;;
     unset) unset 'arr[$key]' ;;
     has) [[ -v arr[$key] ]] ;;
-    *) die "Usage: hash <array_name> {set|get|unset|has} <key> [value]" ;;
+    *) die "Usage: hash <array_name> {set|get|unset|has} <key> [<value>]" ;;
     esac
 }

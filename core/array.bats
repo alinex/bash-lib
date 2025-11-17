@@ -7,6 +7,36 @@ setup() {
 }
 
 ######################################################################################
+# array
+######################################################################################
+
+# bats test_tags=array
+@test "array: has value" {
+    declare -g test_array
+    # shellcheck disable=SC2190
+    test_array=(one two three)
+    run array test_array has two
+    assert_success
+}
+# bats test_tags=array
+@test "array: not has value" {
+    declare -g test_array
+    # shellcheck disable=SC2190
+    test_array=(one two three)
+    run array test_array has nine
+    assert_failure
+}
+# bats test_tags=array2
+@test "array: indexof value" {
+    declare -g test_array
+    # shellcheck disable=SC2190
+    test_array=(one two three)
+    run array test_array indexof two
+    assert_output "1"
+    assert_success
+}
+
+######################################################################################
 # contains
 ######################################################################################
 
