@@ -563,6 +563,15 @@ jira_update(){
 curl -u "$ATLASSIAN_USER:$ATLASSIAN_TOKEN" -H "Content-Type: application/json" -X PUT "$JIRA_API/issue/$1" -d "$1"||die "Could not update Jira issue $1!"
 }
 _load_module module/software
+tsv2table(){
+install mlr
+input "$@"|mlr --csvlite --ifs '\t' -o pprint cat
+}
+tsv2md(){
+install mlr
+input "$@"|uncolorize|mlr --csvlite --ifs '\t' --omd cat
+}
+_load_module module/software
 mongo(){
 num_parameters --min 2 --max 2 --die "Mongo needs two parameters: Usage mongo <database> <command>" "$@"
 local cluster key
@@ -1805,7 +1814,6 @@ has_tty(){
 is_bash(){
 [[ -n ${BASH_VERSION:-} ]]
 }
-_load_module module/software
 help(){
 heading "Hilfe: $1"
 info "Usage: $2"
@@ -1874,14 +1882,6 @@ input "$@"|sed 's/\r$//'
 urlencode(){
 install jq
 input "$@"|jq -sRr @uri|sed 's/%0A$//'
-}
-tsv2table(){
-install mlr
-input "$@"|mlr --csvlite --ifs '\t' -o pprint cat
-}
-tsv2md(){
-install mlr
-input "$@"|uncolorize|mlr --csvlite --ifs '\t' --omd cat
 }
 erase_line(){
 printf '%b' $'\e[1K\r'
@@ -2598,7 +2598,6 @@ return 0
 }
 install(){
 local apt=""
-local snap=""
 local apk=""
 local reload=""
 for cmd in "$@";do
@@ -2606,8 +2605,10 @@ if ! hash _software_install has "$cmd"&&! command -v "$cmd" >/dev/null;then
 debug "search how to add $cmd"
 PATH="$PATH:/usr/local/sbin:/usr/sbin:/sbin" which "$cmd" >/dev/null||if command -v apt-get >/dev/null;then
 case $cmd in
-yq)snap+=" $cmd";;
 mlr)apt+=" miller";;
+yq)curl -sL https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 >/usr/local/bin/yq
+chmod +x /usr/local/bin/yq
+;;
 mongosh)local url
 url="$(curl -s https://www.mongodb.com/try/download/bi-connector|tr ',' '\n'|grep /mongosh-|grep 'Linux x64'|sed 's/"[}]*$//;s/.*"//')"
 curl -s "$url" >mongosh.tgz
@@ -2640,7 +2641,6 @@ reload+=" ~/.bashrc"
 fi
 test -z "$apt"||sudo apt-get update
 test -z "$apt"||sudo apt-get install -y $apt
-test -z "$snap"||sudo snap install $snap
 test -z "$apk"||sudo apk update
 test -z "$apk"||sudo apk add $apk
 for file in $reload;do

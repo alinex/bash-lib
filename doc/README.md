@@ -229,6 +229,15 @@ This covers atlassian API for Jira and confluence.
 | [`jira_create`](function/jira_create.md) | Create jira tickets |
 | [`jira_update`](function/jira_update.md) | Update jira tickets |
 
+### Csv Module
+
+Module with modifiers for csv/tsv tables.
+
+| Variable/Function | Description |
+| --- | --- |
+| [`tsv2table`](function/tsv2table.md) | Convert TSV data into visual table |
+| [`tsv2md`](function/tsv2md.md) | Convert TSV data into markdown table |
+
 ### Database Module
 
 Module with database access helpers.
@@ -339,8 +348,6 @@ Module with output and user interaction helpers.
 | [`html2md`](function/html2md.md) | Convert HTML to markdown (simplified version) |
 | [`nocr`](function/nocr.md) | Remove carriage return from line endings |
 | [`urlencode`](function/urlencode.md) | Encode message to be used within the url |
-| [`tsv2table`](function/tsv2table.md) | Convert TSV data into visual table |
-| [`tsv2md`](function/tsv2md.md) | Convert TSV data into markdown table |
 | [`erase_line`](function/erase_line.md) | Remove current line |
 | [`horizontal_line`](function/horizontal_line.md) | Show a horizontal line |
 | [`spinner_start`](function/spinner_start.md) | Function to start the spinner in the background |
