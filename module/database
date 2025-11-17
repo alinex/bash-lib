@@ -9,7 +9,7 @@ source /dev/null
 # Module with database access helpers.
 
 # Load dependent modules if not done
-_load_module module/software
+use module/software
 
 ######################################################################################
 # Mongo

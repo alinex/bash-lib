@@ -388,6 +388,7 @@ download() {
 # Globals:  $server
 #           $login - default is "operator"
 # Examples: IP="$(remote_bashlib ip ip_intern)"
+# TODO: add modules if the code contains `use module/name``
 remote_bashlib() {
     # parameter parsing
     local opt

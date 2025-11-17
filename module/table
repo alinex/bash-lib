@@ -5,7 +5,7 @@ source /dev/null
 # Module with modifiers for csv/tsv tables.
 
 # Load dependent modules if not done
-_load_module module/software
+use module/software
 
 ######################################################################################
 # csv

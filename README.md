@@ -155,6 +155,8 @@ And for the scripts better use the individual loading if not so much is needed:
 source $BASHLIB_HOME/base           # to load only basics
 source $BASHLIB_HOME/module/output  # and then single modules
 source $BASHLIB_HOME/configs        # load configuration
+# or load modules as needed with
+use module/output
 ```
 
 For further assistance see the [Examples](./doc/README.md#Examples) within the Modules API documentation.
