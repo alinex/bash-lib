@@ -1,0 +1,118 @@
+#!/usr/bin/env bash
+# shellcheck source=base
+source /dev/null
+
+# Module with modifiers for csv/tsv tables.
+
+# Load dependent modules if not done
+_load_module module/software
+
+######################################################################################
+# csv
+######################################################################################
+
+######################################################################################
+# old
+######################################################################################
+
+# Convert TSV data into visual table
+# Usage:    tsv2table <tsv>
+#           <tsv> | tsv2table
+# Stdout:   <table>
+tsv2table() {
+    #tsv to pprint
+    install mlr
+    input "$@" | mlr --csvlite --ifs '\t' -o pprint cat
+}
+
+# Convert TSV data into markdown table
+# Usage:    tsv2md <tsv>
+#           <tsv> | tsv2md
+# Stdout:   <md>
+tsv2md() {
+    install mlr
+    input "$@" | uncolorize | mlr --csvlite --ifs '\t' --omd cat
+}
+
+######################################################################################
+# csv
+######################################################################################
+
+# Transform comma separated table.
+# Usage:    <string> | tsv {to} <param>...
+#           <string> | tsv to {tsv}              # convert
+csv() {
+    case $1 in
+    to)
+        case $2 in
+        tsv)
+            python3 -c '
+import sys, csv
+reader = csv.reader(sys.stdin)
+writer = csv.writer(sys.stdout, delimiter="\t", lineterminator="\n")
+for row in reader:
+    writer.writerow(row)
+'
+            ;;
+        *) die "Allowed formats are only tsv, not [$2]" ;;
+        esac
+        ;;
+    *) die "Usage: csv {to} [<value>]" ;;
+    esac
+}
+
+######################################################################################
+# tsv
+######################################################################################
+
+# Transform tab separated table.
+# Usage:    <string> | tsv {to|crop} <param>...
+#           <string> | tsv to {csv|pprint}          # convert
+#           <string> | tsv crop <num|name> <width>  # crop column
+tsv() {
+    local separator=$'\t'
+    local input
+    input=$(cat) # read stdin
+    local cmd="$1"
+    case $cmd in
+    to)
+        local format=$2
+        case $format in
+        csv)
+            awk 'BEGIN { FS="\t"; OFS="," }
+                {
+                    for(i=1; i<=NF; i++) {
+                        if ($i ~ /,|"|\n/) {
+                            gsub(/"/, "\"\"", $i)  # double quotes inside field
+                            $i = "\"" $i "\""
+                        }
+                    }
+                    $1 = $1  # force rebuilding the line with OFS
+                    print
+                }' <<<"$input"
+            ;;
+        pprint)
+            column -t -s $'\t' <<<"$input" | less -S
+            ;;
+        *) die "Allowed formats are only csv, not [$format]" ;;
+        esac
+        ;;
+    crop)
+        local cols idx line orig
+        IFS=$separator read -r -a cols < <(head -n 1 <<<"$input")
+        is_number "$2" && idx="$2" || idx="$(array cols indexof "$2")" || die "Column [$2] not found in table"
+        local width="$3"
+        [[ -n "$col" && -n "$width" ]] || die "Usage: table crop <column> <width>"
+        while IFS=$separator read -r -a line; do
+            orig="${line[idx]}"
+            # Crop string to width, adding "…" if truncated
+            ((${#orig} <= width)) || line[idx]="${orig:0:width-1}…"
+            (
+                IFS="$separator"
+                echo "${line[*]}"
+            )
+        done <<<"$input"
+        ;;
+    *) die "Usage: tsv {to|crop} [<value>]" ;;
+    esac
+}

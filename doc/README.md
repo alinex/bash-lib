@@ -88,7 +88,8 @@ Array helpers.
 
 | Variable/Function | Description |
 | --- | --- |
-| [`contains`](function/contains.md) | Check if value is contained in array |
+| [`contains`](function/contains.md) | Deprecated: Check if value is contained in array |
+| [`array`](function/array.md) | Array analayzation. |
 | [`join`](function/join.md) | Join array elements by delimiter. |
 | [`split`](function/split.md) | Splits string by delimiter into array |
 | [`hash`](function/hash.md) | After declaring a variable as associative array: `declare -A <arrax-name>` |
@@ -228,15 +229,6 @@ This covers atlassian API for Jira and confluence.
 | [`jira_get`](function/jira_get.md) | Get jira ticket details |
 | [`jira_create`](function/jira_create.md) | Create jira tickets |
 | [`jira_update`](function/jira_update.md) | Update jira tickets |
-
-### Csv Module
-
-Module with modifiers for csv/tsv tables.
-
-| Variable/Function | Description |
-| --- | --- |
-| [`tsv2table`](function/tsv2table.md) | Convert TSV data into visual table |
-| [`tsv2md`](function/tsv2md.md) | Convert TSV data into markdown table |
 
 ### Database Module
 
@@ -411,10 +403,21 @@ Software management functions.
 
 | Variable/Function | Description |
 | --- | --- |
-| [`installed`](function/installed.md) | Check for installed commands |
 | [`install`](function/install.md) | Install software package |
+| [`installed`](function/installed.md) | Check for installed commands |
 | [`semver`](function/semver.md) | Parse semantic version number |
 | [`semver_diff`](function/semver_diff.md) | Calculate difference |
+
+### Table Module
+
+Module with modifiers for csv/tsv tables.
+
+| Variable/Function | Description |
+| --- | --- |
+| [`tsv2table`](function/tsv2table.md) | Convert TSV data into visual table |
+| [`tsv2md`](function/tsv2md.md) | Convert TSV data into markdown table |
+| [`csv`](function/csv.md) | Transform comma separated table. |
+| [`tsv`](function/tsv.md) | Transform tab separated table. |
 
 ## Extra
 
