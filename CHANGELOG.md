@@ -4,6 +4,8 @@ As this is not driven by releases and therefore tags are not used it is an ongoi
 
 ## Ongoing
 
+## 21. November 2025 - V2.0.2
+
 - Deprecated as warning and `die` possible
 - integrate ip pattern mapping to detect provider, network segment or vmware link
 - simplified remote invocation using [`remote_bashlib`](doc/function/remote_bashlib.md)
@@ -17,7 +19,7 @@ As this is not driven by releases and therefore tags are not used it is an ongoi
 - move color, array and validator module into core
 - add [to_alphanum](doc/function/to_alphanum.md) to make possible hash keys
 - add [hash](doc/function/hash.md) function
-- support alpine
+- more alpine support
 
 ## 05. November 2025 - V2.0.1
 

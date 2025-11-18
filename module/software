@@ -9,13 +9,27 @@
 # Cache used to prevent multiple install calls for the same information in one run
 declare -Ag _software_install
 
+_install_yq() {
+    curl -sL https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 >/usr/local/bin/yq
+    chmod +x /usr/local/bin/yq
+}
+_install_mongosh() {
+    local url
+    url="$(curl -s https://www.mongodb.com/try/download/bi-connector | tr ',' '\n' | grep /mongosh- | grep 'Linux x64' | sed 's/"[}]*$//;s/.*"//')"
+    curl -s "$url" >mongosh.tgz
+    tar -xzvf mongosh.tgz
+    sudo mv mongosh-*/bin/mongosh /usr/bin
+    rm -r mongosh-* mongosh.tgz
+}
+
 # Install software package
 # Usage:    install <command>...
 install() {
     # collect what to be needed
-    local apt=""
-    local apk=""
-    local reload=""
+    declare -a before
+    declare -a apt
+    declare -a apk
+    declare -a after
     # check what is needed
     for cmd in "$@"; do
         if ! hash _software_install has "$cmd" && ! command -v "$cmd" >/dev/null; then
@@ -24,57 +38,51 @@ install() {
                 # debian
                 if command -v apt-get >/dev/null; then
                     case $cmd in
-                    mlr) apt+=" miller" ;;
-                    yq)
-                        curl -sL https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 >/usr/local/bin/yq
-                        chmod +x /usr/local/bin/yq
-                        ;;
-                    mongosh)
-                        local url
-                        url="$(curl -s https://www.mongodb.com/try/download/bi-connector | tr ',' '\n' | grep /mongosh- | grep 'Linux x64' | sed 's/"[}]*$//;s/.*"//')"
-                        curl -s "$url" >mongosh.tgz
-                        tar -xzvf mongosh.tgz
-                        sudo mv mongosh-*/bin/mongosh /usr/bin
-                        rm -r mongosh-* mongosh.tgz
-                        ;;
-                    *) apt+=" $cmd" ;;
+                    mlr) apt+=(miller) ;;
+                    yq) after+=(_install_yq) ;;
+                    mongosh) after+=(_install_mongosh) ;;
+                    *) apt+=("$cmd") ;;
                     esac
                 # alpine
                 elif command -v apk >/dev/null; then
                     case $cmd in
-                    mlr) apk+=" miller" ;;
-                    mongosh)
-                        local url
-                        url="$(curl -s https://www.mongodb.com/try/download/bi-connector | tr ',' '\n' | grep /mongosh- | grep 'Linux x64' | sed 's/"[}]*$//;s/.*"//')"
-                        curl -s "$url" >mongosh.tgz
-                        tar -xzvf mongosh.tgz
-                        sudo mv mongosh-*/bin/mongosh /usr/bin
-                        rm -r mongosh-* mongosh.tgz
-                        ;;
-                    *) apk+=" $cmd" ;;
+                    mlr) apk+=(miller) ;;
+                    mongosh) after+=(_install_mongosh) ;;
+                    *) apk+=("$cmd") ;;
                     esac
                 fi
-            hash _software_install set "$cmd" 1
         fi
     done
-    if test -n "$snap" && ! command -v snapd >/dev/null; then
-        apt="$apt snapd"
-        snap="$snap snapd"
-        reload+=" ~/.bashrc"
-    fi
-    # install all in one through package managers
-    test -z "$apt" || sudo apt-get update
-    # shellcheck disable=SC2086
-    test -z "$apt" || sudo apt-get install -y $apt
-    test -z "$apk" || sudo apk update
-    # shellcheck disable=SC2086
-    test -z "$apk" || sudo apk add $apk
-    # reload possibly changed config
-    # shellcheck disable=SC1090
-    for file in $reload; do
-        # shellcheck disable=SC2086
-        source $file
+    # run before commands
+    for cmd in "${before[@]}"; do
+        eval "$cmd"
     done
+    # install all in one through package managers
+    if ((${#apt[@]} > 0)); then
+        sudo apt-get update
+        sudo apt-get install -y "${apt[@]}"
+    fi
+    if ((${#apk[@]} > 0)); then
+        sudo apk update
+        sudo apk add "${apk[@]}"
+    fi
+    # run after commands
+    for cmd in "${after[@]}"; do
+        eval "$cmd"
+    done
+    # check what is needed
+    local failed=0
+    for cmd in "$@"; do
+        if ! hash _software_install has "$cmd"; then
+            if command -v "$cmd" >/dev/null; then
+                hash _software_install set "$cmd" 1
+            else
+                error "Install of $cmd failed!"
+                failed=1
+            fi
+        fi
+    done
+    return "$failed"
 }
 
 # Check for installed commands

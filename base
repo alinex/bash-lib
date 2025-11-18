@@ -354,16 +354,6 @@ local src="${BASH_SOURCE[i]}"
 printf "at %s() in %s:%s\n" "$func" "$src" "$line"|debug "$level"
 done
 }
-_load_module(){
-local module=$1
-local path
-path="$(dirname "$module")"
-case $path in
-core)return 0;;
-module)[[ ! $BASHLIB_LOADER =~ loader|full|remote ]]||return 0
-esac
-source "$module"
-}
 debug(){
 local level=1 func
 if [[ $1 =~ ^-?[0-9]+$ ]];then
@@ -393,6 +383,17 @@ exit 1
 }
 [ -n "${BASH_VERSION:-}" ]||die "No bash CLI! This can only be run under bash"
 ((BASH_VERSINFO[0]>4||(BASH_VERSINFO[0]==4&&BASH_VERSINFO[1]>=2)))||die "No bash CLI! This can only be run under bash >=4.2!"
+use(){
+local module=$1
+[[ $module =~ / ]]||module="module/$module"
+local path
+path="$(dirname "$module")"
+case $path in
+core)return 0;;
+module)[[ ! $BASHLIB_LOADER =~ loader|full|remote ]]||return 0
+esac
+source "$module"
+}
 trap_add(){
 local new="$1"
 local sig="$2"

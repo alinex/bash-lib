@@ -194,6 +194,7 @@ The core functions contains essential parts which may also be used while loading
 | ``$CURL_HTTP_CODE`` | Last HTTP return code from curl |
 | [`debug`](function/debug.md) | Write message to STDERR if in DEBUG mode else do nothing |
 | [`die`](function/die.md) | Output error message and exit |
+| [`use`](function/use.md) | Load bashlib module |
 | [`trap_add`](function/trap_add.md) | Set or add an additional trap without overwriting existing ones |
 | [`trap_remove`](function/trap_remove.md) | Remove a specific trap |
 | [`mktemp`](function/mktemp.md) | Make a temporary file, which is recognizable |

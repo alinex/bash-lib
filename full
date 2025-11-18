@@ -354,16 +354,6 @@ local src="${BASH_SOURCE[i]}"
 printf "at %s() in %s:%s\n" "$func" "$src" "$line"|debug "$level"
 done
 }
-_load_module(){
-local module=$1
-local path
-path="$(dirname "$module")"
-case $path in
-core)return 0;;
-module)[[ ! $BASHLIB_LOADER =~ loader|full|remote ]]||return 0
-esac
-source "$module"
-}
 debug(){
 local level=1 func
 if [[ $1 =~ ^-?[0-9]+$ ]];then
@@ -393,6 +383,17 @@ exit 1
 }
 [ -n "${BASH_VERSION:-}" ]||die "No bash CLI! This can only be run under bash"
 ((BASH_VERSINFO[0]>4||(BASH_VERSINFO[0]==4&&BASH_VERSINFO[1]>=2)))||die "No bash CLI! This can only be run under bash >=4.2!"
+use(){
+local module=$1
+[[ $module =~ / ]]||module="module/$module"
+local path
+path="$(dirname "$module")"
+case $path in
+core)return 0;;
+module)[[ ! $BASHLIB_LOADER =~ loader|full|remote ]]||return 0
+esac
+source "$module"
+}
 trap_add(){
 local new="$1"
 local sig="$2"
@@ -580,7 +581,7 @@ curl -u "$ATLASSIAN_USER:$ATLASSIAN_TOKEN" -H "Content-Type: application/json" -
 jira_update(){
 curl -u "$ATLASSIAN_USER:$ATLASSIAN_TOKEN" -H "Content-Type: application/json" -X PUT "$JIRA_API/issue/$1" -d "$1"||die "Could not update Jira issue $1!"
 }
-_load_module module/software
+use module/software
 mongo(){
 num_parameters --min 2 --max 2 --die "Mongo needs two parameters: Usage mongo <database> <command>" "$@"
 local cluster key
@@ -2599,56 +2600,68 @@ done
 [ -n "$quiet" ]||echo ""
 }
 declare -Ag _software_install
+_install_yq(){
+curl -sL https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 >/usr/local/bin/yq
+chmod +x /usr/local/bin/yq
+}
+_install_mongosh(){
+local url
+url="$(curl -s https://www.mongodb.com/try/download/bi-connector|tr ',' '\n'|grep /mongosh-|grep 'Linux x64'|sed 's/"[}]*$//;s/.*"//')"
+curl -s "$url" >mongosh.tgz
+tar -xzvf mongosh.tgz
+sudo mv mongosh-*/bin/mongosh /usr/bin
+rm -r mongosh-* mongosh.tgz
+}
 install(){
-local apt=""
-local apk=""
-local reload=""
+declare -a before
+declare -a apt
+declare -a apk
+declare -a after
 for cmd in "$@";do
 if ! hash _software_install has "$cmd"&&! command -v "$cmd" >/dev/null;then
 debug "search how to add $cmd"
 PATH="$PATH:/usr/local/sbin:/usr/sbin:/sbin" which "$cmd" >/dev/null||if command -v apt-get >/dev/null;then
 case $cmd in
-mlr)apt+=" miller";;
-yq)curl -sL https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 >/usr/local/bin/yq
-chmod +x /usr/local/bin/yq
-;;
-mongosh)local url
-url="$(curl -s https://www.mongodb.com/try/download/bi-connector|tr ',' '\n'|grep /mongosh-|grep 'Linux x64'|sed 's/"[}]*$//;s/.*"//')"
-curl -s "$url" >mongosh.tgz
-tar -xzvf mongosh.tgz
-sudo mv mongosh-*/bin/mongosh /usr/bin
-rm -r mongosh-* mongosh.tgz
-;;
-*)apt+=" $cmd"
+mlr)apt+=(miller);;
+yq)after+=(_install_yq);;
+mongosh)after+=(_install_mongosh);;
+*)apt+=("$cmd")
 esac
 elif command -v apk >/dev/null;then
 case $cmd in
-mlr)apk+=" miller";;
-mongosh)local url
-url="$(curl -s https://www.mongodb.com/try/download/bi-connector|tr ',' '\n'|grep /mongosh-|grep 'Linux x64'|sed 's/"[}]*$//;s/.*"//')"
-curl -s "$url" >mongosh.tgz
-tar -xzvf mongosh.tgz
-sudo mv mongosh-*/bin/mongosh /usr/bin
-rm -r mongosh-* mongosh.tgz
-;;
-*)apk+=" $cmd"
+mlr)apk+=(miller);;
+mongosh)after+=(_install_mongosh);;
+*)apk+=("$cmd")
 esac
 fi
+fi
+done
+for cmd in "${before[@]}";do
+eval "$cmd"
+done
+if ((${#apt[@]}>0));then
+sudo apt-get update
+sudo apt-get install -y "${apt[@]}"
+fi
+if ((${#apk[@]}>0));then
+sudo apk update
+sudo apk add "${apk[@]}"
+fi
+for cmd in "${after[@]}";do
+eval "$cmd"
+done
+local failed=0
+for cmd in "$@";do
+if ! hash _software_install has "$cmd";then
+if command -v "$cmd" >/dev/null;then
 hash _software_install set "$cmd" 1
+else
+error "Install of $cmd failed!"
+failed=1
+fi
 fi
 done
-if test -n "$snap"&&! command -v snapd >/dev/null;then
-apt="$apt snapd"
-snap="$snap snapd"
-reload+=" ~/.bashrc"
-fi
-test -z "$apt"||sudo apt-get update
-test -z "$apt"||sudo apt-get install -y $apt
-test -z "$apk"||sudo apk update
-test -z "$apk"||sudo apk add $apk
-for file in $reload;do
-source $file
-done
+return "$failed"
 }
 installed(){
 for cmd in "$@";do
@@ -2749,7 +2762,7 @@ echo "$num"
 fi
 ((num==0))&&return 0||return 1
 }
-_load_module module/software
+use module/software
 tsv2table(){
 install mlr
 input "$@"|mlr --csvlite --ifs '\t' -o pprint cat
@@ -2759,21 +2772,20 @@ install mlr
 input "$@"|uncolorize|mlr --csvlite --ifs '\t' --omd cat
 }
 csv(){
-case $cmd in
-to)local format=$3
-case $format in
+case $1 in
+to)case $2 in
 tsv)python3 -c '
-                import sys, csv
-                reader = csv.reader(sys.stdin)
-                writer = csv.writer(sys.stdout, delimiter="\t", lineterminator="\n")
-                for row in reader:
-                    writer.writerow(row)
-                '
+import sys, csv
+reader = csv.reader(sys.stdin)
+writer = csv.writer(sys.stdout, delimiter="\t", lineterminator="\n")
+for row in reader:
+    writer.writerow(row)
+'
 ;;
-*)die "Allowed formats are only tsv, not [$format]"
+*)die "Allowed formats are only tsv, not [$2]"
 esac
 ;;
-*)die "Usage: table <array_name> {to|crop} [<value>]"
+*)die "Usage: csv {to} [<value>]"
 esac
 }
 tsv(){
@@ -2782,7 +2794,7 @@ local input
 input=$(cat)
 local cmd="$1"
 case $cmd in
-to)local format=$3
+to)local format=$2
 case $format in
 csv)awk 'BEGIN { FS="\t"; OFS="," }
                 {
@@ -2792,6 +2804,7 @@ csv)awk 'BEGIN { FS="\t"; OFS="," }
                             $i = "\"" $i "\""
                         }
                     }
+                    $1 = $1  # force rebuilding the line with OFS
                     print
                 }' <<<"$input"
 ;;
@@ -2812,7 +2825,7 @@ orig="${line[idx]}"
 echo "${line[*]}")
 done <<<"$input"
 ;;
-*)die "Usage: table <array_name> {to|crop} [<value>]"
+*)die "Usage: tsv {to|crop} [<value>]"
 esac
 }
 source $BASHLIB_HOME/configs
