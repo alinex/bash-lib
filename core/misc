@@ -65,7 +65,7 @@ die() {
     echo -e "${CC_CRITICAL}$(input "$@")${CC_RESET}" >&2
     _stacktrace
     # kill -s TERM "$PPID" # forcibly terminite the parent
-    exit 1
+    [[ $- =~ i ]] && return 1 || exit 1
 }
 [ -n "${BASH_VERSION:-}" ] || die "No bash CLI! This can only be run under bash"
 ((BASH_VERSINFO[0] > 4 || (BASH_VERSINFO[0] == 4 && BASH_VERSINFO[1] >= 2))) ||

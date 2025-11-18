@@ -7,8 +7,8 @@
 ### Script Base Setup
 ######################################################################################
 
-set -eE         # exit on uncatched failure
-set -o pipefail # fail if any command in a pipeline fails
+[[ $- =~ i ]] || set -eE # exit on uncatched failure
+set -o pipefail          # fail if any command in a pipeline fails
 #set -u # exit on use of unset variables
 
 # Set in the environment to where the BASHLIB is installed

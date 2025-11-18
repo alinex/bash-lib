@@ -227,7 +227,7 @@ echo -e "\t${CC_OK}CC_OK$CC_RESET"
 echo -e "\t${CC_HEADING}CC_HEADING$CC_RESET"
 echo -e "\t${CC_INVERS}CC_INVERS$CC_RESET"
 }
-set -eE
+[[ $- =~ i ]]||set -eE
 set -o pipefail
 BASHLIB_HOME=${BASHLIB_HOME:-$HOME/bashlib}
 DEBUG=${DEBUG-}
@@ -379,7 +379,7 @@ debug "Running in DEBUG=${DEBUG-} mode!"
 die(){
 echo -e "$CC_CRITICAL$(input "$@")$CC_RESET" >&2
 _stacktrace
-exit 1
+[[ $- =~ i ]]&&return 1||exit 1
 }
 [ -n "${BASH_VERSION:-}" ]||die "No bash CLI! This can only be run under bash"
 ((BASH_VERSINFO[0]>4||(BASH_VERSINFO[0]==4&&BASH_VERSINFO[1]>=2)))||die "No bash CLI! This can only be run under bash >=4.2!"
