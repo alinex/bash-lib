@@ -51,15 +51,15 @@ The support is divided into:
 ❔ no interest at the moment
 ⛔ could not be supported
 
-| Distribution   | Versions |         |        |
-| -------------- | -------- | ------- | ------ |
+| Distribution   | Versions |         |        | Untested |
+| -------------- | -------- | ------- | ------ | -------- |
 | Debian         | ✅ 11     | ✅ 12    | ✅ 13   |
 | ⤷ Ubuntu       | ✅  22.04 | ✅ 24.04 |
 | ⤷   Linux Mint | ✅ 21     | ✅ 22    |
 | ⤷   KDE Neon   | ⏳        |
 | ⤷ MX Linux     | 🟢 23     |
 | ⤷ AntiX        | 🟢 23     |
-| Alpine         | 🟡 3.19   | 🟡 3.21  | 🟡 3.22 |
+| Alpine         | ✅ 3.19   | ✅ 3.21  | ✅ 3.22 | mongo    |
 | Arch Linux     | ⏳        |
 | ⤷ Manjaro      | ⏳ 25     |
 | ⤷ EndeavourOS  | ⏳        |
@@ -162,6 +162,9 @@ use module/output
 For further assistance see the [Examples](./doc/README.md#Examples) within the Modules API documentation.
 
 A [bash short reference](./bash-reference.md) is also available here.
+
+You can also use the BashLib directly in the terminal.
+Load it directly in bash with the above `source` commands.
 
 ## Configuration
 

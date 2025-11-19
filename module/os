@@ -114,11 +114,11 @@ os_detect() {
         done
         ;;
     info)
-        echo -n "${_os_detected["os"]} system with kernel ${_os_detected["kernel"]} on ${_os_detected["architecture"]} (${_os_detected["cpu_num"]}x ${_os_detected["cpu_model"]})"
+        echo -n "${_os_detected[os]} system with kernel ${_os_detected[kernel]} on ${_os_detected[architecture]} (${_os_detected[cpu_num]}x ${_os_detected[cpu_model]})"
         [ "${_os_detected["virtual_machine"]}" = "true" ] && echo "virtual machine" || echo
-        echo "${_os_detected["distribution"]} version ${_os_detected["revision_number"]} (${_os_detected["revision_name"]})"
-        if [ -n "${_os_detected["base_revision_number"]}" ]; then
-            echo "Based on ${_os_detected["base"]} version ${_os_detected["base_revision_number"]} (${_os_detected["base_revision_name"]})"
+        echo "${_os_detected[distribution]} version ${_os_detected[revision_number]} (${_os_detected[revision_name]})"
+        if [ -n "${_os_detected[base_revision_number]}" ] && [ ! "${_os_detected[revision_number]}" = "${_os_detected[base_revision_number]}" ]; then
+            echo "Based on ${_os_detected[base]} version ${_os_detected[base_revision_number]} (${_os_detected[base_revision_name]})"
         fi
         ;;
     *) echo "${_os_detected["$1"]}" ;;
@@ -126,7 +126,7 @@ os_detect() {
 }
 
 detect_os() { _deprecated "use os_detect data"; }
-system_info() { deprected "use os_detect info"; }
+system_info() { _deprecated "use os_detect info"; }
 
 ######################################################################################
 ### Disk

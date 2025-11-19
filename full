@@ -1732,18 +1732,18 @@ do
 echo -e "$key\t${_os_detected[$key]}"
 done
 ;;
-info)echo -n "${_os_detected["os"]} system with kernel ${_os_detected["kernel"]} on ${_os_detected["architecture"]} (${_os_detected["cpu_num"]}x ${_os_detected["cpu_model"]})"
+info)echo -n "${_os_detected[os]} system with kernel ${_os_detected[kernel]} on ${_os_detected[architecture]} (${_os_detected[cpu_num]}x ${_os_detected[cpu_model]})"
 [ "${_os_detected["virtual_machine"]}" = "true" ]&&echo "virtual machine"||echo
-echo "${_os_detected["distribution"]} version ${_os_detected["revision_number"]} (${_os_detected["revision_name"]})"
-if [ -n "${_os_detected["base_revision_number"]}" ];then
-echo "Based on ${_os_detected["base"]} version ${_os_detected["base_revision_number"]} (${_os_detected["base_revision_name"]})"
+echo "${_os_detected[distribution]} version ${_os_detected[revision_number]} (${_os_detected[revision_name]})"
+if [ -n "${_os_detected[base_revision_number]}" ]&&[ ! "${_os_detected[revision_number]}" = "${_os_detected[base_revision_number]}" ];then
+echo "Based on ${_os_detected[base]} version ${_os_detected[base_revision_number]} (${_os_detected[base_revision_name]})"
 fi
 ;;
 *)echo "${_os_detected["$1"]}"
 esac
 }
 detect_os(){ _deprecated "use os_detect data";}
-system_info(){ deprected "use os_detect info";}
+system_info(){ _deprecated "use os_detect info";}
 disk_free(){
 local opt="" free_operator free_percent free_bytes collect
 eval set -- "$(option_parse $'l locale -\nc collect +\nf free +' "$@")"
@@ -2607,10 +2607,16 @@ chmod +x /usr/local/bin/yq
 _install_mongosh(){
 local url
 url="$(curl -s https://www.mongodb.com/try/download/bi-connector|tr ',' '\n'|grep /mongosh-|grep 'Linux x64'|sed 's/"[}]*$//;s/.*"//')"
-curl -s "$url" >mongosh.tgz
+curl -# -L -o mongosh.tgz "$url"
 tar -xzvf mongosh.tgz
 sudo mv mongosh-*/bin/mongosh /usr/bin
 rm -r mongosh-* mongosh.tgz
+}
+_install_alpine_glibc(){
+apk add --no-cache ca-certificates wget
+wget -q -O /etc/apk/keys/sgerrand.rsa.pub https://alpine-pkgs.sgerrand.com/sgerrand.rsa.pub
+wget https://github.com/sgerrand/alpine-pkg-glibc/releases/download/2.35-r0/glibc-2.35-r0.apk
+apk --force-overwrite add glibc-2.35-r0.apk
 }
 install(){
 declare -a before
@@ -2630,7 +2636,7 @@ esac
 elif command -v apk >/dev/null;then
 case $cmd in
 mlr)apk+=(miller);;
-mongosh)after+=(_install_mongosh);;
+mongosh)after+=(_install_alpine_glibc _install_mongosh);;
 *)apk+=("$cmd")
 esac
 fi

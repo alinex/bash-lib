@@ -16,10 +16,16 @@ _install_yq() {
 _install_mongosh() {
     local url
     url="$(curl -s https://www.mongodb.com/try/download/bi-connector | tr ',' '\n' | grep /mongosh- | grep 'Linux x64' | sed 's/"[}]*$//;s/.*"//')"
-    curl -s "$url" >mongosh.tgz
+    curl -# -L -o mongosh.tgz "$url"
     tar -xzvf mongosh.tgz
     sudo mv mongosh-*/bin/mongosh /usr/bin
     rm -r mongosh-* mongosh.tgz
+}
+_install_alpine_glibc() {
+    apk add --no-cache ca-certificates wget
+    wget -q -O /etc/apk/keys/sgerrand.rsa.pub https://alpine-pkgs.sgerrand.com/sgerrand.rsa.pub
+    wget https://github.com/sgerrand/alpine-pkg-glibc/releases/download/2.35-r0/glibc-2.35-r0.apk
+    apk --force-overwrite add glibc-2.35-r0.apk
 }
 
 # Install software package
@@ -47,7 +53,7 @@ install() {
                 elif command -v apk >/dev/null; then
                     case $cmd in
                     mlr) apk+=(miller) ;;
-                    mongosh) after+=(_install_mongosh) ;;
+                    mongosh) die "Installation of mongosh in Alpine not possible!" ;;
                     *) apk+=("$cmd") ;;
                     esac
                 fi

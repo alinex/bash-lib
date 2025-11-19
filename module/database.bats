@@ -14,6 +14,9 @@ setup() {
 
 # bats test_tags=mongo
 @test "mongo: should ping" {
+    if [ -f /etc/alpine-release ]; then
+        skip "mongosh install on alpine not possible"
+    fi
     # shellcheck disable=SC2034
     server="$TEST_SERVER_MONGO"
     run mongo "" "db.runCommand({ ping: 1 })"
