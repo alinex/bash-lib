@@ -4,7 +4,7 @@
 export BASHLIB_HOME="$(pwd)"
 
 # allow to always use sudo, also if not needed
-if [ "$(id -u)" -eq 0 ] && command -v sudo >/dev/null 2>&1; then
+if [ "$(id -u)" -ne 0 ] && command -v sudo >/dev/null 2>&1; then
     alias sudo='sudo'
 else
     alias sudo=''
