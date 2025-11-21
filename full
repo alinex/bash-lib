@@ -2838,17 +2838,32 @@ pprint)column -t -s $'\t' <<<"$input"|less -S
 *)die "Allowed formats are only csv, not [$format]"
 esac
 ;;
-crop)local cols idx line orig
+crop)local cols idx
 IFS=$separator read -r -a cols < <(head -n 1 <<<"$input")
-is_number "$2"&&idx="$2"||idx="$(array cols indexof "$2")"||die "Column [$2] not found in table"
+is_integer "$2"&&idx=$(($2-1))||idx="$(array cols indexof "$2")"||die "Column [$2] not found in table"
 local width="$3"
-[[ -n $col && -n $width ]]||die "Usage: table crop <column> <width>"
+[[ -n $idx && -n $width ]]||die "Usage: table crop <column> <width>"
+local line orig
 while IFS=$separator read -r -a line;do
 orig="${line[idx]}"
 ((${#orig}<=width))||line[idx]="${orig:0:width-1}…"
 (IFS="$separator"
 echo "${line[*]}")
 done <<<"$input"
+;;
+sort)local cols idx
+IFS=$separator read -r -a cols < <(head -n 1 <<<"$input")
+is_integer "$2"&&idx=$(($2-1))||idx="$(array cols indexof "$2")"||die "Column [$2] not found in table"
+local col type
+col=$((idx+1))
+[ ! "$3" = "numeric" ]||type=n
+[[ -n $idx ]]||die "Usage: table sort <column> [numeric]"
+(IFS="$separator"
+echo "${cols[*]}")
+tail -n +2 <<<"$input"|sort -t $'\t' "-k$col,$col$type"
+;;
+reverse)head -1 <<<"$input"
+tail -n +2 <<<"$input"|tac
 ;;
 *)die "Usage: tsv {to|crop} [<value>]"
 esac

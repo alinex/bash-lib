@@ -43,6 +43,8 @@ If you already use it jump directly to the [module description](https://gitlab.c
 
 ## Distributions
 
+We test some distributions automatically using docker images.
+
 The support is divided into: 
 ✅ fully supported
 🟢 should also work (but not tested)
@@ -56,7 +58,7 @@ The support is divided into:
 | Debian         | ✅ 11     | ✅ 12    | ✅ 13   |
 | ⤷ Ubuntu       | ✅  22.04 | ✅ 24.04 |
 | ⤷   Linux Mint | ✅ 21     | ✅ 22    |
-| ⤷   KDE Neon   | ⏳        |
+| ⤷   KDE Neon   | ✅ stable |
 | ⤷ MX Linux     | 🟢 23     |
 | ⤷ AntiX        | 🟢 23     |
 | Alpine         | ✅ 3.19   | ✅ 3.21  | ✅ 3.22 | mongo    |
@@ -91,7 +93,7 @@ bashlib/
     test            # helper to run test on docker instances
     tests/          # setup, installation and resources for this
     doc/            # examples and auto generated api documentation available through GitLab Web UI
-    .*              # some developer setup files ;-)
+    *               # some developer setup files ;-)
 ```
 
 The BashLib will be installed on the System with it's `BASHLIB_HOME` directory in the environment to let the scripts find it and load what they need.
