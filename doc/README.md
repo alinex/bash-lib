@@ -80,7 +80,7 @@ This should help to read function parameters/arguments in different ways.
 | [`input`](function/input.md) | Collect string from stdin (no parameters) or concatenate the parameters |
 | [`input_args`](function/input_args.md) | Collect string from stdin (not more than defined parameters) or concatenate the parameters |
 | [`input_lines`](function/input_lines.md) | Collect string from stdin (no parameters) or parameters each as a line |
-| [`escape_args`](function/escape_args.md) | Escape all args |
+| [`escape_args`](function/escape_args.md) | Escape all args into single string, this could not be used directly in commands as arguments only through eval |
 
 ### Array Module
 

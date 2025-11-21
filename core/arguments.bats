@@ -155,3 +155,9 @@ h help  -       Show Help Page"
     assert_output "--free=\\<6%"
     assert_success
 }
+# bats test_tags=escape_args
+@test "escape_args: arguments with spaces" {
+    run escape_args "This should be one argument"
+    assert_output "This\\ should\\ be\\ one\\ argument"
+    assert_success
+}

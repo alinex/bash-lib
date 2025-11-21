@@ -482,10 +482,10 @@ local args=("$@")
 local file res
 array args has '-o'||file=$(mktemp -r)
 local opt
-[ -z "$file" ]||opt="-o"
-debug "command curl -s -w \"Error: %{url_effective} with RC:%{http_code}\" $opt $file -L $*"
-res=$(command curl -s -w "Error: %{url_effective} with RC:%{http_code}\n" "$opt" "$file" -L $(escape_args "$@")|tail -1|trim_end)
-debug "$res"
+[ -z "$file" ]||opt="-o $file"
+debug "command curl -s -w \"Error: %{url_effective} with RC:%{http_code}\" $opt -L $(escape_args "$@")"
+res=$(command curl -s -w "%{url_effective} with RC:%{http_code}" $opt -L "$@"|tail -1)
+debug "Response: $res"
 CURL_HTTP_CODE=${res: -3}
 if [[ $CURL_HTTP_CODE =~ ^2[0-9]{2}$ ]];then
 if [ -n "$file" ];then
@@ -497,7 +497,7 @@ if [ -n "$file" ];then
 jq . "$file" >&2 2>/dev/null||cat "$file" >&2
 rm "$file"
 fi
-error "$res" >&2
+error "Error: $res" >&2
 return 1
 fi
 }
@@ -2610,13 +2610,17 @@ done
 }
 declare -Ag _software_install
 _install_yq(){
-curl https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -o /usr/local/bin/yq
-chmod +x /usr/local/bin/yq
+local file
+file="$(mktemp --random)"
+curl https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -o "$file"
+chmod +x "$file"
+sudo mv "$file" /usr/local/bin/yq
 }
 _install_mongosh(){
-local url
+local url/tmp/testfile
+/tmp/testfile
 url="$(curl https://www.mongodb.com/try/download/bi-connector|tr ',' '\n'|grep /mongosh-|grep 'Linux x64'|sed 's/"[}]*$//;s/.*"//')"
-curl -# -o mongosh.tgz "$url"
+curl -o mongosh.tgz "$url"
 tar -xzvf mongosh.tgz
 sudo mv mongosh-*/bin/mongosh /usr/bin
 rm -r mongosh-* mongosh.tgz
@@ -2634,7 +2638,7 @@ declare -a apk
 declare -a after
 for cmd in "$@";do
 if ! hash _software_install has "$cmd"&&! command -v "$cmd" >/dev/null;then
-debug "search how to add $cmd"
+debug 3 "search how to add $cmd"
 PATH="$PATH:/usr/local/sbin:/usr/sbin:/sbin" which "$cmd" >/dev/null||if command -v apt-get >/dev/null;then
 case $cmd in
 mlr)apt+=(miller);;
@@ -2649,20 +2653,26 @@ mongosh)die "Installation of mongosh in Alpine not possible!";;
 *)apk+=("$cmd")
 esac
 fi
+else
+debug 3 "$cmd is alreay installed or tried earlier"
 fi
 done
 for cmd in "${before[@]}";do
+debug "Prepare $cmd (manually)..."
 eval "$cmd"
 done
 if ((${#apt[@]}>0));then
+debug "Installing debian packages: ${apk[*]}..."
 sudo apt-get update
 sudo apt-get install -y "${apt[@]}"
 fi
 if ((${#apk[@]}>0));then
+debug "Installing alpine packages: ${apk[*]}..."
 sudo apk update
 sudo apk add "${apk[@]}"
 fi
 for cmd in "${after[@]}";do
+debug "Installing $cmd (manually)..."
 eval "$cmd"
 done
 local failed=0

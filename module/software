@@ -10,11 +10,15 @@
 declare -Ag _software_install
 
 _install_yq() {
-    curl https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -o /usr/local/bin/yq
-    chmod +x /usr/local/bin/yq
+    local file
+    file="$(mktemp --random)"
+    curl https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -o "$file"
+    chmod +x "$file"
+    sudo mv "$file" /usr/local/bin/yq
 }
 _install_mongosh() {
-    local url
+    local url/tmp/testfile
+    /tmp/testfile
     url="$(curl https://www.mongodb.com/try/download/bi-connector | tr ',' '\n' | grep /mongosh- | grep 'Linux x64' | sed 's/"[}]*$//;s/.*"//')"
     curl -o mongosh.tgz "$url"
     tar -xzvf mongosh.tgz
@@ -39,7 +43,7 @@ install() {
     # check what is needed
     for cmd in "$@"; do
         if ! hash _software_install has "$cmd" && ! command -v "$cmd" >/dev/null; then
-            debug "search how to add $cmd"
+            debug 3 "search how to add $cmd"
             PATH="$PATH:/usr/local/sbin:/usr/sbin:/sbin" which "$cmd" >/dev/null ||
                 # debian
                 if command -v apt-get >/dev/null; then
@@ -57,23 +61,29 @@ install() {
                     *) apk+=("$cmd") ;;
                     esac
                 fi
+        else
+            debug 3 "$cmd is alreay installed or tried earlier"
         fi
     done
     # run before commands
     for cmd in "${before[@]}"; do
+        debug "Prepare $cmd (manually)..."
         eval "$cmd"
     done
     # install all in one through package managers
     if ((${#apt[@]} > 0)); then
+        debug "Installing debian packages: ${apk[*]}..."
         sudo apt-get update
         sudo apt-get install -y "${apt[@]}"
     fi
     if ((${#apk[@]} > 0)); then
+        debug "Installing alpine packages: ${apk[*]}..."
         sudo apk update
         sudo apk add "${apk[@]}"
     fi
     # run after commands
     for cmd in "${after[@]}"; do
+        debug "Installing $cmd (manually)..."
         eval "$cmd"
     done
     # check what is needed
