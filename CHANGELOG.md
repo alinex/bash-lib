@@ -4,7 +4,7 @@ As this is not driven by releases and therefore tags are not used it is an ongoi
 
 ## Ongoing
 
-## 21. November 2025 - V2.0.2
+## 21. November 2025 - V2.1.0
 
 - Deprecated as warning and `die` possible
 - integrate ip pattern mapping to detect provider, network segment or vmware link
@@ -20,6 +20,7 @@ As this is not driven by releases and therefore tags are not used it is an ongoi
 - add [to_alphanum](doc/function/to_alphanum.md) to make possible hash keys
 - add [hash](doc/function/hash.md) function
 - more alpine support
+- add [csv](doc/function/csv.md) and [tsv](doc/function/tsv.md) manipulation
 
 ## 05. November 2025 - V2.0.1
 
