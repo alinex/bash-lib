@@ -11,22 +11,29 @@ setup() {
 ######################################################################################
 
 # bats test_tags=install
+@test "install: should install default package (ncdu)" {
+    run install ncdu
+    assert_success
+    assert command -v ncdu >/dev/null
+}
+# bats test_tags=install
 @test "install: should install mlr" {
     run install mlr
-    assert command -v mlr >/dev/null
     assert_success
+    assert command -v mlr >/dev/null
 }
 # bats test_tags=install
 @test "install: should install yq" {
     run install yq
-    assert command -v yq >/dev/null
     assert_success
+    assert command -v yq >/dev/null
 }
 # bats test_tags=install
 @test "install: should install mongosh" {
+    [ ! -e /etc/alpine-release ] || skip "MongoSH install on Alpine not possible."
     run install mongosh
-    assert command -v mongosh >/dev/null
     assert_success
+    assert command -v mongosh >/dev/null
 }
 
 ######################################################################################
