@@ -2514,6 +2514,19 @@ local ssh="$_login@$host"
 local dir=${2:-.}
 rsync -av $ssh:"$1" "$dir"
 }
+_module_resolve(){
+local modules=()
+split "$1" modules ,
+local init=1 module line
+for module in "${modules[@]}";do
+[[ $module =~ ^(full|base|.*/.*)$ ]]||module="module/$module"
+[ -n "$init" ]&&init=||echo -n ,
+echo -n "$module"
+while read -r line;do
+echo -n ",$(_module_resolve "$line")"
+done < <(grep '^use ' "$BASHLIB_HOME/$module"|sed 's/^use //'||true)
+done
+}
 remote_bashlib(){
 local opt
 eval set -- "$(option_parse $'+l login +\nh host +\nj jump +' "$@")"
@@ -2528,20 +2541,16 @@ break
 *)die "$(gettext "Unrecognized option"): $1"
 esac
 done
-local modules
-IFS=',' read -ra modules <<<"${1-}"
+local list modules
+list="$(_module_resolve "${1-}")"
+IFS=',' read -ra modules <<<"$list"
+debug "Modules: ${modules[*]}"
 shift
-for e in "${modules[@]}";do
-case $e in
-database)modules+=(software);;
-output)modules+=(software)
-esac
-done
 local pattern='^#!/usr/bin/env'" bash|source "'/dev/null'
 (echo "#!/usr/bin/env" bash
 echo "DEBUG=${DEBUG:-}"
 echo "BASHLIB_LOADER=remote"
-if [[ ${modules[0]} =~ full|base ]];then
+if [[ ${modules[0]} =~ ^(full|base)$ ]];then
 grep -Ev "$pattern" "$BASHLIB_HOME/${modules[0]}"
 modules=("${modules[@]:1}")
 else
@@ -2555,7 +2564,6 @@ grep -Ev "$pattern" "$f"
 fi
 done
 else
-[[ $module =~ .*/.* ]]||module="module/$module"
 grep -Ev "$pattern" "$BASHLIB_HOME/$module"
 fi
 done

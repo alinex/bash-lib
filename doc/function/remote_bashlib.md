@@ -10,7 +10,6 @@ The modules can be:
 - `configs` to also transfer all the configurations
 - `config/`<name>`` to load only one config
 - any other name will be interpreted as `module/`<name>`` (short form)
-TODO: add modules if the code contains `use module/name``
 
 
 ### Usage

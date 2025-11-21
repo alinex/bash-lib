@@ -370,6 +370,20 @@ download() {
 ### Extended remote commands
 ######################################################################################
 
+_module_resolve() {
+    local modules=()
+    split "$1" modules ,
+    local init=1 module line
+    for module in "${modules[@]}"; do
+        [[ "$module" =~ ^(full|base|.*/.*)$ ]] || module="module/$module"
+        [ -n "$init" ] && init= || echo -n ,
+        echo -n "$module"
+        while read -r line; do
+            echo -n ",$(_module_resolve "$line")"
+        done < <(grep '^use ' "$BASHLIB_HOME/$module" | sed 's/^use //' || true)
+    done
+}
+
 # Deprected: Run bashlib command on remote.
 # The `modules` are a comma separated list of module names like network os.
 # The modules can be:
@@ -388,7 +402,6 @@ download() {
 # Globals:  $server
 #           $login - default is "operator"
 # Examples: IP="$(remote_bashlib ip ip_intern)"
-# TODO: add modules if the code contains `use module/name``
 remote_bashlib() {
     # parameter parsing
     local opt
@@ -407,16 +420,11 @@ remote_bashlib() {
         esac
     done
     # processing
-    local modules
-    IFS=',' read -ra modules <<<"${1-}"
+    local list modules
+    list="$(_module_resolve "${1-}")"
+    IFS=',' read -ra modules <<<"$list"
+    debug "Modules: ${modules[*]}"
     shift
-    # add needed modules
-    for e in "${modules[@]}"; do
-        case $e in
-        database) modules+=(software) ;;
-        output) modules+=(software) ;;
-        esac
-    done
     local pattern='^#!/usr/bin/env'" bash|source "'/dev/null'
     # shellcheck disable=SC2086
     (
@@ -424,7 +432,7 @@ remote_bashlib() {
         echo "DEBUG=${DEBUG:-}"
         echo "BASHLIB_LOADER=remote"
         # load base
-        if [[ "${modules[0]}" =~ full|base ]]; then
+        if [[ "${modules[0]}" =~ ^(full|base)$ ]]; then
             grep -Ev "$pattern" "$BASHLIB_HOME/${modules[0]}"
             modules=("${modules[@]:1}")
         else
@@ -439,7 +447,6 @@ remote_bashlib() {
                     fi
                 done
             else
-                [[ "$module" =~ .*/.* ]] || module="module/$module"
                 grep -Ev "$pattern" "$BASHLIB_HOME/$module"
             fi
         done

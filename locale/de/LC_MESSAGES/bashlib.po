@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-11-21 14:51+0100\n"
+"POT-Creation-Date: 2025-11-21 21:47+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -36,8 +36,8 @@ msgstr "Ungültige Einheit für Zeitdauer"
 #: core/validator:36 module/os:174 module/monitoring:148 module/input:41
 #: module/input:105 module/input:254 module/input:530 module/input:710
 #: module/remote:51 module/remote:106 module/remote:158 module/remote:211
-#: module/remote:264 module/remote:312 module/remote:356 module/remote:406
-#: module/remote:509 module/mattermost:321 module/mattermost:356
+#: module/remote:264 module/remote:312 module/remote:356 module/remote:419
+#: module/remote:516 module/mattermost:321 module/mattermost:356
 #: module/software:160
 msgid "Unrecognized option"
 msgstr "Unbekannte Option"
@@ -218,7 +218,7 @@ msgstr "Start: Schritt $name um $date"
 msgid "No file to execute remotely under $file"
 msgstr "Keine Datei unter $file für Remote ausführen"
 
-#: module/remote:517
+#: module/remote:524
 #, sh-format
 msgid "Wait until the reboot is complete ($seconds seconds)"
 msgstr "Warten bis der Reboot fertig ist ($seconds Sekunden)"
