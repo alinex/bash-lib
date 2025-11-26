@@ -4,6 +4,8 @@ As this is not driven by releases and therefore tags are not used it is an ongoi
 
 ## Ongoing
 
+- Add support for Arch/Manjaro
+
 ## 21. November 2025 - V2.1.0
 
 - Deprecated as warning and `die` possible

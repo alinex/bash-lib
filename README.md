@@ -53,20 +53,22 @@ The support is divided into:
 ❔ no interest at the moment
 ⛔ could not be supported
 
-| Distribution   | Versions |         |        | Untested |
-| -------------- | -------- | ------- | ------ | -------- |
-| Debian         | ✅ 11     | ✅ 12    | ✅ 13   |
-| ⤷ Ubuntu       | ✅  22.04 | ✅ 24.04 |
-| ⤷   Linux Mint | ✅ 21     | ✅ 22    |
-| ⤷   KDE Neon   | ✅ stable |
-| ⤷ MX Linux     | 🟢 23     |
-| ⤷ AntiX        | 🟢 23     |
-| Alpine         | ✅ 3.19   | ✅ 3.21  | ✅ 3.22 | mongo    |
-| Arch Linux     | ⏳        |
-| ⤷ Manjaro      | ⏳ 25     |
-| ⤷ EndeavourOS  | ⏳        |
-| ⤷ Garuda Linux | ⏳        |
-| ⤷ CachyOS      | ⏳        |
+| Distribution   | Versions  |         |        | Untested                 |
+| -------------- | --------- | ------- | ------ | ------------------------ |
+| Debian         | ✅ 11      | ✅ 12    | ✅ 13   |
+| ⤷ Ubuntu       | ✅  22.04  | ✅ 24.04 |
+| ⤷   Linux Mint | ✅ 21      | ✅ 22    |
+| ⤷   KDE Neon   | ✅ stable  |
+| ⤷ Kali Linux   | 🟢 rolling |
+| ⤷ MX Linux     | 🟢 23      |
+| ⤷ AntiX        | 🟢 23      |
+| ⤷ Parrot OS    | 🟢         |
+| Alpine         | ✅ 3.19    | ✅ 3.21  | ✅ 3.22 | mongo                    |
+| Arch Linux     | ✅ rolling |         |        | mongo,monitoring,network |
+| ⤷ Manjaro      | ✅ 25      |         |        | mongo,monitoring,network |
+| ⤷ EndeavourOS  | 🟢         |
+| ⤷ Garuda Linux | 🟢         |
+| ⤷ CachyOS      | 🟢         |
 
 ## Architecture
 

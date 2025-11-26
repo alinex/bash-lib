@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+
+# shellcheck disable=SC2155
+export BASHLIB_HOME="$(pwd)"
+
+# allow to always use sudo, also if not needed
+if [ "$(id -u)" -ne 0 ] && command -v sudo >/dev/null 2>&1; then
+    alias sudo='sudo'
+else
+    alias sudo=''
+fi
+
+# install needed packages
+sudo pacman -Syu --noconfirm
+sudo pacman -Sy --noconfirm git expect jq glibc glibc-locales which less python
+
+# Set timezone (for date tests)
+sudo ln -sf /usr/share/zoneinfo/Europe/Berlin /etc/localtime
+
+# Set language
+sudo sed -i 's/# \?de_DE.UTF-8 UTF-8/de_DE.UTF-8 UTF-8/' /etc/locale.gen
+sudo locale-gen
+echo LANG=de_DE.UTF-8 | sudo tee /etc/locale.conf
+export LANG=de_DE.UTF-8
+export LANGUAGE=de_DE.UTF-8
+export LC_ALL=de_DE.UTF-8
+
+# install bats
+# shellcheck disable=SC1091
+. "$BASHLIB_HOME/tests/setup/bats"

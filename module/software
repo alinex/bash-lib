@@ -39,12 +39,14 @@ install() {
     declare -a before
     declare -a apt
     declare -a apk
+    declare -a pacman
+    declare -a yay
     declare -a after
     # check what is needed
     for cmd in "$@"; do
         if ! hash _software_install has "$cmd" && ! command -v "$cmd" >/dev/null; then
             debug 3 "search how to add $cmd"
-            PATH="$PATH:/usr/local/sbin:/usr/sbin:/sbin" which "$cmd" >/dev/null ||
+            PATH="$PATH:/usr/local/sbin:/usr/sbin:/sbin" which "$cmd" >/dev/null 2>/dev/null ||
                 # debian
                 if command -v apt-get >/dev/null; then
                     case $cmd in
@@ -59,6 +61,17 @@ install() {
                     mlr) apk+=(miller) ;;
                     mongosh) die "Installation of mongosh in Alpine not possible!" ;;
                     *) apk+=("$cmd") ;;
+                    esac
+                # arch
+                elif command -v pacman >/dev/null; then
+                    case $cmd in
+                    mlr) pacman+=(miller) ;;
+                    mongosh)
+                        pacman+=(base-devel)
+                        yay+=(mongosh-bin)
+                        after+=(_install_mongosh)
+                        ;;
+                    *) pacman+=("$cmd") ;;
                     esac
                 fi
         else
@@ -80,6 +93,20 @@ install() {
         debug "Installing alpine packages: ${apk[*]}..."
         sudo apk update
         sudo apk add "${apk[@]}"
+    fi
+    if ((${#pacman[@]} > 0)); then
+        debug "Installing arch packages: ${pacman[*]}..."
+        sudo pacman -S --noconfirm "${pacman[@]}"
+    fi
+    if ((${#yay[@]} > 0)); then
+        if ! command -v yay >/dev/null; then
+            debug "Install AUR_helper yay..."
+            git clone https://aur.archlinux.org/yay.git
+            cd yay || exit
+            makepkg -si
+        fi
+        debug "Installing arch packages (AUR): ${yay[*]}..."
+        sudo yay -S --noconfirm "${yay[@]}"
     fi
     # run after commands
     for cmd in "${after[@]}"; do
