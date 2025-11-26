@@ -7,10 +7,10 @@ ubuntu      24.04   debian      ubuntu:22.04
 linuxmint   21      debian      linuxmintd/mint21-amd64
 linuxmint   22      debian      linuxmintd/mint22-amd64
 kdeneon     stable  debian      kdeneon/all:stable
-kalilinux  rolling debian      kalilinux/kali-rolling
+kali        rolling debian      kalilinux/kali-rolling
 #mxlinux    23      debian      -
 #antix      23      debian      -
-#parrotos   stable  debian      danielkomaz/parrotos
+parrotos   stable  debian      danielkomaz/parrotos
 alpine      3.19    alpine      alpine:3.19
 alpine      3.20    alpine      alpine:3.20
 alpine      3.21    alpine      alpine:3.21
@@ -19,17 +19,19 @@ manjaro     25      arch        manjarolinux/base
 #EndeavourOS rolling arch       -
 #Garuda             arch        -
 #CachyOS            arch        -
-#blackarch
-# ------------------------
 #redhat         https://hub.docker.com/r/redhat
 #  fedora       https://hub.docker.com/_/fedora
 #  centos       https://hub.docker.com/_/centos
-#solaris
+# ------------------------
 #mandriva
-#freebsd openbsd
-#opensuse
 #Gentoo
 #   funtoo
+#slackware
+#   salixos
+#freebsd openbsd
+#opensuse
+#solaris
+#macos          https://hub.docker.com/r/dockurr/macos
 #busybox    https://hub.docker.com/_/busybox
 #amazonlinux    https://hub.docker.com/_/amazonlinux
 #oraclelinux    https://hub.docker.com/_/oraclelinux
@@ -37,7 +39,3 @@ manjaro     25      arch        manjarolinux/base
 #photon         https://hub.docker.com/_/photon
 #almalinux      https://hub.docker.com/_/almalinux
 #mageia         https://hub.docker.com/_/mageia
-#kalilinux      https://hub.docker.com/r/kalilinux/kali-rolling
-#macos          https://hub.docker.com/r/dockurr/macos
-#slackware
-#   salixos

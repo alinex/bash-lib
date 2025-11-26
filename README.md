@@ -59,7 +59,7 @@ The support is divided into:
 | ⤷ Ubuntu       | ✅  22.04  | ✅ 24.04 |
 | ⤷   Linux Mint | ✅ 21      | ✅ 22    |
 | ⤷   KDE Neon   | ✅ stable  |
-| ⤷ Kali Linux   | 🟢 rolling |
+| ⤷ Kali Linux   | ✅ rolling |         |        | database,monitoring      |
 | ⤷ MX Linux     | 🟢 23      |
 | ⤷ AntiX        | 🟢 23      |
 | ⤷ Parrot OS    | 🟢         |
@@ -69,6 +69,10 @@ The support is divided into:
 | ⤷ EndeavourOS  | 🟢         |
 | ⤷ Garuda Linux | 🟢         |
 | ⤷ CachyOS      | 🟢         |
+| RedHat         | ⏳         |
+| ⤷ CentOS       | ⏳         |
+| ⤷ Fedora       | ⏳         |
+| ⤷ CentOS       | ⏳         |
 
 ## Architecture
 

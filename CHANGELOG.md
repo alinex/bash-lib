@@ -4,7 +4,7 @@ As this is not driven by releases and therefore tags are not used it is an ongoi
 
 ## Ongoing
 
-- Add support for Arch/Manjaro
+- Add support for Arch/Manjaro/Kali Linux
 
 ## 21. November 2025 - V2.1.0
 
