@@ -373,8 +373,8 @@ else
 fi
 while IFS= read -r line;do
 printf "$CC_BLACK> %-20s %s$CC_RESET\n" "$func" "$line" >&2
-! command -v log >/dev/null||log debug "$text"
 done <<<"$text"
+! command -v log >/dev/null||log debug "$func: $text"
 }
 debug "Running in DEBUG=${DEBUG-} mode!"
 die(){

@@ -373,8 +373,8 @@ else
 fi
 while IFS= read -r line;do
 printf "$CC_BLACK> %-20s %s$CC_RESET\n" "$func" "$line" >&2
-! command -v log >/dev/null||log debug "$text"
 done <<<"$text"
+! command -v log >/dev/null||log debug "$func: $text"
 }
 debug "Running in DEBUG=${DEBUG-} mode!"
 die(){
@@ -1851,25 +1851,34 @@ fi
 echo "$4"
 exit 0
 }
-declare -a _log_level=(debug info notice warn error critical)
-declare -A _log_rotate_time
+declare -ag _log_level=(debug info notice warn error critical)
+declare -Ag _log_rotate_time
 _log_rotate_time[hourly]="%Y-%m-%dT%H"
 _log_rotate_time[daily]="%Y-%m-%d"
 _log_rotate_time[weekly]="%Y_week_%W"
 _log_rotate_time[monthly]="%Y-%m"
-declare -A _log_active
+declare -Ag _log_active
 log(){
-local level=1 rotate cleanup text
-eval set -- "$(option_parse $'l level +\nr rotate +\nc cleanup +' "$@")"
+local level=1 rotate compress=0 cleanup text size
+eval set -- "$(option_parse $'l level +\nr rotate +\nz compress -\nc cleanup +' "$@")"
 while true;do
 case "$1" in
 -l|--level)level="$(array _log_level indexof "$2")"||die "Log level $2 is undefined, use one of: ${_log_level[*]}"
 shift 2
 ;;
--r|--rotate)rotate="$(hash _log_rotate_time get "$2")"||die "Rotate option $2 is not recognized use: horly daily weekly monthly"
+-r|--rotate)if
+(($2>0))
+then
+rotate="$2"
+else
+rotate="$(hash _log_rotate_time get "$2")"||die "Rotate option $2 is not recognized use: horly daily weekly monthly"
+fi
 shift 2
 ;;
--c|--cleanup)cleanup="$2"
+-z|--compress)compress=1
+shift
+;;
+-c|--cleanup)cleanup="$(duration_format seconds "$2")"
 shift 2
 ;;
 --)shift
@@ -1879,10 +1888,11 @@ break
 esac
 done
 [ -n "$rotate" ]||cleanup=""
+[ -n "$rotate" ]||compress=""
 case $1 in
 start)num_parameters --min=2 --max=2 --die="To start a new log a file path is needed as argument" "$@"
 [ -w "$2" ]||[ -w "$(dirname "$2")" ]||die "Could not write/create log under $2"
-hash _log_active set "$2" "$2 $level $rotate $cleanup"
+hash _log_active set "$2" "$2 $level $rotate $compress $cleanup"
 ;;
 stop)num_parameters --min=2 --max=2 --die="To end a log it'S file path is needed as argument" "$@"
 hash _log_active unset "$2"
@@ -1895,13 +1905,47 @@ for e in "${_log_active[@]}";do
 read -r file minlevel rotate cleanup <<<"$e"
 ((level>=minlevel))||continue
 path="$file"
-[ -z "$rotate" ]||path+="_$(date_format "$rotate")"
+if [ -n "$rotate" ]&&((rotate==0));then
+path+="_$(date_format "$rotate")"
+fi
 echo "$(date_format sql) ${1^^} $(uncolorize "$text")" >>"$path"
 done
 ;;
 *)die "Unrecognized command $1: start, stop or any log level allowed"
 esac
 }
+_log_manager(){
+local parent=$PPID file minlevel rotate compress cleanup size
+while true;do
+for e in "${_log_active[@]}";do
+read -r file minlevel rotate compress cleanup <<<"$e"
+if [ -n "$cleanup" ];then
+find "$(dirname "$file")" -type f -name "$(basename "$file")*" ! -newermt "$(date -d "$cleanup seconds ago")" -delete 2>/dev/null
+fi
+if ((rotate>0));then
+size="$(stat -c %s "$file")"
+if ((size>rotate));then
+mr -f "$file.99"
+for ((i=99; i>1; i--));do
+local old="$file.$i"
+local new="$file.$((i-1))"
+[ ! -f "$old" ]||mv "$old" "$new"
+done
+! [ -f "$file" ]||mv "$file" "$file.1"
+fi
+fi
+if ((compress==1));then
+find "$(dirname "$file")" -type f -name "$(basename "$file")*" -mmin 3600 -exec gzip --best {} \; 2>/dev/null
+fi
+done
+for ((i=0; i<300; i++));do
+sleep 1
+kill -0 "$parent" 2>/dev/null||exit 0
+done
+done
+}
+_log_manager&
+disown
 heading(){
 local prefix=""
 test -z "${server-}"||prefix="${server-} "

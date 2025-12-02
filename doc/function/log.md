@@ -4,7 +4,6 @@
 
 After initialising a log using `start` the default output options will additionally write into log. But you can also specifically write t it using the log function.
 Multiple log with different levels are possible.
-TODO: rotate=`<bytes>`
 
 
 ### Usage
@@ -20,8 +19,9 @@ log end <file>
 ```bash
 -l, --level=<level>                 # level := debug info notice warn error critical
 # File logging:
--r, --rotate=hourly|daily|weekly|monthly
+-r, --rotate=hourly|daily|weekly|monthly|<bytes>
 -c, --cleanup=<num>|<duration>
+-z, --compress
 ```
 
 ### Files
