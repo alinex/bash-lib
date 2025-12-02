@@ -255,9 +255,9 @@ unix)format="+%s";;
 eu-date)format="+%Y-%m-%d";;
 us-date)format="+%m/%d/%Y";;
 human-date)format="+%A, %B %d, %Y";;
-time)format="%H:%M:%S";;
-time-short)format="%H:%M";;
-*)format="$1"
+time)format="+%H:%M:%S";;
+time-short)format="+%H:%M";;
+*)format="+$1"
 esac
 [ -n "$2" ]&&value="${2-}"||value=$(now)
 [[ $value =~ ^-?[0-9]+$ ]]&&eval "date -d @$value $format"||eval "date -d \"$value\" $format"||die "Date format '$value' not parsable!"
@@ -373,12 +373,19 @@ else
 fi
 while IFS= read -r line;do
 printf "$CC_BLACK> %-20s %s$CC_RESET\n" "$func" "$line" >&2
+! command -v log >/dev/null||log debug "$text"
 done <<<"$text"
 }
 debug "Running in DEBUG=${DEBUG-} mode!"
 die(){
-echo -e "$CC_CRITICAL$(input "$@")$CC_RESET" >&2
+local text
+text="$(input "$@")"
+echo -e "$CC_CRITICAL$text$CC_RESET" >&2
 _stacktrace
+if command -v log >/dev/null;then
+log critical "$text"
+_stacktrace 2>&1|log critical
+fi
 [[ $- =~ i ]]&&return 1||exit 1
 }
 [ -n "${BASH_VERSION:-}" ]||die "No bash CLI! This can only be run under bash"
@@ -799,7 +806,7 @@ _deprecated "use confirm --true <question>"
 confirm --true "$1"
 }
 ask_input(){
-_deprecated "use ask <question>"
+_deprecated "use ask string <question>"
 ask "$@"
 }
 ask(){
@@ -1844,6 +1851,57 @@ fi
 echo "$4"
 exit 0
 }
+declare -a _log_level=(debug info notice warn error critical)
+declare -A _log_rotate_time
+_log_rotate_time[hourly]="%Y-%m-%dT%H"
+_log_rotate_time[daily]="%Y-%m-%d"
+_log_rotate_time[weekly]="%Y_week_%W"
+_log_rotate_time[monthly]="%Y-%m"
+declare -A _log_active
+log(){
+local level=1 rotate cleanup text
+eval set -- "$(option_parse $'l level +\nr rotate +\nc cleanup +' "$@")"
+while true;do
+case "$1" in
+-l|--level)level="$(array _log_level indexof "$2")"||die "Log level $2 is undefined, use one of: ${_log_level[*]}"
+shift 2
+;;
+-r|--rotate)rotate="$(hash _log_rotate_time get "$2")"||die "Rotate option $2 is not recognized use: horly daily weekly monthly"
+shift 2
+;;
+-c|--cleanup)cleanup="$2"
+shift 2
+;;
+--)shift
+break
+;;
+*)die "$(gettext "Unrecognized option"): $1"
+esac
+done
+[ -n "$rotate" ]||cleanup=""
+case $1 in
+start)num_parameters --min=2 --max=2 --die="To start a new log a file path is needed as argument" "$@"
+[ -w "$2" ]||[ -w "$(dirname "$2")" ]||die "Could not write/create log under $2"
+hash _log_active set "$2" "$2 $level $rotate $cleanup"
+;;
+stop)num_parameters --min=2 --max=2 --die="To end a log it'S file path is needed as argument" "$@"
+hash _log_active unset "$2"
+;;
+debug|info|notice|warn|error|critical)level="$(array _log_level indexof "$1")"
+text="$(input_args 1 "$@")"
+[ -n "$text" ]||return 0
+local file minlevel
+for e in "${_log_active[@]}";do
+read -r file minlevel rotate cleanup <<<"$e"
+((level>=minlevel))||continue
+path="$file"
+[ -z "$rotate" ]||path+="_$(date_format "$rotate")"
+echo "$(date_format sql) ${1^^} $(uncolorize "$text")" >>"$path"
+done
+;;
+*)die "Unrecognized command $1: start, stop or any log level allowed"
+esac
+}
 heading(){
 local prefix=""
 test -z "${server-}"||prefix="${server-} "
@@ -1853,41 +1911,49 @@ critical(){
 local text
 text="$(input "$@")"
 test -z "$text"||printf "%s\n" "$CC_CRITICAL$text$CC_RESET"
+((${#_log_active[@]}==0))||log critical "$text"
 }
 error(){
 local text
 text="$(input "$@")"
 test -z "$text"||printf "%s\n" "$CC_ERROR$text$CC_RESET"
+((${#_log_active[@]}==0))||log error "$text"
 }
 warn(){
 local text
 text="$(input "$@")"
 test -z "$text"||printf "%s\n" "$CC_WARN$text$CC_RESET"
+((${#_log_active[@]}==0))||log warn "$text"
 }
 notice(){
 local text
 text="$(input "$@")"
 test -z "$text"||printf "%s\n" "$CC_NOTICE$text$CC_RESET"
+((${#_log_active[@]}==0))||log notice "$text"
 }
 info(){
 local text
 text="$(input "$@")"
 test -z "$text"||printf "%s\n" "$text"
+((${#_log_active[@]}==0))||log info "$text"
 }
 ok(){
 local text
 text="$(input "$@")"
 test -z "$text"||echo -e "$CC_OK$text$CC_RESET"
+((${#_log_active[@]}==0))||log notice "$text"
 }
 invers(){
 local text
 text="$(input "$@")"
 test -z "$text"||echo -e "$CC_INVERS$text$CC_RESET"
+((${#_log_active[@]}==0))||log info "$text"
 }
 color(){
 local text
 text="$(input_args 1 "$@")"
 test -z "$text"||echo -e "$CC_ERROR$text$CC_RESET"
+((${#_log_active[@]}==0))||log info "$text"
 }
 uncolorize(){
 input "$@"|sed -r 's/\x1B\[[0-9;]*[mGK]//g'
@@ -2567,7 +2633,9 @@ else
 grep -Ev "$pattern" "$BASHLIB_HOME/$module"
 fi
 done
+(($#==0))||debug "Running: $*"
 (($#==0))||escape_args "$@"
+[ ! -p /dev/stdin ]||debug "Running piped command!"
 [ ! -p /dev/stdin ]||cat </dev/stdin)|shfmt -mn|remote $opt
 }
 remote_install(){
@@ -2643,11 +2711,13 @@ install(){
 declare -a before
 declare -a apt
 declare -a apk
+declare -a pacman
+declare -a yay
 declare -a after
 for cmd in "$@";do
 if ! hash _software_install has "$cmd"&&! command -v "$cmd" >/dev/null;then
 debug 3 "search how to add $cmd"
-PATH="$PATH:/usr/local/sbin:/usr/sbin:/sbin" which "$cmd" >/dev/null||if command -v apt-get >/dev/null;then
+PATH="$PATH:/usr/local/sbin:/usr/sbin:/sbin" which "$cmd" >/dev/null 2>/dev/null||if command -v apt-get >/dev/null;then
 case $cmd in
 mlr)apt+=(miller);;
 yq)after+=(_install_yq);;
@@ -2659,6 +2729,15 @@ case $cmd in
 mlr)apk+=(miller);;
 mongosh)die "Installation of mongosh in Alpine not possible!";;
 *)apk+=("$cmd")
+esac
+elif command -v pacman >/dev/null;then
+case $cmd in
+mlr)pacman+=(miller);;
+mongosh)pacman+=(base-devel)
+yay+=(mongosh-bin)
+after+=(_install_mongosh)
+;;
+*)pacman+=("$cmd")
 esac
 fi
 else
@@ -2678,6 +2757,20 @@ if ((${#apk[@]}>0));then
 debug "Installing alpine packages: ${apk[*]}..."
 sudo apk update
 sudo apk add "${apk[@]}"
+fi
+if ((${#pacman[@]}>0));then
+debug "Installing arch packages: ${pacman[*]}..."
+sudo pacman -S --noconfirm "${pacman[@]}"
+fi
+if ((${#yay[@]}>0));then
+if ! command -v yay >/dev/null;then
+debug "Install AUR_helper yay..."
+git clone https://aur.archlinux.org/yay.git
+cd yay||exit
+makepkg -si
+fi
+debug "Installing arch packages (AUR): ${yay[*]}..."
+sudo yay -S --noconfirm "${yay[@]}"
 fi
 for cmd in "${after[@]}";do
 debug "Installing $cmd (manually)..."

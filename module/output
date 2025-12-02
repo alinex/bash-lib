@@ -22,6 +22,95 @@ help() {
     exit 0
 }
 
+######################################################################################
+# Logging
+######################################################################################
+
+declare -ag _log_level=(debug info notice warn error critical)
+declare -Ag _log_rotate_time
+_log_rotate_time[hourly]="%Y-%m-%dT%H"
+_log_rotate_time[daily]="%Y-%m-%d"
+_log_rotate_time[weekly]="%Y_week_%W"
+_log_rotate_time[monthly]="%Y-%m"
+declare -Ag _log_active
+# _log_active[path]="<path> <level> <rotate> <cleanup>"
+
+# Additional logging (at the moment only into files).
+# After initialising a log using `start` the default output options will additionally write into log. But you can also specifically write t it using the log function.
+# Multiple log with different levels are possible.
+# Usage:    log start <file>        # no spaces in file path allowed
+#           log <level> <message>
+#           log end <file>
+# Options:  -l, --level=<level>                 # level := debug info notice warn error critical
+#           # File logging:
+#           -r, --rotate=hourly|daily|weekly|monthly
+#           -c, --cleanup=<num>|<duration>
+# Files:    <file>[_<pattern>]                  # will contain the logs
+# Example:  # Format: <date> <time> <level> <message>
+#           2025-12-02 14:07:35 INFO Hello
+#           2025-12-02 14:10:04 ERROR Thius is only a test
+# TODO: rotate=<bytes>
+log() {
+    # parameter parsing
+    local level=1 rotate cleanup text
+    eval set -- "$(option_parse $'l level +\nr rotate +\nc cleanup +' "$@")"
+    while true; do
+        case "$1" in
+        -l | --level)
+            level="$(array _log_level indexof "$2")" || die "Log level $2 is undefined, use one of: ${_log_level[*]}"
+            shift 2
+            ;;
+        -r | --rotate)
+            rotate="$(hash _log_rotate_time get "$2")" || die "Rotate option $2 is not recognized use: horly daily weekly monthly"
+            shift 2
+            ;;
+        -c | --cleanup)
+            cleanup="$2"
+            shift 2
+            ;;
+        --)
+            shift
+            break
+            ;;
+        *) die "$(gettext "Unrecognized option"): $1" ;;
+        esac
+    done
+    [ -n "$rotate" ] || cleanup="" # no cleanup if no rotate
+    # processing
+    case $1 in
+    start)
+        num_parameters --min=2 --max=2 --die="To start a new log a file path is needed as argument" "$@"
+        [ -w "$2" ] || [ -w "$(dirname "$2")" ] || die "Could not write/create log under $2"
+        hash _log_active set "$2" "$2 $level $rotate $cleanup"
+        ;;
+    stop)
+        num_parameters --min=2 --max=2 --die="To end a log it'S file path is needed as argument" "$@"
+        hash _log_active unset "$2"
+        ;;
+    debug | info | notice | warn | error | critical)
+        level="$(array _log_level indexof "$1")"
+        text="$(input_args 1 "$@")"
+        [ -n "$text" ] || return 0 # no message
+        # loop over _log_active values
+        local file minlevel
+        for e in "${_log_active[@]}"; do
+            read -r file minlevel rotate cleanup <<<"$e"
+            ((level >= minlevel)) || continue
+            path="$file"
+            [ -z "$rotate" ] || path+="_$(date_format "$rotate")"
+            # log entry
+            echo "$(date_format sql) ${1^^} $(uncolorize "$text")" >>"$path"
+        done
+        # TODO: async cleanup
+        ;;
+    *) die "Unrecognized command $1: start, stop or any log level allowed" ;;
+    esac
+}
+
+######################################################################################
+# Messages
+######################################################################################
+
 # Print block heading
 # Usage:    heading <title>
 #           <title> | heading
@@ -41,6 +130,7 @@ critical() {
     local text
     text="$(input "$@")"
     test -z "$text" || printf "%s\n" "${CC_CRITICAL}$text${CC_RESET}"
+    ((${#_log_active[@]} == 0)) || log critical "$text"
 }
 
 # Print error message
@@ -51,6 +141,7 @@ error() {
     local text
     text="$(input "$@")"
     test -z "$text" || printf "%s\n" "${CC_ERROR}$text${CC_RESET}"
+    ((${#_log_active[@]} == 0)) || log error "$text"
 }
 
 # Print warning message
@@ -61,6 +152,7 @@ warn() {
     local text
     text="$(input "$@")"
     test -z "$text" || printf "%s\n" "${CC_WARN}$text${CC_RESET}"
+    ((${#_log_active[@]} == 0)) || log warn "$text"
 }
 
 # Print special information message
@@ -71,6 +163,7 @@ notice() {
     local text
     text="$(input "$@")"
     test -z "$text" || printf "%s\n" "${CC_NOTICE}$text${CC_RESET}"
+    ((${#_log_active[@]} == 0)) || log notice "$text"
 }
 
 # Print special information message
@@ -81,6 +174,7 @@ info() {
     local text
     text="$(input "$@")"
     test -z "$text" || printf "%s\n" "$text"
+    ((${#_log_active[@]} == 0)) || log info "$text"
 }
 
 # Print success message
@@ -91,6 +185,7 @@ ok() {
     local text
     text="$(input "$@")"
     test -z "$text" || echo -e "${CC_OK}$text${CC_RESET}"
+    ((${#_log_active[@]} == 0)) || log notice "$text"
 }
 
 # Print special marked message like table header
@@ -101,6 +196,7 @@ invers() {
     local text
     text="$(input "$@")"
     test -z "$text" || echo -e "${CC_INVERS}$text${CC_RESET}"
+    ((${#_log_active[@]} == 0)) || log info "$text"
 }
 
 # Print message in defined color
@@ -111,6 +207,7 @@ color() {
     local text
     text="$(input_args 1 "$@")"
     test -z "$text" || echo -e "${CC_ERROR}$text${CC_RESET}"
+    ((${#_log_active[@]} == 0)) || log info "$text"
 }
 
 ######################################################################################

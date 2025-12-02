@@ -328,6 +328,7 @@ Module with output and user interaction helpers.
 | Variable/Function | Description |
 | --- | --- |
 | [`help`](function/help.md) | Show help page and exit |
+| [`log`](function/log.md) | Additional logging (at the moment only into files). |
 | [`heading`](function/heading.md) | Print block heading |
 | [`critical`](function/critical.md) | Print critical/disaster message |
 | [`error`](function/error.md) | Print error message |

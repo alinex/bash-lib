@@ -46,6 +46,7 @@ debug() {
     while IFS= read -r line; do
         printf "$CC_BLACK> %-20s %s$CC_RESET\n" "$func" "$line" >&2
     done <<<"$text"
+    ! command -v log >/dev/null || log debug "$func: $text"
 }
 debug "Running in DEBUG=${DEBUG-} mode!"
 
@@ -62,8 +63,14 @@ debug "Running in DEBUG=${DEBUG-} mode!"
 #           > _stacktrace          at main() in /home/alex/bin/dvb/cleanup:364
 # Return:   always 1 and try to exit script with status 1
 die() {
-    echo -e "${CC_CRITICAL}$(input "$@")${CC_RESET}" >&2
+    local text
+    text="$(input "$@")"
+    echo -e "${CC_CRITICAL}$text${CC_RESET}" >&2
     _stacktrace
+    if command -v log >/dev/null; then
+        log critical "$text"
+        _stacktrace 2>&1 | log critical
+    fi
     # kill -s TERM "$PPID" # forcibly terminite the parent
     [[ $- =~ i ]] && return 1 || exit 1
 }

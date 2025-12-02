@@ -18,7 +18,7 @@ date_format <format> [<value>] # use now if missing
             human-date  Mittwoch, Oktober 01, 2025
             time        12:00:00
             time-short  12:00
-            +%Y         2025 (custom format)
+            %Y          2025 (custom format)
 ```
 
 ### Output (stdout)
