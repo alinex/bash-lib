@@ -159,22 +159,43 @@ _format_duration() {
 
 _timer_start=0
 
-# Start the timer
-# Later use @timer_stop to get the elapsed time.
-# Usage:    timer_start
-timer_start() {
-    _timer_start=$(date +%s.%N)
+# Start/stop the timer
+# After `timer stop` it will return the elapsed time.
+# Usage:    timer start
+#           timer stop
+# Output:   <seconds>.<milliseconds> # after stop
+timer() {
+    case $1 in
+    start)
+        _timer_start=$(date +%s.%N)
+        ;;
+    stop)
+        local seconds nano len
+        IFS='.' read -r seconds nano <<<"$(echo "$(date +%s.%N) - $_timer_start" | bc)"
+        len=$((4 - ${#seconds}))
+        ((len >= 0)) || len=0
+        LANG=C printf "%0.${len}f\n" "$seconds.$nano"
+        debug "Measurement: $seconds.$nano"
+        ;;
+    *) die "Command $1 undefined, use: start stop" ;;
+    esac
 }
 
-# Stop the timer and calculate elapsed time
+# Deprecated: Start the timer
+# Use @timer like `timer start`.
+# Later use @timer_stop to get the elapsed time.
+# Usage:    timer start
+#           timer stop
+timer_start() {
+    _deprecated "Use: timer start"
+    timer start
+}
+
+# Deprecated: Stop the timer and calculate elapsed time
+# Use @timer like `timer stop`.
 # The timer has to be started before using @timer_start.
-# Usgae:    timer_stop
 # Output:   <seconds>.<milliseconds>
-timer_stop() {
-    local seconds nano len
-    IFS='.' read -r seconds nano <<<"$(echo "$(date +%s.%N) - $_timer_start" | bc)"
-    len=$((4 - ${#seconds}))
-    ((len >= 0)) || len=0
-    LANG=C printf "%0.${len}f\n" "$seconds.$nano"
-    debug "Measurement: $seconds.$nano"
+timer_end() {
+    _deprecated "Use: timer end"
+    timer end
 }

@@ -174,21 +174,16 @@ setup() {
 }
 
 ######################################################################################
-# timer_start
+# timer
 ######################################################################################
 
-# bats test_tags=timer_start
-@test "timer_start: start timer without error" {
-    run timer_start
+# bats test_tags=timer
+@test "timer: start timer without error" {
+    run timer start
     assert_success
 }
-
-######################################################################################
-# timer_stop
-######################################################################################
-
-# bats test_tags=timer_stop
-@test "timer_stop: get time since start" {
-    run timer_stop
+# bats test_tags=timer
+@test "timer: get time since start" {
+    run timer stop
     assert_success
 }
