@@ -21,7 +21,6 @@ What BashLib 2 brings:
 The downside against Version 1 may be:
 
 - no backward compatibility - everything is new
-- the logging library is not included (at the moment)
 - needs bash v4.2 (February 2011)
 
 If you already use it jump directly to the [module description](https://gitlab.com/alinex/bash-lib/-/blob/master/doc/README.md).
