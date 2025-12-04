@@ -1,0 +1,76 @@
+#!/usr/bin/env bash
+# shellcheck disable=SC2034
+
+# That are only the APIs, the tokens has to be defined in the secrets config.
+
+######################################################################################
+### Host Specifica
+######################################################################################
+
+# Default login if no `--login` or `$login` available
+REMOTE_LOGIN_DEFAULT=operator
+
+# Array: Color limits per mount (regex critical error warn ok) used in @remote_df
+MOUNT_COLOR_LIMIT=(
+    ".*" 100 90 80 50
+)
+
+# Array: Provider selection per ip (regex provider) used in ???
+IP_PROVIDER_PATTERN=(
+    ".*" Unknown
+)
+# Array: Network segment selection per ip (regex segment) used in ???
+IP_SEGMENT_PATTERN=(
+    ".*" other
+)
+# Array: Network segment selection per ip (regex segment) used in ???
+#IP_VMWARE_PATTERN=(
+#    ".*" "https://myvmware.company.net/ui"
+#)
+
+######################################################################################
+### Mattermost
+######################################################################################
+
+# Mattermost API URL used together with $MATTERMOST_TOKEN and silently disables mattermost functions if not set
+#MATTERMOST_API=https://mattermost.mycompany.de/api/v4
+
+# Array: Channel per pattern (team regex channel) used in @mattermost, @mattermost_repost ("-"" = no selection for team)
+#MATTERMOST_CHANNEL_PATTERN=(
+#    <team> <pattern> <channel name>
+#)
+# Array: Link channel per pattern (team regex channel) used in @mattermost, @mattermost_repost ("-"" = no selection for team)
+#MATTERMOST_LINK_PATTERN=(
+#    <team> <pattern> <channel name>
+#)
+
+######################################################################################
+### Monitoring
+######################################################################################
+
+# Grafana API URL used together with $GRAFANA_TOKEN and silently disables grafana functions if not set
+#GRAFANA_API=http://grafana.mycompany.net/api
+
+# Prometheus API URLs as space separated list
+#PROMETHEUS_API=http://prometheus.mycompany.net/api/v1
+# Prometheus host names as space separated list
+#PROMETHEUS_HOST=prometheus.mycompany.net
+
+######################################################################################
+### Atlassian
+######################################################################################
+
+# Atlassian confluence API URL used together with $ATLASSIAN_USER and $ATLASSIAN_TOKEN and silently disables @confluence functions if not set
+#CONFLUENCE_API=https://mycompany.atlassian.net/wiki/rest/api
+# Atlassian jira API URL used together with $ATLASSIAN_USER and $ATLASSIAN_TOKEN and silently disables @jira functions if not set
+#JIRA_API=https://mycompany.atlassian.net/rest/api/3
+
+######################################################################################
+### Remote API
+######################################################################################
+
+# PowerDNS API URL used together with $POWERDNS_TOKEN and silently disables powerdns function if not set
+#POWERDNS_API=http://dns-ui.mycompany.net/api/v1
+
+# Base URL for Portal to Provider Plusserver
+#PLUSSERVER_PORTAL=https://cloudhub.plusserver.com/

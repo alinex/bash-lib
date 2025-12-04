@@ -123,7 +123,7 @@ Tags will be set if specific milestones are reached and noted in the [changelog]
 
 ## Installation
 
-Can be done locally after checking out the git repository manually by setting only the `BASHLIB_HOME` variable in your environment or directly from the repository by calling:
+Can be done locally after checking out the git repository manually by setting only the `BASHLIB_HOME` variable in your environment or directly from the repository by calling (your user should have sudo rights):
 
 ```bash
 curl -sL https://gitlab.com/alinex/bash-lib/-/raw/master/install | bash     # interactive
@@ -131,11 +131,17 @@ curl -sL https://gitlab.com/alinex/bash-lib/-/raw/master/install | \
     bash -s -- "<path>" y|n "<config>"                                      # automatic
 ```
 
-The steps are:
+This script will ask if you want to globally install it.
 
-1. Download bashlib to your system into a given path (directory will be created)
-2. Setup BASHLIB_HOME in your environment in bashrc
-3. Update configuration links to the directory above bashlib
+- globally installed in `/opt/bashlib` set in `/etc/environment.d/bashlib` and config in `/etc/bashlib`
+- locally installed in `<home-dir>/bashlib` set in `<home-dir>/.bashrc` and config in `<home-dir>/.bashlib-...`
+
+Therefore the following steps will be done:
+
+1. Install mandatory packages
+2. Download bashlib to your system
+3. Setup BASHLIB_HOME in your environment.
+4. Update configuration links.
 
 The update will be the same, you only need to download the new files and overwrite the old ones.
 

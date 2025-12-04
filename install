@@ -21,61 +21,88 @@ if ((BASH_VERSINFO[0] < 4 || (BASH_VERSINFO[0] == 4 && BASH_VERSINFO[1] < 2))); 
     echo "No bash CLI! This can only be run under bash >=4.2!"
     exit 1
 fi
-# detect os
-if [ -f /etc/alpine-release ]; then
-    OS=alpine
-elif [ -f /etc/debian_version ]; then
-    OS=debian
+# ask for type of installation (if not update)
+if [ -e /opt/bashlib ]; then
+    yn=y
+    echo "This will replace the instalation under /opt/bashlib"
+    sudo rm -rf /opt/bashlib
+elif [ -e "$HOME"/bashlib ]; then
+    yn=n
+    echo "This will replace the instalation under $HOME/bashlib"
+    rm -rf "$HOME"/bashlib
+else
+    [ -n "$2" ] && yn="$2" || read -r -n 1 -s -p "Should the bashlib path be added globally (y/n) " yn
+fi
+case $yn in
+"" | [JjYy])
+    instdir=/opt/bashlib
+    sudo mkdir "$instdir"
+    config=/etc/bashlib/
+    sudo mkdir "$config"
+    ;;
+*)
+    instdir="$HOME"/bashlib
+    mkdir "$instdir"
+    config="$HOME"/.bashlib-
+    ;;
+esac
+
+echo "Step 1: Install mandatory packages"
+if [ -f /etc/debian_version ]; then
+    sudo apt update 2>&1 | sed 's/^/        /g'
+    sudo apt install -y bash iproute2 git tzdata curl locales gettext expect jq 2>&1 | sed 's/^/        /g'
+elif [ -f /etc/alpine-release ]; then
+    sudo apk update 2>&1 | sed 's/^/        /g'
+    sudo apk add bash tzdata musl-locales musl-locales-lang git curl coreutils gettext expect sed jq 2>&1 | sed 's/^/        /g'
+elif [ -f /etc/arch-release ]; then
+    sudo pacman -Syu --noconfirm 2>&1 | sed 's/^/        /g'
+    sudo pacman -Sy --noconfirm git expect jq glibc glibc-locales which less python 2>&1 | sed 's/^/        /g'
 else
     echo "This operating system is currently not supported, please install on your own."
     exit 1
 fi
 
-echo "Step 1: Install packages"
-case $OS in
-debian)
-    sudo apt update
-    sudo apt install -y bash iproute2 git tzdata curl locales gettext expect jq
-    ;;
-alpine)
-    sudo apk update
-    sudo apk add bash tzdata musl-locales musl-locales-lang git curl coreutils gettext expect sed jq
-    ;;
-esac
-
 echo "Step 2: Download bashlib to your system"
-# shellcheck disable=SC2015
-[ -n "$1" ] && path="$1" || read -rp "Where to put it: [$HOME/bashlib] " path </dev/tty
-path="${path:-$HOME/bashlib}"
-mkdir -p "$path"
 curl -L "$BASHLIB_DOWNLOAD" -o /tmp/bashlib.tgz
-tar -xzf /tmp/bashlib.tgz -C "$path"
+tar -xzf /tmp/bashlib.tgz -C "$instdir"
 rm /tmp/bashlib.tgz
 echo ""
 
 echo "Step 3: Setup BASHLIB_HOME in your environment."
-# shellcheck disable=SC2015
-[ -n "$2" ] && yn="$2" || read -r -n 1 -s -p "Should the bashlib path be added to $HOME/.bashrc (J/n) " yn
-case $yn in
-"" | [JjYy])
-    echo "export BASHLIB_HOME=\"$path\"" >>"$HOME"/.bashrc
-    ;;
-*) true ;;
-esac
+if [ "$instdir" = "/opt/bashlib" ]; then
+    echo "BASHLIB_HOME=\"$instdir\"" | sudo tee /etc/environment.d/bashlib.conf >/dev/null
+    echo "        Set in /etc/environment.d/bashlib.conf"
+else
+    if grep "export BASHLIB_HOME=\"$instdir\"" "$HOME"/.bashrc; then
+        echo "        Already set in $HOME/.bashrc"
+    else
+        echo "        Added to $HOME/.bashrc"
+        echo "export BASHLIB_HOME=\"$instdir\"" >>"$HOME"/.bashrc
+    fi
+fi
 echo ""
 
 echo "Step 4: Update configuration links."
-# shellcheck disable=SC2015
-[ -n "$3" ] && config="$3" || read -rp "Where to put local configuration: [$HOME] " config </dev/tty
-config="${config:-$HOME}"
-mkdir -p "$config"
+if [ -e "$config"secrets ]; then
+    echo "        Use the existing ${config}secrets"
+else
+    cp "$BASHLIB_HOME"/config/secrets.example "$config"secrets
+    echo "        Created example under ${config}secrets"
+fi
+if [ -e "$config"overwrite ]; then
+    echo "        Use the existing ${config}overwrite"
+else
+    cp "$BASHLIB_HOME"/config/overwrite.example "$config"overwrite
+    echo "        Created example under ${config}overwrite"
+fi
+echo "        Link files into bashlib config dir"
 rm -rf "$BASHLIB_HOME"/config/secrets "$BASHLIB_HOME"/config/overwrite
-touch "$config"/.bashlib-secrets
-ln -s "$config"/.bashlib-secrets "$path"/config/secrets
-touch "$config"/.bashlib-overwrite
-ln -s "$config"/.bashlib-overwrite "$path"/config/overwrite
+ln -s "$config"secrets "$BASHLIB_HOME"/config/secrets
+ln -s "$config"overwrite "$BASHLIB_HOME"/config/overwrite
 echo ""
 
-echo "You could now use the bashlib by adding:
-source $BASHLIB_HOME/full
+echo "You could now use the bashlib by running: source $BASHLIB_HOME/full
+Or add it in your scripts.
+
+Have fun!
 "
