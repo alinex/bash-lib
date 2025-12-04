@@ -11,7 +11,7 @@ As this is not driven by releases and therefore tags are not used it is an ongoi
 ## 21. November 2025 - V2.1.0
 
 - Deprecated as warning and `die` possible
-- integrate ip pattern mapping to detect provider, network segment or vmware link
+- integrate ip pattern mapping to detect provider, network segment or VMware link
 - simplified remote invocation using [`remote_bashlib`](doc/function/remote_bashlib.md)
 - [options](doc/function/option_parse.md) can now also work without permutation
 - all ['remote`](doc/function/remote.md) functions now support a jump host
@@ -59,7 +59,7 @@ As this is not driven by releases and therefore tags are not used it is an ongoi
 - unit **testing** integrated
 - **multilingual** support with EN, DE at first
 - **interactive** support: pause, ask_string, ask_integer, ...
-- remote capabilities integrated: **ssh, curl, prometheus, grafana, confluence, jira, mattermost**
+- remote capabilities integrated: **ssh, curl, Prometheus, Grafana, Confluence, Jira, Mattermost**
 - completely **documented** with [API](doc/README.md)
 
 What was before this, was BashLib V1 and as everything is new it doesn't matter any more.
