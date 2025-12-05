@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Array helpers.
+# Helper functions to work with arrays and associative arrays (hashes).
 
 ######################################################################################
 ### Array analyzing
@@ -15,7 +15,7 @@ contains() {
     array "$1" has "$2"
 }
 
-# Array analayzation.
+# Array analyzation.
 # Usage:    array <array-name> {has|indexof} [<value>]
 array() {
     declare -n arr="$1"
@@ -75,7 +75,7 @@ split() {
 ### Hash
 ######################################################################################
 
-# After declaring a variable as associative array: `declare -A <arrax-name>`
+# After declaring a variable as associative array: `declare -A <array-name>`
 # Usage:    hash <array-name> {set|get|unset|has} <key> [<value>]
 # Example:  hash cache set "myname" "any value"
 #           hash cache get "myname"

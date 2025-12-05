@@ -1,6 +1,6 @@
 # steps_init
 
-## Initialize nstep control
+## Initialize step control
 
 
 

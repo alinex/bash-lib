@@ -1,6 +1,6 @@
 # scrape
 
-## Scrape prometheus exporter url now
+## Scrape Prometheus exporter url now
 
 The metrics can be filtered by `<pattern>` argument.
 Stdout:   Tab separated list:

@@ -36,7 +36,7 @@ mongo() {
 # Postgres
 ######################################################################################
 
-# Run command on postgres
+# Run command on Postgres
 postgres() {
     echo "TODO"
 }

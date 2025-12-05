@@ -1,6 +1,6 @@
 # array
 
-## Array analayzation.
+## Array analyzation.
 
 
 

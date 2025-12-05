@@ -2,8 +2,6 @@
 
 This is the updated version of my personal library used to easily write powerful bash scripts which may work locally, partly remote or completely remote interactive or automatic.
 
-> It is aimed to be used under any Linux like operation systems but primarily made for Debian, first. See the last [pipeline results](https://gitlab.com/alinex/bash-lib/-/pipelines) of how far we are in support.
-
 Version 2 is a complete rework of the library meaning it is another toolset and you could not upgrade to it.
 Some functionalities from the older version will no longer be available like logging while a lot of new possibilities are included.
 
@@ -21,6 +19,7 @@ What BashLib 2 brings:
 The downside against Version 1 may be:
 
 - no backward compatibility - everything is new
+- no automatic conversion from the older versions
 - needs bash v4.2 (February 2011)
 
 If you already use it jump directly to the [module description](https://gitlab.com/alinex/bash-lib/-/blob/master/doc/README.md).

@@ -5,7 +5,7 @@ setup_file() {
     # shellcheck disable=SC2154
     load "$BASHLIB_HOME/tests/bats-library-loader"
     if [ -z "$PROMETHEUS_API" ] || [ -z "$PROMETHEUS_HOST" ] || [ -z "$GRAFANA_API" ] || [ -z "$GRAFANA_TOKEN" ]; then
-        skip "Because prometheus + grafana not set."
+        skip "Because Prometheus + Grafana not set."
     fi
 }
 setup() {

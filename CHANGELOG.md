@@ -7,6 +7,8 @@ As this is not driven by releases and therefore tags are not used it is an ongoi
 - add support for Arch/Manjaro/Kali Linux
 - add [log](./doc/function/log.md) support
 - combine `timer_start` and `timer_end` into [timer](doc/function/timer.md)
+- extend stack traces to show also code lines
+- catch each error and output a failure with stack trace
 
 ## 21. November 2025 - V2.1.0
 

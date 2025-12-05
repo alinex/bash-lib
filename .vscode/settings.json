@@ -32,14 +32,27 @@
   "cSpell.words": [
     "abortable",
     "alphanum",
+    "analyzation",
     "debian",
+    "divibib",
+    "extname",
     "getopt",
     "mattermost",
     "mktemp",
     "ngettext",
+    "nocr",
     "perumtation",
+    "plusserver",
+    "Plusserver",
     "POSIX",
+    "postgres",
+    "powerdns",
+    "POWERDNS",
+    "prometheus",
     "repost",
-    "SCRIPTDIR"
+    "SCRIPTDIR",
+    "uncolorize",
+    "urlencode",
+    "USERPASS"
   ]
 }

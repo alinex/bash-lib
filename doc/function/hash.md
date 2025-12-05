@@ -1,6 +1,6 @@
 # hash
 
-## After declaring a variable as associative array: `declare -A <arrax-name>`
+## After declaring a variable as associative array: `declare -A <array-name>`
 
 
 

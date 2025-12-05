@@ -1,6 +1,6 @@
 # remote_bashlib
 
-## Deprected: Run bashlib command on remote.
+## Deprecated: Run bashlib command on remote.
 
 The `modules` are a comma separated list of module names like network os.
 The modules can be:

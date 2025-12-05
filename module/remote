@@ -384,7 +384,7 @@ _module_resolve() {
     done
 }
 
-# Deprected: Run bashlib command on remote.
+# Deprecated: Run bashlib command on remote.
 # The `modules` are a comma separated list of module names like network os.
 # The modules can be:
 # - `base` or `full` as first element
@@ -471,7 +471,7 @@ remote_system_info() {
     remote_bashlib os system_info "$@"
 }
 
-# Deprectaed: Remote df with visual display
+# Deprecated: Remote df with visual display
 # Use `remote_bashlib os disk_free` instead.
 # The lines will be colorized based on $MOUNT_COLOR_LIMIT setting, which contains sets of 5 entries (pattern critical error warn ok). The first matching pattern will decide the color limits.
 # Usage:    remote_df [<mount>...]                              # show table

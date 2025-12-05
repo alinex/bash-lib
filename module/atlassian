@@ -4,7 +4,7 @@ source /dev/null
 # shellcheck source=config/secrets
 source /dev/null
 
-# This covers atlassian API for Jira and confluence.
+# This covers Atlassian API for Jira and confluence.
 
 ######################################################################################
 # Confluence

@@ -326,7 +326,7 @@ declare -A _async_running
 # Set the variables which should be stored with step control
 STEPS_VARIABLES=
 
-# Initialize nstep control
+# Initialize step control
 # Usage:    steps_init
 # Example:  steps_init
 #           # sync | async | queue calls

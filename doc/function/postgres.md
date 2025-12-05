@@ -1,5 +1,5 @@
 # postgres
 
-## Run command on postgres
+## Run command on Postgres
 
 

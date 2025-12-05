@@ -48,7 +48,7 @@ IP_SEGMENT_PATTERN=(
 ### Monitoring
 ######################################################################################
 
-# Grafana API URL used together with $GRAFANA_TOKEN and silently disables grafana functions if not set
+# Grafana API URL used together with $GRAFANA_TOKEN and silently disables Grafana functions if not set
 #GRAFANA_API=http://grafana.mycompany.net/api
 
 # Prometheus API URLs as space separated list

@@ -84,7 +84,7 @@ CC_GREEN_BG=$'\033[42m'
 CC_YELLOW_BG=$'\033[43m'
 # Set background color to blue
 CC_BLUE_BG=$'\033[44m'
-# Set background color to magenat
+# Set background color to magenta
 CC_MAGENTA_BG=$'\033[45m'
 # Set background color to white
 CC_CYAN_BG=$'\033[46m'

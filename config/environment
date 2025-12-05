@@ -32,7 +32,7 @@ MATTERMOST_LINK_PATTERN=()
 ### Monitoring
 ######################################################################################
 
-# Grafana API URL used together with $GRAFANA_TOKEN and silently disables grafana functions if not set
+# Grafana API URL used together with $GRAFANA_TOKEN and silently disables Grafana functions if not set
 GRAFANA_API=
 # Grafana API Token used in @alerts
 GRAFANA_TOKEN=
@@ -63,7 +63,7 @@ JIRA_API=
 # Default login if no `--login` or `$login` available
 REMOTE_LOGIN_DEFAULT=
 
-# Hash: Mongo Admin User Logins <host> = <username>:<password> but use _ instead of . in hostname
+# Hash: Mongo Admin User Logins `<host> = <username>:<password>` but use `_` instead of `.` in hostname
 declare -A MONGO_ADMIN_USERPASS=()
 
 # PowerDNS API URL used together with $POWERDNS_TOKEN and silently disables powerdns function if not set

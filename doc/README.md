@@ -58,7 +58,7 @@ The configuration module contains a lot of general configuration settings for th
 | ``$MATTERMOST_TOKEN`` | Mattermost API Token used in [`mattermost`](functionmattermost.md) [`mattermost_repost`](functionmattermost_repost.md) [`mattermost_reaction`](functionmattermost_reaction.md) |
 | ``$MATTERMOST_CHANNEL_PATTERN`` | Array: Channel per pattern (team regex channel) used in [`mattermost`](functionmattermost.md) ("-"" = no selection for team) |
 | ``$MATTERMOST_LINK_PATTERN`` | Array: Link channel per pattern (team regex channel) used in [`mattermost`](functionmattermost.md) ("-"" = no selection for team) |
-| ``$GRAFANA_API`` | Grafana API URL used together with `$GRAFANA_TOKEN` and silently disables grafana functions if not set |
+| ``$GRAFANA_API`` | Grafana API URL used together with `$GRAFANA_TOKEN` and silently disables Grafana functions if not set |
 | ``$GRAFANA_TOKEN`` | Grafana API Token used in [`alerts`](functionalerts.md) |
 | ``$PROMETHEUS_API`` | Prometheus API URLs as space separated list |
 | ``$PROMETHEUS`` | Prometheus host names as space separated list |
@@ -67,7 +67,7 @@ The configuration module contains a lot of general configuration settings for th
 | ``$CONFLUENCE_API`` | Atlassian confluence API URL used together with `$ATLASSIAN_USER` and `$ATLASSIAN_TOKEN` and silently disables [`confluence`](functionconfluence.md) functions if not set |
 | ``$JIRA_API`` | Atlassian jira API URL used together with `$ATLASSIAN_USER` and `$ATLASSIAN_TOKEN` and silently disables [`jira`](functionjira.md) functions if not set |
 | ``$REMOTE_LOGIN_DEFAULT`` | Default login if no `--login` or ``$login`` available |
-| ``$MONGO_ADMIN_USERPASS`` | Hash: Mongo Admin User Logins <host> = <username>:<password> but use _ instead of . in hostname |
+| ``$MONGO_ADMIN_USERPASS`` | Hash: Mongo Admin User Logins `<host> = <username>:<password>` but use `_` instead of `.` in hostname |
 | ``$POWERDNS_API`` | PowerDNS API URL used together with `$POWERDNS_TOKEN` and silently disables powerdns function if not set |
 
 ## Core
@@ -84,15 +84,15 @@ This should help to read function parameters/arguments in different ways.
 
 ### Array Module
 
-Array helpers.
+Helper functions to work with arrays and associative arrays (hashes).
 
 | Variable/Function | Description |
 | --- | --- |
 | [`contains`](function/contains.md) | Deprecated: Check if value is contained in array |
-| [`array`](function/array.md) | Array analayzation. |
+| [`array`](function/array.md) | Array analyzation. |
 | [`join`](function/join.md) | Join array elements by delimiter. |
 | [`split`](function/split.md) | Splits string by delimiter into array |
-| [`hash`](function/hash.md) | After declaring a variable as associative array: `declare -A <arrax-name>` |
+| [`hash`](function/hash.md) | After declaring a variable as associative array: `declare -A <array-name>` |
 
 ### Color Module
 
@@ -136,7 +136,7 @@ This module contains color specifications to be used in console output.
 | ``$CC_GREEN_BG`` | Set background color to green |
 | ``$CC_YELLOW_BG`` | Set background color to yellow |
 | ``$CC_BLUE_BG`` | Set background color to blue |
-| ``$CC_MAGENTA_BG`` | Set background color to magenat |
+| ``$CC_MAGENTA_BG`` | Set background color to magenta |
 | ``$CC_CYAN_BG`` | Set background color to white |
 | ``$CC_BLACK_BOLD_BG`` | Set background color to bold black |
 | ``$CC_RED_BOLD_BG`` | Set background color to bold red |
@@ -222,7 +222,7 @@ Validators to make this easier and more readable.
 
 ### Atlassian Module
 
-This covers atlassian API for Jira and confluence.
+This covers Atlassian API for Jira and confluence.
 
 | Variable/Function | Description |
 | --- | --- |
@@ -239,7 +239,7 @@ Module with database access helpers.
 | Variable/Function | Description |
 | --- | --- |
 | [`mongo`](function/mongo.md) | Run command on Mongo DB |
-| [`postgres`](function/postgres.md) | Run command on postgres |
+| [`postgres`](function/postgres.md) | Run command on Postgres |
 
 ### Dns Module
 
@@ -295,8 +295,8 @@ Using the Grafana/Prometheus APIs to get Monitoring information.
 | Variable/Function | Description |
 | --- | --- |
 | [`exporter`](function/exporter.md) | Get exporter list |
-| [`scrape`](function/scrape.md) | Scrape prometheus exporter url now |
-| [`alerts`](function/alerts.md) | Get grafana alerts |
+| [`scrape`](function/scrape.md) | Scrape Prometheus exporter url now |
+| [`alerts`](function/alerts.md) | Get Grafana alerts |
 | [`prometheus`](function/prometheus.md) | Prom ql ausführen |
 | [`prometheus_scrape_now`](function/prometheus_scrape_now.md) | Change scrape interval to scrape now and set back |
 
@@ -306,7 +306,7 @@ Module with network functions.
 
 | Variable/Function | Description |
 | --- | --- |
-| [`ip_intern`](function/ip_intern.md) | Show the IP adresses. |
+| [`ip_intern`](function/ip_intern.md) | Show the IP addresses. |
 | [`ip_pattern`](function/ip_pattern.md) | Find info about IP by configured patterns. |
 | [`ip_extern`](function/ip_extern.md) | Run  os detection and set the constants |
 
@@ -367,7 +367,7 @@ Module for process control
 | [`env_restore`](function/env_restore.md) | Restore environment from shared memory/file |
 | [`env_clean`](function/env_clean.md) | Remove stored environment from shared memory/file |
 | [`env_change`](function/env_change.md) | Change environment in shared memory/file |
-| [`steps_init`](function/steps_init.md) | Initialize nstep control |
+| [`steps_init`](function/steps_init.md) | Initialize step control |
 | [`steps_check`](function/steps_check.md) | Check if step already finished successful |
 | [`steps_done`](function/steps_done.md) | Set step as successfully done |
 | [`sync`](function/sync.md) | Run the given command with optional step control |
@@ -393,10 +393,10 @@ Module with remote calling/execution helpers.
 | [`remote_console`](function/remote_console.md) | Open an interactive console on remote host |
 | [`upload`](function/upload.md) | Upload file |
 | [`download`](function/download.md) | Download file |
-| [`remote_bashlib`](function/remote_bashlib.md) | Deprected: Run bashlib command on remote. |
+| [`remote_bashlib`](function/remote_bashlib.md) | Deprecated: Run bashlib command on remote. |
 | [`remote_install`](function/remote_install.md) | Deprecated: Remote install package like @install |
 | [`remote_system_info`](function/remote_system_info.md) | Deprecated: Display the system description (from remote) |
-| [`remote_df`](function/remote_df.md) | Deprectaed: Remote df with visual display |
+| [`remote_df`](function/remote_df.md) | Deprecated: Remote df with visual display |
 | [`remote_lvm`](function/remote_lvm.md) | Deprecated: Remote check if LVM is used |
 | [`boot_wait`](function/boot_wait.md) | Wait till reboot is finished |
 
