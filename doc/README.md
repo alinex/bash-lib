@@ -188,13 +188,6 @@ Some helpers to work easier with dates.
 | [`timer_start`](function/timer_start.md) | Deprecated: Start the timer |
 | [`timer_stop`](function/timer_stop.md) | Deprecated: Stop the timer and calculate elapsed time |
 
-### Internal Module
-
-The internal functions contains parts which are only needed within the bashlib but not outside.
-
-| Variable/Function | Description |
-| --- | --- |
-
 ### Misc Module
 
 The core functions contains essential parts which may also be used while loading the library.

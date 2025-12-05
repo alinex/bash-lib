@@ -59,6 +59,7 @@ for folder in config core module extra; do
         if [[ -f "$file" && "$file" != *.* ]]; then
             name="$(basename "$file")"
             name="${name#[0-9]*_}" # remove prefix
+            [[ "$name" != "internal" ]] || continue
             echo -n "- $folder/$name"
             (
                 echo ""
