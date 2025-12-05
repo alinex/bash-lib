@@ -165,12 +165,12 @@ remote_term_line() {
     [ -z "$jump" ] || ssh="-J $jump $ssh"
     if [ -p /dev/stdin ]; then
         # shellcheck disable=SC2086
-        ssh -t $ssh bash -s 2> >(grep -v '^Connection to .* closed\.' >&2) | nocr
+        ssh -t $ssh bash -s 2> >(grep -v '^Connection to .* closed\.' >&2 || true) | nocr
         return "${PIPESTATUS[0]}"
     else
         # this allows interactivity
         # shellcheck disable=SC2086
-        ssh -t $ssh "$@" 2> >(grep -v '^Connection to .* closed\.' >&2) | nocr
+        ssh -t $ssh "$@" 2> >(grep -v '^Connection to .* closed\.' >&2 || true) | nocr
         return "${PIPESTATUS[0]}"
     fi
 }

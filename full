@@ -2537,7 +2537,7 @@ if [ -p /dev/stdin ];then
 ssh -t $ssh bash -s 2> >(grep -v '^Connection to .* closed\.' >&2)|nocr
 return "${PIPESTATUS[0]}"
 else
-ssh -t $ssh "$@" 2> >(grep -v '^Connection to .* closed\.' >&2)|nocr
+ssh -t $ssh "$@"|nocr
 return "${PIPESTATUS[0]}"
 fi
 }
