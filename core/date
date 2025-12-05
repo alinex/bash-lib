@@ -95,7 +95,7 @@ _parse_duration() {
     local input="$1"
     local total=0
     local overall_sign=1
-    local value unit vnum
+    local value unit v_num
     # Trim leading sign for the whole input, but remember it
     if [[ "$input" == -* ]]; then
         overall_sign=-1
@@ -109,16 +109,16 @@ _parse_duration() {
     while read -r value unit; do
         # value may itself have a sign (e.g. -30)
         if [[ "$value" =~ ^[+-] ]]; then
-            vnum="$value" # use token's own sign
+            v_num="$value" # use token's own sign
         else
-            vnum=$((overall_sign * value)) # apply overall sign
+            v_num=$((overall_sign * value)) # apply overall sign
         fi
         case "$unit" in
-        '' | s | sec | secs | second | seconds) total=$((total + vnum)) ;;
-        m | min | mins | minute | minutes) total=$((total + vnum * 60)) ;;
-        h | hr | hrs | hour | hours) total=$((total + vnum * 3600)) ;;
-        d | day | days) total=$((total + vnum * 86400)) ;;
-        w | week | weeks) total=$((total + vnum * 604800)) ;;
+        '' | s | sec | secs | second | seconds) total=$((total + v_num)) ;;
+        m | min | mins | minute | minutes) total=$((total + v_num * 60)) ;;
+        h | hr | hrs | hour | hours) total=$((total + v_num * 3600)) ;;
+        d | day | days) total=$((total + v_num * 86400)) ;;
+        w | week | weeks) total=$((total + v_num * 604800)) ;;
         *)
             printf "$(gettext 'Invalid duration unit'): %s\n" "$unit" >&2
             return 1

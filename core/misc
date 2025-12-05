@@ -9,7 +9,7 @@ source /dev/null
 ######################################################################################
 
 # Write message to STDERR if in DEBUG mode else do nothing
-# Debug can support multiple levels starting from 1 upwards to be more verbose. This will only be shown if environment variable `DEBUG` is the same number or higher. Or if the `DEBUG` variable includes the function name. Multiple lines will be printed seperately to have the function name prefix at the start of each.
+# Debug can support multiple levels starting from 1 upwards to be more verbose. This will only be shown if environment variable `DEBUG` is the same number or higher. Or if the `DEBUG` variable includes the function name. Multiple lines will be printed separately to have the function name prefix at the start of each.
 # Usage:    debug [<num>] <message>
 #           <message> | debug [<num>]
 #               <num> := [1-9]      # (default 1) higher to only show in more verbose call
@@ -26,9 +26,11 @@ debug() {
         level="$1"
         shift
     fi
-    #IFS=$' \t\n' read -r _ pfunc _ <<<"$(caller 1)" # enable to show two levels
     IFS=$' \t\n' read -r _ func _ <<<"$(caller 0)"
-    [ -z "$pfunc" ] || [ "$pfunc" = "$func" ] || func="$pfunc/$func"
+    # enable to show two levels
+    #local parent
+    #IFS=$' \t\n' read -r _ parent _ <<<"$(caller 1)"
+    #[ -z "$parent" ] || [ "$parent" = "$func" ] || func="$parent/$func"
     # collect text
     local text
     text="$(input "$@")"
@@ -72,7 +74,7 @@ die() {
         log critical "$text"
         _stacktrace "$trap" 2>&1 | log critical
     fi
-    # kill -s TERM "$PPID" # forcibly terminite the parent
+    # kill -s TERM "$PPID" # forcibly terminate the parent
     [[ $- =~ i ]] && return 1 || exit 1
 }
 [ -n "${BASH_VERSION:-}" ] || die "No bash CLI! This can only be run under bash"
@@ -137,7 +139,7 @@ trap_remove() {
 # The file will be conducted out of the program name and the given <identifier>.
 # You should remove this file by yourself if no longer needed. The files will be available in `/tmp` folder for about 3 unused days (managed by your os) and in memory till the next reboot.
 # Usage:    mktemp [<identifier>]       # use default temp if no identifier given
-# Options:  -d, --directory             # to make a directorty instead of a file
+# Options:  -d, --directory             # to make a directory instead of a file
 #           -m, --memory                # use shared memory
 #           -e, --extension <string>    # to specify file extension (better readability)
 #           -p, --path <base-dir>       # folder under which to create file
@@ -207,11 +209,11 @@ mktemp() {
     fi
     echo "$result"
     [ -z "$ttl" ] || (
-        _rmtemp "$ttl" "$result" >/dev/null 2>&1 &
+        _rm_temp "$ttl" "$result" >/dev/null 2>&1 &
         disown
     )
 }
-_rmtemp() {
+_rm_temp() {
     local wait="$1" file="$2"
     while [ -e "$result" ] && ((wait > 0)); do
         sleep 1

@@ -37,6 +37,9 @@
     "divibib",
     "extname",
     "getopt",
+    "gsub",
+    "indexof",
+    "Iseconds",
     "mattermost",
     "mktemp",
     "ngettext",
@@ -51,8 +54,11 @@
     "prometheus",
     "repost",
     "SCRIPTDIR",
+    "TMPDIR",
+    "uncatched",
     "uncolorize",
     "urlencode",
-    "USERPASS"
+    "USERPASS",
+    "zulu"
   ]
 }

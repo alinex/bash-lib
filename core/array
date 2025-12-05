@@ -77,10 +77,10 @@ split() {
 
 # After declaring a variable as associative array: `declare -A <array-name>`
 # Usage:    hash <array-name> {set|get|unset|has} <key> [<value>]
-# Example:  hash cache set "myname" "any value"
-#           hash cache get "myname"
-#           hash cache has "myname"
-#           hash cache unset "myname"
+# Example:  hash cache set "my_name" "any value"
+#           hash cache get "my_name"
+#           hash cache has "my_name"
+#           hash cache unset "my_name"
 hash() {
     num_parameters --min 3 --max 4 --die "Hash needs two to three parameters: Usage hash <array-name> <cmd> <key> [<value>]" "$@"
     declare -n arr="$1"

@@ -16,7 +16,7 @@ mktemp [<identifier>]       # use default temp if no identifier given
 ### Options
 
 ```bash
--d, --directory             # to make a directorty instead of a file
+-d, --directory             # to make a directory instead of a file
 -m, --memory                # use shared memory
 -e, --extension <string>    # to specify file extension (better readability)
 -p, --path <base-dir>       # folder under which to create file

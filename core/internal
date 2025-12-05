@@ -52,6 +52,7 @@ _stacktrace() {
             ((i == 1)) && func="trap ERR" || func="${FUNCNAME[i]}"
             line="${BASH_LINENO[i]}"
             ((i == 1)) && src="${BASH_SOURCE[i + 1]}" || src="${BASH_SOURCE[i]}"
+            # shellcheck disable=SC2015
             printf "\033[1m%s:%d (%s)\n" "$src" "$line" "$func" | ( ((i == 1)) && warn || notice)
             [ "$line" -gt 0 ] || return 0
             awk -v n="$line" '
