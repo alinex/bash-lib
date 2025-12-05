@@ -69,12 +69,18 @@ The configuration module contains a lot of general configuration settings for th
 | ``$REMOTE_LOGIN_DEFAULT`` | Default login if no `--login` or ``$login`` available |
 | ``$MONGO_ADMIN_USERPASS`` | Hash: Mongo Admin User Logins `<host> = <username>:<password>` but use `_` instead of `.` in hostname |
 | ``$POWERDNS_API`` | PowerDNS API URL used together with `$POWERDNS_TOKEN` and silently disables powerdns function if not set |
+| ``$POWERDNS_TOKEN`` | PowerDNS API Token used together with `$POWERDNS_API` in dns function |
+| ``$PLUSSERVER_PORTAL`` | Base URL for Portal to Provider Plusserver |
+| ``$CONFLUENCE_OUTAGE`` | Atlassian confluence page id for outage information [`confluence_outage`](functionconfluence_outage.md) |
 
 ## Core
 
 ### Arguments Module
 
 This should help to read function parameters/arguments in different ways.
+
+| Variable/Function | Description |
+| --- | --- |
 | [`option_parse`](function/option_parse.md) | Parse arguments based on given specification |
 | [`option_help`](function/option_help.md) | Print help for options defined in options specification |
 | [`input`](function/input.md) | Collect string from stdin (no parameters) or concatenate the parameters |
@@ -171,6 +177,9 @@ The core configuration which is needed for the core functions.
 ### Date Module
 
 Some helpers to work easier with dates.
+
+| Variable/Function | Description |
+| --- | --- |
 | [`now`](function/now.md) | Get current timestamp |
 | [`date_diff`](function/date_diff.md) | Calculate difference in seconds |
 | [`date_format`](function/date_format.md) | Format date in different named versions or format string |

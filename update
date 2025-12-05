@@ -96,9 +96,6 @@ for folder in config core module extra; do
                 sed -E 's#(^|[^[:alnum:]_.-])&([[:alnum:]_]+)#\1[`\2`](example/\2.md)#g' |
                 sed -E 's#(^|[^[:alnum:]_.-])(\$[[:alnum:]_]+)#\1`\2`#g' \
                     >>"$BASHLIB_HOME"/doc/README.md
-            if [ -z "$function_lines" ]; then
-                head -n -3 "$BASHLIB_HOME"/doc/README.md | sponge "$BASHLIB_HOME"/doc/README.md
-            fi
             # Get function names and start lines using grep and awk
             # Supports functions declared as: fname() { ... } or function fname { ... }
             function_lines=$(awk '
