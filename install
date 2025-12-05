@@ -82,7 +82,7 @@ else
 fi
 echo ""
 
-echo "Step 4: Update configuration links."
+echo "Step 4: Update local configuration files."
 if [ -e "$config"secrets ]; then
     echo "        Use the existing ${config}secrets"
 else

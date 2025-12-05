@@ -63,13 +63,14 @@ debug "Running in DEBUG=${DEBUG-} mode!"
 #           > _stacktrace          at main() in /home/alex/bin/dvb/cleanup:364
 # Return:   always 1 and try to exit script with status 1
 die() {
-    local text
+    local text trap
     text="$(input "$@")"
     echo -e "${CC_CRITICAL}$text${CC_RESET}" >&2
-    _stacktrace
+    [[ "$text" != *"Uncaught exception at"* ]] || trap=1
+    _stacktrace "$trap"
     if command -v log >/dev/null; then
         log critical "$text"
-        _stacktrace 2>&1 | log critical
+        _stacktrace "$trap" 2>&1 | log critical
     fi
     # kill -s TERM "$PPID" # forcibly terminite the parent
     [[ $- =~ i ]] && return 1 || exit 1
@@ -77,6 +78,7 @@ die() {
 [ -n "${BASH_VERSION:-}" ] || die "No bash CLI! This can only be run under bash"
 ((BASH_VERSINFO[0] > 4 || (BASH_VERSINFO[0] == 4 && BASH_VERSINFO[1] >= 2))) ||
     die "No bash CLI! This can only be run under bash >=4.2!"
+trap 'die "💥 Uncaught exception at »${BASH_COMMAND}« with exit code $?"' ERR
 
 # Load bashlib module
 # This can be used to load a special module as needed.

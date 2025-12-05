@@ -195,7 +195,7 @@ timer_start() {
 # Use @timer like `timer stop`.
 # The timer has to be started before using @timer_start.
 # Output:   <seconds>.<milliseconds>
-timer_end() {
-    _deprecated "Use: timer end"
-    timer end
+timer_stop() {
+    _deprecated "Use: timer stop"
+    timer stop
 }

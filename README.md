@@ -32,6 +32,7 @@ If you already use it jump directly to the [module description](https://gitlab.c
   - [Distributions](#distributions)
   - [Architecture](#architecture)
     - [Quality](#quality)
+    - [Error handling](#error-handling)
     - [Version control](#version-control)
   - [Installation](#installation)
   - [Usage](#usage)
@@ -107,6 +108,7 @@ The BashLib will be installed on the System with it's `BASHLIB_HOME` directory i
 
 The modules are as far as possible:
 
+- error handling
 - unit tested (using bats)
 - integration tested in different OS using docker
 - CI tested on different OS, too
@@ -115,6 +117,14 @@ The modules are as far as possible:
 Documentation of externally usable variables and functions is completely done inline and exported as [markdown documentation](./doc/README.md).
 
 Management of bugs and issues will be done using [GitLab Issues](https://gitlab.com/alinex/bash-lib/-/issues) and also we use the milestones here. But also instant bug fixing of parts we find by ourself will be done directly in git without any message there.
+
+### Error handling
+
+If any error occur the BashLib will catch it using the `ERR trap` and will print an enhanced error message:
+
+![uncaught_exception](doc/uncaught_error.png)
+
+The message is level `CRITICAL`, the first line is `WARN`, further calls are `NOTICE` and the code view is `INFO` level.
 
 ### Version control
 
@@ -141,7 +151,7 @@ Therefore the following steps will be done:
 1. Install mandatory packages
 2. Download bashlib to your system
 3. Setup BASHLIB_HOME in your environment.
-4. Update configuration links.
+4. Update local configuration files. 
 
 The update will be the same, you only need to download the new files and overwrite the old ones.
 
@@ -181,13 +191,7 @@ Load it directly in bash with the above `source` commands.
 
 ## Configuration
 
-The configuration should be put under `config/` folder and will be loaded in alphabetically order in `full` or by using:
-
-```bash
-source $BASHLIB_HOME/configs
-```
-
-The `config/` folder also contains some language files `lang.<xx>` which will be loaded if the shell is running in the appropriate `$LANG` to have multilingual output.
+The configuration is under `config/` folder and will be loaded in alphabetically order. For your configuration change only the `overwrite` and `secrets` which are linked to your local configuration folder.
 
 ### Environment
 

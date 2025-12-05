@@ -175,8 +175,9 @@ Some helpers to work easier with dates.
 | [`date_diff`](function/date_diff.md) | Calculate difference in seconds |
 | [`date_format`](function/date_format.md) | Format date in different named versions or format string |
 | [`duration_format`](function/duration_format.md) | Format duration in different numbers or human readable |
-| [`timer_start`](function/timer_start.md) | Start the timer |
-| [`timer_stop`](function/timer_stop.md) | Stop the timer and calculate elapsed time |
+| [`timer`](function/timer.md) | Start/stop the timer |
+| [`timer_start`](function/timer_start.md) | Deprecated: Start the timer |
+| [`timer_stop`](function/timer_stop.md) | Deprecated: Stop the timer and calculate elapsed time |
 
 ### Internal Module
 

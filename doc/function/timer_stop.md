@@ -1,9 +1,9 @@
 # timer_stop
 
-## Stop the timer and calculate elapsed time
+## Deprecated: Stop the timer and calculate elapsed time
 
+Use [`timer`](timer.md) like `timer stop`.
 The timer has to be started before using [`timer_start`](timer_start.md).
-Usgae:    timer_stop
 
 
 ### Output (stdout)

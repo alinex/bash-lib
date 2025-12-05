@@ -262,6 +262,7 @@ But you can also select only specific functions to debug by specifying a functio
 - `DEBUG=` to not debug
 - `DEBUG=1` for minimal debugging
 - `DEBUG=5` with stack traces on die
+- `DEBUG=6` with stack traces also with code view
 - `DEBUG=9` for maximal debugging
 - `DEBUG=curl` to only debug one function
 - `DEBUG=curl,remote` for multiple functions
@@ -269,9 +270,27 @@ But you can also select only specific functions to debug by specifying a functio
 Further on, you can send stacktraces using `_stacktrace` which will be output as `DEBUG=5`.
 
 ```text
-> _stacktrace          Stack trace (most recent call last):
-> _stacktrace            at main() in /home/alex/bin/dvb/_test:32
-> _stacktrace            at timer_start() in /home/alex/dvb/bash-lib/core/date:169
+> _stacktrace          /home/alex/dvb/bash-lib/core/date:174 (timer)
+> _stacktrace          scripts/_test:32 (timer)
+> _stacktrace          scripts/_test:0 (main)
+```
+
+And with code example using `DEBUG=6`:
+
+```text
+> _stacktrace          /home/alex/dvb/bash-lib/core/date:174 (timer)
+> _stacktrace           172: stop)
+> _stacktrace           173: local seconds nano len
+> _stacktrace           174: IFS='.' read -r seconds nano <<<"$(echo "$(date +%s.%N) - $_timer_start" | bc)"
+> _stacktrace           175: len=$((4 - ${#seconds}))
+> _stacktrace           176: ((len >= 0)) || len=0
+> _stacktrace          scripts/_test:32 (timer)
+> _stacktrace            30: not_defined_function 555
+> _stacktrace            31: }
+> _stacktrace            32: timer start
+> _stacktrace            33: 
+> _stacktrace            34: server=mycompany.de
+> _stacktrace          scripts/_test:0 (main)
 ```
 
 If you could not find the Problem in `DEBUG` mode, you can load the bash-lib directly into shell, but unset the exit on error, because it may close the shell:
