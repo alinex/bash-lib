@@ -356,36 +356,17 @@ local message="DEPRECATED: ${FUNCNAME[1]} at $func in $file:$line $1"
 [ -n "$2" ]&&echo -e $'\033[1;31m'"$message (update it)$CC_RESET" >&2||die "$message"
 }
 _stacktrace(){
-local level=5 func line src
-if [ -n "$1" ];then
-for ((i=1; i<${#FUNCNAME[@]}; i++));do
-((i==1))&&func="trap ERR"||func="${FUNCNAME[i]}"
-line="${BASH_LINENO[i]}"
-((i==1))&&src="${BASH_SOURCE[i+1]}"||src="${BASH_SOURCE[i]}"
-printf "\033[1m%s:%d (%s)\n" "$src" "$line" "$func"|( ((i==1))&&warn||notice)
-[ "$line" -gt 0 ]||return 0
+local frame=1 line func src
+while read -r line func src < <(caller "$frame"||true);do
+printf "\033[1m%s:%d (%s)\n" "$src" "$line" "$func"|([ -n "$1" ]&&( ((frame==1))&&warn||notice)||debug 5)
 awk -v n="$line" '
             NR>=n-2 && NR<=n+2 {
                 gsub(/^[ \t]+/, "", $0)  # Remove leading spaces/tabs
                 printf "%4d: %s\n", NR, $0
                 if(NR==n+2) exit
-            }' "$src"|sed "/$line:/s/^/"$'\033[1m'"/;/$line:/s/$/"$'\033[22m'"/"|info
+            }' "$src"|sed "/$line:/s/^/"$'\033[1m'"/;/$line:/s/$/"$'\033[22m'"/"|([ -n "$1" ]&&info||debug 6)
+((frame++))||true
 done
-else
-for ((i=1; i<${#FUNCNAME[@]}; i++));do
-func="${FUNCNAME[i]}"
-line="${BASH_LINENO[i]}"
-src="${BASH_SOURCE[i]}"
-printf "\033[1m%s:%d (%s)\n" "$src" "$line" "$func"|debug "$level"
-[ "$line" -gt 0 ]||return 0
-awk -v n="$line" '
-            NR>=n-2 && NR<=n+2 {
-                gsub(/^[ \t]+/, "", $0)  # Remove leading spaces/tabs
-                printf "%4d: %s\n", NR, $0
-                if(NR==n+2) exit
-            }' "$src"|sed "/$line:/s/^/"$'\033[1m'"/;/$line:/s/$/"$'\033[22m'"/"|debug "$((level+1))"
-done
-fi
 }
 debug(){
 local level=1 func
@@ -542,7 +523,97 @@ error "Error: $res" >&2
 return 1
 fi
 }
+is(){
+eval set -- "$(option_parse $'n name +\nd die -\ns sanitize -\n- min +\n- max +' "$@")"
+local name die sanitize min max
+while true;do
+case "$1" in
+-n|--name)name="$2"&&shift 2;;
+-d|--die)die=1&&shift;;
+-s|--sanitize)sanitize=1&&shift;;
+--min)[[ $2 =~ ^[-+]?[0-9]+([.][0-9]+)?$ ]]&&min="$2"&&shift 2||die "$(printf "$(gettext "Parameter %s needs number")" min)";;
+--max)[[ $2 =~ ^[-+]?[0-9]+([.][0-9]+)?$ ]]&&max="$2"&&shift 2||die "$(printf "$(gettext "Parameter %s needs number")" max)";;
+--)shift&&break;;
+*)die "$(gettext "Unrecognized option"): $1"
+esac
+done
+name="${name:-argument}"
+local usage="$(gettext "Incorrect call"): is <check> <value> [options]"
+[ -n "$1" ]&&local check="$1"||die "$usage"
+local val="$2" res="$2"
+case $check in
+set)if
+[ -z "$val" ]
+then
+[ -z "$die" ]&&return 1||die "$(eval_gettext 'The "$name" has to be set with a value.')"
+fi
+;;
+empty)if
+[ -n "$val" ]
+then
+[ -n "$die" ]&&return 1||die "$(eval_gettext 'The "$name" has to be empty but has »${val}«.')"
+fi
+;;
+bool)if
+[[ ${val,,} =~ ^(true|t|1|yes|y|ja|j)$ ]]
+then
+res=1
+elif [[ -z $val || ${val,,} =~ ^(false|f|0|no|n|nein)$ ]];then
+res=0
+else
+[ -z "$die" ]&&return 1||die "$(eval_gettext 'The value »${val}« for "$name" could not be read as true or false.')"
+fi
+;;
+integer)if
+[ -n "$sanitize" ]
+then
+[[ $val =~ ^(-?[0-9]+) ]]&&res="${BASH_REMATCH[1]}"||true
+fi
+if [[ ! $res =~ ^-?[0-9]+$ ]];then
+[ -z "$die" ]&&return 1||die "$(eval_gettext 'The "$name" has to be an integer but »${val}« was given.')"
+fi
+if [[ -n $min && -n $max ]];then
+if ((res<min||res>max));then
+[ -z "$die" ]&&return 1||die "$(eval_gettext 'The "$name" has to be between $min and $max but »${val}« was given.')"
+fi
+elif [[ -n $min ]];then
+if ((res<min));then
+[ -z "$die" ]&&return 1||die "$(eval_gettext 'The "$name" has to at least $min but »${val}« was given.')"
+fi
+elif [[ -n $max ]];then
+if ((res>max));then
+[ -z "$die" ]&&return 1||die "$(eval_gettext 'The "$name" has to not more than $max but »${val}« was given.')"
+fi
+fi
+;;
+float)if
+[ -n "$sanitize" ]
+then
+[[ $val =~ ^(-?[0-9]+([.][0-9]+)?) ]]&&res="${BASH_REMATCH[1]}"||true
+fi
+if [[ ! $res =~ ^-?[0-9]+([.][0-9]+)?$ ]];then
+[ -z "$die" ]&&return 1||die "$(eval_gettext 'The "$name" has to be a float but »${val}« was given.')"
+fi
+if [[ -n $min && -n $max ]];then
+if ((res<min||res>max));then
+[ -z "$die" ]&&return 1||die "$(eval_gettext 'The "$name" has to be between $min and $max but »${val}« was given.')"
+fi
+elif [[ -n $min ]];then
+if ((res<min));then
+[ -z "$die" ]&&return 1||die "$(eval_gettext 'The "$name" has to at least $min but »${val}« was given.')"
+fi
+elif [[ -n $max ]];then
+if ((res>max));then
+[ -z "$die" ]&&return 1||die "$(eval_gettext 'The "$name" has to not more than $max but »${val}« was given.')"
+fi
+fi
+;;
+*)die "$(eval_gettext 'A check named ${check} is not defined.')"
+esac
+echo "$res"
+}
 num_parameters(){
+_deprecated "Use: is integer $# --min=<val> --max=<val>"
 eval set -- "$(option_parse $'- min +\n- max +\n- die +' "$@")"
 local min max die
 while true;do
@@ -571,21 +642,17 @@ return 1
 [ -z "$min" ]||(($#>=min))||_die "[$*] $# < $min (min)"||return 1
 [ -z "$max" ]||(($#<=max))||_die "[$*] $# > $max (max)"||return 1
 }
-is_success(){
-num_parameters --min 1 --max 1 --die "Only one argument allowed, got: $#" -- "$@"
-return "$1"
-}
 is_empty(){
-num_parameters --max 1 --die "Only one argument allowed, got: $#" -- "$@"
-[ -z "$1" ]
+_deprecated "Use: is empty <value>"
+is empty "$1"
 }
 is_integer(){
-num_parameters --min 1 --max 1 --die "Only one argument allowed, got: $#" -- "$@"
-[[ $1 =~ ^-?[0-9]+$ ]]
+_deprecated "Use: is integer <value>"
+is integer "$1"
 }
 is_float(){
-num_parameters --min 1 --max 1 --die "Only one argument allowed, got: $#" -- "$@"
-[[ $1 =~ ^[-+]?[0-9]+([.][0-9]+)?$ ]]
+_deprecated "Use: is float <value>"
+is float "$1"
 }
 trim_start(){
 local str="${1-}"

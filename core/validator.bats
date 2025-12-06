@@ -36,6 +36,111 @@ setup() {
 }
 
 ######################################################################################
+# is
+######################################################################################
+
+# bats test_tags=is
+@test "is: should check for set" {
+    run is set "x"
+    assert_success
+    assert_output "x"
+}
+# bats test_tags=is
+@test "is: should fail for set" {
+    run is set ""
+    assert_failure
+}
+# bats test_tags=is
+@test "is: should die for set" {
+    run is set "" --die
+    assert_failure
+    assert_output -p '"argument" muss mit einem Wert gesetzt werden.'
+}
+# bats test_tags=is
+@test "is: should die for set (named argument)" {
+    run is set "" --name=age --die
+    assert_failure
+    assert_output -p '"age" muss mit einem Wert gesetzt werden.'
+}
+
+# bats test_tags=is
+@test "is: should check for empty" {
+    run is empty ""
+    assert_success
+    assert_output ""
+}
+# bats test_tags=is
+@test "is: should fail for empty" {
+    run is empty "x"
+    assert_failure
+}
+
+# bats test_tags=is
+@test "is: should check for bool true" {
+    run is bool "true"
+    assert_success
+    assert_output "1"
+}
+# bats test_tags=is
+@test "is: should check for bool false" {
+    run is bool "F"
+    assert_success
+    assert_output "0"
+}
+# bats test_tags=is
+@test "is: should fail for bool" {
+    run is bool "?"
+    assert_failure
+}
+
+# bats test_tags=is
+@test "is: should check for integer" {
+    run is integer 5
+    assert_success
+    assert_output "5"
+}
+# bats test_tags=is
+@test "is: should fail for integer" {
+    run is integer five
+    assert_failure
+}
+# bats test_tags=is
+@test "is: should check for integer with sanitize" {
+    run is integer 5.27k --sanitize
+    assert_success
+    assert_output "5"
+}
+# bats test_tags=is
+@test "is: should check for integer with min" {
+    run is integer 6 --min=5
+    assert_success
+    assert_output "6"
+}
+# bats test_tags=is
+@test "is: should fail for integer with min" {
+    run is integer 3 --min=5
+    assert_failure
+}
+# bats test_tags=is
+@test "is: should check for integer with max" {
+    run is integer 3 --max=5
+    assert_success
+    assert_output "3"
+}
+# bats test_tags=is
+@test "is: should fail for integer with max" {
+    run is integer 6 --max=5
+    assert_failure
+}
+
+# bats test_tags=is
+@test "is: should check for float" {
+    run is float 5.8
+    assert_success
+    assert_output "5.8"
+}
+
+######################################################################################
 # is_success
 ######################################################################################
 

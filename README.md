@@ -7,8 +7,8 @@ Some functionalities from the older version will no longer be available like log
 
 What BashLib 2 brings:
 
-- modulare, easier to use
-- easy expandable feature set
+- modulare, with natural language to be easy to use
+- expandable feature set
 - remote capabilities integrated
 - lots of api integrations
 - multilingual (de, en at the moment)

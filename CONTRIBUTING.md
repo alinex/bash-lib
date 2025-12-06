@@ -270,27 +270,23 @@ But you can also select only specific functions to debug by specifying a functio
 Further on, you can send stacktraces using `_stacktrace` which will be output as `DEBUG=5`.
 
 ```text
-> _stacktrace          /home/alex/dvb/bash-lib/core/date:174 (timer)
-> _stacktrace          scripts/_test:32 (timer)
-> _stacktrace          scripts/_test:0 (main)
+> _stacktrace          /home/alex/dvb/bash-lib/core/validator:76 (is)
+> _stacktrace          scripts/_test:33 (main)
 ```
 
 And with code example using `DEBUG=6`:
 
 ```text
-> _stacktrace          /home/alex/dvb/bash-lib/core/date:174 (timer)
-> _stacktrace           172: stop)
-> _stacktrace           173: local seconds nano len
-> _stacktrace           174: IFS='.' read -r seconds nano <<<"$(echo "$(date +%s.%N) - $_timer_start" | bc)"
-> _stacktrace           175: len=$((4 - ${#seconds}))
-> _stacktrace           176: ((len >= 0)) || len=0
-> _stacktrace          scripts/_test:32 (timer)
-> _stacktrace            30: not_defined_function 555
-> _stacktrace            31: }
-> _stacktrace            32: timer start
-> _stacktrace            33: 
-> _stacktrace            34: server=mycompany.de
-> _stacktrace          scripts/_test:0 (main)
+> _stacktrace          /home/alex/dvb/bash-lib/core/validator:76 (is)
+> _stacktrace            74: -n | --name) name="$2" && shift 2 ;;
+> _stacktrace            75: -s | --sanitize) sanitize=1 && shift ;;
+> _stacktrace            76: --min) [[ "$2" =~ ^-?[0-9]+$ ]] && min="$2" && shift 2 || die "$(printf "$(gettext "Parameter %s needs integer")" min)" ;;
+> _stacktrace            77: --max) [[ "$2" =~ ^-?[0-9]+$ ]] && max="$2" && shift 2 || die "$(printf "$(gettext "Parameter %s needs integer")" max)" ;;
+> _stacktrace            78: --) shift && break ;;
+> _stacktrace          scripts/_test:33 (main)
+> _stacktrace            31: ################################################################################################
+> _stacktrace            32: 
+> _stacktrace            33: is integer 5.27k --sanitize --min=o
 ```
 
 If you could not find the Problem in `DEBUG` mode, you can load the bash-lib directly into shell, but unset the exit on error, because it may close the shell:

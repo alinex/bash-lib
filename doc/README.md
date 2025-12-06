@@ -209,11 +209,11 @@ Validators to make this easier and more readable.
 
 | Variable/Function | Description |
 | --- | --- |
-| [`num_parameters`](function/num_parameters.md) | Check that a specific number of parameters are given |
-| [`is_success`](function/is_success.md) | Test if given value is an exit/return success |
-| [`is_empty`](function/is_empty.md) | Test if given value is an empty string or undefined |
-| [`is_integer`](function/is_integer.md) | Test if given value is an integer |
-| [`is_float`](function/is_float.md) | Test if given value is an float |
+| [`is`](function/is.md) | Validate and sanitize values. |
+| [`num_parameters`](function/num_parameters.md) | Deprecated: Check that a specific number of parameters are given |
+| [`is_empty`](function/is_empty.md) | Deprecated: Test if given value is an empty string or undefined |
+| [`is_integer`](function/is_integer.md) | Deprecated: Test if given value is an integer |
+| [`is_float`](function/is_float.md) | Deprecated: Test if given value is an float |
 | [`trim_start`](function/trim_start.md) | Trim leading whitespace or given character |
 | [`trim_end`](function/trim_end.md) | Trim trailing whitespace or given character |
 | [`trim`](function/trim.md) | Trim leading and trailing whitespace or given character |

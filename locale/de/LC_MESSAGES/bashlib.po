@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-05 13:34+0100\n"
+"POT-Creation-Date: 2025-12-06 22:29+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -33,14 +33,72 @@ msgstr "Argument ist nicht ganzzahlig"
 msgid "Invalid duration unit"
 msgstr "Ungültige Einheit für Zeitdauer"
 
-#: core/validator:36 module/os:174 module/monitoring:148 module/input:41
-#: module/input:105 module/input:254 module/input:530 module/input:710
-#: module/remote:51 module/remote:106 module/remote:158 module/remote:211
-#: module/remote:264 module/remote:312 module/remote:356 module/remote:419
-#: module/remote:518 module/output:83 module/mattermost:321
+#: core/validator:43 core/validator:44
+#, fuzzy
+msgid "Parameter %s needs number"
+msgstr "Der Parameter %s muß eine Zahl sein"
+
+#: core/validator:46 core/validator:152 module/os:174 module/monitoring:148
+#: module/input:41 module/input:105 module/input:254 module/input:530
+#: module/input:710 module/remote:51 module/remote:106 module/remote:158
+#: module/remote:211 module/remote:264 module/remote:312 module/remote:356
+#: module/remote:419 module/remote:518 module/output:83 module/mattermost:321
 #: module/mattermost:356 module/software:187
 msgid "Unrecognized option"
 msgstr "Unbekannte Option"
+
+#: core/validator:51
+msgid "Incorrect call"
+msgstr "Ungültige Aufruf"
+
+#: core/validator:59
+#, sh-format
+msgid "The \"$name\" has to be set with a value."
+msgstr "\"$name\" muss mit einem Wert gesetzt werden."
+
+#: core/validator:64
+#, sh-format
+msgid "The \"$name\" has to be empty but has »${val}«."
+msgstr "\"$name\" sollte leer sein enthält aber »${val}«."
+
+#: core/validator:73
+#, sh-format
+msgid "The value »${val}« for \"$name\" could not be read as true or false."
+msgstr ""
+"Der Wert »${val}« für \"$name\" konnte weder als wahr noch als falsch "
+"identifiziert werden."
+
+#: core/validator:81
+#, sh-format
+msgid "The \"$name\" has to be an integer but »${val}« was given."
+msgstr "\"$name\" muss eine Zahl sein aber »${val}« wurde angegeben."
+
+#: core/validator:85 core/validator:106
+#, sh-format
+msgid "The \"$name\" has to be between $min and $max but »${val}« was given."
+msgstr ""
+"\"$name\" muss zwischen $min und $max sein aber »${val}« wurde angegeben."
+
+#: core/validator:89 core/validator:110
+#, sh-format
+msgid "The \"$name\" has to at least $min but »${val}« was given."
+msgstr "\"$name\" muss mindestens $min sein aber »${val}« wurde angegeben."
+
+#: core/validator:93 core/validator:114
+#, sh-format
+msgid "The \"$name\" has to not more than $max but »${val}« was given."
+msgstr ""
+"\"$name\" darf nicht größer als $max sein aber »${val}« wurde angegeben."
+
+#: core/validator:102
+#, sh-format
+msgid "The \"$name\" has to be a float but »${val}« was given."
+msgstr "\"$name\" muss eine Fließkommazahl sein aber »${val}« wurde angegeben."
+
+#: core/validator:118
+#, sh-format
+msgid "A check named ${check} is not defined."
+msgstr "Eine Prüfung namens ${check} ist nicht definiert."
 
 #: module/dns:77
 #, sh-format
@@ -55,12 +113,11 @@ msgid "IP\\tInterface"
 msgstr "IP\\tSchnittstelle"
 
 #: module/monitoring:67
-#, fuzzy
 msgid "Could not get exporters from Prometheus!"
 msgstr "Es konnten keine Exporter von Prometheus ermittelt werden!"
 
 #: module/monitoring:84
-#, fuzzy, sh-format
+#, sh-format
 msgid "Could not scrape the Prometheus exporter at $url!"
 msgstr "Der Prometheus Exporter unter $url konnte nicht abgefragt werden!"
 
@@ -254,13 +311,12 @@ msgid "is a developer upgrade"
 msgstr "ist ein entwickler Upgrade"
 
 #: module/software:247
-#, fuzzy
 msgid "is a developer downgrade"
-msgstr "ist ein entwickler Downgrade"
+msgstr "ist ein Entwickler Downgrade"
 
 #: module/software:251
-#, fuzzy, sh-format
-msgid "is an downgrade of one patch version"
-msgid_plural "is an downgrade of $step patch versions"
-msgstr[0] "ist ein downgrade von einer Patchversion"
-msgstr[1] "ist ein downgrade von $step Patchversionen"
+#, sh-format
+msgid "is a downgrade of one patch version"
+msgid_plural "is a downgrade of $step patch versions"
+msgstr[0] "ist ein Downgrade von einer Patchversion"
+msgstr[1] "ist ein Downgrade von $step Patchversionen"

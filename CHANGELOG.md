@@ -2,13 +2,14 @@
 
 As this is not driven by releases and therefore tags are not used it is an ongoing update so we will divide the changelog into months. If you need a special version instead of the newest one, please select it in git by date.
 
-## Ongoing
+## December Version - in development
 
-- add support for Arch/Manjaro/Kali Linux
-- add [log](./doc/function/log.md) support
-- combine `timer_start` and `timer_end` into [timer](doc/function/timer.md)
+- let functions validate parameters
 - extend stack traces to show also code lines
 - catch each error and output a failure with stack trace
+- add [log](./doc/function/log.md) support
+- combine `timer_start` and `timer_end` into [timer](doc/function/timer.md)
+- add support for Arch/Manjaro/Kali Linux
 
 ## 21. November 2025 - V2.1.0
 

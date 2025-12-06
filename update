@@ -31,7 +31,7 @@ echo "fertig."
 
 echo "Update translations..."
 command -v xgettext &>/dev/null || sudo apt install gettext
-find core module extra -type f -not -name \*.\* -print0 | xargs -0 xgettext -L Shell -o locale/bashlib.pot
+find core module extra -type f -not -name \*.\* -print0 | xargs -0 xgettext --from-code=UTF-8 -L Shell -o locale/bashlib.pot
 sed -i 's/charset=CHARSET/charset=UTF-8/' locale/bashlib.pot
 for lang in $LOCALES; do
     echo -n "- $lang"

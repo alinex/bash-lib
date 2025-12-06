@@ -248,7 +248,7 @@ semver_diff() {
             echo
         elif ((num >= 1000000)); then
             step=$((num / -1000))
-            eval_ngettext "is an downgrade of one patch version" "is an downgrade of \$step patch versions" "$step"
+            eval_ngettext "is a downgrade of one patch version" "is a downgrade of \$step patch versions" "$step"
             echo
         elif ((num >= 1000000000)); then
             step=$((num / -1000000))
@@ -256,7 +256,7 @@ semver_diff() {
             echo
         else
             step=$((num / 1000000000))
-            eval_ngettext "is an upgrade of one major version" "is an upgrade of \$step mayjor versions" "$step"
+            eval_ngettext "is an upgrade of one major version" "is an upgrade of \$step major versions" "$step"
             echo
         fi
         return 0

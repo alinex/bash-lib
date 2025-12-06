@@ -3,15 +3,131 @@
 # Validators to make this easier and more readable.
 
 ######################################################################################
-### Parameter Validation
+### General Validation
 ######################################################################################
 
-# Check that a specific number of parameters are given
+# Validate and sanitize values.
+# Every parameter should be checked to prevent failure later in the code. For such checks you run it with the `--die` option to stop processing if wrong.
+# But you can also use it in the program flow without that and use it's return status to check if it 0=ok or 1=failed.
+# The following checks are implemented:
+# - `set` will fail if no value given
+# - `empty` will fail if not empty like ""
+# - `bool` will transform the value to `1` or `0` and allows: true/false, t/f, 1/0, yes/no, y/j/n, ja/nein, ""
+# - `integer` will check for a number maybe within a range
+# - `float` will check for a number maybe within a range
+# Usage:    is <check> <value> [options]
+# Options:  d, die              # stop with error instead of return state
+#           n, name=<string>    # name the variable for the `die` message
+#           s, sanitize         # for integer
+#           min=<num>           # for integer
+#           max=<num>           # for integer
+# Output:   <value>             # may be sanitized
+# Exit:     with message if incorrect value
+# Example:  # check arguments
+#           is --name=arguments integer $# --min=1 --max=2
+#           name="$(is --name=age integer "$1" --sanitize --min=0)"
+#           init="$(is --name=init bool "$1")"
+#           # use in code
+#           if is integer age --min=18; then
+is() {
+    # parameter parsing
+    eval set -- "$(option_parse $'n name +\nd die -\ns sanitize -\n- min +\n- max +' "$@")"
+    local name die sanitize min max
+    # shellcheck disable=SC2015
+    # shellcheck disable=SC2059
+    while true; do
+        case "$1" in
+        -n | --name) name="$2" && shift 2 ;;
+        -d | --die) die=1 && shift ;;
+        -s | --sanitize) sanitize=1 && shift ;;
+        --min) [[ "$2" =~ ^[-+]?[0-9]+([.][0-9]+)?$ ]] && min="$2" && shift 2 || die "$(printf "$(gettext "Parameter %s needs number")" min)" ;;
+        --max) [[ "$2" =~ ^[-+]?[0-9]+([.][0-9]+)?$ ]] && max="$2" && shift 2 || die "$(printf "$(gettext "Parameter %s needs number")" max)" ;;
+        --) shift && break ;;
+        *) die "$(gettext "Unrecognized option"): $1" ;;
+        esac
+    done
+    name="${name:-argument}"
+    # processing
+    local usage="$(gettext "Incorrect call"): is <check> <value> [options]"
+    # shellcheck disable=SC2015
+    [ -n "$1" ] && local check="$1" || die "$usage"
+    local val="$2" res="$2"
+    # shellcheck disable=SC2015
+    case $check in
+    set)
+        if [ -z "$val" ]; then
+            [ -z "$die" ] && return 1 || die "$(eval_gettext 'The "$name" has to be set with a value.')"
+        fi
+        ;;
+    empty)
+        if [ -n "$val" ]; then
+            [ -n "$die" ] && return 1 || die "$(eval_gettext 'The "$name" has to be empty but has »${val}«.')"
+        fi
+        ;;
+    bool)
+        if [[ "${val,,}" =~ ^(true|t|1|yes|y|ja|j)$ ]]; then
+            res=1
+        elif [[ -z "$val" || "${val,,}" =~ ^(false|f|0|no|n|nein)$ ]]; then
+            res=0
+        else
+            [ -z "$die" ] && return 1 || die "$(eval_gettext 'The value »${val}« for "$name" could not be read as true or false.')"
+        fi
+        ;;
+    integer)
+        if [ -n "$sanitize" ]; then
+            [[ "$val" =~ ^(-?[0-9]+) ]] && res="${BASH_REMATCH[1]}" || true
+        fi
+        if [[ ! "$res" =~ ^-?[0-9]+$ ]]; then
+            [ -z "$die" ] && return 1 || die "$(eval_gettext 'The "$name" has to be an integer but »${val}« was given.')"
+        fi
+        if [[ -n "$min" && -n "$max" ]]; then
+            if ((res < min || res > max)); then
+                [ -z "$die" ] && return 1 || die "$(eval_gettext 'The "$name" has to be between $min and $max but »${val}« was given.')"
+            fi
+        elif [[ -n "$min" ]]; then
+            if ((res < min)); then
+                [ -z "$die" ] && return 1 || die "$(eval_gettext 'The "$name" has to at least $min but »${val}« was given.')"
+            fi
+        elif [[ -n "$max" ]]; then
+            if ((res > max)); then
+                [ -z "$die" ] && return 1 || die "$(eval_gettext 'The "$name" has to not more than $max but »${val}« was given.')"
+            fi
+        fi
+        ;;
+    float)
+        if [ -n "$sanitize" ]; then
+            [[ "$val" =~ ^(-?[0-9]+([.][0-9]+)?) ]] && res="${BASH_REMATCH[1]}" || true
+        fi
+        if [[ ! "$res" =~ ^-?[0-9]+([.][0-9]+)?$ ]]; then
+            [ -z "$die" ] && return 1 || die "$(eval_gettext 'The "$name" has to be a float but »${val}« was given.')"
+        fi
+        if [[ -n "$min" && -n "$max" ]]; then
+            if ((res < min || res > max)); then
+                [ -z "$die" ] && return 1 || die "$(eval_gettext 'The "$name" has to be between $min and $max but »${val}« was given.')"
+            fi
+        elif [[ -n "$min" ]]; then
+            if ((res < min)); then
+                [ -z "$die" ] && return 1 || die "$(eval_gettext 'The "$name" has to at least $min but »${val}« was given.')"
+            fi
+        elif [[ -n "$max" ]]; then
+            if ((res > max)); then
+                [ -z "$die" ] && return 1 || die "$(eval_gettext 'The "$name" has to not more than $max but »${val}« was given.')"
+            fi
+        fi
+        ;;
+    *) die "$(eval_gettext 'A check named ${check} is not defined.')" ;;
+    esac
+    echo "$res"
+}
+
+# Deprecated: Check that a specific number of parameters are given
+# Use: is integer $# --min=1 --max=2
 # Usage:    num_parameters "$@" --min 1 --die "Zu viele Parameter: $USAGE"
 # Options:  --min <int>     # at least <int> elements are needed
 #           --max <int>     # not more than <int> elements are allowed
 #           --die <string>  # exit with this message if not
 num_parameters() {
+    _deprecated "Use: is integer $# --min=<val> --max=<val>"
     # parameter parsing
     eval set -- "$(option_parse $'- min +\n- max +\n- die +' "$@")"
     local min max die
@@ -47,40 +163,31 @@ num_parameters() {
     [ -z "$max" ] || (($# <= max)) || _die "[$*] $# > $max (max)" || return 1
 }
 
-######################################################################################
-### General Validation
-######################################################################################
-
-# Test if given value is an exit/return success
-# Usage:    is_success <code>
-# Status:   0 => true
-is_success() {
-    num_parameters --min 1 --max 1 --die "Only one argument allowed, got: $#" -- "$@"
-    return "$1"
-}
-
-# Test if given value is an empty string or undefined
+# Deprecated: Test if given value is an empty string or undefined
+# Use: is empty <value>
 # Usage:    is_empty <var>
 # Status:   0 => true
 is_empty() {
-    num_parameters --max 1 --die "Only one argument allowed, got: $#" -- "$@"
-    [ -z "$1" ]
+    _deprecated "Use: is empty <value>"
+    is empty "$1"
 }
 
-# Test if given value is an integer
+# Deprecated: Test if given value is an integer
+# Use: is integer <value>
 # Usage:    is_integer <value>
 # Status:   0 => is integer
 is_integer() {
-    num_parameters --min 1 --max 1 --die "Only one argument allowed, got: $#" -- "$@"
-    [[ "$1" =~ ^-?[0-9]+$ ]]
+    _deprecated "Use: is integer <value>"
+    is integer "$1"
 }
 
-# Test if given value is an float
+# Deprecated: Test if given value is an float
+# Use: is integer <value>
 # Usage:    is_float <value>
 # Status:   0 => is float
 is_float() {
-    num_parameters --min 1 --max 1 --die "Only one argument allowed, got: $#" -- "$@"
-    [[ "$1" =~ ^[-+]?[0-9]+([.][0-9]+)?$ ]]
+    _deprecated "Use: is float <value>"
+    is float "$1"
 }
 
 ######################################################################################
