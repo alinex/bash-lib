@@ -37,45 +37,29 @@ _deprecated() {
 # Display stack trace from called position upwards
 # Usage:    _stacktrace [<trap-flag>]
 # Output:   Debug Level 5:
-#           > _stacktrace          at die() in /home/alex/dvb/bash-lib/core/misc:59
-#           > _stacktrace          at _deprecated() in /home/alex/dvb/bash-lib/core/internal:23
-#           > _stacktrace          at ask_input() in /home/alex/dvb/bash-lib/module/input:150
-#           > _stacktrace          at task_find() in /home/alex/bin/dvb/cleanup:206
-#           > _stacktrace          at tasks() in /home/alex/dvb/bash-lib/module/input:451
-#           > _stacktrace          at main() in /home/alex/bin/dvb/cleanup:364
+#           > _stacktrace          /home/alex/dvb/bash-lib/core/validator:76 (is)
+#           > _stacktrace            74: -n | --name) name="$2" && shift 2 ;;
+#           > _stacktrace            75: -s | --sanitize) sanitize=1 && shift ;;
+#           > _stacktrace            76: --min) [[ "$2" =~ ^-?[0-9]+$ ]] && min="$2" && shift 2 || die "$(printf "$(gettext "Parameter %s needs integer")" min)" ;;
+#           > _stacktrace            77: --max) [[ "$2" =~ ^-?[0-9]+$ ]] && max="$2" && shift 2 || die "$(printf "$(gettext "Parameter %s needs integer")" max)" ;;
+#           > _stacktrace            78: --) shift && break ;;
+#           > _stacktrace          scripts/_test:35 (main)
+#           > _stacktrace            33: #false
+#           > _stacktrace            34:
+#           > _stacktrace            35: is integer 5.27k --sanitize --min=o
 # shellcheck disable=SC2120
 _stacktrace() {
-    local level=5 func line src
-    if [ -n "$1" ]; then
-        # Skip this function itself and start from the caller
-        for ((i = 1; i < ${#FUNCNAME[@]}; i++)); do
-            ((i == 1)) && func="trap ERR" || func="${FUNCNAME[i]}"
-            line="${BASH_LINENO[i]}"
-            ((i == 1)) && src="${BASH_SOURCE[i + 1]}" || src="${BASH_SOURCE[i]}"
-            # shellcheck disable=SC2015
-            printf "\033[1m%s:%d (%s)\n" "$src" "$line" "$func" | ( ((i == 1)) && warn || notice)
-            [ "$line" -gt 0 ] || return 0
-            awk -v n="$line" '
+    local frame=1 line func src
+    while read -r line func src < <(caller "$frame" || true); do
+        # shellcheck disable=SC2015
+        printf "\033[1m%s:%d (%s)\n" "$src" "$line" "$func" | ([ -n "$1" ] && ( ((frame == 1)) && warn || notice) || debug 5)
+        # shellcheck disable=SC2015
+        awk -v n="$line" '
             NR>=n-2 && NR<=n+2 {
                 gsub(/^[ \t]+/, "", $0)  # Remove leading spaces/tabs
                 printf "%4d: %s\n", NR, $0
                 if(NR==n+2) exit
-            }' "$src" | sed "/$line:/s/^/"$'\033[1m'"/;/$line:/s/$/"$'\033[22m'"/" | info
-        done
-    else
-        # Skip this function itself and start from the caller
-        for ((i = 1; i < ${#FUNCNAME[@]}; i++)); do
-            func="${FUNCNAME[i]}"
-            line="${BASH_LINENO[i]}"
-            src="${BASH_SOURCE[i]}"
-            printf "\033[1m%s:%d (%s)\n" "$src" "$line" "$func" | debug "$level"
-            [ "$line" -gt 0 ] || return 0
-            awk -v n="$line" '
-            NR>=n-2 && NR<=n+2 {
-                gsub(/^[ \t]+/, "", $0)  # Remove leading spaces/tabs
-                printf "%4d: %s\n", NR, $0
-                if(NR==n+2) exit
-            }' "$src" | sed "/$line:/s/^/"$'\033[1m'"/;/$line:/s/$/"$'\033[22m'"/" | debug "$((level + 1))"
-        done
-    fi
+            }' "$src" | sed "/$line:/s/^/"$'\033[1m'"/;/$line:/s/$/"$'\033[22m'"/" | ([ -n "$1" ] && info || debug 6)
+        ((frame++)) || true
+    done
 }
