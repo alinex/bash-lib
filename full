@@ -227,8 +227,6 @@ echo -e "\t${CC_OK}CC_OK$CC_RESET"
 echo -e "\t${CC_HEADING}CC_HEADING$CC_RESET"
 echo -e "\t${CC_INVERS}CC_INVERS$CC_RESET"
 }
-[[ $- =~ i ]]||set -eE
-set -o pipefail
 BASHLIB_HOME=${BASHLIB_HOME:-$HOME/bashlib}
 DEBUG=${DEBUG-}
 CC_RESET=$'\033[0m'
@@ -389,7 +387,6 @@ printf "$CC_BLACK> %-20s %s$CC_RESET\n" "$func" "$line" >&2
 done <<<"$text"
 ! command -v log >/dev/null||log debug "$func: $text"
 }
-debug "Running in DEBUG=${DEBUG-} mode!"
 die(){
 local text trap
 text="$(input "$@")"
@@ -402,9 +399,6 @@ _stacktrace "$trap" 2>&1|log critical
 fi
 [[ $- =~ i ]]&&return 1||exit 1
 }
-[ -n "${BASH_VERSION:-}" ]||die "No bash CLI! This can only be run under bash"
-((BASH_VERSINFO[0]>4||(BASH_VERSINFO[0]==4&&BASH_VERSINFO[1]>=2)))||die "No bash CLI! This can only be run under bash >=4.2!"
-trap 'die "💥 Uncaught exception at »${BASH_COMMAND}« with exit code $?"' ERR
 use(){
 local module=$1
 [[ $module =~ / ]]||module="module/$module"
@@ -680,6 +674,12 @@ else
 echo "$_name"
 fi
 }
+[[ $- =~ i ]]||set -eE
+set -o pipefail
+[ -n "${BASH_VERSION:-}" ]||die "No bash CLI! This can only be run under bash"
+((BASH_VERSINFO[0]>4||(BASH_VERSINFO[0]==4&&BASH_VERSINFO[1]>=2)))||die "No bash CLI! This can only be run under bash >=4.2!"
+trap 'die "💥 Uncaught exception at »${BASH_COMMAND}« with exit code $?"' ERR
+debug "Running in DEBUG=${DEBUG-} mode!"
 confluence(){
 install jq
 curl -H "Content-Type: application/json" -u "$ATLASSIAN_USER:$ATLASSIAN_TOKEN" "$CONFLUENCE_API/content/$1?expand=body.storage"|jq .body.storage.value -r||die "Could not read confluence page!"

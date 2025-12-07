@@ -50,7 +50,6 @@ debug() {
     done <<<"$text"
     ! command -v log >/dev/null || log debug "$func: $text"
 }
-debug "Running in DEBUG=${DEBUG-} mode!"
 
 # Output error message and exit
 # Usage:    die <message>
@@ -77,10 +76,6 @@ die() {
     # kill -s TERM "$PPID" # forcibly terminate the parent
     [[ $- =~ i ]] && return 1 || exit 1
 }
-[ -n "${BASH_VERSION:-}" ] || die "No bash CLI! This can only be run under bash"
-((BASH_VERSINFO[0] > 4 || (BASH_VERSINFO[0] == 4 && BASH_VERSINFO[1] >= 2))) ||
-    die "No bash CLI! This can only be run under bash >=4.2!"
-trap 'die "💥 Uncaught exception at »${BASH_COMMAND}« with exit code $?"' ERR
 
 # Load bashlib module
 # This can be used to load a special module as needed.

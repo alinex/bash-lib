@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+
+# Initializing and start
+
+######################################################################################
+### Bash Handling
+######################################################################################
+
+[[ $- =~ i ]] || set -eE # exit on uncatched failure
+set -o pipefail          # fail if any command in a pipeline fails
+#set -u # exit on use of unset variables
+
+######################################################################################
+### Initializing
+######################################################################################
+
+# Check basj version
+[ -n "${BASH_VERSION:-}" ] || die "No bash CLI! This can only be run under bash"
+((BASH_VERSINFO[0] > 4 || (BASH_VERSINFO[0] == 4 && BASH_VERSINFO[1] >= 2))) ||
+    die "No bash CLI! This can only be run under bash >=4.2!"
+
+# Catch uncaught exception using trap
+trap 'die "💥 Uncaught exception at »${BASH_COMMAND}« with exit code $?"' ERR
+
+# Display debug mode
+debug "Running in DEBUG=${DEBUG-} mode!"
