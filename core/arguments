@@ -10,19 +10,21 @@ source /dev/null
 
 # Parse arguments based on given specification
 # This will parse the given options into a standardized form and validate them against the given specification.
+# For internal functions there no @option_help is called, the type of options in the `<spec>` can be shortened to +/-.
+# Permutation, reordering and giving options after arguments, is possible by default but can be removed if the whole `<spec>` begins with `+`.
+#
 # Options can be given in different forms: `-a 45`, `-a45`, `--age 45`, `--age=45` are all equal. The last one is preferred because of readability.
 # Also multiple short options can be put together with only the last may need a value.
-# Permutation, reordering and giving options after arguments, is possible by default but can be removed if `<spec>` begins with `+`.
 # Usage:        eval set -- "$(option_parse <spec> "$@")"
 #               <spec> lines := <short-letter>|- <long-word> <type>|- <description>
 # Output:       parsed options <string>
 # Example:      &base_script includes a simple example
 option_parse() {
-    local opt name type desc short="" long=""
-    local spec="$1" permut
+    local opt name type desc short="" long="" spec="$1" permute
+    [ -n "$spec" ] || die "$(gettext 'A specification string is needed as first argument')"
     # check permutation
     if [[ "$spec" =~ ^\+ ]]; then
-        permut=+
+        permute=+
         spec="${spec:1}"
     fi
     # read spec lines
@@ -39,7 +41,7 @@ option_parse() {
     done <<<"$spec"
     shift
     # parse
-    getopt -o "$permut$short" --long "$long" -n "$0" -- "$@"
+    getopt -o "$permute$short" --long "$long" -n "$0" -- "$@"
 }
 
 # Print help for options defined in options specification
@@ -49,6 +51,8 @@ option_parse() {
 # Output:       List of options for help output
 # Example:      &base_script includes a simple example
 option_help() {
+    is set --name=spec --die -- "$1"
+    # processing
     declare opt name type desc
     declare -A opt_descriptions
     declare -A opt_type
@@ -56,7 +60,7 @@ option_help() {
     # read spec lines
     while read -r opt name type desc; do
         [[ "$opt" =~ ^# ]] && continue # skip comments
-        [[ -z "$opt" ]] && continue    # skip empty lines
+        is empty -- "$opt" && continue # skip empty lines
         opt_descriptions[$name]="$desc"
         opt_type[$name]=$type
         opt_short[$name]=$opt
@@ -100,7 +104,7 @@ input() {
 input_args() {
     local num=${1-}
     local start=$((num + 2))
-    [ -n "$num" ] || die "$(gettext "No <num> argument in call to input_args!")"
+    is set --name="num" --die -- "$num"
     ((num > 0)) || die "<num>=$num $(gettext 'argument is not a valid number!')"
     test -p /dev/stdin && cat - || echo "${@:$start}"
 }
@@ -112,7 +116,7 @@ input_args() {
 # Output:   <string-input> or
 #           <string-params> separated by newlines
 input_lines() {
-    if [ -p /dev/stdin ] && [ -z "${1-}" ]; then
+    if [ -p /dev/stdin ] && is empty -- "$1" ]; then
         cat -
     else
         for arg in "$@"; do echo "$arg"; done
@@ -124,7 +128,7 @@ input_lines() {
 ######################################################################################
 
 # Escape all args into single string, this could not be used directly in commands as arguments only through eval
-# Usgae:    escape_args "$@"
+# Usage:    escape_args "$@"
 # Output:   <args> with backslash escapes
 escape_args() {
     local escaped_args=()

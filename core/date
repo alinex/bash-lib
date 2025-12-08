@@ -11,7 +11,10 @@ source /dev/null
 # Get current timestamp
 # Usage:    now
 # Stdout:   <int> seconds since 1970
+# shellcheck disable=SC2120
 now() {
+    is integer --name=arguments --max=0 --die -- $#
+    # processing
     date +%s
 }
 
@@ -23,12 +26,13 @@ now() {
 # Usage:    date_diff <start> <end> # timestamp or date string
 # Stdout:   <seconds> negative if <start> behind <end>
 date_diff() {
+    is integer --name=arguments --max=2 --die -- $#
     local start end
-    num_parameters "$@" --min 2 --max 2 --die "Need exactly two parameters: diff_sec <start> <end>"
-    [[ "$1" =~ ^-?[0-9]+$ ]] && start=${1-} || start=$(date -d "$1" +%s) ||
+    is integer -- "$1" && start="$1" || start=$(date -d "$1" +%s) ||
         die "Date format '$1' not parsable!"
-    [[ "$2" =~ ^-?[0-9]+$ ]] && end=${2-} || end=$(date -d "$2" +%s) ||
+    is integer -- "$2" && end="$2" || end=$(date -d "$2" +%s) ||
         die "Date format '$2' not parsable!"
+    # processing
     echo $((end - start))
 }
 
@@ -47,8 +51,10 @@ date_diff() {
 #                       %Y          2025 (custom format)
 # Output:   <string> in selected format
 date_format() {
+    is integer --name=arguments --max=2 --die -- $#
+    is set --name=format --die -- "$1"
+    # processing
     local value format
-    # date_format <format> <value>
     case $1 in
     iso) format="-Iseconds" ;;
     iso-date) format="-I" ;;
@@ -62,8 +68,8 @@ date_format() {
     time-short) format="+%H:%M" ;;
     *) format="+$1" ;;
     esac
-    [ -n "$2" ] && value="${2-}" || value=$(now)
-    [[ "$value" =~ ^-?[0-9]+$ ]] && eval "date -d @$value $format" || eval "date -d \"$value\" $format" ||
+    value="${2-$(now)}"
+    is integer -- "$value" && eval "date -d @$value $format" || eval "date -d \"$value\" $format" ||
         die "Date format '$value' not parsable!"
 }
 
@@ -81,8 +87,11 @@ date_format() {
 #                       human       # like 1h 30m, 5w, 30s # spaces between different units are optional
 # Output:   <duration> in selected format
 duration_format() {
+    is integer --name=arguments --max=2 --die -- $#
+    is enum --name=format --allow="seconds minutes hours days human" --die -- "$1"
+    # processing
     local value
-    [[ "$2" =~ ^-?[0-9]+$ ]] && value="$2" || value="$(_parse_duration "$2")"
+    is integer -- "$2" && value="$2" || value="$(_parse_duration "$2")"
     case $1 in
     seconds) echo "$value" ;;
     minutes) echo $((value / 60)) ;;
@@ -141,7 +150,6 @@ _format_duration() {
     local m=$(((total % 3600) / 60))
     local s=$((total % 60))
     # Build string
-    #local elements=0
     local out=""
     ((w)) && out+="${w}w "
     ((d)) && out+="${d}d "
@@ -149,7 +157,7 @@ _format_duration() {
     ((m)) && out+="${m}m "
     ((s)) && out+="${s}s "
     # If total was exactly 0
-    [[ -z "$out" ]] && out="0s" && sign=""
+    is empty -- "$out" && out="0s" && sign="" || true
     echo "${sign}${out% }"
 }
 

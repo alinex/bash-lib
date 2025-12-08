@@ -9,7 +9,7 @@ Some formats have multiple character width:
 - `vertical`: ▏ ▎ ▍ ▌ ▋ ▊ ▉ █ ▉ ▊ ▋ ▌ ▍ ▎ ▏
 - `bar`:      (as `vertical` but two characters wide)
 - `fade`:     ░ ▒ ▓ █ ▓ ▒ ░
-- `braile`:   ⠋ ⠙ ⠹ ⠸ ⠼ ⠴ ⠦ ⠧ ⠇ ⠏ (default)
+- `braille`:   ⠋ ⠙ ⠹ ⠸ ⠼ ⠴ ⠦ ⠧ ⠇ ⠏ (default)
 - `roll`:     ⠋ ⠙ ⠚ ⠞ ⠖ ⠦ ⠴ ⠲ ⠳ ⠓
 - `moon`:     🌑 🌒 🌓 🌔 🌕 🌖 🌗 🌘
 - `clock`:    🕐 🕑 🕒 🕓 🕔 🕕 🕖 🕗 🕘 🕙 🕚 🕛
@@ -19,7 +19,7 @@ Some formats have multiple character width:
 ### Usage
 
 ```bash
-spinner_start <format> <time>
+spinner_start <format> [<time>]
 # <format> see above
 # <time> 0.1 or more seconds (default 0.2)
 ```

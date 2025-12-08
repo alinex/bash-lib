@@ -8,5 +8,5 @@ Stdout: `<word>` ->` Code to set color
 ### Usage
 
 ```bash
-color_256 <int>
+color_256 <num>
 ```

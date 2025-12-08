@@ -3,6 +3,7 @@
 ## Print warning message
 
 Stdout:   colored `<string>`
+shellcheck disable=SC2120
 
 
 ### Usage

@@ -105,19 +105,25 @@ CC_MAGENTA_BOLD_BG=$'\033[105m'
 CC_CYAN_BOLD_BG=$'\033[106m'
 
 # Get color code for text color number
-# Usage:  color_256 <int>
+# Usage:  color_256 <num>
 # Stdout: <word> -> Code to set color
 color_256() {
-  local num="${1//[!0-9]/}"
-  echo $'\033[38;5;'"${num:-0}"'m'
+  is integer --name=arguments --max=1 --die -- $#
+  local num
+  num="$(check integer --name=num "$1" --sanitize --min=0 --max=255 --die)"
+  # processing
+  echo $'\033[38;5;'"$num"'m'
 }
 
 # Get color code for background color number
-# Usage:  color_256_bg <int>
+# Usage:  color_256_bg <num>
 # Stdout: <word> -> Code to set color
 color_256_bg() {
-  local num="${1//[!0-9]/}"
-  echo $'\033[48;5;'"${num:-0}"'m'
+  is integer --name=arguments --max=1 --die -- $#
+  local num
+  num="$(check integer --name=num "$1" --sanitize --min=0 --max=255 --die)"
+  # processing
+  echo $'\033[48;5;'"$num"'m'
 }
 
 ######################################################################################
@@ -147,6 +153,7 @@ CC_INVERS=$'\033[7m'
 # Usage:  color_table
 # Stdout: human formatted Table in defined colors and styles
 color_table() {
+  is integer --name=arguments --max=0 --die -- $#
   echo "Basic Colors:"
   echo -e "\t${CC_BLACK}CC_BLACK\t${CC_BLACK_BOLD}CC_BLACK_BOLD\t${CC_BLACK_BG}CC_BLACK_BG\t${CC_BLACK_BOLD_BG}CC_BLACK_BOLD_BG${CC_RESET}"
   echo -e "\t${CC_RED}CC_RED\t\t${CC_RED_BOLD}CC_RED_BOLD\t${CC_RED_BG}CC_RED_BG\t${CC_RED_BOLD_BG}CC_RED_BOLD_BG${CC_RESET}"

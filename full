@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 BASHLIB_LOADER=full
 option_parse(){
-local opt name type desc short="" long=""
-local spec="$1" permut
+local opt name type desc short="" long="" spec="$1" permute
+[ -n "$spec" ]||die "$(gettext 'A specification string is needed as first argument')"
 if [[ $spec =~ ^\+ ]];then
-permut=+
+permute=+
 spec="${spec:1}"
 fi
 while IFS=$' \t\n' read -r opt name type desc;do
@@ -19,16 +19,17 @@ long+="$name,"
 fi
 done <<<"$spec"
 shift
-getopt -o "$permut$short" --long "$long" -n "$0" -- "$@"
+getopt -o "$permute$short" --long "$long" -n "$0" -- "$@"
 }
 option_help(){
+is set --name=spec --die -- "$1"
 declare opt name type desc
 declare -A opt_descriptions
 declare -A opt_type
 declare -A opt_short
 while read -r opt name type desc;do
 [[ $opt =~ ^# ]]&&continue
-[[ -z $opt ]]&&continue
+is empty -- "$opt"&&continue
 opt_descriptions[$name]="$desc"
 opt_type[$name]=$type
 opt_short[$name]=$opt
@@ -52,12 +53,12 @@ test -p /dev/stdin&&(($#==0))&&cat -||echo "$*"
 input_args(){
 local num=${1-}
 local start=$((num+2))
-[ -n "$num" ]||die "$(gettext "No <num> argument in call to input_args!")"
+is set --name="num" --die -- "$num"
 ((num>0))||die "<num>=$num $(gettext 'argument is not a valid number!')"
 test -p /dev/stdin&&cat -||echo "${@:start}"
 }
 input_lines(){
-if [ -p /dev/stdin ]&&[ -z "${1-}" ];then
+if [ -p /dev/stdin ]&&is empty -- "$1" ];then
 cat -
 else
 for arg in "$@";do echo "$arg";done
@@ -75,8 +76,12 @@ _deprecated "use array <array-name> has <value>" warn
 array "$1" has "$2"
 }
 array(){
+is integer --name=arguments --max=3 --die -- $#
+is set --name=array-name --die -- "$1"
+is enum --name=command --allow="has indexof" --die -- "$2"
+is set --name=value --die -- "$3"
 declare -n arr="$1"
-local cmd=$2
+local cmd="$2"
 local value="$3"
 case "$cmd" in
 has)for e in "${arr[@]}"
@@ -93,11 +98,11 @@ return 0
 fi
 done
 return 1
-;;
-*)die "Usage: array <array_name> {has|index} [<value>]"
 esac
 }
 join(){
+is integer --name=arguments --max=2 --die -- $#
+is set --name=array-name --die -- "$1"
 local -n array=$1
 local sep="${2:-,}"
 local joined="${array[0]}"
@@ -107,23 +112,27 @@ done
 echo "$joined"
 }
 split(){
+is integer --name=arguments --max=3 --die -- $#
+is set --name=array-name --die -- "$2"
 local string="$1"
 local -n array=$2
 local sep="${3:-,}"
 IFS="$sep" read -ra array <<<"$string"
 }
 hash(){
-num_parameters --min 3 --max 4 --die "Hash needs two to three parameters: Usage hash <array-name> <cmd> <key> [<value>]" "$@"
+is integer --name=arguments --max=4 --die -- $#
+is set --name=array-name --die -- "$1"
+is enum --name=command --allow="set get unset has" --die -- "$2"
+is set --name=key --die -- "$3"
 declare -n arr="$1"
-local cmd=$2
+local cmd="$2"
 local key="${3//[^a-zA-Z0-9_]/_}"
-local value=$4
+local value="$4"
 case "$cmd" in
 set)arr["$key"]="$value";;
 get)echo "${arr[$key]}";;
 unset)unset 'arr[$key]';;
-has)[[ -v arr[$key] ]];;
-*)die "Usage: hash <array_name> {set|get|unset|has} <key> [<value>]"
+has)[[ -v arr[$key] ]]
 esac
 }
 COLORS=$(tput colors 2>/dev/null||echo 0)
@@ -172,12 +181,16 @@ CC_BLUE_BOLD_BG=$'\033[104m'
 CC_MAGENTA_BOLD_BG=$'\033[105m'
 CC_CYAN_BOLD_BG=$'\033[106m'
 color_256(){
-local num="${1//[!0-9]/}"
-echo $'\033[38;5;'"${num:-0}"'m'
+is integer --name=arguments --max=1 --die -- $#
+local num
+num="$(check integer --name=num "$1" --sanitize --min=0 --max=255 --die)"
+echo $'\033[38;5;'"$num"'m'
 }
 color_256_bg(){
-local num="${1//[!0-9]/}"
-echo $'\033[48;5;'"${num:-0}"'m'
+is integer --name=arguments --max=1 --die -- $#
+local num
+num="$(check integer --name=num "$1" --sanitize --min=0 --max=255 --die)"
+echo $'\033[48;5;'"$num"'m'
 }
 CC_CRITICAL=$'\033[1;45m'
 CC_ERROR=$'\033[1;31m'
@@ -187,6 +200,7 @@ CC_OK=$'\033[1;32m'
 CC_HEADING=$'\033[44m'
 CC_INVERS=$'\033[7m'
 color_table(){
+is integer --name=arguments --max=0 --die -- $#
 echo "Basic Colors:"
 echo -e "\t${CC_BLACK}CC_BLACK\t${CC_BLACK_BOLD}CC_BLACK_BOLD\t${CC_BLACK_BG}CC_BLACK_BG\t${CC_BLACK_BOLD_BG}CC_BLACK_BOLD_BG$CC_RESET"
 echo -e "\t${CC_RED}CC_RED\t\t${CC_RED_BOLD}CC_RED_BOLD\t${CC_RED_BG}CC_RED_BG\t${CC_RED_BOLD_BG}CC_RED_BOLD_BG$CC_RESET"
@@ -233,16 +247,19 @@ CC_RESET=$'\033[0m'
 CC_CRITICAL=$'\033[1;45m'
 CC_BLACK=$'\033[30m'
 now(){
+is integer --name=arguments --max=0 --die -- $#
 date +%s
 }
 date_diff(){
+is integer --name=arguments --max=2 --die -- $#
 local start end
-num_parameters "$@" --min 2 --max 2 --die "Need exactly two parameters: diff_sec <start> <end>"
-[[ $1 =~ ^-?[0-9]+$ ]]&&start=${1-}||start=$(date -d "$1" +%s)||die "Date format '$1' not parsable!"
-[[ $2 =~ ^-?[0-9]+$ ]]&&end=${2-}||end=$(date -d "$2" +%s)||die "Date format '$2' not parsable!"
+is integer -- "$1"&&start="$1"||start=$(date -d "$1" +%s)||die "Date format '$1' not parsable!"
+is integer -- "$2"&&end="$2"||end=$(date -d "$2" +%s)||die "Date format '$2' not parsable!"
 echo $((end-start))
 }
 date_format(){
+is integer --name=arguments --max=2 --die -- $#
+is set --name=format --die -- "$1"
 local value format
 case $1 in
 iso)format="-Iseconds";;
@@ -257,12 +274,14 @@ time)format="+%H:%M:%S";;
 time-short)format="+%H:%M";;
 *)format="+$1"
 esac
-[ -n "$2" ]&&value="${2-}"||value=$(now)
-[[ $value =~ ^-?[0-9]+$ ]]&&eval "date -d @$value $format"||eval "date -d \"$value\" $format"||die "Date format '$value' not parsable!"
+value="${2-$(now)}"
+is integer -- "$value"&&eval "date -d @$value $format"||eval "date -d \"$value\" $format"||die "Date format '$value' not parsable!"
 }
 duration_format(){
+is integer --name=arguments --max=2 --die -- $#
+is enum --name=format --allow="seconds minutes hours days human" --die -- "$1"
 local value
-[[ $2 =~ ^-?[0-9]+$ ]]&&value="$2"||value="$(_parse_duration "$2")"
+is integer -- "$2"&&value="$2"||value="$(_parse_duration "$2")"
 case $1 in
 seconds)echo "$value";;
 minutes)echo $((value/60));;
@@ -319,7 +338,7 @@ local out=""
 ((h))&&out+="${h}h "
 ((m))&&out+="${m}m "
 ((s))&&out+="${s}s "
-[[ -z $out ]]&&out="0s"&&sign=""
+is empty -- "$out"&&out="0s"&&sign=""||true
 echo "$sign${out% }"
 }
 _timer_start=0
@@ -367,17 +386,16 @@ awk -v n="$line" '
 done
 }
 debug(){
+is integer --name=arguments --max=2 --die -- $#
 local level=1 func
-if [[ $1 =~ ^-?[0-9]+$ ]];then
-level="$1"
-shift
-fi
+is integer -- "$1"&&level="$1"&&shift||true
 IFS=$' \t\n' read -r _ func _ <<<"$(caller 0)"
 local text
 text="$(input "$@")"
 test -n "$text"||return 0
-[[ -n $DEBUG ]]||return 0
-if [[ $DEBUG =~ ^-?[0-9]+$ ]];then
+is set -- "$DEBUG"||return 0
+if is integer -- "$DEBUG";then
+is integer --min=0 --die -- "$DEBUG"
 ((level<=DEBUG))||return 0
 else
 [[ $func =~ .*(${DEBUG//, /|}) ]]||return 0
@@ -388,10 +406,11 @@ done <<<"$text"
 ! command -v log >/dev/null||log debug "$func: $text"
 }
 die(){
-local text trap
+is integer --name=arguments --max=1 --die -- $#
+local text trap line func src
 text="$(input "$@")"
-echo -e "$CC_CRITICAL$text$CC_RESET" >&2
 [[ $text != *"Uncaught exception at"* ]]||trap=1
+echo -e "$CC_CRITICAL$text in ${FUNCNAME[1]}$CC_RESET" >&2
 _stacktrace "$trap"
 if command -v log >/dev/null;then
 log critical "$text"
@@ -400,6 +419,8 @@ fi
 [[ $- =~ i ]]&&return 1||exit 1
 }
 use(){
+is integer --name=arguments --max=1 --die -- $#
+is set --name=module --die -- "$1"
 local module=$1
 [[ $module =~ / ]]||module="module/$module"
 local path
@@ -411,6 +432,9 @@ esac
 source "$module"
 }
 trap_add(){
+is integer --name=arguments --min=2 --max=2 --die -- $#
+is set --name=code --die -- "$1"
+is enum --name=signal --allow="SIGINT SIGTERM SIGHUP SIGQUIT SIGUSR1 SIGALRM EXIT ERR DEBUG" --die -- "$2"
 local new="$1"
 local sig="$2"
 local old
@@ -422,6 +446,9 @@ trap "$new" "$sig"
 fi
 }
 trap_remove(){
+is integer --name=arguments --min=2 --max=2 --die -- $#
+is set --name=code --die -- "$1"
+is enum --name=signal --allow="SIGINT SIGTERM SIGHUP SIGQUIT SIGUSR1 SIGALRM EXIT ERR DEBUG" --die -- "$2"
 local remove="$1"
 local sig="$2"
 local current new
@@ -436,34 +463,21 @@ local dir ext result rand
 local path=${TMPDIR:-/tmp}
 while true;do
 case "$1" in
--d|--directory)dir=1
-shift
-;;
--e|--extension)ext=".$2"
-shift 2
-;;
--m|--memory)path="/dev/shm"
-shift
-;;
--p|--path)path="$2"
-shift 2
-;;
--r|--random)rand=$RANDOM
-shift
-;;
--T|--ttl)ttl="$(duration_format seconds "$2")"
-shift 2
-;;
---)shift
-break
-;;
-*)shift
+-d|--directory)dir=1&&shift;;
+-e|--extension)ext=".$2"&&shift 2;;
+-m|--memory)path="/dev/shm"&&shift;;
+-p|--path)path="$2"&&shift 2;;
+-r|--random)rand=$RANDOM&&shift;;
+-T|--ttl)ttl="$(duration_format seconds "$2")"&&shift 2;;
+--)shift&&break;;
+*)die "$(gettext "Unrecognized option"): $1"
 esac
 done
+is integer --name=arguments --max=1 --die -- $#
 local ident
-[ -n "$1" ]&&ident="_$1"
+is set -- "$1"&&ident="_$1"
 result="$path/$(basename "$0")$ident$rand$ext"
-if [ -n "$rand" ];then
+if is empty -- "$rand";then
 while [ -e "$result" ];do
 result="$path/$(basename "$0")$ident$RANDOM$ext"
 done
@@ -471,7 +485,7 @@ fi
 if [ -e "$result" ];then
 debug "already exists $result"
 else
-if [ -n "$dir" ];then
+if is set -- "$dir";then
 debug "create dir $result"
 mkdir -p "$result"
 else
@@ -480,7 +494,7 @@ touch "$result"
 fi
 fi
 echo "$result"
-[ -z "$ttl" ]||(_rm_temp "$ttl" "$result" >/dev/null 2>&1&
+is empty -- "$ttl"||(_rm_temp "$ttl" "$result" >/dev/null 2>&1&
 disown)
 }
 _rm_temp(){
@@ -517,9 +531,256 @@ error "Error: $res" >&2
 return 1
 fi
 }
-is(){
-eval set -- "$(option_parse $'n name +\nd die -\ns sanitize -\n- min +\n- max +' "$@")"
-local name die sanitize min max
+help(){
+is integer --name=arguments --min=2 --max=4 --die -- $#
+is set --name=heading --die -- "$1"
+is set --name=usage --die -- "$2"
+heading "$(gettext Help): $1"
+info "Usage: $2"
+echo ""
+if is set -- "$3";then
+option_help "$3"
+echo ""
+fi
+if is set -- "$4";then
+echo "$4"
+echo
+fi
+exit 0
+}
+declare -ag _log_level=(debug info notice warn error critical)
+declare -Ag _log_rotate_time
+_log_rotate_time[hourly]="%Y-%m-%dT%H"
+_log_rotate_time[daily]="%Y-%m-%d"
+_log_rotate_time[weekly]="%Y_week_%W"
+_log_rotate_time[monthly]="%Y-%m"
+declare -Ag _log_active
+log(){
+local level=1 rotate compress=0 cleanup text size
+eval set -- "$(option_parse $'l level +\nr rotate +\nz compress -\nc cleanup +' "$@")"
+while true;do
+case "$1" in
+-l|--level)level="$(array _log_level indexof "$2")"||die "Log level $2 is undefined, use one of: ${_log_level[*]}"
+shift 2
+;;
+-r|--rotate)if
+(($2>0))
+then
+rotate="$2"
+else
+rotate="$(hash _log_rotate_time get "$2")"||die "Rotate option $2 is not recognized use: horly daily weekly monthly"
+fi
+shift 2
+;;
+-z|--compress)compress=1&&shift;;
+-c|--cleanup)cleanup="$(duration_format seconds "$2")"&&shift 2;;
+--)shift&&break;;
+*)die "$(gettext "Unrecognized option"): $1"
+esac
+done
+is integer --name=arguments --min=1 --max=2 --die -- $#
+is enum --name=command --allow="start stop ${_log_level[*]}" --die -- "$1"
+is empty -- "$rotate"&&cleanup=""&&compress=""||true
+case $1 in
+start)is set --name=destination --die -- "$2"
+[ -w "$2" ]||[ -w "$(dirname "$2")" ]||die "Could not write/create log under $2"
+hash _log_active set "$2" "$2 $level $rotate $compress $cleanup"
+;;
+stop)is set --name=destination --die -- "$2"
+hash _log_active unset "$2"
+;;
+debug|info|notice|warn|error|critical)level="$(array _log_level indexof "$1")"
+text="$(input_args 1 "$@")"
+[ -n "$text" ]||return 0
+local file minlevel
+for e in "${_log_active[@]}";do
+read -r file minlevel rotate cleanup <<<"$e"
+((level>=minlevel))||continue
+path="$file"
+if [ -n "$rotate" ]&&((rotate==0));then
+path+="_$(date_format "$rotate")"
+fi
+echo "$(date_format sql) ${1^^} $(uncolorize "$text")" >>"$path"
+done
+;;
+*)die "Unrecognized command $1: start, stop or any log level allowed"
+esac
+}
+_log_manager(){
+local parent=$PPID file minlevel rotate compress cleanup size
+while true;do
+for e in "${_log_active[@]}";do
+read -r file minlevel rotate compress cleanup <<<"$e"
+if [ -n "$cleanup" ];then
+find "$(dirname "$file")" -type f -name "$(basename "$file")*" ! -newermt "$(date -d "$cleanup seconds ago")" -delete 2>/dev/null
+fi
+if ((rotate>0));then
+size="$(stat -c %s "$file")"
+if ((size>rotate));then
+mr -f "$file.99"
+for ((i=99; i>1; i--));do
+local old="$file.$i"
+local new="$file.$((i-1))"
+[ ! -f "$old" ]||mv "$old" "$new"
+done
+! [ -f "$file" ]||mv "$file" "$file.1"
+fi
+fi
+if ((compress==1));then
+find "$(dirname "$file")" -type f -name "$(basename "$file")*" -mmin 3600 -exec gzip --best {} \; 2>/dev/null
+fi
+done
+for ((i=0; i<300; i++));do
+sleep 1
+kill -0 "$parent" 2>/dev/null||exit 0
+done
+done
+}
+heading(){
+local prefix=""
+is empty -- "$server"||prefix="${server-} "
+printf "\n%s\n\n" "$CC_INVERS$prefix$CC_RESET$CC_HEADING$(input "$@")...$CC_RESET"
+}
+critical(){
+local text
+text="$(input "$@")"
+is set -- "$text"||return 0
+printf "%s\n" "$CC_CRITICAL$text$CC_RESET"
+((${#_log_active[@]}==0))||log critical "$text"
+}
+error(){
+local text
+text="$(input "$@")"
+is set -- "$text"||return 0
+printf "%s\n" "$CC_ERROR$text$CC_RESET"
+((${#_log_active[@]}==0))||log error "$text"
+}
+warn(){
+local text
+text="$(input "$@")"
+is set -- "$text"||return 0
+printf "%s\n" "$CC_WARN$text$CC_RESET"
+((${#_log_active[@]}==0))||log warn "$text"
+}
+notice(){
+local text
+text="$(input "$@")"
+is set -- "$text"||return 0
+printf "%s\n" "$CC_NOTICE$text$CC_RESET"
+((${#_log_active[@]}==0))||log notice "$text"
+}
+info(){
+local text
+text="$(input "$@")"
+is set -- "$text"||return 0
+printf "%s\n" "$text"
+((${#_log_active[@]}==0))||log info "$text"
+}
+ok(){
+local text
+text="$(input "$@")"
+is set -- "$text"||return 0
+echo -e "$CC_OK$text$CC_RESET"
+((${#_log_active[@]}==0))||log notice "$text"
+}
+invers(){
+local text
+text="$(input "$@")"
+is set -- "$text"||return 0
+echo -e "$CC_INVERS$text$CC_RESET"
+((${#_log_active[@]}==0))||log info "$text"
+}
+color(){
+local text
+text="$(input_args 1 "$@")"
+is set -- "$text"||return 0
+echo -e "$CC_ERROR$text$CC_RESET"
+((${#_log_active[@]}==0))||log info "$text"
+}
+uncolorize(){
+input "$@"|sed -r 's/\x1B\[[0-9;]*[mGK]//g'
+}
+html2md(){
+input "$@"|sed 's#&rarr;#→#g;s#&auml;#ä#g;s#&ouml;#ö#g;s#&uuml;#ü#g;s#&Auml;#Ä#g;s#&Ouml;#Ö#g;s#&Uuml;#Ü#g;s#&szlig;#ß#g;s#<strong>\([^<]*\)</strong>#**\1**#g;s#<br/\?>#\n#g;s#<li>#\n- #g;s#<[^>]*>##g'|grep -v '^$'
+}
+nocr(){
+input "$@"|sed 's/\r$//'
+}
+urlencode(){
+install jq
+input "$@"|jq -sRr @uri|sed 's/%0A$//'
+}
+erase_line(){
+is integer --name=arguments --max=0 --die -- $#
+printf '%b' $'\e[1K\r'
+}
+horizontal_line(){
+is integer --name=arguments --max=1 --die -- $#
+is empty -- "$1"||is enum --name=format --allow="light bold double half full"--die -- "$1"
+local char
+case $1 in
+bold)char="━";;
+double)char="═";;
+half)char="▄";;
+full)char="█";;
+*)char="─"
+esac
+local cols
+read -r _ cols < <(stty size)
+((cols>60))||cols=60
+printf "%.0s$char" $(seq 1 "$cols")
+}
+_spinner_pid=""
+spinner_start(){
+is integer --name=arguments --max=2 --die -- $#
+is empty -- "$1"||is enum --name=format --allow="simple arrows vertical bar fade braille roll moon clock weather" --die -- "$1"
+if ! command -v tput >/dev/null 2>&1||[ ! -t 2 ];then
+debug "Disabled because tput and terminal is needed"
+return 0
+fi
+local format="${1:-braile}"
+local spinner
+local size=1
+local chars=1
+local delay=${2:-0.2}
+case $format in
+arrows)spinner='→↑←↓';;
+vertical)spinner='▏▎▍▌▋▊▉█▉▊▋▌▍▎▏';;
+bar)spinner='▏ ▎ ▍ ▌ ▋ ▊ ▉ █ █▏█▎█▍█▌█▋█▊█▉███▉█▊█▋█▌█▍█▎█▏█ ▉ ▊ ▋ ▌ ▍ ▎ ▏ '&&chars=2&&size=2;;
+fade)spinner=' ░▒▓█▓▒░';;
+braille)spinner='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏';;
+roll)spinner='⠋⠙⠚⠞⠖⠦⠴⠲⠳⠓';;
+moon)spinner='🌑🌒🌓🌔🌕🌖🌗🌘'&&size=2;;
+clock)spinner='🕐🕑🕒🕓🕔🕕🕖🕗🕘🕙🕚🕛'&&size=2;;
+weather)spinner='🌤🌥🌦🌧🌨🌩🌪';;
+*)spinner='-\|/'
+esac
+local back=$((size+1))
+printf '\e[?25l'
+(while
+true
+do
+for ((i=0; i<${#spinner}; i+=chars));do
+printf " %s%s" "${spinner:i:chars}" "$(printf '\b%.0s' $(seq 1 "$back"))" >/dev/tty
+sleep "$delay"
+done
+done) \
+&
+_spinner_pid=$!
+disown
+}
+spinner_stop(){
+is integer --name=arguments --max=0 --die -- $#
+[ -n "$_spinner_pid" ]||return
+kill "$_spinner_pid" >/dev/null 2>&1
+wait "$_spinner_pid" 2>/dev/null
+_spinner_pid=""
+printf "    \b\b\b\b"
+printf '\e[?25h'
+}
+check(){
+eval set -- "$(option_parse $'n name +\nd die -\ns sanitize -\n- min +\n- max +\n- allow +' "$@")"
+local name die sanitize min max allow
 while true;do
 case "$1" in
 -n|--name)name="$2"&&shift 2;;
@@ -527,25 +788,27 @@ case "$1" in
 -s|--sanitize)sanitize=1&&shift;;
 --min)[[ $2 =~ ^[-+]?[0-9]+([.][0-9]+)?$ ]]&&min="$2"&&shift 2||die "$(printf "$(gettext "Parameter %s needs number")" min)";;
 --max)[[ $2 =~ ^[-+]?[0-9]+([.][0-9]+)?$ ]]&&max="$2"&&shift 2||die "$(printf "$(gettext "Parameter %s needs number")" max)";;
+--allow)[ -n "$2" ]&&allow="$2"&&shift 2||die "$(gettext "A list of words is needed")";;
 --)shift&&break;;
 *)die "$(gettext "Unrecognized option"): $1"
 esac
 done
 name="${name:-argument}"
-local usage="$(gettext "Incorrect call"): is <check> <value> [options]"
+local usage
+usage="$(gettext "Incorrect call"): is <check> <value> [options]"
 [ -n "$1" ]&&local check="$1"||die "$usage"
 local val="$2" res="$2"
 case $check in
 set)if
 [ -z "$val" ]
 then
-[ -z "$die" ]&&return 1||die "$(eval_gettext 'The "$name" has to be set with a value.')"
+[ -z "$die" ]&&return 1||die "$(eval_gettext 'The "$name" has to be set with a value')"
 fi
 ;;
 empty)if
 [ -n "$val" ]
 then
-[ -n "$die" ]&&return 1||die "$(eval_gettext 'The "$name" has to be empty but has »${val}«.')"
+[ -z "$die" ]&&return 1||die "$(eval_gettext 'The "$name" has to be empty but has »${val}«')"
 fi
 ;;
 bool)if
@@ -555,7 +818,7 @@ res=1
 elif [[ -z $val || ${val,,} =~ ^(false|f|0|no|n|nein)$ ]];then
 res=0
 else
-[ -z "$die" ]&&return 1||die "$(eval_gettext 'The value »${val}« for "$name" could not be read as true or false.')"
+[ -z "$die" ]&&return 1||die "$(eval_gettext 'The value »${val}« for "$name" could not be read as true or false')"
 fi
 ;;
 integer)if
@@ -564,19 +827,23 @@ then
 [[ $val =~ ^(-?[0-9]+) ]]&&res="${BASH_REMATCH[1]}"||true
 fi
 if [[ ! $res =~ ^-?[0-9]+$ ]];then
-[ -z "$die" ]&&return 1||die "$(eval_gettext 'The "$name" has to be an integer but »${val}« was given.')"
+[ -z "$die" ]&&return 1||die "$(eval_gettext 'The "$name" has to be an integer but »${val}« was given')"
 fi
-if [[ -n $min && -n $max ]];then
+if [[ -n $min ]]&&[[ $min == "$max" ]];then
+if ((res!=min));then
+[ -z "$die" ]&&return 1||die "$(eval_gettext 'The "$name" has to be exactly $min but »${val}« was given')"
+fi
+elif [[ -n $min && -n $max ]];then
 if ((res<min||res>max));then
-[ -z "$die" ]&&return 1||die "$(eval_gettext 'The "$name" has to be between $min and $max but »${val}« was given.')"
+[ -z "$die" ]&&return 1||die "$(eval_gettext 'The "$name" has to be between $min and $max but »${val}« was given')"
 fi
 elif [[ -n $min ]];then
 if ((res<min));then
-[ -z "$die" ]&&return 1||die "$(eval_gettext 'The "$name" has to at least $min but »${val}« was given.')"
+[ -z "$die" ]&&return 1||die "$(eval_gettext 'The "$name" has to at least $min but »${val}« was given')"
 fi
 elif [[ -n $max ]];then
 if ((res>max));then
-[ -z "$die" ]&&return 1||die "$(eval_gettext 'The "$name" has to not more than $max but »${val}« was given.')"
+[ -z "$die" ]&&return 1||die "$(eval_gettext 'The "$name" has to not be more than $max but »${val}« was given')"
 fi
 fi
 ;;
@@ -586,28 +853,59 @@ then
 [[ $val =~ ^(-?[0-9]+([.][0-9]+)?) ]]&&res="${BASH_REMATCH[1]}"||true
 fi
 if [[ ! $res =~ ^-?[0-9]+([.][0-9]+)?$ ]];then
-[ -z "$die" ]&&return 1||die "$(eval_gettext 'The "$name" has to be a float but »${val}« was given.')"
+[ -z "$die" ]&&return 1||die "$(eval_gettext 'The "$name" has to be a float but »${val}« was given')"
 fi
-if [[ -n $min && -n $max ]];then
+if [[ -n $min ]]&&[[ $min == "$max" ]];then
+if ((res!=min));then
+[ -z "$die" ]&&return 1||die "$(eval_gettext 'The "$name" has to be exactly $min but »${val}« was given')"
+fi
+elif [[ -n $min && -n $max ]];then
 if ((res<min||res>max));then
-[ -z "$die" ]&&return 1||die "$(eval_gettext 'The "$name" has to be between $min and $max but »${val}« was given.')"
+[ -z "$die" ]&&return 1||die "$(eval_gettext 'The "$name" has to be between $min and $max but »${val}« was given')"
 fi
 elif [[ -n $min ]];then
 if ((res<min));then
-[ -z "$die" ]&&return 1||die "$(eval_gettext 'The "$name" has to at least $min but »${val}« was given.')"
+[ -z "$die" ]&&return 1||die "$(eval_gettext 'The "$name" has to at least $min but »${val}« was given')"
 fi
 elif [[ -n $max ]];then
 if ((res>max));then
-[ -z "$die" ]&&return 1||die "$(eval_gettext 'The "$name" has to not more than $max but »${val}« was given.')"
+[ -z "$die" ]&&return 1||die "$(eval_gettext 'The "$name" has to not be more than $max but »${val}« was given')"
 fi
 fi
 ;;
-*)die "$(eval_gettext 'A check named ${check} is not defined.')"
+length)val=${#val}
+if [[ -n $min ]]&&[[ $min == "$max" ]];then
+if ((res!=min));then
+[ -z "$die" ]&&return 1||die "$(eval_gettext 'The length of "$name" has to be exactly $min but »${res}« is $val characters long')"
+fi
+elif [[ -n $min && -n $max ]];then
+if ((val<min||val>max));then
+[ -z "$die" ]&&return 1||die "$(eval_gettext 'The length of "$name" has to be between $min and $max but »${res}« is $val characters long')"
+fi
+elif [[ -n $min ]];then
+if ((val<min));then
+[ -z "$die" ]&&return 1||die "$(eval_gettext 'The length of "$name" has to be at least $min but »${res}« is $val characters long')"
+fi
+elif [[ -n $max ]];then
+if ((val>max));then
+[ -z "$die" ]&&return 1||die "$(eval_gettext 'The length of "$name" has to be not more than $max but »${res}« is $val characters long')"
+fi
+fi
+;;
+enum)[ -n "$allow" ]||die "$(gettext "A list with --allow=<words> is needed for enum check")"
+if [[ " $allow " != *" $val "* ]];then
+[ -z "$die" ]&&return 1||die "$(eval_gettext '"$name" is set to "${val}" but has to be one of: $allow')"
+fi
+;;
+*)die "$(eval_gettext 'A check named ${check} is not defined')"
 esac
 echo "$res"
 }
+is(){
+check "$@" >/dev/null
+}
 num_parameters(){
-_deprecated "Use: is integer $# --min=<val> --max=<val>"
+_deprecated "Use: is integer $# --min=<val> --max=<val>" warn
 eval set -- "$(option_parse $'- min +\n- max +\n- die +' "$@")"
 local min max die
 while true;do
@@ -637,36 +935,41 @@ return 1
 [ -z "$max" ]||(($#<=max))||_die "[$*] $# > $max (max)"||return 1
 }
 is_empty(){
-_deprecated "Use: is empty <value>"
-is empty "$1"
+_deprecated "Use: is empty -- <value>"
+is empty -- "$1"
 }
 is_integer(){
-_deprecated "Use: is integer <value>"
-is integer "$1"
+_deprecated "Use: is integer <value>" warn
+is integer -- "$1"
 }
 is_float(){
-_deprecated "Use: is float <value>"
-is float "$1"
+_deprecated "Use: is float -- <value>" warn
+is float -- "$1"
 }
 trim_start(){
+is integer --name=arguments --max=2 --die -- $#
 local str="${1-}"
 local char="${2:-[:space:]}"
 echo "${str#"${str%%[!$char]*}"}"
 }
 trim_end(){
+is integer --name=arguments --max=2 --die -- $#
 local str="${1:-}"
 local char="${2:-[:space:]}"
 echo "${str%"${str##*[!$char]}"}"
 }
 trim(){
+is integer --name=arguments --max=2 --die -- $#
 trim_end "$(trim_start "$1" "$2")" "$2"
 }
 to_alphanum(){
+is integer --name=arguments --max=1 --die -- $#
 local text
 text="$(input "$@")"
 echo "${text//[^a-zA-Z0-9_]/_}"
 }
 value_if_variable(){
+is integer --name=arguments --max=2 --die -- $#
 local _name="$1"
 if [[ $_name =~ ^[a-zA-Z_][a-zA-Z0-9_]*$ ]]&&[ -n "${!_name-}" ];then
 echo "${!_name}"
@@ -676,10 +979,12 @@ fi
 }
 [[ $- =~ i ]]||set -eE
 set -o pipefail
-[ -n "${BASH_VERSION:-}" ]||die "No bash CLI! This can only be run under bash"
+is set -- "${BASH_VERSION:-}"||die "No bash CLI! This can only be run under bash"
 ((BASH_VERSINFO[0]>4||(BASH_VERSINFO[0]==4&&BASH_VERSINFO[1]>=2)))||die "No bash CLI! This can only be run under bash >=4.2!"
 trap 'die "💥 Uncaught exception at »${BASH_COMMAND}« with exit code $?"' ERR
 debug "Running in DEBUG=${DEBUG-} mode!"
+_log_manager&
+disown
 confluence(){
 install jq
 curl -H "Content-Type: application/json" -u "$ATLASSIAN_USER:$ATLASSIAN_TOKEN" "$CONFLUENCE_API/content/$1?expand=body.storage"|jq .body.storage.value -r||die "Could not read confluence page!"
@@ -1941,241 +2246,6 @@ has_tty(){
 is_bash(){
 [[ -n ${BASH_VERSION:-} ]]
 }
-help(){
-heading "Hilfe: $1"
-info "Usage: $2"
-echo ""
-if [ -n "$3" ];then
-option_help "$3"
-echo ""
-fi
-echo "$4"
-exit 0
-}
-declare -ag _log_level=(debug info notice warn error critical)
-declare -Ag _log_rotate_time
-_log_rotate_time[hourly]="%Y-%m-%dT%H"
-_log_rotate_time[daily]="%Y-%m-%d"
-_log_rotate_time[weekly]="%Y_week_%W"
-_log_rotate_time[monthly]="%Y-%m"
-declare -Ag _log_active
-log(){
-local level=1 rotate compress=0 cleanup text size
-eval set -- "$(option_parse $'l level +\nr rotate +\nz compress -\nc cleanup +' "$@")"
-while true;do
-case "$1" in
--l|--level)level="$(array _log_level indexof "$2")"||die "Log level $2 is undefined, use one of: ${_log_level[*]}"
-shift 2
-;;
--r|--rotate)if
-(($2>0))
-then
-rotate="$2"
-else
-rotate="$(hash _log_rotate_time get "$2")"||die "Rotate option $2 is not recognized use: horly daily weekly monthly"
-fi
-shift 2
-;;
--z|--compress)compress=1
-shift
-;;
--c|--cleanup)cleanup="$(duration_format seconds "$2")"
-shift 2
-;;
---)shift
-break
-;;
-*)die "$(gettext "Unrecognized option"): $1"
-esac
-done
-[ -n "$rotate" ]||cleanup=""
-[ -n "$rotate" ]||compress=""
-case $1 in
-start)num_parameters --min=2 --max=2 --die="To start a new log a file path is needed as argument" "$@"
-[ -w "$2" ]||[ -w "$(dirname "$2")" ]||die "Could not write/create log under $2"
-hash _log_active set "$2" "$2 $level $rotate $compress $cleanup"
-;;
-stop)num_parameters --min=2 --max=2 --die="To end a log it'S file path is needed as argument" "$@"
-hash _log_active unset "$2"
-;;
-debug|info|notice|warn|error|critical)level="$(array _log_level indexof "$1")"
-text="$(input_args 1 "$@")"
-[ -n "$text" ]||return 0
-local file minlevel
-for e in "${_log_active[@]}";do
-read -r file minlevel rotate cleanup <<<"$e"
-((level>=minlevel))||continue
-path="$file"
-if [ -n "$rotate" ]&&((rotate==0));then
-path+="_$(date_format "$rotate")"
-fi
-echo "$(date_format sql) ${1^^} $(uncolorize "$text")" >>"$path"
-done
-;;
-*)die "Unrecognized command $1: start, stop or any log level allowed"
-esac
-}
-_log_manager(){
-local parent=$PPID file minlevel rotate compress cleanup size
-while true;do
-for e in "${_log_active[@]}";do
-read -r file minlevel rotate compress cleanup <<<"$e"
-if [ -n "$cleanup" ];then
-find "$(dirname "$file")" -type f -name "$(basename "$file")*" ! -newermt "$(date -d "$cleanup seconds ago")" -delete 2>/dev/null
-fi
-if ((rotate>0));then
-size="$(stat -c %s "$file")"
-if ((size>rotate));then
-mr -f "$file.99"
-for ((i=99; i>1; i--));do
-local old="$file.$i"
-local new="$file.$((i-1))"
-[ ! -f "$old" ]||mv "$old" "$new"
-done
-! [ -f "$file" ]||mv "$file" "$file.1"
-fi
-fi
-if ((compress==1));then
-find "$(dirname "$file")" -type f -name "$(basename "$file")*" -mmin 3600 -exec gzip --best {} \; 2>/dev/null
-fi
-done
-for ((i=0; i<300; i++));do
-sleep 1
-kill -0 "$parent" 2>/dev/null||exit 0
-done
-done
-}
-_log_manager&
-disown
-heading(){
-local prefix=""
-test -z "${server-}"||prefix="${server-} "
-printf "\n%s\n\n" "$CC_INVERS$prefix$CC_RESET$CC_HEADING$(input "$@")...$CC_RESET"
-}
-critical(){
-local text
-text="$(input "$@")"
-test -z "$text"||printf "%s\n" "$CC_CRITICAL$text$CC_RESET"
-((${#_log_active[@]}==0))||log critical "$text"
-}
-error(){
-local text
-text="$(input "$@")"
-test -z "$text"||printf "%s\n" "$CC_ERROR$text$CC_RESET"
-((${#_log_active[@]}==0))||log error "$text"
-}
-warn(){
-local text
-text="$(input "$@")"
-test -z "$text"||printf "%s\n" "$CC_WARN$text$CC_RESET"
-((${#_log_active[@]}==0))||log warn "$text"
-}
-notice(){
-local text
-text="$(input "$@")"
-test -z "$text"||printf "%s\n" "$CC_NOTICE$text$CC_RESET"
-((${#_log_active[@]}==0))||log notice "$text"
-}
-info(){
-local text
-text="$(input "$@")"
-test -z "$text"||printf "%s\n" "$text"
-((${#_log_active[@]}==0))||log info "$text"
-}
-ok(){
-local text
-text="$(input "$@")"
-test -z "$text"||echo -e "$CC_OK$text$CC_RESET"
-((${#_log_active[@]}==0))||log notice "$text"
-}
-invers(){
-local text
-text="$(input "$@")"
-test -z "$text"||echo -e "$CC_INVERS$text$CC_RESET"
-((${#_log_active[@]}==0))||log info "$text"
-}
-color(){
-local text
-text="$(input_args 1 "$@")"
-test -z "$text"||echo -e "$CC_ERROR$text$CC_RESET"
-((${#_log_active[@]}==0))||log info "$text"
-}
-uncolorize(){
-input "$@"|sed -r 's/\x1B\[[0-9;]*[mGK]//g'
-}
-html2md(){
-input "$@"|sed 's#&rarr;#→#g;s#&auml;#ä#g;s#&ouml;#ö#g;s#&uuml;#ü#g;s#&Auml;#Ä#g;s#&Ouml;#Ö#g;s#&Uuml;#Ü#g;s#&szlig;#ß#g;s#<strong>\([^<]*\)</strong>#**\1**#g;s#<br/\?>#\n#g;s#<li>#\n- #g;s#<[^>]*>##g'|grep -v '^$'
-}
-nocr(){
-input "$@"|sed 's/\r$//'
-}
-urlencode(){
-install jq
-input "$@"|jq -sRr @uri|sed 's/%0A$//'
-}
-erase_line(){
-printf '%b' $'\e[1K\r'
-}
-horizontal_line(){
-local char
-case $1 in
-light)char="─";;
-bold)char="━";;
-double)char="═";;
-half)char="▄";;
-full)char="█";;
-*)char="─"
-esac
-local cols
-read -r _ cols < <(stty size)
-((cols>60))||cols=60
-printf "%.0s$char" $(seq 1 "$cols")
-}
-_spinner_pid=""
-spinner_start(){
-if ! command -v tput >/dev/null 2>&1||[ ! -t 2 ];then
-debug "Disabled because tput and terminal is needed"
-return 0
-fi
-local format="${1:-braile}"
-local spinner
-local size=1
-local chars=1
-local delay=${2:-0.2}
-case $format in
-arrows)spinner='→↑←↓';;
-vertical)spinner='▏▎▍▌▋▊▉█▉▊▋▌▍▎▏';;
-bar)spinner='▏ ▎ ▍ ▌ ▋ ▊ ▉ █ █▏█▎█▍█▌█▋█▊█▉███▉█▊█▋█▌█▍█▎█▏█ ▉ ▊ ▋ ▌ ▍ ▎ ▏ '&&chars=2&&size=2;;
-fade)spinner=' ░▒▓█▓▒░';;
-braile)spinner='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏';;
-roll)spinner='⠋⠙⠚⠞⠖⠦⠴⠲⠳⠓';;
-moon)spinner='🌑🌒🌓🌔🌕🌖🌗🌘'&&size=2;;
-clock)spinner='🕐🕑🕒🕓🕔🕕🕖🕗🕘🕙🕚🕛'&&size=2;;
-weather)spinner='🌤🌥🌦🌧🌨🌩🌪';;
-*)spinner='-\|/'
-esac
-local back=$((size+1))
-printf '\e[?25l'
-(while
-true
-do
-for ((i=0; i<${#spinner}; i+=chars));do
-printf " %s%s" "${spinner:i:chars}" "$(printf '\b%.0s' $(seq 1 "$back"))" >/dev/tty
-sleep "$delay"
-done
-done) \
-&
-_spinner_pid=$!
-disown
-}
-spinner_stop(){
-[ -n "$_spinner_pid" ]||return
-kill "$_spinner_pid" >/dev/null 2>&1
-wait "$_spinner_pid" 2>/dev/null
-_spinner_pid=""
-printf "    \b\b\b\b"
-printf '\e[?25h'
-}
 sudo_allow(){
 ((EUID!=0))||return 0
 command -v sudo >/dev/null||return 0
@@ -2998,7 +3068,7 @@ gettext "are identical versions"
 echo
 elif ((num>=1000000000));then
 step=$((num/1000000000))
-eval_ngettext "is an upgrade of one major version" 'is an upgrade of $step mayjor versions' "$step"
+eval_ngettext "is an upgrade of one major version" 'is an upgrade of $step major versions' "$step"
 echo
 elif ((num>=1000000));then
 step=$((num/1000000))

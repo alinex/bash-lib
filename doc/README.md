@@ -203,12 +203,39 @@ The core functions contains essential parts which may also be used while loading
 | [`mktemp`](function/mktemp.md) | Make a temporary file, which is recognizable |
 | [`curl`](function/curl.md) | Curl with added error handling |
 
+### Output Module
+
+Module with output and user interaction helpers.
+
+| Variable/Function | Description |
+| --- | --- |
+| [`help`](function/help.md) | Show help page and exit |
+| [`log`](function/log.md) | Additional logging (at the moment only into files). |
+| [`heading`](function/heading.md) | Print block heading |
+| [`critical`](function/critical.md) | Print critical/disaster message |
+| [`error`](function/error.md) | Print error message |
+| [`warn`](function/warn.md) | Print warning message |
+| [`notice`](function/notice.md) | Print special information message |
+| [`info`](function/info.md) | Print special information message |
+| [`ok`](function/ok.md) | Print success message |
+| [`invers`](function/invers.md) | Print special marked message like table header |
+| [`color`](function/color.md) | Print message in defined color |
+| [`uncolorize`](function/uncolorize.md) | Remove color codes from text |
+| [`html2md`](function/html2md.md) | Convert HTML to markdown (simplified version) |
+| [`nocr`](function/nocr.md) | Remove carriage return from line endings |
+| [`urlencode`](function/urlencode.md) | Encode message to be used within the url |
+| [`erase_line`](function/erase_line.md) | Remove current line |
+| [`horizontal_line`](function/horizontal_line.md) | Show a horizontal line |
+| [`spinner_start`](function/spinner_start.md) | Function to start the spinner in the background |
+| [`spinner_stop`](function/spinner_stop.md) | Function to stop the spinner |
+
 ### Validator Module
 
 Validators to make this easier and more readable.
 
 | Variable/Function | Description |
 | --- | --- |
+| [`check`](function/check.md) | Validate and sanitize values. |
 | [`is`](function/is.md) | Validate and sanitize values. |
 | [`num_parameters`](function/num_parameters.md) | Deprecated: Check that a specific number of parameters are given |
 | [`is_empty`](function/is_empty.md) | Deprecated: Test if given value is an empty string or undefined |
@@ -323,32 +350,6 @@ Module with operating system specific helper functions.
 | [`uses_lvm`](function/uses_lvm.md) | Check if LVM is used |
 | [`has_tty`](function/has_tty.md) | Has tty present |
 | [`is_bash`](function/is_bash.md) | Is running with bash console |
-
-### Output Module
-
-Module with output and user interaction helpers.
-
-| Variable/Function | Description |
-| --- | --- |
-| [`help`](function/help.md) | Show help page and exit |
-| [`log`](function/log.md) | Additional logging (at the moment only into files). |
-| [`heading`](function/heading.md) | Print block heading |
-| [`critical`](function/critical.md) | Print critical/disaster message |
-| [`error`](function/error.md) | Print error message |
-| [`warn`](function/warn.md) | Print warning message |
-| [`notice`](function/notice.md) | Print special information message |
-| [`info`](function/info.md) | Print special information message |
-| [`ok`](function/ok.md) | Print success message |
-| [`invers`](function/invers.md) | Print special marked message like table header |
-| [`color`](function/color.md) | Print message in defined color |
-| [`uncolorize`](function/uncolorize.md) | Remove color codes from text |
-| [`html2md`](function/html2md.md) | Convert HTML to markdown (simplified version) |
-| [`nocr`](function/nocr.md) | Remove carriage return from line endings |
-| [`urlencode`](function/urlencode.md) | Encode message to be used within the url |
-| [`erase_line`](function/erase_line.md) | Remove current line |
-| [`horizontal_line`](function/horizontal_line.md) | Show a horizontal line |
-| [`spinner_start`](function/spinner_start.md) | Function to start the spinner in the background |
-| [`spinner_stop`](function/spinner_stop.md) | Function to stop the spinner |
 
 ### Process Module
 

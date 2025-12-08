@@ -1,10 +1,10 @@
-# is
+# check
 
 ## Validate and sanitize values.
 
-This validation is possible using the [`check`](check.md) and `is` function.
-- [`check`](check.md) should be used for sanitize because it will output the value
-- `is` should be used for checking only validity or stop processing on problem because no value is output
+This validation is possible using the `check` and [`is`](is.md) function.
+- `check` should be used for sanitize because it will output the value
+- [`is`](is.md) should be used for checking only validity or stop processing on problem because no value is output
 #
 Every parameter should be checked to prevent failure later in the code.
 For such checks you run it with the `--die` option to stop processing if wrong.
@@ -27,22 +27,29 @@ Exit:     with message if incorrect value
 ### Usage
 
 ```bash
-is <check> [options] -- <value>
+check <check> [options] -- <value>
 ```
 
 ### Options
 
 ```bash
-d, die              # stop with error instead of return state
-n, name=<string>    # name the variable for the `die` message
+d, die              # used in [`is`](is.md) to stop with error instead of return state
+n, name=<string>    # used in [`is`](is.md) to display variable name in `die` message
+s, sanitize         # for integer
 min=<num>           # for integer
 max=<num>           # for integer
 allow=<words>       # for enum (space separated)
 ```
 
+### Output (stdout)
+
+- `<value>`             # may be sanitized
+
 ### Examples
 
 - # check arguments
-- is integer --name=arguments --max=2 $# # mostly only check max, if all args are checked separately
+- check integer --name=arguments --max=2 $# >`/dev/null # mostly only check max, if all args are checked separately
+- name="$(check integer --name=age --sanitize --min=0 -- "`$1`")"
+- init="$(check bool --name=init "`$1`")"
 - # use in code
-- if is integer age --min=18 -- "`$1`"; then
+- if check integer age --min=18 -- "`$1`" >`/dev/null; then

@@ -2,8 +2,13 @@
 
 ## Escape all args into single string, this could not be used directly in commands as arguments only through eval
 
-Usgae:    escape_args "$@"
 
+
+### Usage
+
+```bash
+escape_args "$@"
+```
 
 ### Output (stdout)
 

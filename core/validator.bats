@@ -7,32 +7,126 @@ setup() {
 }
 
 ######################################################################################
-# num_parameters
+# check
 ######################################################################################
 
-# bats test_tags=num_parameters
-@test "num_parameters: should work if correct number" {
-    run num_parameters p1 p2 --min 1
-    assert_output ""
+# bats test_tags=check
+@test "check: should check for set" {
+    run check set "x"
     assert_success
+    assert_output "x"
 }
-# bats test_tags=num_parameters
-@test "num_parameters: should fail if to few parameters" {
-    run num_parameters p1 p2 --min 4
-    assert_output -p "Check num_parameters: [p1 p2] 2 < 4"
+# bats test_tags=check
+@test "check: should fail for set" {
+    run check set ""
     assert_failure
 }
-# bats test_tags=num_parameters
-@test "num_parameters: should die on error" {
-    run num_parameters p1 p2 --min 4 --die "Wrong call"
-    assert_output -p "Wrong call"
+# bats test_tags=check
+@test "check: should die for set" {
+    run check set "" --die
+    assert_failure
+    assert_output -p '"argument" muss mit einem Wert gesetzt werden'
+}
+# bats test_tags=check
+@test "check: should die for set (named argument)" {
+    run check set "" --name=age --die
+    assert_failure
+    assert_output -p '"age" muss mit einem Wert gesetzt werden'
+}
+
+# bats test_tags=check
+@test "check: should check for empty" {
+    run check empty ""
+    assert_success
+    assert_output ""
+}
+# bats test_tags=check
+@test "check: should fail for empty" {
+    run check empty "x"
     assert_failure
 }
-# bats test_tags=num_parameters
-@test "num_parameters: should work with no parameters allowed" {
-    run num_parameters --max 0
-    assert_output ""
+
+# bats test_tags=check
+@test "check: should check for bool true" {
+    run check bool "true"
     assert_success
+    assert_output "1"
+}
+# bats test_tags=check
+@test "check: should check for bool false" {
+    run check bool "F"
+    assert_success
+    assert_output "0"
+}
+# bats test_tags=check
+@test "check: should fail for bool" {
+    run check bool "?"
+    assert_failure
+}
+
+# bats test_tags=check
+@test "check: should check for integer" {
+    run check integer 5
+    assert_success
+    assert_output "5"
+}
+# bats test_tags=check
+@test "check: should check for integer (negative)" {
+    run check integer -- -5
+    assert_success
+    assert_output "-5"
+}
+# bats test_tags=check
+@test "check: should fail for integer" {
+    run check integer five
+    assert_failure
+}
+# bats test_tags=check
+@test "check: should check for integer with sanitize" {
+    run check integer 5.27k --sanitize
+    assert_success
+    assert_output "5"
+}
+# bats test_tags=check
+@test "check: should check for integer with min" {
+    run check integer 6 --min=5
+    assert_success
+    assert_output "6"
+}
+# bats test_tags=check
+@test "check: should fail for integer with min" {
+    run check integer 3 --min=5
+    assert_failure
+}
+# bats test_tags=check
+@test "check: should check for integer with max" {
+    run check integer 3 --max=5
+    assert_success
+    assert_output "3"
+}
+# bats test_tags=check
+@test "check: should fail for integer with max" {
+    run check integer 6 --max=5
+    assert_failure
+}
+
+# bats test_tags=check
+@test "check: should check for float" {
+    run check float 5.8
+    assert_success
+    assert_output "5.8"
+}
+
+# bats test_tags=check
+@test "check: should check for enum" {
+    run check enum test --allow="check test run doc"
+    assert_success
+    assert_output "test"
+}
+# bats test_tags=check
+@test "check: should fail for enum" {
+    run check enum init --allow="check test run doc"
+    assert_failure
 }
 
 ######################################################################################
@@ -43,24 +137,12 @@ setup() {
 @test "is: should check for set" {
     run is set "x"
     assert_success
-    assert_output "x"
+    assert_output ""
 }
 # bats test_tags=is
 @test "is: should fail for set" {
     run is set ""
     assert_failure
-}
-# bats test_tags=is
-@test "is: should die for set" {
-    run is set "" --die
-    assert_failure
-    assert_output -p '"argument" muss mit einem Wert gesetzt werden.'
-}
-# bats test_tags=is
-@test "is: should die for set (named argument)" {
-    run is set "" --name=age --die
-    assert_failure
-    assert_output -p '"age" muss mit einem Wert gesetzt werden.'
 }
 
 # bats test_tags=is
@@ -79,13 +161,13 @@ setup() {
 @test "is: should check for bool true" {
     run is bool "true"
     assert_success
-    assert_output "1"
+    assert_output ""
 }
 # bats test_tags=is
 @test "is: should check for bool false" {
     run is bool "F"
     assert_success
-    assert_output "0"
+    assert_output ""
 }
 # bats test_tags=is
 @test "is: should fail for bool" {
@@ -97,7 +179,7 @@ setup() {
 @test "is: should check for integer" {
     run is integer 5
     assert_success
-    assert_output "5"
+    assert_output ""
 }
 # bats test_tags=is
 @test "is: should fail for integer" {
@@ -105,16 +187,10 @@ setup() {
     assert_failure
 }
 # bats test_tags=is
-@test "is: should check for integer with sanitize" {
-    run is integer 5.27k --sanitize
-    assert_success
-    assert_output "5"
-}
-# bats test_tags=is
 @test "is: should check for integer with min" {
     run is integer 6 --min=5
     assert_success
-    assert_output "6"
+    assert_output ""
 }
 # bats test_tags=is
 @test "is: should fail for integer with min" {
@@ -125,7 +201,7 @@ setup() {
 @test "is: should check for integer with max" {
     run is integer 3 --max=5
     assert_success
-    assert_output "3"
+    assert_output ""
 }
 # bats test_tags=is
 @test "is: should fail for integer with max" {
@@ -137,82 +213,19 @@ setup() {
 @test "is: should check for float" {
     run is float 5.8
     assert_success
-    assert_output "5.8"
+    assert_output ""
 }
 
-######################################################################################
-# is_success
-######################################################################################
-
-# bats test_tags=is_success
-@test "is_success: 0 should be ok" {
-    run is_success 0
+# bats test_tags=is
+@test "is: should check for enum" {
+    run is enum test --allow="check test run doc"
     assert_success
+    assert_output ""
 }
-# bats test_tags=is_success
-@test "is_success: 1 should be error" {
-    run is_success 1
+# bats test_tags=is
+@test "is: should fail for enum" {
+    run is enum init --allow="check test run doc"
     assert_failure
-}
-
-######################################################################################
-# is_empty
-######################################################################################
-
-# bats test_tags=is_empty
-@test "is_empty: should work without argument" {
-    run is_empty
-    assert_success
-}
-# bats test_tags=is_empty
-@test "is_empty: should work with empty string" {
-    run is_empty ""
-    assert_success
-}
-# bats test_tags=is_empty
-@test "is_empty: should fail with somethin in it" {
-    run is_empty 123
-    assert_failure
-}
-
-######################################################################################
-# is_integer
-######################################################################################
-
-# bats test_tags=is_integer
-@test "is_integer: should work with 234" {
-    run is_integer 234
-    assert_success
-}
-# bats test_tags=is_integer
-@test "is_integer: should fail with 5m" {
-    run is_integer 5m
-    assert_failure
-}
-# bats test_tags=is_integer
-@test "is_integer: should work with -234" {
-    run is_integer -234
-    assert_success
-}
-
-######################################################################################
-# is_float
-######################################################################################
-
-# bats test_tags=is_float
-@test "is_float: should work with 234.8" {
-    run is_float 234.8
-    assert_success
-}
-# bats test_tags=is_float
-@test "is_float: should fail with 5m" {
-    run is_float 5m
-    assert_failure
-}
-# bats test_tags=is_float
-@test "is_float: should work with -234" {
-    run is_float -234
-    assert_success
 }
 
 ######################################################################################

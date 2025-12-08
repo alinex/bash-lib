@@ -4,9 +4,9 @@ As this is not driven by releases and therefore tags are not used it is an ongoi
 
 ## December Version - in development
 
-- let functions validate parameters
-- extend stack traces to show also code lines
-- catch each error and output a failure with stack trace
+- let functions validate parameters using [is](doc/function/is.md) and [check](doc/function/check.md)
+- extend stack traces to show also code lines through [die](doc/function/die.md)
+- catch each error and output a failure with stack trace through [die](doc/function/die.md)
 - add [log](./doc/function/log.md) support
 - combine `timer_start` and `timer_end` into [timer](doc/function/timer.md)
 - add support for Arch/Manjaro/Kali Linux

@@ -230,7 +230,7 @@ semver_diff() {
             echo
         elif ((num >= 1000000000)); then
             step=$((num / 1000000000))
-            eval_ngettext "is an upgrade of one major version" "is an upgrade of \$step mayjor versions" "$step"
+            eval_ngettext "is an upgrade of one major version" "is an upgrade of \$step major versions" "$step"
             echo
         elif ((num >= 1000000)); then
             step=$((num / 1000000))

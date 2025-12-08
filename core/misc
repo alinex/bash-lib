@@ -20,25 +20,21 @@ source /dev/null
 #           $DEBUG=9 - to output all
 # Stderr:   > <func>           <message>      # color: gray
 debug() {
+    is integer --name=arguments --max=2 --die -- $#
+    # processing
     # get level and function
     local level=1 func
-    if [[ "$1" =~ ^-?[0-9]+$ ]]; then
-        level="$1"
-        shift
-    fi
+    is integer -- "$1" && level="$1" && shift || true
     IFS=$' \t\n' read -r _ func _ <<<"$(caller 0)"
-    # enable to show two levels
-    #local parent
-    #IFS=$' \t\n' read -r _ parent _ <<<"$(caller 1)"
-    #[ -z "$parent" ] || [ "$parent" = "$func" ] || func="$parent/$func"
     # collect text
     local text
     text="$(input "$@")"
     test -n "$text" || return 0
     # decide to print
-    [[ -n "$DEBUG" ]] || return 0
-    if [[ "$DEBUG" =~ ^-?[0-9]+$ ]]; then
+    is set -- "$DEBUG" || return 0
+    if is integer -- "$DEBUG"; then
         # numeric => decide on level
+        is integer --min=0 --die -- "$DEBUG"
         ((level <= DEBUG)) || return 0
     else
         # string => check for match
@@ -64,10 +60,13 @@ debug() {
 #           > _stacktrace          at main() in /home/alex/bin/dvb/cleanup:364
 # Return:   always 1 and try to exit script with status 1
 die() {
-    local text trap
+    is integer --name=arguments --max=1 --die -- $#
+    # processing
+    local text trap line func src
     text="$(input "$@")"
-    echo -e "${CC_CRITICAL}$text${CC_RESET}" >&2
     [[ "$text" != *"Uncaught exception at"* ]] || trap=1
+    # output
+    echo -e "${CC_CRITICAL}$text in ${FUNCNAME[1]}${CC_RESET}" >&2
     _stacktrace "$trap"
     if command -v log >/dev/null; then
         log critical "$text"
@@ -81,6 +80,9 @@ die() {
 # This can be used to load a special module as needed.
 # Usage:    use [<path>/]<module>
 use() {
+    is integer --name=arguments --max=1 --die -- $#
+    is set --name=module --die -- "$1"
+    # processing
     local module=$1
     [[ "$module" =~ / ]] || module="module/$module"
     local path
@@ -97,8 +99,12 @@ use() {
 # This is done by adding the new code as additional command before the existing ones if the trap is already set.
 # Usage:    trap_add <code> <signal>
 trap_add() {
+    is integer --name=arguments --min=2 --max=2 --die -- $#
+    is set --name=code --die -- "$1"
+    is enum --name=signal --allow="SIGINT SIGTERM SIGHUP SIGQUIT SIGUSR1 SIGALRM EXIT ERR DEBUG" --die -- "$2"
     local new="$1"
     local sig="$2"
+    # processing
     local old
     old="$(trap -p "$sig" | awk -F"'" '{print $2}')"
     if [[ -n "$old" ]]; then
@@ -114,8 +120,12 @@ trap_add() {
 # Not the whole trap is removed, but only the given code.
 # Usage:    trap_remove <cmd> <signal>
 trap_remove() {
+    is integer --name=arguments --min=2 --max=2 --die -- $#
+    is set --name=code --die -- "$1"
+    is enum --name=signal --allow="SIGINT SIGTERM SIGHUP SIGQUIT SIGUSR1 SIGALRM EXIT ERR DEBUG" --die -- "$2"
     local remove="$1"
     local sig="$2"
+    # processing
     local current new
     debug 3 "remove $remove from $sig"
     current="$(trap -p "$sig" | awk -F"'" '{print $2}')"
@@ -150,42 +160,22 @@ mktemp() {
     local path=${TMPDIR:-/tmp}
     while true; do
         case "$1" in
-        -d | --directory)
-            dir=1
-            shift
-            ;;
-        -e | --extension)
-            ext=".$2"
-            shift 2
-            ;;
-        -m | --memory)
-            path="/dev/shm"
-            shift
-            ;;
-        -p | --path)
-            path="$2"
-            shift 2
-            ;;
-        -r | --random)
-            rand=$RANDOM
-            shift
-            ;;
-        -T | --ttl)
-            ttl="$(duration_format seconds "$2")"
-            shift 2
-            ;;
-        --)
-            shift
-            break
-            ;;
-        *) shift ;; # ignore
+        -d | --directory) dir=1 && shift ;;
+        -e | --extension) ext=".$2" && shift 2 ;;
+        -m | --memory) path="/dev/shm" && shift ;;
+        -p | --path) path="$2" && shift 2 ;;
+        -r | --random) rand=$RANDOM && shift ;;
+        -T | --ttl) ttl="$(duration_format seconds "$2")" && shift 2 ;;
+        --) shift && break ;;
+        *) die "$(gettext "Unrecognized option"): $1" ;;
         esac
     done
-    # processing
+    is integer --name=arguments --max=1 --die -- $#
     local ident
-    [ -n "$1" ] && ident="_$1"
+    is set -- "$1" && ident="_$1"
+    # processing
     result="$path/$(basename "$0")$ident$rand$ext"
-    if [ -n "$rand" ]; then
+    if is empty -- "$rand"; then
         # loop while already exists
         while [ -e "$result" ]; do
             result="$path/$(basename "$0")$ident$RANDOM$ext"
@@ -194,7 +184,7 @@ mktemp() {
     if [ -e "$result" ]; then
         debug "already exists $result"
     else
-        if [ -n "$dir" ]; then
+        if is set -- "$dir"; then
             debug "create dir $result"
             mkdir -p "$result"
         else
@@ -203,7 +193,7 @@ mktemp() {
         fi
     fi
     echo "$result"
-    [ -z "$ttl" ] || (
+    is empty -- "$ttl" || (
         _rm_temp "$ttl" "$result" >/dev/null 2>&1 &
         disown
     )

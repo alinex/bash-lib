@@ -11,14 +11,21 @@ source /dev/null
 # Show help page and exit
 # Usage:    help <heading> <usage> <options-spec> <details>
 help() {
-    heading "Hilfe: $1"
+    is integer --name=arguments --min=2 --max=4 --die -- $#
+    is set --name=heading --die -- "$1"
+    is set --name=usage --die -- "$2"
+    # processing
+    heading "$(gettext Help): $1"
     info "Usage: $2"
     echo ""
-    if [ -n "$3" ]; then
+    if is set -- "$3"; then
         option_help "$3"
         echo ""
     fi
-    echo "$4"
+    if is set -- "$4"; then
+        echo "$4"
+        echo
+    fi
     exit 0
 }
 
@@ -36,20 +43,21 @@ declare -Ag _log_active
 # _log_active[path]="<path> <level> <rotate> [<compress> [<cleanup>]]"
 
 # Additional logging (at the moment only into files).
-# After initialising a log using `start` the default output options will additionally write into log. But you can also specifically write t it using the log function.
+# After initializing a log using `start` the default output options will additionally write into log. But you can also specifically write t it using the log function.
 # Multiple log with different levels are possible.
-# Usage:    log start <file>        # no spaces in file path allowed
+# Usage:    log start <destination>                    # no spaces in file path allowed
 #           log <level> <message>
-#           log end <file>
+#           <message> | log <level>
+#           log end <destination>
 # Options:  -l, --level=<level>                 # level := debug info notice warn error critical
 #           # File logging:
 #           -r, --rotate=hourly|daily|weekly|monthly|<bytes>
 #           -c, --cleanup=<num>|<duration>
 #           -z, --compress
-# Files:    <file>[_<pattern>]                  # will contain the logs
+# Files:    <destination>[_<pattern>]                  # will contain the logs
 # Example:  # Format: <date> <time> <level> <message>
 #           2025-12-02 14:07:35 INFO Hello
-#           2025-12-02 14:10:04 ERROR Thius is only a test
+#           2025-12-02 14:10:04 ERROR This is only a test
 log() {
     # parameter parsing
     local level=1 rotate compress=0 cleanup text size
@@ -68,32 +76,24 @@ log() {
             fi
             shift 2
             ;;
-        -z | --compress)
-            compress=1
-            shift
-            ;;
-        -c | --cleanup)
-            cleanup="$(duration_format seconds "$2")"
-            shift 2
-            ;;
-        --)
-            shift
-            break
-            ;;
+        -z | --compress) compress=1 && shift ;;
+        -c | --cleanup) cleanup="$(duration_format seconds "$2")" && shift 2 ;;
+        --) shift && break ;;
         *) die "$(gettext "Unrecognized option"): $1" ;;
         esac
     done
-    [ -n "$rotate" ] || cleanup=""  # no cleanup if no rotate
-    [ -n "$rotate" ] || compress="" # no compress if no rotate
+    is integer --name=arguments --min=1 --max=2 --die -- $#
+    is enum --name=command --allow="start stop ${_log_level[*]}" --die -- "$1"
+    is empty -- "$rotate" && cleanup="" && compress="" || true # no cleanup/compress if no rotate
     # processing
     case $1 in
     start)
-        num_parameters --min=2 --max=2 --die="To start a new log a file path is needed as argument" "$@"
+        is set --name=destination --die -- "$2"
         [ -w "$2" ] || [ -w "$(dirname "$2")" ] || die "Could not write/create log under $2"
         hash _log_active set "$2" "$2 $level $rotate $compress $cleanup"
         ;;
     stop)
-        num_parameters --min=2 --max=2 --die="To end a log it'S file path is needed as argument" "$@"
+        is set --name=destination --die -- "$2"
         hash _log_active unset "$2"
         ;;
     debug | info | notice | warn | error | critical)
@@ -153,8 +153,6 @@ _log_manager() {
         done
     done
 }
-_log_manager &
-disown
 
 ######################################################################################
 # Messages
@@ -167,7 +165,8 @@ disown
 # Variable: $server
 heading() {
     local prefix=""
-    test -z "${server-}" || prefix="${server-} "
+    # shellcheck disable=SC2154
+    is empty -- "$server" || prefix="${server-} "
     printf "\n%s\n\n" "${CC_INVERS}$prefix${CC_RESET}${CC_HEADING}$(input "$@")...${CC_RESET}"
 }
 
@@ -178,7 +177,8 @@ heading() {
 critical() {
     local text
     text="$(input "$@")"
-    test -z "$text" || printf "%s\n" "${CC_CRITICAL}$text${CC_RESET}"
+    is set -- "$text" || return 0
+    printf "%s\n" "${CC_CRITICAL}$text${CC_RESET}"
     ((${#_log_active[@]} == 0)) || log critical "$text"
 }
 
@@ -189,7 +189,8 @@ critical() {
 error() {
     local text
     text="$(input "$@")"
-    test -z "$text" || printf "%s\n" "${CC_ERROR}$text${CC_RESET}"
+    is set -- "$text" || return 0
+    printf "%s\n" "${CC_ERROR}$text${CC_RESET}"
     ((${#_log_active[@]} == 0)) || log error "$text"
 }
 
@@ -197,10 +198,12 @@ error() {
 # Usage:    warn <message>
 #           <message> | warn
 # Stdout:   colored <string>
+# shellcheck disable=SC2120
 warn() {
     local text
     text="$(input "$@")"
-    test -z "$text" || printf "%s\n" "${CC_WARN}$text${CC_RESET}"
+    is set -- "$text" || return 0
+    printf "%s\n" "${CC_WARN}$text${CC_RESET}"
     ((${#_log_active[@]} == 0)) || log warn "$text"
 }
 
@@ -208,10 +211,12 @@ warn() {
 # Usage:    info <message>
 #           <message> | info
 # Stdout:   colored <string>
+# shellcheck disable=SC2120
 notice() {
     local text
     text="$(input "$@")"
-    test -z "$text" || printf "%s\n" "${CC_NOTICE}$text${CC_RESET}"
+    is set -- "$text" || return 0
+    printf "%s\n" "${CC_NOTICE}$text${CC_RESET}"
     ((${#_log_active[@]} == 0)) || log notice "$text"
 }
 
@@ -222,7 +227,8 @@ notice() {
 info() {
     local text
     text="$(input "$@")"
-    test -z "$text" || printf "%s\n" "$text"
+    is set -- "$text" || return 0
+    printf "%s\n" "$text"
     ((${#_log_active[@]} == 0)) || log info "$text"
 }
 
@@ -233,7 +239,8 @@ info() {
 ok() {
     local text
     text="$(input "$@")"
-    test -z "$text" || echo -e "${CC_OK}$text${CC_RESET}"
+    is set -- "$text" || return 0
+    echo -e "${CC_OK}$text${CC_RESET}"
     ((${#_log_active[@]} == 0)) || log notice "$text"
 }
 
@@ -244,7 +251,8 @@ ok() {
 invers() {
     local text
     text="$(input "$@")"
-    test -z "$text" || echo -e "${CC_INVERS}$text${CC_RESET}"
+    is set -- "$text" || return 0
+    echo -e "${CC_INVERS}$text${CC_RESET}"
     ((${#_log_active[@]} == 0)) || log info "$text"
 }
 
@@ -255,7 +263,8 @@ invers() {
 color() {
     local text
     text="$(input_args 1 "$@")"
-    test -z "$text" || echo -e "${CC_ERROR}$text${CC_RESET}"
+    is set -- "$text" || return 0
+    echo -e "${CC_ERROR}$text${CC_RESET}"
     ((${#_log_active[@]} == 0)) || log info "$text"
 }
 
@@ -307,6 +316,8 @@ urlencode() {
 # When printed to a terminal, it will erase everything from the current cursor position backward to the beginning of the line.
 # Usage:    erase_line
 erase_line() {
+    is integer --name=arguments --max=0 --die -- $#
+    # processing
     printf '%b' $'\e[1K\r'
 }
 
@@ -321,9 +332,12 @@ erase_line() {
 # Usage:    horizontal_line [<format>]
 # Output:   ────────── # over full width of terminal
 horizontal_line() {
+    is integer --name=arguments --max=1 --die -- $#
+    is empty -- "$1" || is enum --name=format --allow="light bold double half full"--die -- "$1"
+    # processing
     local char
     case $1 in
-    light) char="─" ;;
+    #light) char="─" ;; # is the default
     bold) char="━" ;;
     double) char="═" ;;
     half) char="▄" ;;
@@ -346,17 +360,20 @@ _spinner_pid=""
 # - `vertical`: ▏ ▎ ▍ ▌ ▋ ▊ ▉ █ ▉ ▊ ▋ ▌ ▍ ▎ ▏
 # - `bar`:      (as `vertical` but two characters wide)
 # - `fade`:     ░ ▒ ▓ █ ▓ ▒ ░
-# - `braile`:   ⠋ ⠙ ⠹ ⠸ ⠼ ⠴ ⠦ ⠧ ⠇ ⠏ (default)
+# - `braille`:   ⠋ ⠙ ⠹ ⠸ ⠼ ⠴ ⠦ ⠧ ⠇ ⠏ (default)
 # - `roll`:     ⠋ ⠙ ⠚ ⠞ ⠖ ⠦ ⠴ ⠲ ⠳ ⠓
 # - `moon`:     🌑 🌒 🌓 🌔 🌕 🌖 🌗 🌘
 # - `clock`:    🕐 🕑 🕒 🕓 🕔 🕕 🕖 🕗 🕘 🕙 🕚 🕛
 # - `weather`:  🌤 🌥 🌦 🌧 🌨 🌩 🌪
-# Usage:    spinner_start <format> <time>
+# Usage:    spinner_start <format> [<time>]
 #           # <format> see above
 #           # <time> 0.1 or more seconds (default 0.2)
 # TTY:      <symbol> with back-space so that cursor is always before it
 # Returns:   0 without doing anything if no `tput` and terminal available
 spinner_start() {
+    is integer --name=arguments --max=2 --die -- $#
+    is empty -- "$1" || is enum --name=format --allow="simple arrows vertical bar fade braille roll moon clock weather" --die -- "$1"
+    # processing
     if ! command -v tput >/dev/null 2>&1 || [ ! -t 2 ]; then
         debug "Disabled because tput and terminal is needed"
         return 0
@@ -367,11 +384,12 @@ spinner_start() {
     local chars=1
     local delay=${2:-0.2}
     case $format in
+    #simple) spinner='-\|/' ;; # is the default option, too
     arrows) spinner='→↑←↓' ;;
     vertical) spinner='▏▎▍▌▋▊▉█▉▊▋▌▍▎▏' ;;
     bar) spinner='▏ ▎ ▍ ▌ ▋ ▊ ▉ █ █▏█▎█▍█▌█▋█▊█▉███▉█▊█▋█▌█▍█▎█▏█ ▉ ▊ ▋ ▌ ▍ ▎ ▏ ' && chars=2 && size=2 ;;
     fade) spinner=' ░▒▓█▓▒░' ;;
-    braile) spinner='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏' ;;
+    braille) spinner='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏' ;;
     roll) spinner='⠋⠙⠚⠞⠖⠦⠴⠲⠳⠓' ;;
     moon) spinner='🌑🌒🌓🌔🌕🌖🌗🌘' && size=2 ;;
     clock) spinner='🕐🕑🕒🕓🕔🕕🕖🕗🕘🕙🕚🕛' && size=2 ;;
@@ -397,6 +415,8 @@ spinner_start() {
 # Call this after @spinner_start to stop it. It has to be called within the same thread!
 # Usage:    spinner_stop
 spinner_stop() {
+    is integer --name=arguments --max=0 --die -- $#
+    # processing
     [ -n "$_spinner_pid" ] || return # spinner not started
     kill "$_spinner_pid" >/dev/null 2>&1
     wait "$_spinner_pid" 2>/dev/null

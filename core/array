@@ -18,9 +18,14 @@ contains() {
 # Array analyzation.
 # Usage:    array <array-name> {has|indexof} [<value>]
 array() {
+    is integer --name=arguments --max=3 --die -- $#
+    is set --name=array-name --die -- "$1"
+    is enum --name=command --allow="has indexof" --die -- "$2"
+    is set --name=value --die -- "$3"
     declare -n arr="$1"
-    local cmd=$2
+    local cmd="$2"
     local value="$3"
+    # processing
     case "$cmd" in
     has)
         for e in "${arr[@]}"; do
@@ -37,7 +42,6 @@ array() {
         done
         return 1
         ;;
-    *) die "Usage: array <array_name> {has|index} [<value>]" ;;
     esac
 }
 
@@ -50,8 +54,11 @@ array() {
 # Usage:    join <array-name> [<delimiter>]
 # Output:   <string>
 join() {
+    is integer --name=arguments --max=2 --die -- $#
+    is set --name=array-name --die -- "$1"
     local -n array=$1
     local sep="${2:-,}"
+    # processing
     local joined="${array[0]}"
     for element in "${array[@]:1}"; do
         joined+="${sep}${element}"
@@ -64,6 +71,8 @@ join() {
 # Usage:    split <string> <array-name> [<delimiter>]
 # Output:   <string>
 split() {
+    is integer --name=arguments --max=3 --die -- $#
+    is set --name=array-name --die -- "$2"
     local string="$1"
     local -n array=$2
     local sep="${3:-,}"
@@ -82,16 +91,19 @@ split() {
 #           hash cache has "my_name"
 #           hash cache unset "my_name"
 hash() {
-    num_parameters --min 3 --max 4 --die "Hash needs two to three parameters: Usage hash <array-name> <cmd> <key> [<value>]" "$@"
+    is integer --name=arguments --max=4 --die -- $#
+    is set --name=array-name --die -- "$1"
+    is enum --name=command --allow="set get unset has" --die -- "$2"
+    is set --name=key --die -- "$3"
     declare -n arr="$1"
-    local cmd=$2
+    local cmd="$2"
     local key="${3//[^a-zA-Z0-9_]/_}" # only a-zA-Z0-9_ allowed
-    local value=$4
+    local value="$4"
+    # processing
     case "$cmd" in
     set) arr["$key"]="$value" ;;
     get) echo "${arr[$key]}" ;;
     unset) unset 'arr[$key]' ;;
     has) [[ -v arr[$key] ]] ;;
-    *) die "Usage: hash <array_name> {set|get|unset|has} <key> [<value>]" ;;
     esac
 }

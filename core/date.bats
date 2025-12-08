@@ -58,7 +58,7 @@ setup() {
 # bats test_tags=date_format
 @test "date_format: format date with custom format" {
     start=$(now)
-    run date_format +%Y "2025-10-01 12:00"
+    run date_format %Y "2025-10-01 12:00"
     assert_output "2025"
     assert_success
 }
@@ -139,11 +139,11 @@ setup() {
 # bats test_tags=duration_format
 @test "duration_format: parse negative" {
     run duration_format seconds "-5"
-    assert_output -5
+    assert_output "-5"
     assert_success
 }
 # bats test_tags=duration_format
-@test "duration_format: parse cnegative ombined" {
+@test "duration_format: parse negative combined" {
     run duration_format seconds "-1h30m"
     assert_output -5400
     assert_success
