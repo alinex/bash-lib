@@ -40,7 +40,7 @@ msgstr "Argument ist nicht ganzzahlig"
 
 #: core/output:18
 msgid "Help"
-msgstr ""
+msgstr "Hilfe"
 
 #: core/date:132
 msgid "Invalid duration unit"
@@ -145,12 +145,12 @@ msgstr ""
 
 #: core/validator:161
 msgid "A list with --allow=<words> is needed for enum check"
-msgstr ""
+msgstr "Eine Liste mit --allow=<words> wird für den enum Check benötigt"
 
 #: core/validator:163
 #, sh-format
 msgid "\"$name\" is set to \"${val}\" but has to be one of: $allow"
-msgstr ""
+msgstr "\"$name\" enthält \"${val}\" es sind aber nur folgende Werte erlaubt: $allow"
 
 #: core/validator:166
 #, sh-format
