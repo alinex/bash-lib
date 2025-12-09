@@ -32,7 +32,9 @@ declare -A _os_detected
 # Output:   <tsv-table> for data
 #           <value> else
 os_detect() {
-    num_parameters --min 1 --max 1 --die "A format is needed." -- "$@"
+    is integer --name=arguments --max=1 --die -- $#
+    is enum --name=format --allow="data info os base base_revision_name base_revision_number distribution revision_number revision_name kernel cpu_model cpu_num architecture machine_id virtual_machine" --die -- "$1"
+    # processing
     if [ ${#_os_detected[@]} -eq 0 ]; then
         # get values
         _os_detected["os"]="$(
@@ -176,12 +178,12 @@ disk_free() {
     done
     debug "collect into $collect ($free_operator ${free_percent}%/${free_bytes}B)"
     # processing
-    local firstline="" percent mount device limit_c limit_e limit_w limit_o
+    local firstLine="" percent mount device limit_c limit_e limit_w limit_o
     IFS=$'\n'
     # shellcheck disable=SC2248
     for line in $(df -h $opt -x tmpfs -x efivarfs -x devtmpfs -x squashfs "$@"); do
-        if [ -z "$firstline" ]; then
-            firstline=1
+        if [ -z "$firstLine" ]; then
+            firstLine=1
             echo -e "${CC_INVERSE}$line${CC_RESET}"
         else
             percent=$(echo "$line" | xargs echo | cut -d' ' -f5 | sed 's/%//')
@@ -233,25 +235,20 @@ disk_free() {
 # Return:   0 for uses LVM
 #           1 if not
 uses_lvm() {
+    is integer --name=arguments --max=0 --die -- $#
     command -v vgs >/dev/null &&                      # installed
         sudo vgs --noheadings >/dev/null &&           # vgs returns ok
         [ -n "$(sudo vgs --noheadings)" ] &>/dev/null # vgs returns at least one group
 }
 
 ######################################################################################
-### Further Specialities
+### Further Specialties
 ######################################################################################
 
 # Has tty present
 # Usage:    has_ttyp
 # Status:   0 || 1
 has_tty() {
+    is integer --name=arguments --max=0 --die -- $#
     { : >/dev/tty; } &>/dev/null
-}
-
-# Is running with bash console
-# Usage:    is_bash
-# Status:   0 || 1
-is_bash() {
-    [[ -n "${BASH_VERSION:-}" ]]
 }

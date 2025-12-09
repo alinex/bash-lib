@@ -20,7 +20,9 @@ use module/software
 #           <tsv> | tsv2table
 # Stdout:   <table>
 tsv2table() {
-    #tsv to pprint
+    is integer --name=arguments --max=1 --die -- $#
+    is set --name=tsv --die -- "$1"
+    # processing
     install mlr
     input "$@" | mlr --csvlite --ifs '\t' -o pprint cat
 }
@@ -30,6 +32,9 @@ tsv2table() {
 #           <tsv> | tsv2md
 # Stdout:   <md>
 tsv2md() {
+    is integer --name=arguments --max=1 --die -- $#
+    is set --name=tsv --die -- "$1"
+    # processing
     install mlr
     input "$@" | uncolorize | mlr --csvlite --ifs '\t' --omd cat
 }
@@ -42,6 +47,9 @@ tsv2md() {
 # Usage:    <string> | tsv {to} <param>...
 #           <string> | tsv to {tsv}              # convert
 csv() {
+    is integer --name=arguments --max=1 --die -- $#
+    is set --name=tsv --die -- "$1"
+    # processing
     case $1 in
     to)
         case $2 in

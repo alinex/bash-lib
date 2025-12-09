@@ -201,6 +201,9 @@ mattermost_post_ids=""
 # Stdout:   <postid list>
 # Returns:  0 without action if no $MATTERMOST_API + $MATTERMOST_TOKEN
 mattermost() {
+    is integer --name=arguments --max=3 --die -- $#
+    is set --name=channel-name --die -- "$1"
+    # processing
     if [ -z "$MATTERMOST_API" ] || [ -z "$MATTERMOST_TOKEN" ]; then
         debug "Disabled because MATTERMOST_API and MATTERMOST_TOKEN are not both set"
         return 0
@@ -270,54 +273,18 @@ mattermost_attachment() {
             json="$(echo "$json" | jq --arg i "$color" '. + {color: $i}')"
             shift 2
             ;;
-        --text)
-            json="$(echo "$json" | jq --arg i "$2" '. + {text: $i}')"
-            shift 2
-            ;;
-        --author)
-            json="$(echo "$json" | jq --arg i "$2" '. + {author_name: $i}')"
-            shift 2
-            ;;
-        --avatar)
-            json="$(echo "$json" | jq --arg i "$2" '. + {author_icon: $i}')"
-            shift 2
-            ;;
-        --home)
-            json="$(echo "$json" | jq --arg i "$2" '. + {author_link: $i}')"
-            shift 2
-            ;;
-        --title)
-            json="$(echo "$json" | jq --arg i "$2" '. + {title: $i}')"
-            shift 2
-            ;;
-        --link)
-            json="$(echo "$json" | jq --arg i "$2" '. + {title_link: $i}')"
-            shift 2
-            ;;
-        --image)
-            json="$(echo "$json" | jq --arg i "$2" '. + {image_url: $i}')"
-            shift 2
-            ;;
-        --thumb)
-            json="$(echo "$json" | jq --arg i "$2" '. + {thumb_url: $i}')"
-            shift 2
-            ;;
-        --fields)
-            fields="$2"
-            shift 2
-            ;;
-        --footer)
-            json="$(echo "$json" | jq --arg i "$2" '. + {footer: $i}')"
-            shift 2
-            ;;
-        --logo)
-            json="$(echo "$json" | jq --arg i "$2" '. + {footer_image: $i}')"
-            shift 2
-            ;;
-        --)
-            shift
-            break
-            ;;
+        --text) json="$(echo "$json" | jq --arg i "$2" '. + {text: $i}')" && shift 2 ;;
+        --author) json="$(echo "$json" | jq --arg i "$2" '. + {author_name: $i}')" && shift 2 ;;
+        --avatar) json="$(echo "$json" | jq --arg i "$2" '. + {author_icon: $i}')" && shift 2 ;;
+        --home) json="$(echo "$json" | jq --arg i "$2" '. + {author_link: $i}')" && shift 2 ;;
+        --title) json="$(echo "$json" | jq --arg i "$2" '. + {title: $i}')" && shift 2 ;;
+        --link) json="$(echo "$json" | jq --arg i "$2" '. + {title_link: $i}')" && shift 2 ;;
+        --image) json="$(echo "$json" | jq --arg i "$2" '. + {image_url: $i}')" && shift 2 ;;
+        --thumb) json="$(echo "$json" | jq --arg i "$2" '. + {thumb_url: $i}')" && shift 2 ;;
+        --fields) fields="$2" && shift 2 ;;
+        --footer) json="$(echo "$json" | jq --arg i "$2" '. + {footer: $i}')" && shift 2 ;;
+        --logo) json="$(echo "$json" | jq --arg i "$2" '. + {footer_image: $i}')" && shift 2 ;;
+        --) shift && break ;;
         *) die "$(gettext "Unrecognized option"): $1" ;;
         esac
     done
@@ -356,6 +323,8 @@ mattermost_reaction() {
         *) die "$(gettext "Unrecognized option"): $1" ;;
         esac
     done
+    is integer --name=arguments --max=1 --die -- $#
+    is set --name=emoji -- "$1"
     emoji=$1
     case $1 in
     check | ok) emoji=white_check_mark ;;
@@ -386,6 +355,7 @@ mattermost_repost() {
         debug "Disabled because MATTERMOST_API and MATTERMOST_TOKEN are not both set"
         return 0
     fi
+    is integer --name=arguments --max=2 --die -- $#
     local line main channel post
     # for lines in channels
     while read -r line; do

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-08 14:32+0100\n"
+"POT-Creation-Date: 2025-12-09 10:50+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,12 +17,12 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: core/misc:170 core/output:82 core/validator:59 core/validator:235
-#: module/os:174 module/monitoring:148 module/input:41 module/input:105
-#: module/input:254 module/input:530 module/input:710 module/remote:51
-#: module/remote:106 module/remote:158 module/remote:211 module/remote:264
-#: module/remote:312 module/remote:356 module/remote:419 module/remote:518
-#: module/mattermost:321 module/mattermost:356 module/software:187
+#: core/misc:102 core/output:154 core/validator:59 core/validator:235
+#: module/os:176 module/monitoring:143 module/input:30 module/input:83
+#: module/input:218 module/input:476 module/input:642 module/remote:36
+#: module/remote:79 module/remote:119 module/remote:161 module/remote:200
+#: module/remote:236 module/remote:283 module/remote:343 module/remote:437
+#: module/mattermost:288 module/mattermost:323 module/software:193
 msgid "Unrecognized option"
 msgstr "Unbekannte Option"
 
@@ -38,7 +38,7 @@ msgstr "Optionen"
 msgid "argument is not a valid number!"
 msgstr "Argument ist nicht ganzzahlig"
 
-#: core/output:18
+#: core/output:90
 msgid "Help"
 msgstr "Hilfe"
 
@@ -150,14 +150,15 @@ msgstr "Eine Liste mit --allow=<words> wird für den enum Check benötigt"
 #: core/validator:163
 #, sh-format
 msgid "\"$name\" is set to \"${val}\" but has to be one of: $allow"
-msgstr "\"$name\" enthält \"${val}\" es sind aber nur folgende Werte erlaubt: $allow"
+msgstr ""
+"\"$name\" enthält \"${val}\" es sind aber nur folgende Werte erlaubt: $allow"
 
 #: core/validator:166
 #, sh-format
 msgid "A check named ${check} is not defined"
 msgstr "Eine Prüfung namens ${check} ist nicht definiert"
 
-#: module/dns:77
+#: module/dns:80
 #, sh-format
 msgid ""
 "To update $PLUSSERVER_PORTAL/services/nameservers -> download CSV (manually)."
@@ -165,7 +166,7 @@ msgstr ""
 "Für Update $PLUSSERVER_PORTAL/services/nameservers -> CSV herunterladen "
 "(manuell)."
 
-#: module/network:19
+#: module/network:21
 msgid "IP\\tInterface"
 msgstr "IP\\tSchnittstelle"
 
@@ -173,205 +174,205 @@ msgstr "IP\\tSchnittstelle"
 msgid "Could not get exporters from Prometheus!"
 msgstr "Es konnten keine Exporter von Prometheus ermittelt werden!"
 
-#: module/monitoring:84
+#: module/monitoring:85
 #, sh-format
 msgid "Could not scrape the Prometheus exporter at $url!"
 msgstr "Der Prometheus Exporter unter $url konnte nicht abgefragt werden!"
 
-#: module/monitoring:155
+#: module/monitoring:150
 msgid "Could not get alerts from Grafana!"
 msgstr "Es konnten keine Grafana Alerts abgerufen werden!"
 
-#: module/monitoring:156
+#: module/monitoring:151
 msgid "Parse error in Grafana alerts list with filter"
 msgstr "Fehler beim Parsen der Grafana Alarmliste mit Filter"
 
-#: module/monitoring:184
+#: module/monitoring:179
 msgid "Severity\\tNetwork\\tInstance\\tSummary\\tStart"
 msgstr "Schweregrad\\tNetz\\tInstanz\\tZusammenfassung\\tStart"
 
-#: module/input:48
+#: module/input:38
 msgid "Please wait to go on"
 msgstr "Warte bis es weiter geht"
 
-#: module/input:48
+#: module/input:38
 msgid "Press any key to continue..."
 msgstr "Taste drücken um fortzufahren..."
 
-#: module/input:59
+#: module/input:49
 msgid "aborted by user"
 msgstr "Abbruch durch Benutzer"
 
-#: module/input:110
+#: module/input:88
 msgid "Should this be done"
 msgstr "Soll dies durchgeführt werden"
 
-#: module/input:114 module/input:151 module/input:174
+#: module/input:93 module/input:130 module/input:153
 msgid "No"
 msgstr "Nein"
 
-#: module/input:114 module/input:147 module/input:169
+#: module/input:93 module/input:126 module/input:148
 msgid "Yes"
 msgstr "Ja"
 
-#: module/input:156 module/input:388 module/input:618
+#: module/input:135 module/input:349 module/input:565
 msgid "value needed"
 msgstr "Wert notwendig"
 
-#: module/input:178 module/input:414 module/input:644
+#: module/input:157 module/input:375 module/input:591
 msgid "invalid character"
 msgstr "ungültiges Zeichen"
 
-#: module/input:262
+#: module/input:229
 msgid "Enter integer number"
 msgstr "Gib eine Nummer ein"
 
-#: module/input:271
+#: module/input:238
 msgid "Enter float number"
 msgstr "Gib eine Fließkommazahl ein"
 
-#: module/input:281
+#: module/input:248
 msgid "Enter password"
 msgstr "Gib das Passwort ein"
 
-#: module/input:285
+#: module/input:252
 msgid "Enter time"
 msgstr "Gib die Zeit an"
 
-#: module/input:290
+#: module/input:256
 msgid "Enter text (end with empty line)"
 msgstr "Gib einen Text ein (Beenden mit Leerzeile)"
 
-#: module/input:293
+#: module/input:257
 msgid "Enter text here"
 msgstr "Gib einen Text ein"
 
-#: module/input:296
+#: module/input:258
 msgid "Enter short line"
 msgstr "Gib eine kurze Zeile ein"
 
-#: module/input:305
+#: module/input:266
 msgid "Input through system editor..."
 msgstr "Eingabe mit dem Systemeditor..."
 
-#: module/input:370
+#: module/input:331
 msgid "incomplete"
 msgstr "unvollständig"
 
-#: module/input:425
+#: module/input:386
 msgid "bad"
 msgstr "schlecht"
 
-#: module/input:427
+#: module/input:388
 msgid "weak"
 msgstr "schwach"
 
-#: module/input:429
+#: module/input:390
 msgid "good"
 msgstr "gut"
 
-#: module/input:431
+#: module/input:392
 msgid "strong"
 msgstr "stark"
 
-#: module/input:575
+#: module/input:522
 msgid "Select one of the above options"
 msgstr "Wähle eine der obigen Optionen"
 
-#: module/input:729
+#: module/input:661
 msgid "Could not get task list from command"
 msgstr "Befehlsliste konnte nicht von der Funktion gelesen werden"
 
-#: module/input:736
+#: module/input:668
 msgid "No tasks found to be executed."
 msgstr "Keine Aufgaben zum Ausführen gefunden."
 
-#: module/input:742
+#: module/input:674
 msgid "Exit"
 msgstr "Beenden"
 
-#: module/input:749
+#: module/input:681
 #, sh-format
 msgid "Got error $error running $task"
 msgstr "Beim Aufruf von $task kam es zum Fehler $error"
 
-#: module/process:82
+#: module/process:90
 msgid "Failed to remove lockfile"
 msgstr "Lockfile konnte nicht entfernt werden"
 
-#: module/process:97 module/process:130
+#: module/process:106 module/process:140
 msgid "Failed to create PID lockfile"
 msgstr "PID Lockfile konnte nicht erstellt werden"
 
-#: module/process:105
+#: module/process:114
 #, sh-format
 msgid "Waiting for unlock in $lockfile by PID $pid"
 msgstr "Warten, bis zur Freigabe in $lockfile durch PID $pid"
 
-#: module/process:339
+#: module/process:354
 msgid "Work steps are logged so that you can resume work mid-process"
 msgstr ""
 "Arbeitsschritte werden protokolliert um auch mittendrin wieder aufzusetzen"
 
-#: module/process:351
+#: module/process:368
 #, sh-format
 msgid "Job $name already done in this run, skipping"
 msgstr "Der Job $name wurde bereits ausgeführt, überspringe diesen"
 
-#: module/process:370
+#: module/process:389
 #, sh-format
 msgid "Finished: Step $name at $date"
 msgstr "Fertig: Schritt $name um $date"
 
-#: module/process:397
+#: module/process:419
 #, sh-format
 msgid "Started: step $name at $date"
 msgstr "Start: Schritt $name um $date"
 
-#: module/remote:222
+#: module/remote:173
 #, sh-format
 msgid "No file to execute remotely under $file"
 msgstr "Keine Datei unter $file für Remote ausführen"
 
-#: module/remote:526
+#: module/remote:446
 #, sh-format
 msgid "Wait until the reboot is complete ($seconds seconds)"
 msgstr "Warten bis der Reboot fertig ist ($seconds Sekunden)"
 
-#: module/software:229
+#: module/software:237
 msgid "are identical versions"
 msgstr "sind identische Versionen"
 
-#: module/software:233 module/software:259
+#: module/software:241 module/software:267
 #, sh-format
 msgid "is an upgrade of one major version"
 msgid_plural "is an upgrade of $step major versions"
 msgstr[0] "ist ein upgrade von einer Hauptversion"
 msgstr[1] "ist ein upgrade von $step Hauptversionen"
 
-#: module/software:237 module/software:255
+#: module/software:245 module/software:263
 #, sh-format
 msgid "is an upgrade of one minor version"
 msgid_plural "is an upgrade of $step minor versions"
 msgstr[0] "ist ein upgrade von einer Nebenversion"
 msgstr[1] "ist ein upgrade von $step Nebenversionen"
 
-#: module/software:241
+#: module/software:249
 #, sh-format
 msgid "is an upgrade of one patch version"
 msgid_plural "is an upgrade of $step patch versions"
 msgstr[0] "ist ein upgrade von einer Patchversion"
 msgstr[1] "ist ein upgrade von $step Patchversionen"
 
-#: module/software:244
+#: module/software:252
 msgid "is a developer upgrade"
 msgstr "ist ein Entwickler Upgrade"
 
-#: module/software:247
+#: module/software:255
 msgid "is a developer downgrade"
 msgstr "ist ein Entwickler Downgrade"
 
-#: module/software:251
+#: module/software:259
 #, sh-format
 msgid "is a downgrade of one patch version"
 msgid_plural "is a downgrade of $step patch versions"

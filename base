@@ -385,39 +385,6 @@ awk -v n="$line" '
 ((frame++))||true
 done
 }
-debug(){
-is integer --name=arguments --max=2 --die -- $#
-local level=1 func
-is integer -- "$1"&&level="$1"&&shift||true
-IFS=$' \t\n' read -r _ func _ <<<"$(caller 0)"
-local text
-text="$(input "$@")"
-test -n "$text"||return 0
-is set -- "$DEBUG"||return 0
-if is integer -- "$DEBUG";then
-is integer --min=0 --die -- "$DEBUG"
-((level<=DEBUG))||return 0
-else
-[[ $func =~ .*(${DEBUG//, /|}) ]]||return 0
-fi
-while IFS= read -r line;do
-printf "$CC_BLACK> %-20s %s$CC_RESET\n" "$func" "$line" >&2
-done <<<"$text"
-! command -v log >/dev/null||log debug "$func: $text"
-}
-die(){
-is integer --name=arguments --max=1 --die -- $#
-local text trap line func src
-text="$(input "$@")"
-[[ $text != *"Uncaught exception at"* ]]||trap=1
-echo -e "$CC_CRITICAL$text in ${FUNCNAME[1]}$CC_RESET" >&2
-_stacktrace "$trap"
-if command -v log >/dev/null;then
-log critical "$text"
-_stacktrace "$trap" 2>&1|log critical
-fi
-[[ $- =~ i ]]&&return 1||exit 1
-}
 use(){
 is integer --name=arguments --max=1 --die -- $#
 is set --name=module --die -- "$1"
@@ -530,6 +497,39 @@ fi
 error "Error: $res" >&2
 return 1
 fi
+}
+debug(){
+is integer --name=arguments --max=2 --die -- $#
+local level=1 func
+is integer -- "$1"&&level="$1"&&shift||true
+IFS=$' \t\n' read -r _ func _ <<<"$(caller 0)"
+local text
+text="$(input "$@")"
+test -n "$text"||return 0
+is set -- "$DEBUG"||return 0
+if is integer -- "$DEBUG";then
+is integer --min=0 --die -- "$DEBUG"
+((level<=DEBUG))||return 0
+else
+[[ $func =~ .*(${DEBUG//, /|}) ]]||return 0
+fi
+while IFS= read -r line;do
+printf "$CC_BLACK> %-20s %s$CC_RESET\n" "$func" "$line" >&2
+done <<<"$text"
+! command -v log >/dev/null||log debug "$func: $text"
+}
+die(){
+is integer --name=arguments --max=1 --die -- $#
+local text trap line func src
+text="$(input "$@")"
+[[ $text != *"Uncaught exception at"* ]]||trap=1
+echo -e "$CC_CRITICAL$text in ${FUNCNAME[1]}$CC_RESET" >&2
+_stacktrace "$trap"
+if command -v log >/dev/null;then
+log critical "$text"
+_stacktrace "$trap" 2>&1|log critical
+fi
+[[ $- =~ i ]]&&return 1||exit 1
 }
 help(){
 is integer --name=arguments --min=2 --max=4 --die -- $#

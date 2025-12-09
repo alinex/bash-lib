@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
 # shellcheck source=base
 source /dev/null
-# shellcheck source=module/color
-source /dev/null
 
 # Module with user interaction helpers.
 
@@ -26,29 +24,21 @@ pause() {
     eval set -- "$(option_parse $'a abort -\nT timeout +' "$@")"
     while true; do
         case "$1" in
-        -T | --timeout)
-            timeout="$(duration_format seconds "$2")"
-            shift 2
-            ;;
-        -a | --abort)
-            abort=1
-            shift
-            ;;
-        --)
-            shift
-            break
-            ;;
+        -T | --timeout) timeout="$(duration_format seconds "$2")" && shift 2 ;;
+        -a | --abort) abort=1 && shift ;;
+        --) shift && break ;;
         *) die "$(gettext "Unrecognized option"): $1" ;;
         esac
     done
-    # processing
+    is integer --name=arguments --max=1 --die -- $#
     local text length
     text="$(input "$@")"
-    if [ -z "$text" ]; then
-        [ -n "$timeout" ] && [ -z "$abort" ] && text="$(gettext 'Please wait to go on')" || text="$(gettext 'Press any key to continue...')"
+    # processing
+    if is empty -- "$text"; then
+        is set -- "$timeout" && is empty -- "$abort" && text="$(gettext 'Please wait to go on')" || text="$(gettext 'Press any key to continue...')"
     fi
     echo -en "${CC_NOTICE}$text${CC_RESET} "
-    if [ -z "$timeout" ]; then
+    if is empty -- "$timeout"; then
         read -n 1 -s -r _ </dev/tty
     else
         stty -echo </dev/tty
@@ -86,31 +76,20 @@ confirm() {
     eval set -- "$(option_parse $'t true -\nf false -\nT timeout +' "$@")"
     while true; do
         case "$1" in
-        -t | --true)
-            default=1
-            shift
-            ;;
-        -f | --false)
-            default=0
-            shift
-            ;;
-        -T | --timeout)
-            timeout="$(duration_format seconds "$2")"
-            shift 2
-            ;;
-        --)
-            shift
-            break
-            ;;
+        -t | --true) default=1 && shift ;;
+        -f | --false) default=0 && shift ;;
+        -T | --timeout) timeout="$(duration_format seconds "$2")" && shift 2 ;;
+        --) shift && break ;;
         *) die "$(gettext "Unrecognized option"): $1" ;;
         esac
     done
-    # processing
+    is integer --name=arguments --max=1 --die -- $#
     local prompt
     prompt="${1:-$(gettext "Should this be done")}"
-    local char="" seq itext invalid rc
+    # processing
+    local char="" seq i_text invalid rc
     local countdown="$timeout"
-    if [ -n "$default" ]; then
+    if is set -- "$default"; then
         ((default == 0)) && prompt="$prompt [$(gettext "No")]" || prompt="$prompt [$(gettext "Yes")]"
     fi
     echo -en "${CC_NOTICE}$prompt?${CC_RESET} " >/dev/tty
@@ -131,8 +110,8 @@ confirm() {
             if [ -n "$timeout" ]; then
                 ((countdown--))
                 if ((countdown > 0)); then
-                    itext="  $(duration_format human "$countdown")     "
-                    echo -ne "$itext$(printf '\b%.0s' $(seq 1 ${#itext}))" >/dev/tty
+                    i_text="  $(duration_format human "$countdown")     "
+                    echo -ne "$i_text$(printf '\b%.0s' $(seq 1 ${#i_text}))" >/dev/tty
                     continue
                 fi
             else
@@ -152,9 +131,9 @@ confirm() {
                     stty echo </dev/tty
                     return 1
                 fi
-            elif [ -n "$itext" ]; then
-                itext="$(gettext 'value needed')"
-                echo -en "   ${CC_RED}$itext${CC_RESET}$(printf '\b%.0s' $(seq 1 $((${#itext} + 3))))" >/dev/tty
+            elif [ -n "$i_text" ]; then
+                i_text="$(gettext 'value needed')"
+                echo -en "   ${CC_RED}$i_text${CC_RESET}$(printf '\b%.0s' $(seq 1 $((${#i_text} + 3))))" >/dev/tty
                 invalid=1
             fi
         # ignore escape sequences
@@ -175,11 +154,11 @@ confirm() {
             stty echo </dev/tty
             return 1
         else
-            itext="$(gettext 'invalid character')"
-            echo -en "   ${CC_RED}$itext${CC_RESET}$(printf '\b%.0s' $(seq 1 $((${#itext} + 3))))" >/dev/tty
+            i_text="$(gettext 'invalid character')"
+            echo -en "   ${CC_RED}$i_text${CC_RESET}$(printf '\b%.0s' $(seq 1 $((${#i_text} + 3))))" >/dev/tty
             invalid=1
         fi
-        itext=""
+        i_text=""
     done
     stty echo </dev/tty
 }
@@ -215,9 +194,9 @@ ask_input() {
 # - `float` - allow number [0-9]+.[0-9]+ (alternative , is allowed as decimal separator)
 # - `password` - will show only `*` characters to hide input
 # - `time` - a time with hour and minute can be given
-# If another format is needed, you can fall back to string and vaildate on your own after you got the response.
+# If another format is needed, you can fall back to string and validate on your own after you got the response.
 # Usage:    ask <format> <question>
-# Options:  -e, --empty                 # allowe empty value
+# Options:  -e, --empty                 # allow empty value
 #           -n, --allow-negative        # on number, integer, float
 #           -d, --default <value>       # set default if none given
 #           -T, --timeout <duration>    # time till default is used
@@ -231,33 +210,21 @@ ask() {
     eval set -- "$(option_parse $'e empty -\nd default +\nT timeout +\nn allow-negative -' "$@")"
     while true; do
         case "$1" in
-        -e | --empty)
-            empty=1
-            shift
-            ;;
-        -d | --default)
-            default="$2"
-            shift 2
-            ;;
-        -T | --timeout)
-            timeout="$(duration_format seconds "$2")"
-            shift 2
-            ;;
-        -n | --allow-negative)
-            negative=1
-            shift
-            ;;
-        --)
-            shift
-            break
-            ;;
+        -e | --empty) empty=1 && shift ;;
+        -d | --default) default="$2" && shift 2 ;;
+        -T | --timeout) timeout="$(duration_format seconds "$2")" && shift 2 ;;
+        -n | --allow-negative) negative=1 && shift ;;
+        --) shift && break ;;
         *) die "$(gettext "Unrecognized option"): $1" ;;
         esac
     done
-    # processing
+    is integer --name=arguments --max=2 --die -- $#
+    is empty -- "$1" || is enum --name=format --allow="string integer number float password time text editor" --die -- "$1"
     local prompt pattern mask
     local format="$1"
+    # processing
     case $format in
+    #string) prompt="${2:-$(gettext "Enter short line")}" ;; # is done through default
     integer | number)
         prompt="${2:-$(gettext "Enter integer number")}"
         if [ -n "$negative" ]; then
@@ -286,17 +253,11 @@ ask() {
         pattern="^([0-1]?[0-9]|2[0-3])(:([0-5]?[0-9])?)?$"
         final="^([0-1][0-9]|2[0-3]):[0-5][0-9]$"
         ;;
-    text)
-        prompt="${2:-$(gettext "Enter text (end with empty line)")}"
-        ;;
-    editor)
-        prompt="${2:-$(gettext "Enter text here")}"
-        ;;
-    *)
-        prompt="${2:-$(gettext "Enter short line")}"
-        ;;
+    text) prompt="${2:-$(gettext "Enter text (end with empty line)")}" ;;
+    editor) prompt="${2:-$(gettext "Enter text here")}" ;;
+    *) prompt="${2:-$(gettext "Enter short line")}" ;;
     esac
-    local input="" char="" seq invalid itext utext q
+    local input="" char="" seq invalid i_text u_text q
     local countdown="$timeout"
     local nl=$'\n'
     [ -z "$default" ] && [ -z "$empty" ] || prompt="$prompt [$default]"
@@ -347,8 +308,8 @@ ask() {
             if [ -n "$timeout" ]; then
                 ((countdown--))
                 if ((countdown > 0)); then
-                    itext="  $(duration_format human "$countdown")     "
-                    echo -ne "$itext$(printf '\b%.0s' $(seq 1 ${#itext}))" >/dev/tty
+                    i_text="  $(duration_format human "$countdown")     "
+                    echo -ne "$i_text$(printf '\b%.0s' $(seq 1 ${#i_text}))" >/dev/tty
                     continue
                 fi
             else
@@ -367,8 +328,8 @@ ask() {
                     echo "          " >/dev/tty
                     break
                 else
-                    itext="$(gettext 'incomplete')"
-                    echo -en "   ${CC_RED}$itext${CC_RESET}$(printf '\b%.0s' $(seq 1 $((${#itext} + 3))))" >/dev/tty
+                    i_text="$(gettext 'incomplete')"
+                    echo -en "   ${CC_RED}$i_text${CC_RESET}$(printf '\b%.0s' $(seq 1 $((${#i_text} + 3))))" >/dev/tty
                     invalid=1
                 fi
             # end if input done
@@ -384,9 +345,9 @@ ask() {
             elif [ -n "$empty" ]; then
                 echo >/dev/tty
                 break
-            elif [ -n "$itext" ]; then
-                itext="$(gettext 'value needed')"
-                echo -en "   ${CC_RED}$itext${CC_RESET}$(printf '\b%.0s' $(seq 1 $((${#itext} + 3))))" >/dev/tty
+            elif [ -n "$i_text" ]; then
+                i_text="$(gettext 'value needed')"
+                echo -en "   ${CC_RED}$i_text${CC_RESET}$(printf '\b%.0s' $(seq 1 $((${#i_text} + 3))))" >/dev/tty
                 invalid=1
             fi
         # Handle backspace
@@ -411,8 +372,8 @@ ask() {
                     char=.
                 fi
                 if [[ ! "$input$char" =~ $pattern ]]; then
-                    itext="$(gettext 'invalid character')"
-                    echo -en "   ${CC_RED}$itext${CC_RESET}$(printf '\b%.0s' $(seq 1 $((${#itext} + 3))))" >/dev/tty
+                    i_text="$(gettext 'invalid character')"
+                    echo -en "   ${CC_RED}$i_text${CC_RESET}$(printf '\b%.0s' $(seq 1 $((${#i_text} + 3))))" >/dev/tty
                     invalid=1
                     continue
                 fi
@@ -422,20 +383,20 @@ ask() {
             if [ "$format" = "password" ]; then
                 q=$(_password_strength "$input")
                 if ((q < 25)); then
-                    itext="${CC_RED}$(gettext 'bad')${CC_RESET}"
+                    i_text="${CC_RED}$(gettext 'bad')${CC_RESET}"
                 elif ((q < 50)); then
-                    itext="${CC_YELLOW}$(gettext 'weak')${CC_RESET}"
+                    i_text="${CC_YELLOW}$(gettext 'weak')${CC_RESET}"
                 elif ((q < 75)); then
-                    itext="$(gettext 'good')"
+                    i_text="$(gettext 'good')"
                 else
-                    itext="${CC_GREEN}$(gettext 'strong')${CC_RESET}"
+                    i_text="${CC_GREEN}$(gettext 'strong')${CC_RESET}"
                 fi
-                utext="$(uncolorize "$itext")"
-                echo -en "   $itext$(printf '\b%.0s' $(seq 1 $((${#utext} + 3))))" >/dev/tty
+                u_text="$(uncolorize "$i_text")"
+                echo -en "   $i_text$(printf '\b%.0s' $(seq 1 $((${#u_text} + 3))))" >/dev/tty
                 invalid=1
             fi
         fi
-        itext=""
+        i_text=""
     done
     stty echo </dev/tty
     debug 4 "Octal result: $(od -An -to1 -v <<<"$input")"
@@ -492,13 +453,13 @@ _password_strength() {
 #           -x, --exit <string>         # will add an exit option at the end -> return "exit"
 #           -d, --default <string|int>  # the command or number which will be returned on <enter>
 #           -T, --timeout <duration>    # timeout till default selection as seconds or duration @duration_format
-# Entry:    <entry> := <string> | <key> "|" <display> # whitespace arround values are removed
+# Entry:    <entry> := <string> | <key> "|" <display> # whitespace around values are removed
 # TTY:      [<title>]
 #           <list>
 #           ...
 #           <question> <key>
 # Stdout:   selected <line>
-#           exit # if run with --exit and this was choosen
+#           exit # if run with --exit and this was chosen
 # Example:  &input#choose shows all possible use cases
 # TODO > 10 entries make two columns using mlr display
 choose() {
@@ -507,35 +468,21 @@ choose() {
     eval set -- "$(option_parse $'t title +\nx exit +\nd default +\nT timeout +' "$@")"
     while true; do
         case "$1" in
-        -t | --title)
-            notice "$2" >/dev/tty
-            shift 2
-            ;;
-        -d | --default)
-            default="$2"
-            shift 2
-            ;;
-        -x | --exit)
-            end="$2"
-            shift 2
-            ;;
-        -T | --timeout)
-            timeout="$(duration_format seconds "$2")"
-            shift 2
-            ;;
-        --)
-            shift
-            break
-            ;;
+        -t | --title) notice "$2" >/dev/tty && shift 2 ;;
+        -d | --default) default="$2" && shift 2 ;;
+        -x | --exit) end="$2" && shift 2 ;;
+        -T | --timeout) timeout="$(duration_format seconds "$2")" && shift 2 ;;
+        --) shift && break ;;
         *) die "$(gettext "Unrecognized option"): $1" ;;
         esac
     done
-    # output list
-    local list line key display num=0 pattern max
+    local list max length
     list="$(input_lines "$@")"
     list="$(trim "$list" | grep -v ^#)"
     max="$(wc -l <<<"$list")"
     length="${#max}"
+    # output list
+    local line key display num=0 pattern
     while read -r line; do
         num=$((num + 1))
         IFS="|" read -r key display <<<"$line"
@@ -545,7 +492,7 @@ choose() {
         fi
         printf "  %0${length}d) $(trim "${display:-$key}")\n" "$num" >/dev/tty
     done <<<"$list"
-    [ -z "$default" ] || is_integer "$default" || die "Default option $default not recognized."
+    is empty -- "$default" || is integer -- "$default" || die "Default option $default not recognized."
     [ -z "$end" ] || printf "  %${length}s) ${end}\n" x >/dev/tty
     # Pattern example parts:
     # 8      [1-8]
@@ -569,7 +516,7 @@ choose() {
     [ -z "$end" ] || pattern="(x|$pattern)"
     pattern="^$pattern$"
     # question
-    local input="" char="" itext invalid
+    local input="" char="" i_text invalid
     local countdown="$timeout"
     # shellcheck disable=SC2155
     local question="$(gettext "Select one of the above options")"
@@ -591,8 +538,8 @@ choose() {
             if [ -n "$timeout" ]; then
                 ((countdown--))
                 if ((countdown > 0)); then
-                    itext="  $(duration_format human "$countdown")     "
-                    echo -ne "$itext$(printf '\b%.0s' $(seq 1 ${#itext}))" >/dev/tty
+                    i_text="  $(duration_format human "$countdown")     "
+                    echo -ne "$i_text$(printf '\b%.0s' $(seq 1 ${#i_text}))" >/dev/tty
                     continue
                 fi
             else
@@ -615,8 +562,8 @@ choose() {
                 echo "          " >/dev/tty
                 break
             else
-                itext="$(gettext 'value needed')"
-                echo -en "   ${CC_RED}$itext${CC_RESET}$(printf '\b%.0s' $(seq 1 $((${#itext} + 3))))" >/dev/tty
+                i_text="$(gettext 'value needed')"
+                echo -en "   ${CC_RED}$i_text${CC_RESET}$(printf '\b%.0s' $(seq 1 $((${#i_text} + 3))))" >/dev/tty
                 invalid=1
             fi
         # Handle backspace
@@ -641,8 +588,8 @@ choose() {
         # next character
         else
             if [[ ! "$input$char" =~ $pattern ]]; then
-                itext="$(gettext 'invalid character')"
-                echo -en "   ${CC_RED}$itext${CC_RESET}$(printf '\b%.0s' $(seq 1 $((${#itext} + 3))))" >/dev/tty
+                i_text="$(gettext 'invalid character')"
+                echo -en "   ${CC_RED}$i_text${CC_RESET}$(printf '\b%.0s' $(seq 1 $((${#i_text} + 3))))" >/dev/tty
                 invalid=1
                 continue
             fi
@@ -661,7 +608,7 @@ choose() {
 
 # Run tasks as selected by user
 # Often the functions are also named `check-...` for the ones which will return tasks and `task-...` for the ones really doing the job. The first one may do a lot of analyzation and output user information on stdout.
-# The '|' character is not possible within the commands. If a pipe is neccessary put it within a function. Also some commands can be disabled in the list by preceding the command with an `#` character.
+# The '|' character is not possible within the commands. If a pipe is necessary put it within a function. Also some commands can be disabled in the list by preceding the command with an `#` character.
 # If there are no tasks defined or the dynamic list will return no tasks it will end with a success message.
 # Usage:    tasks <entry>...
 #           # <entry>       := <check-fn> or "<task-line>"
@@ -687,50 +634,35 @@ tasks() {
     eval set -- "$(option_parse $'t title +\nd default +\nT timeout +\nl loop -' "$@")"
     while true; do
         case "$1" in
-        -t | --title)
-            title="-t$2" >/dev/tty
-            shift 2
-            ;;
-        -d | --default)
-            _default="$2" >/dev/tty
-            shift 2
-            ;;
-        -T | --timeout)
-            opt="-T $2 " >/dev/tty
-            shift 2
-            ;;
-        -l | --loop)
-            loop=1
-            shift
-            ;;
-        --)
-            shift
-            break
-            ;;
+        -t | --title) title="-t$2" >/dev/tty && shift 2 ;;
+        -d | --default) _default="$2" >/dev/tty && shift 2 ;;
+        -T | --timeout) opt="-T $2 " >/dev/tty && shift 2 ;;
+        -l | --loop) loop=1 && shift ;;
+        --) shift && break ;;
         *) die "$(gettext "Unrecognized option"): $1" ;;
         esac
     done
     # processing
-    local raw list task num newlist cmd name
+    local raw list task num new_list cmd name
     find /dev/shm -regex ".*/$0_tasks_[0-9]*" -mmin +60 -delete 2>/dev/null || true # cleanup broken runs
-    newlist="$(mktemp -m "tasks_$$")"
+    new_list="$(mktemp -m "tasks_$$")"
     raw="$(input_lines "$@" | grep -v '^[[:space:]]*#')" || true
     # ask user to select
     while true; do
         list="$raw"
         # check for dynamic parts in list
         while grep -qv '|' <<<"$list"; do
-            : >"$newlist"
+            : >"$new_list"
             while IFS= read -r line; do
                 IFS='|' read -r cmd name <<<"$line"
                 if [ -n "$name" ]; then
-                    echo "$line" >>"$newlist"
+                    echo "$line" >>"$new_list"
                 else
-                    $cmd </dev/null >>"$newlist" || die "$(gettext "Could not get task list from command"): $cmd"
+                    $cmd </dev/null >>"$new_list" || die "$(gettext "Could not get task list from command"): $cmd"
                 fi
             done <<<"$list"
-            list="$(sed '/^[[:space:]]*$/d' "$newlist")"
-            rm "$newlist"
+            list="$(sed '/^[[:space:]]*$/d' "$new_list")"
+            rm "$new_list"
             # list is empty
             if [ -z "$list" ]; then
                 ok "$(gettext "No tasks found to be executed.")"
@@ -740,7 +672,7 @@ tasks() {
         _default="$(value_if_variable "$_default")"
         # shellcheck disable=SC2086
         task=$(choose "$title" -x "$(gettext "Exit")" $opt -d "$_default" <<<"$list")
-        debug "choosen $task"
+        debug "chosen $task"
         [[ "$task" != "exit" ]] || break
         local error
         # shellcheck disable=SC2034

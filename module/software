@@ -35,6 +35,7 @@ _install_alpine_glibc() {
 # Install software package
 # Usage:    install <command>...
 install() {
+    is set --name=command --die -- "$1"
     # collect what to be needed
     declare -a before
     declare -a apt
@@ -75,7 +76,7 @@ install() {
                     esac
                 fi
         else
-            debug 3 "$cmd is alreay installed or tried earlier"
+            debug 3 "$cmd is already installed or tried earlier"
         fi
     done
     # run before commands
@@ -133,6 +134,8 @@ install() {
 # Return:   0 if all installed
 #           1 if missing at least one
 installed() {
+    is set --name=command --die -- "$1"
+    # processing
     for cmd in "$@"; do
         command -v "$cmd" >/dev/null || return 1
     done
@@ -152,6 +155,9 @@ installed() {
 #           <prerelease>    or "" if undefined
 #           <build>         or "" if undefined
 semver() {
+    is integer --name=arguments --max=1 --die -- $#
+    is set --name=version --die -- "$1"
+    # processing
     input "$@" |
         sed -e 's#[^0-9]*\([0-9]*:\)\?\([0-9]*\)\([.]\([0-9]*\)\)\?\([.]\([0-9]*\)\)\?\(-\([^+]*\)\)\?+\?\(.*\)\?.*#\2\n\4\n\6\n\8\n\9#'
 }
@@ -187,7 +193,9 @@ semver_diff() {
         *) die "$(gettext "Unrecognized option"): $1" ;;
         esac
     done
-    num_parameters "$@" --min 2 --max 2 --die "Need exactly two parameters: semver_diff [-h] <first> <second>"
+    is integer --name=arguments --max=2 --die -- $#
+    is set --name=version1 --die -- "$1"
+    is set --name=version2 --die -- "$2"
     # processing
     [[ "${1-}" =~ [.-] ]] && version1="$(semver "$1")" || version1="$1"
     [[ "${2-}" =~ [.-] ]] && version2="$(semver "$2")" || version2="$2"

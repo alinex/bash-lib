@@ -32,29 +32,14 @@ DESCRIPTION=\
 eval set -- "$(option_parse "$OPTIONS" "$@")"
 while true; do
     case "$1" in
-    -n|--name)  
-        name="$2"
-        shift 2
-        ;;
-    -a|--age)   
-        age="$2"
-        shift 2
-        ;;
-    -h|--help)  
-        help "$TITLE" "$USAGE" "$OPTIONS" "$DESCRIPTION"
-        exit
-        ;;
-    --) 
-        shift
-        break
-        ;;
-        *) die "Unrecognized option: $1" ;;
-        ;;
+    -n | --name) name="$2" && shift 2 ;;
+    -a | --age) age="$2" && shift 2 ;;
+    -h | --help) help "$TITLE" "$USAGE" "$OPTIONS" "$DESCRIPTION" && exit ;;
+    --) shift && break ;;
+    *) die "Unrecognized option: $1" ;;
     esac
 done
-num_parameters --min 1 --max 1 \
-    --die "Falsche Anzahl Parameter: $USAGE" \
-    -- "$@"
+is integer --name=arguments --max=1 --die -- $#
 
 header "$TITLE"
 ```

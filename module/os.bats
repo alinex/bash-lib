@@ -125,13 +125,3 @@ setup() {
     run has_tty
     assert_success
 }
-
-######################################################################################
-# is_bash
-######################################################################################
-
-# bats test_tags=is_bash
-@test "is_bash: should get timestamp" {
-    run is_bash
-    assert_success
-}

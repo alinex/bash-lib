@@ -9,6 +9,64 @@ setup() {
 }
 
 ######################################################################################
+# debug
+######################################################################################
+
+# bats test_tags=debug
+@test "debug: do nothing if no debugging" {
+    DEBUG="" run debug Test
+    assert_output ""
+    assert_success
+}
+# bats test_tags=debug
+@test "debug: show level 1" {
+    DEBUG=1 run debug Test
+    assert_output --partial "> bats_merge_stdout_and_stderr Test"
+    assert_success
+}
+# bats test_tags=debug
+@test "debug: do not show level 2" {
+    DEBUG=1 run debug 2 Test
+    assert_output ""
+    assert_success
+}
+# bats test_tags=debug
+@test "debug: show func" {
+    DEBUG=bats_merge_stdout_and_stderr run debug Test
+    assert_output --partial "> bats_merge_stdout_and_stderr Test"
+    assert_success
+}
+# bats test_tags=debug
+@test "debug: show func with pattern" {
+    DEBUG="bats.*" run debug Test
+    assert_output --partial "> bats_merge_stdout_and_stderr Test"
+    assert_success
+}
+# bats test_tags=debug
+@test "debug: do not show func test" {
+    DEBUG="test" run debug Test
+    assert_output ""
+    assert_success
+}
+
+######################################################################################
+# die
+######################################################################################
+
+# bats test_tags=die
+@test "die: with message as argument" {
+    run die Failed
+    assert_output -p "Failed"
+    assert_failure
+}
+# bats test_tags=die
+@test "die: with piped message" {
+    run bats_pipe echo Failed \| die
+    assert_output -p "Failed"
+    assert_failure
+}
+
+######################################################################################
 # help
 ######################################################################################
 

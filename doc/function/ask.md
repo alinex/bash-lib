@@ -11,7 +11,7 @@ Possible formats are:
 - `float` - allow number [0-9]+.[0-9]+ (alternative , is allowed as decimal separator)
 - `password` - will show only `*` characters to hide input
 - `time` - a time with hour and minute can be given
-If another format is needed, you can fall back to string and vaildate on your own after you got the response.
+If another format is needed, you can fall back to string and validate on your own after you got the response.
 Stdout:   `<answer>`
 
 
@@ -24,7 +24,7 @@ ask <format> <question>
 ### Options
 
 ```bash
--e, --empty                 # allowe empty value
+-e, --empty                 # allow empty value
 -n, --allow-negative        # on number, integer, float
 -d, --default <value>       # set default if none given
 -T, --timeout <duration>    # time till default is used

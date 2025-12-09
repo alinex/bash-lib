@@ -8,5 +8,5 @@ Exit:     0 if done else not done or with failure
 ### Usage
 
 ```bash
-steps_done <name>
+steps_check <name>
 ```

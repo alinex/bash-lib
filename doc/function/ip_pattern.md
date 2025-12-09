@@ -6,7 +6,7 @@ Possible types are like in the configuration:
 - provider
 - segment
 - vmware
-If no pattern matches there won't be any rteturn value
+If no pattern matches there won't be any return value
 
 
 ### Usage

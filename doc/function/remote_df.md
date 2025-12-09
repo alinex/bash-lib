@@ -10,7 +10,7 @@ The lines will be colorized based on `$MOUNT_COLOR_LIMIT` setting, which contain
 
 ```bash
 remote_df [<mount>...]                              # show table
-remote_df <var> <operator> <limit%> [<mount>...]    # additionaly collect specific volumes
+remote_df <var> <operator> <limit%> [<mount>...]    # additionally collect specific volumes
 ```
 
 ### Options

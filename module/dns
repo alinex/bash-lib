@@ -8,9 +8,6 @@ source /dev/null
 
 # Module with DNS methods.
 
-# load other modules if not already done
-declare -F "num_parameters" >/dev/null || source "$BASHLIB_HOME"/module/validator
-
 ######################################################################################
 # DNS
 ######################################################################################
@@ -28,6 +25,8 @@ declare -F "num_parameters" >/dev/null || source "$BASHLIB_HOME"/module/validato
 #           <dns-name>  CNAME   <destination>   <seconds>
 #           and more...
 dns_list() {
+    is integer --name=arguments --max=1 --die -- $#
+    # processing
     echo $'NAME\tTYPE\tCONTENT\tTTL'
     powerdns "$1" | tail -n +2 || true
     plusserver_dns "$1" | tail -n +2 || true
@@ -43,6 +42,8 @@ dns_list() {
 #           and more...
 # Returns:  0 - without output if no $POWERDNS_API + $POWERDNS_TOKEN
 powerdns() {
+    is integer --name=arguments --max=1 --die -- $#
+    # processing
     if [ -z "$POWERDNS_API" ] || [ -z "$POWERDNS_TOKEN" ]; then
         debug "Disabled because POWERDNS_API and POWERDNS_TOKEN are not both set"
         return 0
@@ -64,6 +65,8 @@ powerdns() {
 #           and more...
 # Returns:  0 - without output if no $PLUSSERVER_PORTAL
 plusserver_dns() {
+    is integer --name=arguments --max=1 --die -- $#
+    # processing
     if [ -z "$PLUSSERVER_PORTAL" ]; then
         debug "Disabled because PLUSSERVER_PORTAL is not set"
         return 0

@@ -8,9 +8,6 @@ source /dev/null
 
 # Module with remote calling/execution helpers.
 
-# load other modules if not already done
-declare -F "num_parameters" >/dev/null || source "$BASHLIB_HOME"/module/validator
-
 ######################################################################################
 # Remote SSH
 ######################################################################################
@@ -32,22 +29,10 @@ remote() {
     eval set -- "$(option_parse $'+l login +\nh host +\nj jump +' "$@")"
     while true; do
         case "$1" in
-        -l | --login)
-            _login="$2"
-            shift 2
-            ;;
-        -h | --host)
-            host="$2"
-            shift 2
-            ;;
-        -j | --jump)
-            jump="$2"
-            shift 2
-            ;;
-        --)
-            shift
-            break
-            ;;
+        -l | --login) _login="$2" && shift 2 ;;
+        -h | --host) host="$2" && shift 2 ;;
+        -j | --jump) jump="$2" && shift 2 ;;
+        --) shift && break ;;
         *) die "$(gettext "Unrecognized option"): $1" ;;
         esac
     done
@@ -87,22 +72,10 @@ remote_term() {
     eval set -- "$(option_parse $'+l login +\nh host +\nj jump +' "$@")"
     while true; do
         case "$1" in
-        -l | --login)
-            _login="$2"
-            shift 2
-            ;;
-        -h | --host)
-            host="$2"
-            shift 2
-            ;;
-        -j | --jump)
-            jump="$2"
-            shift 2
-            ;;
-        --)
-            shift
-            break
-            ;;
+        -l | --login) _login="$2" && shift 2 ;;
+        -h | --host) host="$2" && shift 2 ;;
+        -j | --jump) jump="$2" && shift 2 ;;
+        --) shift && break ;;
         *) die "$(gettext "Unrecognized option"): $1" ;;
         esac
     done
@@ -139,22 +112,10 @@ remote_term_line() {
     eval set -- "$(option_parse $'+l login +\nh host +\nj jump +' "$@")"
     while true; do
         case "$1" in
-        -l | --login)
-            _login="$2"
-            shift 2
-            ;;
-        -h | --host)
-            host="$2"
-            shift 2
-            ;;
-        -j | --jump)
-            jump="$2"
-            shift 2
-            ;;
-        --)
-            shift
-            break
-            ;;
+        -l | --login) _login="$2" && shift 2 ;;
+        -h | --host) host="$2" && shift 2 ;;
+        -j | --jump) jump="$2" && shift 2 ;;
+        --) shift && break ;;
         *) die "$(gettext "Unrecognized option"): $1" ;;
         esac
     done
@@ -165,16 +126,17 @@ remote_term_line() {
     [ -z "$jump" ] || ssh="-J $jump $ssh"
     if [ -p /dev/stdin ]; then
         # shellcheck disable=SC2086
+        # shellcheck disable=SC2119
         ssh -t $ssh bash -s 2> >(grep -v '^Connection to .* closed\.' >&2 || true) | nocr
         return "${PIPESTATUS[0]}"
     else
         # this allows interactivity
         # shellcheck disable=SC2086
+        # shellcheck disable=SC2119
         ssh -t $ssh "$@" 2> >(grep -v '^Connection to .* closed\.' >&2 || true) | nocr
         return "${PIPESTATUS[0]}"
     fi
 }
-# STDERR_CLEANUP="2> >(grep -v '^Connection to .* closed\.' >&2)"
 
 # Run local script on remote
 # Usage:    remote_file [<options>] <file>
@@ -192,25 +154,14 @@ remote_file() {
     eval set -- "$(option_parse $'+l login +\nh host +\nj jump +' "$@")"
     while true; do
         case "$1" in
-        -l | --login)
-            _login="$2"
-            shift 2
-            ;;
-        -h | --host)
-            host="$2"
-            shift 2
-            ;;
-        -j | --jump)
-            jump="$2"
-            shift 2
-            ;;
-        --)
-            shift
-            break
-            ;;
+        -l | --login) _login="$2" && shift 2 ;;
+        -h | --host) host="$2" && shift 2 ;;
+        -j | --jump) jump="$2" && shift 2 ;;
+        --) shift && break ;;
         *) die "$(gettext "Unrecognized option"): $1" ;;
         esac
     done
+    is integer --name=arguments --max=1 --die -- $#
     # processing
     _login=${_login:-${login:-$REMOTE_LOGIN_DEFAULT}}
     host=${host:-$server}
@@ -241,31 +192,16 @@ remote_console() {
     eval set -- "$(option_parse $'+l login +\nh host +\nj jump +\nA forward-agent -' "$@")"
     while true; do
         case "$1" in
-        -l | --login)
-            _login="$2"
-            shift 2
-            ;;
-        -h | --host)
-            host="$2"
-            shift 2
-            ;;
-        -j | --jump)
-            jump="$2"
-            shift 2
-            ;;
-        -A | --forward-agent)
-            opt="-A"
-            shift
-            ;;
-        --)
-            shift
-            break
-            ;;
+        -l | --login) _login="$2" && shift 2 ;;
+        -h | --host) host="$2" && shift 2 ;;
+        -j | --jump) jump="$2" && shift 2 ;;
+        -A | --forward-agent) opt="-A" && shift ;;
+        --) shift && break ;;
         *) die "$(gettext "Unrecognized option"): $1" ;;
         esac
     done
+    is integer --name=arguments --max=2 --die -- $#
     # processing
-    num_parameters "$@" --min 2 --max 2 --die "Need exactly two parameters: semver_diff [-h] <first> <second>"
     _login=${_login:-${login:-$REMOTE_LOGIN_DEFAULT}}
     host=${host:-$server}
     local ssh="${_login}@${host}"
@@ -293,25 +229,16 @@ upload() {
     eval set -- "$(option_parse $'+l login +\nh host +\nj jump +' "$@")"
     while true; do
         case "$1" in
-        -l | --login)
-            _login="$2"
-            shift 2
-            ;;
-        -h | --host)
-            host="$2"
-            shift 2
-            ;;
-        -j | --jump)
-            jump="$2"
-            shift 2
-            ;;
-        --)
-            shift
-            break
-            ;;
+        -l | --login) _login="$2" && shift 2 ;;
+        -h | --host) host="$2" && shift 2 ;;
+        -j | --jump) jump="$2" && shift 2 ;;
+        --) shift && break ;;
         *) die "$(gettext "Unrecognized option"): $1" ;;
         esac
     done
+    is integer --name=arguments --max=2 --die -- $#
+    is set --name=source --die -- "$1"
+    is set --name=dest --die -- "$2"
     # processing
     _login=${_login:-${login:-$REMOTE_LOGIN_DEFAULT}}
     host=${host:-$server}
@@ -356,6 +283,9 @@ download() {
         *) die "$(gettext "Unrecognized option"): $1" ;;
         esac
     done
+    is integer --name=arguments --max=2 --die -- $#
+    is set --name=source --die -- "$1"
+    is set --name=dest --die -- "$2"
     # processing
     _login=${_login:-${login:-$REMOTE_LOGIN_DEFAULT}}
     host=${host:-$server}
@@ -408,23 +338,18 @@ remote_bashlib() {
     eval set -- "$(option_parse $'+l login +\nh host +\nj jump +' "$@")"
     while true; do
         case "$1" in
-        -l | --login | -h | --host | -j | --jump)
-            opt+=" $1 $2"
-            shift 2
-            ;;
-        --)
-            shift
-            break
-            ;;
+        -l | --login | -h | --host | -j | --jump) opt+=" $1 $2" && shift 2 ;;
+        --) shift && break ;;
         *) die "$(gettext "Unrecognized option"): $1" ;;
         esac
     done
-    # processing
+    is set --name=module --die -- "$1"
     local list modules
     list="$(_module_resolve "${1-}")"
     IFS=',' read -ra modules <<<"$list"
     debug "Modules: ${modules[*]}"
     shift
+    # processing
     local pattern='^#!/usr/bin/env'" bash|source "'/dev/null'
     # shellcheck disable=SC2086
     (
@@ -475,7 +400,7 @@ remote_system_info() {
 # Use `remote_bashlib os disk_free` instead.
 # The lines will be colorized based on $MOUNT_COLOR_LIMIT setting, which contains sets of 5 entries (pattern critical error warn ok). The first matching pattern will decide the color limits.
 # Usage:    remote_df [<mount>...]                              # show table
-#           remote_df <var> <operator> <limit%> [<mount>...]    # additionaly collect specific volumes
+#           remote_df <var> <operator> <limit%> [<mount>...]    # additionally collect specific volumes
 # Options:  -l, --local     # only list local devices
 remote_df() {
     _deprecated "use remote_bashlib os disk_free" warn
@@ -507,17 +432,12 @@ boot_wait() {
     local quiet
     while true; do
         case "$1" in
-        -q | --quiet)
-            quiet=1
-            shift
-            ;;
-        --)
-            shift
-            break
-            ;;
+        -q | --quiet) quiet=1 && shift ;;
+        --) shift && break ;;
         *) die "$(gettext "Unrecognized option"): $1" ;;
         esac
     done
+    is integer --name=arguments --max=0 --die -- $#
     # processing
     local uptime seconds=15
     echo -ne "Warten bis der Reboot fertig ist" >&2

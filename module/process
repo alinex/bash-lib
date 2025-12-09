@@ -12,6 +12,8 @@
 # Return:   0 if allowed
 #           @die if not allowed
 sudo_allow() {
+    is integer --name=arguments --max=1 --die -- $#
+    # processing
     ((EUID != 0)) || return 0
     command -v sudo >/dev/null || return 0
     command sudo -ln "$@" >/dev/null || die "User $(whoami) is not allowed to call 'sudo $*', but this is neccessary!"
@@ -34,7 +36,10 @@ sudo() {
 # Execute command in N times
 # Usage:    repeat <N> <command> [<params>]...
 repeat() {
+    is integer --name=num --min=0 --die -- "$1"
+    is set --name=command --die -- "$2"
     local -i n=$1
+    # processing
     ((n > 0)) || return
     shift
     for n in $(seq "$n"); do
@@ -48,7 +53,10 @@ repeat() {
 # For large numbers of retries the max delay is effectively the retry count in minutes.
 # Usage:    retry <N> <command> [<params>]...
 function retry {
+    is integer --name=num --min=0 --die -- "$1"
+    is set --name=command --die -- "$2"
     local retries=$1
+    # processing
     shift
     local count=0 exit wait
     until "$@"; do
@@ -91,11 +99,12 @@ _lock_remove() {
 # process will wait on the lock statement till no other process with the same lock is running
 # before going on.
 lock() {
+    is integer --name=arguments --max=0 --die -- $#
     local lockfile logged pid
     lockfile="$(mktemp 'lockfile')"
     # make a file with our PID
     echo $$ >"$lockfile.$$" 2>/dev/null || die "$(gettext "Failed to create PID lockfile"): $lockfile.$$"
-    # rmove old lock if no longer running
+    # remove old lock if no longer running
     _lock_remove
     # try it, till it works
     logged=0
@@ -124,6 +133,7 @@ lock() {
 # process will wait on the lock statement till no other process with the same lock is running
 # before going on.
 lock_exit() {
+    is integer --name=arguments --max=0 --die -- $#
     local lockfile logged pid
     lockfile="$(mktemp 'lockfile')"
     # make a file with our PID
@@ -142,7 +152,9 @@ lock_exit() {
 
 # Remove the lock
 # Usage:    unlock
+# shellcheck disable=SC2120
 unlock() {
+    is integer --name=arguments --max=0 --die -- $#
     local lockfile
     lockfile="$(mktemp 'lockfile')"
     # remove own lockfile
@@ -254,6 +266,7 @@ env_restore() {
 # Options:  -d, --disk                          # store on disk in temporary folder
 #           -p, --path <base-dir>               # store on disk in given folder
 env_clean() {
+    is integer --name=arguments --max=1 --die -- $#
     debug "env_clean $*"
     # parameter parsing
     eval set -- "$(option_parse $'d disk -\np path +' "$@")"
@@ -304,8 +317,9 @@ env_change() {
         *) shift ;; # ignore
         esac
     done
+    is set --name=ident --die -- "$1"
+    is set --name=command --die -- "$2"
     # processing
-    num_parameters --min 2 --die "At least <ident> <command> is needed!" -- "$@"
     local ident=$1
     shift || true
     local command=$1
@@ -332,6 +346,7 @@ STEPS_VARIABLES=
 #           # sync | async | queue calls
 #           steps_done
 steps_init() {
+    is integer --name=arguments --max=0 --die -- $#
     declare -g -A _STEPS
     env_restore steps
     declare -p _STEPS
@@ -340,11 +355,13 @@ steps_init() {
 }
 
 # Check if step already finished successful
-# Usage:    steps_done <name>
+# Usage:    steps_check <name>
 # Exit:     0 if done else not done or with failure
 steps_check() {
+    is integer --name=arguments --max=1 --die -- $#
+    is set --name=name --die -- "$1"
     local name="$1"
-    num_parameters --min 1 --max 1 --die "Only an <ident> is needed, but must be there!" -- "$@"
+    # processing
     declare -p _STEPS 2>/dev/null | grep -q 'declare -A' || return 1 # return not found if no step control
     if [ -n "${_STEPS["$name"]}" ]; then
         # shellcheck disable=SC2005
@@ -359,8 +376,10 @@ steps_check() {
 # Usage:    steps_done <name>   # finished one step
 #           steps_done          # completely finished -> cleanup
 steps_done() {
+    is integer --name=arguments --max=1 --die -- $#
+    is set --name=name --die -- "$1"
     local name="$1"
-    num_parameters --min 0 --max 1 --die "Only an <ident> is needed!" -- "$@"
+    # processing
     declare -p _STEPS 2>/dev/null | grep -q 'declare -A' || return # do nothin if no step control
     if [ -n "$1" ]; then
         _STEPS["$name"]=1
@@ -379,16 +398,19 @@ steps_done() {
 # This will use the command itself as name. If you run the same command multiple times use
 # async_name directly.
 sync() {
-    num_parameters --min 1 --die "At least a <command> is needed!" -- "$@"
+    is set --name=command --die -- "$1"
+    # processing
     sync_name "$1" "$@"
 }
 
 # Alternative to sync in which this call is given a name to refer
 # Usage:     sync <name> <cmd> [<params>...]
 sync_name() {
-    num_parameters --min 2 --die "At least a <name> and <command> is needed!" -- "$@"
+    is set --name=name --die -- "$1"
+    is set --name=command --die -- "$2"
     local name=$1
     shift
+    # processing
     steps_check "$name" && return || true
     local date
     # shellcheck disable=SC2034
@@ -409,16 +431,19 @@ sync_name() {
 #           async task3
 #           wait # for all to end
 async() {
-    num_parameters --min 1 --die "At least a <command> is needed!" -- "$@"
+    is set --name=command --die -- "$1"
+    # processing
     async_name "$1" "$@"
 }
 
 # Alternative to async in which this call is given a name to refer in async_wait
 # Usage:    async <name> <cmd> [<params>...]
 async_name() {
-    num_parameters --min 2 --die "At least a <name> and <command> is needed!" -- "$@"
+    is set --name=name --die -- "$1"
+    is set --name=command --die -- "$2"
     local name=$1
     shift
+    # processing
     ! steps_check "$name" || return
     declare -p _STEPS 2>/dev/null | grep -q 'declare -A' && echo "Started: step $name at $(date_format sql)" >&2 || true
     "$@" &
@@ -495,14 +520,17 @@ _queue_control() {
 #           queue task4
 #           wait # for all to end
 queue() {
-    num_parameters --min 1 --die "At least a <command> is needed!" -- "$@"
+    is set --name=command --die -- "$1"
+    # processing
     queue_name "$1" "$@"
 }
 
 # Add command to process queue
 # Usage:    queue_name <name> <command> [<params>...]
 queue_name() {
-    num_parameters --min 2 --die "At least a <name> and <command> is needed!" -- "$@"
+    is set --name=name --die -- "$1"
+    is set --name=command --die -- "$2"
+    # processing
     ! steps_check "$1" || return 0
     local entry
     entry=$(printf "%s\x1f" "$@")
@@ -520,6 +548,8 @@ queue_name() {
 # Usage:    queue_runnung
 # Return:   0 if still running
 queue_running() {
+    is integer --name=arguments --max=0 --die -- $#
+    # processing
     [ -n "$_queue_control_pid" ] && kill -0 "$_queue_control_pid"
 }
 
@@ -542,9 +572,12 @@ queue_running() {
 # - directly give pattern
 # Usage:    random <pattern> [<length>]
 random() {
-    num_parameters --min 1 --die "At least a <pattern> is needed!" -- "$@"
+    is integer --name=arguments --max=2 --die -- $#
+    is set --name=pattern --die -- "$1"
+    is set -- "$2" && is integer --name=length --min=0 --die -- "$2"
     local pattern="$1"
     local length=${2:-16}
+    # processing
     local result=""
     local umlaut UMLAUT
     if [[ "$LANG" =~ ^de ]]; then

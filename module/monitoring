@@ -77,8 +77,9 @@ exporter() {
 # Return:   0 if metrics found
 #           1 if no matching metric
 scrape() {
+    is integer --name=arguments --max=2 --die -- $#
+    is set --name=url --die -- "$1"
     local url="$1"
-    num_parameters "$@" --min 1 --max 2 --die "Wrong number of parameters for scrape!"
     debug "Scrape the Prometheus exporter at $1"
     local metrics
     metrics="$(curl "$url" | grep -Ev '^($|#)' || die "$(eval_gettext "Could not scrape the Prometheus exporter at \$url!")")"
@@ -93,18 +94,18 @@ scrape() {
 # The list can be filtered by options and a specific output format can be selected.
 # Usage:    alerts [<format>]                       # tsv, json, console, mattermost
 #           alerts -i "^$server" console || echo "" # will print the alerts with an empty line if there are some
-# Options:  -a, --alertname <regexp>                # select alert name
+# Options:  -a, --alertname <regexp>               # select alert name
 #           -n, --net <name>                        # select network name
 #           -i, --instance <regexp>                 # select only matching instances
 #           -s, --summary <regexp>                  # select by summary text
 #           -q, --quiet                             # return only status code
 # Stdout:   format=json: directly like in the Grafana API
 #
-#           format=mattermost - json in the format of mattermost attachements
+#           format=mattermost - json in the format of mattermost attachments
 #
 #           format=tsv - Tab separated table:
 #           Severity    Network     Instance    Summary         Start
-#           <severity>  <network>   <instance>  <decription>    <time>
+#           <severity>  <network>   <instance>  <description>   <time>
 #           ...
 #
 #           format=console - like tsv but colorized and fixed column width instead of tabs
@@ -137,14 +138,8 @@ alerts() {
             [ -z "$2" ] || filter="$filter | select(.labels.net? // \"\"|test(\"$2\"; \"i\"))"
             shift 2
             ;;
-        -q | --quiet)
-            quiet=1
-            shift
-            ;;
-        --)
-            shift
-            break
-            ;;
+        -q | --quiet) quiet=1 && shift ;;
+        --) shift && break ;;
         *) die "$(gettext "Unrecognized option"): $1" ;;
         esac
     done
@@ -223,6 +218,9 @@ prometheus() {
         debug "Disabled because PROMETHEUS_API is not set"
         return 0
     fi
+    is integer --name=arguments --max=1 --die -- $#
+    is set --name=prom-ql --die -- "$1"
+    # processing
     local api
     api="${PROMETHEUS_API%% *}"
     curl "$api/query?query=$(echo "$1" | urlencode)"

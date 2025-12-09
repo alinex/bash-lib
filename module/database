@@ -21,7 +21,9 @@ use module/software
 # Global:   $server
 #           $MONGO_ADMIN_USERPASS
 mongo() {
-    num_parameters --min 2 --max 2 --die "Mongo needs two parameters: Usage mongo <database> <command>" "$@"
+    is integer --name=arguments --max=2 --die -- $#
+    is set --name=command --die -- "$2"
+    # processing
     local cluster key
     install mongosh
     # shellcheck disable=SC2001

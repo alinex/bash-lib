@@ -14,6 +14,9 @@ source /dev/null
 # Usage:    confluence <page_id>
 # Output:   <html>
 confluence() {
+    is integer --name=arguments --max=1 --die -- $#
+    is set --name=page-id --die -- "$1"
+    # processing
     install jq
     curl -H "Content-Type: application/json" -u "$ATLASSIAN_USER:$ATLASSIAN_TOKEN" "$CONFLUENCE_API/content/$1?expand=body.storage" |
         jq .body.storage.value -r ||
@@ -29,6 +32,9 @@ confluence() {
 # Usage:    jira_search <jql>
 # Output:   <json>
 jira_search() {
+    is integer --name=arguments --max=1 --die -- $#
+    is set --name=jql --die -- "$1"
+    # processing
     install jq
     curl -u "$ATLASSIAN_USER:$ATLASSIAN_TOKEN" -H "Content-Type: application/json" -X GET "$JIRA_API/search/jql?jql=$1&fields=*all" |
         jq '.issues[]' ||
@@ -39,6 +45,9 @@ jira_search() {
 # Usage:    jira_get <issue-key>
 # Output:   <json>
 jira_get() {
+    is integer --name=arguments --max=1 --die -- $#
+    is set --name=issue-key --die -- "$1"
+    # processing
     curl -u "$ATLASSIAN_USER:$ATLASSIAN_TOKEN" -H "Content-Type: application/json" -X GET "$JIRA_API/issue/$1" ||
         die "Could not get Jira issue $1!"
 }
@@ -47,6 +56,9 @@ jira_get() {
 # Usage:    jira_create <json>
 # Output:   <issue-key>
 jira_create() {
+    is integer --name=arguments --max=1 --die -- $#
+    is set --name=json --die -- "$1"
+    # processing
     install jq
     curl -u "$ATLASSIAN_USER:$ATLASSIAN_TOKEN" -H "Content-Type: application/json" -X POST "$JIRA_API/issue/" -d "$1" |
         jq '.key' -r ||
@@ -56,6 +68,10 @@ jira_create() {
 # Update jira tickets
 # Usage:    jira_update <issue-key> <json>
 jira_update() {
+    is integer --name=arguments --max=2 --die -- $#
+    is set --name=issue-key --die -- "$1"
+    is set --name=json --die -- "$2"
+    # processing
     curl -u "$ATLASSIAN_USER:$ATLASSIAN_TOKEN" -H "Content-Type: application/json" -X PUT "$JIRA_API/issue/$1" -d "$1" ||
         die "Could not update Jira issue $1!"
 }

@@ -385,39 +385,6 @@ awk -v n="$line" '
 ((frame++))||true
 done
 }
-debug(){
-is integer --name=arguments --max=2 --die -- $#
-local level=1 func
-is integer -- "$1"&&level="$1"&&shift||true
-IFS=$' \t\n' read -r _ func _ <<<"$(caller 0)"
-local text
-text="$(input "$@")"
-test -n "$text"||return 0
-is set -- "$DEBUG"||return 0
-if is integer -- "$DEBUG";then
-is integer --min=0 --die -- "$DEBUG"
-((level<=DEBUG))||return 0
-else
-[[ $func =~ .*(${DEBUG//, /|}) ]]||return 0
-fi
-while IFS= read -r line;do
-printf "$CC_BLACK> %-20s %s$CC_RESET\n" "$func" "$line" >&2
-done <<<"$text"
-! command -v log >/dev/null||log debug "$func: $text"
-}
-die(){
-is integer --name=arguments --max=1 --die -- $#
-local text trap line func src
-text="$(input "$@")"
-[[ $text != *"Uncaught exception at"* ]]||trap=1
-echo -e "$CC_CRITICAL$text in ${FUNCNAME[1]}$CC_RESET" >&2
-_stacktrace "$trap"
-if command -v log >/dev/null;then
-log critical "$text"
-_stacktrace "$trap" 2>&1|log critical
-fi
-[[ $- =~ i ]]&&return 1||exit 1
-}
 use(){
 is integer --name=arguments --max=1 --die -- $#
 is set --name=module --die -- "$1"
@@ -530,6 +497,39 @@ fi
 error "Error: $res" >&2
 return 1
 fi
+}
+debug(){
+is integer --name=arguments --max=2 --die -- $#
+local level=1 func
+is integer -- "$1"&&level="$1"&&shift||true
+IFS=$' \t\n' read -r _ func _ <<<"$(caller 0)"
+local text
+text="$(input "$@")"
+test -n "$text"||return 0
+is set -- "$DEBUG"||return 0
+if is integer -- "$DEBUG";then
+is integer --min=0 --die -- "$DEBUG"
+((level<=DEBUG))||return 0
+else
+[[ $func =~ .*(${DEBUG//, /|}) ]]||return 0
+fi
+while IFS= read -r line;do
+printf "$CC_BLACK> %-20s %s$CC_RESET\n" "$func" "$line" >&2
+done <<<"$text"
+! command -v log >/dev/null||log debug "$func: $text"
+}
+die(){
+is integer --name=arguments --max=1 --die -- $#
+local text trap line func src
+text="$(input "$@")"
+[[ $text != *"Uncaught exception at"* ]]||trap=1
+echo -e "$CC_CRITICAL$text in ${FUNCNAME[1]}$CC_RESET" >&2
+_stacktrace "$trap"
+if command -v log >/dev/null;then
+log critical "$text"
+_stacktrace "$trap" 2>&1|log critical
+fi
+[[ $- =~ i ]]&&return 1||exit 1
 }
 help(){
 is integer --name=arguments --min=2 --max=4 --die -- $#
@@ -986,26 +986,38 @@ debug "Running in DEBUG=${DEBUG-} mode!"
 _log_manager&
 disown
 confluence(){
+is integer --name=arguments --max=1 --die -- $#
+is set --name=page-id --die -- "$1"
 install jq
 curl -H "Content-Type: application/json" -u "$ATLASSIAN_USER:$ATLASSIAN_TOKEN" "$CONFLUENCE_API/content/$1?expand=body.storage"|jq .body.storage.value -r||die "Could not read confluence page!"
 }
 jira_search(){
+is integer --name=arguments --max=1 --die -- $#
+is set --name=jql --die -- "$1"
 install jq
 curl -u "$ATLASSIAN_USER:$ATLASSIAN_TOKEN" -H "Content-Type: application/json" -X GET "$JIRA_API/search/jql?jql=$1&fields=*all"|jq '.issues[]'||die "Could not search for Jira issues using $1!"
 }
 jira_get(){
+is integer --name=arguments --max=1 --die -- $#
+is set --name=issue-key --die -- "$1"
 curl -u "$ATLASSIAN_USER:$ATLASSIAN_TOKEN" -H "Content-Type: application/json" -X GET "$JIRA_API/issue/$1"||die "Could not get Jira issue $1!"
 }
 jira_create(){
+is integer --name=arguments --max=1 --die -- $#
+is set --name=json --die -- "$1"
 install jq
 curl -u "$ATLASSIAN_USER:$ATLASSIAN_TOKEN" -H "Content-Type: application/json" -X POST "$JIRA_API/issue/" -d "$1"|jq '.key' -r||die "Could not create Jira issue!"
 }
 jira_update(){
+is integer --name=arguments --max=2 --die -- $#
+is set --name=issue-key --die -- "$1"
+is set --name=json --die -- "$2"
 curl -u "$ATLASSIAN_USER:$ATLASSIAN_TOKEN" -H "Content-Type: application/json" -X PUT "$JIRA_API/issue/$1" -d "$1"||die "Could not update Jira issue $1!"
 }
 use module/software
 mongo(){
-num_parameters --min 2 --max 2 --die "Mongo needs two parameters: Usage mongo <database> <command>" "$@"
+is integer --name=arguments --max=2 --die -- $#
+is set --name=command --die -- "$2"
 local cluster key
 install mongosh
 cluster="$(sed 's/^[^.]*\.//' <<<"$server")"
@@ -1016,13 +1028,14 @@ command mongosh "mongodb://$(hash MONGO_ADMIN_USERPASS get "$cluster")@$server:2
 postgres(){
 echo "TODO"
 }
-declare -F "num_parameters" >/dev/null||source "$BASHLIB_HOME"/module/validator
 dns_list(){
+is integer --name=arguments --max=1 --die -- $#
 echo $'NAME\tTYPE\tCONTENT\tTTL'
 powerdns "$1"|tail -n +2||true
 plusserver_dns "$1"|tail -n +2||true
 }
 powerdns(){
+is integer --name=arguments --max=1 --die -- $#
 if [ -z "$POWERDNS_API" ]||[ -z "$POWERDNS_TOKEN" ];then
 debug "Disabled because POWERDNS_API and POWERDNS_TOKEN are not both set"
 return 0
@@ -1031,6 +1044,7 @@ echo $'NAME\tTYPE\tCONTENT\tTTL'
 curl -s -H "X-API-Key:$POWERDNS_TOKEN" "$POWERDNS_API/servers/localhost/search-data?q=*&max=10000"|jq -r '.[] | select(.object_type == "record" and .disabled == false) | [(.name | sub("\\.$"; "")), .type, (.content | sub("\\.$"; "")), .ttl] | @tsv'|grep -E "$1"
 }
 plusserver_dns(){
+is integer --name=arguments --max=1 --die -- $#
 if [ -z "$PLUSSERVER_PORTAL" ];then
 debug "Disabled because PLUSSERVER_PORTAL is not set"
 return 0
@@ -1050,12 +1064,14 @@ rename name,NAME,record_type,TYPE,record_data,CONTENT,record_ttl,TTL \
 "$list"|awk 'NR == 1 || /'"$1"'/'
 }
 basename(){
+is integer --name=arguments --max=1 --die -- $#
 local path
 path="$(input "$@")"
 path="${path%/}"
 echo "${path##*/}"
 }
 dirname(){
+is integer --name=arguments --max=1 --die -- $#
 local path
 path="$(input "$@")"
 [[ $path == '/' ]]&&echo '/'&&return 0
@@ -1064,6 +1080,7 @@ path="$(input "$@")"
 echo "${path%/*}"
 }
 extname(){
+is integer --name=arguments --max=1 --die -- $#
 local path
 path="$(input "$@")"
 [[ $path =~ ^\. ]]&&echo ''&&return
@@ -1071,6 +1088,7 @@ path="$(input "$@")"
 echo ".${path##*.}"
 }
 script_path(){
+is integer --name=arguments --max=0 --die -- $#
 dirname "$(readlink -f "${BASH_SOURCE[-1]:-$(pwd)/x}")"
 }
 declare -F "color_256" >/dev/null||source "$BASHLIB_HOME"/module/color
@@ -1079,25 +1097,20 @@ local timeout abort
 eval set -- "$(option_parse $'a abort -\nT timeout +' "$@")"
 while true;do
 case "$1" in
--T|--timeout)timeout="$(duration_format seconds "$2")"
-shift 2
-;;
--a|--abort)abort=1
-shift
-;;
---)shift
-break
-;;
+-T|--timeout)timeout="$(duration_format seconds "$2")"&&shift 2;;
+-a|--abort)abort=1&&shift;;
+--)shift&&break;;
 *)die "$(gettext "Unrecognized option"): $1"
 esac
 done
+is integer --name=arguments --max=1 --die -- $#
 local text length
 text="$(input "$@")"
-if [ -z "$text" ];then
-[ -n "$timeout" ]&&[ -z "$abort" ]&&text="$(gettext 'Please wait to go on')"||text="$(gettext 'Press any key to continue...')"
+if is empty -- "$text";then
+is set -- "$timeout"&&is empty -- "$abort"&&text="$(gettext 'Please wait to go on')"||text="$(gettext 'Press any key to continue...')"
 fi
 echo -en "$CC_NOTICE$text$CC_RESET "
-if [ -z "$timeout" ];then
+if is empty -- "$timeout";then
 read -n 1 -s -r _ </dev/tty
 else
 stty -echo </dev/tty
@@ -1122,26 +1135,19 @@ local default timeout
 eval set -- "$(option_parse $'t true -\nf false -\nT timeout +' "$@")"
 while true;do
 case "$1" in
--t|--true)default=1
-shift
-;;
--f|--false)default=0
-shift
-;;
--T|--timeout)timeout="$(duration_format seconds "$2")"
-shift 2
-;;
---)shift
-break
-;;
+-t|--true)default=1&&shift;;
+-f|--false)default=0&&shift;;
+-T|--timeout)timeout="$(duration_format seconds "$2")"&&shift 2;;
+--)shift&&break;;
 *)die "$(gettext "Unrecognized option"): $1"
 esac
 done
+is integer --name=arguments --max=1 --die -- $#
 local prompt
 prompt="${1:-$(gettext "Should this be done")}"
-local char="" seq itext invalid rc
+local char="" seq i_text invalid rc
 local countdown="$timeout"
-if [ -n "$default" ];then
+if is set -- "$default";then
 ((default==0))&&prompt="$prompt [$(gettext "No")]"||prompt="$prompt [$(gettext "Yes")]"
 fi
 echo -en "$CC_NOTICE$prompt?$CC_RESET " >/dev/tty
@@ -1157,8 +1163,8 @@ rc=0
 if [ -n "$timeout" ];then
 ((countdown--))
 if ((countdown>0));then
-itext="  $(duration_format human "$countdown")     "
-echo -ne "$itext$(printf '\b%.0s' $(seq 1 ${#itext}))" >/dev/tty
+i_text="  $(duration_format human "$countdown")     "
+echo -ne "$i_text$(printf '\b%.0s' $(seq 1 ${#i_text}))" >/dev/tty
 continue
 fi
 else
@@ -1176,9 +1182,9 @@ echo -e "$(gettext "No")     " >/dev/tty
 stty echo </dev/tty
 return 1
 fi
-elif [ -n "$itext" ];then
-itext="$(gettext 'value needed')"
-echo -en "   $CC_RED$itext$CC_RESET$(printf '\b%.0s' $(seq 1 $((${#itext}+3))))" >/dev/tty
+elif [ -n "$i_text" ];then
+i_text="$(gettext 'value needed')"
+echo -en "   $CC_RED$i_text$CC_RESET$(printf '\b%.0s' $(seq 1 $((${#i_text}+3))))" >/dev/tty
 invalid=1
 fi
 elif [[ $char == $'\033' ]];then
@@ -1195,11 +1201,11 @@ echo -e "$(gettext "No")" >/dev/tty
 stty echo </dev/tty
 return 1
 else
-itext="$(gettext 'invalid character')"
-echo -en "   $CC_RED$itext$CC_RESET$(printf '\b%.0s' $(seq 1 $((${#itext}+3))))" >/dev/tty
+i_text="$(gettext 'invalid character')"
+echo -en "   $CC_RED$i_text$CC_RESET$(printf '\b%.0s' $(seq 1 $((${#i_text}+3))))" >/dev/tty
 invalid=1
 fi
-itext=""
+i_text=""
 done
 stty echo </dev/tty
 }
@@ -1220,24 +1226,16 @@ local default empty negative timeout
 eval set -- "$(option_parse $'e empty -\nd default +\nT timeout +\nn allow-negative -' "$@")"
 while true;do
 case "$1" in
--e|--empty)empty=1
-shift
-;;
--d|--default)default="$2"
-shift 2
-;;
--T|--timeout)timeout="$(duration_format seconds "$2")"
-shift 2
-;;
--n|--allow-negative)negative=1
-shift
-;;
---)shift
-break
-;;
+-e|--empty)empty=1&&shift;;
+-d|--default)default="$2"&&shift 2;;
+-T|--timeout)timeout="$(duration_format seconds "$2")"&&shift 2;;
+-n|--allow-negative)negative=1&&shift;;
+--)shift&&break;;
 *)die "$(gettext "Unrecognized option"): $1"
 esac
 done
+is integer --name=arguments --max=2 --die -- $#
+is empty -- "$1"||is enum --name=format --allow="string integer number float password time text editor" --die -- "$1"
 local prompt pattern mask
 local format="$1"
 case $format in
@@ -1265,13 +1263,11 @@ time)prompt="${2:-$(gettext "Enter time")}"
 pattern="^([0-1]?[0-9]|2[0-3])(:([0-5]?[0-9])?)?$"
 final="^([0-1][0-9]|2[0-3]):[0-5][0-9]$"
 ;;
-text)prompt="${2:-$(gettext "Enter text (end with empty line)")}"
-;;
-editor)prompt="${2:-$(gettext "Enter text here")}"
-;;
+text)prompt="${2:-$(gettext "Enter text (end with empty line)")}";;
+editor)prompt="${2:-$(gettext "Enter text here")}";;
 *)prompt="${2:-$(gettext "Enter short line")}"
 esac
-local input="" char="" seq invalid itext utext q
+local input="" char="" seq invalid i_text u_text q
 local countdown="$timeout"
 local nl=$'\n'
 [ -z "$default" ]&&[ -z "$empty" ]||prompt="$prompt [$default]"
@@ -1316,8 +1312,8 @@ rc=0
 if [ -n "$timeout" ];then
 ((countdown--))
 if ((countdown>0));then
-itext="  $(duration_format human "$countdown")     "
-echo -ne "$itext$(printf '\b%.0s' $(seq 1 ${#itext}))" >/dev/tty
+i_text="  $(duration_format human "$countdown")     "
+echo -ne "$i_text$(printf '\b%.0s' $(seq 1 ${#i_text}))" >/dev/tty
 continue
 fi
 else
@@ -1333,8 +1329,8 @@ if [[ $input =~ $final ]];then
 echo "          " >/dev/tty
 break
 else
-itext="$(gettext 'incomplete')"
-echo -en "   $CC_RED$itext$CC_RESET$(printf '\b%.0s' $(seq 1 $((${#itext}+3))))" >/dev/tty
+i_text="$(gettext 'incomplete')"
+echo -en "   $CC_RED$i_text$CC_RESET$(printf '\b%.0s' $(seq 1 $((${#i_text}+3))))" >/dev/tty
 invalid=1
 fi
 elif [ -n "$input" ];then
@@ -1347,9 +1343,9 @@ break
 elif [ -n "$empty" ];then
 echo >/dev/tty
 break
-elif [ -n "$itext" ];then
-itext="$(gettext 'value needed')"
-echo -en "   $CC_RED$itext$CC_RESET$(printf '\b%.0s' $(seq 1 $((${#itext}+3))))" >/dev/tty
+elif [ -n "$i_text" ];then
+i_text="$(gettext 'value needed')"
+echo -en "   $CC_RED$i_text$CC_RESET$(printf '\b%.0s' $(seq 1 $((${#i_text}+3))))" >/dev/tty
 invalid=1
 fi
 elif [[ $char == $'\177' ]];then
@@ -1369,8 +1365,8 @@ if [ "$format" = "float" ]&&[ "$char" = "," ];then
 char=.
 fi
 if [[ ! "$input$char" =~ $pattern ]];then
-itext="$(gettext 'invalid character')"
-echo -en "   $CC_RED$itext$CC_RESET$(printf '\b%.0s' $(seq 1 $((${#itext}+3))))" >/dev/tty
+i_text="$(gettext 'invalid character')"
+echo -en "   $CC_RED$i_text$CC_RESET$(printf '\b%.0s' $(seq 1 $((${#i_text}+3))))" >/dev/tty
 invalid=1
 continue
 fi
@@ -1380,20 +1376,20 @@ input+="$char"
 if [ "$format" = "password" ];then
 q=$(_password_strength "$input")
 if ((q<25));then
-itext="$CC_RED$(gettext 'bad')$CC_RESET"
+i_text="$CC_RED$(gettext 'bad')$CC_RESET"
 elif ((q<50));then
-itext="$CC_YELLOW$(gettext 'weak')$CC_RESET"
+i_text="$CC_YELLOW$(gettext 'weak')$CC_RESET"
 elif ((q<75));then
-itext="$(gettext 'good')"
+i_text="$(gettext 'good')"
 else
-itext="$CC_GREEN$(gettext 'strong')$CC_RESET"
+i_text="$CC_GREEN$(gettext 'strong')$CC_RESET"
 fi
-utext="$(uncolorize "$itext")"
-echo -en "   $itext$(printf '\b%.0s' $(seq 1 $((${#utext}+3))))" >/dev/tty
+u_text="$(uncolorize "$i_text")"
+echo -en "   $i_text$(printf '\b%.0s' $(seq 1 $((${#u_text}+3))))" >/dev/tty
 invalid=1
 fi
 fi
-itext=""
+i_text=""
 done
 stty echo </dev/tty
 debug 4 "Octal result: $(od -An -to1 -v <<<"$input")"
@@ -1434,29 +1430,20 @@ local end default timeout
 eval set -- "$(option_parse $'t title +\nx exit +\nd default +\nT timeout +' "$@")"
 while true;do
 case "$1" in
--t|--title)notice "$2" >/dev/tty
-shift 2
-;;
--d|--default)default="$2"
-shift 2
-;;
--x|--exit)end="$2"
-shift 2
-;;
--T|--timeout)timeout="$(duration_format seconds "$2")"
-shift 2
-;;
---)shift
-break
-;;
+-t|--title)notice "$2" >/dev/tty&&shift 2;;
+-d|--default)default="$2"&&shift 2;;
+-x|--exit)end="$2"&&shift 2;;
+-T|--timeout)timeout="$(duration_format seconds "$2")"&&shift 2;;
+--)shift&&break;;
 *)die "$(gettext "Unrecognized option"): $1"
 esac
 done
-local list line key display num=0 pattern max
+local list max length
 list="$(input_lines "$@")"
 list="$(trim "$list"|grep -v ^#)"
 max="$(wc -l <<<"$list")"
 length="${#max}"
+local line key display num=0 pattern
 while read -r line;do
 num=$((num+1))
 IFS="|" read -r key display <<<"$line"
@@ -1466,7 +1453,7 @@ if [ -n "$default" ];then
 fi
 printf "  %0${length}d) $(trim "${display:-$key}")\n" "$num" >/dev/tty
 done <<<"$list"
-[ -z "$default" ]||is_integer "$default"||die "Default option $default not recognized."
+is empty -- "$default"||is integer -- "$default"||die "Default option $default not recognized."
 [ -z "$end" ]||printf "  %${length}s) $end\n" x >/dev/tty
 if ((length==1));then
 pattern="[1-$max]"
@@ -1485,7 +1472,7 @@ fi
 ((length==1))||pattern="(0|$pattern)"
 [ -z "$end" ]||pattern="(x|$pattern)"
 pattern="^$pattern$"
-local input="" char="" itext invalid
+local input="" char="" i_text invalid
 local countdown="$timeout"
 local question="$(gettext "Select one of the above options")"
 [ -z "$default" ]&&timeout=""||question="$question [$default]"
@@ -1502,8 +1489,8 @@ rc=0
 if [ -n "$timeout" ];then
 ((countdown--))
 if ((countdown>0));then
-itext="  $(duration_format human "$countdown")     "
-echo -ne "$itext$(printf '\b%.0s' $(seq 1 ${#itext}))" >/dev/tty
+i_text="  $(duration_format human "$countdown")     "
+echo -ne "$i_text$(printf '\b%.0s' $(seq 1 ${#i_text}))" >/dev/tty
 continue
 fi
 else
@@ -1522,8 +1509,8 @@ input="$default"
 echo "          " >/dev/tty
 break
 else
-itext="$(gettext 'value needed')"
-echo -en "   $CC_RED$itext$CC_RESET$(printf '\b%.0s' $(seq 1 $((${#itext}+3))))" >/dev/tty
+i_text="$(gettext 'value needed')"
+echo -en "   $CC_RED$i_text$CC_RESET$(printf '\b%.0s' $(seq 1 $((${#i_text}+3))))" >/dev/tty
 invalid=1
 fi
 elif [[ $char == $'\177' ]];then
@@ -1543,8 +1530,8 @@ stty echo </dev/tty
 return 0
 else
 if [[ ! "$input$char" =~ $pattern ]];then
-itext="$(gettext 'invalid character')"
-echo -en "   $CC_RED$itext$CC_RESET$(printf '\b%.0s' $(seq 1 $((${#itext}+3))))" >/dev/tty
+i_text="$(gettext 'invalid character')"
+echo -en "   $CC_RED$i_text$CC_RESET$(printf '\b%.0s' $(seq 1 $((${#i_text}+3))))" >/dev/tty
 invalid=1
 continue
 fi
@@ -1564,42 +1551,32 @@ local end title _default opt loop
 eval set -- "$(option_parse $'t title +\nd default +\nT timeout +\nl loop -' "$@")"
 while true;do
 case "$1" in
--t|--title)title="-t$2" >/dev/tty
-shift 2
-;;
--d|--default)_default="$2" >/dev/tty
-shift 2
-;;
--T|--timeout)opt="-T $2 " >/dev/tty
-shift 2
-;;
--l|--loop)loop=1
-shift
-;;
---)shift
-break
-;;
+-t|--title)title="-t$2" >/dev/tty&&shift 2;;
+-d|--default)_default="$2" >/dev/tty&&shift 2;;
+-T|--timeout)opt="-T $2 " >/dev/tty&&shift 2;;
+-l|--loop)loop=1&&shift;;
+--)shift&&break;;
 *)die "$(gettext "Unrecognized option"): $1"
 esac
 done
-local raw list task num newlist cmd name
+local raw list task num new_list cmd name
 find /dev/shm -regex ".*/$0_tasks_[0-9]*" -mmin +60 -delete 2>/dev/null||true
-newlist="$(mktemp -m "tasks_$$")"
+new_list="$(mktemp -m "tasks_$$")"
 raw="$(input_lines "$@"|grep -v '^[[:space:]]*#')"||true
 while true;do
 list="$raw"
 while grep -qv '|' <<<"$list";do
-: >"$newlist"
+: >"$new_list"
 while IFS= read -r line;do
 IFS='|' read -r cmd name <<<"$line"
 if [ -n "$name" ];then
-echo "$line" >>"$newlist"
+echo "$line" >>"$new_list"
 else
-$cmd </dev/null >>"$newlist"||die "$(gettext "Could not get task list from command"): $cmd"
+$cmd </dev/null >>"$new_list"||die "$(gettext "Could not get task list from command"): $cmd"
 fi
 done <<<"$list"
-list="$(sed '/^[[:space:]]*$/d' "$newlist")"
-rm "$newlist"
+list="$(sed '/^[[:space:]]*$/d' "$new_list")"
+rm "$new_list"
 if [ -z "$list" ];then
 ok "$(gettext "No tasks found to be executed.")"
 return
@@ -1607,7 +1584,7 @@ fi
 done
 _default="$(value_if_variable "$_default")"
 task=$(choose "$title" -x "$(gettext "Exit")" $opt -d "$_default" <<<"$list")
-debug "choosen $task"
+debug "chosen $task"
 [[ $task != "exit" ]]||break
 local error
 if ! eval "$task";then
@@ -1734,6 +1711,8 @@ shopt -s nocasematch
 }
 mattermost_post_ids=""
 mattermost(){
+is integer --name=arguments --max=3 --die -- $#
+is set --name=channel-name --die -- "$1"
 if [ -z "$MATTERMOST_API" ]||[ -z "$MATTERMOST_TOKEN" ];then
 debug "Disabled because MATTERMOST_API and MATTERMOST_TOKEN are not both set"
 return 0
@@ -1780,42 +1759,18 @@ esac
 json="$(echo "$json"|jq --arg i "$color" '. + {color: $i}')"
 shift 2
 ;;
---text)json="$(echo "$json"|jq --arg i "$2" '. + {text: $i}')"
-shift 2
-;;
---author)json="$(echo "$json"|jq --arg i "$2" '. + {author_name: $i}')"
-shift 2
-;;
---avatar)json="$(echo "$json"|jq --arg i "$2" '. + {author_icon: $i}')"
-shift 2
-;;
---home)json="$(echo "$json"|jq --arg i "$2" '. + {author_link: $i}')"
-shift 2
-;;
---title)json="$(echo "$json"|jq --arg i "$2" '. + {title: $i}')"
-shift 2
-;;
---link)json="$(echo "$json"|jq --arg i "$2" '. + {title_link: $i}')"
-shift 2
-;;
---image)json="$(echo "$json"|jq --arg i "$2" '. + {image_url: $i}')"
-shift 2
-;;
---thumb)json="$(echo "$json"|jq --arg i "$2" '. + {thumb_url: $i}')"
-shift 2
-;;
---fields)fields="$2"
-shift 2
-;;
---footer)json="$(echo "$json"|jq --arg i "$2" '. + {footer: $i}')"
-shift 2
-;;
---logo)json="$(echo "$json"|jq --arg i "$2" '. + {footer_image: $i}')"
-shift 2
-;;
---)shift
-break
-;;
+--text)json="$(echo "$json"|jq --arg i "$2" '. + {text: $i}')"&&shift 2;;
+--author)json="$(echo "$json"|jq --arg i "$2" '. + {author_name: $i}')"&&shift 2;;
+--avatar)json="$(echo "$json"|jq --arg i "$2" '. + {author_icon: $i}')"&&shift 2;;
+--home)json="$(echo "$json"|jq --arg i "$2" '. + {author_link: $i}')"&&shift 2;;
+--title)json="$(echo "$json"|jq --arg i "$2" '. + {title: $i}')"&&shift 2;;
+--link)json="$(echo "$json"|jq --arg i "$2" '. + {title_link: $i}')"&&shift 2;;
+--image)json="$(echo "$json"|jq --arg i "$2" '. + {image_url: $i}')"&&shift 2;;
+--thumb)json="$(echo "$json"|jq --arg i "$2" '. + {thumb_url: $i}')"&&shift 2;;
+--fields)fields="$2"&&shift 2;;
+--footer)json="$(echo "$json"|jq --arg i "$2" '. + {footer: $i}')"&&shift 2;;
+--logo)json="$(echo "$json"|jq --arg i "$2" '. + {footer_image: $i}')"&&shift 2;;
+--)shift&&break;;
 *)die "$(gettext "Unrecognized option"): $1"
 esac
 done
@@ -1843,6 +1798,8 @@ break
 *)die "$(gettext "Unrecognized option"): $1"
 esac
 done
+is integer --name=arguments --max=1 --die -- $#
+is set --name=emoji -- "$1"
 emoji=$1
 case $1 in
 check|ok)emoji=white_check_mark
@@ -1866,6 +1823,7 @@ if [ -z "$MATTERMOST_API" ]||[ -z "$MATTERMOST_TOKEN" ];then
 debug "Disabled because MATTERMOST_API and MATTERMOST_TOKEN are not both set"
 return 0
 fi
+is integer --name=arguments --max=2 --die -- $#
 local line main channel post
 while read -r line;do
 [ -n "$line" ]||continue
@@ -1919,8 +1877,9 @@ done||(($?==141))||die "$(gettext "Could not get exporters from Prometheus!")"
 done
 }
 scrape(){
+is integer --name=arguments --max=2 --die -- $#
+is set --name=url --die -- "$1"
 local url="$1"
-num_parameters "$@" --min 1 --max 2 --die "Wrong number of parameters for scrape!"
 debug "Scrape the Prometheus exporter at $1"
 local metrics
 metrics="$(curl "$url"|grep -Ev '^($|#)'||die "$(eval_gettext 'Could not scrape the Prometheus exporter at $url!')")"
@@ -1951,12 +1910,8 @@ shift 2
 -n|--net)[ -z "$2" ]||filter="$filter | select(.labels.net? // \"\"|test(\"$2\"; \"i\"))"
 shift 2
 ;;
--q|--quiet)quiet=1
-shift
-;;
---)shift
-break
-;;
+-q|--quiet)quiet=1&&shift;;
+--)shift&&break;;
 *)die "$(gettext "Unrecognized option"): $1"
 esac
 done
@@ -2016,6 +1971,8 @@ if [ -z "$PROMETHEUS_API" ];then
 debug "Disabled because PROMETHEUS_API is not set"
 return 0
 fi
+is integer --name=arguments --max=1 --die -- $#
+is set --name=prom-ql --die -- "$1"
 local api
 api="${PROMETHEUS_API%% *}"
 curl "$api/query?query=$(echo "$1"|urlencode)"
@@ -2042,6 +1999,7 @@ remote /etc/prometheus/config-builder/update >/dev/null
 done
 }
 ip_intern(){
+is integer --name=arguments --max=1 --die -- $#
 case ${1-} in
 data)echo -e "$(gettext "IP\tInterface")"
 ip -o addr show|awk 'BEGIN { OFS="\t" } $2 != "lo" {print $4, $2}'
@@ -2050,7 +2008,8 @@ ip -o addr show|awk 'BEGIN { OFS="\t" } $2 != "lo" {print $4, $2}'
 esac
 }
 ip_pattern(){
-num_parameters --min 1 --max 2 --die "A type has to be defined, an ip is optional." -- "$@"
+is integer --name=arguments --max=2 --die -- $#
+is enum --name=type --allow="provider segment vmware" --die -- "$1"
 local type=$1
 local ip=${2-}
 [ -n "$ip" ]||ip="$(ip_intern)"
@@ -2069,7 +2028,8 @@ return 1
 }
 _ip_extern_json=
 ip_extern(){
-num_parameters --min 1 --max 1 --die "A format is needed." -- "$@"
+is integer --name=arguments --max=1 --die -- $#
+is enum --name=format --allow="data country countryCode region regionName city zip lat lon timezone isp org as ip" --die -- "$1"
 [ -n "$_ip_extern_json" ]||_ip_extern_json="$(curl http://ip-api.com/json)"
 case ${1-} in
 data)jq -r 'with_entries(if .key == "query" then .key = "ip" else . end) | to_entries[] | "\(.key)\t\(.value)"' <<<"$_ip_extern_json";;
@@ -2080,7 +2040,8 @@ esac
 detect_extern_ip(){ _deprecated "use ip_extern instead";}
 declare -A _os_detected
 os_detect(){
-num_parameters --min 1 --max 1 --die "A format is needed." -- "$@"
+is integer --name=arguments --max=1 --die -- $#
+is enum --name=format --allow="data info os base base_revision_name base_revision_number distribution revision_number revision_name kernel cpu_model cpu_num architecture machine_id virtual_machine" --die -- "$1"
 if [ ${#_os_detected[@]} -eq 0 ];then
 _os_detected["os"]="$(case "$(uname -s)" in
 "Darwin")echo MacOS;;
@@ -2194,11 +2155,11 @@ break
 esac
 done
 debug "collect into $collect ($free_operator $free_percent%/${free_bytes}B)"
-local firstline="" percent mount device limit_c limit_e limit_w limit_o
+local firstLine="" percent mount device limit_c limit_e limit_w limit_o
 IFS=$'\n'
 for line in $(df -h $opt -x tmpfs -x efivarfs -x devtmpfs -x squashfs "$@");do
-if [ -z "$firstline" ];then
-firstline=1
+if [ -z "$firstLine" ];then
+firstLine=1
 echo -e "$CC_INVERSE$line$CC_RESET"
 else
 percent=$(echo "$line"|xargs echo|cut -d' ' -f5|sed 's/%//')
@@ -2238,15 +2199,15 @@ done
 unset IFS
 }
 uses_lvm(){
+is integer --name=arguments --max=0 --die -- $#
 command -v vgs >/dev/null&&sudo vgs --noheadings >/dev/null&&[ -n "$(sudo vgs --noheadings)" ] &>/dev/null
 }
 has_tty(){
+is integer --name=arguments --max=0 --die -- $#
 { : >/dev/tty;} &>/dev/null
 }
-is_bash(){
-[[ -n ${BASH_VERSION:-} ]]
-}
 sudo_allow(){
+is integer --name=arguments --max=1 --die -- $#
 ((EUID!=0))||return 0
 command -v sudo >/dev/null||return 0
 command sudo -ln "$@" >/dev/null||die "User $(whoami) is not allowed to call 'sudo $*', but this is neccessary!"
@@ -2259,6 +2220,8 @@ else
 fi
 }
 repeat(){
+is integer --name=num --min=0 --die -- "$1"
+is set --name=command --die -- "$2"
 local -i n=$1
 ((n>0))||return
 shift
@@ -2268,6 +2231,8 @@ debug 3 "call #$n: $*"
 done
 }
 function retry {
+is integer --name=num --min=0 --die -- "$1"
+is set --name=command --die -- "$2"
 local retries=$1
 shift
 local count=0 exit wait
@@ -2292,6 +2257,7 @@ pid=$(cat "$lockfile")||true
 ([ -n "$pid" ]&&kill -0 "$pid" 2>/dev/null)||rm -f "$lockfile" "$lockfile.$pid"||die "$(gettext "Failed to remove lockfile"): $lockfile"
 }
 lock(){
+is integer --name=arguments --max=0 --die -- $#
 local lockfile logged pid
 lockfile="$(mktemp 'lockfile')"
 echo $$ >"$lockfile.$$" 2>/dev/null||die "$(gettext "Failed to create PID lockfile"): $lockfile.$$"
@@ -2310,6 +2276,7 @@ done
 trap_add unlock EXIT
 }
 lock_exit(){
+is integer --name=arguments --max=0 --die -- $#
 local lockfile logged pid
 lockfile="$(mktemp 'lockfile')"
 echo $$ >"$lockfile.$$" 2>/dev/null||die "$(gettext "Failed to create PID lockfile"): $lockfile.$$"
@@ -2322,6 +2289,7 @@ fi
 trap_add unlock EXIT
 }
 unlock(){
+is integer --name=arguments --max=0 --die -- $#
 local lockfile
 lockfile="$(mktemp 'lockfile')"
 [ ! -e "$lockfile.$$" ]||rm -f "$lockfile.$$" 2>/dev/null
@@ -2384,6 +2352,7 @@ source "$shm_env" 2>/dev/null||true
 fi
 }
 env_clean(){
+is integer --name=arguments --max=1 --die -- $#
 debug "env_clean $*"
 eval set -- "$(option_parse $'d disk -\np path +' "$@")"
 local opt="-m"
@@ -2420,7 +2389,8 @@ break
 *)shift
 esac
 done
-num_parameters --min 2 --die "At least <ident> <command> is needed!" -- "$@"
+is set --name=ident --die -- "$1"
+is set --name=command --die -- "$2"
 local ident=$1
 shift||true
 local command=$1
@@ -2432,6 +2402,7 @@ env_store $opt "$ident" "$@"
 declare -A _async_running
 STEPS_VARIABLES=
 steps_init(){
+is integer --name=arguments --max=0 --die -- $#
 declare -g -A _STEPS
 env_restore steps
 declare -p _STEPS
@@ -2439,8 +2410,9 @@ env_store steps _STEPS "$STEPS_VARIABLES"
 echo "$(gettext "Work steps are logged so that you can resume work mid-process")..." >&2
 }
 steps_check(){
+is integer --name=arguments --max=1 --die -- $#
+is set --name=name --die -- "$1"
 local name="$1"
-num_parameters --min 1 --max 1 --die "Only an <ident> is needed, but must be there!" -- "$@"
 declare -p _STEPS 2>/dev/null|grep -q 'declare -A'||return 1
 if [ -n "${_STEPS["$name"]}" ];then
 echo "$(eval_gettext 'Job $name already done in this run, skipping')" >&2
@@ -2450,8 +2422,9 @@ return 1
 fi
 }
 steps_done(){
+is integer --name=arguments --max=1 --die -- $#
+is set --name=name --die -- "$1"
 local name="$1"
-num_parameters --min 0 --max 1 --die "Only an <ident> is needed!" -- "$@"
 declare -p _STEPS 2>/dev/null|grep -q 'declare -A'||return
 if [ -n "$1" ];then
 _STEPS["$name"]=1
@@ -2463,11 +2436,12 @@ env_clean steps
 fi
 }
 sync(){
-num_parameters --min 1 --die "At least a <command> is needed!" -- "$@"
+is set --name=command --die -- "$1"
 sync_name "$1" "$@"
 }
 sync_name(){
-num_parameters --min 2 --die "At least a <name> and <command> is needed!" -- "$@"
+is set --name=name --die -- "$1"
+is set --name=command --die -- "$2"
 local name=$1
 shift
 steps_check "$name"&&return||true
@@ -2478,11 +2452,12 @@ declare -p _STEPS 2>/dev/null|grep -q 'declare -A'&&echo "$(eval_gettext 'Starte
 steps_done "$name"
 }
 async(){
-num_parameters --min 1 --die "At least a <command> is needed!" -- "$@"
+is set --name=command --die -- "$1"
 async_name "$1" "$@"
 }
 async_name(){
-num_parameters --min 2 --die "At least a <name> and <command> is needed!" -- "$@"
+is set --name=name --die -- "$1"
+is set --name=command --die -- "$2"
 local name=$1
 shift
 ! steps_check "$name"||return
@@ -2536,11 +2511,12 @@ done
 env_clean queue
 }
 queue(){
-num_parameters --min 1 --die "At least a <command> is needed!" -- "$@"
+is set --name=command --die -- "$1"
 queue_name "$1" "$@"
 }
 queue_name(){
-num_parameters --min 2 --die "At least a <name> and <command> is needed!" -- "$@"
+is set --name=name --die -- "$1"
+is set --name=command --die -- "$2"
 ! steps_check "$1"||return 0
 local entry
 entry=$(printf "%s\x1f" "$@")
@@ -2552,10 +2528,13 @@ _queue_control_pid=$!
 fi
 }
 queue_running(){
+is integer --name=arguments --max=0 --die -- $#
 [ -n "$_queue_control_pid" ]&&kill -0 "$_queue_control_pid"
 }
 random(){
-num_parameters --min 1 --die "At least a <pattern> is needed!" -- "$@"
+is integer --name=arguments --max=2 --die -- $#
+is set --name=pattern --die -- "$1"
+is set -- "$2"&&is integer --name=length --min=0 --die -- "$2"
 local pattern="$1"
 local length=${2:-16}
 local result=""
@@ -2580,24 +2559,15 @@ result+="$(head /dev/urandom|tr -dc "$pattern")"
 done
 echo "${result:0:length}"
 }
-declare -F "num_parameters" >/dev/null||source "$BASHLIB_HOME"/module/validator
 remote(){
 local _login host jump
 eval set -- "$(option_parse $'+l login +\nh host +\nj jump +' "$@")"
 while true;do
 case "$1" in
--l|--login)_login="$2"
-shift 2
-;;
--h|--host)host="$2"
-shift 2
-;;
--j|--jump)jump="$2"
-shift 2
-;;
---)shift
-break
-;;
+-l|--login)_login="$2"&&shift 2;;
+-h|--host)host="$2"&&shift 2;;
+-j|--jump)jump="$2"&&shift 2;;
+--)shift&&break;;
 *)die "$(gettext "Unrecognized option"): $1"
 esac
 done
@@ -2618,18 +2588,10 @@ local _login host jump
 eval set -- "$(option_parse $'+l login +\nh host +\nj jump +' "$@")"
 while true;do
 case "$1" in
--l|--login)_login="$2"
-shift 2
-;;
--h|--host)host="$2"
-shift 2
-;;
--j|--jump)jump="$2"
-shift 2
-;;
---)shift
-break
-;;
+-l|--login)_login="$2"&&shift 2;;
+-h|--host)host="$2"&&shift 2;;
+-j|--jump)jump="$2"&&shift 2;;
+--)shift&&break;;
 *)die "$(gettext "Unrecognized option"): $1"
 esac
 done
@@ -2650,18 +2612,10 @@ local _login host jump
 eval set -- "$(option_parse $'+l login +\nh host +\nj jump +' "$@")"
 while true;do
 case "$1" in
--l|--login)_login="$2"
-shift 2
-;;
--h|--host)host="$2"
-shift 2
-;;
--j|--jump)jump="$2"
-shift 2
-;;
---)shift
-break
-;;
+-l|--login)_login="$2"&&shift 2;;
+-h|--host)host="$2"&&shift 2;;
+-j|--jump)jump="$2"&&shift 2;;
+--)shift&&break;;
 *)die "$(gettext "Unrecognized option"): $1"
 esac
 done
@@ -2682,21 +2636,14 @@ local _login host jump
 eval set -- "$(option_parse $'+l login +\nh host +\nj jump +' "$@")"
 while true;do
 case "$1" in
--l|--login)_login="$2"
-shift 2
-;;
--h|--host)host="$2"
-shift 2
-;;
--j|--jump)jump="$2"
-shift 2
-;;
---)shift
-break
-;;
+-l|--login)_login="$2"&&shift 2;;
+-h|--host)host="$2"&&shift 2;;
+-j|--jump)jump="$2"&&shift 2;;
+--)shift&&break;;
 *)die "$(gettext "Unrecognized option"): $1"
 esac
 done
+is integer --name=arguments --max=1 --die -- $#
 _login=${_login:-${login:-$REMOTE_LOGIN_DEFAULT}}
 host=${host:-$server}
 local ssh="$_login@$host"
@@ -2712,25 +2659,15 @@ local _login host jump opt
 eval set -- "$(option_parse $'+l login +\nh host +\nj jump +\nA forward-agent -' "$@")"
 while true;do
 case "$1" in
--l|--login)_login="$2"
-shift 2
-;;
--h|--host)host="$2"
-shift 2
-;;
--j|--jump)jump="$2"
-shift 2
-;;
--A|--forward-agent)opt="-A"
-shift
-;;
---)shift
-break
-;;
+-l|--login)_login="$2"&&shift 2;;
+-h|--host)host="$2"&&shift 2;;
+-j|--jump)jump="$2"&&shift 2;;
+-A|--forward-agent)opt="-A"&&shift;;
+--)shift&&break;;
 *)die "$(gettext "Unrecognized option"): $1"
 esac
 done
-num_parameters "$@" --min 2 --max 2 --die "Need exactly two parameters: semver_diff [-h] <first> <second>"
+is integer --name=arguments --max=2 --die -- $#
 _login=${_login:-${login:-$REMOTE_LOGIN_DEFAULT}}
 host=${host:-$server}
 local ssh="$_login@$host"
@@ -2745,21 +2682,16 @@ local _login host jump
 eval set -- "$(option_parse $'+l login +\nh host +\nj jump +' "$@")"
 while true;do
 case "$1" in
--l|--login)_login="$2"
-shift 2
-;;
--h|--host)host="$2"
-shift 2
-;;
--j|--jump)jump="$2"
-shift 2
-;;
---)shift
-break
-;;
+-l|--login)_login="$2"&&shift 2;;
+-h|--host)host="$2"&&shift 2;;
+-j|--jump)jump="$2"&&shift 2;;
+--)shift&&break;;
 *)die "$(gettext "Unrecognized option"): $1"
 esac
 done
+is integer --name=arguments --max=2 --die -- $#
+is set --name=source --die -- "$1"
+is set --name=dest --die -- "$2"
 _login=${_login:-${login:-$REMOTE_LOGIN_DEFAULT}}
 host=${host:-$server}
 local ssh="$_login@$host"
@@ -2788,6 +2720,9 @@ break
 *)die "$(gettext "Unrecognized option"): $1"
 esac
 done
+is integer --name=arguments --max=2 --die -- $#
+is set --name=source --die -- "$1"
+is set --name=dest --die -- "$2"
 _login=${_login:-${login:-$REMOTE_LOGIN_DEFAULT}}
 host=${host:-$server}
 local ssh="$_login@$host"
@@ -2813,15 +2748,12 @@ local opt
 eval set -- "$(option_parse $'+l login +\nh host +\nj jump +' "$@")"
 while true;do
 case "$1" in
--l|--login|-h|--host|-j|--jump)opt+=" $1 $2"
-shift 2
-;;
---)shift
-break
-;;
+-l|--login|-h|--host|-j|--jump)opt+=" $1 $2"&&shift 2;;
+--)shift&&break;;
 *)die "$(gettext "Unrecognized option"): $1"
 esac
 done
+is set --name=module --die -- "$1"
 local list modules
 list="$(_module_resolve "${1-}")"
 IFS=',' read -ra modules <<<"$list"
@@ -2874,15 +2806,12 @@ eval set -- "$(option_parse $'q quiet -' "$@")"
 local quiet
 while true;do
 case "$1" in
--q|--quiet)quiet=1
-shift
-;;
---)shift
-break
-;;
+-q|--quiet)quiet=1&&shift;;
+--)shift&&break;;
 *)die "$(gettext "Unrecognized option"): $1"
 esac
 done
+is integer --name=arguments --max=0 --die -- $#
 local uptime seconds=15
 echo -ne "Warten bis der Reboot fertig ist" >&2
 sleep "$seconds"
@@ -2923,6 +2852,7 @@ wget https://github.com/sgerrand/alpine-pkg-glibc/releases/download/2.35-r0/glib
 apk --force-overwrite add glibc-2.35-r0.apk
 }
 install(){
+is set --name=command --die -- "$1"
 declare -a before
 declare -a apt
 declare -a apk
@@ -2956,7 +2886,7 @@ after+=(_install_mongosh)
 esac
 fi
 else
-debug 3 "$cmd is alreay installed or tried earlier"
+debug 3 "$cmd is already installed or tried earlier"
 fi
 done
 for cmd in "${before[@]}";do
@@ -3005,12 +2935,15 @@ done
 return "$failed"
 }
 installed(){
+is set --name=command --die -- "$1"
 for cmd in "$@";do
 command -v "$cmd" >/dev/null||return 1
 done
 return 0
 }
 semver(){
+is integer --name=arguments --max=1 --die -- $#
+is set --name=version --die -- "$1"
 input "$@"|sed -e 's#[^0-9]*\([0-9]*:\)\?\([0-9]*\)\([.]\([0-9]*\)\)\?\([.]\([0-9]*\)\)\?\(-\([^+]*\)\)\?+\?\(.*\)\?.*#\2\n\4\n\6\n\8\n\9#'
 }
 semver_diff(){
@@ -3027,7 +2960,9 @@ break
 *)die "$(gettext "Unrecognized option"): $1"
 esac
 done
-num_parameters "$@" --min 2 --max 2 --die "Need exactly two parameters: semver_diff [-h] <first> <second>"
+is integer --name=arguments --max=2 --die -- $#
+is set --name=version1 --die -- "$1"
+is set --name=version2 --die -- "$2"
 [[ ${1-} =~ [.-] ]]&&version1="$(semver "$1")"||version1="$1"
 [[ ${2-} =~ [.-] ]]&&version2="$(semver "$2")"||version2="$2"
 IFS=$'\n' readarray -t v1 <<<"$version1"
@@ -3105,14 +3040,20 @@ fi
 }
 use module/software
 tsv2table(){
+is integer --name=arguments --max=1 --die -- $#
+is set --name=tsv --die -- "$1"
 install mlr
 input "$@"|mlr --csvlite --ifs '\t' -o pprint cat
 }
 tsv2md(){
+is integer --name=arguments --max=1 --die -- $#
+is set --name=tsv --die -- "$1"
 install mlr
 input "$@"|uncolorize|mlr --csvlite --ifs '\t' --omd cat
 }
 csv(){
+is integer --name=arguments --max=1 --die -- $#
+is set --name=tsv --die -- "$1"
 case $1 in
 to)case $2 in
 tsv)python3 -c '

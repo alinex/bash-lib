@@ -195,8 +195,6 @@ The core functions contains essential parts which may also be used while loading
 | Variable/Function | Description |
 | --- | --- |
 | ``$CURL_HTTP_CODE`` | Last HTTP return code from curl |
-| [`debug`](function/debug.md) | Write message to STDERR if in DEBUG mode else do nothing |
-| [`die`](function/die.md) | Output error message and exit |
 | [`use`](function/use.md) | Load bashlib module |
 | [`trap_add`](function/trap_add.md) | Set or add an additional trap without overwriting existing ones |
 | [`trap_remove`](function/trap_remove.md) | Remove a specific trap |
@@ -209,6 +207,8 @@ Module with output and user interaction helpers.
 
 | Variable/Function | Description |
 | --- | --- |
+| [`debug`](function/debug.md) | Write message to STDERR if in DEBUG mode else do nothing |
+| [`die`](function/die.md) | Output error message and exit |
 | [`help`](function/help.md) | Show help page and exit |
 | [`log`](function/log.md) | Additional logging (at the moment only into files). |
 | [`heading`](function/heading.md) | Print block heading |
@@ -349,7 +349,6 @@ Module with operating system specific helper functions.
 | [`disk_free`](function/disk_free.md) | Disk free with visual display |
 | [`uses_lvm`](function/uses_lvm.md) | Check if LVM is used |
 | [`has_tty`](function/has_tty.md) | Has tty present |
-| [`is_bash`](function/is_bash.md) | Is running with bash console |
 
 ### Process Module
 

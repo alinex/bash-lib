@@ -13,7 +13,9 @@
 # - data - complete data table tab separated
 # Usage:    ip_intern <format>
 # Output:   <ip>
+# shellcheck disable=SC2120
 ip_intern() {
+    is integer --name=arguments --max=1 --die -- $#
     case ${1-} in
     data)
         echo -e "$(gettext "IP\tInterface")"
@@ -28,16 +30,18 @@ ip_intern() {
 # - provider
 # - segment
 # - vmware
-# If no pattern matches there won't be any rteturn value
+# If no pattern matches there won't be any return value
 # Usage:    ip_pattern <type> [<ip>]
 # Output:   <value> of first matching line
 # Return:   1 if no match found
 ip_pattern() {
-    num_parameters --min 1 --max 2 --die "A type has to be defined, an ip is optional." -- "$@"
+    is integer --name=arguments --max=2 --die -- $#
+    is enum --name=type --allow="provider segment vmware" --die -- "$1"
     local type=$1
     local ip=${2-}
     [ -n "$ip" ] || ip="$(ip_intern)"
-    # use refertenced array
+    # processing
+    # use referenced array
     local name="IP_${type^^}_PATTERN"
     declare -p "$name" 2>/dev/null | grep -q 'declare \-a' || die "No configuration array $name defined."
     debug "checking $ip against $name"
@@ -75,7 +79,9 @@ _ip_extern_json=
 # Output:   <tsv-table> for data
 #           <value> else
 ip_extern() {
-    num_parameters --min 1 --max 1 --die "A format is needed." -- "$@"
+    is integer --name=arguments --max=1 --die -- $#
+    is enum --name=format --allow="data country countryCode region regionName city zip lat lon timezone isp org as ip" --die -- "$1"
+    # processing
     [ -n "$_ip_extern_json" ] || _ip_extern_json="$(curl http://ip-api.com/json)"
     case ${1-} in
     data) jq -r 'with_entries(if .key == "query" then .key = "ip" else . end) | to_entries[] | "\(.key)\t\(.value)"' <<<"$_ip_extern_json" ;;
