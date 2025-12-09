@@ -129,6 +129,24 @@ setup() {
     assert_failure
 }
 
+# bats test_tags=check
+@test "check: should check for duration (number)" {
+    run check duration -- 600
+    assert_success
+    assert_output "600"
+}
+# bats test_tags=check
+@test "check: should check for duration (human)" {
+    run check duration -- 1h30m
+    assert_success
+    assert_output "5400"
+}
+# bats test_tags=check
+@test "check: should fail for duration" {
+    run check duration init
+    assert_failure
+}
+
 ######################################################################################
 # is
 ######################################################################################

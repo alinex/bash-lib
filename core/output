@@ -24,7 +24,7 @@ debug() {
     # processing
     # get level and function
     local level=1 func
-    is integer -- "$1" && level="$1" && shift || true
+    is integer --min 1 -- "$1" && level="$1" && shift || true
     IFS=$' \t\n' read -r _ func _ <<<"$(caller 0)"
     # collect text
     local text
@@ -137,19 +137,22 @@ log() {
     while true; do
         case "$1" in
         -l | --level)
-            level="$(array _log_level indexof "$2")" || die "Log level $2 is undefined, use one of: ${_log_level[*]}"
+            is enum --name=level --allow="${_log_level[*]}" --die -- "$2"
+            level="$(array _log_level indexof "$2")"
             shift 2
             ;;
         -r | --rotate)
             if (($2 > 0)); then
                 rotate="$2"
             else
-                rotate="$(hash _log_rotate_time get "$2")" || die "Rotate option $2 is not recognized use: horly daily weekly monthly"
+                # shellcheck disable=SC2145
+                is enum --name=rotate --allow="${!_log_rotate_time[@]}" --die -- "$2"
+                rotate="$(hash _log_rotate_time get "$2")"
             fi
             shift 2
             ;;
         -z | --compress) compress=1 && shift ;;
-        -c | --cleanup) cleanup="$(duration_format seconds "$2")" && shift 2 ;;
+        -c | --cleanup) cleanup="$(check duration --name=cleanup --die -- "$2")" && shift 2 ;;
         --) shift && break ;;
         *) die "$(gettext "Unrecognized option"): $1" ;;
         esac
@@ -173,10 +176,10 @@ log() {
         text="$(input_args 1 "$@")"
         [ -n "$text" ] || return 0 # no message
         # loop over _log_active values
-        local file minlevel
+        local file minLevel
         for e in "${_log_active[@]}"; do
-            read -r file minlevel rotate cleanup <<<"$e"
-            ((level >= minlevel)) || continue
+            read -r file minLevel rotate cleanup <<<"$e"
+            ((level >= minLevel)) || continue
             path="$file"
             if [ -n "$rotate" ] && ((rotate == 0)); then
                 path+="_$(date_format "$rotate")"
@@ -190,10 +193,10 @@ log() {
 }
 
 _log_manager() {
-    local parent=$PPID file minlevel rotate compress cleanup size
+    local parent=$PPID file minLevel rotate compress cleanup size
     while true; do
         for e in "${_log_active[@]}"; do
-            read -r file minlevel rotate compress cleanup <<<"$e"
+            read -r file minLevel rotate compress cleanup <<<"$e"
             # cleanup
             if [ -n "$cleanup" ]; then
                 find "$(dirname "$file")" -type f -name "$(basename "$file")*" ! -newermt "$(date -d "$cleanup seconds ago")" -delete 2>/dev/null
@@ -450,7 +453,7 @@ spinner_start() {
         debug "Disabled because tput and terminal is needed"
         return 0
     fi
-    local format="${1:-braile}"
+    local format="${1:-braille}"
     local spinner
     local size=1
     local chars=1

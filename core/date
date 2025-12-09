@@ -89,9 +89,9 @@ date_format() {
 duration_format() {
     is integer --name=arguments --max=2 --die -- $#
     is enum --name=format --allow="seconds minutes hours days human" --die -- "$1"
-    # processing
     local value
     is integer -- "$2" && value="$2" || value="$(_parse_duration "$2")"
+    # processing
     case $1 in
     seconds) echo "$value" ;;
     minutes) echo $((value / 60)) ;;

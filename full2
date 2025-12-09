@@ -29,7 +29,7 @@ declare -A opt_type
 declare -A opt_short
 while read -r opt name type desc;do
 [[ $opt =~ ^# ]]&&continue
-is empty -- "$opt"&&continue
+[ -z "$opt" ]&&continue
 opt_descriptions[$name]="$desc"
 opt_type[$name]=$type
 opt_short[$name]=$opt
@@ -58,7 +58,7 @@ is set --name="num" --die -- "$num"
 test -p /dev/stdin&&cat -||echo "${@:start}"
 }
 input_lines(){
-if [ -p /dev/stdin ]&&is empty -- "$1" ];then
+if [ -p /dev/stdin ]&&[ -z "$1" ] ];then
 cat -
 else
 for arg in "$@";do echo "$arg";done
@@ -253,8 +253,8 @@ date +%s
 date_diff(){
 is integer --name=arguments --max=2 --die -- $#
 local start end
-is integer -- "$1"&&start="$1"||start=$(date -d "$1" +%s)||die "Date format '$1' not parsable!"
-is integer -- "$2"&&end="$2"||end=$(date -d "$2" +%s)||die "Date format '$2' not parsable!"
+[[ "$1" =~ ^-?[0-9]+$ ]]&&start="$1"||start=$(date -d "$1" +%s)||die "Date format '$1' not parsable!"
+[[ "$2" =~ ^-?[0-9]+$ ]]&&end="$2"||end=$(date -d "$2" +%s)||die "Date format '$2' not parsable!"
 echo $((end-start))
 }
 date_format(){
@@ -275,13 +275,13 @@ time-short)format="+%H:%M";;
 *)format="+$1"
 esac
 value="${2-$(now)}"
-is integer -- "$value"&&eval "date -d @$value $format"||eval "date -d \"$value\" $format"||die "Date format '$value' not parsable!"
+[[ "$value" =~ ^-?[0-9]+$ ]]&&eval "date -d @$value $format"||eval "date -d \"$value\" $format"||die "Date format '$value' not parsable!"
 }
 duration_format(){
 is integer --name=arguments --max=2 --die -- $#
 is enum --name=format --allow="seconds minutes hours days human" --die -- "$1"
 local value
-is integer -- "$2"&&value="$2"||value="$(_parse_duration "$2")"
+[[ "$2" =~ ^-?[0-9]+$ ]]&&value="$2"||value="$(_parse_duration "$2")"
 case $1 in
 seconds)echo "$value";;
 minutes)echo $((value/60));;
@@ -338,7 +338,7 @@ local out=""
 ((h))&&out+="${h}h "
 ((m))&&out+="${m}m "
 ((s))&&out+="${s}s "
-is empty -- "$out"&&out="0s"&&sign=""||true
+[ -z "$out" ]&&out="0s"&&sign=""||true
 echo "$sign${out% }"
 }
 _timer_start=0
@@ -442,9 +442,9 @@ esac
 done
 is integer --name=arguments --max=1 --die -- $#
 local ident
-is set -- "$1"&&ident="_$1"
+[ -n "$1" ]&&ident="_$1"
 result="$path/$(basename "$0")$ident$rand$ext"
-if is empty -- "$rand";then
+if [ -z "$rand" ];then
 while [ -e "$result" ];do
 result="$path/$(basename "$0")$ident$RANDOM$ext"
 done
@@ -452,7 +452,7 @@ fi
 if [ -e "$result" ];then
 debug "already exists $result"
 else
-if is set -- "$dir";then
+if [ -n "$dir" ];then
 debug "create dir $result"
 mkdir -p "$result"
 else
@@ -461,7 +461,7 @@ touch "$result"
 fi
 fi
 echo "$result"
-is empty -- "$ttl"||(_rm_temp "$ttl" "$result" >/dev/null 2>&1&
+[ -z "$ttl" ]||(_rm_temp "$ttl" "$result" >/dev/null 2>&1&
 disown)
 }
 _rm_temp(){
@@ -506,8 +506,8 @@ IFS=$' \t\n' read -r _ func _ <<<"$(caller 0)"
 local text
 text="$(input "$@")"
 test -n "$text"||return 0
-is set -- "$DEBUG"||return 0
-if is integer -- "$DEBUG";then
+[ -n "$DEBUG" ]||return 0
+if [[ "$DEBUG" =~ ^-?[0-9]+$ ]];then
 is integer --min=0 --die -- "$DEBUG"
 ((level<=DEBUG))||return 0
 else
@@ -538,11 +538,11 @@ is set --name=usage --die -- "$2"
 heading "$(gettext Help): $1"
 info "Usage: $2"
 echo ""
-if is set -- "$3";then
+if [ -n "$3" ];then
 option_help "$3"
 echo ""
 fi
-if is set -- "$4";then
+if [ -n "$4" ];then
 echo "$4"
 echo
 fi
@@ -582,7 +582,7 @@ esac
 done
 is integer --name=arguments --min=1 --max=2 --die -- $#
 is enum --name=command --allow="start stop ${_log_level[*]}" --die -- "$1"
-is empty -- "$rotate"&&cleanup=""&&compress=""||true
+[ -z "$rotate" ]&&cleanup=""&&compress=""||true
 case $1 in
 start)is set --name=destination --die -- "$2"
 [ -w "$2" ]||[ -w "$(dirname "$2")" ]||die "Could not write/create log under $2"
@@ -640,62 +640,62 @@ done
 }
 heading(){
 local prefix=""
-is empty -- "$server"||prefix="${server-} "
+[ -z "$server" ]||prefix="${server-} "
 printf "\n%s\n\n" "$CC_INVERS$prefix$CC_RESET$CC_HEADING$(input "$@")...$CC_RESET"
 }
 critical(){
 local text
 text="$(input "$@")"
-is set -- "$text"||return 0
+[ -n "$text" ]||return 0
 printf "%s\n" "$CC_CRITICAL$text$CC_RESET"
 ((${#_log_active[@]}==0))||log critical "$text"
 }
 error(){
 local text
 text="$(input "$@")"
-is set -- "$text"||return 0
+[ -n "$text" ]||return 0
 printf "%s\n" "$CC_ERROR$text$CC_RESET"
 ((${#_log_active[@]}==0))||log error "$text"
 }
 warn(){
 local text
 text="$(input "$@")"
-is set -- "$text"||return 0
+[ -n "$text" ]||return 0
 printf "%s\n" "$CC_WARN$text$CC_RESET"
 ((${#_log_active[@]}==0))||log warn "$text"
 }
 notice(){
 local text
 text="$(input "$@")"
-is set -- "$text"||return 0
+[ -n "$text" ]||return 0
 printf "%s\n" "$CC_NOTICE$text$CC_RESET"
 ((${#_log_active[@]}==0))||log notice "$text"
 }
 info(){
 local text
 text="$(input "$@")"
-is set -- "$text"||return 0
+[ -n "$text" ]||return 0
 printf "%s\n" "$text"
 ((${#_log_active[@]}==0))||log info "$text"
 }
 ok(){
 local text
 text="$(input "$@")"
-is set -- "$text"||return 0
+[ -n "$text" ]||return 0
 echo -e "$CC_OK$text$CC_RESET"
 ((${#_log_active[@]}==0))||log notice "$text"
 }
 invers(){
 local text
 text="$(input "$@")"
-is set -- "$text"||return 0
+[ -n "$text" ]||return 0
 echo -e "$CC_INVERS$text$CC_RESET"
 ((${#_log_active[@]}==0))||log info "$text"
 }
 color(){
 local text
 text="$(input_args 1 "$@")"
-is set -- "$text"||return 0
+[ -n "$text" ]||return 0
 echo -e "$CC_ERROR$text$CC_RESET"
 ((${#_log_active[@]}==0))||log info "$text"
 }
@@ -718,7 +718,7 @@ printf '%b' $'\e[1K\r'
 }
 horizontal_line(){
 is integer --name=arguments --max=1 --die -- $#
-is empty -- "$1"||is enum --name=format --allow="light bold double half full"--die -- "$1"
+[ -z "$1" ]||is enum --name=format --allow="light bold double half full"--die -- "$1"
 local char
 case $1 in
 bold)char="━";;
@@ -735,7 +735,7 @@ printf "%.0s$char" $(seq 1 "$cols")
 _spinner_pid=""
 spinner_start(){
 is integer --name=arguments --max=2 --die -- $#
-is empty -- "$1"||is enum --name=format --allow="simple arrows vertical bar fade braille roll moon clock weather" --die -- "$1"
+[ -z "$1" ]||is enum --name=format --allow="simple arrows vertical bar fade braille roll moon clock weather" --die -- "$1"
 if ! command -v tput >/dev/null 2>&1||[ ! -t 2 ];then
 debug "Disabled because tput and terminal is needed"
 return 0
@@ -943,15 +943,15 @@ return 1
 }
 is_empty(){
 _deprecated "Use: is empty -- <value>"
-is empty -- "$1"
+[ -z "$1" ]
 }
 is_integer(){
 _deprecated "Use: is integer <value>" warn
-is integer -- "$1"
+[[ "$1" =~ ^-?[0-9]+$ ]]
 }
 is_float(){
 _deprecated "Use: is float -- <value>" warn
-is float -- "$1"
+[[ "$1" =~ ^-?[0-9]+([.][0-9]+)?$ ]]
 }
 trim_start(){
 is integer --name=arguments --max=2 --die -- $#
@@ -986,7 +986,7 @@ fi
 }
 [[ $- =~ i ]]||set -eE
 set -o pipefail
-is set -- "${BASH_VERSION:-}"||die "No bash CLI! This can only be run under bash"
+[ -n "${BASH_VERSION:-}" ]||die "No bash CLI! This can only be run under bash"
 ((BASH_VERSINFO[0]>4||(BASH_VERSINFO[0]==4&&BASH_VERSINFO[1]>=2)))||die "No bash CLI! This can only be run under bash >=4.2!"
 trap 'die "💥 Uncaught exception at »${BASH_COMMAND}« with exit code $?"' ERR
 debug "Running in DEBUG=${DEBUG-} mode!"
@@ -1113,11 +1113,11 @@ done
 is integer --name=arguments --max=1 --die -- $#
 local text length
 text="$(input "$@")"
-if is empty -- "$text";then
-is set -- "$timeout"&&is empty -- "$abort"&&text="$(gettext 'Please wait to go on')"||text="$(gettext 'Press any key to continue...')"
+if [ -z "$text" ];then
+[ -n "$timeout" ]&&[ -z "$abort" ]&&text="$(gettext 'Please wait to go on')"||text="$(gettext 'Press any key to continue...')"
 fi
 echo -en "$CC_NOTICE$text$CC_RESET "
-if is empty -- "$timeout";then
+if [ -z "$timeout" ];then
 read -n 1 -s -r _ </dev/tty
 else
 stty -echo </dev/tty
@@ -1154,7 +1154,7 @@ local prompt
 prompt="${1:-$(gettext "Should this be done")}"
 local char="" seq i_text invalid rc
 local countdown="$timeout"
-if is set -- "$default";then
+if [ -n "$default" ];then
 ((default==0))&&prompt="$prompt [$(gettext "No")]"||prompt="$prompt [$(gettext "Yes")]"
 fi
 echo -en "$CC_NOTICE$prompt?$CC_RESET " >/dev/tty
@@ -1242,7 +1242,7 @@ case "$1" in
 esac
 done
 is integer --name=arguments --max=2 --die -- $#
-is empty -- "$1"||is enum --name=format --allow="string integer number float password time text editor" --die -- "$1"
+[ -z "$1" ]||is enum --name=format --allow="string integer number float password time text editor" --die -- "$1"
 local prompt pattern mask
 local format="$1"
 case $format in
@@ -1460,7 +1460,7 @@ if [ -n "$default" ];then
 fi
 printf "  %0${length}d) $(trim "${display:-$key}")\n" "$num" >/dev/tty
 done <<<"$list"
-is empty -- "$default"||is integer -- "$default"||die "Default option $default not recognized."
+[ -z "$default" ]||[[ "$default" =~ ^-?[0-9]+$ ]]||die "Default option $default not recognized."
 [ -z "$end" ]||printf "  %${length}s) $end\n" x >/dev/tty
 if ((length==1));then
 pattern="[1-$max]"
@@ -2541,7 +2541,7 @@ is integer --name=arguments --max=0 --die -- $#
 random(){
 is integer --name=arguments --max=2 --die -- $#
 is set --name=pattern --die -- "$1"
-is set -- "$2"&&is integer --name=length --min=0 --die -- "$2"
+[ -n "$2" ]&&is integer --name=length --min=0 --die -- "$2"
 local pattern="$1"
 local length=${2:-16}
 local result=""
@@ -3104,7 +3104,7 @@ esac
 ;;
 crop)local cols idx
 IFS=$separator read -r -a cols < <(head -n 1 <<<"$input")
-is integer -- "$2"&&idx=$(($2-1))||idx="$(array cols indexof "$2")"||die "Column [$2] not found in table"
+[[ "$2" =~ ^-?[0-9]+$ ]]&&idx=$(($2-1))||idx="$(array cols indexof "$2")"||die "Column [$2] not found in table"
 local width="$3"
 [[ -n $idx && -n $width ]]||die "Usage: table crop <column> <width>"
 local line orig
@@ -3117,7 +3117,7 @@ done <<<"$input"
 ;;
 sort)local cols idx
 IFS=$separator read -r -a cols < <(head -n 1 <<<"$input")
-is integer -- "$2"&&idx=$(($2-1))||idx="$(array cols indexof "$2")"||die "Column [$2] not found in table"
+[[ "$2" =~ ^-?[0-9]+$ ]]&&idx=$(($2-1))||idx="$(array cols indexof "$2")"||die "Column [$2] not found in table"
 local col type
 col=$((idx+1))
 [ ! "$3" = "numeric" ]||type=n
@@ -3132,4 +3132,3 @@ tail -n +2 <<<"$input"|tac
 *)die "Usage: tsv {to|crop} [<value>]"
 esac
 }
-source $BASHLIB_HOME/configs

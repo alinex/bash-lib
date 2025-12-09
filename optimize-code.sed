@@ -6,3 +6,6 @@ s/\bis set -- ("[^"]+")/[ -n \1 ]/g
 s/\bis empty -- ("[^"]+")/[ -z \1 ]/g
 s/\bis integer -- ("[^"]+")/[[ \1 =~ ^-?[0-9]+$ ]]/g
 s/\bis float -- ("[^"]+")/[[ \1 =~ ^-?[0-9]+([.][0-9]+)?$ ]]/g
+
+# remove validators not needed out of development
+#/^is integer --name=arguments .* --die -- \$#$/d

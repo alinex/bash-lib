@@ -20,6 +20,7 @@ The following checks are implemented:
 - `float` will check for a number maybe within a range
 - `enum' will check against valid words using `--allow="word1 word2"`
 - `length` check that the length is within range (like integer)
+- `duration` check and parse the [`duration_format`](duration_format.md)
 #
 Exit:     with message if incorrect value
 
@@ -45,4 +46,5 @@ allow=<words>       # for enum (space separated)
 - # check arguments
 - is integer --name=arguments --max=2 $# # mostly only check max, if all args are checked separately
 - # use in code
-- if is integer age --min=18 -- "`$1`"; then
+- if is integer age --min=18 -- "`$1`"; then ...
+- if ! is integer "`$DEBUG`"; then ...

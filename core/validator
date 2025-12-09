@@ -25,6 +25,7 @@
 # - `float` will check for a number maybe within a range
 # - `enum' will check against valid words using `--allow="word1 word2"`
 # - `length` check that the length is within range (like integer)
+# - `duration` check and parse the @duration_format
 #
 # Usage:    check <check> [options] -- <value>
 # Options:  d, die              # used in @is to stop with error instead of return state
@@ -163,6 +164,12 @@ check() {
             [ -z "$die" ] && return 1 || die "$(eval_gettext '"$name" is set to "${val}" but has to be one of: $allow')"
         fi
         ;;
+    duration)
+        [[ "$res" =~ ^-?[0-9] ]] && res="$(duration_format seconds "$val")" || true
+        if [[ ! "$res" =~ ^-?[0-9]+$ ]]; then
+            [ -z "$die" ] && return 1 || die "$(eval_gettext 'The "$name" has to be an integer or human duration but »${val}« was given')"
+        fi
+        ;;
     *) die "$(eval_gettext 'A check named ${check} is not defined')" ;;
     esac
     echo "$res"
@@ -187,6 +194,7 @@ check() {
 # - `float` will check for a number maybe within a range
 # - `enum' will check against valid words using `--allow="word1 word2"`
 # - `length` check that the length is within range (like integer)
+# - `duration` check and parse the @duration_format
 #
 # Usage:    is <check> [options] -- <value>
 # Options:  d, die              # stop with error instead of return state
@@ -198,7 +206,8 @@ check() {
 # Example:  # check arguments
 #           is integer --name=arguments --max=2 $# # mostly only check max, if all args are checked separately
 #           # use in code
-#           if is integer age --min=18 -- "$1"; then
+#           if is integer age --min=18 -- "$1"; then ...
+#           if ! is integer "$DEBUG"; then ...
 is() {
     check "$@" >/dev/null
 }
