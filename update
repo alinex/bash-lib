@@ -17,16 +17,21 @@ for folder in core module; do
         fi
     done
 done
+echo -n "(optimize) "
+#sed -E -f optimize-code.sed "$BASHLIB_HOME/full" >"$BASHLIB_HOME/full2"
+sed -i -E -f optimize-code.sed "$BASHLIB_HOME/full"
 echo "fertig."
 echo "source \$BASHLIB_HOME/configs" >>"$BASHLIB_HOME/full" # load configs
 echo "#!/usr/bin/env bash" >"$BASHLIB_HOME/base"
 echo "BASHLIB_LOADER=base" >>"$BASHLIB_HOME/base"
-echo -n "- base (core) "
+echo -n "- base core "
 for f in "$BASHLIB_HOME"/core/*; do
     if [[ -f "$f" && "$f" != *.* ]]; then
         shfmt -mn "$f" | grep -Ev '^#!/usr/bin/env bash|source /dev/null' >>"$BASHLIB_HOME/base"
     fi
 done
+echo -n "(optimize) "
+sed -i -E -f optimize-code.sed "$BASHLIB_HOME/base"
 echo "fertig."
 
 echo "Update translations..."
