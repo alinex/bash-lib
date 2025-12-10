@@ -7,7 +7,7 @@
 ######################################################################################
 
 # Deprecated: Check if value is contained in array
-# Usage:    contains <array-name> <match>
+# Usage:        contains <array-name> <match>
 # Example:  x=( one two three )
 #           contains x two && echo YES || echo NO
 contains() {
@@ -16,7 +16,18 @@ contains() {
 }
 
 # Array analyzation.
-# Usage:    array <array-name> {has|indexof} [<value>]
+# This can be used for easy array access functions. The array itself is not given by value but by name, so no `$` before the name.
+#
+# The following commands ar<string-input>e possible:
+#
+# - `has` to check if a value could be found within the array
+# - `indexof` will return the index number of the value if found
+#
+# Usage:        array <array-name> <command> [<value>]
+# Variables:    `<array-name>` as basis to work on
+# Stdout:       `<value>` for `has`
+#               `<index-num>` for `indexof`
+# Return:       0 if ok, 1 if entry not found
 array() {
     is integer --name=arguments --max=3 --die -- $#
     is set --name=array-name --die -- "$1"
@@ -49,10 +60,11 @@ array() {
 ### Join/Split array
 ######################################################################################
 
-# Join array elements by delimiter.
+# Join array elements by delimiter
 # Convert all elements in array into a string separated by delimiter (default is `,`).
-# Usage:    join <array-name> [<delimiter>]
-# Output:   <string>
+# Usage:        join <array-name> [<delimiter>]
+# Variables:    `<array-name>` to read values to join
+# Output:       <string>
 join() {
     is integer --name=arguments --max=2 --die -- $#
     is set --name=array-name --die -- "$1"
@@ -68,8 +80,8 @@ join() {
 
 # Splits string by delimiter into array
 # The delimiter defaults to `,`.
-# Usage:    split <string> <array-name> [<delimiter>]
-# Output:   <string>
+# Usage:        split <string> <array-name> [<delimiter>]
+# Variables:    `<array-name>` to store values
 split() {
     is integer --name=arguments --max=3 --die -- $#
     is set --name=array-name --die -- "$2"
@@ -84,26 +96,54 @@ split() {
 ### Hash
 ######################################################################################
 
-# After declaring a variable as associative array: `declare -A <array-name>`
-# Usage:    hash <array-name> {set|get|unset|has} <key> [<value>]
-# Example:  hash cache set "my_name" "any value"
-#           hash cache get "my_name"
-#           hash cache has "my_name"
-#           hash cache unset "my_name"
+# Methods to work with assoziative arrays (hashes)
+# After declaring a variable as associative array: `declare -A <array-name>` this commands may help working with it. The array itself is not given by value but by name, so no `$` before the name.
+#
+# As an assoziative array not allows all characters for the key, unsupported characters will be replaced by _.
+#
+# The following commands ar<string-input>e possible:
+#
+# - `set` add or update a `<value>` in the index
+# - `get`
+# - `unset`
+# - `has`
+#
+# Usage:        hash <array-name> <command> <key> [<value>]
+# Options:      -k, --key-format={base64|underscore} # how to convert special character to be uses as key
+# Variables:    `<array-name>` as basis to work on
+# Output:       `<value>` for `get`
+# Error:        1 if not found for `get` or `has`
+# Example:      hash cache set "my_name" "any value"
+#               hash cache get "my_name"
+#               hash cache has "my_name"
+#               hash cache unset "my_name"
 hash() {
+    # parameter parsing
+    local keyFormat="base64"
+    eval set -- "$(option_parse $'k key-format +' "$@")"
+    while true; do
+        case "$1" in
+        -k | --key-format) keyFormat="$(check enum --allow="underscore base64" -- "$2")" && shift 2 ;;
+        --) shift && break ;;
+        *) die "$(gettext "Unrecognized option"): $1" ;;
+        esac
+    done
     is integer --name=arguments --max=4 --die -- $#
     is set --name=array-name --die -- "$1"
     is enum --name=command --allow="set get unset has" --die -- "$2"
     is set --name=key --die -- "$3"
     declare -n arr="$1"
-    local cmd="$2"
-    local key="${3//[^a-zA-Z0-9_]/_}" # only a-zA-Z0-9_ allowed
-    local value="$4"
+    local cmd="$2" key value="$4"
+    case $keyFormat in
+    base64) key="$(base64 -w0 <<<"$3")" ;;
+    underscore) key="${3//[^a-zA-Z0-9_]/_}" ;;
+    esac
     # processing
     case "$cmd" in
     set) arr["$key"]="$value" ;;
-    get) echo "${arr[$key]}" ;;
+    get) echo "${arr["$key"]}" ;;
     unset) unset 'arr[$key]' ;;
-    has) [[ -v arr[$key] ]] ;;
+    has) [[ -v arr["$key"] ]] ;;
+    #indexof) ...
     esac
 }
