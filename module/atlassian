@@ -12,7 +12,7 @@ source /dev/null
 
 # Get page content from Confluence using API
 # Usage:    confluence <page_id>
-# Output:   <html>
+# Output:   `<html>`
 confluence() {
     is integer --name=arguments --max=1 --die -- $#
     is set --name=page-id --die -- "$1"
@@ -33,7 +33,7 @@ confluence() {
 
 # Search for jira tickets
 # Usage:    jira_search <jql>
-# Output:   <json>
+# Output:   `<json>`
 jira_search() {
     is integer --name=arguments --max=1 --die -- $#
     is set --name=jql --die -- "$1"
@@ -46,7 +46,7 @@ jira_search() {
 
 # Get jira ticket details
 # Usage:    jira_get <issue-key>
-# Output:   <json>
+# Output:   `<json>`
 jira_get() {
     is integer --name=arguments --max=1 --die -- $#
     is set --name=issue-key --die -- "$1"
@@ -57,7 +57,7 @@ jira_get() {
 
 # Create jira tickets
 # Usage:    jira_create <json>
-# Output:   <issue-key>
+# Output:   `<issue-key>`
 jira_create() {
     is integer --name=arguments --max=1 --die -- $#
     is set --name=json --die -- "$1"

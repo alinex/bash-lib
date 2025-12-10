@@ -12,16 +12,12 @@ powerdns <pattern>
 
 ### Globals
 
-- `$POWERDNS_API` + `$POWERDNS_TOKEN` if powerdns is possible
+- `POWERDNS_API` + `POWERDNS_TOKEN` if powerdns is possible
 
 ### Output (stdout)
 
-- Tab separated table:
-- NAME        TYPE    CONTENT         TTL
-- `<dns-name>`  A                       `<seconds>`
-- `<dns-name>`  CNAME   `<destination>`   `<seconds>`
-- and more...
+- ``<tsv>`` with header line
 
 ### Return (exit code)
 
-- 0 - without output if no `$POWERDNS_API` + `$POWERDNS_TOKEN`
+- 0 - without output if no `POWERDNS_API` + `POWERDNS_TOKEN`

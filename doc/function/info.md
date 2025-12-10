@@ -2,7 +2,6 @@
 
 ## Print special information message
 
-Stdout:   colored `<string>`
 
 
 ### Usage
@@ -11,3 +10,7 @@ Stdout:   colored `<string>`
 info <message>
 <message> | info
 ```
+
+### Output (stdout)
+
+- colored `<string>`

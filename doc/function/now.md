@@ -2,8 +2,6 @@
 
 ## Get current timestamp
 
-Stdout:   `<int>` seconds since 1970
-shellcheck disable=SC2120
 
 
 ### Usage
@@ -11,3 +9,7 @@ shellcheck disable=SC2120
 ```bash
 now
 ```
+
+### Output (stdout)
+
+- ``<seconds>`` since 1970

@@ -1,6 +1,6 @@
 # join
 
-## Join array elements by delimiter.
+## Join array elements by delimiter
 
 Convert all elements in array into a string separated by delimiter (default is `,`).
 
@@ -10,6 +10,10 @@ Convert all elements in array into a string separated by delimiter (default is `
 ```bash
 join <array-name> [<delimiter>]
 ```
+
+### Globals
+
+- ``<array-name>`` to read values to join
 
 ### Output (stdout)
 

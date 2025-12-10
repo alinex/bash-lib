@@ -14,4 +14,4 @@ extname <path>
 
 ### Output (stdout)
 
-- `<extension>`
+- ``<extension>``

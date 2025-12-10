@@ -14,11 +14,11 @@ source /dev/null
 #           <message> | debug [<num>]
 #               <num> := [1-9]      # (default 1) higher to only show in more verbose call
 #               <message>           # the message text
-# Globals:  $DEBUG - if unset nothing will be printed
-#           $DEBUG=<num> - only print messages with same or lower numeric level
-#           $DEBUG=<func>,... - only print if the function is matched
-#           $DEBUG=9 - to output all
-# Stderr:   > <func>           <message>      # color: gray
+# Globals:  `DEBUG` - if unset nothing will be printed
+#           `DEBUG=<num>` - only print messages with same or lower numeric level
+#           `DEBUG=<func>,...` - only print if the function is matched
+#           `DEBUG=9` - to output all
+# Error:    `> <func>           <message>`      # color: gray
 debug() {
     is integer --name=arguments --max=2 --die -- $#
     # processing
@@ -236,7 +236,7 @@ _log_manager() {
 # Print block heading
 # Usage:    heading <title>
 #           <title> | heading
-# Stdout:   colored <string>
+# Output:   colored <string>
 # Variable: $server
 heading() {
     local prefix=""
@@ -248,7 +248,7 @@ heading() {
 # Print critical/disaster message
 # Usage:    critical <message>
 #           <message> | critical
-# Stdout:   colored <string>
+# Output:   colored <string>
 critical() {
     local text
     text="$(input "$@")"
@@ -260,7 +260,7 @@ critical() {
 # Print error message
 # Usage:    error <message>
 #           <message> | error
-# Stdout:   colored <string>
+# Output:   colored <string>
 error() {
     local text
     text="$(input "$@")"
@@ -272,7 +272,7 @@ error() {
 # Print warning message
 # Usage:    warn <message>
 #           <message> | warn
-# Stdout:   colored <string>
+# Output:   colored <string>
 # shellcheck disable=SC2120
 warn() {
     local text
@@ -285,7 +285,7 @@ warn() {
 # Print special information message
 # Usage:    info <message>
 #           <message> | info
-# Stdout:   colored <string>
+# Output:   colored <string>
 # shellcheck disable=SC2120
 notice() {
     local text
@@ -298,7 +298,7 @@ notice() {
 # Print special information message
 # Usage:    info <message>
 #           <message> | info
-# Stdout:   colored <string>
+# Output:   colored <string>
 info() {
     local text
     text="$(input "$@")"
@@ -310,7 +310,7 @@ info() {
 # Print success message
 # Usage:    ok <message>
 #           <message> | ok
-# Stdout:   colored <string>
+# Output:   colored <string>
 ok() {
     local text
     text="$(input "$@")"
@@ -322,7 +322,7 @@ ok() {
 # Print special marked message like table header
 # Usage:    invers <message>
 #           <message> | invers
-# Stdout:   colored <string>
+# Output:   colored <string>
 invers() {
     local text
     text="$(input "$@")"
@@ -334,7 +334,7 @@ invers() {
 # Print message in defined color
 # Usage:    color <color> <message>
 #           <message> | color <color>
-# Stdout:   colored <string>
+# Output:   colored <string>
 color() {
     local text
     text="$(input_args 1 "$@")"
@@ -350,7 +350,7 @@ color() {
 # Remove color codes from text
 # Usage:    uncolorize <text>
 #           <text> | uncolorize
-# Stdout:   <text>
+# Output:   <text>
 # shellcheck disable=SC2120
 uncolorize() {
     input "$@" | sed -r 's/\x1B\[[0-9;]*[mGK]//g'
@@ -359,7 +359,7 @@ uncolorize() {
 # Convert HTML to markdown (simplified version)
 # Usage:    html2md <html-part>
 #           <html-part> | html2md
-# Stdout:   <md>
+# Output:   <md>
 html2md() {
     input "$@" |
         sed 's#&rarr;#→#g;s#&auml;#ä#g;s#&ouml;#ö#g;s#&uuml;#ü#g;s#&Auml;#Ä#g;s#&Ouml;#Ö#g;s#&Uuml;#Ü#g;s#&szlig;#ß#g;s#<strong>\([^<]*\)</strong>#**\1**#g;s#<br/\?>#\n#g;s#<li>#\n- #g;s#<[^>]*>##g' |
@@ -369,7 +369,7 @@ html2md() {
 # Remove carriage return from line endings
 # Usage:    nocr <text>
 #           <text> | nocr
-# Stdout:   <text>
+# Output:   <text>
 nocr() {
     input "$@" | sed 's/\r$//' # removes all: tr -d '\r'
 }
@@ -377,7 +377,7 @@ nocr() {
 # Encode message to be used within the url
 # Usage:    urlencode <string>
 #           <string> | urlencode
-# Stdout:   <string>
+# Output:   <string>
 urlencode() {
     install jq
     input "$@" | jq -sRr @uri | sed 's/%0A$//'

@@ -14,4 +14,4 @@ to_alphanum <string>
 
 ### Output (stdout)
 
-- `<alnum>`
+- ``<alnum>``

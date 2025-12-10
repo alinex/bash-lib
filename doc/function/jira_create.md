@@ -12,4 +12,4 @@ jira_create <json>
 
 ### Output (stdout)
 
-- `<issue-key>`
+- ``<issue-key>``

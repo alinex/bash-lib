@@ -2,8 +2,6 @@
 
 ## Remove color codes from text
 
-Stdout:   `<text>`
-shellcheck disable=SC2120
 
 
 ### Usage
@@ -12,3 +10,7 @@ shellcheck disable=SC2120
 uncolorize <text>
 <text> | uncolorize
 ```
+
+### Output (stdout)
+
+- `<text>`

@@ -10,7 +10,7 @@ source /dev/null
 
 # Get current timestamp
 # Usage:    now
-# Stdout:   <int> seconds since 1970
+# Output:   `<seconds>` since 1970
 # shellcheck disable=SC2120
 now() {
     is integer --name=arguments --max=0 --die -- $#
@@ -23,8 +23,9 @@ now() {
 ######################################################################################
 
 # Calculate difference in seconds
+# The two dates to compare can be unix timestamps (seconds since 1970) or a parsable date format.
 # Usage:    date_diff <start> <end> # timestamp or date string
-# Stdout:   <seconds> negative if <start> behind <end>
+# Output:   `<seconds>` negative if `<start>` behind `<end>`
 date_diff() {
     is integer --name=arguments --max=2 --die -- $#
     local start end
@@ -37,6 +38,7 @@ date_diff() {
 }
 
 # Format date in different named versions or format string
+# The `<value>` can be unix timestamp (seconds since 1970) or a parsable date format.
 # Usage:    date_format <format> [<value>] # use now if missing
 #           <format>:   iso         2025-10-01T12:00:00+02:00
 #                       iso-date    2025-10-01
@@ -78,14 +80,14 @@ date_format() {
 ######################################################################################
 
 # Format duration in different numbers or human readable
-# This function can convert into seconds and back into human format as you like. Months or years are not possible because they are not accurately better use 30d or 365 d for that.
+# This function can convert into seconds and back into human format as you like. Months or years are not possible because they are not accurately, better use 30d or 365d for that.
 # Usage:    duration_format <format> <value|human format>
 #           <format>:   seconds
 #                       minutes     # using floor 110s = 1
 #                       hours       # using floor
 #                       days        # using floor
 #                       human       # like 1h 30m, 5w, 30s # spaces between different units are optional
-# Output:   <duration> in selected format
+# Output:   `<duration>` in selected format
 duration_format() {
     is integer --name=arguments --max=2 --die -- $#
     is enum --name=format --allow="seconds minutes hours days human" --die -- "$1"

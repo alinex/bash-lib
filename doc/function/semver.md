@@ -2,7 +2,6 @@
 
 ## Parse semantic version number
 
-Stdout:   `<major>`
 
 
 ### Usage
@@ -10,8 +9,12 @@ Stdout:   `<major>`
 ```bash
 semver <string>
 <string> | semver
-<minor>         or "" if undefined
-<patch>         or "" if undefined
-<prerelease>    or "" if undefined
-<build>         or "" if undefined
 ```
+
+### Output (stdout)
+
+- `<major>`
+- `<minor>`         or "" if undefined
+- `<patch>`         or "" if undefined
+- `<prerelease>`    or "" if undefined
+- `<build>`         or "" if undefined

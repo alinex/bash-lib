@@ -9,11 +9,16 @@ source /dev/null
 ######################################################################################
 
 # Load bashlib module
-# This can be used to load a special module as needed.
-# Usage:    use [<path>/]<module>
+# This can be used to load a special additional module as needed. If you try to load something which is already loaded it will do nothing.
+#
+# The core modules are always loaded, so you won't need to load them.
+# Something from the module folder can be loaded manually if you are started with only the base library.
+# And finally the extra folder has always to be loaded individually.
+# Usage:    use [<folder>/]<module>
+# Globals:  `BASHLIB_LOADER` to know which loader was used
 use() {
     is integer --name=arguments --max=1 --die -- $#
-    is set --name=module --die -- "$1"
+    is set --name=module-path --die -- "$1"
     # processing
     local module=$1
     [[ "$module" =~ / ]] || module="module/$module"
@@ -24,6 +29,7 @@ use() {
     core) return 0 ;;
     module) [[ ! "$BASHLIB_LOADER" =~ loader|full|remote ]] || return 0 ;;
     esac
+    debug 5 "Loading module $module"
     source "$module"
 }
 
@@ -71,17 +77,18 @@ trap_remove() {
 ### Temporary Files
 ######################################################################################
 
-# Make a temporary file, which is recognizable
+# Make a temporary file, which can be recognizable/individual
 # As the same invocation from the same program will get the same file it can be called multiple times, as long as no `--random` is set.
-# The file will be conducted out of the program name and the given <identifier>.
-# You should remove this file by yourself if no longer needed. The files will be available in `/tmp` folder for about 3 unused days (managed by your os) and in memory till the next reboot.
+# The file will be conducted out of the program name and the given `<identifier>`.
+#
+# You should remove this file by yourself if it is no longer needed. The files will be available in `/tmp` folder for about 3 unused days (managed by your os) and in memory till the next reboot.
 # Usage:    mktemp [<identifier>]       # use default temp if no identifier given
 # Options:  -d, --directory             # to make a directory instead of a file
 #           -m, --memory                # use shared memory
-#           -e, --extension <string>    # to specify file extension (better readability)
-#           -p, --path <base-dir>       # folder under which to create file
+#           -e, --extension=<string>    # to specify file extension (better readability)
+#           -p, --path=<base-dir>       # folder under which to create file
 #           -r, --random                # add a random (numeric) part to the identifier
-#           -T, --ttl <duration>        # duration to remove file again as seconds or duration @duration_format
+#           -T, --ttl=<duration>        # duration to remove file again as seconds or duration @duration_format
 # Output:   <path>
 #           Debug: path and if it is created
 #           Debug: remove after TTL
@@ -150,10 +157,8 @@ CURL_HTTP_CODE=""
 # Curl with added error handling
 # This will load the content into a temporary shared memory file while running.
 # Usage:    like curl
-# Globals:  $server
-#           $login - default is "operator"
-#           CURL_HTTP_CODE set with last code
-# Error:    <text> if not RC:2xx
+# Globals:  `CURL_HTTP_CODE` set with last code
+# Error:    `<text>` if not RC:2xx
 # Return:   0 if RC:2xx
 #           1 if not
 curl() {

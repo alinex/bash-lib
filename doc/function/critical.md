@@ -2,7 +2,6 @@
 
 ## Print critical/disaster message
 
-Stdout:   colored `<string>`
 
 
 ### Usage
@@ -11,3 +10,7 @@ Stdout:   colored `<string>`
 critical <message>
 <message> | critical
 ```
+
+### Output (stdout)
+
+- colored `<string>`

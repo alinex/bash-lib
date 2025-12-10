@@ -15,4 +15,4 @@ basename <path>
 
 ### Output (stdout)
 
-- `<file>`
+- ``<file>``

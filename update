@@ -146,6 +146,7 @@ for folder in config core module extra; do
                 description=""
                 usage=""
                 globals=""
+                variables=""
                 output=""
                 error=""
                 example=""
@@ -174,6 +175,11 @@ for folder in config core module extra; do
                             spaces=${#start}
                         fi
                         options+="\n${line:$spaces}"
+                    elif [[ "$line" =~ ^variable(s)?: ]] || { [ "$chapter" = "variables" ] && [[ "$line" =~ ^[[:space:]] ]]; }; then
+                        # shellcheck disable=SC2001
+                        line="$(sed 's/^\(variables\?:\)\?\s*//i' <<<"$line")"
+                        globals+="\n- $line"
+                        chapter="variables"
                     elif [[ "$line" =~ ^global(s)?: ]] || { [ "$chapter" = "globals" ] && [[ "$line" =~ ^[[:space:]] ]]; }; then
                         # shellcheck disable=SC2001
                         line="$(sed 's/^\(globals\?:\)\?\s*//i' <<<"$line")"
@@ -212,7 +218,7 @@ for folder in config core module extra; do
                         line="$(sed 's/^\(returns\?:\)\?\s*//i' <<<"$line")"
                         return+="\n- $line"
                         chapter="return"
-                    else
+                    elif [[ ! "$line" =~ ^shellcheck ]]; then
                         description="$description\n$line"
                     fi
                 done <<<"$comments"
@@ -230,6 +236,7 @@ for folder in config core module extra; do
                     [ -z "${description//[[:space:]]/}" ] || echo -e "$(tag2code "$description")"
                     [ -z "$usage" ] || echo -e "\n### Usage\n\n\`\`\`bash${usage}\n\`\`\`"
                     [ -z "$options" ] || echo -e "\n### Options\n\n\`\`\`bash${options}\n\`\`\`"
+                    [ -z "$variables" ] || echo -e "\n### Variables\n$(tag2code "$variables")"
                     [ -z "$globals" ] || echo -e "\n### Globals\n$(tag2code "$globals")"
                     [ -z "$tty" ] || echo -e "\n### TTY (direct)\n\n\`\`\`bash${tty}\n\`\`\`"
                     [ -z "$files" ] || echo -e "\n### Files\n$(tag2code "$files")"

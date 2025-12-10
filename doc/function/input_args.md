@@ -15,5 +15,5 @@ text="$(input <num> "$@")"
 
 ### Output (stdout)
 
-- `<string-input>` or
-- `<string-params>` separated by spaces
+- ``<string-input>`` or
+- ``<string-params>`` separated by spaces

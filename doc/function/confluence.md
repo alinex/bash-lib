@@ -12,4 +12,4 @@ confluence <page_id>
 
 ### Output (stdout)
 
-- `<html>`
+- ``<html>``

@@ -2,7 +2,6 @@
 
 ## Print success message
 
-Stdout:   colored `<string>`
 
 
 ### Usage
@@ -11,3 +10,7 @@ Stdout:   colored `<string>`
 ok <message>
 <message> | ok
 ```
+
+### Output (stdout)
+
+- colored `<string>`

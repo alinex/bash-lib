@@ -2,7 +2,6 @@
 
 ## Print special marked message like table header
 
-Stdout:   colored `<string>`
 
 
 ### Usage
@@ -11,3 +10,7 @@ Stdout:   colored `<string>`
 invers <message>
 <message> | invers
 ```
+
+### Output (stdout)
+
+- colored `<string>`

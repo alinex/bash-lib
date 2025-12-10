@@ -2,7 +2,6 @@
 
 ## Convert TSV data into markdown table
 
-Stdout:   `<md>`
 
 
 ### Usage
@@ -11,3 +10,7 @@ Stdout:   `<md>`
 tsv2md <tsv>
 <tsv> | tsv2md
 ```
+
+### Output (stdout)
+
+- `<md>`

@@ -12,4 +12,4 @@ value_if_variable <name>
 
 ### Output (stdout)
 
-- `<string>`
+- ``<string>``

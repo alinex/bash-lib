@@ -12,7 +12,7 @@ prometheus <prom-ql>
 
 ### Globals
 
-- `$PROMETHEUS_API` to query
+- `PROMETHEUS_API` to query
 
 ### Return (exit code)
 

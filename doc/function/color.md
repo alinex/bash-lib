@@ -2,7 +2,6 @@
 
 ## Print message in defined color
 
-Stdout:   colored `<string>`
 
 
 ### Usage
@@ -11,3 +10,7 @@ Stdout:   colored `<string>`
 color <color> <message>
 <message> | color <color>
 ```
+
+### Output (stdout)
+
+- colored `<string>`

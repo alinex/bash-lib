@@ -2,7 +2,6 @@
 
 ## Send a message to Mattermost
 
-Stdout:   `<postid list>`
 
 
 ### Usage
@@ -14,6 +13,10 @@ mattermost <channel-name> <text> [<attachments>]
 ### Globals
 
 - `$MATTERMOST_API` + `$MATTERMOST_TOKEN` to access API
+
+### Output (stdout)
+
+- `<postid list>`
 
 ### Return (exit code)
 

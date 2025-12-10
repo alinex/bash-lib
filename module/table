@@ -18,7 +18,7 @@ use module/software
 # Convert TSV data into visual table
 # Usage:    tsv2table <tsv>
 #           <tsv> | tsv2table
-# Stdout:   <table>
+# Output:   <table>
 tsv2table() {
     is integer --name=arguments --max=1 --die -- $#
     # processing
@@ -29,7 +29,7 @@ tsv2table() {
 # Convert TSV data into markdown table
 # Usage:    tsv2md <tsv>
 #           <tsv> | tsv2md
-# Stdout:   <md>
+# Output:   <md>
 tsv2md() {
     is integer --name=arguments --max=1 --die -- $#
     # processing

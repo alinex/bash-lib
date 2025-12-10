@@ -12,4 +12,4 @@ escape_args "$@"
 
 ### Output (stdout)
 
-- `<args>` with backslash escapes
+- ``<args>`` with backslash escapes

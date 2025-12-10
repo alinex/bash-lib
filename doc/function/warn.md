@@ -2,8 +2,6 @@
 
 ## Print warning message
 
-Stdout:   colored `<string>`
-shellcheck disable=SC2120
 
 
 ### Usage
@@ -12,3 +10,7 @@ shellcheck disable=SC2120
 warn <message>
 <message> | warn
 ```
+
+### Output (stdout)
+
+- colored `<string>`

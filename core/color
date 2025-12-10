@@ -106,7 +106,7 @@ CC_CYAN_BOLD_BG=$'\033[106m'
 
 # Get color code for text color number
 # Usage:  color_256 <num>
-# Stdout: <word> -> Code to set color
+# Output: <word> -> Code to set color
 color_256() {
   is integer --name=arguments --max=1 --die -- $#
   local num
@@ -117,7 +117,7 @@ color_256() {
 
 # Get color code for background color number
 # Usage:  color_256_bg <num>
-# Stdout: <word> -> Code to set color
+# Output: <word> -> Code to set color
 color_256_bg() {
   is integer --name=arguments --max=1 --die -- $#
   local num
@@ -151,7 +151,7 @@ CC_INVERS=$'\033[7m'
 
 # Show complete color table
 # Usage:  color_table
-# Stdout: human formatted Table in defined colors and styles
+# Output: human formatted Table in defined colors and styles
 color_table() {
   is integer --name=arguments --max=0 --die -- $#
   echo "Basic Colors:"

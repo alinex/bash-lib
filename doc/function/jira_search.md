@@ -12,4 +12,4 @@ jira_search <jql>
 
 ### Output (stdout)
 
-- `<json>`
+- ``<json>``

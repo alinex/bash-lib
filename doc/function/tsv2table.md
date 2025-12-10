@@ -2,7 +2,6 @@
 
 ## Convert TSV data into visual table
 
-Stdout:   `<table>`
 
 
 ### Usage
@@ -11,3 +10,7 @@ Stdout:   `<table>`
 tsv2table <tsv>
 <tsv> | tsv2table
 ```
+
+### Output (stdout)
+
+- `<table>`

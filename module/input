@@ -15,7 +15,7 @@ declare -F "color_256" >/dev/null || source "$BASHLIB_HOME"/module/color
 # Usage:    pause <message>
 #           <message> | pause
 # Options:  -T, --timeout <duration>    # time after which the default will be used
-# Options:  -a, --abort                 # let the timeout abort by key press
+#           -a, --abort                 # let the timeout abort by key press
 # TTY:      <question> <key>
 # Example:  &input#pause shows all possible use cases
 pause() {
@@ -187,6 +187,7 @@ ask_input() {
 # Ask for an input element
 # This will also validate while typing if you select the correct format. So you can only input characters matching the input format.
 # Possible formats are:
+#
 # - `string` - (default) allow anything
 # - `text` - multiline text (ends with empty line)
 # - `editor` - multiline text through system editor
@@ -194,6 +195,7 @@ ask_input() {
 # - `float` - allow number [0-9]+.[0-9]+ (alternative , is allowed as decimal separator)
 # - `password` - will show only `*` characters to hide input
 # - `time` - a time with hour and minute can be given
+#
 # If another format is needed, you can fall back to string and validate on your own after you got the response.
 # Usage:    ask <format> <question>
 # Options:  -e, --empty                 # allow empty value
@@ -202,7 +204,7 @@ ask_input() {
 #           -T, --timeout <duration>    # time till default is used
 # TTY:      <question> <valid characters>...
 #           # input <keys> printed if valid
-# Stdout:   <answer>
+# Output:   <answer>
 # Example:  &input#ask shows all possible use cases
 ask() {
     # parameter parsing
@@ -407,7 +409,7 @@ ask() {
 
 # Calculate password strength
 # Usage:    _password_strength <password>
-# Output:   <int> 0 (weakest) up to 100 (strongest)
+# Output:   `<int>` 0 (weakest) up to 100 (strongest)
 _password_strength() {
     local password="$1"
     local len=${#password}
@@ -444,8 +446,9 @@ _password_strength() {
 
 # Select from list (extended version of native select)
 # The given list will be printed as numerical options from which you select one by typing it's number. Number validation is on, so you can only input a valid number. No return-lkey needed if the full number is given.
-# With the options a default can be given, which will be selected using return-key or a timeout till this is used.
 # Each list entry can be a single `<text>` or `<key>|<name>` while the `<name>` is shown the `<key>` will be returned if selected.
+#
+# With the options a default can be given, which will be selected using return-key or a timeout till this is used.
 # With the option `--exit` the additional entry will break by returning `exit`.
 # Usage:    choose [-t] <entry>...
 #           <list> | choose [-t]
@@ -458,7 +461,7 @@ _password_strength() {
 #           <list>
 #           ...
 #           <question> <key>
-# Stdout:   selected <line>
+# Output:   selected `<line>`
 #           exit # if run with --exit and this was chosen
 # Example:  &input#choose shows all possible use cases
 # TODO > 10 entries make two columns using mlr display

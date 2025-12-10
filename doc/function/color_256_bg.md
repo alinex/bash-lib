@@ -2,7 +2,6 @@
 
 ## Get color code for background color number
 
-Stdout: `<word>` ->` Code to set color
 
 
 ### Usage
@@ -10,3 +9,7 @@ Stdout: `<word>` ->` Code to set color
 ```bash
 color_256_bg <num>
 ```
+
+### Output (stdout)
+
+- `<word>` ->` Code to set color

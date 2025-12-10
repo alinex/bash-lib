@@ -3,7 +3,6 @@
 ## Create an attachment json to be used in post
 
 Find free linkable icons under https://icons8.de/icons/all
-Stdout:   `<json>` for this attachment
 
 
 ### Usage
@@ -33,6 +32,10 @@ mattermost_post `$channelid` "" "$(mattermost_attachment --color ...)"
 ### Globals
 
 - `$MATTERMOST_API` + `$MATTERMOST_TOKEN` to access API
+
+### Output (stdout)
+
+- `<json>` for this attachment
 
 ### Return (exit code)
 

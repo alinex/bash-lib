@@ -13,13 +13,11 @@ like curl
 
 ### Globals
 
-- `$server`
-- `$login` - default is "operator"
-- CURL_HTTP_CODE set with last code
+- `CURL_HTTP_CODE` set with last code
 
 ### Error (stderr)
 
-- `<text>` if not RC:2xx
+- ``<text>`` if not RC:2xx
 
 ### Return (exit code)
 

@@ -2,7 +2,6 @@
 
 ## Show complete color table
 
-Stdout: human formatted Table in defined colors and styles
 
 
 ### Usage
@@ -10,3 +9,7 @@ Stdout: human formatted Table in defined colors and styles
 ```bash
 color_table
 ```
+
+### Output (stdout)
+
+- human formatted Table in defined colors and styles

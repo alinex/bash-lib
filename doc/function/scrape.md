@@ -3,16 +3,18 @@
 ## Scrape Prometheus exporter url now
 
 The metrics can be filtered by `<pattern>` argument.
-Stdout:   Tab separated list:
 
 
 ### Usage
 
 ```bash
 scrape <url> <pattern>
-<metric>    [<value>=<text>],...    <value>
-...
 ```
+
+### Output (stdout)
+
+- Tab separated list:
+- ``<metric>`    [`<value>`=`<text>`],...    `<value>``
 
 ### Return (exit code)
 

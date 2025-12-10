@@ -11,6 +11,6 @@ The delimiter defaults to `,`.
 split <string> <array-name> [<delimiter>]
 ```
 
-### Output (stdout)
+### Globals
 
-- `<string>`
+- ``<array-name>`` to store values

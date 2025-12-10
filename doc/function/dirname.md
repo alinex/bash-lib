@@ -15,4 +15,4 @@ dirname <path>
 
 ### Output (stdout)
 
-- `<base-path>`
+- ``<base-path>``

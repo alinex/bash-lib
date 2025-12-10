@@ -2,7 +2,6 @@
 
 ## Print error message
 
-Stdout:   colored `<string>`
 
 
 ### Usage
@@ -11,3 +10,7 @@ Stdout:   colored `<string>`
 error <message>
 <message> | error
 ```
+
+### Output (stdout)
+
+- colored `<string>`

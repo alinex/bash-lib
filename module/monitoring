@@ -16,10 +16,9 @@ source /dev/null
 # The result can be filtered by additional argument specification.
 # Usage:    exporter [<field>=<value>]...
 # Globals:  $PROMETHEUS_HOST + $PROMETHEUS_API
-# Stdout:   Tab separated list without header:
-#           <url>   <job>   <label-values>
-#           ...
-# Return:   0 without output if no $PROMETHEUS_HOST + $PROMETHEUS_API
+# Output:   Tab separated list without header:
+#           `<url>   <job>   <label-values>`
+# Return:   0 without output if no `PROMETHEUS_HOST` + `PROMETHEUS_API`
 exporter() {
     if [ -z "$PROMETHEUS_HOST" ] || [ -z "$PROMETHEUS_API" ]; then
         debug "Disabled because PROMETHEUS_HOST and PROMETHEUS_API are not both set"
@@ -71,9 +70,8 @@ exporter() {
 # Scrape Prometheus exporter url now
 # The metrics can be filtered by <pattern> argument.
 # Usage:    scrape <url> <pattern>
-# Stdout:   Tab separated list:
-#           <metric>    [<value>=<text>],...    <value>
-#           ...
+# Output:   Tab separated list:
+#           `<metric>    [<value>=<text>],...    <value>`
 # Return:   0 if metrics found
 #           1 if no matching metric
 scrape() {
@@ -99,16 +97,10 @@ scrape() {
 #           -i, --instance <regexp>                 # select only matching instances
 #           -s, --summary <regexp>                  # select by summary text
 #           -q, --quiet                             # return only status code
-# Stdout:   format=json: directly like in the Grafana API
-#
-#           format=mattermost - json in the format of mattermost attachments
-#
-#           format=tsv - Tab separated table:
-#           Severity    Network     Instance    Summary         Start
-#           <severity>  <network>   <instance>  <description>   <time>
-#           ...
-#
-#           format=console - like tsv but colorized and fixed column width instead of tabs
+# Output:   `format=json` - directly like in the Grafana API
+#           `format=mattermost` - json in the format of mattermost attachments
+#           `format=tsv` - Tab separated table
+#           `format=console` - like tsv but colorized and fixed column width instead of tabs
 # Return:   0 - no alerts
 #           <num> - at least one alert
 #           0 - without output if no $GRAFANA_API + $GRAFANA_TOKEN
@@ -211,7 +203,7 @@ alerts() {
 
 # Prom ql ausführen
 # Usage:    prometheus <prom-ql>
-# Globals:  $PROMETHEUS_API to query
+# Globals:  `PROMETHEUS_API` to query
 # Returns:  0 - without output if no $PROMETHEUS_API
 prometheus() {
     if [ -z "$PROMETHEUS_API" ]; then
@@ -231,8 +223,8 @@ prometheus() {
 
 # Change scrape interval to scrape now and set back
 # Usage:    prometheus_scrape_now <job> [<timeout>]
-# Globals:  $PROMETHEUS_HOST to change config temporarily
-# Returns:  0 - without output if no $PROMETHEUS_HOST
+# Globals:  `PROMETHEUS_HOST` to change config temporarily
+# Returns:  0 - without output if no `PROMETHEUS_HOST`
 prometheus_scrape_now() {
     if [ -z "$PROMETHEUS_HOST" ]; then
         debug "Disabled because PROMETHEUS_HOST is not set"

@@ -120,19 +120,34 @@ local sep="${3:-,}"
 IFS="$sep" read -ra array <<<"$string"
 }
 hash(){
+local keyFormat="base64"
+eval set -- "$(option_parse $'k key-format +' "$@")"
+while true;do
+case "$1" in
+-k|--key-format)keyFormat="$(check enum --allow="underscore base64" -- "$2")"&&shift 2;;
+--)shift&&break;;
+*)die "$(gettext "Unrecognized option"): $1"
+esac
+done
 is integer --name=arguments --max=4 --die -- $#
 is set --name=array-name --die -- "$1"
-is enum --name=command --allow="set get unset has" --die -- "$2"
-is set --name=key --die -- "$3"
+is enum --name=command --allow="set get unset has contains" --die -- "$2"
 declare -n arr="$1"
-local cmd="$2"
-local key="${3//[^a-zA-Z0-9_]/_}"
-local value="$4"
+local cmd="$2" key value="$4"
+case $keyFormat in
+base64)key="$(base64 -w0 <<<"$3")";;
+underscore)key="${3//[^a-zA-Z0-9_]/_}"
+esac
 case "$cmd" in
-set)arr["$key"]="$value";;
-get)echo "${arr[$key]}";;
-unset)unset 'arr[$key]';;
-has)[[ -v arr[$key] ]]
+set)is set --name=key --die -- "$3"&&arr["$key"]="$value";;
+get)is set --name=key --die -- "$3"&&echo "${arr["$key"]}";;
+unset)is set --name=key --die -- "$3"&&unset 'arr[$key]';;
+has)is set --name=key --die -- "$3"&&[[ -v arr["$key"] ]];;
+contains)is set --name=value --die -- "$3"
+for key in "${!arr[@]}";do
+[[ ${arr["$key"]} != "$3" ]]||return 0
+done
+return 1
 esac
 }
 COLORS=$(tput colors 2>/dev/null||echo 0)
@@ -387,7 +402,7 @@ done
 }
 use(){
 is integer --name=arguments --max=1 --die -- $#
-is set --name=module --die -- "$1"
+is set --name=module-path --die -- "$1"
 local module=$1
 [[ $module =~ / ]]||module="module/$module"
 local path
@@ -396,6 +411,7 @@ case $path in
 core)return 0;;
 module)[[ ! $BASHLIB_LOADER =~ loader|full|remote ]]||return 0
 esac
+debug 5 "Loading module $module"
 source "$module"
 }
 trap_add(){

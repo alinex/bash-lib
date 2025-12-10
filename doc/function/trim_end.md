@@ -13,4 +13,4 @@ trim_end <value> [<characters>]
 
 ### Output (stdout)
 
-- `<string>`
+- ``<string>``

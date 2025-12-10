@@ -2,7 +2,6 @@
 
 ## Remove carriage return from line endings
 
-Stdout:   `<text>`
 
 
 ### Usage
@@ -11,3 +10,7 @@ Stdout:   `<text>`
 nocr <text>
 <text> | nocr
 ```
+
+### Output (stdout)
+
+- `<text>`

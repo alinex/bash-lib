@@ -96,9 +96,9 @@ Helper functions to work with arrays and associative arrays (hashes).
 | --- | --- |
 | [`contains`](function/contains.md) | Deprecated: Check if value is contained in array |
 | [`array`](function/array.md) | Array analyzation. |
-| [`join`](function/join.md) | Join array elements by delimiter. |
+| [`join`](function/join.md) | Join array elements by delimiter |
 | [`split`](function/split.md) | Splits string by delimiter into array |
-| [`hash`](function/hash.md) | After declaring a variable as associative array: `declare -A <array-name>` |
+| [`hash`](function/hash.md) | Methods to work with assoziative arrays (hashes) |
 
 ### Color Module
 
@@ -198,7 +198,7 @@ The core functions contains essential parts which may also be used while loading
 | [`use`](function/use.md) | Load bashlib module |
 | [`trap_add`](function/trap_add.md) | Set or add an additional trap without overwriting existing ones |
 | [`trap_remove`](function/trap_remove.md) | Remove a specific trap |
-| [`mktemp`](function/mktemp.md) | Make a temporary file, which is recognizable |
+| [`mktemp`](function/mktemp.md) | Make a temporary file, which can be recognizable/individual |
 | [`curl`](function/curl.md) | Curl with added error handling |
 
 ### Output Module

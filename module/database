@@ -18,8 +18,8 @@ use module/software
 # Run command on Mongo DB
 # Usage:    mongo "" <command>            # global command
 #           mongo <database> <command>    # work in database
-# Global:   $server
-#           $MONGO_ADMIN_USERPASS
+# Global:   `server`
+#           `MONGO_ADMIN_USERPASS`
 mongo() {
     is integer --name=arguments --max=2 --die -- $#
     is set --name=command --die -- "$2"

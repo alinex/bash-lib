@@ -3,10 +3,6 @@
 ## Get Grafana alerts
 
 The list can be filtered by options and a specific output format can be selected.
-Stdout:   format=json: directly like in the Grafana API
-
-
-
 
 
 ### Usage
@@ -24,13 +20,14 @@ alerts -i "^`$server`" console || echo "" # will print the alerts with an empty 
 -i, --instance <regexp>                 # select only matching instances
 -s, --summary <regexp>                  # select by summary text
 -q, --quiet                             # return only status code
-format=mattermost - json in the format of mattermost attachments
-format=tsv - Tab separated table:
-Severity    Network     Instance    Summary         Start
-<severity>  <network>   <instance>  <description>   <time>
-...
-format=console - like tsv but colorized and fixed column width instead of tabs
 ```
+
+### Output (stdout)
+
+- `format=json` - directly like in the Grafana API
+- `format=mattermost` - json in the format of mattermost attachments
+- `format=tsv` - Tab separated table
+- `format=console` - like tsv but colorized and fixed column width instead of tabs
 
 ### Return (exit code)
 

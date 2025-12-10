@@ -13,16 +13,12 @@ powerdns <pattern>
 
 ### Globals
 
-- `$PLUSSERVER_PORTAL`              if plusserver as provider is used
+- `PLUSSERVER_PORTAL`              if plusserver as provider is used
 
 ### Output (stdout)
 
-- Tab separated table:
-- NAME        TYPE    CONTENT         TTL
-- `<dns-name>`  A                       `<seconds>`
-- `<dns-name>`  CNAME   `<destination>`   `<seconds>`
-- and more...
+- ``<tsv>`` with header line
 
 ### Return (exit code)
 
-- 0 - without output if no `$PLUSSERVER_PORTAL`
+- 0 - without output if no `PLUSSERVER_PORTAL`

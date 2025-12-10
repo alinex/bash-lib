@@ -288,7 +288,7 @@ is_float() {
 
 # Trim leading whitespace or given character
 # Usage:    trim_start <value> [<characters>]
-# Output:   <string>
+# Output:   `<string>`
 # See:      https://stackoverflow.com/a/3352015
 trim_start() {
     is integer --name=arguments --max=2 --die -- $#
@@ -301,7 +301,7 @@ trim_start() {
 
 # Trim trailing whitespace or given character
 # Usage:    trim_end <value> [<characters>]
-# Output:   <string>
+# Output:   `<string>`
 # See:      https://stackoverflow.com/a/3352015
 trim_end() {
     is integer --name=arguments --max=2 --die -- $#
@@ -314,7 +314,7 @@ trim_end() {
 
 # Trim leading and trailing whitespace or given character
 # Usage:    trim <value> [<characters>]
-# Output:   <string>
+# Output:   `<string>`
 # See:      https://stackoverflow.com/a/3352015
 trim() {
     is integer --name=arguments --max=2 --die -- $#
@@ -326,7 +326,7 @@ trim() {
 # This is needed to use it as a key in associative arrays. All other characters are converted into underscore.
 # Usage:    to_alphanum <string>
 #           <string> | to_alphanum
-# Output:   <alnum>
+# Output:   `<alnum>`
 to_alphanum() {
     is integer --name=arguments --max=1 --die -- $#
     local text
@@ -337,7 +337,7 @@ to_alphanum() {
 
 # Return the value or if it is a variable name which is not empty return it's value
 # Usage:    value_if_variable <name>
-# Output:   <string>
+# Output:   `<string>`
 value_if_variable() {
     is integer --name=arguments --max=2 --die -- $#
     local _name="$1"

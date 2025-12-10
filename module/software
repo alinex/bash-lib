@@ -149,7 +149,7 @@ installed() {
 # Parse semantic version number
 # Usage:    semver <string>
 #           <string> | semver
-# Stdout:   <major>
+# Output:   <major>
 #           <minor>         or "" if undefined
 #           <patch>         or "" if undefined
 #           <prerelease>    or "" if undefined
@@ -165,7 +165,7 @@ semver() {
 # Calculate difference
 # Usage:    semver_diff [-h] <first> <second> # can already be parsed or not
 # Options:  -h,--human      # to show it user friendly
-# Stdout:   <int>:  >1000000000 newer major (num / 1000000000 = steps)
+# Error:    <int>:  >1000000000 newer major (num / 1000000000 = steps)
 #                   >1000000 newer minor (num / 1000000 = steps)
 #                   >1000 newer patch (num / 1000 = steps)
 #                   10 newer pre-release

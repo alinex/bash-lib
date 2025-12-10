@@ -2,7 +2,6 @@
 
 ## Encode message to be used within the url
 
-Stdout:   `<string>`
 
 
 ### Usage
@@ -11,3 +10,7 @@ Stdout:   `<string>`
 urlencode <string>
 <string> | urlencode
 ```
+
+### Output (stdout)
+
+- `<string>`

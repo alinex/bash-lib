@@ -2,8 +2,6 @@
 
 ## Print block heading
 
-Stdout:   colored `<string>`
-Variable: `$server`
 
 
 ### Usage
@@ -12,3 +10,11 @@ Variable: `$server`
 heading <title>
 <title> | heading
 ```
+
+### Globals
+
+- `$server`
+
+### Output (stdout)
+
+- colored `<string>`

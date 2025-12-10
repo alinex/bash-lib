@@ -2,8 +2,6 @@
 
 ## Print special information message
 
-Stdout:   colored `<string>`
-shellcheck disable=SC2120
 
 
 ### Usage
@@ -12,3 +10,7 @@ shellcheck disable=SC2120
 info <message>
 <message> | info
 ```
+
+### Output (stdout)
+
+- colored `<string>`

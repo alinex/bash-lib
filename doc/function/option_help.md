@@ -4,6 +4,8 @@
 
 This is mainly used by the [`help`](help.md) output.
 
+It needs the same specification lines like [`option_help`](option_help.md).
+
 
 ### Usage
 
