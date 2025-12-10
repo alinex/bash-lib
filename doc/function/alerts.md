@@ -4,9 +4,9 @@
 
 The list can be filtered by options and a specific output format can be selected.
 Stdout:   format=json: directly like in the Grafana API
-#
-#
-#
+
+
+
 
 
 ### Usage

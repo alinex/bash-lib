@@ -3,11 +3,13 @@
 ## Parse arguments based on given specification
 
 This will parse the given options into a standardized form and validate them against the given specification.
+
 The key for this is the specification string, which consists of a list of lines for each option. Each line contains up to four parts separated by space:
 - ``<short-letter>`` only one letter allowed, but you can set it to `-` if no short option needed
 - ``<long-word>`` the long option which have to be there, use dashed words if multiple
 - ``<type>`` set to `-` if no value needed, else the type of value to be printed in help or '+' in internal function for undefined type
 - ``<description>`` only for the help message
+
 For internal functions we don't use [`option_help`](option_help.md), so the type of options in the ``<spec>`` will be shortened to +/- and a ``<description>`` is not needed.
 Permutation, reordering and giving options after arguments, is possible by default but can be removed if the whole ``<spec>`` begins with `+`.
 Options can be given in different forms: `-a 45`, `-a45`, `--age 45`, `--age=45` are all equal. The last one is preferred because of readability. Also multiple short options can be put together with only the last may need a value.

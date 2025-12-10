@@ -133,7 +133,7 @@ for folder in config core module extra; do
                     line_content=$(sed -n "${linenum}p" "$file")
                     if [[ "$line_content" =~ ^[[:space:]]*# ]]; then
                         # shellcheck disable=SC2001
-                        comments="$(sed 's/^\s*# //' <<<"$line_content")"$'\n'"$comments"
+                        comments="$(sed 's/^\s*# \?//' <<<"$line_content")"$'\n'"$comments"
                     else
                         break
                     fi

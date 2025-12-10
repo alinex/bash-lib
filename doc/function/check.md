@@ -5,13 +5,13 @@
 This validation is possible using the `check` and [`is`](is.md) function.
 - `check` should be used for sanitize because it will output the value
 - [`is`](is.md) should be used for checking only validity or stop processing on problem because no value is output
-#
+
 Every parameter should be checked to prevent failure later in the code.
 For such checks you run it with the `--die` option to stop processing if wrong.
 But you can also use it in the program flow without that and use it's return status to check if it 0=ok or 1=failed.
-#
+
 Because the values may start with an dash you should always put it at the end after '--' to prevent parsing it as option.
-#
+
 The following checks are implemented:
 - `set` will fail if no value given
 - `empty` will fail if not empty like ""
@@ -21,7 +21,7 @@ The following checks are implemented:
 - `enum' will check against valid words using `--allow="word1 word2"`
 - `length` check that the length is within range (like integer)
 - `duration` check and parse the [`duration_format`](duration_format.md)
-#
+
 Exit:     with message if incorrect value
 
 
