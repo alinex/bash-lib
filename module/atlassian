@@ -27,6 +27,9 @@ confluence() {
 # Jira
 ######################################################################################
 # https://developer.atlassian.com/cloud/jira/platform/rest/v3/intro/#version
+# ADF:
+# - https://developer.atlassian.com/cloud/jira/platform/apis/document/structure
+# - https://atlas-doc-parser.readthedocs.io/en/latest/index.html
 
 # Search for jira tickets
 # Usage:    jira_search <jql>

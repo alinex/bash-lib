@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-09 22:20+0100\n"
+"POT-Creation-Date: 2025-12-10 17:33+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -26,15 +26,15 @@ msgstr ""
 msgid "Unrecognized option"
 msgstr "Unbekannte Option"
 
-#: core/arguments:24
+#: core/arguments:32
 msgid "A specification string is needed as first argument"
 msgstr "Ein Text zur Spezifikation ist als erstes ARgument notwendig"
 
-#: core/arguments:68
+#: core/arguments:76
 msgid "Options"
 msgstr "Optionen"
 
-#: core/arguments:108
+#: core/arguments:116
 msgid "argument is not a valid number!"
 msgstr "Argument ist nicht ganzzahlig"
 

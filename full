@@ -3048,19 +3048,17 @@ fi
 use module/software
 tsv2table(){
 is integer --name=arguments --max=1 --die -- $#
-is set --name=tsv --die -- "$1"
 install mlr
 input "$@"|mlr --csvlite --ifs '\t' -o pprint cat
 }
 tsv2md(){
 is integer --name=arguments --max=1 --die -- $#
-is set --name=tsv --die -- "$1"
 install mlr
 input "$@"|uncolorize|mlr --csvlite --ifs '\t' --omd cat
 }
 csv(){
 is integer --name=arguments --max=1 --die -- $#
-is set --name=tsv --die -- "$1"
+is set --name=csv --die -- "$1"
 case $1 in
 to)case $2 in
 tsv)python3 -c '

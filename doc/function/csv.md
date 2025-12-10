@@ -7,6 +7,6 @@
 ### Usage
 
 ```bash
-<string> | tsv {to} <param>...
-<string> | tsv to {tsv}              # convert
+<string> | csv {to} <param>...
+<string> | csv to {tsv}              # convert
 ```

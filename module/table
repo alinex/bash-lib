@@ -21,7 +21,6 @@ use module/software
 # Stdout:   <table>
 tsv2table() {
     is integer --name=arguments --max=1 --die -- $#
-    is set --name=tsv --die -- "$1"
     # processing
     install mlr
     input "$@" | mlr --csvlite --ifs '\t' -o pprint cat
@@ -33,7 +32,6 @@ tsv2table() {
 # Stdout:   <md>
 tsv2md() {
     is integer --name=arguments --max=1 --die -- $#
-    is set --name=tsv --die -- "$1"
     # processing
     install mlr
     input "$@" | uncolorize | mlr --csvlite --ifs '\t' --omd cat
@@ -44,11 +42,11 @@ tsv2md() {
 ######################################################################################
 
 # Transform comma separated table.
-# Usage:    <string> | tsv {to} <param>...
-#           <string> | tsv to {tsv}              # convert
+# Usage:    <string> | csv {to} <param>...
+#           <string> | csv to {tsv}              # convert
 csv() {
     is integer --name=arguments --max=1 --die -- $#
-    is set --name=tsv --die -- "$1"
+    is set --name=csv --die -- "$1"
     # processing
     case $1 in
     to)
