@@ -20,18 +20,15 @@ source /dev/null
 #           `DEBUG=9` - to output all
 # Error:    `> <func>           <message>`      # color: gray
 debug() {
+    local level=1 func text
     is integer --name=arguments --max=2 --die -- $#
-    # processing
-    # get level and function
-    local level=1 func
     is integer --min 1 -- "$1" && level="$1" && shift || true
     IFS=$' \t\n' read -r _ func _ <<<"$(caller 0)"
-    # collect text
-    local text
-    text="$(input "$@")"
-    test -n "$text" || return 0
-    # decide to print
+    is set -- "$1" || return 0
     is set -- "$DEBUG" || return 0
+    text="$(input "$@")"
+    # processing
+    # decide to print
     if is integer -- "$DEBUG"; then
         # numeric => decide on level
         is integer --min=0 --die -- "$DEBUG"

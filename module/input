@@ -633,7 +633,7 @@ choose() {
 # Example:  &tasks different possibilities
 tasks() {
     # parameter parsing
-    local end title _default opt loop
+    local end title _default opt loop raw
     eval set -- "$(option_parse $'t title +\nd default +\nT timeout +\nl loop -' "$@")"
     while true; do
         case "$1" in
@@ -645,11 +645,11 @@ tasks() {
         *) die "$(gettext "Unrecognized option"): $1" ;;
         esac
     done
+    raw="$(input_lines "$@" | grep -v '^[[:space:]]*#')" || true
     # processing
-    local raw list task num new_list cmd name
+    local list task num new_list cmd name
     find /dev/shm -regex ".*/$0_tasks_[0-9]*" -mmin +60 -delete 2>/dev/null || true # cleanup broken runs
     new_list="$(mktemp -m "tasks_$$")"
-    raw="$(input_lines "$@" | grep -v '^[[:space:]]*#')" || true
     # ask user to select
     while true; do
         list="$raw"
