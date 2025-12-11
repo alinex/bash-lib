@@ -63,9 +63,9 @@ _mattermost_channel() {
 }
 
 # Get channel by <post-id>
-# Usgae:    _mattermost_channel_bypost <post-id>
+# Usage:    _mattermost_channel_by_post <post-id>
 # Output:   <channel-id>
-_mattermost_channel_bypost() {
+_mattermost_channel_by_post() {
     debug "GET mattermost/posts/<post-id>"
     curl -H "Authorization: Bearer $MATTERMOST_TOKEN" "$MATTERMOST_API"/posts/"$1" |
         jq '.channel_id' -r ||
@@ -73,7 +73,7 @@ _mattermost_channel_bypost() {
 }
 
 # New post in channel
-# Usage:    _mattermost_post <channelid> <message> [<attachments>]
+# Usage:    _mattermost_post <channel-id> <message> [<attachments>]
 # Output:   <channel-id>/<post-id>
 _mattermost_post() {
     local att=""
@@ -89,13 +89,13 @@ _mattermost_post() {
         curl -H "Authorization: Bearer $MATTERMOST_TOKEN" -H 'Content-Type: application/json' -X POST "$MATTERMOST_API"/posts -d "$json" |
             jq '.id' -r
     ) ||
-        die "Couls not send new post to mattermost!"
+        die "Could not send new post to mattermost!"
     debug "-> $pid"
     echo "$1/$pid"
 }
 
 # Repost in channel
-# Usage:    _mattermost_repost <channelid> <postid> <message> [<attachments>] -> <channel-id>/<post-id>
+# Usage:    _mattermost_repost <channel-id> <post-id> <message> [<attachments>] -> <channel-id>/<post-id>
 _mattermost_repost() {
     local att=""
     if [ -n "$4" ]; then
@@ -115,7 +115,7 @@ _mattermost_repost() {
 }
 
 # Add reaction to post
-# Usage:    _mattermost_reaction <postid> <smiley>
+# Usage:    _mattermost_reaction <post-id> <smiley>
 _mattermost_reaction() {
     local json
     json="$(jq -n --arg u "$(_mattermost_user)" --arg p "$1" --arg t "$2" '{ user_id: $u, post_id: $p, emoji_name: $t }')"
@@ -126,7 +126,7 @@ _mattermost_reaction() {
 }
 
 # Repost in channel
-# Usage:    _mattermost_delete <postid>
+# Usage:    _mattermost_delete <post-id>
 _mattermost_delete() {
     debug "DELETE mattermost/posts"
     curl -H "Authorization: Bearer $MATTERMOST_TOKEN" -H 'Content-Type: application/json' -X DELETE "$MATTERMOST_API"/posts/"$1" ||
@@ -135,7 +135,7 @@ _mattermost_delete() {
 
 # Find channels by predefined pattern
 # Usage:    _mattermost_find_channels <name>
-# Output:   `<team-id>/<channel-id>` ... # first nmain, followig links
+# Output:   `<team-id>/<channel-id>` ... # first main, following links
 #           `<team-id>/<channel-id>` ... # one line per team matching
 _mattermost_find_channels() {
     id() {
@@ -198,7 +198,7 @@ mattermost_post_ids=""
 # Send a message to Mattermost
 # Usage:    mattermost <channel-name> <text> [<attachments>]
 # Globals:  $MATTERMOST_API + $MATTERMOST_TOKEN to access API
-# Output:   <postid list>
+# Output:   <post-id list>
 # Returns:  0 without action if no $MATTERMOST_API + $MATTERMOST_TOKEN
 mattermost() {
     is integer --name=arguments --max=3 --die -- $#
@@ -209,21 +209,21 @@ mattermost() {
         return 0
     fi
     install jq
-    local channels line main links link mainid postid result
+    local channels line main links link mainId postId result
     channels="$(_mattermost_find_channels "$1")" || exit 1
     # for lines in channels
     while read -r line; do
         [ -n "$line" ] || continue
         read -r main links <<<"$line"
         IFS="/" read -r _ channel <<<"$main"
-        mainid=$(_mattermost_post "$channel" "$2" "$3")
-        IFS="/" read -r _ post <<<"$mainid"
-        result="$result\n$mainid"
+        mainId=$(_mattermost_post "$channel" "$2" "$3")
+        IFS="/" read -r _ post <<<"$mainId"
+        result="$result\n$mainId"
         while IFS=" " read -r link; do
             [ -n "$link" ] || continue
             IFS="/" read -r _ channel <<<"$link"
-            postid=$(_mattermost_post "$channel" "https://mattermost.ekz.de/divibib/pl/$post")
-            result="$result $postid"
+            postId=$(_mattermost_post "$channel" "https://mattermost.ekz.de/divibib/pl/$post")
+            result="$result $postId"
         done <<<"$links"
     done <<<"$channels"
     mattermost_post_ids="${result:2}"
@@ -232,7 +232,7 @@ mattermost() {
 # Create an attachment json to be used in post
 # Find free linkable icons under https://icons8.de/icons/all
 # Usage:    mattermost_attachment
-#           mattermost_post $channelid "" "$(mattermost_attachment --color ...)"
+#           mattermost_post <channel-id> "" "$(mattermost_attachment --color ...)"
 # Globals:  $MATTERMOST_API + $MATTERMOST_TOKEN to access API
 # Options:  color <hexcode>   # rgb color or names: critical, error, warning, ok, info, default
 #           text <md>         # text content

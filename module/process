@@ -16,7 +16,7 @@ sudo_allow() {
     # processing
     ((EUID != 0)) || return 0
     command -v sudo >/dev/null || return 0
-    command sudo -ln "$@" >/dev/null || die "User $(whoami) is not allowed to call 'sudo $*', but this is neccessary!"
+    command sudo -ln "$@" >/dev/null || die "User $(whoami) is not allowed to call 'sudo $*', but this is necessary!"
 }
 
 # Sudo overwrite to only use sudo if needed
@@ -136,7 +136,7 @@ lock_exit() {
     lockfile="$(mktemp 'lockfile')"
     # make a file with our PID
     echo $$ >"$lockfile.$$" 2>/dev/null || die "$(gettext "Failed to create PID lockfile"): $lockfile.$$"
-    # rmove old lock if no longer running
+    # move old lock if no longer running
     _lock_remove
     # try to symlink it
     if ! ln "$lockfile.$$" "$lockfile" 2>/dev/null; then
@@ -170,7 +170,7 @@ unlock() {
 ######################################################################################
 
 # Store environment into shared memory/file
-# Use `$$` or '${$}' as the program PID which will be also the same in Subshells or `${BASHPID}` which will differ.
+# Use `$$` or '${$}' as the program PID which will be also the same in Subshell or `${BASHPID}` which will differ.
 # Usage:    env_store [<ident>]                 # store complete environment
 #           env_store [<ident>] [<variable>]... # store only listed variables (ident can be empty string)
 # Options:  d, disk                          # store on disk in temporary folder
@@ -380,7 +380,7 @@ steps_done() {
     is set --name=name --die -- "$1"
     local name="$1"
     # processing
-    declare -p _STEPS 2>/dev/null | grep -q 'declare -A' || return # do nothin if no step control
+    declare -p _STEPS 2>/dev/null | grep -q 'declare -A' || return # do nothing if no step control
     if [ -n "$1" ]; then
         _STEPS["$name"]=1
         # shellcheck disable=SC2155
@@ -454,7 +454,7 @@ async_name() {
 
 # Check if the command is done or wait here till it is so
 # Usage:    async_wait          # to wait for all to be done
-#           async_wait <name>   # to wiat for specific command to finish
+#           async_wait <name>   # to wait for specific command to finish
 async_wait() {
     [ -z "${_async_running["$1"]}" ] && return 0 || true
     wait "${_async_running["$1"]}"

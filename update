@@ -150,7 +150,7 @@ for folder in config core module extra; do
                 sed -E 's#(^|[^[:alnum:]_.-])(\$[[:alnum:]_]+)#\1`\2`#g' \
                     >>"$BASHLIB_HOME"/doc/README.md
             # Get function names and start lines using grep and awk
-            # Supports functions declared as: fname() { ... } or function fname { ... }
+            # Supports functions declared as: name() { ... } or function name { ... }
             function_lines=$(awk '
                 /^[[:space:]]*([a-zA-Z_][a-zA-Z0-9_]*)[[:space:]]*\(\)[[:space:]]*\{/ {
                     print FNR, $0
@@ -164,20 +164,20 @@ for folder in config core module extra; do
             while read -r line function_declaration; do
                 echo -n "." >&2
                 # Extract function name from declaration line
-                funcname=$(echo "$function_declaration" | sed -n 's/.*function[[:space:]]*\([a-zA-Z_][a-zA-Z0-9_]*\).*/\1/p')
-                [ -z "$funcname" ] && funcname=$(echo "$function_declaration" | sed -n 's/^\s*\([a-zA-Z_][a-zA-Z0-9_]*\).*/\1/p')
+                funcName=$(echo "$function_declaration" | sed -n 's/.*function[[:space:]]*\([a-zA-Z_][a-zA-Z0-9_]*\).*/\1/p')
+                [ -z "$funcName" ] && funcName=$(echo "$function_declaration" | sed -n 's/^\s*\([a-zA-Z_][a-zA-Z0-9_]*\).*/\1/p')
                 # Extract comment block directly above function
                 comments=""
-                linenum=$((line - 1))
-                while ((linenum > 0)); do
-                    line_content=$(sed -n "${linenum}p" "$file")
+                lineNum=$((line - 1))
+                while ((lineNum > 0)); do
+                    line_content=$(sed -n "${lineNum}p" "$file")
                     if [[ "$line_content" =~ ^[[:space:]]*# ]]; then
                         # shellcheck disable=SC2001
                         comments="$(sed 's/^\s*# \?//' <<<"$line_content")"$'\n'"$comments"
                     else
                         break
                     fi
-                    linenum=$((linenum - 1))
+                    lineNum=$((lineNum - 1))
                 done
                 # Parse documentation
                 first=1
@@ -263,15 +263,15 @@ for folder in config core module extra; do
                     fi
                 done <<<"$comments"
                 [ -n "$title" ] || continue
-                [ -n "$funcname" ] || continue
-                [[ ! "$funcname" =~ ^_.* ]] || continue
+                [ -n "$funcName" ] || continue
+                [[ ! "$funcName" =~ ^_.* ]] || continue
                 # add to table
-                echo "| [\`$funcname\`](function/$funcname.md) | $title |" >>"$BASHLIB_HOME"/doc/README.md
+                echo "| [\`$funcName\`](function/$funcName.md) | $title |" >>"$BASHLIB_HOME"/doc/README.md
                 # add detail pages
                 shopt -u nocasematch
                 # shellcheck disable=SC2016
                 (
-                    echo "# $funcname"
+                    echo "# $funcName"
                     echo -e "\n## $title"
                     [ -z "${description//[[:space:]]/}" ] || echo -e "$description" | md_optimize
                     [ -z "$usage" ] || echo -e "\n### Usage\n\n\`\`\`bash${usage}\n\`\`\`"
@@ -288,7 +288,7 @@ for folder in config core module extra; do
                     sed -E 's#(^|[^[:alnum:]_.-])@([[:alnum:]_]+)#\1[`\2`](\2.md)#g' |
                     sed -E 's#(^|[^[:alnum:]_.-])&([[:alnum:]_]+)(\#[[:alnum:]_]+)?#\1[`\2`](../example/\2.md\3)#g' |
                     sed -E 's#(^|[^[:alnum:]_.-])(\$[[:alnum:]_]+)#\1`\2`#g' \
-                        >"$BASHLIB_HOME"/doc/function/"$funcname".md
+                        >"$BASHLIB_HOME"/doc/function/"$funcName".md
             done <<<"$function_lines"
             echo " fertig."
         fi
