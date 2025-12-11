@@ -2,8 +2,7 @@
 
 ## Format date in different named versions or format string
 
-The ``<value>`` can be unix timestamp (seconds since 1970) or a parsable date format.
-
+The `<value>` can be unix timestamp (seconds since 1970) or a parsable date format.
 
 ### Usage
 
@@ -24,4 +23,5 @@ date_format <format> [<value>] # use now if missing
 
 ### Output (stdout)
 
-- `<string>` in selected format
+`<string>` in selected format
+

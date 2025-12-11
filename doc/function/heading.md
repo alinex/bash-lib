@@ -2,8 +2,6 @@
 
 ## Print block heading
 
-
-
 ### Usage
 
 ```bash
@@ -14,7 +12,8 @@ heading <title>
 ### Globals
 
 - `$server`
+- 
 
 ### Output (stdout)
 
-- colored `<string>`
+colored `<string>`

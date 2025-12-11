@@ -5,7 +5,6 @@
 After initializing a log using `start` the default output options will additionally write into log. But you can also specifically write t it using the log function.
 Multiple log with different levels are possible.
 
-
 ### Usage
 
 ```bash
@@ -18,11 +17,10 @@ log end <destination>
 ### Options
 
 ```bash
--l, --level=<level>                 # level := debug info notice warn error critical
-# File logging:
--r, --rotate=hourly|daily|weekly|monthly|<bytes>
--c, --cleanup=<num>|<duration>
--z, --compress
+l, level=<level>  with values: debug info notice warn error critical
+r, rotate=hourly|daily|weekly|monthly|<bytes> - only for file logging
+c, cleanup=<num>|<duration> - only for file logging
+z, compress - only for file logging
 ```
 
 ### Files
@@ -31,6 +29,10 @@ log end <destination>
 
 ### Examples
 
-- # Format: `<date>` `<time>` `<level>` `<message>`
-- 2025-12-02 14:07:35 INFO Hello
-- 2025-12-02 14:10:04 ERROR This is only a test
+
+```
+# Format: <date> <time> <level> <message>
+2025-12-02 14:07:35 INFO Hello
+2025-12-02 14:10:04 ERROR This is only a test
+````
+

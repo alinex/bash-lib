@@ -15,7 +15,6 @@ Possible formats are:
 
 If another format is needed, you can fall back to string and validate on your own after you got the response.
 
-
 ### Usage
 
 ```bash
@@ -25,10 +24,10 @@ ask <format> <question>
 ### Options
 
 ```bash
--e, --empty                 # allow empty value
--n, --allow-negative        # on number, integer, float
--d, --default <value>       # set default if none given
--T, --timeout <duration>    # time till default is used
+e, empty                 # allow empty value
+n, allow-negative        # on number, integer, float
+d, default <value>       # set default if none given
+T, timeout <duration>    # time till default is used
 ```
 
 ### TTY (direct)
@@ -40,8 +39,9 @@ ask <format> <question>
 
 ### Output (stdout)
 
-- `<answer>`
+`<answer>`
 
 ### Examples
 
-- [`input`](../example/input.md#ask) shows all possible use cases
+[`input`](../example/input.md#ask) shows all possible use cases
+

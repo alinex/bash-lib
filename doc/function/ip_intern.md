@@ -3,9 +3,9 @@
 ## Show the IP addresses.
 
 The possible response formats are:
-- main - (default) to return only the main IP
-- data - complete data table tab separated
 
+- `main` - (default) to return only the main IP
+- `data` - complete data table tab separated
 
 ### Usage
 
@@ -15,4 +15,5 @@ ip_intern <format>
 
 ### Output (stdout)
 
-- `<ip>`
+`<ip>`
+

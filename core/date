@@ -10,7 +10,7 @@ source /dev/null
 
 # Get current timestamp
 # Usage:    now
-# Output:   `<seconds>` since 1970
+# Output:   <seconds> since 1970
 # shellcheck disable=SC2120
 now() {
     is integer --name=arguments --max=0 --die -- $#
@@ -25,7 +25,7 @@ now() {
 # Calculate difference in seconds
 # The two dates to compare can be unix timestamps (seconds since 1970) or a parsable date format.
 # Usage:    date_diff <start> <end> # timestamp or date string
-# Output:   `<seconds>` negative if `<start>` behind `<end>`
+# Output:   <seconds> negative if <start> behind <end>
 date_diff() {
     is integer --name=arguments --max=2 --die -- $#
     local start end
@@ -87,7 +87,7 @@ date_format() {
 #                       hours       # using floor
 #                       days        # using floor
 #                       human       # like 1h 30m, 5w, 30s # spaces between different units are optional
-# Output:   `<duration>` in selected format
+# Output:   <duration> in selected format
 duration_format() {
     is integer --name=arguments --max=2 --die -- $#
     is enum --name=format --allow="seconds minutes hours days human" --die -- "$1"
@@ -204,7 +204,7 @@ timer_start() {
 # Deprecated: Stop the timer and calculate elapsed time
 # Use @timer like `timer stop`.
 # The timer has to be started before using @timer_start.
-# Output:   <seconds>.<milliseconds>
+# Output:   `<seconds>.<milliseconds>`
 timer_stop() {
     _deprecated "Use: timer stop"
     timer stop

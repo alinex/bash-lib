@@ -13,7 +13,7 @@ source /dev/null
 # It will remove the directory and output only the filename.
 # Usage:    basename <path>
 #           <path> | basename
-# Output:   `<file>`
+# Output:   <file>
 basename() {
     is integer --name=arguments --max=1 --die -- $#
     # processing
@@ -28,7 +28,7 @@ basename() {
 # It will remove the last element in path.
 # Usage:    dirname <path>
 #           <path> | dirname
-# Output:   `<base-path>`
+# Output:   <base-path>
 dirname() {
     is integer --name=arguments --max=1 --die -- $#
     # processing
@@ -44,7 +44,7 @@ dirname() {
 # From the last occurrence of the . (period) character to end of string in the last portion of the path. If there is no . in the last portion of the path, or if the first character of the basename of path (see path.basename()) is ., then an empty string is returned.
 # Usage:    extname <path>
 #           <path> | extname
-# Output:   `<extension>`
+# Output:   <extension>
 extname() {
     is integer --name=arguments --max=1 --die -- $#
     # processing

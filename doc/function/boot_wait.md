@@ -2,8 +2,6 @@
 
 ## Wait till reboot is finished
 
-
-
 ### Usage
 
 ```bash
@@ -13,10 +11,10 @@ boot_wait [<options>]
 ### Options
 
 ```bash
--l, --login <user>
--h, --host <host>
--j, --jump <user>@<host>
--q, --quiet
+l, login <user>
+h, host <host>
+j, jump <user>@<host>
+q, quiet
 ```
 
 ### Globals
@@ -26,4 +24,5 @@ boot_wait [<options>]
 
 ### Error (stderr)
 
-- `<sql-time>`
+`<sql-time>`
+

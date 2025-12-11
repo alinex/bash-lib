@@ -4,7 +4,6 @@
 
 The list can be filtered by options and a specific output format can be selected.
 
-
 ### Usage
 
 ```bash
@@ -15,11 +14,11 @@ alerts -i "^`$server`" console || echo "" # will print the alerts with an empty 
 ### Options
 
 ```bash
--a, --alertname <regexp>               # select alert name
--n, --net <name>                        # select network name
--i, --instance <regexp>                 # select only matching instances
--s, --summary <regexp>                  # select by summary text
--q, --quiet                             # return only status code
+a, alertname <regexp>               # select alert name
+n, net <name>                        # select network name
+i, instance <regexp>                 # select only matching instances
+s, summary <regexp>                  # select by summary text
+q, quiet                             # return only status code
 ```
 
 ### Output (stdout)
@@ -34,3 +33,4 @@ alerts -i "^`$server`" console || echo "" # will print the alerts with an empty 
 - 0 - no alerts
 - `<num>` - at least one alert
 - 0 - without output if no `$GRAFANA_API` + `$GRAFANA_TOKEN`
+- 

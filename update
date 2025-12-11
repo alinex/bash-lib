@@ -17,7 +17,7 @@ for folder in core module; do
         fi
     done
 done
-sed -E -f optimize-code.sed "$BASHLIB_HOME/full" >"$BASHLIB_HOME/full2"
+#sed -E -f optimize-code.sed "$BASHLIB_HOME/full" >"$BASHLIB_HOME/full2"
 #echo -n "(optimize) "
 #sed -i -E -f optimize-code.sed "$BASHLIB_HOME/full"
 echo "fertig -> $(du -h full | cut -f1)B"
@@ -33,6 +33,52 @@ done
 #echo -n "(optimize) "
 #sed -i -E -f optimize-code.sed "$BASHLIB_HOME/base"
 echo "fertig -> $(du -h full | cut -f1)B"
+
+md_optimize() {
+    awk '
+    BEGIN { in_block=0; in_inline=0 }
+
+    {
+      line=$0
+
+      # Toggle fenced code block state
+      if (match(line, /^```/)) {
+        in_block = !in_block
+        if (in_block) {
+            print "\n" line
+        } else {
+            print line
+        }
+        next
+      }
+
+      # If inside fenced block → print unchanged
+      if (in_block) {
+        print line
+        next
+      }
+
+      # Process inline code: split by backticks
+      n = split(line, parts, /`/)
+      out = ""
+
+      for (i=1; i<=n; i++) {
+        if (i % 2 == 0) {
+          # Inside inline backticks → leave unchanged
+          out = out "`" parts[i] "`"
+        } else {
+          # Outside inline code → escape tags
+          tmp = parts[i]
+          gsub(/</, "`<", tmp)
+          gsub(/>/, ">`", tmp)
+          out = out tmp
+        }
+      }
+
+      print out
+    }
+  '
+}
 
 echo "Update translations..."
 command -v xgettext &>/dev/null || sudo apt install gettext
@@ -113,12 +159,6 @@ for folder in config core module extra; do
                     print FNR, $0
                 }
             ' "$file")
-            tag2code() {
-                code="$1"
-                code="${code//</\`<}"
-                code="${code//>/>\`}"
-                echo "$code"
-            }
             [ -n "$function_lines" ] || continue
             # Loop over functions with line numbers
             while read -r line function_declaration; do
@@ -175,22 +215,22 @@ for folder in config core module extra; do
                             spaces=${#start}
                         fi
                         options+="\n${line:$spaces}"
-                    elif [[ "$line" =~ ^variable(s)?: ]] || { [ "$chapter" = "variables" ] && [[ "$line" =~ ^[[:space:]] ]]; }; then
+                    elif [[ "$line" =~ ^variable(s)?: ]] || { [ "$chapter" = "variables" ] && [[ "$line" =~ ^[[:space:]] || "$line" =~ ^$ ]]; }; then
                         # shellcheck disable=SC2001
                         line="$(sed 's/^\(variables\?:\)\?\s*//i' <<<"$line")"
                         globals+="\n- $line"
                         chapter="variables"
-                    elif [[ "$line" =~ ^global(s)?: ]] || { [ "$chapter" = "globals" ] && [[ "$line" =~ ^[[:space:]] ]]; }; then
+                    elif [[ "$line" =~ ^global(s)?: ]] || { [ "$chapter" = "globals" ] && [[ "$line" =~ ^[[:space:]] || "$line" =~ ^$ ]]; }; then
                         # shellcheck disable=SC2001
                         line="$(sed 's/^\(globals\?:\)\?\s*//i' <<<"$line")"
                         globals+="\n- $line"
                         chapter="globals"
-                    elif [[ "$line" =~ ^example(s)?: ]] || { [ "$chapter" = "example" ] && [[ "$line" =~ ^[[:space:]] ]]; }; then
+                    elif [[ "$line" =~ ^example(s)?: ]] || { [ "$chapter" = "example" ] && [[ "$line" =~ ^[[:space:]] || "$line" =~ ^$ ]]; }; then
                         # shellcheck disable=SC2001
                         line="$(sed 's/^\(examples\?:\)\?\s*//i' <<<"$line")"
-                        example+="\n- $line"
+                        example+="\n$line"
                         chapter="example"
-                    elif [[ "$line" =~ ^tty: ]] || { [ "$chapter" = "tty" ] && [[ "$line" =~ ^[[:space:]] ]]; }; then
+                    elif [[ "$line" =~ ^tty: ]] || { [ "$chapter" = "tty" ] && [[ "$line" =~ ^[[:space:]] || "$line" =~ ^$ ]]; }; then
                         if grep -Eiq "^tty:" <<<"$line"; then
                             # shellcheck disable=SC2001
                             start="$(sed 's/^\(tty:\s*\).*/\1/i' <<<"$line")"
@@ -198,22 +238,22 @@ for folder in config core module extra; do
                             spaces=${#start}
                         fi
                         tty+="\n${line:$spaces}"
-                    elif [[ "$line" =~ ^file(s)?: ]] || { [ "$chapter" = "files" ] && [[ "$line" =~ ^[[:space:]] ]]; }; then
+                    elif [[ "$line" =~ ^file(s)?: ]] || { [ "$chapter" = "files" ] && [[ "$line" =~ ^[[:space:]] || "$line" =~ ^$ ]]; }; then
                         # shellcheck disable=SC2001
                         line="$(sed 's/^\(files\?:\)\?\s*//i' <<<"$line")"
                         files+="\n- $line"
                         chapter="files"
-                    elif [[ "$line" =~ ^output: ]] || { [ "$chapter" = "output" ] && [[ "$line" =~ ^[[:space:]] ]]; }; then
+                    elif [[ "$line" =~ ^output: ]] || { [ "$chapter" = "output" ] && [[ "$line" =~ ^[[:space:]] || "$line" =~ ^$ ]]; }; then
                         # shellcheck disable=SC2001
                         line="$(sed 's/^\(output:\)\?\s*//i' <<<"$line")"
-                        output+="\n- $line"
+                        output+="\n$line"
                         chapter="output"
-                    elif [[ "$line" =~ ^error(s)?: ]] || { [ "$chapter" = "error" ] && [[ "$line" =~ ^[[:space:]] ]]; }; then
+                    elif [[ "$line" =~ ^error(s)?: ]] || { [ "$chapter" = "error" ] && [[ "$line" =~ ^[[:space:]] || "$line" =~ ^$ ]]; }; then
                         # shellcheck disable=SC2001
                         line="$(sed 's/^\(errors\?:\)\?\s*//i' <<<"$line")"
-                        error+="\n- $line"
+                        error+="\n$line"
                         chapter="error"
-                    elif [[ "$line" =~ ^return(s)?: ]] || { [ "$chapter" = "return" ] && [[ "$line" =~ ^[[:space:]] ]]; }; then
+                    elif [[ "$line" =~ ^return(s)?: ]] || { [ "$chapter" = "return" ] && [[ "$line" =~ ^[[:space:]] || "$line" =~ ^$ ]]; }; then
                         # shellcheck disable=SC2001
                         line="$(sed 's/^\(returns\?:\)\?\s*//i' <<<"$line")"
                         return+="\n- $line"
@@ -233,17 +273,17 @@ for folder in config core module extra; do
                 (
                     echo "# $funcname"
                     echo -e "\n## $title"
-                    [ -z "${description//[[:space:]]/}" ] || echo -e "$(tag2code "$description")"
+                    [ -z "${description//[[:space:]]/}" ] || echo -e "$description" | md_optimize
                     [ -z "$usage" ] || echo -e "\n### Usage\n\n\`\`\`bash${usage}\n\`\`\`"
                     [ -z "$options" ] || echo -e "\n### Options\n\n\`\`\`bash${options}\n\`\`\`"
-                    [ -z "$variables" ] || echo -e "\n### Variables\n$(tag2code "$variables")"
-                    [ -z "$globals" ] || echo -e "\n### Globals\n$(tag2code "$globals")"
+                    [ -z "$variables" ] || echo -e "\n### Variables\n$variables" | md_optimize
+                    [ -z "$globals" ] || echo -e "\n### Globals\n$globals" | md_optimize
                     [ -z "$tty" ] || echo -e "\n### TTY (direct)\n\n\`\`\`bash${tty}\n\`\`\`"
-                    [ -z "$files" ] || echo -e "\n### Files\n$(tag2code "$files")"
-                    [ -z "$output" ] || echo -e "\n### Output (stdout)\n$(tag2code "$output")"
-                    [ -z "$error" ] || echo -e "\n### Error (stderr)\n$(tag2code "$error")"
-                    [ -z "$return" ] || echo -e "\n### Return (exit code)\n$(tag2code "$return")"
-                    [ -z "$example" ] || echo -e "\n### Examples\n$(tag2code "$example")"
+                    [ -z "$files" ] || echo -e "\n### Files\n$files" | md_optimize
+                    [ -z "$output" ] || echo -e "\n### Output (stdout)\n$output" | md_optimize
+                    [ -z "$error" ] || echo -e "\n### Error (stderr)\n$error" | md_optimize
+                    [ -z "$return" ] || echo -e "\n### Return (exit code)\n$return" | md_optimize
+                    [ -z "$example" ] || echo -e "\n### Examples\n$example" | md_optimize
                 ) |
                     sed -E 's#(^|[^[:alnum:]_.-])@([[:alnum:]_]+)#\1[`\2`](\2.md)#g' |
                     sed -E 's#(^|[^[:alnum:]_.-])&([[:alnum:]_]+)(\#[[:alnum:]_]+)?#\1[`\2`](../example/\2.md\3)#g' |

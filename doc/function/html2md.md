@@ -2,8 +2,6 @@
 
 ## Convert HTML to markdown (simplified version)
 
-
-
 ### Usage
 
 ```bash
@@ -13,4 +11,5 @@ html2md <html-part>
 
 ### Output (stdout)
 
-- `<md>`
+`<md>`
+

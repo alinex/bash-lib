@@ -5,7 +5,6 @@
 This will use the command itself as name. If you run the same command multiple times use
 async_name directly.
 
-
 ### Usage
 
 ```bash
@@ -14,8 +13,12 @@ async <command> [<params>...]
 
 ### Examples
 
-- async task1
-- async task2
-- async_wait task1
-- async task3
-- wait # for all to end
+
+```bash
+async task1
+async task2
+async_wait task1
+async task3
+wait # for all to end
+```
+

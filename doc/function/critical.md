@@ -2,8 +2,6 @@
 
 ## Print critical/disaster message
 
-
-
 ### Usage
 
 ```bash
@@ -13,4 +11,5 @@ critical <message>
 
 ### Output (stdout)
 
-- colored `<string>`
+colored `<string>`
+

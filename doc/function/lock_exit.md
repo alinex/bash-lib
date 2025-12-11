@@ -2,10 +2,7 @@
 
 ## Set the lock or exit with optional error message
 
-In any part of your script you can surround a block with lock and unlock statements. The
-process will wait on the lock statement till no other process with the same lock is running
-before going on.
-
+While another program is running with this lock active it will [`die`](die.md).
 
 ### Usage
 
@@ -17,3 +14,4 @@ lock_exit
 
 - /tmp/`<prog>`-lockfile        # hard link to active process
 - /tmp/`<prog>`-lockfile.`<pid>`  # active or waiting process
+- 

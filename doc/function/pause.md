@@ -2,8 +2,6 @@
 
 ## Wait for some time or user input
 
-
-
 ### Usage
 
 ```bash
@@ -14,8 +12,8 @@ pause <message>
 ### Options
 
 ```bash
--T, --timeout <duration>    # time after which the default will be used
--a, --abort                 # let the timeout abort by key press
+T, timeout <duration>    # time after which the default will be used
+a, abort                 # let the timeout abort by key press
 ```
 
 ### TTY (direct)
@@ -26,4 +24,5 @@ pause <message>
 
 ### Examples
 
-- [`input`](../example/input.md#pause) shows all possible use cases
+[`input`](../example/input.md#pause) shows all possible use cases
+

@@ -2,8 +2,6 @@
 
 ## Print message in defined color
 
-
-
 ### Usage
 
 ```bash
@@ -13,4 +11,5 @@ color <color> <message>
 
 ### Output (stdout)
 
-- colored `<string>`
+colored `<string>`
+

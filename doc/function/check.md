@@ -13,17 +13,17 @@ But you can also use it in the program flow without that and use it's return sta
 Because the values may start with an dash you should always put it at the end after '--' to prevent parsing it as option.
 
 The following checks are implemented:
+
 - `set` will fail if no value given
 - `empty` will fail if not empty like ""
 - `bool` will transform the value to `1` or `0` and allows: true/false, t/f, 1/0, yes/no, y/j/n, ja/nein, ""
 - `integer` will check for a number maybe within a range
 - `float` will check for a number maybe within a range
-- `enum' will check against valid words using `--allow="word1 word2"`
+- `enum' will check against valid words using `--allow="word1 word2"``
 - `length` check that the length is within range (like integer)
 - `duration` check and parse the [`duration_format`](duration_format.md)
 
 Exit:     with message if incorrect value
-
 
 ### Usage
 
@@ -44,13 +44,17 @@ allow=<words>       # for enum (space separated)
 
 ### Output (stdout)
 
-- `<value>`             # may be sanitized
+`<value>`             # may be sanitized
 
 ### Examples
 
-- # check arguments
-- check integer --name=arguments --max=2 $# >`/dev/null # mostly only check max, if all args are checked separately
-- name="$(check integer --name=age --sanitize --min=0 -- "`$1`")"
-- init="$(check bool --name=init "`$1`")"
-- # use in code
-- if check integer age --min=18 -- "`$1`" >`/dev/null; then
+Check arguments:
+
+- `check integer --name=arguments --max=2 $# >/dev/null` # mostly only check max, if all args are checked separately
+- `name="$(check integer --name=age --sanitize --min=0 -- "`$1`")"`
+- `init="$(check bool --name=init "`$1`")"`
+
+Use in code:
+
+- `if check integer age --min=18 -- "`$1`" >/dev/null; then`
+

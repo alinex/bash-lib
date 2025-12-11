@@ -2,8 +2,6 @@
 
 ## Convert TSV data into markdown table
 
-
-
 ### Usage
 
 ```bash
@@ -13,4 +11,5 @@ tsv2md <tsv>
 
 ### Output (stdout)
 
-- `<md>`
+`<md>`
+

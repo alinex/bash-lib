@@ -2,8 +2,6 @@
 
 ## Remove color codes from text
 
-
-
 ### Usage
 
 ```bash
@@ -13,4 +11,5 @@ uncolorize <text>
 
 ### Output (stdout)
 
-- `<text>`
+`<text>`
+

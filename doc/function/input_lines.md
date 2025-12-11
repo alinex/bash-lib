@@ -4,7 +4,6 @@
 
 The same as [`input`](input.md) for piped content but the arguments will not be joined by spaces but read as separate lines.
 
-
 ### Usage
 
 ```bash
@@ -14,5 +13,6 @@ text="$(input_lines "$@")"
 
 ### Output (stdout)
 
-- ``<string-input>`` or
-- ``<string-params>`` separated by newlines
+`<string-input>` or
+`<string-params>` separated by newlines
+

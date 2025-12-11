@@ -2,8 +2,6 @@
 
 ## Print error message
 
-
-
 ### Usage
 
 ```bash
@@ -13,4 +11,5 @@ error <message>
 
 ### Output (stdout)
 
-- colored `<string>`
+colored `<string>`
+

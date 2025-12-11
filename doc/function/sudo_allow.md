@@ -4,7 +4,6 @@
 
 This will [`die`](die.md) if
 
-
 ### Usage
 
 ```bash
@@ -15,3 +14,4 @@ sudo_allow <command-line>
 
 - 0 if allowed
 - [`die`](die.md) if not allowed
+- 

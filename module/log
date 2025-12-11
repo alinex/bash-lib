@@ -24,15 +24,16 @@ declare -Ag _log_active
 #           log <level> <message>
 #           <message> | log <level>
 #           log end <destination>
-# Options:  -l, --level=<level>                 # level := debug info notice warn error critical
-#           # File logging:
-#           -r, --rotate=hourly|daily|weekly|monthly|<bytes>
-#           -c, --cleanup=<num>|<duration>
-#           -z, --compress
+# Options:  l, level=<level>  with values: debug info notice warn error critical
+#           r, rotate=hourly|daily|weekly|monthly|<bytes> - only for file logging
+#           c, cleanup=<num>|<duration> - only for file logging
+#           z, compress - only for file logging
 # Files:    <destination>[_<pattern>]                  # will contain the logs
-# Example:  # Format: <date> <time> <level> <message>
+# Example:  ```
+#           # Format: <date> <time> <level> <message>
 #           2025-12-02 14:07:35 INFO Hello
 #           2025-12-02 14:10:04 ERROR This is only a test
+#           ````
 log() {
     # parameter parsing
     local level=1 rotate compress=0 cleanup text size

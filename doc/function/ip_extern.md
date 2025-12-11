@@ -3,7 +3,8 @@
 ## Run  os detection and set the constants
 
 The following formats are possible:
-- data - all values with ``<name>`	`<value>``
+
+- data - all values with `<name>	<value>`
 - country
 - countryCode
 - region
@@ -18,7 +19,6 @@ The following formats are possible:
 - as
 - ip
 
-
 ### Usage
 
 ```bash
@@ -27,5 +27,6 @@ ip_extern <format>
 
 ### Output (stdout)
 
-- `<tsv-table>` for data
-- `<value>` else
+`<tsv-table>` for data
+`<value>` else
+

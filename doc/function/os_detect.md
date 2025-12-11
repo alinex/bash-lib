@@ -3,7 +3,8 @@
 ## Detect OS settings
 
 The following formats are possible:
-- data - all values with ``<name>`	`<value>``
+
+- data - all values with `<name>	<value>`
 - info - show human readable paragraph
 - os - operating system type like Linux, Solaris, Windows
 - base - base distribution type like Debian, ArchLinux
@@ -19,7 +20,6 @@ The following formats are possible:
 - machine_id
 - virtual_machine - `false` or `true`
 
-
 ### Usage
 
 ```bash
@@ -30,3 +30,4 @@ os_detect <format>
 
 - `<tsv-table>` for data
 - `<value>` else
+

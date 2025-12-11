@@ -10,7 +10,6 @@ The following commands ar`<string-input>`e possible:
 - `indexof` will return the index number of the value if found
 
 
-
 ### Usage
 
 ```bash
@@ -19,13 +18,14 @@ array <array-name> <command> [<value>]
 
 ### Globals
 
-- ``<array-name>`` as basis to work on
+- `<array-name>` as basis to work on
 
 ### Output (stdout)
 
-- ``<value>`` for `has`
-- ``<index-num>`` for `indexof`
+- `<value>` for `has`
+- `<index-num>` for `indexof`
 
 ### Return (exit code)
 
 - 0 if ok, 1 if entry not found
+- 

@@ -6,7 +6,6 @@
  my be contained, remove with nocr
 "Connection ... closed" in stderr: remove using: 2>` >`(grep -v '^Connection to .* closed\.' >`[`2`](../example/2.md))
 
-
 ### Usage
 
 ```bash
@@ -18,9 +17,9 @@ remote_term [<options>] <command>... # special characters have to be masked: | &
 
 ```bash
 # following options, only before `<command>`
--l, --login <user>
--h, --host <host>
--j, --jump <user>@<host>
+l, login <user>
+h, host <host>
+j, jump <user>@<host>
 ```
 
 ### Globals
@@ -30,4 +29,5 @@ remote_term [<options>] <command>... # special characters have to be masked: | &
 
 ### Output (stdout)
 
-- passed through
+passed through
+

@@ -13,6 +13,7 @@ declare -A _os_detected
 
 # Detect OS settings
 # The following formats are possible:
+#
 # - data - all values with `<name>\t<value>`
 # - info - show human readable paragraph
 # - os - operating system type like Linux, Solaris, Windows
@@ -29,8 +30,8 @@ declare -A _os_detected
 # - machine_id
 # - virtual_machine - `false` or `true`
 # Usage:    os_detect <format>
-# Output:   <tsv-table> for data
-#           <value> else
+# Output:   - <tsv-table> for data
+#           - <value> else
 os_detect() {
     is integer --name=arguments --max=1 --die -- $#
     is enum --name=format --allow="data info os base base_revision_name base_revision_number distribution revision_number revision_name kernel cpu_model cpu_num architecture machine_id virtual_machine" --die -- "$1"
@@ -136,11 +137,12 @@ system_info() { _deprecated "use os_detect info"; }
 
 # Disk free with visual display
 # The lines will be colorized based on `$MOUNT_COLOR_LIMIT`` setting, which contains sets of 5 entries (pattern critical error warn ok). The first matching pattern will decide the color limits.
+#
 # If a `--free` condition and `--collect` is given all disks violating this will be collected as string within the collection variable for further use.
 # Usage:    disk_free [options] [<mount>...]            # show table
-# Options:  -l, --local     # only list local devices
-#           -c, --collect <variable-name>
-#           -f, --free [<operator>]<percent%|bytes>
+# Options:  l, local     # only list local devices
+#           c, collect <variable-name>
+#           f, free [<operator>]<percent%|bytes>
 # Output:   # same as `df` command but colorized
 disk_free() {
     # parameter parsing

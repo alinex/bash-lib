@@ -2,8 +2,6 @@
 
 ## Print special marked message like table header
 
-
-
 ### Usage
 
 ```bash
@@ -13,4 +11,5 @@ invers <message>
 
 ### Output (stdout)
 
-- colored `<string>`
+colored `<string>`
+

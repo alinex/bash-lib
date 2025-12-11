@@ -2,8 +2,6 @@
 
 ## Encode message to be used within the url
 
-
-
 ### Usage
 
 ```bash
@@ -13,4 +11,5 @@ urlencode <string>
 
 ### Output (stdout)
 
-- `<string>`
+`<string>`
+

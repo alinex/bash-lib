@@ -2,8 +2,6 @@
 
 ## Check if LVM is used
 
-
-
 ### Usage
 
 ```bash
@@ -14,3 +12,4 @@ uses_lvm
 
 - 0 for uses LVM
 - 1 if not
+- 

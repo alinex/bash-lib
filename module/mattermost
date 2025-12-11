@@ -135,8 +135,8 @@ _mattermost_delete() {
 
 # Find channels by predefined pattern
 # Usage:    _mattermost_find_channels <name>
-# Output:   <team-id>/<channel-id> ... # first nmain, followig links
-#           <team-id>/<channel-id> ... # one line per team matching
+# Output:   `<team-id>/<channel-id>` ... # first nmain, followig links
+#           `<team-id>/<channel-id>` ... # one line per team matching
 _mattermost_find_channels() {
     id() {
         local val
@@ -234,18 +234,18 @@ mattermost() {
 # Usage:    mattermost_attachment
 #           mattermost_post $channelid "" "$(mattermost_attachment --color ...)"
 # Globals:  $MATTERMOST_API + $MATTERMOST_TOKEN to access API
-# Options:  --color <hexcode>   # rgb color or names: critical, error, warning, ok, info, default
-#           --text <md>         # text content
-#           --author <name>     # author name
-#           --avatar <url>      # author icon
-#           --home <url>        # author link
-#           --title <string>    # title
-#           --link <url>        # title link
-#           --image <url>       # bottom image
-#           --thumb <url>       # right image
-#           --fields <json>     # array title=<words>, value=<text>, short=false
-#           --footer <string>   # footer
-#           --logo <url>        # footer image
+# Options:  color <hexcode>   # rgb color or names: critical, error, warning, ok, info, default
+#           text <md>         # text content
+#           author <name>     # author name
+#           avatar <url>      # author icon
+#           home <url>        # author link
+#           title <string>    # title
+#           link <url>        # title link
+#           image <url>       # bottom image
+#           thumb <url>       # right image
+#           fields <json>     # array title=<words>, value=<text>, short=false
+#           footer <string>   # footer
+#           logo <url>        # footer image
 # Output:   <json> for this attachment
 # Returns:  0 without action if no $MATTERMOST_API + $MATTERMOST_TOKEN
 mattermost_attachment() {
@@ -300,7 +300,7 @@ mattermost_attachment() {
 # This can only be called if a @mattermost call was used previously.
 # Usage:    mattermost_reaction <emoji>
 # Globals:  $MATTERMOST_API + $MATTERMOST_TOKEN to access API
-# Options:  -l, --links     # also post this to the links
+# Options:  l, links     # also post this to the links
 # Returns:  0 without action if no $MATTERMOST_API + $MATTERMOST_TOKEN
 mattermost_reaction() {
     if [ -z "$MATTERMOST_API" ] || [ -z "$MATTERMOST_TOKEN" ]; then
@@ -348,8 +348,8 @@ mattermost_reaction() {
 # Add response to mattermost posting
 # This can only be called if a @mattermost call was used previously.
 # Usage:    mattermost_response <text> [<attachments>]
-# Globals:  `MATTERMOST_API` + `MATTERMOST_TOKEN` to access API
-# Returns:  0 without action if no `MATTERMOST_API` + `MATTERMOST_TOKEN`
+# Globals:  $MATTERMOST_API + $MATTERMOST_TOKEN to access API
+# Returns:  0 without action if no $MATTERMOST_API + $MATTERMOST_TOKEN
 mattermost_repost() {
     if [ -z "$MATTERMOST_API" ] || [ -z "$MATTERMOST_TOKEN" ]; then
         debug "Disabled because MATTERMOST_API and MATTERMOST_TOKEN are not both set"

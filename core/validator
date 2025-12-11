@@ -18,6 +18,7 @@
 # Because the values may start with an dash you should always put it at the end after '--' to prevent parsing it as option.
 #
 # The following checks are implemented:
+#
 # - `set` will fail if no value given
 # - `empty` will fail if not empty like ""
 # - `bool` will transform the value to `1` or `0` and allows: true/false, t/f, 1/0, yes/no, y/j/n, ja/nein, ""
@@ -36,12 +37,15 @@
 #           allow=<words>       # for enum (space separated)
 # Output:   <value>             # may be sanitized
 # Exit:     with message if incorrect value
-# Example:  # check arguments
-#           check integer --name=arguments --max=2 $# >/dev/null # mostly only check max, if all args are checked separately
-#           name="$(check integer --name=age --sanitize --min=0 -- "$1")"
-#           init="$(check bool --name=init "$1")"
-#           # use in code
-#           if check integer age --min=18 -- "$1" >/dev/null; then
+# Example:  Check arguments:
+#
+#           - `check integer --name=arguments --max=2 $# >/dev/null` # mostly only check max, if all args are checked separately
+#           - `name="$(check integer --name=age --sanitize --min=0 -- "$1")"`
+#           - `init="$(check bool --name=init "$1")"`
+#
+#           Use in code:
+#
+#           - `if check integer age --min=18 -- "$1" >/dev/null; then`
 check() {
     # parameter parsing
     eval set -- "$(option_parse $'n name +\nd die -\ns sanitize -\n- min +\n- max +\n- allow +' "$@")"
@@ -187,6 +191,7 @@ check() {
 # Because the values may start with an dash you should always put it at the end after '--' to prevent parsing it as option.
 #
 # The following checks are implemented:
+#
 # - `set` will fail if no value given
 # - `empty` will fail if not empty like ""
 # - `bool` will transform the value to `1` or `0` and allows: true/false, t/f, 1/0, yes/no, y/j/n, ja/nein, ""
@@ -203,11 +208,14 @@ check() {
 #           max=<num>           # for integer
 #           allow=<words>       # for enum (space separated)
 # Exit:     with message if incorrect value
-# Example:  # check arguments
-#           is integer --name=arguments --max=2 $# # mostly only check max, if all args are checked separately
-#           # use in code
-#           if is integer age --min=18 -- "$1"; then ...
-#           if ! is integer "$DEBUG"; then ...
+# Example:  Check arguments:
+#
+#           - `is integer --name=arguments --max=2 $#` # mostly only check max, if all args are checked separately
+#
+#           Use in code:
+#
+#           - `if is integer age --min=18 -- "$1"; then ...`
+#           - `if ! is integer "$DEBUG"; then ...`
 is() {
     check "$@" >/dev/null
 }
@@ -215,9 +223,9 @@ is() {
 # Deprecated: Check that a specific number of parameters are given
 # Use: is integer $# --min=1 --max=2
 # Usage:    num_parameters "$@" --min 1 --die "Zu viele Parameter: $USAGE"
-# Options:  --min <int>     # at least <int> elements are needed
-#           --max <int>     # not more than <int> elements are allowed
-#           --die <string>  # exit with this message if not
+# Options:  min=<int>     # at least <int> elements are needed
+#           max=<int>     # not more than <int> elements are allowed
+#           die=<string>  # exit with this message if not
 num_parameters() {
     _deprecated "Use: is integer $# --min=<val> --max=<val>" warn
     # parameter parsing
@@ -288,7 +296,7 @@ is_float() {
 
 # Trim leading whitespace or given character
 # Usage:    trim_start <value> [<characters>]
-# Output:   `<string>`
+# Output:   <string>
 # See:      https://stackoverflow.com/a/3352015
 trim_start() {
     is integer --name=arguments --max=2 --die -- $#
@@ -301,7 +309,7 @@ trim_start() {
 
 # Trim trailing whitespace or given character
 # Usage:    trim_end <value> [<characters>]
-# Output:   `<string>`
+# Output:   <string>
 # See:      https://stackoverflow.com/a/3352015
 trim_end() {
     is integer --name=arguments --max=2 --die -- $#
@@ -314,7 +322,7 @@ trim_end() {
 
 # Trim leading and trailing whitespace or given character
 # Usage:    trim <value> [<characters>]
-# Output:   `<string>`
+# Output:   <string>
 # See:      https://stackoverflow.com/a/3352015
 trim() {
     is integer --name=arguments --max=2 --die -- $#
@@ -326,7 +334,7 @@ trim() {
 # This is needed to use it as a key in associative arrays. All other characters are converted into underscore.
 # Usage:    to_alphanum <string>
 #           <string> | to_alphanum
-# Output:   `<alnum>`
+# Output:   <alnum>
 to_alphanum() {
     is integer --name=arguments --max=1 --die -- $#
     local text
@@ -337,7 +345,7 @@ to_alphanum() {
 
 # Return the value or if it is a variable name which is not empty return it's value
 # Usage:    value_if_variable <name>
-# Output:   `<string>`
+# Output:   <string>
 value_if_variable() {
     is integer --name=arguments --max=2 --die -- $#
     local _name="$1"

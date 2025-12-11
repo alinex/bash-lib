@@ -91,13 +91,13 @@ _lock_remove() {
 }
 
 # Set a lock or wait till it can be set
+# In any part of your script you can surround a block with @lock and @unlock statements. The
+# process will wait on the lock statement till no other process with the same lock is running
+# before going on.
 # Usage:    lock
 # Files:    /tmp/<prog>_lockfile        # hard link to active process
 #           /tmp/<prog>_lockfile.<pid>  # active or waiting process
 # Output:   <wait message>
-# In any part of your script you can surround a block with lock and unlock statements. The
-# process will wait on the lock statement till no other process with the same lock is running
-# before going on.
 lock() {
     is integer --name=arguments --max=0 --die -- $#
     local lockfile logged pid
@@ -126,12 +126,10 @@ lock() {
 }
 
 # Set the lock or exit with optional error message
+# While another program is running with this lock active it will @die.
 # Usage:    lock_exit
 # Files:    /tmp/<prog>-lockfile        # hard link to active process
 #           /tmp/<prog>-lockfile.<pid>  # active or waiting process
-# In any part of your script you can surround a block with lock and unlock statements. The
-# process will wait on the lock statement till no other process with the same lock is running
-# before going on.
 lock_exit() {
     is integer --name=arguments --max=0 --die -- $#
     local lockfile logged pid
@@ -175,16 +173,18 @@ unlock() {
 # Use `$$` or '${$}' as the program PID which will be also the same in Subshells or `${BASHPID}` which will differ.
 # Usage:    env_store [<ident>]                 # store complete environment
 #           env_store [<ident>] [<variable>]... # store only listed variables (ident can be empty string)
-# Options:  -d, --disk                          # store on disk in temporary folder
-#           -p, --path <base-dir>               # store on disk in given folder
+# Options:  d, disk                          # store on disk in temporary folder
+#           p, path <base-dir>               # store on disk in given folder
 # Files:    `/dev/shm/<prog>[-<ident>].env`     # stored environment
-# Example:  env_restore
+# Example:  ```bash
+#           env_restore
 #           ...<code>
 #           env_store # save changes
 #           ....
 #           env_store # save changes
 #           ....
 #           env_clean # everything done remove progress
+#           ```
 env_store() {
     debug "env_store $*"
     # parameter parsing
@@ -217,8 +217,8 @@ env_store() {
 # Restore environment from shared memory/file
 # If some variable names are given only those will be restored.
 # Usage:    env_restore [<ident>] [<variable>]...
-# Options:  -d, --disk                          # store on disk in temporary folder
-#           -p, --path <base-dir>               # store on disk in given folder
+# Options:  d, disk                          # store on disk in temporary folder
+#           p, path <base-dir>               # store on disk in given folder
 # Files:    `/dev/shm/<prog>[-<ident>].env`     # stored environment
 #           `/dev/shm/<prog>[_<ident>]_<sub-pid>.env-sub` # very short temporary file to filter input
 env_restore() {
@@ -263,8 +263,8 @@ env_restore() {
 
 # Remove stored environment from shared memory/file
 # Usage:    env_clean [<ident>]
-# Options:  -d, --disk                          # store on disk in temporary folder
-#           -p, --path <base-dir>               # store on disk in given folder
+# Options:  d, disk                          # store on disk in temporary folder
+#           p, path <base-dir>               # store on disk in given folder
 env_clean() {
     is integer --name=arguments --max=1 --die -- $#
     debug "env_clean $*"
@@ -394,9 +394,9 @@ steps_done() {
 }
 
 # Run the given command with optional step control
-# Usage:    sync <command> [<params>...]
 # This will use the command itself as name. If you run the same command multiple times use
 # async_name directly.
+# Usage:    sync <command> [<params>...]
 sync() {
     is set --name=command --die -- "$1"
     # processing
@@ -422,14 +422,16 @@ sync_name() {
 }
 
 # Run the given command asynchronous ang go on in the calling routine (short form of async_name)
-# Usage:    async <command> [<params>...]
 # This will use the command itself as name. If you run the same command multiple times use
 # async_name directly.
-# Example:  async task1
+# Usage:    async <command> [<params>...]
+# Example:  ```bash
+#           async task1
 #           async task2
 #           async_wait task1
 #           async task3
 #           wait # for all to end
+#           ```
 async() {
     is set --name=command --die -- "$1"
     # processing
@@ -510,15 +512,17 @@ _queue_control() {
 }
 
 # Add command to process queue
-# Usage:    queue <command> [<params>...]
 # This will use the command itself as name. If you run the same command multiple times use
 # queue_name directly.
-# Example:  queue task1
+# Usage:    queue <command> [<params>...]
+# Example:  ```bash
+#           queue task1
 #           queue task2
 #           queue task3
 #           async_wait task2
 #           queue task4
 #           wait # for all to end
+#           ```
 queue() {
     is set --name=command --die -- "$1"
     # processing
@@ -545,7 +549,7 @@ queue_name() {
 }
 
 # Is a queue running
-# Usage:    queue_runnung
+# Usage:    queue_running
 # Return:   0 if still running
 queue_running() {
     is integer --name=arguments --max=0 --die -- $#
@@ -559,7 +563,9 @@ queue_running() {
 
 # Return a random string in specific length
 # The default length is 16.
+#
 # The `<pattern>` is a list of allowed characters in range:
+#
 # - num - `0-9`
 # - letters - 'a-z'
 # - LETTERS - 'A-Z'

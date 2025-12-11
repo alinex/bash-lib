@@ -2,8 +2,6 @@
 
 ## Print special information message
 
-
-
 ### Usage
 
 ```bash
@@ -13,4 +11,5 @@ info <message>
 
 ### Output (stdout)
 
-- colored `<string>`
+colored `<string>`
+

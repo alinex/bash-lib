@@ -2,8 +2,6 @@
 
 ## Run command on remote host
 
-
-
 ### Usage
 
 ```bash
@@ -16,9 +14,9 @@ remote [<options>] <command>... # special characters in command masked with back
 
 ```bash
 # following options, only before `<command>`
--l, --login <user>
--h, --host <host>
--j, --jump <user>@<host>
+l, login <user>
+h, host <host>
+j, jump <user>@<host>
 ```
 
 ### Globals
@@ -28,4 +26,5 @@ remote [<options>] <command>... # special characters in command masked with back
 
 ### Output (stdout)
 
-- passed through
+passed through
+

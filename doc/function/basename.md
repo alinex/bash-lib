@@ -5,7 +5,6 @@
 This is a much faster implementation as the basename command because it is using shell parameter expansion.
 It will remove the directory and output only the filename.
 
-
 ### Usage
 
 ```bash
@@ -15,4 +14,5 @@ basename <path>
 
 ### Output (stdout)
 
-- ``<file>``
+`<file>`
+

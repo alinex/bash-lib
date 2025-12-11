@@ -4,7 +4,6 @@
 
 This function can convert into seconds and back into human format as you like. Months or years are not possible because they are not accurately, better use 30d or 365d for that.
 
-
 ### Usage
 
 ```bash
@@ -18,4 +17,5 @@ duration_format <format> <value|human format>
 
 ### Output (stdout)
 
-- ``<duration>`` in selected format
+`<duration>` in selected format
+

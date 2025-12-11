@@ -2,8 +2,6 @@
 
 ## Print success message
 
-
-
 ### Usage
 
 ```bash
@@ -13,4 +11,5 @@ ok <message>
 
 ### Output (stdout)
 
-- colored `<string>`
+colored `<string>`
+

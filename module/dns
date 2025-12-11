@@ -18,9 +18,15 @@ source /dev/null
 # - @powerdns - PowerDNS https://www.powerdns.com/
 # - @plusserver_dns - the DNS in the Plusserver Cloud https://www.plusserver.com/
 # Usage:    dns_list <pattern>
-# Globals:  `POWERDNS_API` + `POWERDNS_TOKEN` if powerdns is possible
-#           `PLUSSERVER_PORTAL`              if plusserver as provider is used
-# Output:   `<tsv>` with header line
+# Globals:  $POWERDNS_API + $POWERDNS_TOKEN if powerdns is possible
+#           $PLUSSERVER_PORTAL              if plusserver as provider is used
+# Output:   Tab separated <table>:
+#           ```
+#           NAME        TYPE    CONTENT         TTL
+#           <dns-name>  A                       <seconds>
+#           <dns-name>  CNAME   <destination>   <seconds>
+#           and more...
+#           ```
 dns_list() {
     is integer --name=arguments --max=1 --die -- $#
     # processing
@@ -31,8 +37,14 @@ dns_list() {
 
 # Query PowerDNS to get a list of managed domain names
 # Usage:    powerdns <pattern>
-# Globals:  `POWERDNS_API` + `POWERDNS_TOKEN` if powerdns is possible
-# Output:   `<tsv>` with header line
+# Globals:  $POWERDNS_API + $POWERDNS_TOKEN if powerdns is possible
+# Output:   Tab separated <table>:
+#           ```
+#           NAME        TYPE    CONTENT         TTL
+#           <dns-name>  A                       <seconds>
+#           <dns-name>  CNAME   <destination>   <seconds>
+#           and more...
+#           ```
 # Returns:  0 - without output if no `POWERDNS_API` + `POWERDNS_TOKEN`
 powerdns() {
     is integer --name=arguments --max=1 --die -- $#
@@ -50,9 +62,15 @@ powerdns() {
 # Query Plusserver DNS to get a list of managed domain names
 # Because there is no API at plusserver this will work on previously downloaded file. It will give a hint there to download it, which should be done regularly to be up to date.
 # Usage:    powerdns <pattern>
-# Globals:  `PLUSSERVER_PORTAL`              if plusserver as provider is used
-# Output:   `<tsv>` with header line
-# Returns:  0 - without output if no `PLUSSERVER_PORTAL`
+# Globals:  $PLUSSERVER_PORTAL              if plusserver as provider is used
+# Output:   Tab separated <table>:
+#           ```
+#           NAME        TYPE    CONTENT         TTL
+#           <dns-name>  A                       <seconds>
+#           <dns-name>  CNAME   <destination>   <seconds>
+#           and more...
+#           ```
+# Returns:  0 - without output if no $PLUSSERVER_PORTAL
 plusserver_dns() {
     is integer --name=arguments --max=1 --die -- $#
     # processing

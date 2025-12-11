@@ -4,7 +4,6 @@
 
 The result can be filtered by additional argument specification.
 
-
 ### Usage
 
 ```bash
@@ -17,9 +16,10 @@ exporter [<field>=<value>]...
 
 ### Output (stdout)
 
-- Tab separated list without header:
-- ``<url>`   `<job>`   `<label-values>``
+Tab separated list without header:
+`<url>   <job>   <label-values>`
 
 ### Return (exit code)
 
-- 0 without output if no `PROMETHEUS_HOST` + `PROMETHEUS_API`
+- 0 without output if no `$PROMETHEUS_HOST` + `$PROMETHEUS_API`
+- 

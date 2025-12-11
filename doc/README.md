@@ -210,7 +210,6 @@ Module with output and user interaction helpers.
 | [`debug`](function/debug.md) | Write message to STDERR if in DEBUG mode else do nothing |
 | [`die`](function/die.md) | Output error message and exit |
 | [`help`](function/help.md) | Show help page and exit |
-| [`log`](function/log.md) | Additional logging (at the moment only into files). |
 | [`heading`](function/heading.md) | Print block heading |
 | [`critical`](function/critical.md) | Print critical/disaster message |
 | [`error`](function/error.md) | Print error message |
@@ -306,6 +305,14 @@ Module with user interaction helpers.
 | [`choose`](function/choose.md) | Select from list (extended version of native select) |
 | [`tasks`](function/tasks.md) | Run tasks as selected by user |
 
+### Log Module
+
+Logging addition for output module.
+
+| Variable/Function | Description |
+| --- | --- |
+| [`log`](function/log.md) | Additional logging (at the moment only into files). |
+
 ### Mattermost Module
 
 Using the mattermost API to write messages.
@@ -395,7 +402,7 @@ Module with remote calling/execution helpers.
 | [`remote_console`](function/remote_console.md) | Open an interactive console on remote host |
 | [`upload`](function/upload.md) | Upload file |
 | [`download`](function/download.md) | Download file |
-| [`remote_bashlib`](function/remote_bashlib.md) | Deprecated: Run bashlib command on remote. |
+| [`remote_bashlib`](function/remote_bashlib.md) | Run bashlib command on remote. |
 | [`remote_install`](function/remote_install.md) | Deprecated: Remote install package like @install |
 | [`remote_system_info`](function/remote_system_info.md) | Deprecated: Display the system description (from remote) |
 | [`remote_df`](function/remote_df.md) | Deprecated: Remote df with visual display |

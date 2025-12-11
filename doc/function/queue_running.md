@@ -2,14 +2,13 @@
 
 ## Is a queue running
 
-
-
 ### Usage
 
 ```bash
-queue_runnung
+queue_running
 ```
 
 ### Return (exit code)
 
 - 0 if still running
+- 

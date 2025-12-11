@@ -4,7 +4,6 @@
 
 If some variable names are given only those will be restored.
 
-
 ### Usage
 
 ```bash
@@ -14,11 +13,12 @@ env_restore [<ident>] [<variable>]...
 ### Options
 
 ```bash
--d, --disk                          # store on disk in temporary folder
--p, --path <base-dir>               # store on disk in given folder
+d, disk                          # store on disk in temporary folder
+p, path <base-dir>               # store on disk in given folder
 ```
 
 ### Files
 
-- `/dev/shm/`<prog>`[-`<ident>`].env`     # stored environment
-- `/dev/shm/`<prog>`[_`<ident>`]_`<sub-pid>`.env-sub` # very short temporary file to filter input
+- `/dev/shm/<prog>[-<ident>].env`     # stored environment
+- `/dev/shm/<prog>[_<ident>]_<sub-pid>.env-sub` # very short temporary file to filter input
+- 

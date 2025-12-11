@@ -2,8 +2,6 @@
 
 ## Remove carriage return from line endings
 
-
-
 ### Usage
 
 ```bash
@@ -13,4 +11,5 @@ nocr <text>
 
 ### Output (stdout)
 
-- `<text>`
+`<text>`
+

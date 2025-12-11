@@ -14,10 +14,10 @@ source /dev/null
 #           <message> | debug [<num>]
 #               <num> := [1-9]      # (default 1) higher to only show in more verbose call
 #               <message>           # the message text
-# Globals:  `DEBUG` - if unset nothing will be printed
-#           `DEBUG=<num>` - only print messages with same or lower numeric level
-#           `DEBUG=<func>,...` - only print if the function is matched
-#           `DEBUG=9` - to output all
+# Globals:  `$DEBUG` - if unset nothing will be printed
+#           `$DEBUG=<num>` - only print messages with same or lower numeric level
+#           `$DEBUG=<func>,...` - only print if the function is matched
+#           `$DEBUG=9` - to output all
 # Error:    `> <func>           <message>`      # color: gray
 debug() {
     local level=1 func text
@@ -48,6 +48,7 @@ debug() {
 # Usage:    die <message>
 #           <message> | die
 # Error:    # Example if called for deprecated call:
+#           ```
 #           DEPRECATED: ask_input at task_find in /home/alex/bin/dvb/cleanup:206 please use ask string
 #           > _stacktrace          at die() in /home/alex/dvb/bash-lib/core/misc:59
 #           > _stacktrace          at _deprecated() in /home/alex/dvb/bash-lib/core/internal:23
@@ -55,6 +56,7 @@ debug() {
 #           > _stacktrace          at task_find() in /home/alex/bin/dvb/cleanup:206
 #           > _stacktrace          at tasks() in /home/alex/dvb/bash-lib/module/input:451
 #           > _stacktrace          at main() in /home/alex/bin/dvb/cleanup:364
+#           ```
 # Return:   always 1 and try to exit script with status 1
 die() {
     is integer --name=arguments --max=1 --die -- $#
@@ -267,7 +269,9 @@ erase_line() {
 
 # Show a horizontal line
 # It will go over the full width of terminal, but be at least 60 characters wide.
+#
 # Format can be:
+#
 # - light (default) ──────────
 # - bold ━━━━━━━━━━
 # - double ══════════
@@ -298,7 +302,9 @@ _spinner_pid=""
 
 # Function to start the spinner in the background
 # To stop it later call @spinner_stop.
+#
 # Some formats have multiple character width:
+#
 # - `simple`:   - \ | /
 # - `arrows`:   → ↑ ← ↓
 # - `vertical`: ▏ ▎ ▍ ▌ ▋ ▊ ▉ █ ▉ ▊ ▋ ▌ ▍ ▎ ▏

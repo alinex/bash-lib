@@ -2,8 +2,6 @@
 
 ## Print warning message
 
-
-
 ### Usage
 
 ```bash
@@ -13,4 +11,5 @@ warn <message>
 
 ### Output (stdout)
 
-- colored `<string>`
+colored `<string>`
+

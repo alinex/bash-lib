@@ -2,8 +2,6 @@
 
 ## Run remote command with pseudo terminal but line based output (problematic with questions)
 
-
-
 ### Usage
 
 ```bash
@@ -15,9 +13,9 @@ remote_term_line [<options>] <command>... # special characters have to be masked
 
 ```bash
 # following options, only before `<command>`
--l, --login <user>
--h, --host <host>
--j, --jump <user>@<host>
+l, login <user>
+h, host <host>
+j, jump <user>@<host>
 ```
 
 ### Globals
@@ -27,4 +25,5 @@ remote_term_line [<options>] <command>... # special characters have to be masked
 
 ### Output (stdout)
 
-- passed through
+passed through
+

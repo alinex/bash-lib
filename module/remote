@@ -17,9 +17,9 @@ source /dev/null
 #           # <special char> := | & * > < $
 #           <commands> | remote [<options>]
 # Options:  # following options, only before `<command>`
-#           -l, --login <user>
-#           -h, --host <host>
-#           -j, --jump <user>@<host>
+#           l, login <user>
+#           h, host <host>
+#           j, jump <user>@<host>
 # Globals:  $server
 #           $login - default is "operator"
 # Output:   passed through
@@ -60,9 +60,9 @@ remote() {
 # Usage:    remote_term [<options>] <command>... # special characters have to be masked: | & * > <
 #           <title> | remote_term [<options>]
 # Options:  # following options, only before `<command>`
-#           -l, --login <user>
-#           -h, --host <host>
-#           -j, --jump <user>@<host>
+#           l, login <user>
+#           h, host <host>
+#           j, jump <user>@<host>
 # Globals:  $server
 #           $login - default is "operator"
 # Output:   passed through
@@ -100,9 +100,9 @@ remote_term() {
 # Usage:    remote_term_line [<options>] <command>... # special characters have to be masked: | & * > <
 #           <title> | remote_term_line [<options>]
 # Options:  # following options, only before `<command>`
-#           -l, --login <user>
-#           -h, --host <host>
-#           -j, --jump <user>@<host>
+#           l, login <user>
+#           h, host <host>
+#           j, jump <user>@<host>
 # Globals:  $server
 #           $login - default is "operator"
 # Output:   passed through
@@ -142,9 +142,9 @@ remote_term_line() {
 # Usage:    remote_file [<options>] <file>
 #           <file> | remote_file [<options>]
 # Options:  # following options, only before `<file>`
-#           -l, --login <user>
-#           -h, --host <host>
-#           -j, --jump <user>@<host>
+#           l, login <user>
+#           h, host <host>
+#           j, jump <user>@<host>
 # Globals:  $server
 #           $login - default is "operator"
 # Output:   passed through
@@ -178,10 +178,10 @@ remote_file() {
 # Open an interactive console on remote host
 # The motd and banner are prevented by touching .hushlogin on the server.
 # Usage:    remote_console [<options>]
-# Options:  -l, --login <user>
-#           -h, --host <host>
-#           -j, --jump <user>@<host>
-#           -A, --forward-agent     # use local ssh-agent also on remote host for authentication.
+# Options:  l, login <user>
+#           h, host <host>
+#           j, jump <user>@<host>
+#           A, forward-agent     # use local ssh-agent also on remote host for authentication.
 # Globals:  $server
 #           $login - default is "operator"
 # Output:   passed through
@@ -218,9 +218,9 @@ remote_console() {
 # Upload file
 # Usage:    upload [<options>] <source> <dest>
 # Options:  # following options, only before `<source>`
-#           -l, --login <user>
-#           -h, --host <host>
-#           -j, --jump <user>@<host>
+#           l, login <user>
+#           h, host <host>
+#           j, jump <user>@<host>
 # Globals:  $server
 #           $login - default is "operator"
 upload() {
@@ -253,9 +253,9 @@ upload() {
 # Download file
 # Usage:    download [<options>] <source> <dest>
 # Options:  # following options, only before `<source>`
-#           -l, --login <user>
-#           -h, --host <host>
-#           -j, --jump <user>@<host>
+#           l, login <user>
+#           h, host <host>
+#           j, jump <user>@<host>
 # Globals:  $server
 #           $login - default is "operator"
 download() {
@@ -314,9 +314,10 @@ _module_resolve() {
     done
 }
 
-# Deprecated: Run bashlib command on remote.
+# Run bashlib command on remote.
 # The `modules` are a comma separated list of module names like network os.
 # The modules can be:
+#
 # - `base` or `full` as first element
 # - `module/<name>` to load the named module (if not full is used)
 # - `extra/<name>` to load an extra module
@@ -326,9 +327,9 @@ _module_resolve() {
 # Usage:    remote_bashlib [<options>] <module>[,<module>...] <command> [<args>...]
 #           <command> [<args>...] | remote_bashlib [<options>] <module>[,<module>...]
 # Options:  # following options, only before `<module>`
-#           -l, --login <user>
-#           -h, --host <host>
-#           -j, --jump <user>@<host>
+#           l, login <user>
+#           h, host <host>
+#           j, jump <user>@<host>
 # Globals:  $server
 #           $login - default is "operator"
 # Examples: IP="$(remote_bashlib ip ip_intern)"
@@ -419,10 +420,10 @@ remote_lvm() {
 
 # Wait till reboot is finished
 # Usage:    boot_wait [<options>]
-# Options:  -l, --login <user>
-#           -h, --host <host>
-#           -j, --jump <user>@<host>
-#           -q, --quiet
+# Options:  l, login <user>
+#           h, host <host>
+#           j, jump <user>@<host>
+#           q, quiet
 # Globals:  $server
 #           $login - default is "operator"
 # Error:    <sql-time>

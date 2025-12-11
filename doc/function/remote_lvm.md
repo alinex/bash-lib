@@ -4,7 +4,6 @@
 
 Use `remote_bashlib os uses_lvm` instead.
 
-
 ### Usage
 
 ```bash
@@ -15,3 +14,4 @@ remote_lvm
 
 - 0 for uses LVM
 - 1 if not
+- 

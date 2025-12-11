@@ -14,8 +14,8 @@ declare -F "color_256" >/dev/null || source "$BASHLIB_HOME"/module/color
 # Wait for some time or user input
 # Usage:    pause <message>
 #           <message> | pause
-# Options:  -T, --timeout <duration>    # time after which the default will be used
-#           -a, --abort                 # let the timeout abort by key press
+# Options:  T, timeout <duration>    # time after which the default will be used
+#           a, abort                 # let the timeout abort by key press
 # TTY:      <question> <key>
 # Example:  &input#pause shows all possible use cases
 pause() {
@@ -62,9 +62,9 @@ pause() {
 # Ask a yes/no question.
 # The default can be yes or no and if a default is set <return> will use it. Additional to a default a timeout can be set meaning to use default if timeout is reached. If an invalid character is typed, the timeout will restart.
 # Usage:    confirm <question>
-# Options:  -t, --true                  # default: yes
-#           -f, --false                 # default: no
-#           -T, --timeout <duration>    # time after which the default will be used
+# Options:  t, true                  # default: yes
+#           f, false                 # default: no
+#           T, timeout <duration>    # time after which the default will be used
 # TTY:      <question> [<default>]? <answer>
 #           # read single characters
 # Return:   0 for true/yes
@@ -198,10 +198,10 @@ ask_input() {
 #
 # If another format is needed, you can fall back to string and validate on your own after you got the response.
 # Usage:    ask <format> <question>
-# Options:  -e, --empty                 # allow empty value
-#           -n, --allow-negative        # on number, integer, float
-#           -d, --default <value>       # set default if none given
-#           -T, --timeout <duration>    # time till default is used
+# Options:  e, empty                 # allow empty value
+#           n, allow-negative        # on number, integer, float
+#           d, default <value>       # set default if none given
+#           T, timeout <duration>    # time till default is used
 # TTY:      <question> <valid characters>...
 #           # input <keys> printed if valid
 # Output:   <answer>
@@ -409,7 +409,7 @@ ask() {
 
 # Calculate password strength
 # Usage:    _password_strength <password>
-# Output:   `<int>` 0 (weakest) up to 100 (strongest)
+# Output:   <int> 0 (weakest) up to 100 (strongest)
 _password_strength() {
     local password="$1"
     local len=${#password}
@@ -452,17 +452,17 @@ _password_strength() {
 # With the option `--exit` the additional entry will break by returning `exit`.
 # Usage:    choose [-t] <entry>...
 #           <list> | choose [-t]
-# Options:  -t, --title <title>         # display text line above selection
-#           -x, --exit <string>         # will add an exit option at the end -> return "exit"
-#           -d, --default <string|int>  # the command or number which will be returned on <enter>
-#           -T, --timeout <duration>    # timeout till default selection as seconds or duration @duration_format
+# Options:  t, title <title>         # display text line above selection
+#           x, exit <string>         # will add an exit option at the end -> return "exit"
+#           d, default <string|int>  # the command or number which will be returned on <enter>
+#           T, timeout <duration>    # timeout till default selection as seconds or duration @duration_format
 # Entry:    <entry> := <string> | <key> "|" <display> # whitespace around values are removed
 # TTY:      [<title>]
 #           <list>
 #           ...
 #           <question> <key>
 # Output:   selected `<line>`
-#           exit # if run with --exit and this was chosen
+# Return:   `exit 0` # if run with `--exit` and this was chosen
 # Example:  &input#choose shows all possible use cases
 # TODO > 10 entries make two columns using mlr display
 choose() {
@@ -612,6 +612,7 @@ choose() {
 # Run tasks as selected by user
 # Often the functions are also named `check-...` for the ones which will return tasks and `task-...` for the ones really doing the job. The first one may do a lot of analyzation and output user information on stdout.
 # The '|' character is not possible within the commands. If a pipe is necessary put it within a function. Also some commands can be disabled in the list by preceding the command with an `#` character.
+#
 # If there are no tasks defined or the dynamic list will return no tasks it will end with a success message.
 # Usage:    tasks <entry>...
 #           # <entry>       := <check-fn> or "<task-line>"
@@ -620,9 +621,9 @@ choose() {
 #           # <task-line>   := "<task-fn> | <name>"
 #           <task-lines> | tasks            # entries from pipe
 #           tasks <check-fn>                # add entries from function (dynamic)
-# Option    -t, --title <title>             # display text line above selection
-#           -d, --default <string|int|variable>  # default command to start
-#           -T, --timeout <sec>             # timeout till default selection
+# Option    t, title <title>             # display text line above selection
+#           d, default <string|int|variable>  # default command to start
+#           T, timeout <sec>             # timeout till default selection
 # Files:    `/dev/shm/<program>_tasks_<pid>` will be used while dynamically generating the tasks list and removed afterwards
 # TTY:      Nächste Schritte
 #              1) Analyse einzelner Partitionen

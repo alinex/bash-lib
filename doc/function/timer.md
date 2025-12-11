@@ -4,7 +4,6 @@
 
 After `timer stop` it will return the elapsed time.
 
-
 ### Usage
 
 ```bash
@@ -14,4 +13,5 @@ timer stop
 
 ### Output (stdout)
 
-- `<seconds>`.`<milliseconds>` # after stop
+`<seconds>`.`<milliseconds>` # after stop
+

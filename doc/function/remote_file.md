@@ -2,8 +2,6 @@
 
 ## Run local script on remote
 
-
-
 ### Usage
 
 ```bash
@@ -15,9 +13,9 @@ remote_file [<options>] <file>
 
 ```bash
 # following options, only before `<file>`
--l, --login <user>
--h, --host <host>
--j, --jump <user>@<host>
+l, login <user>
+h, host <host>
+j, jump <user>@<host>
 ```
 
 ### Globals
@@ -27,4 +25,5 @@ remote_file [<options>] <file>
 
 ### Output (stdout)
 
-- passed through
+passed through
+

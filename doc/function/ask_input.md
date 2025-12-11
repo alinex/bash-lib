@@ -2,5 +2,5 @@
 
 ## Deprecated: Ask a free question.
 
-Use `ask `<question>`` instead, see [`ask`](ask.md).
+Use `ask <question>` instead, see [`ask`](ask.md).
 

@@ -8,8 +8,10 @@
 
 # Deprecated: Check if value is contained in array
 # Usage:        contains <array-name> <match>
-# Example:  x=( one two three )
+# Example:  ```bash
+#           x=( one two three )
 #           contains x two && echo YES || echo NO
+#           ```
 contains() {
     _deprecated "use array <array-name> has <value>" warn
     array "$1" has "$2"
@@ -24,9 +26,9 @@ contains() {
 # - `indexof` will return the index number of the value if found
 #
 # Usage:        array <array-name> <command> [<value>]
-# Variables:    `<array-name>` as basis to work on
-# Output:       `<value>` for `has`
-#               `<index-num>` for `indexof`
+# Variables:    <array-name> as basis to work on
+# Output:       - <value> for `has`
+#               - <index-num> for `indexof`
 # Return:       0 if ok, 1 if entry not found
 array() {
     is integer --name=arguments --max=3 --die -- $#
@@ -63,7 +65,7 @@ array() {
 # Join array elements by delimiter
 # Convert all elements in array into a string separated by delimiter (default is `,`).
 # Usage:        join <array-name> [<delimiter>]
-# Variables:    `<array-name>` to read values to join
+# Variables:    <array-name> to read values to join
 # Output:       <string>
 join() {
     is integer --name=arguments --max=2 --die -- $#
@@ -81,7 +83,7 @@ join() {
 # Splits string by delimiter into array
 # The delimiter defaults to `,`.
 # Usage:        split <string> <array-name> [<delimiter>]
-# Variables:    `<array-name>` to store values
+# Variables:    <array-name> to store values
 split() {
     is integer --name=arguments --max=3 --die -- $#
     is set --name=array-name --die -- "$2"
@@ -111,13 +113,13 @@ split() {
 #
 # Usage:        hash <array-name> <command> [<key>] [<value>]
 # Options:      -k, --key-format={base64|underscore} # how to convert special character to be uses as key
-# Variables:    `<array-name>` as basis to work on
-# Output:       `<value>` for `get`
+# Variables:    <array-name> as basis to work on
+# Output:       <value> for `get`
 # Error:        1 if not found for `get` or `has`
-# Example:      hash cache set "my_name" "any value"
-#               hash cache get "my_name"
-#               hash cache has "my_name"
-#               hash cache unset "my_name"
+# Example:      - `hash cache set "my_name" "any value"`
+#               - `hash cache get "my_name"`
+#               - `hash cache has "my_name"`
+#               - `hash cache unset "my_name"`
 hash() {
     # parameter parsing
     local keyFormat="base64"

@@ -3,7 +3,9 @@
 ## Function to start the spinner in the background
 
 To stop it later call [`spinner_stop`](spinner_stop.md).
+
 Some formats have multiple character width:
+
 - `simple`:   - \ | /
 - `arrows`:   → ↑ ← ↓
 - `vertical`: ▏ ▎ ▍ ▌ ▋ ▊ ▉ █ ▉ ▊ ▋ ▌ ▍ ▎ ▏
@@ -14,7 +16,6 @@ Some formats have multiple character width:
 - `moon`:     🌑 🌒 🌓 🌔 🌕 🌖 🌗 🌘
 - `clock`:    🕐 🕑 🕒 🕓 🕔 🕕 🕖 🕗 🕘 🕙 🕚 🕛
 - `weather`:  🌤 🌥 🌦 🌧 🌨 🌩 🌪
-
 
 ### Usage
 
@@ -33,3 +34,4 @@ spinner_start <format> [<time>]
 ### Return (exit code)
 
 - 0 without doing anything if no `tput` and terminal available
+- 

@@ -2,5 +2,5 @@
 
 ## Deprecated: Ask yes/no question with default to no.
 
-Use `confirm --false `<question>`` instead, see [`confirm`](confirm.md).
+Use `confirm --false <question>` instead, see [`confirm`](confirm.md).
 

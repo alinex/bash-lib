@@ -8,7 +8,6 @@ The core modules are always loaded, so you won't need to load them.
 Something from the module folder can be loaded manually if you are started with only the base library.
 And finally the extra folder has always to be loaded individually.
 
-
 ### Usage
 
 ```bash
@@ -17,4 +16,5 @@ use [<folder>/]<module>
 
 ### Globals
 
-- `BASHLIB_LOADER` to know which loader was used
+- `$BASHLIB_LOADER` to know which loader was used
+- 
