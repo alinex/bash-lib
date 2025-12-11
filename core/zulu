@@ -24,7 +24,3 @@ trap 'die "💥 Uncaught exception at »${BASH_COMMAND}« with exit code $?"' ER
 
 # Display debug mode
 debug "Running in DEBUG=${DEBUG-} mode!"
-
-# Run log manager
-_log_manager &
-disown

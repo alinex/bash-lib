@@ -1,0 +1,137 @@
+#!/usr/bin/env bash
+# shellcheck source=base
+source /dev/null
+
+# Logging addition for output module.
+
+######################################################################################
+# Logging
+######################################################################################
+
+declare -ag _log_level=(debug info notice warn error critical)
+declare -Ag _log_rotate_time
+_log_rotate_time[hourly]="%Y-%m-%dT%H"
+_log_rotate_time[daily]="%Y-%m-%d"
+_log_rotate_time[weekly]="%Y_week_%W"
+_log_rotate_time[monthly]="%Y-%m"
+declare -Ag _log_active
+# _log_active[path]="<path> <level> <rotate> [<compress> [<cleanup>]]"
+
+# Additional logging (at the moment only into files).
+# After initializing a log using `start` the default output options will additionally write into log. But you can also specifically write t it using the log function.
+# Multiple log with different levels are possible.
+# Usage:    log start <destination>                    # no spaces in file path allowed
+#           log <level> <message>
+#           <message> | log <level>
+#           log end <destination>
+# Options:  -l, --level=<level>                 # level := debug info notice warn error critical
+#           # File logging:
+#           -r, --rotate=hourly|daily|weekly|monthly|<bytes>
+#           -c, --cleanup=<num>|<duration>
+#           -z, --compress
+# Files:    <destination>[_<pattern>]                  # will contain the logs
+# Example:  # Format: <date> <time> <level> <message>
+#           2025-12-02 14:07:35 INFO Hello
+#           2025-12-02 14:10:04 ERROR This is only a test
+log() {
+    # parameter parsing
+    local level=1 rotate compress=0 cleanup text size
+    eval set -- "$(option_parse $'l level +\nr rotate +\nz compress -\nc cleanup +' "$@")"
+    while true; do
+        case "$1" in
+        -l | --level)
+            is enum --name=level --allow="${_log_level[*]}" --die -- "$2"
+            level="$(array _log_level indexof "$2")"
+            shift 2
+            ;;
+        -r | --rotate)
+            if (($2 > 0)); then
+                rotate="$2"
+            else
+                # shellcheck disable=SC2145
+                is enum --name=rotate --allow="${!_log_rotate_time[@]}" --die -- "$2"
+                rotate="$(hash _log_rotate_time get "$2")"
+            fi
+            shift 2
+            ;;
+        -z | --compress) compress=1 && shift ;;
+        -c | --cleanup) cleanup="$(check duration --name=cleanup --die -- "$2")" && shift 2 ;;
+        --) shift && break ;;
+        *) die "$(gettext "Unrecognized option"): $1" ;;
+        esac
+    done
+    is integer --name=arguments --min=1 --max=2 --die -- $#
+    is enum --name=command --allow="start stop ${_log_level[*]}" --die -- "$1"
+    is empty -- "$rotate" && cleanup="" && compress="" || true # no cleanup/compress if no rotate
+    # processing
+    case $1 in
+    start)
+        is set --name=destination --die -- "$2"
+        [ -w "$2" ] || [ -w "$(dirname "$2")" ] || die "Could not write/create log under $2"
+        hash _log_active set "$2" "$2 $level $rotate $compress $cleanup"
+        ;;
+    stop)
+        is set --name=destination --die -- "$2"
+        hash _log_active unset "$2"
+        ;;
+    debug | info | notice | warn | error | critical)
+        level="$(array _log_level indexof "$1")"
+        text="$(input_args 1 "$@")"
+        [ -n "$text" ] || return 0 # no message
+        # loop over _log_active values
+        local file minLevel
+        for e in "${_log_active[@]}"; do
+            read -r file minLevel rotate cleanup <<<"$e"
+            ((level >= minLevel)) || continue
+            path="$file"
+            if [ -n "$rotate" ] && ((rotate == 0)); then
+                path+="_$(date_format "$rotate")"
+            fi
+            # log entry
+            echo "$(date_format sql) ${1^^} $(uncolorize "$text")" >>"$path"
+        done
+        ;;
+    *) die "Unrecognized command $1: start, stop or any log level allowed" ;;
+    esac
+}
+
+_log_manager() {
+    local parent=$PPID file minLevel rotate compress cleanup size
+    while true; do
+        for e in "${_log_active[@]}"; do
+            read -r file minLevel rotate compress cleanup <<<"$e"
+            # cleanup
+            if [ -n "$cleanup" ]; then
+                find "$(dirname "$file")" -type f -name "$(basename "$file")*" ! -newermt "$(date -d "$cleanup seconds ago")" -delete 2>/dev/null
+            fi
+            # rotate on size
+            if ((rotate > 0)); then
+                size="$(stat -c %s "$file")"
+                if ((size > rotate)); then
+                    mr -f "${file}.99"
+                    # Shift existing numbered files up
+                    for ((i = 99; i > 1; i--)); do
+                        local old="${file}.${i}"
+                        local new="${file}.$((i - 1))"
+                        [ ! -f "$old" ] || mv "$old" "$new"
+                    done
+                    # Rotate the main file to .1
+                    ! [ -f "$file" ] || mv "$file" "${file}.1"
+                fi
+            fi
+            # compress
+            if ((compress == 1)); then
+                find "$(dirname "$file")" -type f -name "$(basename "$file")*" -mmin 3600 -exec gzip --best {} \; 2>/dev/null
+            fi
+        done
+        # run manager every 5 minutes
+        for ((i = 0; i < 300; i++)); do
+            sleep 1
+            kill -0 "$parent" 2>/dev/null || exit 0 # end if parent ended
+        done
+    done
+}
+
+# start log manager
+_log_manager &
+disown
