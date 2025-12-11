@@ -120,7 +120,7 @@ input_args() {
     local start=$((num + 2))
     is set --name="num" --die -- "$num"
     ((num > 0)) || die "<num>=$num $(gettext 'argument is not a valid number!')"
-    test -p /dev/stdin && cat - || echo "${@:$start}"
+    test -p /dev/stdin && (($# < num + 2)) && cat - || echo "${@:$start}"
 }
 
 # Collect string from stdin (no parameters) or parameters each as a line

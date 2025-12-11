@@ -99,11 +99,10 @@ h help  -       Show Help Page"
 
 # bats test_tags=input
 @test "input: as arguments into line" {
-    run input one two three
+    run bats_pipe echo fail \| input one two three
     assert_output 'one two three'
     assert_success
 }
-
 # bats test_tags=input
 @test "input: from stdin into line" {
     run bats_pipe echo one two three \| input
@@ -117,7 +116,7 @@ h help  -       Show Help Page"
 
 # bats test_tags=input_args
 @test "input_args: as arguments into line" {
-    run input_args 1 title one two three
+    run bats_pipe echo fail \| input_args 1 title one two three
     assert_output 'one two three'
     assert_success
 }
