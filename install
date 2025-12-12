@@ -4,6 +4,10 @@ source /dev/null
 
 BASHLIB_DOWNLOAD="https://gitlab.com/alinex/bash-lib/-/archive/master/bash-lib-master.tar.gz"
 
+CC_RED=$'\033[31m'
+CC_BLUE=$'\033[34m'
+CC_RESET_BG=$'\033[49m'
+
 logo() {
     a=$'\033[36m'                # cyan
     b=$'\033[33m\033[1m'         # yellow bold
@@ -42,11 +46,11 @@ echo "This will setup the bashlib on $(hostname -f) if not already done or updat
 echo ""
 # check bash version
 if [ -z "${BASH_VERSION:-}" ]; then
-    echo "No bash CLI! This can only be run under bash >=4.2!"
+    echo "${CC_RED}No bash CLI! This can only be run under bash >=4.2!${CC_RESET}"
     exit 1
 fi
 if ((${BASH_VERSINFO[0]} < 4 || (${BASH_VERSINFO[0]} == 4 && ${BASH_VERSINFO[1]} < 2))); then
-    echo "Bash library to old! This can only be run under bash >=4.2! You have Bash Version $BASH_VERSION"
+    echo "${CC_RED}Bash library to old! This can only be run under bash >=4.2! You have Bash Version $BASH_VERSION${CC_RESET}"
     exit 1
 fi
 # ask for type of installation (if not update)
@@ -54,14 +58,18 @@ if [ -e /opt/bashlib ]; then
     yn=y
     echo "This will replace the installation under /opt/bashlib"
     read -n 1 -s -r -p "Press any key to continue..." </dev/tty
+    echo
     sudo rm -rf /opt/bashlib
 elif [ -e "$HOME"/bashlib ]; then
     yn=n
     echo "This will replace the installation under $HOME/bashlib"
     read -n 1 -s -r -p "Press any key to continue..." </dev/tty
+    echo
     rm -rf "$HOME"/bashlib
 else
+    echo "No BashLib found, so it will be installed."
     [ -n "$2" ] && yn="$2" || read -r -n 1 -s -p "Should the bashlib path be added globally (y/n) " yn </dev/tty
+    echo
 fi
 case $yn in
 "" | [JjYy])
@@ -77,7 +85,10 @@ case $yn in
     ;;
 esac
 
+echo "$CC_BLUE"
 echo "Step 1: Install mandatory packages"
+echo "$CC_RESET"
+
 if [ -f /etc/debian_version ]; then
     sudo apt-get update 2>&1 | sed 's/^/        /g'
     sudo apt-get install -y bash iproute2 git tzdata curl locales gettext expect jq 2>&1 | sed 's/^/        /g'
@@ -92,13 +103,19 @@ else
     exit 1
 fi
 
+echo "$CC_BLUE"
 echo "Step 2: Download bashlib to your system"
+echo "$CC_RESET"
+
 curl -L "$BASHLIB_DOWNLOAD" -o /tmp/bashlib.tgz
 tar -xzf /tmp/bashlib.tgz -C "$instdir"
 rm /tmp/bashlib.tgz
 echo ""
 
+echo "$CC_BLUE"
 echo "Step 3: Setup BASHLIB_HOME in your environment."
+echo "$CC_RESET"
+
 if [ "$instdir" = "/opt/bashlib" ]; then
     echo "BASHLIB_HOME=\"$instdir\"" | sudo tee /etc/environment.d/bashlib.conf >/dev/null
     echo "        Set in /etc/environment.d/bashlib.conf"
@@ -112,7 +129,10 @@ else
 fi
 echo ""
 
+echo "$CC_BLUE"
 echo "Step 4: Update local configuration files."
+echo "$CC_RESET"
+
 if [ -e "$config"secrets ]; then
     echo "        Use the existing ${config}secrets"
 else
@@ -132,7 +152,8 @@ ln -s "$config"overwrite "$BASHLIB_HOME"/config/overwrite
 echo ""
 
 echo "You could now use the bashlib by running: source $BASHLIB_HOME/full
-Or add it in your scripts.
+Or add it in your scripts."
 
-Have fun!
-"
+echo "$CC_BLUE"
+echo "Have fun!"
+echo "$CC_RESET"
