@@ -94,6 +94,7 @@ echo "$CC_STEP"
 echo "Step 1: Install mandatory packages"
 echo "$CC_RESET"
 
+echo "        Install needed packages..."
 if [ -f /etc/debian_version ]; then
     sudo apt-get update 2>&1 | sed 's/^/        /g'
     sudo apt-get install -y bash iproute2 git tzdata curl locales gettext expect jq 2>&1 | sed 's/^/        /g'
@@ -104,7 +105,7 @@ elif [ -f /etc/arch-release ]; then
     sudo pacman -Syu --noconfirm 2>&1 | sed 's/^/        /g'
     sudo pacman -Sy --noconfirm git expect jq glibc glibc-locales which less python 2>&1 | sed 's/^/        /g'
 else
-    echo "This operating system is currently not supported, please install on your own."
+    echo "${CC_ERROR}This operating system is currently not supported, please install on your own.${CC_RESET}"
     exit 1
 fi
 
@@ -116,9 +117,10 @@ echo "$CC_STEP"
 echo "Step 2: Download bashlib to your system"
 echo "$CC_RESET"
 
-curl -L -# "$BASHLIB_DOWNLOAD" -o /tmp/bashlib.tgz
-echo "Store under $install"
-tar -xzf /tmp/bashlib.tgz -C "$install"
+echo "        Downloading..."
+curl -L "$BASHLIB_DOWNLOAD" -o /tmp/bashlib.tgz 2>&1 | sed 's/^/        /g'
+echo "        Store under $install"
+tar -xzf /tmp/bashlib.tgz -C "$install" 2>&1 | sed 's/^/        /g'
 rm /tmp/bashlib.tgz
 echo ""
 
@@ -131,14 +133,15 @@ echo "Step 3: Setup BASHLIB_HOME in your environment."
 echo "$CC_RESET"
 
 if [ "$install" = "/opt/bashlib" ]; then
-    echo "BASHLIB_HOME=\"$install\"" | sudo tee /etc/environment.d/bashlib.conf >/dev/null
-    echo "        Set in /etc/environment.d/bashlib.conf"
+    echo "        Set/update global environment in /etc/environment:"
+    sudo sed -i '/^BASHLIB_HOME=/d' /etc/environment
+    echo "BASHLIB_HOME=\"$install\"" | sudo tee -a /etc/environment 2>&1 | sed 's/^/        /g'
 else
     if grep "export BASHLIB_HOME=\"$install\"" "$HOME"/.bashrc; then
         echo "        Already set in $HOME/.bashrc"
     else
         echo "        Added to $HOME/.bashrc"
-        echo "export BASHLIB_HOME=\"$install\"" >>"$HOME"/.bashrc
+        echo "export BASHLIB_HOME=\"$install\"" | tee -a "$HOME"/.bashrc 2>&1 | sed 's/^/        /g'
     fi
 fi
 echo ""
