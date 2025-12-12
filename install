@@ -4,8 +4,8 @@ source /dev/null
 
 BASHLIB_DOWNLOAD="https://gitlab.com/alinex/bash-lib/-/archive/master/bash-lib-master.tar.gz"
 
-CC_RED=$'\033[31m'
-CC_BLUE=$'\033[34m'
+CC_ERROR=$'\033[31m' # red
+CC_STEP=$'\033[36m'  # cyan
 CC_RESET=$'\033[0m'
 
 logo() {
@@ -46,11 +46,11 @@ echo "This will setup the bashlib on $(hostname -f) if not already done or updat
 echo ""
 # check bash version
 if [ -z "${BASH_VERSION:-}" ]; then
-    echo "${CC_RED}No bash CLI! This can only be run under bash >=4.2!${CC_RESET}"
+    echo "${CC_ERROR}No bash CLI! This can only be run under bash >=4.2!${CC_RESET}"
     exit 1
 fi
 if ((${BASH_VERSINFO[0]} < 4 || (${BASH_VERSINFO[0]} == 4 && ${BASH_VERSINFO[1]} < 2))); then
-    echo "${CC_RED}Bash library to old! This can only be run under bash >=4.2! You have Bash Version $BASH_VERSION${CC_RESET}"
+    echo "${CC_ERROR}Bash library to old! This can only be run under bash >=4.2! You have Bash Version $BASH_VERSION${CC_RESET}"
     exit 1
 fi
 # ask for type of installation (if not update)
@@ -90,7 +90,7 @@ esac
 # STEP 1
 ###############################################################################
 
-echo "$CC_BLUE"
+echo "$CC_STEP"
 echo "Step 1: Install mandatory packages"
 echo "$CC_RESET"
 
@@ -112,11 +112,12 @@ fi
 # STEP 2
 ###############################################################################
 
-echo "$CC_BLUE"
+echo "$CC_STEP"
 echo "Step 2: Download bashlib to your system"
 echo "$CC_RESET"
 
-curl -sL -# "$BASHLIB_DOWNLOAD" -o /tmp/bashlib.tgz
+curl -L -# "$BASHLIB_DOWNLOAD" -o /tmp/bashlib.tgz
+echo "Store under $install"
 tar -xzf /tmp/bashlib.tgz -C "$install"
 rm /tmp/bashlib.tgz
 echo ""
@@ -125,7 +126,7 @@ echo ""
 # STEP 3
 ###############################################################################
 
-echo "$CC_BLUE"
+echo "$CC_STEP"
 echo "Step 3: Setup BASHLIB_HOME in your environment."
 echo "$CC_RESET"
 
@@ -146,7 +147,7 @@ echo ""
 # STEP 4
 ###############################################################################
 
-echo "$CC_BLUE"
+echo "$CC_STEP"
 echo "Step 4: Update local configuration files."
 echo "$CC_RESET"
 
@@ -171,6 +172,6 @@ echo ""
 echo "You could now use the bashlib by running: source $BASHLIB_HOME/full
 Or add it in your scripts."
 
-echo "$CC_BLUE"
+echo "$CC_STEP"
 echo "Have fun!"
 echo "$CC_RESET"
