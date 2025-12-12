@@ -138,7 +138,7 @@ if [ "$install" = "/opt/bashlib" ]; then
     environment=/etc/environment
     echo "        Set/update global environment in $environment:"
     sudo sed -i '/^BASHLIB_HOME=/d' $environment
-    echo "BASHLIB_HOME=\"$install\"" | sudo tee -a $source 2>&1 | sed 's/^/        /g'
+    echo "BASHLIB_HOME=\"$install\"" | sudo tee -a $environment 2>&1 | sed 's/^/        /g'
 else
     environment="$HOME"/.bashrc
     sudo sed -i '/^export BASHLIB_HOME=/d' $environment
@@ -158,7 +158,6 @@ if [ -e "$config"secrets ]; then
     echo "        Use the existing ${config}secrets"
 else
     echo "        Create example under ${config}secrets"
-    echo cp "$install"/config/secrets.example "$config"secrets
     cp "$install"/config/secrets.example "$config"secrets
 fi
 if [ -e "$config"overwrite ]; then
@@ -174,7 +173,8 @@ ln -s "$config"overwrite "$install"/config/overwrite
 echo ""
 
 echo "Please re-login or set the updated configuration using: source \"$environment\"
-You could now use the bashlib by running: source \$BASHLIB_HOME/full
+
+You could now use the bashlib by running: source \"\$BASHLIB_HOME\"/full
 Or add it in your scripts."
 
 echo "$CC_STEP"
