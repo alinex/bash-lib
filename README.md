@@ -142,7 +142,7 @@ curl -sL https://gitlab.com/alinex/bash-lib/-/raw/master/install | \
 
 This script will ask if you want to globally install it.
 
-- globally installed in `/opt/bashlib` set in `/etc/environment.d/bashlib` and config in `/etc/bashlib`
+- globally installed in `/opt/bashlib` set in `/etc/environment` and config in `/etc/bashlib`
 - locally installed in `<home-dir>/bashlib` set in `<home-dir>/.bashrc` and config in `<home-dir>/.bashlib-...`
 
 Therefore the following steps will be done:
@@ -150,9 +150,10 @@ Therefore the following steps will be done:
 1. Install mandatory packages
 2. Download bashlib to your system
 3. Setup BASHLIB_HOME in your environment.
-4. Update local configuration files. 
+4. Update local configuration files.
 
 The update will be the same, you only need to download the new files and overwrite the old ones.
+If you want to remove it later the commands will be shown while installing/updating, too.
 
 ## Usage
 

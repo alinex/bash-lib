@@ -125,6 +125,14 @@ tar -xzf /tmp/bashlib.tgz -C "$install" --strip-components=1 \
     --exclude='bash-lib-master/tests' \
     --exclude='bash-lib-master/doc' 2>&1 | sed 's/^/        /g'
 rm /tmp/bashlib.tgz
+rm -f "$install"/.* "$install"/optimize-code.sed "$install"/update "$install"/test "$install"/install "$install"/config/test-setup.conf 2>/dev/null
+rm -rf "$install"/.vscode 2>/dev/null
+find "$install" -name \*.bats -delete 2>/dev/null
+find "$install" -name \*.md -delete 2>/dev/null
+find "$install" -name \*.po -delete 2>/dev/null
+sed "s|\${DATE}|$(date +%Y-%m-%d)|g" "$install"/install-info >"$install"/README.md
+rm -f "$install"/install-info 2>/dev/null
+
 echo ""
 
 ###############################################################################
