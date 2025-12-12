@@ -7,6 +7,7 @@ BASHLIB_DOWNLOAD="https://gitlab.com/alinex/bash-lib/-/archive/master/bash-lib-m
 CC_ERROR=$'\033[31m' # red
 CC_STEP=$'\033[36m'  # cyan
 CC_RESET=$'\033[0m'
+CC_INTENSITY_BOLD=$'\033[1m'
 
 logo() {
     a=$'\033[36m'                # cyan
@@ -172,14 +173,14 @@ ln -s "$config"secrets "$install"/config/secrets
 ln -s "$config"overwrite "$install"/config/overwrite
 echo ""
 
-echo "Please re-login or set the updated configuration using: source \"$environment\"
-
-To uninstall use:
+echo "To uninstall use:
     sudo rm -rf "$install" "$config"
     sudo sed -i '/BASHLIB_HOME=/d' "$environment"
 
-You could now use the bashlib by running: source \"\$BASHLIB_HOME\"/full
-Or add it in your scripts."
+Please re-login or set the updated configuration using: ${CC_INTENSITY_BOLD}source \"$environment\"${CC_RESET}
+
+You could now use the bashlib by running: ${CC_INTENSITY_BOLD}source \"\$BASHLIB_HOME\"/full${CC_RESET}
+Test it with: ${CC_INTENSITY_BOLD}heading It works${CC_RESET}"
 
 echo "$CC_STEP"
 echo "Have fun!"
