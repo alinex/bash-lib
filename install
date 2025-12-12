@@ -4,11 +4,39 @@ source /dev/null
 
 BASHLIB_DOWNLOAD="https://gitlab.com/alinex/bash-lib/-/archive/master/bash-lib-master.tar.gz"
 
+logo() {
+    a=$'\033[36m' # cyan
+    b=$'\033[93m' # yellow bold
+    c=$'\033[43m' # yellow bg
+    r=$'\033[0m'  # reset
+    u=$'\033[4m'  # underline
+    p="$(printf '%*s' $((($(tput cols) - 80) / 2)))"
+    t="$(printf '%*s' $((($(tput cols) - ${#1}) / 2)))"
+    echo
+    echo "$p$a                         $b  __   ____     ___"
+    echo "$p$a           ######  ##### $b ▕  ▏ ▕    ╲   ▕   ▏ $a  ########### #####       #####"
+    echo "$p$a          ######## ##### $b ▕  ▏ ▕     ╲  ▕   ▏ $a ############  #####     #####"
+    echo "$p$a         ######### ##### $b ▕  ▏ ▕  ▕╲  ╲ ▕   ▏ $a #####          #####   #####"
+    echo "$p$a        ########## ##### $b ▕  ▏ ▕  ▕ ╲  ╲▕   ▏ $a #####           ##### #####"
+    echo "$p$a       ##### ##### ##### $b ▕  ▏ ▕  ▕  ╲  ▔   ▏ $a ############     #########"
+    echo "$p$a      #####  ##### ##### $b ▕  ▏ ▕  ▕   ╲     ▏ $a ############     #########"
+    echo "$p$a     #####   ##### ##### $b ▕  ▏ ▕  ▕    ╲    ▏ $a #####           ##### #####"
+    echo "$p$a    #####    ##### ##### $b  ▔▔   ▔▔▔     ▔▔▔▔  $a #####          #####   #####"
+    echo "$p$a   ##### ######### ########################### ############  #####     #####"
+    echo "$p$a  ##### ##########  #########################   ########### #####       ##### $r"
+    echo "$p$b▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄$r$c"
+    echo "$t$1$r"
+    echo "$p$b▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀$r"
+    echo
+}
+
 # To avoid question give all information:
 # Usage:    install <path> <y|n> <config-path>
 
 set -eE         # exit on uncatched failure
 set -o pipefail # fail if any command in a pipeline fails
+
+logo "Bash Lib 2 - INSTALLER"
 
 echo "This will setup the bashlib on this host if not already done..."
 echo ""
