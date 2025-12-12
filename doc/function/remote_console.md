@@ -1,7 +1,8 @@
 # remote_console
 
-## Open an interactive console on remote host
+## Deprecated: Open an interactive console on remote host
 
+Use: remote console
 The motd and banner are prevented by touching .hushlogin on the server.
 
 ### Usage

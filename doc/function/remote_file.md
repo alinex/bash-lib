@@ -1,6 +1,8 @@
 # remote_file
 
-## Run local script on remote
+## Deprecated: Run local script on remote
+
+Use: remote --file `<file>`
 
 ### Usage
 

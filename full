@@ -1643,7 +1643,7 @@ fi
 [ -n "${_mattermost_cache[$cache]}" ]||die "Channel $2 does not exist in mattermost (team $1)"
 echo "${_mattermost_cache[$cache]}"
 }
-_mattermost_channel_bypost(){
+_mattermost_channel_by_post(){
 debug "GET mattermost/posts/<post-id>"
 curl -H "Authorization: Bearer $MATTERMOST_TOKEN" "$MATTERMOST_API"/posts/"$1"|jq '.channel_id' -r||die "Could not get channel of post $1 in mattermost!"
 }
@@ -1657,7 +1657,7 @@ local json pid
 json="$(jq -n --arg c "$1" --arg t "$2" '{ channel_id: $c, message: $t '"$att"' }')"
 debug "POST mattermost/posts"
 debug "JSON: $json" >&2
-pid=$(curl -H "Authorization: Bearer $MATTERMOST_TOKEN" -H 'Content-Type: application/json' -X POST "$MATTERMOST_API"/posts -d "$json"|jq '.id' -r)||die "Couls not send new post to mattermost!"
+pid=$(curl -H "Authorization: Bearer $MATTERMOST_TOKEN" -H 'Content-Type: application/json' -X POST "$MATTERMOST_API"/posts -d "$json"|jq '.id' -r)||die "Could not send new post to mattermost!"
 debug "-> $pid"
 echo "$1/$pid"
 }
@@ -1740,20 +1740,20 @@ debug "Disabled because MATTERMOST_API and MATTERMOST_TOKEN are not both set"
 return 0
 fi
 install jq
-local channels line main links link mainid postid result
+local channels line main links link mainId postId result
 channels="$(_mattermost_find_channels "$1")"||exit 1
 while read -r line;do
 [ -n "$line" ]||continue
 read -r main links <<<"$line"
 IFS="/" read -r _ channel <<<"$main"
-mainid=$(_mattermost_post "$channel" "$2" "$3")
-IFS="/" read -r _ post <<<"$mainid"
-result="$result\n$mainid"
+mainId=$(_mattermost_post "$channel" "$2" "$3")
+IFS="/" read -r _ post <<<"$mainId"
+result="$result\n$mainId"
 while IFS=" " read -r link;do
 [ -n "$link" ]||continue
 IFS="/" read -r _ channel <<<"$link"
-postid=$(_mattermost_post "$channel" "https://mattermost.ekz.de/divibib/pl/$post")
-result="$result $postid"
+postId=$(_mattermost_post "$channel" "https://mattermost.ekz.de/divibib/pl/$post")
+result="$result $postId"
 done <<<"$links"
 done <<<"$channels"
 mattermost_post_ids="${result:2}"
@@ -2232,7 +2232,7 @@ sudo_allow(){
 is integer --name=arguments --max=1 --die -- $#
 ((EUID!=0))||return 0
 command -v sudo >/dev/null||return 0
-command sudo -ln "$@" >/dev/null||die "User $(whoami) is not allowed to call 'sudo $*', but this is neccessary!"
+command sudo -ln "$@" >/dev/null||die "User $(whoami) is not allowed to call 'sudo $*', but this is necessary!"
 }
 sudo(){
 if ((EUID!=0))&&command -v sudo >/dev/null;then
@@ -2582,13 +2582,16 @@ done
 echo "${result:0:length}"
 }
 remote(){
-local _login host jump
-eval set -- "$(option_parse $'+l login +\nh host +\nj jump +' "$@")"
+local _login host jump term lines file
+eval set -- "$(option_parse $'+l login +\nh host +\nj jump +\nt terminal -\n- line-based -\nf file -' "$@")"
 while true;do
 case "$1" in
 -l|--login)_login="$2"&&shift 2;;
 -h|--host)host="$2"&&shift 2;;
 -j|--jump)jump="$2"&&shift 2;;
+-t|--terminal)term=1&&shift;;
+--line-based)lines=1&&shift;;
+-f|--file)file=1&&shift;;
 --)shift&&break;;
 *)die "$(gettext "Unrecognized option"): $1"
 esac
@@ -2597,107 +2600,47 @@ _login=${_login:-${login:-$REMOTE_LOGIN_DEFAULT}}
 host=${host:-$server}
 local ssh="$_login@$host"
 [ -z "$jump" ]||ssh="-J $jump $ssh"
-if [ -p /dev/stdin ]&&(($#==0));then
-ssh $ssh bash -s
-return "${PIPESTATUS[0]}"
-else
-ssh $ssh "$@"
-return "${PIPESTATUS[0]}"
-fi
-}
-remote_term(){
-local _login host jump
-eval set -- "$(option_parse $'+l login +\nh host +\nj jump +' "$@")"
-while true;do
-case "$1" in
--l|--login)_login="$2"&&shift 2;;
--h|--host)host="$2"&&shift 2;;
--j|--jump)jump="$2"&&shift 2;;
---)shift&&break;;
-*)die "$(gettext "Unrecognized option"): $1"
-esac
-done
-_login=${_login:-${login:-$REMOTE_LOGIN_DEFAULT}}
-host=${host:-$server}
-local ssh="$_login@$host"
-[ -z "$jump" ]||ssh="-J $jump $ssh"
-if [ -p /dev/stdin ];then
-ssh -t $ssh bash -s
-return "${PIPESTATUS[0]}"
-else
-ssh -t $ssh "$@"
-return "${PIPESTATUS[0]}"
-fi
-}
-remote_term_line(){
-local _login host jump
-eval set -- "$(option_parse $'+l login +\nh host +\nj jump +' "$@")"
-while true;do
-case "$1" in
--l|--login)_login="$2"&&shift 2;;
--h|--host)host="$2"&&shift 2;;
--j|--jump)jump="$2"&&shift 2;;
---)shift&&break;;
-*)die "$(gettext "Unrecognized option"): $1"
-esac
-done
-_login=${_login:-${login:-$REMOTE_LOGIN_DEFAULT}}
-host=${host:-$server}
-local ssh="$_login@$host"
-[ -z "$jump" ]||ssh="-J $jump $ssh"
-if [ -p /dev/stdin ];then
-ssh -t $ssh bash -s 2> >(grep -v '^Connection to .* closed\.' >&2||true)|nocr
-return "${PIPESTATUS[0]}"
-else
-ssh -t $ssh "$@" 2> >(grep -v '^Connection to .* closed\.' >&2||true)|nocr
-return "${PIPESTATUS[0]}"
-fi
-}
-remote_file(){
-local _login host jump
-eval set -- "$(option_parse $'+l login +\nh host +\nj jump +' "$@")"
-while true;do
-case "$1" in
--l|--login)_login="$2"&&shift 2;;
--h|--host)host="$2"&&shift 2;;
--j|--jump)jump="$2"&&shift 2;;
---)shift&&break;;
-*)die "$(gettext "Unrecognized option"): $1"
-esac
-done
-is integer --name=arguments --max=1 --die -- $#
-_login=${_login:-${login:-$REMOTE_LOGIN_DEFAULT}}
-host=${host:-$server}
-local ssh="$_login@$host"
-[ -z "$jump" ]||ssh="-J $jump $ssh"
-local file
-file="$(input "$@")"
-test "${file:0:1}" = "/"||file="$(path)/$file"
-test -f "$file"||die "$(eval_gettext 'No file to execute remotely under $file')"
-ssh $ssh 'bash -s' <"$file"
-}
-remote_console(){
-local _login host jump opt
-eval set -- "$(option_parse $'+l login +\nh host +\nj jump +\nA forward-agent -' "$@")"
-while true;do
-case "$1" in
--l|--login)_login="$2"&&shift 2;;
--h|--host)host="$2"&&shift 2;;
--j|--jump)jump="$2"&&shift 2;;
--A|--forward-agent)opt="-A"&&shift;;
---)shift&&break;;
-*)die "$(gettext "Unrecognized option"): $1"
-esac
-done
-is integer --name=arguments --max=2 --die -- $#
-_login=${_login:-${login:-$REMOTE_LOGIN_DEFAULT}}
-host=${host:-$server}
-local ssh="$_login@$host"
-[ -z "$jump" ]||ssh="-J $jump $ssh"
+[ -z "$term" ]||ssh="-t $ssh"
+if [ -n "$file" ];then
+is set --name=arguments --max=1 --die -- $#
+is readable --name=file --die -- "$1"
+ssh $ssh 'bash -s' <"$1"
+elif [ "$1" = "console" ];then
 local rc
 ssh $ssh '(nohup touch .hushlogin && sleep 1 && rm .hushlogin) >/dev/null 2>&1 </dev/null &'
 ssh $opt $ssh </dev/tty||rc=$?
 return "$rc"
+elif [ -p /dev/stdin ]&&(($#==0));then
+if [ -z "$lines" ];then
+ssh $ssh bash -s
+else
+ssh $ssh bash -s 2> >(grep -v '^Connection to .* closed\.' >&2||true) >&2|nocr
+fi
+return "${PIPESTATUS[0]}"
+else
+if [ -z "$lines" ];then
+ssh $ssh "$@"
+else
+ssh $ssh "$@" 2> >(grep -v '^Connection to .* closed\.' >&2||true) >&2|nocr
+fi
+return "${PIPESTATUS[0]}"
+fi
+}
+remote_term(){
+_deprecated "Use: remote --terminal ... instead" warn
+remote --terminal "$@"
+}
+remote_term_line(){
+_deprecated "Use: @remote --terminal --line-based ..." warn
+remote --terminal --line-based "$@"
+}
+remote_file(){
+_deprecated "se: remote --file <file>" warn
+remote --file "$@"
+}
+remote_console(){
+_deprecated "Use: remote console" warn
+remote "$@" console
 }
 upload(){
 local _login host jump

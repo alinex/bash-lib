@@ -8,7 +8,7 @@ Find free linkable icons under https://icons8.de/icons/all
 
 ```bash
 mattermost_attachment
-mattermost_post `$channelid` "" "$(mattermost_attachment --color ...)"
+mattermost_post <channel-id> "" "$(mattermost_attachment --color ...)"
 ```
 
 ### Options

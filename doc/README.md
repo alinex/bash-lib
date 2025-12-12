@@ -395,11 +395,11 @@ Module with remote calling/execution helpers.
 
 | Variable/Function | Description |
 | --- | --- |
-| [`remote`](function/remote.md) | Run command on remote host |
-| [`remote_term`](function/remote_term.md) | Run remote command with pseudo terminal |
-| [`remote_term_line`](function/remote_term_line.md) | Run remote command with pseudo terminal but line based output (problematic with questions) |
-| [`remote_file`](function/remote_file.md) | Run local script on remote |
-| [`remote_console`](function/remote_console.md) | Open an interactive console on remote host |
+| [`remote`](function/remote.md) | Run command on remote host. |
+| [`remote_term`](function/remote_term.md) | Deprecated: Run remote command with pseudo terminal |
+| [`remote_term_line`](function/remote_term_line.md) | Deprecated: Run remote command with pseudo terminal but line based output (problematic with questions) |
+| [`remote_file`](function/remote_file.md) | Deprecated: Run local script on remote |
+| [`remote_console`](function/remote_console.md) | Deprecated: Open an interactive console on remote host |
 | [`upload`](function/upload.md) | Upload file |
 | [`download`](function/download.md) | Download file |
 | [`remote_bashlib`](function/remote_bashlib.md) | Run bashlib command on remote. |

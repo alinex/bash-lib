@@ -14,7 +14,7 @@ mattermost <channel-name> <text> [<attachments>]
 
 ### Output (stdout)
 
-`<postid list>`
+`<post-id list>`
 
 ### Return (exit code)
 

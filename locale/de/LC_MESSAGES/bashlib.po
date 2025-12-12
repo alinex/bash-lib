@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-11 13:04+0100\n"
+"POT-Creation-Date: 2025-12-12 21:12+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -20,9 +20,8 @@ msgstr ""
 #: core/misc:109 core/validator:64 core/validator:252 core/array:131
 #: module/os:178 module/monitoring:135 module/input:30 module/input:83
 #: module/input:220 module/input:479 module/input:646 module/log:61
-#: module/remote:36 module/remote:79 module/remote:119 module/remote:161
-#: module/remote:200 module/remote:236 module/remote:283 module/remote:344
-#: module/remote:438 module/mattermost:288 module/mattermost:323
+#: module/remote:48 module/remote:177 module/remote:224 module/remote:285
+#: module/remote:379 module/mattermost:288 module/mattermost:323
 #: module/software:197
 msgid "Unrecognized option"
 msgstr "Unbekannte Option"
@@ -336,12 +335,7 @@ msgstr "Fertig: Schritt $name um $date"
 msgid "Started: step $name at $date"
 msgstr "Start: Schritt $name um $date"
 
-#: module/remote:173
-#, sh-format
-msgid "No file to execute remotely under $file"
-msgstr "Keine Datei unter $file für Remote ausführen"
-
-#: module/remote:447
+#: module/remote:388
 #, sh-format
 msgid "Wait until the reboot is complete ($seconds seconds)"
 msgstr "Warten bis der Reboot fertig ist ($seconds Sekunden)"
@@ -385,6 +379,10 @@ msgid "is a downgrade of one patch version"
 msgid_plural "is a downgrade of $step patch versions"
 msgstr[0] "ist ein Downgrade von einer Patchversion"
 msgstr[1] "ist ein Downgrade von $step Patchversionen"
+
+#, sh-format
+#~ msgid "No file to execute remotely under $file"
+#~ msgstr "Keine Datei unter $file für Remote ausführen"
 
 #~ msgid "No <num> argument in call to input_args!"
 #~ msgstr "Kein <num> Argument im Aufruf zu input_args!"

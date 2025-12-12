@@ -2,7 +2,7 @@
 
 ## Store environment into shared memory/file
 
-Use `$$` or '${$}' as the program PID which will be also the same in Subshells or `${BASHPID}` which will differ.
+Use `$$` or '${$}' as the program PID which will be also the same in Subshell or `${BASHPID}` which will differ.
 
 ### Usage
 

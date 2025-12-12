@@ -8,5 +8,5 @@
 
 ```bash
 async_wait          # to wait for all to be done
-async_wait <name>   # to wiat for specific command to finish
+async_wait <name>   # to wait for specific command to finish
 ```

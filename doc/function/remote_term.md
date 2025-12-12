@@ -1,9 +1,10 @@
 # remote_term
 
-## Run remote command with pseudo terminal
+## Deprecated: Run remote command with pseudo terminal
 
-
- my be contained, remove with nocr
+Use: remote --terminal ...
+``
+` my be contained in output, remove with n@ocr`
 "Connection ... closed" in stderr: remove using: 2>` >`(grep -v '^Connection to .* closed\.' >`[`2`](../example/2.md))
 
 ### Usage

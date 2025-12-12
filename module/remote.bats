@@ -36,41 +36,33 @@ setup() {
     assert_failure
 }
 
-######################################################################################
-# remote_term
-######################################################################################
-
-# bats test_tags=remote_term
-@test "remote_term: should get hostname of remote host" {
-    run remote_term hostname
+# bats test_tags=remote
+@test "remote: should get hostname of remote host (with terminal)" {
+    run remote --terminal hostname
     assert_output -p "$server"
     assert_success
 }
-# bats test_tags=remote_term
-@test "remote_term: with piped message" {
-    run bats_pipe echo hostname \| remote
+# bats test_tags=remote
+@test "remote: with piped message (with terminal)" {
+    run bats_pipe echo hostname \| remote --terminal
     assert_output -p "$server"
     assert_success
 }
-# bats test_tags=remote_term_line
-@test "remote_term_line: with failed code" {
-    run remote_term_line false
+# bats test_tags=remote
+@test "remote: with failed code (with terminal)" {
+    run remote --terminal false
     assert_failure
 }
 
-######################################################################################
-# remote_term_line
-######################################################################################
-
-# bats test_tags=remote_term_line
-@test "remote_term_line: should get hostname of remote host" {
-    run remote_term_line hostname
+# bats test_tags=remote
+@test "remote: should get hostname of remote host (with terminal, line-based)" {
+    run remote --terminal --line-based hostname
     assert_output -p "$server"
     assert_success
 }
-# bats test_tags=remote_term_line
-@test "remote_term_line: with piped message" {
-    run bats_pipe echo hostname \| remote
+# bats test_tags=remote
+@test "remote: with piped message (with terminal, line-based)" {
+    run bats_pipe echo hostname \| remote --terminal --line-based
     assert_output -p "$server"
     assert_success
 }
