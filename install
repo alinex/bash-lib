@@ -31,7 +31,7 @@ elif [ -e "$HOME"/bashlib ]; then
     echo "This will replace the instalation under $HOME/bashlib"
     rm -rf "$HOME"/bashlib
 else
-    [ -n "$2" ] && yn="$2" || read -r -n 1 -s -p "Should the bashlib path be added globally (y/n) " yn
+    [ -n "$2" ] && yn="$2" || read -r -n 1 -s -p "Should the bashlib path be added globally (y/n) " yn </dev/tty
 fi
 case $yn in
 "" | [JjYy])
