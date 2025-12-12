@@ -2,6 +2,16 @@
 # shellcheck source=base
 source /dev/null
 
+# Usage:
+#
+# interactive install
+#   curl -sL https://gitlab.com/alinex/bash-lib/-/raw/master/install | bash
+# automatic install, all values provided
+#   curl -sL https://gitlab.com/alinex/bash-lib/-/raw/master/install | bash -s -- "<path>" y|n "<config>"
+#
+# update if already installed
+#   curl -sL https://gitlab.com/alinex/bash-lib/-/raw/master/install | bash
+
 BASHLIB_DOWNLOAD="https://gitlab.com/alinex/bash-lib/-/archive/master/bash-lib-master.tar.gz"
 
 CC_ERROR=$'\033[31m' # red
@@ -58,14 +68,14 @@ fi
 if [ -e /opt/bashlib ]; then
     yn=y
     echo "This will replace the installation under /opt/bashlib"
-    read -n 1 -s -r -p "Press any key to continue..." </dev/tty
     echo
+    sleep 3
     sudo rm -rf /opt/bashlib
 elif [ -e "$HOME"/bashlib ]; then
     yn=n
     echo "This will replace the installation under $HOME/bashlib"
-    read -n 1 -s -r -p "Press any key to continue..." </dev/tty
     echo
+    sleep 3
     rm -rf "$HOME"/bashlib
 else
     echo "No BashLib found, so it will be installed."
@@ -124,6 +134,7 @@ echo "        Store under $install"
 tar -xzf /tmp/bashlib.tgz -C "$install" --strip-components=1 \
     --exclude='bash-lib-master/tests' \
     --exclude='bash-lib-master/doc' 2>&1 | sed 's/^/        /g'
+echo "        Remove unnecessary files"
 rm /tmp/bashlib.tgz
 rm -f "$install"/.* "$install"/optimize-code.sed "$install"/update "$install"/test "$install"/install "$install"/config/test-setup.conf 2>/dev/null || true
 rm -rf "$install"/.vscode 2>/dev/null || true
@@ -132,7 +143,6 @@ find "$install" -name \*.md -delete 2>/dev/null || true
 find "$install" -name \*.po -delete 2>/dev/null || true
 sed "s|\${DATE}|$(date +%Y-%m-%d)|g" "$install"/install-info >"$install"/README.md || true
 rm -f "$install"/install-info 2>/dev/null || true
-
 echo ""
 
 ###############################################################################

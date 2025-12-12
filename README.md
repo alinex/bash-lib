@@ -135,9 +135,13 @@ Tags will be set if specific milestones are reached and noted in the [changelog]
 Can be done locally after checking out the git repository manually by setting only the `BASHLIB_HOME` variable in your environment or directly from the repository by calling (your user should have sudo rights):
 
 ```bash
-curl -sL https://gitlab.com/alinex/bash-lib/-/raw/master/install | bash     # interactive
-curl -sL https://gitlab.com/alinex/bash-lib/-/raw/master/install | \
-    bash -s -- "<path>" y|n "<config>"                                      # automatic
+# interactive install
+curl -sL https://gitlab.com/alinex/bash-lib/-/raw/master/install | bash     
+# automatic install, all values provided
+curl -sL https://gitlab.com/alinex/bash-lib/-/raw/master/install | bash -s -- "<path>" y|n "<config>"                                      
+
+# update if already installed
+curl -sL https://gitlab.com/alinex/bash-lib/-/raw/master/install | bash
 ```
 
 This script will ask if you want to globally install it.
