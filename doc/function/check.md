@@ -22,6 +22,11 @@ The following checks are implemented:
 - `enum' will check against valid words using `--allow="word1 word2"``
 - `length` check that the length is within range (like integer)
 - `duration` check and parse the [`duration_format`](duration_format.md)
+- `path` check that value is an existing path (any type)
+- `file` check that value is an existing file
+- `directory` check that value is an existing directory
+- `readable` check that value is a file readable by user
+- `writable` check that value is a file writable by user
 
 Exit:     with message if incorrect value
 

@@ -829,6 +829,36 @@ if [[ ! $res =~ ^-?[0-9]+$ ]];then
 [ -z "$die" ]&&return 1||die "$(eval_gettext 'The "$name" has to be an integer or human duration but »${val}« was given')"
 fi
 ;;
+path)if
+[ -e "$val" ]
+then
+[ -z "$die" ]&&return 1||die "$(eval_gettext 'The "$name" has to be an existing path')"
+fi
+;;
+file)if
+[ -f "$val" ]
+then
+[ -z "$die" ]&&return 1||die "$(eval_gettext 'The "$name" has to be an existing file')"
+fi
+;;
+directory)if
+[ -d "$val" ]
+then
+[ -z "$die" ]&&return 1||die "$(eval_gettext 'The "$name" has to be an existing directory')"
+fi
+;;
+readable)if
+[ -r "$val" ]
+then
+[ -z "$die" ]&&return 1||die "$(eval_gettext 'The "$name" has to be a file readable for user')"
+fi
+;;
+writable)if
+[ -w "$val" ]
+then
+[ -z "$die" ]&&return 1||die "$(eval_gettext 'The "$name" has to be a file writable for user')"
+fi
+;;
 *)die "$(eval_gettext 'A check named ${check} is not defined')"
 esac
 echo "$res"
