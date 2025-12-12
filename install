@@ -5,11 +5,11 @@ source /dev/null
 BASHLIB_DOWNLOAD="https://gitlab.com/alinex/bash-lib/-/archive/master/bash-lib-master.tar.gz"
 
 logo() {
-    a=$'\033[36m'         # cyan
-    b=$'\033[33m\033[1m'  # yellow bold
-    c=$'\033[43m\033[30m' # yellow bg + black
-    r=$'\033[0m'          # reset
-    u=$'\033[4m'          # underline
+    a=$'\033[36m'                # cyan
+    b=$'\033[33m\033[1m'         # yellow bold
+    c=$'\033[43m\033[30m\033[1m' # yellow bg + black bold
+    r=$'\033[0m'                 # reset
+    u=$'\033[4m'                 # underline
     p="$(printf '%*s' $((($(tput cols) - 80) / 2)))"
     t="$(printf '%*s' $((($(tput cols) - ${#1}) / 2)))"
     echo
@@ -38,7 +38,7 @@ set -o pipefail # fail if any command in a pipeline fails
 
 logo "Bash Lib 2 - INSTALLER"
 
-echo "This will setup the bashlib on this host if not already done or update it..."
+echo "This will setup the bashlib on $(hostname -f) if not already done or update it..."
 echo ""
 # check bash version
 if [ -z "${BASH_VERSION:-}" ]; then
