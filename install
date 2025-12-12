@@ -73,17 +73,22 @@ else
 fi
 case $yn in
 "" | [JjYy])
-    instdir=/opt/bashlib
-    sudo mkdir "$instdir"
+    install=/opt/bashlib
+    sudo mkdir "$install"
     config=/etc/bashlib/
     sudo mkdir "$config"
     ;;
 *)
-    instdir="$HOME"/bashlib
-    mkdir "$instdir"
+    install="$HOME"/bashlib
+    mkdir "$install"
     config="$HOME"/.bashlib-
+    sudo() { "$@"; } # don't use sudo
     ;;
 esac
+
+###############################################################################
+# STEP 1
+###############################################################################
 
 echo "$CC_BLUE"
 echo "Step 1: Install mandatory packages"
@@ -103,31 +108,43 @@ else
     exit 1
 fi
 
+###############################################################################
+# STEP 2
+###############################################################################
+
 echo "$CC_BLUE"
 echo "Step 2: Download bashlib to your system"
 echo "$CC_RESET"
 
-curl -L "$BASHLIB_DOWNLOAD" -o /tmp/bashlib.tgz
-tar -xzf /tmp/bashlib.tgz -C "$instdir"
+curl -sL -# "$BASHLIB_DOWNLOAD" -o /tmp/bashlib.tgz
+sudo tar -xzf /tmp/bashlib.tgz -C "$install"
 rm /tmp/bashlib.tgz
 echo ""
+
+###############################################################################
+# STEP 3
+###############################################################################
 
 echo "$CC_BLUE"
 echo "Step 3: Setup BASHLIB_HOME in your environment."
 echo "$CC_RESET"
 
-if [ "$instdir" = "/opt/bashlib" ]; then
-    echo "BASHLIB_HOME=\"$instdir\"" | sudo tee /etc/environment.d/bashlib.conf >/dev/null
+if [ "$install" = "/opt/bashlib" ]; then
+    echo "BASHLIB_HOME=\"$install\"" | sudo tee /etc/environment.d/bashlib.conf >/dev/null
     echo "        Set in /etc/environment.d/bashlib.conf"
 else
-    if grep "export BASHLIB_HOME=\"$instdir\"" "$HOME"/.bashrc; then
+    if grep "export BASHLIB_HOME=\"$install\"" "$HOME"/.bashrc; then
         echo "        Already set in $HOME/.bashrc"
     else
         echo "        Added to $HOME/.bashrc"
-        echo "export BASHLIB_HOME=\"$instdir\"" >>"$HOME"/.bashrc
+        echo "export BASHLIB_HOME=\"$install\"" >>"$HOME"/.bashrc
     fi
 fi
 echo ""
+
+###############################################################################
+# STEP 4
+###############################################################################
 
 echo "$CC_BLUE"
 echo "Step 4: Update local configuration files."
