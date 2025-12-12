@@ -17,7 +17,7 @@ if [ -n "${BASH_VERSION:-}" ]; then
     echo "No bash CLI! This can only be run under bash >=4.2!"
     exit 1
 fi
-if ((BASH_VERSINFO[0] < 4 || (BASH_VERSINFO[0] == 4 && BASH_VERSINFO[1] < 2))); then
+if ((${BASH_VERSINFO[0]} < 4 || (${BASH_VERSINFO[0]} == 4 && ${BASH_VERSINFO[1]} < 2))); then
     echo "No bash CLI! This can only be run under bash >=4.2!"
     exit 1
 fi
