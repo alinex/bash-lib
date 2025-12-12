@@ -5,11 +5,11 @@ source /dev/null
 BASHLIB_DOWNLOAD="https://gitlab.com/alinex/bash-lib/-/archive/master/bash-lib-master.tar.gz"
 
 logo() {
-    a=$'\033[36m' # cyan
-    b=$'\033[93m' # yellow bold
-    c=$'\033[43m' # yellow bg
-    r=$'\033[0m'  # reset
-    u=$'\033[4m'  # underline
+    a=$'\033[36m'        # cyan
+    b=$'\033[33m\033[1m' # yellow bold
+    c=$'\033[43m'        # yellow bg
+    r=$'\033[0m'         # reset
+    u=$'\033[4m'         # underline
     p="$(printf '%*s' $((($(tput cols) - 80) / 2)))"
     t="$(printf '%*s' $((($(tput cols) - ${#1}) / 2)))"
     echo
