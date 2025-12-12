@@ -6,7 +6,7 @@ BASHLIB_DOWNLOAD="https://gitlab.com/alinex/bash-lib/-/archive/master/bash-lib-m
 
 CC_RED=$'\033[31m'
 CC_BLUE=$'\033[34m'
-CC_RESET_BG=$'\033[49m'
+CC_RESET=$'\033[0m'
 
 logo() {
     a=$'\033[36m'                # cyan
