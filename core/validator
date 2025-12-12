@@ -27,6 +27,11 @@
 # - `enum' will check against valid words using `--allow="word1 word2"`
 # - `length` check that the length is within range (like integer)
 # - `duration` check and parse the @duration_format
+# - `path` check that value is an existing path (any type)
+# - `file` check that value is an existing file
+# - `directory` check that value is an existing directory
+# - `readable` check that value is a file readable by user
+# - `writable` check that value is a file writable by user
 #
 # Usage:    check <check> [options] -- <value>
 # Options:  d, die              # used in @is to stop with error instead of return state
@@ -174,6 +179,31 @@ check() {
             [ -z "$die" ] && return 1 || die "$(eval_gettext 'The "$name" has to be an integer or human duration but »${val}« was given')"
         fi
         ;;
+    path)
+        if [ -e "$val" ]; then
+            [ -z "$die" ] && return 1 || die "$(eval_gettext 'The "$name" has to be an existing path')"
+        fi
+        ;;
+    file)
+        if [ -f "$val" ]; then
+            [ -z "$die" ] && return 1 || die "$(eval_gettext 'The "$name" has to be an existing file')"
+        fi
+        ;;
+    directory)
+        if [ -d "$val" ]; then
+            [ -z "$die" ] && return 1 || die "$(eval_gettext 'The "$name" has to be an existing directory')"
+        fi
+        ;;
+    readable)
+        if [ -r "$val" ]; then
+            [ -z "$die" ] && return 1 || die "$(eval_gettext 'The "$name" has to be a file readable for user')"
+        fi
+        ;;
+    writable)
+        if [ -w "$val" ]; then
+            [ -z "$die" ] && return 1 || die "$(eval_gettext 'The "$name" has to be a file writable for user')"
+        fi
+        ;;
     *) die "$(eval_gettext 'A check named ${check} is not defined')" ;;
     esac
     echo "$res"
@@ -200,6 +230,11 @@ check() {
 # - `enum' will check against valid words using `--allow="word1 word2"`
 # - `length` check that the length is within range (like integer)
 # - `duration` check and parse the @duration_format
+# - `path` check that value is an existing path (any type)
+# - `file` check that value is an existing file
+# - `directory` check that value is an existing directory
+# - `readable` check that value is a file readable by user
+# - `writable` check that value is a file writable by user
 #
 # Usage:    is <check> [options] -- <value>
 # Options:  d, die              # stop with error instead of return state
