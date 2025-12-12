@@ -38,7 +38,7 @@ set -o pipefail # fail if any command in a pipeline fails
 
 logo "Bash Lib 2 - INSTALLER"
 
-echo "This will setup the bashlib on this host if not already done..."
+echo "This will setup the bashlib on this host if not already done or update it..."
 echo ""
 # check bash version
 if [ -z "${BASH_VERSION:-}" ]; then
@@ -52,11 +52,13 @@ fi
 # ask for type of installation (if not update)
 if [ -e /opt/bashlib ]; then
     yn=y
-    echo "This will replace the instalation under /opt/bashlib"
+    echo "This will replace the installation under /opt/bashlib"
+    read -n 1 -s -r -p "Press any key to continue..." </dev/tty
     sudo rm -rf /opt/bashlib
 elif [ -e "$HOME"/bashlib ]; then
     yn=n
-    echo "This will replace the instalation under $HOME/bashlib"
+    echo "This will replace the installation under $HOME/bashlib"
+    read -n 1 -s -r -p "Press any key to continue..." </dev/tty
     rm -rf "$HOME"/bashlib
 else
     [ -n "$2" ] && yn="$2" || read -r -n 1 -s -p "Should the bashlib path be added globally (y/n) " yn </dev/tty
@@ -77,8 +79,8 @@ esac
 
 echo "Step 1: Install mandatory packages"
 if [ -f /etc/debian_version ]; then
-    sudo apt update 2>&1 | sed 's/^/        /g'
-    sudo apt install -y bash iproute2 git tzdata curl locales gettext expect jq 2>&1 | sed 's/^/        /g'
+    sudo apt-get update 2>&1 | sed 's/^/        /g'
+    sudo apt-get install -y bash iproute2 git tzdata curl locales gettext expect jq 2>&1 | sed 's/^/        /g'
 elif [ -f /etc/alpine-release ]; then
     sudo apk update 2>&1 | sed 's/^/        /g'
     sudo apk add bash tzdata musl-locales musl-locales-lang git curl coreutils gettext expect sed jq 2>&1 | sed 's/^/        /g'
