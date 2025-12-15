@@ -53,7 +53,7 @@ _stacktrace() {
     if [ -z "$1" ] && ((DEBUG < 5)); then bestChoice=1; fi
     while read -r line func src < <(caller "$frame" || true); do
         if [ -n "$bestChoice" ] && [[ ! "$func" =~ ^is$|^check$ ]]; then
-            printf "Possibly called at %s:%d (%s)\n" "$src" "$line" "$func" | warn >&2
+            printf "Triggered at %s:%d (%s)\n" "$src" "$line" "$func" | warn >&2
             bestChoice=""
         fi
         # shellcheck disable=SC2015
