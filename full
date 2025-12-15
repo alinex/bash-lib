@@ -2252,7 +2252,7 @@ unset IFS
 }
 uses_lvm(){
 is integer --name=arguments --max=0 --die -- $#
-sudo command -v vgs >/dev/null&&sudo vgs --noheadings >/dev/null&&[ -n "$(sudo vgs --noheadings)" ] &>/dev/null
+sudo bash -lc 'command -v vgs' >/dev/null&&sudo vgs --noheadings >/dev/null&&[ -n "$(sudo vgs --noheadings)" ] &>/dev/null
 }
 has_tty(){
 is integer --name=arguments --max=0 --die -- $#
