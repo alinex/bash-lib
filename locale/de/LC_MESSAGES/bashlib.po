@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-12 21:36+0100\n"
+"POT-Creation-Date: 2025-12-15 15:54+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -38,7 +38,7 @@ msgstr "Optionen"
 msgid "argument is not a valid number!"
 msgstr "Argument ist nicht ganzzahlig"
 
-#: core/output:89
+#: core/output:88
 msgid "Help"
 msgstr "Hilfe"
 
@@ -161,27 +161,27 @@ msgstr "\"$name\" muss eine Zahl sein aber »${val}« wurde angegeben"
 
 #: core/validator:184
 #, fuzzy, sh-format
-msgid "The \"$name\" has to be an existing path"
+msgid "The \"$name\" ${val} has to be an existing path"
 msgstr "\"$name\" muss mit einem Wert gesetzt werden"
 
 #: core/validator:189
 #, fuzzy, sh-format
-msgid "The \"$name\" has to be an existing file"
+msgid "The \"$name\" ${val} has to be an existing file"
 msgstr "\"$name\" muss mit einem Wert gesetzt werden"
 
 #: core/validator:194
 #, fuzzy, sh-format
-msgid "The \"$name\" has to be an existing directory"
+msgid "The \"$name\" ${val} has to be an existing directory"
 msgstr "\"$name\" muss mit einem Wert gesetzt werden"
 
 #: core/validator:199
 #, fuzzy, sh-format
-msgid "The \"$name\" has to be a file readable for user"
+msgid "The \"$name\" ${val} has to be a file readable for user"
 msgstr "\"$name\" muss mit einem Wert gesetzt werden"
 
 #: core/validator:204
 #, fuzzy, sh-format
-msgid "The \"$name\" has to be a file writable for user"
+msgid "The \"$name\" ${val} has to be a file writable for user"
 msgstr "\"$name\" muss mit einem Wert gesetzt werden"
 
 #: core/validator:207

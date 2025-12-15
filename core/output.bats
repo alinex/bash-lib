@@ -25,6 +25,12 @@ setup() {
     assert_success
 }
 # bats test_tags=debug
+@test "debug: with piped message" {
+    DEBUG=1 run bats_pipe echo Test \| debug
+    assert_output --partial "> bats_merge_stdout_and_stderr Test"
+    assert_success
+}
+# bats test_tags=debug
 @test "debug: do not show level 2" {
     DEBUG=1 run debug 2 Test
     assert_output ""

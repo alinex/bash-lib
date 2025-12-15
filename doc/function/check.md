@@ -55,7 +55,7 @@ allow=<words>       # for enum (space separated)
 
 Check arguments:
 
-- `check integer --name=arguments --max=2 $# >/dev/null` # mostly only check max, if all args are checked separately
+- `check integer --name=arguments --max=2 -- $# >/dev/null` # mostly only check max, if all args are checked separately
 - `name="$(check integer --name=age --sanitize --min=0 -- "`$1`")"`
 - `init="$(check bool --name=init "`$1`")"`
 

@@ -24,7 +24,6 @@ debug() {
     is integer --name=arguments --max=2 --die -- $#
     is integer --min 1 -- "$1" && level="$1" && shift || true
     IFS=$' \t\n' read -r _ func _ <<<"$(caller 0 || true)"
-    is set -- "$1" || return 0
     is set -- "$DEBUG" || return 0
     text="$(input "$@")"
     # processing

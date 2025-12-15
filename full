@@ -388,8 +388,13 @@ local message="DEPRECATED: ${FUNCNAME[1]} at $func in $file:$line $1"
 [ -n "$2" ]&&echo -e "$CC_WARN$message (update it)$CC_RESET" >&2||die "$message"
 }
 _stacktrace(){
-local frame=1 line func src
+local frame=1 line func src bestChoice
+if [ -z "$1" ]&&((DEBUG<5));then bestChoice=1;fi
 while read -r line func src < <(caller "$frame"||true);do
+if [ -n "$bestChoice" ]&&[[ ! $func =~ ^is$|^check$ ]];then
+printf "Possibly called at %s:%d (%s)\n" "$src" "$line" "$func"|warn >&2
+bestChoice=""
+fi
 printf "\033[1m%s:%d (%s)\n" "$src" "$line" "$func"|([ -n "$1" ]&&( ((frame==1))&&warn||notice)||debug 5)
 awk -v n="$line" '
             NR>=n-2 && NR<=n+2 {
@@ -519,7 +524,6 @@ local level=1 func text
 is integer --name=arguments --max=2 --die -- $#
 is integer --min 1 -- "$1"&&level="$1"&&shift||true
 IFS=$' \t\n' read -r _ func _ <<<"$(caller 0||true)"
-is set -- "$1"||return 0
 is set -- "$DEBUG"||return 0
 text="$(input "$@")"
 if is integer -- "$DEBUG";then
@@ -830,33 +834,33 @@ if [[ ! $res =~ ^-?[0-9]+$ ]];then
 fi
 ;;
 path)if
-[ -e "$val" ]
+[ ! -e "$val" ]
 then
-[ -z "$die" ]&&return 1||die "$(eval_gettext 'The "$name" has to be an existing path')"
+[ -z "$die" ]&&return 1||die "$(eval_gettext 'The "$name" ${val} has to be an existing path')"
 fi
 ;;
 file)if
-[ -f "$val" ]
+[ ! -f "$val" ]
 then
-[ -z "$die" ]&&return 1||die "$(eval_gettext 'The "$name" has to be an existing file')"
+[ -z "$die" ]&&return 1||die "$(eval_gettext 'The "$name" ${val} has to be an existing file')"
 fi
 ;;
 directory)if
-[ -d "$val" ]
+[ ! -d "$val" ]
 then
-[ -z "$die" ]&&return 1||die "$(eval_gettext 'The "$name" has to be an existing directory')"
+[ -z "$die" ]&&return 1||die "$(eval_gettext 'The "$name" ${val} has to be an existing directory')"
 fi
 ;;
 readable)if
-[ -r "$val" ]
+[ ! -r "$val" ]
 then
-[ -z "$die" ]&&return 1||die "$(eval_gettext 'The "$name" has to be a file readable for user')"
+[ -z "$die" ]&&return 1||die "$(eval_gettext 'The "$name" ${val} has to be a file readable for user')"
 fi
 ;;
 writable)if
-[ -w "$val" ]
+[ ! -w "$val" ]
 then
-[ -z "$die" ]&&return 1||die "$(eval_gettext 'The "$name" has to be a file writable for user')"
+[ -z "$die" ]&&return 1||die "$(eval_gettext 'The "$name" ${val} has to be a file writable for user')"
 fi
 ;;
 *)die "$(eval_gettext 'A check named ${check} is not defined')"

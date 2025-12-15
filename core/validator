@@ -44,7 +44,7 @@
 # Exit:     with message if incorrect value
 # Example:  Check arguments:
 #
-#           - `check integer --name=arguments --max=2 $# >/dev/null` # mostly only check max, if all args are checked separately
+#           - `check integer --name=arguments --max=2 -- $# >/dev/null` # mostly only check max, if all args are checked separately
 #           - `name="$(check integer --name=age --sanitize --min=0 -- "$1")"`
 #           - `init="$(check bool --name=init "$1")"`
 #
@@ -180,28 +180,28 @@ check() {
         fi
         ;;
     path)
-        if [ -e "$val" ]; then
-            [ -z "$die" ] && return 1 || die "$(eval_gettext 'The "$name" has to be an existing path')"
+        if [ ! -e "$val" ]; then
+            [ -z "$die" ] && return 1 || die "$(eval_gettext 'The "$name" ${val} has to be an existing path')"
         fi
         ;;
     file)
-        if [ -f "$val" ]; then
-            [ -z "$die" ] && return 1 || die "$(eval_gettext 'The "$name" has to be an existing file')"
+        if [ ! -f "$val" ]; then
+            [ -z "$die" ] && return 1 || die "$(eval_gettext 'The "$name" ${val} has to be an existing file')"
         fi
         ;;
     directory)
-        if [ -d "$val" ]; then
-            [ -z "$die" ] && return 1 || die "$(eval_gettext 'The "$name" has to be an existing directory')"
+        if [ ! -d "$val" ]; then
+            [ -z "$die" ] && return 1 || die "$(eval_gettext 'The "$name" ${val} has to be an existing directory')"
         fi
         ;;
     readable)
-        if [ -r "$val" ]; then
-            [ -z "$die" ] && return 1 || die "$(eval_gettext 'The "$name" has to be a file readable for user')"
+        if [ ! -r "$val" ]; then
+            [ -z "$die" ] && return 1 || die "$(eval_gettext 'The "$name" ${val} has to be a file readable for user')"
         fi
         ;;
     writable)
-        if [ -w "$val" ]; then
-            [ -z "$die" ] && return 1 || die "$(eval_gettext 'The "$name" has to be a file writable for user')"
+        if [ ! -w "$val" ]; then
+            [ -z "$die" ] && return 1 || die "$(eval_gettext 'The "$name" ${val} has to be a file writable for user')"
         fi
         ;;
     *) die "$(eval_gettext 'A check named ${check} is not defined')" ;;
