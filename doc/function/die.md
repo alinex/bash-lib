@@ -25,5 +25,5 @@ DEPRECATED: ask_input at task_find in /home/alex/bin/dvb/cleanup:206 please use 
 
 ### Return (exit code)
 
-- always 1 and try to exit script with status 1
+- 143 SIGTERM
 - 

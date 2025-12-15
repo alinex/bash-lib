@@ -392,7 +392,7 @@ local frame=1 line func src bestChoice
 if [ -z "$1" ]&&((DEBUG<5));then bestChoice=1;fi
 while read -r line func src < <(caller "$frame"||true);do
 if [ -n "$bestChoice" ]&&[[ ! $func =~ ^is$|^check$ ]];then
-printf "Possibly called at %s:%d (%s)\n" "$src" "$line" "$func"|warn >&2
+printf "Triggered at %s:%d (%s)\n" "$src" "$line" "$func"|warn >&2
 bestChoice=""
 fi
 printf "\033[1m%s:%d (%s)\n" "$src" "$line" "$func"|([ -n "$1" ]&&( ((frame==1))&&warn||notice)||debug 5)
@@ -520,12 +520,14 @@ return 1
 fi
 }
 debug(){
-local level=1 func text
+local level=1 func text sign='>'
 is integer --name=arguments --max=2 --die -- $#
 is integer --min 1 -- "$1"&&level="$1"&&shift||true
 IFS=$' \t\n' read -r _ func _ <<<"$(caller 0||true)"
 is set -- "$DEBUG"||return 0
 text="$(input "$@")"
+echo "$BASHLIB_LOADER" >&2
+[[ $BASHLIB_LOADER != "remote" ]]||sign='»'
 if is integer -- "$DEBUG";then
 is integer --min=0 --die -- "$DEBUG"
 ((level<=DEBUG))||return 0
@@ -533,7 +535,7 @@ else
 [[ $func =~ .*(${DEBUG//, /|}) ]]||return 0
 fi
 while IFS= read -r line;do
-printf "$CC_BLACK> %-20s %s$CC_RESET\n" "$func" "$line" >&2
+printf "$CC_BLACK$sign %-20s %s$CC_RESET\n" "$func" "$line" >&2
 done <<<"$text"
 ! command -v log >/dev/null||log debug "$func: $text"
 }
@@ -543,12 +545,13 @@ local text trap line func src
 text="$(input "$@")"
 [[ $text != *"Uncaught exception at"* ]]||trap=1
 echo -e "$CC_CRITICAL$text in ${FUNCNAME[1]}$CC_RESET" >&2
-_stacktrace "$trap"
+_stacktrace "$trap" 2>&1
 if command -v log >/dev/null;then
 log critical "$text"
 _stacktrace "$trap" 2>&1|log critical
 fi
-[[ $- =~ i ]]&&return 1||exit 1
+kill -- -$$ 2>/dev/null
+exit 143
 }
 help(){
 is integer --name=arguments --min=2 --max=4 --die -- $#
@@ -2615,6 +2618,19 @@ result+="$(head /dev/urandom|tr -dc "$pattern")"
 done
 echo "${result:0:length}"
 }
+_module_resolve(){
+local modules=()
+split "$1" modules ,
+local init=1 module line
+for module in "${modules[@]}";do
+[[ $module =~ ^(full|base|.*/.*)$ ]]||module="module/$module"
+[ -n "$init" ]&&init=||echo -n ,
+echo -n "$module"
+while read -r line;do
+echo -n ",$(_module_resolve "$line")"
+done < <(grep '^use ' "$BASHLIB_HOME/$module"|sed 's/^use //'||true)
+done
+}
 remote(){
 local _login host jump term lines file
 eval set -- "$(option_parse $'+l login +\nh host +\nj jump +\nt terminal -\n- line-based -\nf file -' "$@")"
@@ -2635,15 +2651,52 @@ host=${host:-$server}
 local ssh="$_login@$host"
 [ -z "$jump" ]||ssh="-J $jump $ssh"
 [ -z "$term" ]||ssh="-t $ssh"
-if [ -n "$file" ];then
-is set --name=arguments --max=1 --die -- $#
-is readable --name=file --die -- "$1"
-ssh $ssh 'bash -s' <"$1"
-elif [ "$1" = "console" ];then
+if [ "$1" = "console" ];then
 local rc
 ssh $ssh '(nohup touch .hushlogin && sleep 1 && rm .hushlogin) >/dev/null 2>&1 </dev/null &'
 ssh $opt $ssh </dev/tty||rc=$?
+elif [ "$1" = "bashlib" ];then
+shift
+local list modules rc
+list="$(_module_resolve "${1-}")"
+IFS=',' read -ra modules <<<"$list"
+debug "Modules: ${modules[*]}"
+shift
+local pattern='^#!/usr/bin/env'" bash|source "'/dev/null'
+(echo "#!/usr/bin/env" bash
+echo "DEBUG=${DEBUG:-}"
+echo "BASHLIB_LOADER=remote"
+if [[ ${modules[0]} =~ ^(full|base)$ ]];then
+grep -Ev "$pattern" "$BASHLIB_HOME/${modules[0]}"
+modules=("${modules[@]:1}")
+else
+grep -Ev "$pattern" "$BASHLIB_HOME"/base
+fi
+for module in "${modules[@]}";do
+if [ "$module" = "configs" ];then
+for f in "$BASHLIB_HOME"/config/*;do
+if [[ -f $f && $f != *.* ]];then
+grep -Ev "$pattern" "$f"
+fi
+done
+else
+grep -Ev "$pattern" "$BASHLIB_HOME/$module"
+fi
+done
+(($#==0))||debug "Running: $*"
+(($#==0))||escape_args "$@"
+[ ! -p /dev/stdin ]||debug "Running piped command!"
+[ ! -p /dev/stdin ]||cat </dev/stdin)|shfmt -mn|remote $opt||rc=$?
+if ((rc==143));then
+kill -- -$$ 2>/dev/null
+exit 143
+fi
+return $rc
+elif [ -n "$file" ];then
 return "$rc"
+is set --name=arguments --max=1 --die -- $#
+is readable --name=file --die -- "$1"
+ssh $ssh 'bash -s' <"$1"
 elif [ -p /dev/stdin ]&&(($#==0));then
 if [ -z "$lines" ];then
 ssh $ssh bash -s
@@ -2728,19 +2781,6 @@ local ssh="$_login@$host"
 [ -z "$jump" ]||ssh="-J $jump $ssh"
 local dir=${2:-.}
 rsync -av $ssh:"$1" "$dir"
-}
-_module_resolve(){
-local modules=()
-split "$1" modules ,
-local init=1 module line
-for module in "${modules[@]}";do
-[[ $module =~ ^(full|base|.*/.*)$ ]]||module="module/$module"
-[ -n "$init" ]&&init=||echo -n ,
-echo -n "$module"
-while read -r line;do
-echo -n ",$(_module_resolve "$line")"
-done < <(grep '^use ' "$BASHLIB_HOME/$module"|sed 's/^use //'||true)
-done
 }
 remote_bashlib(){
 local opt

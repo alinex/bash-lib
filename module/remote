@@ -12,6 +12,20 @@ source /dev/null
 # Remote SSH
 ######################################################################################
 
+_module_resolve() {
+    local modules=()
+    split "$1" modules ,
+    local init=1 module line
+    for module in "${modules[@]}"; do
+        [[ "$module" =~ ^(full|base|.*/.*)$ ]] || module="module/$module"
+        [ -n "$init" ] && init= || echo -n ,
+        echo -n "$module"
+        while read -r line; do
+            echo -n ",$(_module_resolve "$line")"
+        done < <(grep '^use ' "$BASHLIB_HOME/$module" | sed 's/^use //' || true)
+    done
+}
+
 # Run command on remote host.
 # You can let it use the `$server` and `$login` variables or give it in the options.
 #
@@ -21,6 +35,7 @@ source /dev/null
 #           <commands> | remote [<options>]     # pipe the command which prevents masking
 #           remote [<options>] --file <file>    # run file content on remote host
 #           remote [<options>] console          # open a remote console to the user
+#           remote [<options>] bashlib <modules> <command>...         # run bashlib command on remote (no need to be installed)
 # Options:  # following options, only before `<command>`
 #           l, login <user>         # username for login
 #           h, host <host>          # destination host
@@ -54,18 +69,65 @@ remote() {
     local ssh="${_login}@${host}"
     [ -z "$jump" ] || ssh="-J $jump $ssh" # use a jump host
     [ -z "$term" ] || ssh="-t $ssh"       # add pseudo terminal
-    if [ -n "$file" ]; then
-        is set --name=arguments --max=1 --die -- $#
-        is readable --name=file --die -- "$1"
-        ssh $ssh 'bash -s' <"$1"
-    elif [ "$1" = "console" ]; then
+    if [ "$1" = "console" ]; then
         local rc
         # shellcheck disable=SC2086
         ssh $ssh '(nohup touch .hushlogin && sleep 1 && rm .hushlogin) >/dev/null 2>&1 </dev/null &' # no banner
         # shellcheck disable=SC2086
         # shellcheck disable=SC2248
         ssh $opt $ssh </dev/tty || rc=$?
+    # bashlib
+    elif [ "$1" = "bashlib" ]; then
+        shift
+        local list modules rc
+        list="$(_module_resolve "${1-}")"
+        IFS=',' read -ra modules <<<"$list"
+        debug "Modules: ${modules[*]}"
+        shift
+        # processing
+        local pattern='^#!/usr/bin/env'" bash|source "'/dev/null'
+        # shellcheck disable=SC2086
+        (
+            echo "#!/usr/bin/env" bash
+            echo "DEBUG=${DEBUG:-}"
+            echo "BASHLIB_LOADER=remote"
+            # load base
+            if [[ "${modules[0]}" =~ ^(full|base)$ ]]; then
+                grep -Ev "$pattern" "$BASHLIB_HOME/${modules[0]}"
+                modules=("${modules[@]:1}")
+            else
+                grep -Ev "$pattern" "$BASHLIB_HOME"/base
+            fi
+            # load modules
+            for module in "${modules[@]}"; do
+                if [ "$module" = "configs" ]; then
+                    for f in "$BASHLIB_HOME"/config/*; do
+                        if [[ -f "$f" && "$f" != *.* ]]; then
+                            grep -Ev "$pattern" "$f"
+                        fi
+                    done
+                else
+                    grep -Ev "$pattern" "$BASHLIB_HOME/$module"
+                fi
+            done
+            (($# == 0)) || debug "Running: $*"
+            (($# == 0)) || escape_args "$@"
+            [ ! -p /dev/stdin ] || debug "Running piped command!"
+            [ ! -p /dev/stdin ] || cat </dev/stdin
+        ) | shfmt -mn | remote $opt || rc=$?
+        # process SIGKILL if issued on remote
+        if ((rc == 143)); then
+            kill -- -$$ 2>/dev/null
+            exit 143
+        fi
+        return $rc
+    # file
+    elif [ -n "$file" ]; then
         return "$rc"
+        is set --name=arguments --max=1 --die -- $#
+        is readable --name=file --die -- "$1"
+        ssh $ssh 'bash -s' <"$1"
+    # piped input
     elif [ -p /dev/stdin ] && (($# == 0)); then
         if [ -z "$lines" ]; then
             # shellcheck disable=SC2086
@@ -76,6 +138,7 @@ remote() {
             ssh $ssh bash -s 2> >(grep -v '^Connection to .* closed\.' >&2 || true) >&2 | nocr
         fi
         return "${PIPESTATUS[0]}"
+    # arguments
     else
         if [ -z "$lines" ]; then
             # shellcheck disable=SC2086
@@ -240,20 +303,6 @@ download() {
 ######################################################################################
 ### Extended remote commands
 ######################################################################################
-
-_module_resolve() {
-    local modules=()
-    split "$1" modules ,
-    local init=1 module line
-    for module in "${modules[@]}"; do
-        [[ "$module" =~ ^(full|base|.*/.*)$ ]] || module="module/$module"
-        [ -n "$init" ] && init= || echo -n ,
-        echo -n "$module"
-        while read -r line; do
-            echo -n ",$(_module_resolve "$line")"
-        done < <(grep '^use ' "$BASHLIB_HOME/$module" | sed 's/^use //' || true)
-    done
-}
 
 # Run bashlib command on remote.
 # The `modules` are a comma separated list of module names like network os.

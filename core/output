@@ -20,12 +20,13 @@ source /dev/null
 #           `$DEBUG=9` - to output all
 # Error:    `> <func>           <message>`      # color: gray
 debug() {
-    local level=1 func text
+    local level=1 func text sign='>'
     is integer --name=arguments --max=2 --die -- $#
     is integer --min 1 -- "$1" && level="$1" && shift || true
     IFS=$' \t\n' read -r _ func _ <<<"$(caller 0 || true)"
     is set -- "$DEBUG" || return 0
     text="$(input "$@")"
+    [[ "$BASHLIB_LOADER" != "remote" ]] || sign='»'
     # processing
     # decide to print
     if is integer -- "$DEBUG"; then
@@ -38,7 +39,7 @@ debug() {
     fi
     # print each line separately
     while IFS= read -r line; do
-        printf "$CC_BLACK> %-20s %s$CC_RESET\n" "$func" "$line" >&2
+        printf "$CC_BLACK$sign %-20s %s$CC_RESET\n" "$func" "$line" >&2
     done <<<"$text"
     ! command -v log >/dev/null || log debug "$func: $text"
 }
@@ -65,7 +66,7 @@ die() {
     [[ "$text" != *"Uncaught exception at"* ]] || trap=1
     # output
     echo -e "${CC_CRITICAL}$text in ${FUNCNAME[1]}${CC_RESET}" >&2
-    _stacktrace "$trap"
+    _stacktrace "$trap" 2>&1
     if command -v log >/dev/null; then
         log critical "$text"
         _stacktrace "$trap" 2>&1 | log critical

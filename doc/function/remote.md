@@ -15,6 +15,7 @@ remote [<options>] <command>...     # special characters in command masked with 
 <commands> | remote [<options>]     # pipe the command which prevents masking
 remote [<options>] --file <file>    # run file content on remote host
 remote [<options>] console          # open a remote console to the user
+remote [<options>] bashlib <modules> <command>...         # run bashlib command on remote (no need to be installed)
 ```
 
 ### Options

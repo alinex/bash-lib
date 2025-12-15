@@ -116,14 +116,3 @@ setup() {
     assert_success
 }
 
-######################################################################################
-# remote_install
-######################################################################################
-
-# bats test_tags=remote_install
-@test "remote_install: should do nothing if installed" {
-    skip
-    run remote_install htop
-    assert_output ""
-    assert_success
-}
