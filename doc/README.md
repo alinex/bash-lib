@@ -402,7 +402,7 @@ Module with remote calling/execution helpers.
 | [`remote_console`](function/remote_console.md) | Deprecated: Open an interactive console on remote host |
 | [`upload`](function/upload.md) | Upload file |
 | [`download`](function/download.md) | Download file |
-| [`remote_bashlib`](function/remote_bashlib.md) | Run bashlib command on remote. |
+| [`remote_bashlib`](function/remote_bashlib.md) | Deprecated: Run bashlib command on remote. |
 | [`remote_install`](function/remote_install.md) | Deprecated: Remote install package like @install |
 | [`remote_system_info`](function/remote_system_info.md) | Deprecated: Display the system description (from remote) |
 | [`remote_df`](function/remote_df.md) | Deprecated: Remote df with visual display |

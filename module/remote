@@ -31,6 +31,17 @@ _module_resolve() {
 #
 # If you use a pseudo `--terminal`, `\r\n` may be contained in output, remove with @nocr.`
 # This will also return "Connection ... closed" in stderr after done. Handle it or use the `--line-based` option, which will return output line by line (problematic on some interactive parts) but without the connection closed message an no `\r\\n`.
+#
+# If you run a `remote bashlib <modules> <command>` command the `modules` are a comma separated list of module names like network os.
+# The modules can be:
+#
+# - `base` or `full` as first element
+# - `module/<name>` to load the named module (if not full is used)
+# - `extra/<name>` to load an extra module
+# - `configs` to also transfer all the configurations
+# - `config/<name>` to load only one config
+# - any other name will be interpreted as `module/<name>` (short form)
+#
 # Usage:    remote [<options>] <command>...     # special characters in command masked with backslash ( | & * > < $ )
 #           <commands> | remote [<options>]     # pipe the command which prevents masking
 #           remote [<options>] --file <file>    # run file content on remote host
@@ -46,6 +57,9 @@ _module_resolve() {
 # Globals:  $server
 #           $login - default is "operator"
 # Output:   passed through
+# Return:   Error code from remote command
+#           (255) will die because it is a connection problem
+#           (143) will exit because it was from a SIGTERM on the remote
 # Example:  &remote shows how to use it
 remote() {
     # parameter parsing
@@ -115,44 +129,43 @@ remote() {
             [ ! -p /dev/stdin ] || debug "Running piped command!"
             [ ! -p /dev/stdin ] || cat </dev/stdin
         ) | shfmt -mn | ssh $ssh bash -s || rc=$?
-        # connection problem
-        if ((rc == 255)); then
-            die "SSH Connection to $ssh not possible"
-        # process SIGKILL if issued on remote
-        elif ((rc == 143)); then
-            kill -- -$$ 2>/dev/null
-            exit 143
-        fi
-        return $rc
     # file
     elif [ -n "$file" ]; then
-        return "$rc"
         is set --name=arguments --max=1 --die -- $#
         is readable --name=file --die -- "$1"
-        ssh $ssh 'bash -s' <"$1"
+        ssh $ssh 'bash -s' <"$1" || rc=$?
     # piped input
     elif [ -p /dev/stdin ] && (($# == 0)); then
         if [ -z "$lines" ]; then
             # shellcheck disable=SC2086
-            ssh $ssh bash -s
+            ssh $ssh bash -s || rc=$?
         else
             # shellcheck disable=SC2086
             # shellcheck disable=SC2119
-            ssh $ssh bash -s 2> >(grep -v '^Connection to .* closed\.' >&2 || true) >&2 | nocr
+            ssh $ssh bash -s 2> >(grep -v '^Connection to .* closed\.' >&2 || true) >&2 | nocr || rc=$?
         fi
         return "${PIPESTATUS[0]}"
     # arguments
     else
         if [ -z "$lines" ]; then
             # shellcheck disable=SC2086
-            ssh $ssh "$@"
+            ssh $ssh "$@" || rc=$?
         else
             # shellcheck disable=SC2086
             # shellcheck disable=SC2119
-            ssh $ssh "$@" 2> >(grep -v '^Connection to .* closed\.' >&2 || true) >&2 | nocr
+            ssh $ssh "$@" 2> >(grep -v '^Connection to .* closed\.' >&2 || true) >&2 | nocr || rc=$?
         fi
         return "${PIPESTATUS[0]}"
     fi
+    # connection problem
+    if ((rc == 255)); then
+        die "SSH Connection to $ssh not possible"
+    # process SIGKILL if issued on remote
+    elif ((rc == 143)); then
+        kill -- -$$ 2>/dev/null
+        exit 143
+    fi
+    return $rc
 }
 
 # Deprecated: Run remote command with pseudo terminal
@@ -307,7 +320,8 @@ download() {
 ### Extended remote commands
 ######################################################################################
 
-# Run bashlib command on remote.
+# Deprecated: Run bashlib command on remote.
+# Use: remote bashlib <module> <command>
 # The `modules` are a comma separated list of module names like network os.
 # The modules can be:
 #
@@ -327,6 +341,7 @@ download() {
 #           $login - default is "operator"
 # Examples: IP="$(remote_bashlib ip ip_intern)"
 remote_bashlib() {
+    _deprecated "Use: remote bashlib <module> <command>" warn
     # parameter parsing
     local opt
     eval set -- "$(option_parse $'+l login +\nh host +\nj jump +' "$@")"

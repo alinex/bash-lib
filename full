@@ -2687,6 +2687,25 @@ done
 (($#==0))||escape_args "$@"
 [ ! -p /dev/stdin ]||debug "Running piped command!"
 [ ! -p /dev/stdin ]||cat </dev/stdin)|shfmt -mn|ssh $ssh bash -s||rc=$?
+elif [ -n "$file" ];then
+is set --name=arguments --max=1 --die -- $#
+is readable --name=file --die -- "$1"
+ssh $ssh 'bash -s' <"$1"||rc=$?
+elif [ -p /dev/stdin ]&&(($#==0));then
+if [ -z "$lines" ];then
+ssh $ssh bash -s||rc=$?
+else
+ssh $ssh bash -s 2> >(grep -v '^Connection to .* closed\.' >&2||true) >&2|nocr||rc=$?
+fi
+return "${PIPESTATUS[0]}"
+else
+if [ -z "$lines" ];then
+ssh $ssh "$@"||rc=$?
+else
+ssh $ssh "$@" 2> >(grep -v '^Connection to .* closed\.' >&2||true) >&2|nocr||rc=$?
+fi
+return "${PIPESTATUS[0]}"
+fi
 if ((rc==255));then
 die "SSH Connection to $ssh not possible"
 elif ((rc==143));then
@@ -2694,26 +2713,6 @@ kill -- -$$ 2>/dev/null
 exit 143
 fi
 return $rc
-elif [ -n "$file" ];then
-return "$rc"
-is set --name=arguments --max=1 --die -- $#
-is readable --name=file --die -- "$1"
-ssh $ssh 'bash -s' <"$1"
-elif [ -p /dev/stdin ]&&(($#==0));then
-if [ -z "$lines" ];then
-ssh $ssh bash -s
-else
-ssh $ssh bash -s 2> >(grep -v '^Connection to .* closed\.' >&2||true) >&2|nocr
-fi
-return "${PIPESTATUS[0]}"
-else
-if [ -z "$lines" ];then
-ssh $ssh "$@"
-else
-ssh $ssh "$@" 2> >(grep -v '^Connection to .* closed\.' >&2||true) >&2|nocr
-fi
-return "${PIPESTATUS[0]}"
-fi
 }
 remote_term(){
 _deprecated "Use: remote --terminal ... instead" warn
@@ -2785,6 +2784,7 @@ local dir=${2:-.}
 rsync -av $ssh:"$1" "$dir"
 }
 remote_bashlib(){
+_deprecated "Use: remote bashlib <module> <command>" warn
 local opt
 eval set -- "$(option_parse $'+l login +\nh host +\nj jump +' "$@")"
 while true;do

@@ -5,7 +5,6 @@ The BashLib allows you to easily run every common remotely as easy as locally.
 Therefore we have multiple methods:
 
 - @remote
-- @remote_bashlib
 - @upload
 - @download
 
@@ -52,7 +51,7 @@ my-server.provider.de
 
 ```bash
 # run bashlib remotely with <module> <command> <arguments>
-$ remote_bashlib software install jq
+$ remote bashlib software install jq
 ```
 
 ## Upload/Download
