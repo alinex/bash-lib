@@ -319,3 +319,124 @@ Using the mattermost API to write messages.
 
 | Variable/Function | Description |
 | --- | --- |
+| [`mattermost`](function/mattermost.md) | Send a message to Mattermost |
+| [`mattermost_attachment`](function/mattermost_attachment.md) | Create an attachment json to be used in post |
+| [`mattermost_reaction`](function/mattermost_reaction.md) | Add reaction to existing post |
+| [`mattermost_repost`](function/mattermost_repost.md) | Add response to mattermost posting |
+
+### Monitoring Module
+
+Using the Grafana/Prometheus APIs to get Monitoring information.
+
+| Variable/Function | Description |
+| --- | --- |
+| [`exporter`](function/exporter.md) | Get exporter list |
+| [`scrape`](function/scrape.md) | Scrape Prometheus exporter url now |
+| [`alerts`](function/alerts.md) | Get Grafana alerts |
+| [`prometheus`](function/prometheus.md) | Prom ql ausführen |
+| [`prometheus_scrape_now`](function/prometheus_scrape_now.md) | Change scrape interval to scrape now and set back |
+
+### Network Module
+
+Module with network functions.
+
+| Variable/Function | Description |
+| --- | --- |
+| [`ip_intern`](function/ip_intern.md) | Show the IP addresses. |
+| [`ip_pattern`](function/ip_pattern.md) | Find info about IP by configured patterns. |
+| [`ip_extern`](function/ip_extern.md) | Run  os detection and set the constants |
+
+### Os Module
+
+Module with operating system specific helper functions.
+
+| Variable/Function | Description |
+| --- | --- |
+| [`os_detect`](function/os_detect.md) | Detect OS settings |
+| [`disk_free`](function/disk_free.md) | Disk free with visual display |
+| [`uses_lvm`](function/uses_lvm.md) | Check if LVM is used |
+| [`has_tty`](function/has_tty.md) | Has tty present |
+
+### Process Module
+
+Module for process control
+
+| Variable/Function | Description |
+| --- | --- |
+| ``$STEPS_VARIABLES`` | Set the variables which should be stored with step control |
+| ``$ASYNC_QUEUE_MAX`` | Maximum number of parallel tasks for queue |
+| [`sudo_allow`](function/sudo_allow.md) | Check if sudo is needed for command |
+| [`sudo`](function/sudo.md) | Sudo overwrite to only use sudo if needed |
+| [`repeat`](function/repeat.md) | Execute command in N times |
+| [`retry`](function/retry.md) | Retry a command multiple times until it succeeds |
+| [`lock`](function/lock.md) | Set a lock or wait till it can be set |
+| [`lock_exit`](function/lock_exit.md) | Set the lock or exit with optional error message |
+| [`unlock`](function/unlock.md) | Remove the lock |
+| [`env_store`](function/env_store.md) | Store environment into shared memory/file |
+| [`env_restore`](function/env_restore.md) | Restore environment from shared memory/file |
+| [`env_clean`](function/env_clean.md) | Remove stored environment from shared memory/file |
+| [`env_change`](function/env_change.md) | Change environment in shared memory/file |
+| [`steps_init`](function/steps_init.md) | Initialize step control |
+| [`steps_check`](function/steps_check.md) | Check if step already finished successful |
+| [`steps_done`](function/steps_done.md) | Set step as successfully done |
+| [`sync`](function/sync.md) | Run the given command with optional step control |
+| [`sync_name`](function/sync_name.md) | Alternative to sync in which this call is given a name to refer |
+| [`async`](function/async.md) | Run the given command asynchronous ang go on in the calling routine (short form of async_name) |
+| [`async_name`](function/async_name.md) | Alternative to async in which this call is given a name to refer in async_wait |
+| [`async_wait`](function/async_wait.md) | Check if the command is done or wait here till it is so |
+| [`queue`](function/queue.md) | Add command to process queue |
+| [`queue_name`](function/queue_name.md) | Add command to process queue |
+| [`queue_running`](function/queue_running.md) | Is a queue running |
+| [`random`](function/random.md) | Return a random string in specific length |
+
+### Remote Module
+
+Module with remote calling/execution helpers.
+
+| Variable/Function | Description |
+| --- | --- |
+| [`remote`](function/remote.md) | Run command on remote host. |
+| [`remote_term`](function/remote_term.md) | Deprecated: Run remote command with pseudo terminal |
+| [`remote_term_line`](function/remote_term_line.md) | Deprecated: Run remote command with pseudo terminal but line based output (problematic with questions) |
+| [`remote_file`](function/remote_file.md) | Deprecated: Run local script on remote |
+| [`remote_console`](function/remote_console.md) | Deprecated: Open an interactive console on remote host |
+| [`upload`](function/upload.md) | Upload file |
+| [`download`](function/download.md) | Download file |
+| [`remote_bashlib`](function/remote_bashlib.md) | Run bashlib command on remote. |
+| [`remote_install`](function/remote_install.md) | Deprecated: Remote install package like @install |
+| [`remote_system_info`](function/remote_system_info.md) | Deprecated: Display the system description (from remote) |
+| [`remote_df`](function/remote_df.md) | Deprecated: Remote df with visual display |
+| [`remote_lvm`](function/remote_lvm.md) | Deprecated: Remote check if LVM is used |
+| [`boot_wait`](function/boot_wait.md) | Wait till reboot is finished |
+
+### Software Module
+
+Software management functions.
+
+| Variable/Function | Description |
+| --- | --- |
+| [`install`](function/install.md) | Install software package |
+| [`installed`](function/installed.md) | Check for installed commands |
+| [`semver`](function/semver.md) | Parse semantic version number |
+| [`semver_diff`](function/semver_diff.md) | Calculate difference |
+
+### Table Module
+
+Module with modifiers for csv/tsv tables.
+
+| Variable/Function | Description |
+| --- | --- |
+| [`tsv2table`](function/tsv2table.md) | Convert TSV data into visual table |
+| [`tsv2md`](function/tsv2md.md) | Convert TSV data into markdown table |
+| [`csv`](function/csv.md) | Transform comma separated table. |
+| [`tsv`](function/tsv.md) | Transform tab separated table. |
+
+## Extra
+
+### Divibib Module
+
+Module with divibib specific helpers.
+
+| Variable/Function | Description |
+| --- | --- |
+| [`confluence_outage`](function/confluence_outage.md) | Get outage information |
