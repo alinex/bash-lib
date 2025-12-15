@@ -74,7 +74,7 @@ echo "
 check_one
 check_two
 #check_three
-remote_console | Open Remote Console (interactive)
+remote console | Open Remote Console (interactive)
 " | tasks --title="Next Steps" --default=task_one
 ```
 

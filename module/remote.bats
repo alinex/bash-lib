@@ -67,24 +67,20 @@ setup() {
     assert_success
 }
 
-######################################################################################
-# remote_file
-######################################################################################
-
-# bats test_tags=remote_file
-@test "remote_file: with simple code" {
+# bats test_tags=remote
+@test "remote: with simple code (file)" {
     file=$(mktemp)
     echo "hostname" >"$file"
-    run remote_file "$file"
+    run remote --file "$file"
     assert_output "$server"
     assert_success
     rm "$file"
 }
-# bats test_tags=remote_file
-@test "remote_file: with piped filename" {
+# bats test_tags=remote
+@test "remote: with piped filename (file)" {
     file=$(mktemp)
     echo "hostname" >"$file"
-    run bats_pipe echo "$file" \| remote_file
+    run bats_pipe echo "$file" \| remote --file
     assert_output "$server"
     assert_success
     rm "$file"

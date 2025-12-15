@@ -8,7 +8,7 @@ The motd and banner are prevented by touching .hushlogin on the server.
 ### Usage
 
 ```bash
-remote_console [<options>]
+remoteconsole [<options>]
 ```
 
 ### Options

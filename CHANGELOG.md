@@ -5,12 +5,12 @@ As this is not driven by releases and therefore tags are not used it is an ongoi
 ## December Version - in development
 
 - let functions validate parameters using [is](doc/function/is.md) and [check](doc/function/check.md)
+- filesystem checks for `is` and `check` function
 - extend stack traces to show also code lines through [die](doc/function/die.md)
 - catch each error and output a failure with stack trace through [die](doc/function/die.md)
 - add [log](./doc/function/log.md) support
 - combine `timer_start` and `timer_end` into [timer](doc/function/timer.md)
 - combine all remote functions together into [remote](doc/function/remote.md)
-- filesystem checks for [is](doc/function/is.md)
 - add support for Arch/Manjaro/Kali Linux
 
 ## 21. November 2025 - V2.1.0
