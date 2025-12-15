@@ -385,7 +385,7 @@ source gettext.sh
 _deprecated(){
 IFS=$' \t\n' read -r line func file <<<"$(caller 1)"
 local message="DEPRECATED: ${FUNCNAME[1]} at $func in $file:$line $1"
-[ -n "$2" ]&&echo -e $'\033[1;31m'"$message (update it)$CC_RESET" >&2||die "$message"
+[ -n "$2" ]&&echo -e "$CC_WARN$message (update it)$CC_RESET" >&2||die "$message"
 }
 _stacktrace(){
 local frame=1 line func src

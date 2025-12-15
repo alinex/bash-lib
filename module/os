@@ -238,7 +238,7 @@ disk_free() {
 #           1 if not
 uses_lvm() {
     is integer --name=arguments --max=0 --die -- $#
-    command -v vgs >/dev/null &&                      # installed
+    sudo command -v vgs >/dev/null &&                 # installed
         sudo vgs --noheadings >/dev/null &&           # vgs returns ok
         [ -n "$(sudo vgs --noheadings)" ] &>/dev/null # vgs returns at least one group
 }

@@ -385,7 +385,7 @@ source gettext.sh
 _deprecated(){
 IFS=$' \t\n' read -r line func file <<<"$(caller 1)"
 local message="DEPRECATED: ${FUNCNAME[1]} at $func in $file:$line $1"
-[ -n "$2" ]&&echo -e $'\033[1;31m'"$message (update it)$CC_RESET" >&2||die "$message"
+[ -n "$2" ]&&echo -e "$CC_WARN$message (update it)$CC_RESET" >&2||die "$message"
 }
 _stacktrace(){
 local frame=1 line func src
@@ -2252,7 +2252,7 @@ unset IFS
 }
 uses_lvm(){
 is integer --name=arguments --max=0 --die -- $#
-command -v vgs >/dev/null&&sudo vgs --noheadings >/dev/null&&[ -n "$(sudo vgs --noheadings)" ] &>/dev/null
+sudo command -v vgs >/dev/null&&sudo vgs --noheadings >/dev/null&&[ -n "$(sudo vgs --noheadings)" ] &>/dev/null
 }
 has_tty(){
 is integer --name=arguments --max=0 --die -- $#
