@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-BASHLIB_LOADER=full
+BASHLIB_LOADER=${BASHLIB_LOADER:-full}
 option_parse(){
 local opt name type desc short="" long="" spec="$1" permute
 [ -n "$spec" ]||die "$(gettext 'A specification string is needed as first argument')"
@@ -524,10 +524,10 @@ local level=1 func text sign='>'
 is integer --name=arguments --max=2 --die -- $#
 is integer --min 1 -- "$1"&&level="$1"&&shift||true
 IFS=$' \t\n' read -r _ func _ <<<"$(caller 0||true)"
+func="${func:-(main)}"
 is set -- "$DEBUG"||return 0
 text="$(input "$@")"
-echo "$BASHLIB_LOADER" >&2
-[[ $BASHLIB_LOADER != "remote" ]]||sign='»'
+[[ $BASHLIB_LOADER != "remote" ]]||sign='>>'
 if is integer -- "$DEBUG";then
 is integer --min=0 --die -- "$DEBUG"
 ((level<=DEBUG))||return 0
@@ -535,7 +535,7 @@ else
 [[ $func =~ .*(${DEBUG//, /|}) ]]||return 0
 fi
 while IFS= read -r line;do
-printf "$CC_BLACK$sign %-20s %s$CC_RESET\n" "$func" "$line" >&2
+printf "$CC_BLACK%-2s %-20s %s$CC_RESET\n" "$sign" "$func" "$line" >&2
 done <<<"$text"
 ! command -v log >/dev/null||log debug "$func: $text"
 }
@@ -2657,7 +2657,7 @@ ssh $ssh '(nohup touch .hushlogin && sleep 1 && rm .hushlogin) >/dev/null 2>&1 <
 ssh $opt $ssh </dev/tty||rc=$?
 elif [ "$1" = "bashlib" ];then
 shift
-local list modules rc
+local list modules rc=0
 list="$(_module_resolve "${1-}")"
 IFS=',' read -ra modules <<<"$list"
 debug "Modules: ${modules[*]}"
@@ -2686,8 +2686,10 @@ done
 (($#==0))||debug "Running: $*"
 (($#==0))||escape_args "$@"
 [ ! -p /dev/stdin ]||debug "Running piped command!"
-[ ! -p /dev/stdin ]||cat </dev/stdin)|shfmt -mn|remote $opt||rc=$?
-if ((rc==143));then
+[ ! -p /dev/stdin ]||cat </dev/stdin)|shfmt -mn|ssh $ssh bash -s||rc=$?
+if ((rc==255));then
+die "SSH Connection to $ssh not possible"
+elif ((rc==143));then
 kill -- -$$ 2>/dev/null
 exit 143
 fi

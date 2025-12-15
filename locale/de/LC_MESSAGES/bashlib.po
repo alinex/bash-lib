@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-15 20:16+0100\n"
+"POT-Creation-Date: 2025-12-15 21:59+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -20,8 +20,8 @@ msgstr ""
 #: core/misc:109 core/validator:69 core/validator:287 core/array:131
 #: module/os:178 module/monitoring:135 module/input:30 module/input:83
 #: module/input:220 module/input:479 module/input:646 module/log:61
-#: module/remote:63 module/remote:240 module/remote:287 module/remote:334
-#: module/remote:428 module/mattermost:288 module/mattermost:323
+#: module/remote:63 module/remote:243 module/remote:290 module/remote:337
+#: module/remote:431 module/mattermost:288 module/mattermost:323
 #: module/software:197
 msgid "Unrecognized option"
 msgstr "Unbekannte Option"
@@ -360,7 +360,7 @@ msgstr "Fertig: Schritt $name um $date"
 msgid "Started: step $name at $date"
 msgstr "Start: Schritt $name um $date"
 
-#: module/remote:437
+#: module/remote:440
 #, sh-format
 msgid "Wait until the reboot is complete ($seconds seconds)"
 msgstr "Warten bis der Reboot fertig ist ($seconds Sekunden)"

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-BASHLIB_LOADER=base
+BASHLIB_LOADER=${BASHLIB_LOADER:-base}
 option_parse(){
 local opt name type desc short="" long="" spec="$1" permute
 [ -n "$spec" ]||die "$(gettext 'A specification string is needed as first argument')"
@@ -524,10 +524,10 @@ local level=1 func text sign='>'
 is integer --name=arguments --max=2 --die -- $#
 is integer --min 1 -- "$1"&&level="$1"&&shift||true
 IFS=$' \t\n' read -r _ func _ <<<"$(caller 0||true)"
+func="${func:-(main)}"
 is set -- "$DEBUG"||return 0
 text="$(input "$@")"
-echo "$BASHLIB_LOADER" >&2
-[[ $BASHLIB_LOADER != "remote" ]]||sign='»'
+[[ $BASHLIB_LOADER != "remote" ]]||sign='>>'
 if is integer -- "$DEBUG";then
 is integer --min=0 --die -- "$DEBUG"
 ((level<=DEBUG))||return 0
@@ -535,7 +535,7 @@ else
 [[ $func =~ .*(${DEBUG//, /|}) ]]||return 0
 fi
 while IFS= read -r line;do
-printf "$CC_BLACK$sign %-20s %s$CC_RESET\n" "$func" "$line" >&2
+printf "$CC_BLACK%-2s %-20s %s$CC_RESET\n" "$sign" "$func" "$line" >&2
 done <<<"$text"
 ! command -v log >/dev/null||log debug "$func: $text"
 }

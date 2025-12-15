@@ -24,9 +24,10 @@ debug() {
     is integer --name=arguments --max=2 --die -- $#
     is integer --min 1 -- "$1" && level="$1" && shift || true
     IFS=$' \t\n' read -r _ func _ <<<"$(caller 0 || true)"
+    func="${func:-(main)}"
     is set -- "$DEBUG" || return 0
     text="$(input "$@")"
-    [[ "$BASHLIB_LOADER" != "remote" ]] || sign='»'
+    [[ "$BASHLIB_LOADER" != "remote" ]] || sign='>>'
     # processing
     # decide to print
     if is integer -- "$DEBUG"; then
@@ -39,7 +40,7 @@ debug() {
     fi
     # print each line separately
     while IFS= read -r line; do
-        printf "$CC_BLACK$sign %-20s %s$CC_RESET\n" "$func" "$line" >&2
+        printf "$CC_BLACK%-2s %-20s %s$CC_RESET\n" "$sign" "$func" "$line" >&2
     done <<<"$text"
     ! command -v log >/dev/null || log debug "$func: $text"
 }

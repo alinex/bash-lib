@@ -79,7 +79,7 @@ remote() {
     # bashlib
     elif [ "$1" = "bashlib" ]; then
         shift
-        local list modules rc
+        local list modules rc=0
         list="$(_module_resolve "${1-}")"
         IFS=',' read -ra modules <<<"$list"
         debug "Modules: ${modules[*]}"
@@ -114,9 +114,12 @@ remote() {
             (($# == 0)) || escape_args "$@"
             [ ! -p /dev/stdin ] || debug "Running piped command!"
             [ ! -p /dev/stdin ] || cat </dev/stdin
-        ) | shfmt -mn | remote $opt || rc=$?
+        ) | shfmt -mn | ssh $ssh bash -s || rc=$?
+        # connection problem
+        if ((rc == 255)); then
+            die "SSH Connection to $ssh not possible"
         # process SIGKILL if issued on remote
-        if ((rc == 143)); then
+        elif ((rc == 143)); then
             kill -- -$$ 2>/dev/null
             exit 143
         fi
