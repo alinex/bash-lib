@@ -73,6 +73,7 @@ die() {
         _stacktrace "$trap" 2>&1 | log critical
     fi
     # sends SIGTERM to process group → process receives SIGTERM
+    sleep 1 # to let output pipes finish
     kill -- -$$ 2>/dev/null
     exit 143
 }

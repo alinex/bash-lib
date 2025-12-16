@@ -30,6 +30,6 @@ setup() {
 # bats test_tags=_stacktrace
 @test "_stacktrace: show" {
     DEBUG="" run _stacktrace
-    assert_output ""
+    assert_output -p "Triggered at /usr/local/lib/bats-core/test_functions.bash:380 (run)"
     assert_success
 }

@@ -37,24 +37,6 @@ setup() {
 }
 
 ######################################################################################
-# contains
-######################################################################################
-
-# bats test_tags=contains
-@test "contains: should find entry" {
-    x=( one two three )
-    run contains x two
-    assert_success
-}
-# bats test_tags=contains
-@test "contains: should not find entry" {
-    # shellcheck disable=SC2034
-    x=( one two three )
-    run contains x ten
-    assert_failure
-}
-
-######################################################################################
 # join
 ######################################################################################
 
@@ -105,6 +87,14 @@ setup() {
     declare -Ag test_array
     test_array["one"]=1
     run hash test_array get one
+    assert_output "1"
+    assert_success
+}
+# bats test_tags=hash
+@test "hash: get value (base64)" {
+    declare -Ag test_array
+    test_array["b25lCg=="]=1
+    run hash --key-format=base64 test_array get one
     assert_output "1"
     assert_success
 }

@@ -4,7 +4,10 @@
 
 After declaring a variable as associative array: `declare -A <array-name>` this commands may help working with it. The array itself is not given by value but by name, so no `$` before the name.
 
-As an assoziative array not allows all characters for the key, unsupported characters will be replaced by _.
+As an assoziative array not allows all characters for the key, the key can be:
+
+- simple (default) - unsupported characters will be replaced by _
+- base64 - encode the whole key as base64
 
 The following commands ar`<string-input>`e possible:
 
@@ -24,7 +27,7 @@ hash <array-name> <command> [<key>] [<value>]
 ### Options
 
 ```bash
--k, --key-format={base64|underscore} # how to convert special character to be uses as key
+-k, --key-format={base64|simple} # how to convert key because of special characters
 ```
 
 ### Globals

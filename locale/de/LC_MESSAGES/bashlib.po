@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-16 07:26+0100\n"
+"POT-Creation-Date: 2025-12-16 07:46+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: core/misc:109 core/validator:69 core/validator:287 core/array:131
+#: core/misc:109 core/validator:69 core/validator:287 core/array:134
 #: module/os:178 module/monitoring:135 module/input:30 module/input:83
 #: module/input:220 module/input:479 module/input:646 module/log:61
 #: module/remote:77 module/remote:255 module/remote:302 module/remote:351
@@ -38,7 +38,7 @@ msgstr "Optionen"
 msgid "argument is not a valid number!"
 msgstr "Argument ist nicht ganzzahlig"
 
-#: core/output:91
+#: core/output:92
 msgid "Help"
 msgstr "Hilfe"
 

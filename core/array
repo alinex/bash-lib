@@ -101,7 +101,10 @@ split() {
 # Methods to work with assoziative arrays (hashes)
 # After declaring a variable as associative array: `declare -A <array-name>` this commands may help working with it. The array itself is not given by value but by name, so no `$` before the name.
 #
-# As an assoziative array not allows all characters for the key, unsupported characters will be replaced by _.
+# As an assoziative array not allows all characters for the key, the key can be:
+#
+# - simple (default) - unsupported characters will be replaced by _
+# - base64 - encode the whole key as base64
 #
 # The following commands ar<string-input>e possible:
 #
@@ -112,7 +115,7 @@ split() {
 # - `contains` check if the given `<value>` is found in any key
 #
 # Usage:        hash <array-name> <command> [<key>] [<value>]
-# Options:      -k, --key-format={base64|underscore} # how to convert special character to be uses as key
+# Options:      -k, --key-format={base64|simple} # how to convert key because of special characters
 # Variables:    <array-name> as basis to work on
 # Output:       <value> for `get`
 # Error:        1 if not found for `get` or `has`
@@ -122,11 +125,11 @@ split() {
 #               - `hash cache unset "my_name"`
 hash() {
     # parameter parsing
-    local keyFormat="base64"
+    local keyFormat="simple"
     eval set -- "$(option_parse $'k key-format +' "$@")"
     while true; do
         case "$1" in
-        -k | --key-format) keyFormat="$(check enum --allow="underscore base64" -- "$2")" && shift 2 ;;
+        -k | --key-format) keyFormat="$(check enum --allow="simple base64" -- "$2")" && shift 2 ;;
         --) shift && break ;;
         *) die "$(gettext "Unrecognized option"): $1" ;;
         esac
@@ -138,7 +141,7 @@ hash() {
     local cmd="$2" key value="$4"
     case $keyFormat in
     base64) key="$(base64 -w0 <<<"$3")" ;;
-    underscore) key="${3//[^a-zA-Z0-9_]/_}" ;;
+    simple) key="${3//[^a-zA-Z0-9_]/_}" ;;
     esac
     # processing
     case "$cmd" in

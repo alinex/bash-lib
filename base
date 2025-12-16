@@ -120,11 +120,11 @@ local sep="${3:-,}"
 IFS="$sep" read -ra array <<<"$string"
 }
 hash(){
-local keyFormat="base64"
+local keyFormat="simple"
 eval set -- "$(option_parse $'k key-format +' "$@")"
 while true;do
 case "$1" in
--k|--key-format)keyFormat="$(check enum --allow="underscore base64" -- "$2")"&&shift 2;;
+-k|--key-format)keyFormat="$(check enum --allow="simple base64" -- "$2")"&&shift 2;;
 --)shift&&break;;
 *)die "$(gettext "Unrecognized option"): $1"
 esac
@@ -136,7 +136,7 @@ declare -n arr="$1"
 local cmd="$2" key value="$4"
 case $keyFormat in
 base64)key="$(base64 -w0 <<<"$3")";;
-underscore)key="${3//[^a-zA-Z0-9_]/_}"
+simple)key="${3//[^a-zA-Z0-9_]/_}"
 esac
 case "$cmd" in
 set)is set --name=key --die -- "$3"&&arr["$key"]="$value";;
@@ -550,6 +550,7 @@ if command -v log >/dev/null;then
 log critical "$text"
 _stacktrace "$trap" 2>&1|log critical
 fi
+sleep 1
 kill -- -$$ 2>/dev/null
 exit 143
 }
