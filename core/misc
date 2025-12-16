@@ -157,7 +157,7 @@ CURL_HTTP_CODE=""
 # Curl with added error handling
 # This will load the content into a temporary shared memory file while running.
 #
-# The information of the CURL_* variables are stored in an environment file because of the different processes you have to make the changes visible using `env_restore curl`. After that you may use them.
+# The information of the CURL_* variables are stored in an environment file because of the different processes you have to make the changes visible using `variables restore curl`. After that you may use them.
 # Usage:    like curl
 # Globals:  `CURL_HTTP_CODE` set with last code
 # Error:    `<text>` if not RC:2xx
@@ -176,7 +176,7 @@ curl() {
     debug "Response: $res"
     CURL_HTTP_CODE=${res:(-3)}
     # store variables
-    env_store curl CURL_HTTP_CODE
+    variables store curl CURL_HTTP_CODE
     # output response
     if [ -n "$file" ]; then
         cat "$file"

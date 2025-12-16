@@ -30,25 +30,25 @@ To overcome this you have to return the value using `echo` and set it to the var
 ```bash
 # initialisieren
 $ default="init"
-env_store task default # store only default variable
+variables store task default # store only default variable
 
 # verändern
 $ set_default() { 
     default="$1"
-    env_store task default # store only default variable
+    variables store task default # store only default variable
   }
 
 default="task_increase $device"
-env_restore task # all that is contained
+variables restore task # all that is contained
 
 # running in a subshell
 $(set_default two)
-env_restore task
+variables restore task
 echo $default
 two
 
 # cleanup
-env_clean task
+variables clean task
 ```
 
-> In the above example the variable `default` will be stored in `/dev/shm/<prog>_task.env` every time it is read it should be loaded using [env_restore](../function/env_restore.md) and after changing it updated using [env_store](../function/env_store.md). At the end a cleanup can be done using [env_clean](../function/env_clean.md).
+> In the above example the variable `default` will be stored in `/dev/shm/<prog>_task.env` every time it is read it should be loaded using [variables restore](../function/variables restore.md) and after changing it updated using [variables store](../function/variables store.md). At the end a cleanup can be done using [variables clean](../function/variables clean.md).

@@ -166,26 +166,118 @@ unlock() {
 }
 
 ######################################################################################
-# Persistent environment store
+# Persistent variables store
 ######################################################################################
 
-# Store environment into shared memory/file
+# Store variables into shared memory/file
+# The <ident> specifies also who will use the same file.
+# To get the same file in all your invocations of this script only use a fixed string here.
+# To have a different file for each script invocation include `$$` or '${$}'.
+# Or to have another file in each sub process include $BASHPID.
+#
+# You may do the following:
+#
+# - `store` all or some variables
+# - `restore` all or some variables
+# - `clean` remove the store
+# - `change` run a command which will change the variables in the store
+# Usage:    variables store [<ident>] [<variable>]...   # store complete or only listed variables (ident can be empty string)
+#           variables restore [<ident>] [<variable>]... # restore all or defined variables
+#           variables clean [<ident>]                   # remove the store
+#           variables update <ident> <cmd-line> [<variable>]..   # update some variables by the cmd-line
+# Options:  d, disk                             # store on disk in temporary folder
+#           p, path <base-dir>                  # store on disk in given folder
+# Files:    `/dev/shm/<prog>[-<ident>].env`     # stored environment
+# Files:    `/tmp/<prog>[-<ident>].env`         # if `--disk` was used
+# Example:  ```bash
+#           variables restore
+#           ...<code>
+#           variables store # save changes
+#           ....
+#           variables store # save changes
+#           ....
+#           variables clean # everything done remove progress
+#           ```
+variables() {
+    # parameter parsing
+    eval set -- "$(option_parse $'d disk -\np path +' "$@")"
+    local opt="-m" command
+    while true; do
+        case "$1" in
+        -d | --disk)
+            opt=""
+            shift
+            ;;
+        -p | --path)
+            opt="$1 $2"
+            shift 2
+            ;;
+        --)
+            shift
+            break
+            ;;
+        *) shift ;; # ignore
+        esac
+    done
+    command="$(check enum --name=command --allow="store restore clean" --die -- "$1")"
+    shift
+    local ident=$1
+    shift || true
+    # processing
+    local file
+    file="$(mktemp $opt --extension=env "$ident")"
+    case "$command" in
+    store)
+        declare -p "$@" | sed 's/^declare\b/declare -g/' >"$file"
+        ;;
+    restore)
+        [ -s "$file" ] || return 0
+        if [[ $# -gt 0 ]]; then
+            temp="$(mktemp -me env-sub "${ident}_${BASHPID}")"
+            grep -E "$(tr ' ' '|' <<<"$*")" "$file" >"$temp" || true
+            # shellcheck disable=SC1090
+            source "$temp" || true
+            rm -r "$temp" || true
+        else
+            source "$file" 2>/dev/null || true
+        fi
+        ;;
+    clean)
+        rm -f "$file"
+        ;;
+    change)
+        is set --name=cmd-line --die -- "$1"
+        # processing
+        local command=$1
+        shift || true
+        # shellcheck disable=SC2086
+        variables restore $opt "$ident"
+        eval "$command"
+        # shellcheck disable=SC2086
+        variables store $opt "$ident" "$@"
+        ;;
+    esac
+}
+
+# Deprecated: Store environment into shared memory/file
+# Use: variables store...
 # Use `$$` or '${$}' as the program PID which will be also the same in Subshell or `${BASHPID}` which will differ.
-# Usage:    env_store [<ident>]                 # store complete environment
-#           env_store [<ident>] [<variable>]... # store only listed variables (ident can be empty string)
+# Usage:    store [<ident>]                 # store complete environment
+#           store [<ident>] [<variable>]... # store only listed variables (ident can be empty string)
 # Options:  d, disk                          # store on disk in temporary folder
 #           p, path <base-dir>               # store on disk in given folder
 # Files:    `/dev/shm/<prog>[-<ident>].env`     # stored environment
 # Example:  ```bash
 #           env_restore
 #           ...<code>
-#           env_store # save changes
+#           store # save changes
 #           ....
-#           env_store # save changes
+#           store # save changes
 #           ....
 #           env_clean # everything done remove progress
 #           ```
 env_store() {
+    _deprecated "Use: variables store..." warn
     debug "env_store $*"
     # parameter parsing
     eval set -- "$(option_parse $'d disk -\np path +' "$@")"
@@ -214,7 +306,8 @@ env_store() {
     declare -p "$@" | sed 's/^declare\b/declare -g/' >"$(mktemp $opt --extension=env "$ident")"
 }
 
-# Restore environment from shared memory/file
+# Deprecated: Restore environment from shared memory/file
+# Use: variables restore...
 # If some variable names are given only those will be restored.
 # Usage:    env_restore [<ident>] [<variable>]...
 # Options:  d, disk                          # store on disk in temporary folder
@@ -222,6 +315,7 @@ env_store() {
 # Files:    `/dev/shm/<prog>[-<ident>].env`     # stored environment
 #           `/dev/shm/<prog>[_<ident>]_<sub-pid>.env-sub` # very short temporary file to filter input
 env_restore() {
+    _deprecated "Use: variables restore..." warn
     debug "env_restore $*"
     # parameter parsing
     eval set -- "$(option_parse $'d disk -\np path +' "$@")"
@@ -261,11 +355,13 @@ env_restore() {
     fi
 }
 
-# Remove stored environment from shared memory/file
+# Deprecated: Remove stored environment from shared memory/file
 # Usage:    env_clean [<ident>]
 # Options:  d, disk                          # store on disk in temporary folder
 #           p, path <base-dir>               # store on disk in given folder
+# Use: variables clean...
 env_clean() {
+    _deprecated "Use: variables clean..." warn
     is integer --name=arguments --max=1 --die -- $#
     debug "env_clean $*"
     # parameter parsing
@@ -293,10 +389,12 @@ env_clean() {
     rm -f "$(mktemp $opt -e env "$1")"
 }
 
-# Change environment in shared memory/file
+# Deprecated: Change environment in shared memory/file
+# Use: variables change...
 # Usage:    env_change <ident> <command>                # store complete environment
 #           env_change <ident> <command> [<variable>]...# store only listed variables (ident can be empty string)
 env_change() {
+    _deprecated "Use: variables change..." warn
     # parameter parsing
     eval set -- "$(option_parse $'d disk -\np path +' "$@")"
     local opt
@@ -348,9 +446,9 @@ STEPS_VARIABLES=
 steps_init() {
     is integer --name=arguments --max=0 --die -- $#
     declare -g -A _STEPS
-    env_restore steps
+    variables restore steps
     declare -p _STEPS
-    env_store steps _STEPS "$STEPS_VARIABLES" # initial store
+    variables store steps _STEPS "$STEPS_VARIABLES" # initial store
     echo "$(gettext "Work steps are logged so that you can resume work mid-process")..." >&2
 }
 
@@ -387,9 +485,9 @@ steps_done() {
         local date="$(date_format sql)"
         # shellcheck disable=SC2005
         echo "$(eval_gettext "Finished: Step \$name at \$date")" >&2
-        env_store steps _STEPS "$STEPS_VARIABLES"
+        variables store steps _STEPS "$STEPS_VARIABLES"
     else
-        env_clean steps
+        variables clean steps
     fi
 }
 
@@ -449,7 +547,7 @@ async_name() {
     ! steps_check "$name" || return
     declare -p _STEPS 2>/dev/null | grep -q 'declare -A' && echo "Started: step $name at $(date_format sql)" >&2 || true
     "$@" &
-    env_change queue "_async_running[\"$name\"]=$!" _queue _async_running
+    variables change queue "_async_running[\"$name\"]=$!" _queue _async_running
 }
 
 # Check if the command is done or wait here till it is so
@@ -461,7 +559,7 @@ async_wait() {
     local code=$?
     if ((code == 0)); then
         steps_done "$1"
-        env_change queue "unset async_running[\"$1\"]" _queue _async_running
+        variables change queue "unset async_running[\"$1\"]" _queue _async_running
     else
         declare -p _STEPS 2>/dev/null | grep -q 'declare -A' && echo echo "Failed: Step $1 at $(date_format sql)" >&2 || true
     fi
@@ -479,18 +577,18 @@ _queue_control() {
     while true; do
         sleep 1
         # loop async table
-        env_restore queue
+        variables restore queue
         if ((${#_async_running[@]} > 0)); then
             for name in "${!_async_running[@]}"; do
                 pid="${_async_running["$name"]}"
                 # process no longer running
                 if ! kill -0 "$pid" 2>/dev/null; then
                     steps_done "$name"
-                    env_change queue "unset _async_running[\"$name\"]" _queue _async_running
+                    variables change queue "unset _async_running[\"$name\"]" _queue _async_running
                 fi
             done || true
         fi
-        env_restore queue
+        variables restore queue
         debug "Task queue: $$ $BASHPID async ${#_async_running[@]} queue ${#_queue[@]}"
         # test if queue and running are empty -> end control
         ((${#_queue[@]} > 0 || ${#_async_running[@]} > 0)) || return 0
@@ -501,14 +599,14 @@ _queue_control() {
                 ((${#_queue[@]} > 0)) || break
                 # shift from queue
                 first="${_queue[0]}"
-                env_change queue "_queue=(\"\${_queue[@]:1}\")" _queue _async_running
+                variables change queue "_queue=(\"\${_queue[@]:1}\")" _queue _async_running
                 IFS=$'\x1f' read -r -a params <<<"$first" # split back into array
                 # execute
                 async_name "${params[@]}"
             done
         fi
     done
-    env_clean queue
+    variables clean queue
 }
 
 # Add command to process queue
@@ -540,7 +638,7 @@ queue_name() {
     entry=$(printf "%s\x1f" "$@")
     entry=${entry%$'\x1f'} # remove trailing separator
     # change queue and in shm
-    env_change queue "_queue+=(\"$entry\")" _queue _async_running
+    variables change queue "_queue+=(\"$entry\")" _queue _async_running
     # start queue control if not running
     if [ -z "$_queue_control_pid" ]; then
         _queue_control &

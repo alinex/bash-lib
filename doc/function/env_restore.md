@@ -1,7 +1,8 @@
 # env_restore
 
-## Restore environment from shared memory/file
+## Deprecated: Restore environment from shared memory/file
 
+Use: variables restore...
 If some variable names are given only those will be restored.
 
 ### Usage

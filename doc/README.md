@@ -370,10 +370,11 @@ Module for process control
 | [`lock`](function/lock.md) | Set a lock or wait till it can be set |
 | [`lock_exit`](function/lock_exit.md) | Set the lock or exit with optional error message |
 | [`unlock`](function/unlock.md) | Remove the lock |
-| [`env_store`](function/env_store.md) | Store environment into shared memory/file |
-| [`env_restore`](function/env_restore.md) | Restore environment from shared memory/file |
-| [`env_clean`](function/env_clean.md) | Remove stored environment from shared memory/file |
-| [`env_change`](function/env_change.md) | Change environment in shared memory/file |
+| [`variables`](function/variables.md) | Store variables into shared memory/file |
+| [`env_store`](function/env_store.md) | Deprecated: Store environment into shared memory/file |
+| [`env_restore`](function/env_restore.md) | Deprecated: Restore environment from shared memory/file |
+| [`env_clean`](function/env_clean.md) | Deprecated: Remove stored environment from shared memory/file |
+| [`env_change`](function/env_change.md) | Deprecated: Change environment in shared memory/file |
 | [`steps_init`](function/steps_init.md) | Initialize step control |
 | [`steps_check`](function/steps_check.md) | Check if step already finished successful |
 | [`steps_done`](function/steps_done.md) | Set step as successfully done |

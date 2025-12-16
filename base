@@ -505,7 +505,7 @@ debug "command curl -s -w \"Error: %{url_effective} with RC:%{http_code}\" $opt 
 res=$(command curl -s -w "%{url_effective} with RC:%{http_code}" $opt -L "$@"|tail -1)
 debug "Response: $res"
 CURL_HTTP_CODE=${res: -3}
-env_store curl CURL_HTTP_CODE
+variables store curl CURL_HTTP_CODE
 if [ -n "$file" ];then
 cat "$file"
 rm "$file"

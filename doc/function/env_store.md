@@ -1,14 +1,15 @@
 # env_store
 
-## Store environment into shared memory/file
+## Deprecated: Store environment into shared memory/file
 
+Use: variables store...
 Use `$$` or '${$}' as the program PID which will be also the same in Subshell or `${BASHPID}` which will differ.
 
 ### Usage
 
 ```bash
-env_store [<ident>]                 # store complete environment
-env_store [<ident>] [<variable>]... # store only listed variables (ident can be empty string)
+store [<ident>]                 # store complete environment
+store [<ident>] [<variable>]... # store only listed variables (ident can be empty string)
 ```
 
 ### Options
@@ -28,9 +29,9 @@ p, path <base-dir>               # store on disk in given folder
 ```bash
 env_restore
 ...<code>
-env_store # save changes
+store # save changes
 ....
-env_store # save changes
+store # save changes
 ....
 env_clean # everything done remove progress
 ```

@@ -88,12 +88,12 @@ setup() {
 }
 
 ######################################################################################
-# env_store
+# variables
 ######################################################################################
 
-# bats test_tags=env_store
-@test "env_store: create file" {
-    run env_store
+# bats test_tags=variables
+@test "variables: store create file" {
+    run variables store
     assert [ -e "/dev/shm/$(basename "$0").env" ]
     assert_success
 }

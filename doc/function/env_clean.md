@@ -1,7 +1,8 @@
 # env_clean
 
-## Remove stored environment from shared memory/file
+## Deprecated: Remove stored environment from shared memory/file
 
+Use: variables clean...
 
 
 ### Usage

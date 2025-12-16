@@ -505,7 +505,7 @@ debug "command curl -s -w \"Error: %{url_effective} with RC:%{http_code}\" $opt 
 res=$(command curl -s -w "%{url_effective} with RC:%{http_code}" $opt -L "$@"|tail -1)
 debug "Response: $res"
 CURL_HTTP_CODE=${res: -3}
-env_store curl CURL_HTTP_CODE
+variables store curl CURL_HTTP_CODE
 if [ -n "$file" ];then
 cat "$file"
 rm "$file"
@@ -968,9 +968,9 @@ get)is set --name=arguments --max=1 --die -- $#
 is set --name=issueId-or-key --die -- "$1"
 debug "GET $1"
 response="$(curl --request GET --url "$JIRA_HOST/$api/issue/$1" --user "$ATLASSIAN_USER:$ATLASSIAN_TOKEN" -H "Content-Type: application/json")"||true
-env_restore curl
+variables restore curl
 case $CURL_HTTP_CODE in
-404)(jq .errorMessages[] -r <<<"$response"||"$response")|die
+404)(echo -n "HTTP Code $CURL_HTTP_CODE: "&&jq .errorMessages[] -r <<<"$response"||"$response")|die
 esac
 esac
 }
@@ -2350,7 +2350,54 @@ pid=$(cat "$lockfile")||true
 trap_remove unlock EXIT
 return 0
 }
+variables(){
+eval set -- "$(option_parse $'d disk -\np path +' "$@")"
+local opt="-m" command
+while true;do
+case "$1" in
+-d|--disk)opt=""
+shift
+;;
+-p|--path)opt="$1 $2"
+shift 2
+;;
+--)shift
+break
+;;
+*)shift
+esac
+done
+command="$(check enum --name=command --allow="store restore clean" --die -- "$1")"
+shift
+local ident=$1
+shift||true
+local file
+file="$(mktemp $opt --extension=env "$ident")"
+case "$command" in
+store)declare -p "$@"|sed 's/^declare\b/declare -g/' >"$file"
+;;
+restore)[ -s "$file" ]||return 0
+if [[ $# -gt 0 ]];then
+temp="$(mktemp -me env-sub "${ident}_$BASHPID")"
+grep -E "$(tr ' ' '|' <<<"$*")" "$file" >"$temp"||true
+source "$temp"||true
+rm -r "$temp"||true
+else
+source "$file" 2>/dev/null||true
+fi
+;;
+clean)rm -f "$file"
+;;
+change)is set --name=cmd-line --die -- "$1"
+local command=$1
+shift||true
+variables restore $opt "$ident"
+eval "$command"
+variables store $opt "$ident" "$@"
+esac
+}
 env_store(){
+_deprecated "Use: variables store..." warn
 debug "env_store $*"
 eval set -- "$(option_parse $'d disk -\np path +' "$@")"
 local opt="-m"
@@ -2373,6 +2420,7 @@ shift||true
 declare -p "$@"|sed 's/^declare\b/declare -g/' >"$(mktemp $opt --extension=env "$ident")"
 }
 env_restore(){
+_deprecated "Use: variables restore..." warn
 debug "env_restore $*"
 eval set -- "$(option_parse $'d disk -\np path +' "$@")"
 local opt="-m"
@@ -2404,6 +2452,7 @@ source "$shm_env" 2>/dev/null||true
 fi
 }
 env_clean(){
+_deprecated "Use: variables clean..." warn
 is integer --name=arguments --max=1 --die -- $#
 debug "env_clean $*"
 eval set -- "$(option_parse $'d disk -\np path +' "$@")"
@@ -2425,6 +2474,7 @@ done
 rm -f "$(mktemp $opt -e env "$1")"
 }
 env_change(){
+_deprecated "Use: variables change..." warn
 eval set -- "$(option_parse $'d disk -\np path +' "$@")"
 local opt
 while true;do
@@ -2456,9 +2506,9 @@ STEPS_VARIABLES=
 steps_init(){
 is integer --name=arguments --max=0 --die -- $#
 declare -g -A _STEPS
-env_restore steps
+variables restore steps
 declare -p _STEPS
-env_store steps _STEPS "$STEPS_VARIABLES"
+variables store steps _STEPS "$STEPS_VARIABLES"
 echo "$(gettext "Work steps are logged so that you can resume work mid-process")..." >&2
 }
 steps_check(){
@@ -2482,9 +2532,9 @@ if [ -n "$1" ];then
 _STEPS["$name"]=1
 local date="$(date_format sql)"
 echo "$(eval_gettext 'Finished: Step $name at $date')" >&2
-env_store steps _STEPS "$STEPS_VARIABLES"
+variables store steps _STEPS "$STEPS_VARIABLES"
 else
-env_clean steps
+variables clean steps
 fi
 }
 sync(){
@@ -2515,7 +2565,7 @@ shift
 ! steps_check "$name"||return
 declare -p _STEPS 2>/dev/null|grep -q 'declare -A'&&echo "Started: step $name at $(date_format sql)" >&2||true
 "$@"&
-env_change queue "_async_running[\"$name\"]=$!" _queue _async_running
+variables change queue "_async_running[\"$name\"]=$!" _queue _async_running
 }
 async_wait(){
 [ -z "${_async_running["$1"]}" ]&&return 0||true
@@ -2523,7 +2573,7 @@ wait "${_async_running["$1"]}"
 local code=$?
 if ((code==0));then
 steps_done "$1"
-env_change queue "unset async_running[\"$1\"]" _queue _async_running
+variables change queue "unset async_running[\"$1\"]" _queue _async_running
 else
 declare -p _STEPS 2>/dev/null|grep -q 'declare -A'&&echo echo "Failed: Step $1 at $(date_format sql)" >&2||true
 fi
@@ -2536,17 +2586,17 @@ _queue_control(){
 local name pid free first params
 while true;do
 sleep 1
-env_restore queue
+variables restore queue
 if ((${#_async_running[@]}>0));then
 for name in "${!_async_running[@]}";do
 pid="${_async_running["$name"]}"
 if ! kill -0 "$pid" 2>/dev/null;then
 steps_done "$name"
-env_change queue "unset _async_running[\"$name\"]" _queue _async_running
+variables change queue "unset _async_running[\"$name\"]" _queue _async_running
 fi
 done||true
 fi
-env_restore queue
+variables restore queue
 debug "Task queue: $$ $BASHPID async ${#_async_running[@]} queue ${#_queue[@]}"
 ((${#_queue[@]}>0||${#_async_running[@]}>0))||return 0
 free=$((ASYNC_QUEUE_MAX-${#_async_running[@]}))
@@ -2554,13 +2604,13 @@ if ((free>0));then
 for _ in $(seq 1 "$free");do
 ((${#_queue[@]}>0))||break
 first="${_queue[0]}"
-env_change queue '_queue=("${_queue[@]:1}")' _queue _async_running
+variables change queue '_queue=("${_queue[@]:1}")' _queue _async_running
 IFS=$'\x1f' read -r -a params <<<"$first"
 async_name "${params[@]}"
 done
 fi
 done
-env_clean queue
+variables clean queue
 }
 queue(){
 is set --name=command --die -- "$1"
@@ -2573,7 +2623,7 @@ is set --name=command --die -- "$2"
 local entry
 entry=$(printf "%s\x1f" "$@")
 entry=${entry%$'\x1f'}
-env_change queue "_queue+=(\"$entry\")" _queue _async_running
+variables change queue "_queue+=(\"$entry\")" _queue _async_running
 if [ -z "$_queue_control_pid" ];then
 _queue_control&
 _queue_control_pid=$!

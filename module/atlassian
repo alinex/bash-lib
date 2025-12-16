@@ -61,9 +61,9 @@ jira() {
         is set --name=issueId-or-key --die -- "$1"
         debug "GET $1"
         response="$(curl --request GET --url "$JIRA_HOST/$api/issue/$1" --user "$ATLASSIAN_USER:$ATLASSIAN_TOKEN" -H "Content-Type: application/json")" || true
-        env_restore curl
+        variables restore curl
         case $CURL_HTTP_CODE in
-        404) (jq .errorMessages[] -r <<<"$response" || "$response") | die ;;
+        404) (echo -n "HTTP Code $CURL_HTTP_CODE: " && jq .errorMessages[] -r <<<"$response" || "$response") | die ;;
         esac
         ;;
     esac

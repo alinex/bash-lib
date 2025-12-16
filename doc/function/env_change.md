@@ -1,7 +1,8 @@
 # env_change
 
-## Change environment in shared memory/file
+## Deprecated: Change environment in shared memory/file
 
+Use: variables change...
 
 
 ### Usage
