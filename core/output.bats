@@ -4,7 +4,6 @@
 setup() {
     # shellcheck disable=SC2154
     load "$BASHLIB_HOME/tests/bats-library-loader"
-    export testlog=/tmp/testlog
     # declare global used variables
 }
 
@@ -338,15 +337,10 @@ setup() {
 # bats test_tags=urlencode
 @test "urlencode: with message as argument" {
     run urlencode "http://my-server:8080/?secret=1 und 2"
+    # cspell:disable-next-line
     assert_output "http%3A%2F%2Fmy-server%3A8080%2F%3Fsecret%3D1%20und%202"
     assert_success
 }
-## bats test_tags=urlencode 
-#@test "urlencode: with piped message" {
-#    run bats_pipe echo "http://my-server:8080/?secret=1 und 2" \| urlencode
-#    assert_output "http%3A%2F%2Fmy-server%3A8080%2F%3Fsecret%3D1%20und%202"
-#    assert_success
-##}
 
 ######################################################################################
 # horizontal_line

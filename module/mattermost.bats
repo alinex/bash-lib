@@ -52,12 +52,12 @@ setup() {
 }
 
 ######################################################################################
-# _mattermost_channel_bypost
+# _mattermost_channel_by_post
 ######################################################################################
 
-# bats test_tags=_mattermost_channel_bypost
-@test "_mattermost_channel_bypost: for existing post" {
-    run _mattermost_channel_bypost "$TEST_MM_POST_ID"
+# bats test_tags=_mattermost_channel_by_post
+@test "_mattermost_channel_by_post: for existing post" {
+    run _mattermost_channel_by_post "$TEST_MM_POST_ID"
     assert_output "$TEST_MM_CHANNEL_ID"
     assert_success
 }

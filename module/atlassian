@@ -75,7 +75,7 @@ jira() {
     esac
 }
 
-# Usage _jira <url> <data>
+# Usage _jira <method> <path> <data>
 _jira() {
     local METHOD=$1
     local REST="$2"

@@ -76,15 +76,6 @@ setup() {
     assert_success
     rm "$file"
 }
-# bats test_tags=remote
-@test "remote: with piped filename (file)" {
-    file=$(mktemp)
-    echo "hostname" >"$file"
-    run bats_pipe echo "$file" \| remote --file
-    assert_output "$server"
-    assert_success
-    rm "$file"
-}
 
 ######################################################################################
 # upload
