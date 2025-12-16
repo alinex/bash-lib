@@ -34,16 +34,18 @@ setup() {
     if [ -z "$JIRA_HOST" ]; then
         skip "Because JIRA_HOST not set."
     fi
-    run jira SEC-198
+    run jira get SEC-198
     assert_success
+    assert_output -p '"key":"SEC-198"'
 }
 # bats test_tags=jira
 @test "jira: should get issue by issueId" {
     if [ -z "$JIRA_HOST" ]; then
         skip "Because JIRA_HOST not set."
     fi
-    run jira 60162
+    run jira get 60162
     assert_success
+    assert_output -p '"key":"SEC-198"'
 }
 # bats test_tags=jira
 @test "jira: fail to get issue by key" {
@@ -52,4 +54,16 @@ setup() {
     fi
     run jira get NOT-EXISTING-KEY
     assert_failure
+}
+# bats test_tags=jira
+@test "jira: should search by title" {
+    if [ -z "$JIRA_HOST" ]; then
+        skip "Because JIRA_HOST not set."
+    fi
+    SECURITY_BOARD_ID=10134
+    cve=CVE-2017-5336
+    jql="project = ${SECURITY_BOARD_ID} AND summary ~ $cve ORDER BY created ASC"
+    run jira search "$jql"
+    assert_success
+    assert_output 60162
 }

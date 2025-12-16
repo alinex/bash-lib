@@ -26,7 +26,6 @@ confluence() {
 ######################################################################################
 # Jira
 ######################################################################################
-# https://developer.atlassian.com/cloud/jira/platform/rest/v3/intro/#version
 # ADF:
 # - https://developer.atlassian.com/cloud/jira/platform/apis/document/structure
 # - https://atlas-doc-parser.readthedocs.io/en/latest/index.html
@@ -39,32 +38,65 @@ confluence() {
 #
 # The following commands are supported:
 #
-# - get <issueId>|<key>
+# - `get` will return all fields of an issue as json
+# - `search` will find matching issues
 #
 # Usage:    jira <command> <options>...
 #           jira get <issueId>|<key>
 #           jira search <jql>
 #           jira update <ticket-id> <json>
 #           jira create <json>
+# Output:   - get: <json>
+#           - search: <issueId> list, each in a separate line
+# Return:   die on 400, 404 Error
+#           retry on other not 2xx Code
 jira() {
     is set --name=JIRA_HOST --die -- "$JIRA_HOST"
     is set --name=ATLASSIAN_USER --die -- "$ATLASSIAN_USER"
     is set --name=ATLASSIAN_TOKEN --die -- "$ATLASSIAN_TOKEN"
     local command
-    command="$(check enum --name=command --allow="get" --die -- "$1")"
+    command="$(check enum --name=command --allow="get search" --die -- "$1")"
     shift
-    local api=/rest/api/3
     # processing
     case "$command" in
     get)
         is set --name=arguments --max=1 --die -- $#
         is set --name=issueId-or-key --die -- "$1"
         debug "GET $1"
-        response="$(curl --request GET --url "$JIRA_HOST/$api/issue/$1" --user "$ATLASSIAN_USER:$ATLASSIAN_TOKEN" -H "Content-Type: application/json")" || true
-        variables restore curl
-        case $CURL_HTTP_CODE in
-        404) (echo -n "HTTP Code $CURL_HTTP_CODE: " && jq .errorMessages[] -r <<<"$response" || "$response") | die ;;
-        esac
+        _jira GET "issue/$1"
+        ;;
+    search)
+        is set --name=arguments --max=1 --die -- $#
+        is set --name=jql --die -- "$1"
+        debug "SEARCH $1"
+        local res rc=0
+        _jira GET "search/jql?jql=$(urlencode "$jql")" | jq .issues[].id -r
         ;;
     esac
+}
+
+# Usage _jira <url> <data>
+_jira() {
+    local METHOD=$1
+    local REST="$2"
+    local DATA="$3"
+    local api=/rest/api/3
+    local res rc=0 num=0 retry=3
+    while ((num <= retry)); do
+        ((num == 0)) || debug "Retry $num"
+        res="$(curl --store --request $METHOD --url "$JIRA_HOST/$api/$REST" --user "$ATLASSIAN_USER:$ATLASSIAN_TOKEN" --data "$DATA" -H "Content-Type: application/json")" || rc=$?
+        variables restore --clean curl
+        if ((rc == 0)); then
+            echo "$res"
+            return
+        else
+            # error code handling without retry
+            case $CURL_HTTP_CODE in
+            400 | 404) (echo -n "HTTP Code $CURL_HTTP_CODE: " && jq .errorMessages[] -r <<<"$res" || echo "$res") | die ;;
+            esac
+        fi
+        ((num++)) || true
+        sleep $(((num + 1) ** 2))
+    done
+    (echo -n "HTTP Code $CURL_HTTP_CODE: " && jq .errorMessages[] -r <<<"$res" || echo "$res") | die
 }

@@ -157,13 +157,28 @@ CURL_HTTP_CODE=""
 # Curl with added error handling
 # This will load the content into a temporary shared memory file while running.
 #
-# The information of the CURL_* variables are stored in an environment file because of the different processes you have to make the changes visible using `variables restore curl`. After that you may use them.
+# The information of the CURL_* variables are stored in an environment file, if `--store` is added, and you get them set in your process parent using `variables restore curl` there.
 # Usage:    like curl
+# Options:  default Options like in vanilla curl
+#           store   # if set `variable store` will be called
 # Globals:  `CURL_HTTP_CODE` set with last code
 # Error:    `<text>` if not RC:2xx
 # Return:   0 if RC:2xx
 #           1 if not
 curl() {
+    # check for additional flags
+    local args=() i=1 store
+    while [[ $i -le $# ]]; do
+        if [[ "${!i}" == "--store" ]]; then
+            store=1
+            shift $i
+            i=1
+            continue
+        fi
+        args+=("${!i}")
+        ((i++))
+    done
+    set -- "${args[@]}"
     # shellcheck disable=SC2034
     local args=("$@")
     local file res
@@ -176,7 +191,7 @@ curl() {
     debug "Response: $res"
     CURL_HTTP_CODE=${res:(-3)}
     # store variables
-    variables store curl CURL_HTTP_CODE
+    [ -z "$store" ] || variables store curl CURL_HTTP_CODE
     # output response
     if [ -n "$file" ]; then
         cat "$file"

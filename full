@@ -496,6 +496,18 @@ debug "Removed $file after TTL $1 seconds"
 }
 CURL_HTTP_CODE=""
 curl(){
+local args=() i=1 store
+while [[ $i -le $# ]];do
+if [[ ${!i} == "--store" ]];then
+store=1
+shift $i
+i=1
+continue
+fi
+args+=("${!i}")
+((i++))
+done
+set -- "${args[@]}"
 local args=("$@")
 local file res
 array args has '-o'||file=$(mktemp -r)
@@ -505,7 +517,7 @@ debug "command curl -s -w \"Error: %{url_effective} with RC:%{http_code}\" $opt 
 res=$(command curl -s -w "%{url_effective} with RC:%{http_code}" $opt -L "$@"|tail -1)
 debug "Response: $res"
 CURL_HTTP_CODE=${res: -3}
-variables store curl CURL_HTTP_CODE
+[ -z "$store" ]||variables store curl CURL_HTTP_CODE
 if [ -n "$file" ];then
 cat "$file"
 rm "$file"
@@ -960,19 +972,43 @@ is set --name=JIRA_HOST --die -- "$JIRA_HOST"
 is set --name=ATLASSIAN_USER --die -- "$ATLASSIAN_USER"
 is set --name=ATLASSIAN_TOKEN --die -- "$ATLASSIAN_TOKEN"
 local command
-command="$(check enum --name=command --allow="get" --die -- "$1")"
+command="$(check enum --name=command --allow="get search" --die -- "$1")"
 shift
-local api=/rest/api/3
 case "$command" in
 get)is set --name=arguments --max=1 --die -- $#
 is set --name=issueId-or-key --die -- "$1"
 debug "GET $1"
-response="$(curl --request GET --url "$JIRA_HOST/$api/issue/$1" --user "$ATLASSIAN_USER:$ATLASSIAN_TOKEN" -H "Content-Type: application/json")"||true
-variables restore curl
+_jira GET "issue/$1"
+;;
+search)is set --name=arguments --max=1 --die -- $#
+is set --name=jql --die -- "$1"
+debug "SEARCH $1"
+local res rc=0
+_jira GET "search/jql?jql=$(urlencode "$jql")"|jq .issues[].id -r
+esac
+}
+_jira(){
+local METHOD=$1
+local REST="$2"
+local DATA="$3"
+local api=/rest/api/3
+local res rc=0 num=0 retry=3
+while ((num<=retry));do
+((num==0))||debug "Retry $num"
+res="$(curl --store --request $METHOD --url "$JIRA_HOST/$api/$REST" --user "$ATLASSIAN_USER:$ATLASSIAN_TOKEN" --data "$DATA" -H "Content-Type: application/json")"||rc=$?
+variables restore --clean curl
+if ((rc==0));then
+echo "$res"
+return
+else
 case $CURL_HTTP_CODE in
-404)(echo -n "HTTP Code $CURL_HTTP_CODE: "&&jq .errorMessages[] -r <<<"$response"||"$response")|die
+400|404)(echo -n "HTTP Code $CURL_HTTP_CODE: "&&jq .errorMessages[] -r <<<"$res"||echo "$res")|die
 esac
-esac
+fi
+((num++))||true
+sleep $(((num+1)**2))
+done
+(echo -n "HTTP Code $CURL_HTTP_CODE: "&&jq .errorMessages[] -r <<<"$res"||echo "$res")|die
 }
 use module/software
 mongo(){
@@ -2351,19 +2387,14 @@ trap_remove unlock EXIT
 return 0
 }
 variables(){
-eval set -- "$(option_parse $'d disk -\np path +' "$@")"
-local opt="-m" command
+eval set -- "$(option_parse $'d disk -\np path +\nc clean -' "$@")"
+local opt="-m" command clean
 while true;do
 case "$1" in
--d|--disk)opt=""
-shift
-;;
--p|--path)opt="$1 $2"
-shift 2
-;;
---)shift
-break
-;;
+-d|--disk)opt=""&&shift;;
+-p|--path)opt="$1 $2"&&shift 2;;
+-c|--clean)clean=1&&shift;;
+--)shift&&break;;
 *)shift
 esac
 done
@@ -2374,8 +2405,7 @@ shift||true
 local file
 file="$(mktemp $opt --extension=env "$ident")"
 case "$command" in
-store)declare -p "$@"|sed 's/^declare\b/declare -g/' >"$file"
-;;
+store)declare -p "$@"|sed 's/^declare\b/declare -g/' >"$file";;
 restore)[ -s "$file" ]||return 0
 if [[ $# -gt 0 ]];then
 temp="$(mktemp -me env-sub "${ident}_$BASHPID")"
@@ -2385,9 +2415,9 @@ rm -r "$temp"||true
 else
 source "$file" 2>/dev/null||true
 fi
+[ -z "$clean" ]||rm -f "$file"
 ;;
-clean)rm -f "$file"
-;;
+clean)rm -f "$file";;
 change)is set --name=cmd-line --die -- "$1"
 local command=$1
 shift||true

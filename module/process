@@ -187,6 +187,7 @@ unlock() {
 #           variables update <ident> <cmd-line> [<variable>]..   # update some variables by the cmd-line
 # Options:  d, disk                             # store on disk in temporary folder
 #           p, path <base-dir>                  # store on disk in given folder
+#           c, clean                            # remove after restore is done
 # Files:    `/dev/shm/<prog>[-<ident>].env`     # stored environment
 # Files:    `/tmp/<prog>[-<ident>].env`         # if `--disk` was used
 # Example:  ```bash
@@ -200,22 +201,14 @@ unlock() {
 #           ```
 variables() {
     # parameter parsing
-    eval set -- "$(option_parse $'d disk -\np path +' "$@")"
-    local opt="-m" command
+    eval set -- "$(option_parse $'d disk -\np path +\nc clean -' "$@")"
+    local opt="-m" command clean
     while true; do
         case "$1" in
-        -d | --disk)
-            opt=""
-            shift
-            ;;
-        -p | --path)
-            opt="$1 $2"
-            shift 2
-            ;;
-        --)
-            shift
-            break
-            ;;
+        -d | --disk) opt="" && shift ;;
+        -p | --path) opt="$1 $2" && shift 2 ;;
+        -c | --clean) clean=1 && shift ;;
+        --) shift && break ;;
         *) shift ;; # ignore
         esac
     done
@@ -227,9 +220,7 @@ variables() {
     local file
     file="$(mktemp $opt --extension=env "$ident")"
     case "$command" in
-    store)
-        declare -p "$@" | sed 's/^declare\b/declare -g/' >"$file"
-        ;;
+    store) declare -p "$@" | sed 's/^declare\b/declare -g/' >"$file" ;;
     restore)
         [ -s "$file" ] || return 0
         if [[ $# -gt 0 ]]; then
@@ -241,10 +232,9 @@ variables() {
         else
             source "$file" 2>/dev/null || true
         fi
+        [ -z "$clean" ] || rm -f "$file" # also directly clean it
         ;;
-    clean)
-        rm -f "$file"
-        ;;
+    clean) rm -f "$file" ;;
     change)
         is set --name=cmd-line --die -- "$1"
         # processing

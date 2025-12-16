@@ -496,6 +496,18 @@ debug "Removed $file after TTL $1 seconds"
 }
 CURL_HTTP_CODE=""
 curl(){
+local args=() i=1 store
+while [[ $i -le $# ]];do
+if [[ ${!i} == "--store" ]];then
+store=1
+shift $i
+i=1
+continue
+fi
+args+=("${!i}")
+((i++))
+done
+set -- "${args[@]}"
 local args=("$@")
 local file res
 array args has '-o'||file=$(mktemp -r)
@@ -505,7 +517,7 @@ debug "command curl -s -w \"Error: %{url_effective} with RC:%{http_code}\" $opt 
 res=$(command curl -s -w "%{url_effective} with RC:%{http_code}" $opt -L "$@"|tail -1)
 debug "Response: $res"
 CURL_HTTP_CODE=${res: -3}
-variables store curl CURL_HTTP_CODE
+[ -z "$store" ]||variables store curl CURL_HTTP_CODE
 if [ -n "$file" ];then
 cat "$file"
 rm "$file"

@@ -9,8 +9,8 @@ Jira API V3 is used there: https://developer.atlassian.com/cloud/jira/platform/r
 
 The following commands are supported:
 
-- get `<issueId>`|`<key>`
-
+- `get` will return all fields of an issue as json
+- `search` will find matching issues
 
 
 ### Usage
@@ -22,3 +22,14 @@ jira search <jql>
 jira update <ticket-id> <json>
 jira create <json>
 ```
+
+### Output (stdout)
+
+- get: `<json>`
+- search: `<issueId>` list, each in a separate line
+
+### Return (exit code)
+
+- die on 400, 404 Error
+- retry on other not 2xx Code
+- 

@@ -32,7 +32,7 @@ for f in "$BASHLIB_HOME"/core/*; do
 done
 #echo -n "(optimize) "
 #sed -i -E -f optimize-code.sed "$BASHLIB_HOME/base"
-echo "fertig -> $(du -h full | cut -f1)B"
+echo "fertig -> $(du -h base | cut -f1)B"
 
 md_optimize() {
     awk '
