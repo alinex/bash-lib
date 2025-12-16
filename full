@@ -58,7 +58,7 @@ is set --name="num" --die -- "$num"
 test -p /dev/stdin&&(($#<num+2))&&cat -||echo "${@:start}"
 }
 input_lines(){
-if [ -p /dev/stdin ]&&is empty -- "$1" ];then
+if [ -p /dev/stdin ]&&is empty -- "$1";then
 cat -
 else
 for arg in "$@";do echo "$arg";done
@@ -500,7 +500,7 @@ local args=() i=1 store
 while [[ $i -le $# ]];do
 if [[ ${!i} == "--store" ]];then
 store=1
-shift $i
+shift "$i"
 i=1
 continue
 fi
@@ -540,10 +540,10 @@ if is integer -- "$DEBUG";then
 is integer --min=0 --die -- "$DEBUG"
 ((level<=DEBUG))||return 0
 else
-[[ $func =~ .*(${DEBUG//, /|}) ]]||return 0
+[[ $func =~ .*(${DEBUG//,? /|}) ]]||return 0
 fi
 while IFS= read -r line;do
-((DEBUG<9))&&printf "$CC_BLACK%-2s %-20s %s$CC_RESET\n" "$sign" "$func" "$line" >&2||printf "$CC_BLACK%-2s %7d %-20s %s$CC_RESET\n" "$sign" $BASHPID "$func" "$line" >&2
+is integer --min=9 -- "$DEBUG"&&printf "$CC_BLACK%-2s %7d %-20s %s$CC_RESET\n" "$sign" "$BASHPID" "$func" "$line" >&2||printf "$CC_BLACK%-2s %-20s %s$CC_RESET\n" "$sign" "$func" "$line" >&2
 done <<<"$text"
 ! command -v log >/dev/null||log debug "$func: $text"
 }
@@ -984,7 +984,7 @@ search)is set --name=arguments --max=1 --die -- $#
 is set --name=jql --die -- "$1"
 debug "SEARCH $1"
 local res rc=0
-_jira GET "search/jql?jql=$(urlencode "$jql")"|jq .issues[].id -r
+_jira GET "search/jql?jql=$(urlencode "$1")"|jq .issues[].id -r
 esac
 }
 _jira(){
@@ -995,7 +995,7 @@ local api=/rest/api/3
 local res rc=0 num=0 retry=3
 while ((num<=retry));do
 ((num==0))||debug "Retry $num"
-res="$(curl --store --request $METHOD --url "$JIRA_HOST/$api/$REST" --user "$ATLASSIAN_USER:$ATLASSIAN_TOKEN" --data "$DATA" -H "Content-Type: application/json")"||rc=$?
+res="$(curl --store --request "$METHOD" --url "$JIRA_HOST/$api/$REST" --user "$ATLASSIAN_USER:$ATLASSIAN_TOKEN" --data "$DATA" -H "Content-Type: application/json")"||rc=$?
 variables restore --clean curl
 if ((rc==0));then
 echo "$res"
@@ -1275,7 +1275,7 @@ local answer
 answer="$(mktemp --random editor)"
 echo "$prompt" >"$answer"
 if [ -n "$timeout" ];then
-debug timeout "$timeout" ${EDITOR:-vi} "$answer"
+debug timeout "$timeout" "${EDITOR:-vi}" "$answer"
 ${EDITOR:-vi} "$answer"&
 sleep "$timeout"
 pkill -TERM -P $!||true
@@ -2102,7 +2102,7 @@ local type=$1
 local ip=${2-}
 [ -n "$ip" ]||ip="$(ip_intern)"
 local name="IP_${type^^}_PATTERN"
-declare -p "$name" 2>/dev/null|grep -q 'declare \-a'||die "No configuration array $name defined."
+declare -p "$name" 2>/dev/null|grep -q 'declare -a'||die "No configuration array $name defined."
 debug "checking $ip against $name"
 declare -n lookup="$name"
 for ((i=0; i<${#lookup[@]}; i+=2));do
@@ -2784,7 +2784,7 @@ elif ((rc==143));then
 kill -- -$$ 2>/dev/null
 exit 143
 fi
-return $rc
+return "$rc"
 }
 remote_term(){
 _deprecated "Use: remote --terminal ... instead" warn
@@ -3163,10 +3163,11 @@ install mlr
 input "$@"|uncolorize|mlr --csvlite --ifs '\t' --omd cat
 }
 csv(){
-is integer --name=arguments --max=1 --die -- $#
-is set --name=csv --die -- "$1"
+is set --name=command --allow="to" --die -- "$1"
 case $1 in
-to)case $2 in
+to)is integer --name=arguments --max=2 --die -- $#
+is set --name=format --allow="tsv" --die -- "$2"
+case $2 in
 tsv)python3 -c '
 import sys, csv
 reader = csv.reader(sys.stdin)
@@ -3174,11 +3175,7 @@ writer = csv.writer(sys.stdout, delimiter="\t", lineterminator="\n")
 for row in reader:
     writer.writerow(row)
 '
-;;
-*)die "Allowed formats are only tsv, not [$2]"
 esac
-;;
-*)die "Usage: csv {to} [<value>]"
 esac
 }
 tsv(){

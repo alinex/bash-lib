@@ -52,19 +52,19 @@ The support is divided into:
 ❔ no interest at the moment
 ⛔ could not be supported
 
-| Distribution   | Versions  |         |        | Untested                 |
-| -------------- | --------- | ------- | ------ | ------------------------ |
+| Distribution   | Versions  |         |        | Untested            |
+| -------------- | --------- | ------- | ------ | ------------------- |
 | Debian         | ✅ 11      | ✅ 12    | ✅ 13   |
 | ⤷ Ubuntu       | ✅  22.04  | ✅ 24.04 |
 | ⤷   Linux Mint | ✅ 21      | ✅ 22    |
 | ⤷   KDE Neon   | ✅ stable  |
-| ⤷ Kali Linux   | ✅ rolling |         |        | database,monitoring      |
+| ⤷ Kali Linux   | ✅ rolling |         |        | database,monitoring |
 | ⤷ MX Linux     | 🟢 23      |
 | ⤷ AntiX        | 🟢 23      |
 | ⤷ Parrot OS    | 🟢         |
-| Alpine         | ✅ 3.19    | ✅ 3.21  | ✅ 3.22 | mongo                    |
-| Arch Linux     | ✅ rolling |         |        | mongo,monitoring,network |
-| ⤷ Manjaro      | ✅ 25      |         |        | mongo,monitoring,network |
+| Alpine         | ✅ 3.19    | ✅ 3.21  | ✅ 3.22 | mongo               |
+| Arch Linux     | ✅ rolling |         |        | mongo,monitoring    |
+| ⤷ Manjaro      | ✅ 25      |         |        | mongo,monitoring    |
 | ⤷ EndeavourOS  | 🟢         |
 | ⤷ Garuda Linux | 🟢         |
 | ⤷ CachyOS      | 🟢         |

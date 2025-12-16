@@ -19,7 +19,9 @@ manjaro     25      arch        manjarolinux/base
 #EndeavourOS rolling arch       -
 #Garuda             arch        -
 #CachyOS            arch        -
-#redhat         https://hub.docker.com/r/redhat
+#redhat      8       redhat      redhat/ubi8
+#redhat      9       redhat      redhat/ubi9
+#redhat      10      redhat      redhat/ubi10
 #  fedora       https://hub.docker.com/_/fedora
 #  centos       https://hub.docker.com/_/centos
 # ------------------------

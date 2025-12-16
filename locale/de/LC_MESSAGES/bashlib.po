@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-16 15:09+0100\n"
+"POT-Creation-Date: 2025-12-16 21:47+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,10 +18,10 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 
 #: core/misc:109 core/validator:69 core/validator:287 core/array:134
-#: module/os:178 module/monitoring:135 module/input:30 module/input:83
+#: module/os:178 module/monitoring:137 module/input:30 module/input:83
 #: module/input:220 module/input:479 module/input:646 module/log:61
-#: module/remote:77 module/remote:255 module/remote:302 module/remote:351
-#: module/remote:445 module/mattermost:288 module/mattermost:323
+#: module/remote:77 module/remote:258 module/remote:305 module/remote:354
+#: module/remote:448 module/mattermost:288 module/mattermost:323
 #: module/software:197
 msgid "Unrecognized option"
 msgstr "Unbekannte Option"
@@ -201,24 +201,24 @@ msgstr ""
 msgid "IP\\tInterface"
 msgstr "IP\\tSchnittstelle"
 
-#: module/monitoring:66
+#: module/monitoring:68
 msgid "Could not get exporters from Prometheus!"
 msgstr "Es konnten keine Exporter von Prometheus ermittelt werden!"
 
-#: module/monitoring:83
+#: module/monitoring:85
 #, sh-format
 msgid "Could not scrape the Prometheus exporter at $url!"
 msgstr "Der Prometheus Exporter unter $url konnte nicht abgefragt werden!"
 
-#: module/monitoring:142
+#: module/monitoring:144
 msgid "Could not get alerts from Grafana!"
 msgstr "Es konnten keine Grafana Alerts abgerufen werden!"
 
-#: module/monitoring:143
+#: module/monitoring:145
 msgid "Parse error in Grafana alerts list with filter"
 msgstr "Fehler beim Parsen der Grafana Alarmliste mit Filter"
 
-#: module/monitoring:171
+#: module/monitoring:173
 msgid "Severity\\tNetwork\\tInstance\\tSummary\\tStart"
 msgstr "Schweregrad\\tNetz\\tInstanz\\tZusammenfassung\\tStart"
 
@@ -340,27 +340,27 @@ msgstr "PID Lockfile konnte nicht erstellt werden"
 msgid "Waiting for unlock in $lockfile by PID $pid"
 msgstr "Warten, bis zur Freigabe in $lockfile durch PID $pid"
 
-#: module/process:442
+#: module/process:444
 msgid "Work steps are logged so that you can resume work mid-process"
 msgstr ""
 "Arbeitsschritte werden protokolliert um auch mittendrin wieder aufzusetzen"
 
-#: module/process:456
+#: module/process:458
 #, sh-format
 msgid "Job $name already done in this run, skipping"
 msgstr "Der Job $name wurde bereits ausgeführt, überspringe diesen"
 
-#: module/process:477
+#: module/process:479
 #, sh-format
 msgid "Finished: Step $name at $date"
 msgstr "Fertig: Schritt $name um $date"
 
-#: module/process:507
+#: module/process:509
 #, sh-format
 msgid "Started: step $name at $date"
 msgstr "Start: Schritt $name um $date"
 
-#: module/remote:454
+#: module/remote:457
 #, sh-format
 msgid "Wait until the reboot is complete ($seconds seconds)"
 msgstr "Warten bis der Reboot fertig ist ($seconds Sekunden)"

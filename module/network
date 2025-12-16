@@ -46,7 +46,7 @@ ip_pattern() {
     # processing
     # use referenced array
     local name="IP_${type^^}_PATTERN"
-    declare -p "$name" 2>/dev/null | grep -q 'declare \-a' || die "No configuration array $name defined."
+    declare -p "$name" 2>/dev/null | grep -q 'declare -a' || die "No configuration array $name defined."
     debug "checking $ip against $name"
     declare -n lookup="$name"
     # find pattern

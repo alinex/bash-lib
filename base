@@ -58,7 +58,7 @@ is set --name="num" --die -- "$num"
 test -p /dev/stdin&&(($#<num+2))&&cat -||echo "${@:start}"
 }
 input_lines(){
-if [ -p /dev/stdin ]&&is empty -- "$1" ];then
+if [ -p /dev/stdin ]&&is empty -- "$1";then
 cat -
 else
 for arg in "$@";do echo "$arg";done
@@ -500,7 +500,7 @@ local args=() i=1 store
 while [[ $i -le $# ]];do
 if [[ ${!i} == "--store" ]];then
 store=1
-shift $i
+shift "$i"
 i=1
 continue
 fi
@@ -540,10 +540,10 @@ if is integer -- "$DEBUG";then
 is integer --min=0 --die -- "$DEBUG"
 ((level<=DEBUG))||return 0
 else
-[[ $func =~ .*(${DEBUG//, /|}) ]]||return 0
+[[ $func =~ .*(${DEBUG//,? /|}) ]]||return 0
 fi
 while IFS= read -r line;do
-((DEBUG<9))&&printf "$CC_BLACK%-2s %-20s %s$CC_RESET\n" "$sign" "$func" "$line" >&2||printf "$CC_BLACK%-2s %7d %-20s %s$CC_RESET\n" "$sign" $BASHPID "$func" "$line" >&2
+is integer --min=9 -- "$DEBUG"&&printf "$CC_BLACK%-2s %7d %-20s %s$CC_RESET\n" "$sign" "$BASHPID" "$func" "$line" >&2||printf "$CC_BLACK%-2s %-20s %s$CC_RESET\n" "$sign" "$func" "$line" >&2
 done <<<"$text"
 ! command -v log >/dev/null||log debug "$func: $text"
 }
