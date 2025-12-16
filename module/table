@@ -45,11 +45,12 @@ tsv2md() {
 # Usage:    <string> | csv {to} <param>...
 #           <string> | csv to {tsv}              # convert
 csv() {
-    is integer --name=arguments --max=1 --die -- $#
-    is set --name=csv --die -- "$1"
+    is set --name=command --allow="to" --die -- "$1"
     # processing
     case $1 in
     to)
+        is integer --name=arguments --max=2 --die -- $#
+        is set --name=format --allow="tsv" --die -- "$2"
         case $2 in
         tsv)
             python3 -c '
@@ -60,10 +61,8 @@ for row in reader:
     writer.writerow(row)
 '
             ;;
-        *) die "Allowed formats are only tsv, not [$2]" ;;
         esac
         ;;
-    *) die "Usage: csv {to} [<value>]" ;;
     esac
 }
 
