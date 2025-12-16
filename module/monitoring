@@ -55,7 +55,9 @@ exporter() {
                 local login user pass
                 login="$(echo "$auth" | grep "$(echo "$line" | cut -f2)" | grep "$(echo "$line" | cut -f4)")"
                 if [ -n "$login" ]; then
+                    # shellcheck disable=SC2119
                     user="$(echo "$login" | cut -f2 | tr -d '\n' | urlencode)"
+                    # shellcheck disable=SC2119
                     pass="$(echo "$login" | cut -f3 | tr -d '\n' | urlencode)"
                     echo "$line" | cut -f1-3 | sed "s#://#://$user:$pass@#"
                 else
@@ -215,6 +217,7 @@ prometheus() {
     # processing
     local api
     api="${PROMETHEUS_API%% *}"
+    # shellcheck disable=SC2119
     curl "$api/query?query=$(echo "$1" | urlencode)"
     # start=
     # end=

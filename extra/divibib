@@ -21,8 +21,11 @@ confluence_outage() {
     local row office customer user
     row="$(confluence "$CONFLUENCE_OUTAGE" | sed 's/<\/tr>/<\/tr>\n/g;s/<tr>/\n<tr>/g' | grep '^<tr' | grep "$1" | head -1 | sed 's/<\/td>/<\/td>\n/g;s/<td>/\n<td>/g' | grep '^<td' || true)"
     test -n "$row" || return 0
+    # shellcheck disable=SC2119
     office="$(echo "$row" | sed -n '2p' | html2md)"
+    # shellcheck disable=SC2119
     customer="$(echo "$row" | sed -n '3p' | html2md)"
+    # shellcheck disable=SC2119
     user="$(echo "$row" | sed -n '4p' | html2md)"
     echo -e "##### Auswirkungen für Endkunden\n\n$user\n\n##### Auswirkungen für Bibliotheken\n\n$customer\n\n##### Auswirkungen intern divibib/ekz\n\n$office"
 }
@@ -34,13 +37,16 @@ confluence_outage() {
 backoffice_set() {
     # set message in backoffice <from> <to> <message>
     local start end
+    # shellcheck disable=SC2119
     [[ "$1" =~ ^[0-9]+$ ]] &&
         start="$(date -d @"$1" -u +"%Y-%m-%dT%H:%M:%SZ" | urlencode)" ||
         start="$(date -d "$1" -u +"%Y-%m-%dT%H:%M:%SZ" | urlencode)"
+    # shellcheck disable=SC2119
     [[ "$2" =~ ^[0-9]+$ ]] &&
         end="$(date -d @"$2" -u +"%Y-%m-%dT%H:%M:%SZ" | urlencode)" ||
         end="$(date -d "$2" -u +"%Y-%m-%dT%H:%M:%SZ" | urlencode)"
     local message
+    # shellcheck disable=SC2119
     message="$(echo "${3:-Wartungsarbeiten}" | urlencode)"
     echo "Meldung im Backoffice: ${3:-Wartungsarbeiten}" >&2
     curl -u "swagger:$MIDDLEWARE_SWAGGER_PASSWORD" -X POST "http://user-application.service.user.dvb/v1/back-office/maintenance?validFrom=$start&validTo=$end&message=$message"

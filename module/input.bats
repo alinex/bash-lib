@@ -539,8 +539,8 @@ setup() {
     assert_output "27"
 }
 # bats test_tags=_password_strength
-@test "_password_strength: AmEsadSsAdS as good" {
-    run _password_strength AmEsadSsAdS
+@test "_password_strength: AmESadSsAdS as good" {
+    run _password_strength AmESadSsAdS
     assert_success
     assert_output "64"
 }
@@ -734,7 +734,7 @@ setup() {
         log_user 0
         spawn bash -c "
             source '"$BASHLIB_HOME"'/loader
-            tasks \"task1|run tsask 1\" \"task2| run task 2\"
+            tasks \"task1|run task 1\" \"task2| run task 2\"
         "
         log_user 1
         expect "Wähle eine der obigen Optionen"
@@ -774,7 +774,7 @@ setup() {
         log_user 0
         spawn bash -c "
             source '"$BASHLIB_HOME"'/loader
-            tasks --title=ToDo \"task1|run tsask 1\" \"task2| run task 2\"
+            tasks --title=ToDo \"task1|run task 1\" \"task2| run task 2\"
         "
         log_user 1
         expect "Wähle eine der obigen Optionen"
@@ -795,7 +795,7 @@ setup() {
         log_user 0
         spawn bash -c "
             source '"$BASHLIB_HOME"'/loader
-            tasks --default=1 \"task1|run tsask 1\" \"task2| run task 2\"
+            tasks --default=1 \"task1|run task 1\" \"task2| run task 2\"
         "
         log_user 1
         expect "Wähle eine der obigen Optionen"
@@ -815,7 +815,7 @@ setup() {
         log_user 0
         spawn bash -c "
             source '"$BASHLIB_HOME"'/loader
-            tasks --default=task2 \"task1|run tsask 1\" \"task2| run task 2\"
+            tasks --default=task2 \"task1|run task 1\" \"task2| run task 2\"
         "
         log_user 1
         expect "Wähle eine der obigen Optionen"
@@ -835,7 +835,7 @@ setup() {
         log_user 0
         spawn bash -c "
             source '"$BASHLIB_HOME"'/loader
-            tasks --default=\"run task 2\" \"task1|run tsask 1\" \"task2|run task 2\"
+            tasks --default=\"run task 2\" \"task1|run task 1\" \"task2|run task 2\"
         "
         log_user 1
         expect "Wähle eine der obigen Optionen"
@@ -855,7 +855,7 @@ setup() {
         log_user 0
         spawn bash -c "
             source '"$BASHLIB_HOME"'/loader
-            tasks --default=1 --timeout=1 \"task1|run tsask 1\" \"task2| run task 2\"
+            tasks --default=1 --timeout=1 \"task1|run task 1\" \"task2| run task 2\"
         "
         log_user 1
         expect "Wähle eine der obigen Optionen"

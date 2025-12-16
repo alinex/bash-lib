@@ -90,13 +90,13 @@ setup() {
     assert_success
 }
 # bats test_tags=disk_free
-@test "disk_free: should dosplay root only" {
+@test "disk_free: should display root only" {
     run bats_pipe disk_free / \| wc -l
     assert_output "2"
     assert_success
 }
 # bats test_tags=disk_free
-@test "disk_free: should dosplay root local" {
+@test "disk_free: should display root local" {
     run disk_free -l
     assert_success
 }

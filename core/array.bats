@@ -109,7 +109,7 @@ setup() {
 @test "hash: has no value" {
     declare -Ag test_array
     test_array["one"]=1
-    run hash test_array has ninetynine
+    run hash test_array has ninetyNine
     assert_failure
 }
 # bats test_tags=hash
@@ -123,6 +123,7 @@ setup() {
 # bats test_tags=hash
 @test "hash: complex key" {
     declare -Ag test_array
+    # shellcheck disable=SC2034
     test_array["o_n_e"]=1
     run hash test_array has "o n%e"   
     assert_success

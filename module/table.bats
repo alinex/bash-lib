@@ -82,7 +82,7 @@ EOT
 @test "tsv: crop 2 10" {
     in="$(cat <<'EOT'
 col1	col2
-number1	a very long line with text which shoould be cropped
+number1	a very long line with text which should be cropped
 EOT
 )"
     out="$(cat <<'EOT'
@@ -98,7 +98,7 @@ EOT
 @test "tsv: crop col2 10" {
     in="$(cat <<'EOT'
 col1	col2
-number1	a very long line with text which shoould be cropped
+number1	a very long line with text which should be cropped
 EOT
 )"
     out="$(cat <<'EOT'

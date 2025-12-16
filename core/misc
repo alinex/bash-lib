@@ -171,7 +171,7 @@ curl() {
     while [[ $i -le $# ]]; do
         if [[ "${!i}" == "--store" ]]; then
             store=1
-            shift $i
+            shift "$i"
             i=1
             continue
         fi

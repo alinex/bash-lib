@@ -130,7 +130,7 @@ input_args() {
 # Output:   <string-input> or
 #           <string-params> separated by newlines
 input_lines() {
-    if [ -p /dev/stdin ] && is empty -- "$1" ]; then
+    if [ -p /dev/stdin ] && is empty -- "$1"; then
         cat -
     else
         for arg in "$@"; do echo "$arg"; done

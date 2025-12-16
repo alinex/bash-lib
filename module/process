@@ -218,6 +218,7 @@ variables() {
     shift || true
     # processing
     local file
+    # shellcheck disable=SC2086
     file="$(mktemp $opt --extension=env "$ident")"
     case "$command" in
     store) declare -p "$@" | sed 's/^declare\b/declare -g/' >"$file" ;;
@@ -230,6 +231,7 @@ variables() {
             source "$temp" || true
             rm -r "$temp" || true
         else
+            # shellcheck disable=SC1090
             source "$file" 2>/dev/null || true
         fi
         [ -z "$clean" ] || rm -f "$file" # also directly clean it

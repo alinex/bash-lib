@@ -272,7 +272,7 @@ ask() {
             answer="$(mktemp --random editor)"
             echo "$prompt" >"$answer"
             if [ -n "$timeout" ]; then
-                debug timeout "$timeout" ${EDITOR:-vi} "$answer"
+                debug timeout "$timeout" "${EDITOR:-vi}" "$answer"
                 ${EDITOR:-vi} "$answer" &
                 sleep "$timeout"
                 pkill -TERM -P $! || true

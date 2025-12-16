@@ -133,6 +133,7 @@ remote() {
     elif [ -n "$file" ]; then
         is set --name=arguments --max=1 --die -- $#
         is readable --name=file --die -- "$1"
+        # shellcheck disable=SC2086
         ssh $ssh 'bash -s' <"$1" || rc=$?
     # piped input
     elif [ -p /dev/stdin ] && (($# == 0)); then
@@ -149,10 +150,12 @@ remote() {
     else
         if [ -z "$lines" ]; then
             # shellcheck disable=SC2086
+            # shellcheck disable=SC2029
             ssh $ssh "$@" || rc="${PIPESTATUS[0]}"
         else
             # shellcheck disable=SC2086
             # shellcheck disable=SC2119
+            # shellcheck disable=SC2029
             ssh $ssh "$@" 2> >(grep -v '^Connection to .* closed\.' >&2 || true) >&2 | nocr || rc=$?
         fi
     fi
@@ -164,7 +167,7 @@ remote() {
         kill -- -$$ 2>/dev/null
         exit 143
     fi
-    return $rc
+    return "$rc"
 }
 
 # Deprecated: Run remote command with pseudo terminal

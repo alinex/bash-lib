@@ -55,6 +55,6 @@ setup() {
 
 # bats test_tags=alerts
 @test "alerts: should get empty list" {
-    run alerts -i not-existing.host.microschrot.com
+    run alerts -i not-existing.host.micro-schrott.com
     assert_success
 }
