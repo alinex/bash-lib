@@ -21,13 +21,13 @@ setup() {
 # bats test_tags=debug
 @test "debug: show level 1" {
     DEBUG=1 run debug Test
-    assert_output --partial "> bats_merge_stdout_and_stderr Test"
+    assert_output --partial ">  bats_merge_stdout_and_stderr Test"
     assert_success
 }
 # bats test_tags=debug
 @test "debug: with piped message" {
     DEBUG=1 run bats_pipe echo Test \| debug
-    assert_output --partial "> bats_merge_stdout_and_stderr Test"
+    assert_output --partial ">  bats_pipe            Test"
     assert_success
 }
 # bats test_tags=debug
@@ -39,13 +39,13 @@ setup() {
 # bats test_tags=debug
 @test "debug: show func" {
     DEBUG=bats_merge_stdout_and_stderr run debug Test
-    assert_output --partial "> bats_merge_stdout_and_stderr Test"
+    assert_output --partial ">  bats_merge_stdout_and_stderr Test"
     assert_success
 }
 # bats test_tags=debug
 @test "debug: show func with pattern" {
     DEBUG="bats.*" run debug Test
-    assert_output --partial "> bats_merge_stdout_and_stderr Test"
+    assert_output --partial ">  bats_merge_stdout_and_stderr Test"
     assert_success
 }
 # bats test_tags=debug

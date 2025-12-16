@@ -2648,7 +2648,7 @@ esac
 done
 _login=${_login:-${login:-$REMOTE_LOGIN_DEFAULT}}
 host=${host:-$server}
-local ssh="$_login@$host"
+local ssh="$_login@$host" rc=0
 [ -z "$jump" ]||ssh="-J $jump $ssh"
 [ -z "$term" ]||ssh="-t $ssh"
 if [ "$1" = "console" ];then
@@ -2657,7 +2657,7 @@ ssh $ssh '(nohup touch .hushlogin && sleep 1 && rm .hushlogin) >/dev/null 2>&1 <
 ssh $opt $ssh </dev/tty||rc=$?
 elif [ "$1" = "bashlib" ];then
 shift
-local list modules rc=0
+local list modules
 list="$(_module_resolve "${1-}")"
 IFS=',' read -ra modules <<<"$list"
 debug "Modules: ${modules[*]}"
@@ -2700,11 +2700,10 @@ fi
 return "${PIPESTATUS[0]}"
 else
 if [ -z "$lines" ];then
-ssh $ssh "$@"||rc=$?
+ssh $ssh "$@"||rc="${PIPESTATUS[0]}"
 else
 ssh $ssh "$@" 2> >(grep -v '^Connection to .* closed\.' >&2||true) >&2|nocr||rc=$?
 fi
-return "${PIPESTATUS[0]}"
 fi
 if ((rc==255));then
 die "SSH Connection to $ssh not possible"
