@@ -465,7 +465,7 @@ is integer --name=arguments --max=1 --die -- $#
 local ident
 is set -- "$1"&&ident="_$1"
 result="$path/$(basename "$0")$ident$rand$ext"
-if is empty -- "$rand";then
+if is set -- "$rand";then
 while [ -e "$result" ];do
 result="$path/$(basename "$0")$ident$RANDOM$ext"
 done
@@ -505,16 +505,12 @@ debug "command curl -s -w \"Error: %{url_effective} with RC:%{http_code}\" $opt 
 res=$(command curl -s -w "%{url_effective} with RC:%{http_code}" $opt -L "$@"|tail -1)
 debug "Response: $res"
 CURL_HTTP_CODE=${res: -3}
-if [[ $CURL_HTTP_CODE =~ ^2[0-9]{2}$ ]];then
+env_store curl CURL_HTTP_CODE
 if [ -n "$file" ];then
 cat "$file"
 rm "$file"
 fi
-else
-if [ -n "$file" ];then
-jq . "$file" >&2 2>/dev/null||cat "$file" >&2
-rm "$file"
-fi
+if [[ ! $CURL_HTTP_CODE =~ ^2[0-9]{2}$ ]];then
 error "Error: $res" >&2
 return 1
 fi
@@ -535,7 +531,7 @@ else
 [[ $func =~ .*(${DEBUG//, /|}) ]]||return 0
 fi
 while IFS= read -r line;do
-printf "$CC_BLACK%-2s %-20s %s$CC_RESET\n" "$sign" "$func" "$line" >&2
+((DEBUG<9))&&printf "$CC_BLACK%-2s %-20s %s$CC_RESET\n" "$sign" "$func" "$line" >&2||printf "$CC_BLACK%-2s %7d %-20s %s$CC_RESET\n" "$sign" $BASHPID "$func" "$line" >&2
 done <<<"$text"
 ! command -v log >/dev/null||log debug "$func: $text"
 }
@@ -959,28 +955,24 @@ is set --name=page-id --die -- "$1"
 install jq
 curl -H "Content-Type: application/json" -u "$ATLASSIAN_USER:$ATLASSIAN_TOKEN" "$CONFLUENCE_API/content/$1?expand=body.storage"|jq .body.storage.value -r||die "Could not read confluence page!"
 }
-jira_search(){
-is integer --name=arguments --max=1 --die -- $#
-is set --name=jql --die -- "$1"
-install jq
-curl -u "$ATLASSIAN_USER:$ATLASSIAN_TOKEN" -H "Content-Type: application/json" -X GET "$JIRA_API/search/jql?jql=$1&fields=*all"|jq '.issues[]'||die "Could not search for Jira issues using $1!"
-}
-jira_get(){
-is integer --name=arguments --max=1 --die -- $#
-is set --name=issue-key --die -- "$1"
-curl -u "$ATLASSIAN_USER:$ATLASSIAN_TOKEN" -H "Content-Type: application/json" -X GET "$JIRA_API/issue/$1"||die "Could not get Jira issue $1!"
-}
-jira_create(){
-is integer --name=arguments --max=1 --die -- $#
-is set --name=json --die -- "$1"
-install jq
-curl -u "$ATLASSIAN_USER:$ATLASSIAN_TOKEN" -H "Content-Type: application/json" -X POST "$JIRA_API/issue/" -d "$1"|jq '.key' -r||die "Could not create Jira issue!"
-}
-jira_update(){
-is integer --name=arguments --max=2 --die -- $#
-is set --name=issue-key --die -- "$1"
-is set --name=json --die -- "$2"
-curl -u "$ATLASSIAN_USER:$ATLASSIAN_TOKEN" -H "Content-Type: application/json" -X PUT "$JIRA_API/issue/$1" -d "$1"||die "Could not update Jira issue $1!"
+jira(){
+is set --name=JIRA_HOST --die -- "$JIRA_HOST"
+is set --name=ATLASSIAN_USER --die -- "$ATLASSIAN_USER"
+is set --name=ATLASSIAN_TOKEN --die -- "$ATLASSIAN_TOKEN"
+local command
+command="$(check enum --name=command --allow="get" --die -- "$1")"
+shift
+local api=/rest/api/3
+case "$command" in
+get)is set --name=arguments --max=1 --die -- $#
+is set --name=issueId-or-key --die -- "$1"
+debug "GET $1"
+response="$(curl --request GET --url "$JIRA_HOST/$api/issue/$1" --user "$ATLASSIAN_USER:$ATLASSIAN_TOKEN" -H "Content-Type: application/json")"||true
+env_restore curl
+case $CURL_HTTP_CODE in
+404)(jq .errorMessages[] -r <<<"$response"||"$response")|die
+esac
+esac
 }
 use module/software
 mongo(){
@@ -2378,7 +2370,7 @@ esac
 done
 local ident=$1
 shift||true
-declare -p "$@"|sed 's/^declare\b/declare -g/' >"$(mktemp $opt -e env "$ident")"
+declare -p "$@"|sed 's/^declare\b/declare -g/' >"$(mktemp $opt --extension=env "$ident")"
 }
 env_restore(){
 debug "env_restore $*"

@@ -62,8 +62,8 @@ IP_SEGMENT_PATTERN=(
 
 # Atlassian confluence API URL used together with $ATLASSIAN_USER and $ATLASSIAN_TOKEN and silently disables @confluence functions if not set
 #CONFLUENCE_API=https://mycompany.atlassian.net/wiki/rest/api
-# Atlassian jira API URL used together with $ATLASSIAN_USER and $ATLASSIAN_TOKEN and silently disables @jira functions if not set
-#JIRA_API=https://mycompany.atlassian.net/rest/api/3
+# Atlassian Jira URL to connect to
+#JIRA_HOST=https://my-company.atlassian.net
 
 ######################################################################################
 ### Remote API

@@ -4,6 +4,8 @@
 
 This will load the content into a temporary shared memory file while running.
 
+The information of the CURL_* variables are stored in an environment file because of the different processes you have to make the changes visible using `env_restore curl`. After that you may use them.
+
 ### Usage
 
 ```bash

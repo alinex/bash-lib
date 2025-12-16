@@ -50,6 +50,8 @@ PROMETHEUS=
 ATLASSIAN_USER=
 # Atlassian password for API access in confluence and jira
 ATLASSIAN_TOKEN=
+# Atlassian Jira URL this can be https://my-company.atlassian.net
+JIRA_HOST=https://ekz-gruppe.atlassian.net
 
 # Atlassian confluence API URL used together with $ATLASSIAN_USER and $ATLASSIAN_TOKEN and silently disables @confluence functions if not set
 CONFLUENCE_API=

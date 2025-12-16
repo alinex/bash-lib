@@ -24,3 +24,32 @@ setup() {
     run confluence 677347344
     assert_success
 }
+
+######################################################################################
+# jira
+######################################################################################
+
+# bats test_tags=jira
+@test "jira: should get issue by key" {
+    if [ -z "$JIRA_HOST" ]; then
+        skip "Because JIRA_HOST not set."
+    fi
+    run jira SEC-198
+    assert_success
+}
+# bats test_tags=jira
+@test "jira: should get issue by issueId" {
+    if [ -z "$JIRA_HOST" ]; then
+        skip "Because JIRA_HOST not set."
+    fi
+    run jira 60162
+    assert_success
+}
+# bats test_tags=jira
+@test "jira: fail to get issue by key" {
+    if [ -z "$JIRA_HOST" ]; then
+        skip "Because JIRA_HOST not set."
+    fi
+    run jira get NOT-EXISTING-KEY
+    assert_failure
+}

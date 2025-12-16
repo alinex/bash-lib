@@ -64,6 +64,7 @@ The configuration module contains a lot of general configuration settings for th
 | ``$PROMETHEUS`` | Prometheus host names as space separated list |
 | ``$ATLASSIAN_USER`` | Atlassian user for API access in confluence and jira |
 | ``$ATLASSIAN_TOKEN`` | Atlassian password for API access in confluence and jira |
+| ``$JIRA_HOST`` | Atlassian Jira URL this can be https://my-company.atlassian.net |
 | ``$CONFLUENCE_API`` | Atlassian confluence API URL used together with `$ATLASSIAN_USER` and `$ATLASSIAN_TOKEN` and silently disables [`confluence`](functionconfluence.md) functions if not set |
 | ``$JIRA_API`` | Atlassian jira API URL used together with `$ATLASSIAN_USER` and `$ATLASSIAN_TOKEN` and silently disables [`jira`](functionjira.md) functions if not set |
 | ``$REMOTE_LOGIN_DEFAULT`` | Default login if no `--login` or ``$login`` available |
@@ -255,10 +256,7 @@ This covers Atlassian API for Jira and confluence.
 | Variable/Function | Description |
 | --- | --- |
 | [`confluence`](function/confluence.md) | Get page content from Confluence using API |
-| [`jira_search`](function/jira_search.md) | Search for jira tickets |
-| [`jira_get`](function/jira_get.md) | Get jira ticket details |
-| [`jira_create`](function/jira_create.md) | Create jira tickets |
-| [`jira_update`](function/jira_update.md) | Update jira tickets |
+| [`jira`](function/jira.md) | https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issues/#api-group-issues |
 
 ### Database Module
 

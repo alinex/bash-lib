@@ -31,50 +31,40 @@ confluence() {
 # - https://developer.atlassian.com/cloud/jira/platform/apis/document/structure
 # - https://atlas-doc-parser.readthedocs.io/en/latest/index.html
 
-# Search for jira tickets
-# Usage:    jira_search <jql>
-# Output:   <json>
-jira_search() {
-    is integer --name=arguments --max=1 --die -- $#
-    is set --name=jql --die -- "$1"
+# https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issues/#api-group-issues
+#
+# Jira API calls
+# To connect the $ATLASSIAN_USER and $ATLASSIAN_TOKEN is needed.
+# Jira API V3 is used there: https://developer.atlassian.com/cloud/jira/platform/rest/v3/intro which brings some elements in the [Atlassian Document Format](https://developer.atlassian.com/cloud/jira/platform/apis/document/structure/).
+#
+# The following commands are supported:
+#
+# - get <issueId>|<key>
+#
+# Usage:    jira <command> <options>...
+#           jira get <issueId>|<key>
+#           jira search <jql>
+#           jira update <ticket-id> <json>
+#           jira create <json>
+jira() {
+    is set --name=JIRA_HOST --die -- "$JIRA_HOST"
+    is set --name=ATLASSIAN_USER --die -- "$ATLASSIAN_USER"
+    is set --name=ATLASSIAN_TOKEN --die -- "$ATLASSIAN_TOKEN"
+    local command
+    command="$(check enum --name=command --allow="get" --die -- "$1")"
+    shift
+    local api=/rest/api/3
     # processing
-    install jq
-    curl -u "$ATLASSIAN_USER:$ATLASSIAN_TOKEN" -H "Content-Type: application/json" -X GET "$JIRA_API/search/jql?jql=$1&fields=*all" |
-        jq '.issues[]' ||
-        die "Could not search for Jira issues using $1!"
-}
-
-# Get jira ticket details
-# Usage:    jira_get <issue-key>
-# Output:   <json>
-jira_get() {
-    is integer --name=arguments --max=1 --die -- $#
-    is set --name=issue-key --die -- "$1"
-    # processing
-    curl -u "$ATLASSIAN_USER:$ATLASSIAN_TOKEN" -H "Content-Type: application/json" -X GET "$JIRA_API/issue/$1" ||
-        die "Could not get Jira issue $1!"
-}
-
-# Create jira tickets
-# Usage:    jira_create <json>
-# Output:   <issue-key>
-jira_create() {
-    is integer --name=arguments --max=1 --die -- $#
-    is set --name=json --die -- "$1"
-    # processing
-    install jq
-    curl -u "$ATLASSIAN_USER:$ATLASSIAN_TOKEN" -H "Content-Type: application/json" -X POST "$JIRA_API/issue/" -d "$1" |
-        jq '.key' -r ||
-        die "Could not create Jira issue!"
-}
-
-# Update jira tickets
-# Usage:    jira_update <issue-key> <json>
-jira_update() {
-    is integer --name=arguments --max=2 --die -- $#
-    is set --name=issue-key --die -- "$1"
-    is set --name=json --die -- "$2"
-    # processing
-    curl -u "$ATLASSIAN_USER:$ATLASSIAN_TOKEN" -H "Content-Type: application/json" -X PUT "$JIRA_API/issue/$1" -d "$1" ||
-        die "Could not update Jira issue $1!"
+    case "$command" in
+    get)
+        is set --name=arguments --max=1 --die -- $#
+        is set --name=issueId-or-key --die -- "$1"
+        debug "GET $1"
+        response="$(curl --request GET --url "$JIRA_HOST/$api/issue/$1" --user "$ATLASSIAN_USER:$ATLASSIAN_TOKEN" -H "Content-Type: application/json")" || true
+        env_restore curl
+        case $CURL_HTTP_CODE in
+        404) (jq .errorMessages[] -r <<<"$response" || "$response") | die ;;
+        esac
+        ;;
+    esac
 }

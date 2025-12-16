@@ -211,7 +211,7 @@ env_store() {
     local ident=$1
     shift || true
     # shellcheck disable=SC2086
-    declare -p "$@" | sed 's/^declare\b/declare -g/' >"$(mktemp $opt -e env "$ident")"
+    declare -p "$@" | sed 's/^declare\b/declare -g/' >"$(mktemp $opt --extension=env "$ident")"
 }
 
 # Restore environment from shared memory/file

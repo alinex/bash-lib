@@ -465,7 +465,7 @@ is integer --name=arguments --max=1 --die -- $#
 local ident
 is set -- "$1"&&ident="_$1"
 result="$path/$(basename "$0")$ident$rand$ext"
-if is empty -- "$rand";then
+if is set -- "$rand";then
 while [ -e "$result" ];do
 result="$path/$(basename "$0")$ident$RANDOM$ext"
 done
@@ -505,16 +505,12 @@ debug "command curl -s -w \"Error: %{url_effective} with RC:%{http_code}\" $opt 
 res=$(command curl -s -w "%{url_effective} with RC:%{http_code}" $opt -L "$@"|tail -1)
 debug "Response: $res"
 CURL_HTTP_CODE=${res: -3}
-if [[ $CURL_HTTP_CODE =~ ^2[0-9]{2}$ ]];then
+env_store curl CURL_HTTP_CODE
 if [ -n "$file" ];then
 cat "$file"
 rm "$file"
 fi
-else
-if [ -n "$file" ];then
-jq . "$file" >&2 2>/dev/null||cat "$file" >&2
-rm "$file"
-fi
+if [[ ! $CURL_HTTP_CODE =~ ^2[0-9]{2}$ ]];then
 error "Error: $res" >&2
 return 1
 fi
@@ -535,7 +531,7 @@ else
 [[ $func =~ .*(${DEBUG//, /|}) ]]||return 0
 fi
 while IFS= read -r line;do
-printf "$CC_BLACK%-2s %-20s %s$CC_RESET\n" "$sign" "$func" "$line" >&2
+((DEBUG<9))&&printf "$CC_BLACK%-2s %-20s %s$CC_RESET\n" "$sign" "$func" "$line" >&2||printf "$CC_BLACK%-2s %7d %-20s %s$CC_RESET\n" "$sign" $BASHPID "$func" "$line" >&2
 done <<<"$text"
 ! command -v log >/dev/null||log debug "$func: $text"
 }
