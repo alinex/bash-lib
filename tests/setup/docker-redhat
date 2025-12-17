@@ -11,19 +11,13 @@ else
 fi
 
 # install needed packages
-sudo pacman -Syu --noconfirm
-sudo pacman -Sy --noconfirm git expect jq glibc glibc-locales which less python
-
+sudo dnf update -y
+sudo dnf install -y git python3 jq expect gettext glibc-all-langpacks glibc-locale-source
 # Set timezone (for date tests)
-sudo ln -sf /usr/share/zoneinfo/Europe/Berlin /etc/localtime
-
+ln -sf /usr/share/zoneinfo/Europe/Berlin /etc/localtime
+export TZ=Europe/Berlin
 # Set language
-sudo sed -i 's/# \?de_DE.UTF-8 UTF-8/de_DE.UTF-8 UTF-8/' /etc/locale.gen
-sudo locale-gen
-echo LANG=de_DE.UTF-8 | sudo tee /etc/locale.conf
-export LANG=de_DE.UTF-8
-export LANGUAGE=de_DE.UTF-8
-export LC_ALL=de_DE.UTF-8
+localedef -i de_DE -f UTF-8 de_DE.UTF-8
 
 # install bats
 # shellcheck disable=SC1091

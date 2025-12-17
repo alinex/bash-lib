@@ -22,6 +22,7 @@ This document outlines the process and best practices for contributing to the pr
     - [📋 Run Unit Tests](#-run-unit-tests)
       - [Local run](#local-run)
       - [Docker based Tests](#docker-based-tests)
+      - [Manual Docker run](#manual-docker-run)
       - [CI Run in GitLab](#ci-run-in-gitlab)
     - [📝 Linting with Shellcheck](#-linting-with-shellcheck)
     - [🧹 Code Guidelines](#-code-guidelines)
@@ -403,6 +404,26 @@ You can also selectively run only one os type yb giving this a argument or a spe
 ```bash
 ./test debian        # Test all valid debian versions
 ./test debian 12     # Test only Debian 12
+```
+
+#### Manual Docker run
+
+First run a shell within the docker image (my home directory is added here, because of the test-config which is needed):
+
+```bash
+docker run --rm -it -v ".:/mnt" -v "/home/alex:/home/alex" -w /mnt "redhat/ubi8" sh
+```
+
+Now you have to setup for BashLib with the correct OS type:
+
+```bash
+. tests/setup/docker-redhat
+```
+
+ANd then you can run the tests like locally:
+
+```bash
+bats core module
 ```
 
 #### CI Run in GitLab

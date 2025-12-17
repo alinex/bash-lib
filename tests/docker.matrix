@@ -19,16 +19,20 @@ manjaro     25      arch        manjarolinux/base
 #EndeavourOS rolling arch       -
 #Garuda             arch        -
 #CachyOS            arch        -
-#redhat      8       redhat      redhat/ubi8
-#redhat      9       redhat      redhat/ubi9
-#redhat      10      redhat      redhat/ubi10
-#  fedora       https://hub.docker.com/_/fedora
-#  centos       https://hub.docker.com/_/centos
+redhat      8       redhat      redhat/ubi8
+redhat      9       redhat      redhat/ubi9
+redhat      10      redhat      redhat/ubi10
+fedora      41      redhat      fedora:41
+fedora      42      redhat      fedora:42
+fedora      43      redhat      fedora:43
+centos      8       redhat      centos:centos8
+centos      stream9 redhat      quay.io/centos/centos:stream9
 # ------------------------
-#mandriva
-#Gentoo
-#   funtoo
-#slackware
+#mandriva       openmandriva/cooker   (rolling)
+#Gentoo         gentoo/stage3 
+#   funtoo      funtoo/stage3-generic_64
+#slackware      aclemons/slackware:15.0
+#slackware      aclemons/slackware:14.0
 #   salixos
 #freebsd openbsd
 #opensuse

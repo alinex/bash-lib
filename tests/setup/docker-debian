@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/env sh
 
 # shellcheck disable=SC2155
 export BASHLIB_HOME="$(pwd)"
