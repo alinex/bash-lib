@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+# shellcheck source=config/environment
+source /dev/null
+# shellcheck source=base
+source /dev/null
+
+# Run trivy security scan and analyze results.
+
+# Run a trivy security analysis.
+# Usage:    trivy [<options>] fs <path>
+# Output:   <report-path>
+# Return:   1 if there are at least one CRITICAL or HIGH vulnerabilities
+trivy() {
+    true
+}

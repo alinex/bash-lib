@@ -11,6 +11,11 @@ The following commands are supported:
 
 - `get` will return all fields of an issue as json
 - `search` will find matching issues
+- `create` to generate a new issue
+- `delete` to remove an issue
+- `json` manipulate jira issue json
+
+The Jira JSON consists of the `fields` array and some additional meta like `id`, `key`. To simplify work with it the json helper allows to manipulate it.
 
 
 ### Usage
@@ -21,12 +26,17 @@ jira get <issueId>|<key>
 jira search <jql>
 jira update <ticket-id> <json>
 jira create <json>
+jira delete <issueId>|<key>
+jira json <json> set <field> <value>
+jira json <json> get <field>
+jira json <json> remove <field>
 ```
 
 ### Output (stdout)
 
 - get: `<json>`
 - search: `<issueId>` list, each in a separate line
+- create: `<issueId>` which was just created
 
 ### Return (exit code)
 

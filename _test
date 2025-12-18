@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+# shellcheck disable=SC2329
+# shellcheck source=base disable=SC2015
+test -z "${DEBUG-}" && source "$BASHLIB_HOME"/full || source "$BASHLIB_HOME"/loader
+
+TITLE="Test suite"
+USAGE="$(basename "$0") [<options>] <instance>"
+OPTIONS="
+n name  string  Name of Birthday Person
+a age   int     Age in years
+h help  -       Show Help Page"
+DESCRIPTION=""
+# parse and validate arguments
+eval set -- "$(option_parse "$OPTIONS" "$@")"
+while true; do
+    case "$1" in
+    -n | --name) shift 2 ;;
+    -a | --age) shift 2 ;;
+    -h | --help)
+        help "$TITLE" "$USAGE" "$OPTIONS" "$DESCRIPTION"
+        exit
+        ;;
+    --)
+        shift
+        break
+        ;;
+    *) die "Unerwartete option: $1" ;;
+    esac
+done
+################################################################################################
+
+task1() { echo "task1"; }
+task2() { echo "task2"; }
+#tasks "task1|run task 1" "task2| run task 2"
+echo -e "task1 | run task 1\ntask2 | run task 2" | tasks
+exit
+
+json=""
+echo "$json" | jq
+exit
+
+SECURITY_BOARD_ID=10134
+cve=CVE-2017-5336
+jql="project = ${SECURITY_BOARD_ID} AND summary ~ $cve ORDER BY created ASC"
+issueId="$(jira search "$jql" | head -1)"
+jira get "$issueId" | jq

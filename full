@@ -971,9 +971,7 @@ jira(){
 is set --name=JIRA_HOST --die -- "$JIRA_HOST"
 is set --name=ATLASSIAN_USER --die -- "$ATLASSIAN_USER"
 is set --name=ATLASSIAN_TOKEN --die -- "$ATLASSIAN_TOKEN"
-local command
-command="$(check enum --name=command --allow="get search" --die -- "$1")"
-shift
+is enum --name=command --allow="get search create delete json" --die -- "$1"&&local command="$1"&&shift
 case "$command" in
 get)is set --name=arguments --max=1 --die -- $#
 is set --name=issueId-or-key --die -- "$1"
@@ -985,6 +983,26 @@ is set --name=jql --die -- "$1"
 debug "SEARCH $1"
 local res rc=0
 _jira GET "search/jql?jql=$(urlencode "$1")"|jq .issues[].id -r
+;;
+create)is set --name=arguments --max=1 --die -- $#
+is set --name=json --die -- "$1"
+debug "CREATE Issue ${jq-r '.fields.summary' <<<"$1"}"
+_jira POST issue "$1"|jq .id
+;;
+delete)is set --name=arguments --max=1 --die -- $#
+is set --name=issueId-or-key --die -- "$1"
+debug "DELETE $1"
+_jira GET "issue/$1"
+;;
+json)local empty='{"fields":{}}'
+local json="${1:-$empty}"&&shift
+is enum --name=sub-command --allow="set get remove" --die -- "$1"&&local subCommand="$1"&&shift
+is set --name=field --die -- "$1"&&local field="$1"
+case "$subCommand" in
+set)jq --arg v "$2" ".fields.$field = \$v" <<<"$json";;
+get)jq ".fields.$field" <<<"$json";;
+remove)jq "del(.fields.$field)" <<<"$json"
+esac
 esac
 }
 _jira(){
@@ -1579,7 +1597,7 @@ return
 fi
 done
 _default="$(value_if_variable "$_default")"
-task=$(choose "$title" -x "$(gettext "Exit")" $opt -d "$_default" <<<"$list")
+task=$(choose "$title" -x "$(gettext "Exit")" $opt -d "$_default" "$list" </dev/null)
 debug "chosen $task"
 [[ $task != "exit" ]]||break
 local error
@@ -3232,5 +3250,8 @@ tail -n +2 <<<"$input"|tac
 ;;
 *)die "Usage: tsv {to|crop} [<value>]"
 esac
+}
+trivy(){
+true
 }
 source $BASHLIB_HOME/configs

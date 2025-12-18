@@ -657,6 +657,7 @@ tasks() {
         # check for dynamic parts in list
         while grep -qv '|' <<<"$list"; do
             : >"$new_list"
+            # resolve dynamic parts
             while IFS= read -r line; do
                 IFS='|' read -r cmd name <<<"$line"
                 if [ -n "$name" ]; then
@@ -675,7 +676,7 @@ tasks() {
         done
         _default="$(value_if_variable "$_default")"
         # shellcheck disable=SC2086
-        task=$(choose "$title" -x "$(gettext "Exit")" $opt -d "$_default" <<<"$list")
+        task=$(choose "$title" -x "$(gettext "Exit")" $opt -d "$_default" "$list" </dev/null)
         debug "chosen $task"
         [[ "$task" != "exit" ]] || break
         local error

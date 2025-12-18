@@ -52,23 +52,23 @@ The support is divided into:
 ❔ no interest at the moment
 ⛔ could not be supported
 
-| Distribution   | Versions  |         |            | Untested/Problematic                  |
-| -------------- | --------- | ------- | ---------- | ------------------------------------- |
+| Distribution   | Versions  |         |            | Untested/Problematic                                |
+| -------------- | --------- | ------- | ---------- | --------------------------------------------------- |
 | Debian         | ✅ 11      | ✅ 12    | ✅ 13       |
 | ⤷ Ubuntu       | ✅  22.04  | ✅ 24.04 |
 | ⤷   Linux Mint | ✅ 21      | ✅ 22    |
 | ⤷   KDE Neon   | ✅ stable  |
-| ⤷ Kali Linux   | ✅ rolling |         |            | monitoring,remote                     |
+| ⤷ Kali Linux   | ✅ rolling |         |            | monitoring,remote                                   |
 | ⤷ MX Linux     | 🟢 21      | 🟢 22    | 🟢 23       |
 | ⤷ AntiX        | 🟢 23      |
 | ⤷ Parrot OS    | 🟢         |
-| Alpine         | ✅ 3.19    | ✅ 3.21  | ✅ 3.22     | mongo                                 |
-| Arch Linux     | ✅ rolling |         |            | remote                                |
-| ⤷ Manjaro      | ✅ 25      |         |            | mongo,monitoring                      |
+| Alpine         | ✅ 3.19    | ✅ 3.21  | ✅ 3.22     | mongo                                               |
+| Arch Linux     | ✅ rolling |         |            | remote                                              |
+| ⤷ Manjaro      | ✅ 25      |         |            | mongo,monitoring                                    |
 | ⤷ EndeavourOS  | 🟢         |
 | ⤷ Garuda Linux | 🟢         |
 | ⤷ CachyOS      | 🟢         |
-| RedHat         | ✅ 8       | ✅ 9     | ✅ 10       | mongo,input,monitoring,network,remote |
+| RedHat         | ✅ 8       | ✅ 9     | ✅ 10       | mongo,tasks,monitoring,network,install,table,remote |
 | ⤷ CentOS       | ⛔ 7       | 🟢 8     | 🟢 Stream 9 |
 | ⤷ Fedora       | 🟢 41      | 🟢 42    | 🟢 43       |
 

@@ -430,6 +430,14 @@ Module with modifiers for csv/tsv tables.
 | [`csv`](function/csv.md) | Transform comma separated table. |
 | [`tsv`](function/tsv.md) | Transform tab separated table. |
 
+### Trivy Module
+
+Run trivy security scan and analyze results.
+
+| Variable/Function | Description |
+| --- | --- |
+| [`trivy`](function/trivy.md) | Run a trivy security analysis. |
+
 ## Extra
 
 ### Divibib Module
