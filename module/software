@@ -42,6 +42,7 @@ install() {
     declare -a apk
     declare -a pacman
     declare -a yay
+    declare -a dnf
     declare -a after
     # check what is needed
     for cmd in "$@"; do
@@ -74,6 +75,15 @@ install() {
                         ;;
                     *) pacman+=("$cmd") ;;
                     esac
+                # redhat
+                elif command -v dnf >/dev/null; then
+                    case $cmd in
+                    ip) dnf+=(iproute) ;;
+                    mlr) before+=(_install_redhat_epel) && dnf+=(miller) ;;
+                    yq) before+=(_install_redhat_epel) && dnf+=(yq) ;;
+                    mongosh) dnf=(mongodb-mongosh)
+                    *) dnf+=("$cmd") ;;
+                    esac
                 fi
         else
             debug 3 "$cmd is already installed or tried earlier"
@@ -98,6 +108,10 @@ install() {
     if ((${#pacman[@]} > 0)); then
         debug "Installing arch packages: ${pacman[*]}..."
         sudo pacman -S --noconfirm "${pacman[@]}"
+    fi
+    if ((${#dnf[@]} > 0)); then
+        debug "Installing RedHat packages: ${dnf[*]}..."
+        sudo dnf install -y "${dnf[@]}"
     fi
     if ((${#yay[@]} > 0)); then
         if ! command -v yay >/dev/null; then

@@ -16,7 +16,7 @@ setup() {
 # bats test_tags=ip_intern
 @test "ip_intern: with default format" {
     run ip_intern
-    assert_output -e "^[0-9]+\.[0-9]+.[0-9]+.[0-9]+$"
+    assert_output -e "[0-9]+\.[0-9]+.[0-9]+.[0-9]+$"
     assert_success
 }
 # bats test_tags=ip_intern

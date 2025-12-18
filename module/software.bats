@@ -11,10 +11,10 @@ setup() {
 ######################################################################################
 
 # bats test_tags=install
-@test "install: should install default package (ncdu)" {
-    run install ncdu
+@test "install: should install default package (ed)" {
+    run install ed
     assert_success
-    assert command -v ncdu >/dev/null
+    assert command -v ed >/dev/null
 }
 # bats test_tags=install
 @test "install: should install mlr" {

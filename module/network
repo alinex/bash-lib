@@ -17,6 +17,7 @@
 # shellcheck disable=SC2120
 ip_intern() {
     is integer --name=arguments --max=1 --die -- $#
+    install ip
     case ${1-} in
     data)
         echo -e "$(gettext "IP\tInterface")"
