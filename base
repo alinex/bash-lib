@@ -644,7 +644,7 @@ uncolorize(){
 input "$@"|sed -r 's/\x1B\[[0-9;]*[mGK]//g'
 }
 html2md(){
-input "$@"|sed 's#&rarr;#→#g;s#&auml;#ä#g;s#&ouml;#ö#g;s#&uuml;#ü#g;s#&Auml;#Ä#g;s#&Ouml;#Ö#g;s#&Uuml;#Ü#g;s#&szlig;#ß#g;s#<strong>\([^<]*\)</strong>#**\1**#g;s#<br/\?>#\n#g;s#<li>#\n- #g;s#<[^>]*>##g'|grep -v '^$'
+input "$@"|sed 's#&rarr;#→#g;s#&auml;#ä#g;s#&ouml;#ö#g;s#&uuml;#ü#g;s#&Auml;#Ä#g;s#&Ouml;#Ö#g;s#&Uuml;#Ü#g;s#&szlig;#ß#g;s#<strong>\([^<]*\)</strong>#**\1**#g;s#<br/\?>#\n#g;s#<li[^>]*>#\n- #g;s#<[^>]*>##g'|grep -v '^$'
 }
 nocr(){
 input "$@"|sed 's/\r$//'
