@@ -17,7 +17,11 @@ sudo dnf install -y git python3 jq expect gettext glibc-all-langpacks glibc-loca
 ln -sf /usr/share/zoneinfo/Europe/Berlin /etc/localtime
 export TZ=Europe/Berlin
 # Set language
-localedef -i de_DE -f UTF-8 de_DE.UTF-8
+echo "LANG=de_DE.UTF-8" | sudo tee /etc/locale.conf
+echo "LANGUAGE=de_DE.UTF-8" | sudo tee -a /etc/locale.conf
+echo "LC_ALL=de_DE.UTF-8" | sudo tee -a /etc/locale.conf
+sudo localedef -i de_DE -f UTF-8 de_DE.UTF-8
+. /etc/profile
 
 # install bats
 # shellcheck disable=SC1091
