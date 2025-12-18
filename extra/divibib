@@ -22,11 +22,11 @@ confluence_outage() {
     row="$(confluence "$CONFLUENCE_OUTAGE" | sed 's/<\/tr>/<\/tr>\n/g;s/<tr>/\n<tr>/g' | grep '^<tr' | grep "$1" | head -1 | sed 's/<\/td>/<\/td>\n/g;s/<td>/\n<td>/g' | grep '^<td' || true)"
     test -n "$row" || return 0
     # shellcheck disable=SC2119
-    office="$(echo "$row" | sed -n '2p' | html2md)"
+    office="$(echo "$row" | sed -n '1p' | html2md)"
     # shellcheck disable=SC2119
-    customer="$(echo "$row" | sed -n '3p' | html2md)"
+    customer="$(echo "$row" | sed -n '2p' | html2md)"
     # shellcheck disable=SC2119
-    user="$(echo "$row" | sed -n '4p' | html2md)"
+    user="$(echo "$row" | sed -n '3p' | html2md)"
     echo -e "##### Auswirkungen für Endkunden\n\n$user\n\n##### Auswirkungen für Bibliotheken\n\n$customer\n\n##### Auswirkungen intern divibib/ekz\n\n$office"
 }
 
