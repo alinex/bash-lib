@@ -30,7 +30,7 @@ use() {
     module) [[ ! "$BASHLIB_LOADER" =~ loader|full|remote ]] || return 0 ;;
     esac
     debug 5 "Loading module $module"
-    source "$module"
+    source "$BASHLIB_HOME/$module"
 }
 
 # Set or add an additional trap without overwriting existing ones
