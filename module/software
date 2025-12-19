@@ -81,7 +81,7 @@ install() {
                     ip) dnf+=(iproute) ;;
                     mlr) before+=(_install_redhat_epel) && dnf+=(miller) ;;
                     yq) before+=(_install_redhat_epel) && dnf+=(yq) ;;
-                    mongosh) dnf=(mongodb-mongosh)
+                    mongosh) dnf=(mongodb-mongosh) ;;
                     *) dnf+=("$cmd") ;;
                     esac
                 fi
