@@ -74,3 +74,12 @@ IP_SEGMENT_PATTERN=(
 
 # Base URL for Portal to Provider Plusserver
 #PLUSSERVER_PORTAL=https://cloudhub.plusserver.com/
+
+######################################################################################
+### Trivy
+######################################################################################
+
+# Maximum time to generate trivy security report
+TRIVY_DEFAULT_TIMEOUT=60m
+# Optional, use specified trivy server for caching of the internet databases
+TRIVY_CACHE_SERVER=http://trivy.mycompany.net:8080
