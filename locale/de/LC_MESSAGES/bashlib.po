@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-18 21:53+0100\n"
+"POT-Creation-Date: 2025-12-19 14:37+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,11 +18,11 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 
 #: core/misc:109 core/validator:69 core/validator:287 core/array:134
-#: module/os:178 module/monitoring:137 module/input:30 module/input:83
-#: module/input:220 module/input:479 module/input:646 module/log:61
-#: module/remote:77 module/remote:258 module/remote:305 module/remote:354
-#: module/remote:448 module/mattermost:288 module/mattermost:323
-#: module/software:197
+#: module/os:178 module/trivy:44 module/monitoring:137 module/input:30
+#: module/input:83 module/input:220 module/input:479 module/input:646
+#: module/log:61 module/remote:77 module/remote:258 module/remote:305
+#: module/remote:354 module/remote:448 module/mattermost:288
+#: module/mattermost:323 module/software:226
 msgid "Unrecognized option"
 msgstr "Unbekannte Option"
 
@@ -197,7 +197,7 @@ msgstr ""
 "Für Update $PLUSSERVER_PORTAL/services/nameservers -> CSV herunterladen "
 "(manuell)."
 
-#: module/network:22
+#: module/network:23
 msgid "IP\\tInterface"
 msgstr "IP\\tSchnittstelle"
 
@@ -365,40 +365,40 @@ msgstr "Start: Schritt $name um $date"
 msgid "Wait until the reboot is complete ($seconds seconds)"
 msgstr "Warten bis der Reboot fertig ist ($seconds Sekunden)"
 
-#: module/software:241
+#: module/software:270
 msgid "are identical versions"
 msgstr "sind identische Versionen"
 
-#: module/software:245 module/software:271
+#: module/software:274 module/software:300
 #, sh-format
 msgid "is an upgrade of one major version"
 msgid_plural "is an upgrade of $step major versions"
 msgstr[0] "ist ein upgrade von einer Hauptversion"
 msgstr[1] "ist ein upgrade von $step Hauptversionen"
 
-#: module/software:249 module/software:267
+#: module/software:278 module/software:296
 #, sh-format
 msgid "is an upgrade of one minor version"
 msgid_plural "is an upgrade of $step minor versions"
 msgstr[0] "ist ein upgrade von einer Nebenversion"
 msgstr[1] "ist ein upgrade von $step Nebenversionen"
 
-#: module/software:253
+#: module/software:282
 #, sh-format
 msgid "is an upgrade of one patch version"
 msgid_plural "is an upgrade of $step patch versions"
 msgstr[0] "ist ein upgrade von einer Patchversion"
 msgstr[1] "ist ein upgrade von $step Patchversionen"
 
-#: module/software:256
+#: module/software:285
 msgid "is a developer upgrade"
 msgstr "ist ein Entwickler Upgrade"
 
-#: module/software:259
+#: module/software:288
 msgid "is a developer downgrade"
 msgstr "ist ein Entwickler Downgrade"
 
-#: module/software:263
+#: module/software:292
 #, sh-format
 msgid "is a downgrade of one patch version"
 msgid_plural "is a downgrade of $step patch versions"

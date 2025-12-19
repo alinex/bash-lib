@@ -29,6 +29,9 @@ while true; do
 done
 ################################################################################################
 
+trivy files /home/alex/dvb/divibib-search-api
+exit
+
 task1() { echo "task1"; }
 task2() { echo "task2"; }
 #tasks "task1|run task 1" "task2| run task 2"

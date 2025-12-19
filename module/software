@@ -9,12 +9,23 @@
 # Cache used to prevent multiple install calls for the same information in one run
 declare -Ag _software_install
 
+# repositories
+_repo_debian_trivy() {
+    sudo apt-get update
+    sudo apt-get install -y wget gnupg lsb-release
+    wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | gpg --dearmor | sudo tee /usr/share/keyrings/trivy.gpg >/dev/null
+    echo "deb [signed-by=/usr/share/keyrings/trivy.gpg] https://aquasecurity.github.io/trivy-repo/deb generic main" | sudo tee -a /etc/apt/sources.list.d/trivy.list
+}
+_repo_redhat_epel() {
+    is set -- "$major" || major="$(grep ^VERSION_ID /etc/os-release | sed 's/.*="//;s/\..*//')"
+    if ! dnf repolist | grep -q epel; then
+        dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-${major}.noarch.rpm
+    fi
+}
+# manual installs
 _install_yq() {
-    local file
-    file="$(mktemp --random)"
-    curl https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -o "$file"
-    chmod +x "$file"
-    sudo mv "$file" /usr/local/bin/yq
+    wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/local/bin/yq
+    chmod +x /usr/local/bin/yq
 }
 _install_mongosh() {
     local url/tmp/testfile
@@ -24,12 +35,6 @@ _install_mongosh() {
     tar -xzvf mongosh.tgz
     sudo mv mongosh-*/bin/mongosh /usr/bin
     rm -r mongosh-* mongosh.tgz
-}
-_install_alpine_glibc() {
-    apk add --no-cache ca-certificates wget
-    wget -q -O /etc/apk/keys/sgerrand.rsa.pub https://alpine-pkgs.sgerrand.com/sgerrand.rsa.pub
-    wget https://github.com/sgerrand/alpine-pkg-glibc/releases/download/2.35-r0/glibc-2.35-r0.apk
-    apk --force-overwrite add glibc-2.35-r0.apk
 }
 
 # Install software package
@@ -44,6 +49,7 @@ install() {
     declare -a yay
     declare -a dnf
     declare -a after
+    local major
     # check what is needed
     for cmd in "$@"; do
         if ! hash _software_install has "$cmd" && ! command -v "$cmd" >/dev/null; then
@@ -55,6 +61,7 @@ install() {
                     mlr) apt+=(miller) ;;
                     yq) after+=(_install_yq) ;;
                     mongosh) after+=(_install_mongosh) ;;
+                    trivy) before+=(_repo_debian_trivy) && apt+=(trivy) ;;
                     *) apt+=("$cmd") ;;
                     esac
                 # alpine
@@ -79,14 +86,22 @@ install() {
                 elif command -v dnf >/dev/null; then
                     case $cmd in
                     ip) dnf+=(iproute) ;;
-                    mlr) before+=(_install_redhat_epel) && dnf+=(miller) ;;
-                    yq) before+=(_install_redhat_epel) && dnf+=(yq) ;;
+                    mlr) before+=(_repo_redhat_epel) && dnf+=(miller) ;;
+                    yq)
+                        major="$(grep ^VERSION_ID /etc/os-release | sed 's/.*="//;s/\..*//')"
+                        if ((major < 9)); then
+                            after+=(_install_yq)
+                        else
+                            before+=(_repo_redhat_epel) && dnf+=(yq)
+                        fi
+                        ;;
                     mongosh) dnf=(mongodb-mongosh) ;;
                     *) dnf+=("$cmd") ;;
                     esac
                 fi
         else
             debug 3 "$cmd is already installed or tried earlier"
+            return 0
         fi
     done
     # run before commands
@@ -94,10 +109,10 @@ install() {
         debug "Prepare $cmd (manually)..."
         eval "$cmd"
     done
+    sudo apt-get update
     # install all in one through package managers
     if ((${#apt[@]} > 0)); then
         debug "Installing debian packages: ${apk[*]}..."
-        sudo apt-get update
         sudo apt-get install -y "${apt[@]}"
     fi
     if ((${#apk[@]} > 0)); then

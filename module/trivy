@@ -6,10 +6,62 @@ source /dev/null
 
 # Run trivy security scan and analyze results.
 
+TRIVY_DEFAULT_TIMEOUT=60m
+TRIVY_CACHE_SERVER=http://operations.host.office.grp:8080
+
 # Run a trivy security analysis.
-# Usage:    trivy [<options>] fs <path>
+# If not installed it will install trivy and then use it.
+# It will run the security analysis and output the directory in which you find all data:
+#
+# ```
+# trivy.json - the original output of trivy containing all vulnerabilities
+#
+# ```
+#
+# After use you should remove this temporary folder to reclaim space.
+#
+# Warning: This will overwrite the original trivy command, so if you want to use trivy directly while bashlib is loaded, use `command trivy ....`
+# Usage:    trivy [<options>] root
+#           trivy [<options>] files <path>
+#           trivy [<options>] docker <file>
+#           trivy [<options>] docker <image>
+# Options:  t, timeout <duration>   set the timeout for the job in <int>m or <int>h
+#           o, only-os              let `root` command only scan OS without filesystem traversal
 # Output:   <report-path>
 # Return:   1 if there are at least one CRITICAL or HIGH vulnerabilities
 trivy() {
-    true
+    is enum --name=command --allow="root files docker" --die -- "$1" && local command="$1" && shift
+    local timeout
+    timeout=${TRIVY_DEFAULT_TIMEOUT:-60m}
+    # parameter parsing
+    local _login host jump term lines file
+    eval set -- "$(option_parse $'t timeout +\no only-os -' "$@")"
+    while true; do
+        case "$1" in
+        -t | --timeout) timeout="$2" && shift 2 ;;
+        -o | --only-os) onlyOS=1 && shift ;;
+        --) shift && break ;;
+        *) die "$(gettext "Unrecognized option"): $1" ;;
+        esac
+    done
+    # processing
+    install trivy
+    local work cmd opt="--exit-code 0 --no-progress --skip-version-check --timeout $timeout -f json"
+    work="$(mktemp --directory "$$")"
+    cmd="$(command -v trivy)"
+    opt+=" -o $work/trivy.json"
+    is empty -- "$DEBUG" || opt+=" --debug"
+    is empty -- "$TRIVY_CACHE_SERVER" || opt+=" --server $TRIVY_CACHE_SERVER"
+    case $command in
+    root)
+        is empty -- "$onlyOS" || opt+=" --pkg-types os"
+        sudo $cmd rootfs $opt $exclude / 2>&1 | sed 's/[^A-Z]*T[^A-Z]*//' | debug
+        ;;
+    files) command $cmd fs $opt "$1" 2>&1 | sed 's/[^A-Z]*T[^A-Z]*//' | debug ;;
+    docker) command $cmd image $opt --input "$1" 2>&1 | sed 's/[^A-Z]*T[^A-Z]*//' | debug ;;
+    esac
+    echo "$work"
 }
+
+# split by severity
+# split by type

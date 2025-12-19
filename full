@@ -417,7 +417,7 @@ core)return 0;;
 module)[[ ! $BASHLIB_LOADER =~ loader|full|remote ]]||return 0
 esac
 debug 5 "Loading module $module"
-source "$module"
+source "$BASHLIB_HOME/$module"
 }
 trap_add(){
 is integer --name=arguments --min=2 --max=2 --die -- $#
@@ -2106,6 +2106,7 @@ done
 }
 ip_intern(){
 is integer --name=arguments --max=1 --die -- $#
+install ip
 case ${1-} in
 data)echo -e "$(gettext "IP\tInterface")"
 ip -o addr show|awk 'BEGIN { OFS="\t" } $2 != "lo" {print $4, $2}'
@@ -2960,12 +2961,21 @@ done
 [ -n "$quiet" ]||echo ""
 }
 declare -Ag _software_install
+_repo_debian_trivy(){
+sudo apt-get update
+sudo apt-get install -y wget gnupg lsb-release
+wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key|gpg --dearmor|sudo tee /usr/share/keyrings/trivy.gpg >/dev/null
+echo "deb [signed-by=/usr/share/keyrings/trivy.gpg] https://aquasecurity.github.io/trivy-repo/deb generic main"|sudo tee -a /etc/apt/sources.list.d/trivy.list
+}
+_repo_redhat_epel(){
+is set -- "$major"||major="$(grep ^VERSION_ID /etc/os-release|sed 's/.*="//;s/\..*//')"
+if ! dnf repolist|grep -q epel;then
+dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-$major.noarch.rpm
+fi
+}
 _install_yq(){
-local file
-file="$(mktemp --random)"
-curl https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -o "$file"
-chmod +x "$file"
-sudo mv "$file" /usr/local/bin/yq
+wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/local/bin/yq
+chmod +x /usr/local/bin/yq
 }
 _install_mongosh(){
 local url/tmp/testfile
@@ -2976,12 +2986,6 @@ tar -xzvf mongosh.tgz
 sudo mv mongosh-*/bin/mongosh /usr/bin
 rm -r mongosh-* mongosh.tgz
 }
-_install_alpine_glibc(){
-apk add --no-cache ca-certificates wget
-wget -q -O /etc/apk/keys/sgerrand.rsa.pub https://alpine-pkgs.sgerrand.com/sgerrand.rsa.pub
-wget https://github.com/sgerrand/alpine-pkg-glibc/releases/download/2.35-r0/glibc-2.35-r0.apk
-apk --force-overwrite add glibc-2.35-r0.apk
-}
 install(){
 is set --name=command --die -- "$1"
 declare -a before
@@ -2989,7 +2993,9 @@ declare -a apt
 declare -a apk
 declare -a pacman
 declare -a yay
+declare -a dnf
 declare -a after
+local major
 for cmd in "$@";do
 if ! hash _software_install has "$cmd"&&! command -v "$cmd" >/dev/null;then
 debug 3 "search how to add $cmd"
@@ -2998,6 +3004,7 @@ case $cmd in
 mlr)apt+=(miller);;
 yq)after+=(_install_yq);;
 mongosh)after+=(_install_mongosh);;
+trivy)before+=(_repo_debian_trivy)&&apt+=(trivy);;
 *)apt+=("$cmd")
 esac
 elif command -v apk >/dev/null;then
@@ -3015,18 +3022,33 @@ after+=(_install_mongosh)
 ;;
 *)pacman+=("$cmd")
 esac
+elif command -v dnf >/dev/null;then
+case $cmd in
+ip)dnf+=(iproute);;
+mlr)before+=(_repo_redhat_epel)&&dnf+=(miller);;
+yq)major="$(grep ^VERSION_ID /etc/os-release|sed 's/.*="//;s/\..*//')"
+if ((major<9));then
+after+=(_install_yq)
+else
+before+=(_repo_redhat_epel)&&dnf+=(yq)
+fi
+;;
+mongosh)dnf=(mongodb-mongosh);;
+*)dnf+=("$cmd")
+esac
 fi
 else
 debug 3 "$cmd is already installed or tried earlier"
+return 0
 fi
 done
 for cmd in "${before[@]}";do
 debug "Prepare $cmd (manually)..."
 eval "$cmd"
 done
+sudo apt-get update
 if ((${#apt[@]}>0));then
 debug "Installing debian packages: ${apk[*]}..."
-sudo apt-get update
 sudo apt-get install -y "${apt[@]}"
 fi
 if ((${#apk[@]}>0));then
@@ -3037,6 +3059,10 @@ fi
 if ((${#pacman[@]}>0));then
 debug "Installing arch packages: ${pacman[*]}..."
 sudo pacman -S --noconfirm "${pacman[@]}"
+fi
+if ((${#dnf[@]}>0));then
+debug "Installing RedHat packages: ${dnf[*]}..."
+sudo dnf install -y "${dnf[@]}"
 fi
 if ((${#yay[@]}>0));then
 if ! command -v yay >/dev/null;then
@@ -3251,7 +3277,36 @@ tail -n +2 <<<"$input"|tac
 *)die "Usage: tsv {to|crop} [<value>]"
 esac
 }
+TRIVY_DEFAULT_TIMEOUT=60m
+TRIVY_CACHE_SERVER=http://operations.host.office.grp:8080
 trivy(){
-true
+is enum --name=command --allow="root files docker" --die -- "$1"&&local command="$1"&&shift
+local timeout
+timeout=${TRIVY_DEFAULT_TIMEOUT:-60m}
+local _login host jump term lines file
+eval set -- "$(option_parse $'t timeout +\no only-os -' "$@")"
+while true;do
+case "$1" in
+-t|--timeout)timeout="$2"&&shift 2;;
+-o|--only-os)onlyOS=1&&shift;;
+--)shift&&break;;
+*)die "$(gettext "Unrecognized option"): $1"
+esac
+done
+install trivy
+local work cmd opt="--exit-code 0 --no-progress --skip-version-check --timeout $timeout -f json"
+work="$(mktemp --directory "$$")"
+cmd="$(command -v trivy)"
+opt+=" -o $work/trivy.json"
+is empty -- "$DEBUG"||opt+=" --debug"
+is empty -- "$TRIVY_CACHE_SERVER"||opt+=" --server $TRIVY_CACHE_SERVER"
+case $command in
+root)is empty -- "$onlyOS"||opt+=" --pkg-types os"
+sudo $cmd rootfs $opt $exclude / 2>&1|sed 's/[^A-Z]*T[^A-Z]*//'|debug
+;;
+files)command $cmd fs $opt "$1" 2>&1|sed 's/[^A-Z]*T[^A-Z]*//'|debug;;
+docker)command $cmd image $opt --input "$1" 2>&1|sed 's/[^A-Z]*T[^A-Z]*//'|debug
+esac
+echo "$work"
 }
 source $BASHLIB_HOME/configs

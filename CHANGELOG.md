@@ -12,8 +12,8 @@ As this is not driven by releases and therefore tags are not used it is an ongoi
 - combine `timer_start` and `timer_end` into [timer](doc/function/timer.md)
 - combine all remote* functions together into [remote](doc/function/remote.md)
 - combine env_* functions into [variables](doc/function/variables.md)
-- added [jira](doc/function/jira.md) function to search and get issues
-- add support for Arch/Manjaro/Kali Linux
+- added [jira](doc/function/jira.md) function to work with issues
+- add support for Arch/Manjaro/Kali Linux and RedHat/CentOS/Fedora
 
 ## 21. November 2025 - V2.1.0
 
