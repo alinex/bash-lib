@@ -71,7 +71,7 @@ die() {
     [[ "$text" != *"Uncaught exception at"* ]] || trap=1
     # output
     echo -e "${CC_CRITICAL}$text in ${FUNCNAME[1]}${CC_RESET}" >&2
-    _stacktrace "$trap" 2>&1
+    _stacktrace "$trap"
     if command -v log >/dev/null; then
         log critical "$text"
         _stacktrace "$trap" 2>&1 | log critical
