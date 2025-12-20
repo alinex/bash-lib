@@ -74,8 +74,6 @@ function retry {
     return 0
 }
 
-countdown() { _deprecated "use pause <text> --timeout=<duration> --abort"; }
-
 ######################################################################################
 # Locking
 ######################################################################################
@@ -253,172 +251,26 @@ variables() {
 
 # Deprecated: Store environment into shared memory/file
 # Use: variables store...
-# Use `$$` or '${$}' as the program PID which will be also the same in Subshell or `${BASHPID}` which will differ.
-# Usage:    store [<ident>]                 # store complete environment
-#           store [<ident>] [<variable>]... # store only listed variables (ident can be empty string)
-# Options:  d, disk                          # store on disk in temporary folder
-#           p, path <base-dir>               # store on disk in given folder
-# Files:    `/dev/shm/<prog>[-<ident>].env`     # stored environment
-# Example:  ```bash
-#           env_restore
-#           ...<code>
-#           store # save changes
-#           ....
-#           store # save changes
-#           ....
-#           env_clean # everything done remove progress
-#           ```
 env_store() {
-    _deprecated "Use: variables store..." warn
-    debug "env_store $*"
-    # parameter parsing
-    eval set -- "$(option_parse $'d disk -\np path +' "$@")"
-    local opt="-m"
-    while true; do
-        case "$1" in
-        -d | --disk)
-            opt=""
-            shift
-            ;;
-        -p | --path)
-            opt="$1 $2"
-            shift 2
-            ;;
-        --)
-            shift
-            break
-            ;;
-        *) shift ;; # ignore
-        esac
-    done
-    # processing
-    local ident=$1
-    shift || true
-    # shellcheck disable=SC2086
-    declare -p "$@" | sed 's/^declare\b/declare -g/' >"$(mktemp $opt --extension=env "$ident")"
+    _deprecated "Use: variables store..."
 }
 
 # Deprecated: Restore environment from shared memory/file
 # Use: variables restore...
-# If some variable names are given only those will be restored.
-# Usage:    env_restore [<ident>] [<variable>]...
-# Options:  d, disk                          # store on disk in temporary folder
-#           p, path <base-dir>               # store on disk in given folder
-# Files:    `/dev/shm/<prog>[-<ident>].env`     # stored environment
-#           `/dev/shm/<prog>[_<ident>]_<sub-pid>.env-sub` # very short temporary file to filter input
 env_restore() {
-    _deprecated "Use: variables restore..." warn
-    debug "env_restore $*"
-    # parameter parsing
-    eval set -- "$(option_parse $'d disk -\np path +' "$@")"
-    local opt="-m"
-    while true; do
-        case "$1" in
-        -d | --disk)
-            opt=""
-            shift
-            ;;
-        -p | --path)
-            opt="$1 $2"
-            shift 2
-            ;;
-        --)
-            shift
-            break
-            ;;
-        *) shift ;; # ignore
-        esac
-    done
-    # processing
-    local ident="${1-}" shm_env
-    shift || true
-    # shellcheck disable=SC2086
-    shm_env="$(mktemp $opt -e env "$ident")"
-    [ -s "$shm_env" ] || return 0
-    if [[ "$#" -gt 0 ]]; then
-        temp="$(mktemp -me env-sub "${ident}_${BASHPID}")"
-        grep -E "$(tr ' ' '|' <<<"$*")" "$shm_env" >"$temp" || true
-        # shellcheck disable=SC1090
-        source "$temp" || true
-        rm -r "$temp" || true
-    else
-        # shellcheck disable=SC1090
-        source "$shm_env" 2>/dev/null || true
-    fi
+    _deprecated "Use: variables restore..."
 }
 
 # Deprecated: Remove stored environment from shared memory/file
-# Usage:    env_clean [<ident>]
-# Options:  d, disk                          # store on disk in temporary folder
-#           p, path <base-dir>               # store on disk in given folder
 # Use: variables clean...
 env_clean() {
-    _deprecated "Use: variables clean..." warn
-    is integer --name=arguments --max=1 --die -- $#
-    debug "env_clean $*"
-    # parameter parsing
-    eval set -- "$(option_parse $'d disk -\np path +' "$@")"
-    local opt="-m"
-    while true; do
-        case "$1" in
-        -d | --disk)
-            opt=""
-            shift
-            ;;
-        -p | --path)
-            opt="$1 $2"
-            shift 2
-            ;;
-        --)
-            shift
-            break
-            ;;
-        *) shift ;; # ignore
-        esac
-    done
-    # processing
-    # shellcheck disable=SC2086
-    rm -f "$(mktemp $opt -e env "$1")"
+    _deprecated "Use: variables clean..."
 }
 
 # Deprecated: Change environment in shared memory/file
 # Use: variables change...
-# Usage:    env_change <ident> <command>                # store complete environment
-#           env_change <ident> <command> [<variable>]...# store only listed variables (ident can be empty string)
 env_change() {
-    _deprecated "Use: variables change..." warn
-    # parameter parsing
-    eval set -- "$(option_parse $'d disk -\np path +' "$@")"
-    local opt
-    while true; do
-        case "$1" in
-        -d | --disk)
-            opt="$opt $1"
-            shift
-            ;;
-        -p | --path)
-            opt="$opt $1 $2"
-            shift 2
-            ;;
-        --)
-            shift
-            break
-            ;;
-        *) shift ;; # ignore
-        esac
-    done
-    is set --name=ident --die -- "$1"
-    is set --name=command --die -- "$2"
-    # processing
-    local ident=$1
-    shift || true
-    local command=$1
-    shift || true
-    # shellcheck disable=SC2086
-    env_restore $opt "$ident"
-    eval "$command"
-    # shellcheck disable=SC2086
-    env_store $opt "$ident" "$@"
+    _deprecated "Use: variables change..."
 }
 
 ######################################################################################

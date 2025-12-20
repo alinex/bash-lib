@@ -72,8 +72,7 @@ done
 echo "${escaped_args[*]}"
 }
 contains(){
-_deprecated "use array <array-name> has <value>" warn
-array "$1" has "$2"
+_deprecated "use array <array-name> has <value>"
 }
 array(){
 is integer --name=arguments --max=3 --die -- $#
@@ -373,11 +372,9 @@ esac
 }
 timer_start(){
 _deprecated "Use: timer start"
-timer start
 }
 timer_stop(){
 _deprecated "Use: timer stop"
-timer stop
 }
 export TEXTDOMAIN=bashlib
 export TEXTDOMAINDIR=$BASHLIB_HOME/locale
@@ -883,46 +880,16 @@ is(){
 check "$@" >/dev/null
 }
 num_parameters(){
-_deprecated "Use: is integer $# --min=<val> --max=<val>" warn
-eval set -- "$(option_parse $'- min +\n- max +\n- die +' "$@")"
-local min max die
-while true;do
-case "$1" in
---min)min=$2
-shift 2
-;;
---max)max=$2
-shift 2
-;;
---die)die=$2
-shift 2
-;;
---)shift
-break
-;;
-*)die "$(gettext "Unrecognized option"): $1"
-esac
-done
-_die(){
-read -r line func file <<<"$(caller 1)"
-echo "Check ${FUNCNAME[1]}: $1 ($func in $file:$line)" >&2
-[ -z "$die" ]||die "$die"
-return 1
-}
-[ -z "$min" ]||(($#>=min))||_die "[$*] $# < $min (min)"||return 1
-[ -z "$max" ]||(($#<=max))||_die "[$*] $# > $max (max)"||return 1
+_deprecated "Use: is integer $# --min=<val> --max=<val>"
 }
 is_empty(){
 _deprecated "Use: is empty -- <value>"
-is empty -- "$1"
 }
 is_integer(){
-_deprecated "Use: is integer <value>" warn
-is integer -- "$1"
+_deprecated "Use: is integer <value>"
 }
 is_float(){
-_deprecated "Use: is float -- <value>" warn
-is float -- "$1"
+_deprecated "Use: is float -- <value>"
 }
 trim_start(){
 is integer --name=arguments --max=2 --die -- $#

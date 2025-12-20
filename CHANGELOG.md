@@ -2,6 +2,10 @@
 
 As this is not driven by releases and therefore tags are not used it is an ongoing update so we will divide the changelog into months. If you need a special version instead of the newest one, please select it in git by date.
 
+## Newest Development (not released)
+
+- move down deprecated methods
+
 ## December Version - v2.2.0
 
 - let functions validate parameters using [is](doc/function/is.md) and [check](doc/function/check.md)

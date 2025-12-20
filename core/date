@@ -193,19 +193,12 @@ timer() {
 
 # Deprecated: Start the timer
 # Use @timer like `timer start`.
-# Later use @timer_stop to get the elapsed time.
-# Usage:    timer start
-#           timer stop
 timer_start() {
     _deprecated "Use: timer start"
-    timer start
 }
 
 # Deprecated: Stop the timer and calculate elapsed time
 # Use @timer like `timer stop`.
-# The timer has to be started before using @timer_start.
-# Output:   `<seconds>.<milliseconds>`
 timer_stop() {
     _deprecated "Use: timer stop"
-    timer stop
 }

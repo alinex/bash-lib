@@ -7,14 +7,9 @@
 ######################################################################################
 
 # Deprecated: Check if value is contained in array
-# Usage:        contains <array-name> <match>
-# Example:  ```bash
-#           x=( one two three )
-#           contains x two && echo YES || echo NO
-#           ```
+# Use array <array-name> has <value>
 contains() {
-    _deprecated "use array <array-name> has <value>" warn
-    array "$1" has "$2"
+    _deprecated "use array <array-name> has <value>"
 }
 
 # Array analyzation.

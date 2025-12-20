@@ -94,5 +94,3 @@ ip_extern() {
     *) jq -r ".$1" <<<"$_ip_extern_json" ;;
     esac
 }
-
-detect_extern_ip() { _deprecated "use ip_extern instead"; }

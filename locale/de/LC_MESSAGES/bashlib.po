@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-19 14:37+0100\n"
+"POT-Creation-Date: 2025-12-20 21:59+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,11 +17,10 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: core/misc:109 core/validator:69 core/validator:287 core/array:134
-#: module/os:178 module/trivy:44 module/monitoring:137 module/input:30
-#: module/input:83 module/input:220 module/input:479 module/input:646
-#: module/log:61 module/remote:77 module/remote:258 module/remote:305
-#: module/remote:354 module/remote:448 module/mattermost:288
+#: core/misc:109 core/validator:69 core/array:129 module/os:175 module/trivy:44
+#: module/monitoring:137 module/input:30 module/input:83 module/input:217
+#: module/input:476 module/input:643 module/log:61 module/remote:77
+#: module/remote:215 module/remote:262 module/remote:329 module/mattermost:288
 #: module/mattermost:323 module/software:226
 msgid "Unrecognized option"
 msgstr "Unbekannte Option"
@@ -157,7 +156,9 @@ msgstr ""
 #, sh-format
 msgid ""
 "The \"$name\" has to be an integer or human duration but »${val}« was given"
-msgstr "\"$name\" muss eine Zahl oder eine Zeitdauer sein aber »${val}« wurde angegeben"
+msgstr ""
+"\"$name\" muss eine Zahl oder eine Zeitdauer sein aber »${val}« wurde "
+"angegeben"
 
 #: core/validator:184
 #, sh-format
@@ -246,121 +247,121 @@ msgstr "Nein"
 msgid "Yes"
 msgstr "Ja"
 
-#: module/input:135 module/input:351 module/input:568
+#: module/input:135 module/input:348 module/input:565
 msgid "value needed"
 msgstr "Wert notwendig"
 
-#: module/input:157 module/input:377 module/input:594
+#: module/input:157 module/input:374 module/input:591
 msgid "invalid character"
 msgstr "ungültiges Zeichen"
 
-#: module/input:231
+#: module/input:228
 msgid "Enter integer number"
 msgstr "Gib eine Nummer ein"
 
-#: module/input:240
+#: module/input:237
 msgid "Enter float number"
 msgstr "Gib eine Fließkommazahl ein"
 
-#: module/input:250
+#: module/input:247
 msgid "Enter password"
 msgstr "Gib das Passwort ein"
 
-#: module/input:254
+#: module/input:251
 msgid "Enter time"
 msgstr "Gib die Zeit an"
 
-#: module/input:258
+#: module/input:255
 msgid "Enter text (end with empty line)"
 msgstr "Gib einen Text ein (Beenden mit Leerzeile)"
 
-#: module/input:259
+#: module/input:256
 msgid "Enter text here"
 msgstr "Gib einen Text ein"
 
-#: module/input:260
+#: module/input:257
 msgid "Enter short line"
 msgstr "Gib eine kurze Zeile ein"
 
-#: module/input:268
+#: module/input:265
 msgid "Input through system editor..."
 msgstr "Eingabe mit dem Systemeditor..."
 
-#: module/input:333
+#: module/input:330
 msgid "incomplete"
 msgstr "unvollständig"
 
-#: module/input:388
+#: module/input:385
 msgid "bad"
 msgstr "schlecht"
 
-#: module/input:390
+#: module/input:387
 msgid "weak"
 msgstr "schwach"
 
-#: module/input:392
+#: module/input:389
 msgid "good"
 msgstr "gut"
 
-#: module/input:394
+#: module/input:391
 msgid "strong"
 msgstr "stark"
 
-#: module/input:525
+#: module/input:522
 msgid "Select one of the above options"
 msgstr "Wähle eine der obigen Optionen"
 
-#: module/input:666
+#: module/input:663
 msgid "Could not get task list from command"
 msgstr "Befehlsliste konnte nicht von der Funktion gelesen werden"
 
-#: module/input:673
+#: module/input:670
 msgid "No tasks found to be executed."
 msgstr "Keine Aufgaben zum Ausführen gefunden."
 
-#: module/input:679
+#: module/input:676
 msgid "Exit"
 msgstr "Beenden"
 
-#: module/input:686
+#: module/input:683
 #, sh-format
 msgid "Got error $error running $task"
 msgstr "Beim Aufruf von $task kam es zum Fehler $error"
 
-#: module/process:90
+#: module/process:88
 msgid "Failed to remove lockfile"
 msgstr "Lockfile konnte nicht entfernt werden"
 
-#: module/process:106 module/process:138
+#: module/process:104 module/process:136
 msgid "Failed to create PID lockfile"
 msgstr "PID Lockfile konnte nicht erstellt werden"
 
-#: module/process:114
+#: module/process:112
 #, sh-format
 msgid "Waiting for unlock in $lockfile by PID $pid"
 msgstr "Warten, bis zur Freigabe in $lockfile durch PID $pid"
 
-#: module/process:444
+#: module/process:296
 msgid "Work steps are logged so that you can resume work mid-process"
 msgstr ""
 "Arbeitsschritte werden protokolliert um auch mittendrin wieder aufzusetzen"
 
-#: module/process:458
+#: module/process:310
 #, sh-format
 msgid "Job $name already done in this run, skipping"
 msgstr "Der Job $name wurde bereits ausgeführt, überspringe diesen"
 
-#: module/process:479
+#: module/process:331
 #, sh-format
 msgid "Finished: Step $name at $date"
 msgstr "Fertig: Schritt $name um $date"
 
-#: module/process:509
+#: module/process:361
 #, sh-format
 msgid "Started: step $name at $date"
 msgstr "Start: Schritt $name um $date"
 
-#: module/remote:457
+#: module/remote:338
 #, sh-format
 msgid "Wait until the reboot is complete ($seconds seconds)"
 msgstr "Warten bis der Reboot fertig ist ($seconds Sekunden)"

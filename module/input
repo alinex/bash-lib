@@ -166,22 +166,19 @@ confirm() {
 # Deprecated: Ask yes/no question with default to no.
 # Use `confirm --false <question>` instead, see @confirm.
 ask_no() {
-    _deprecated "use confirm --false <question>" warn
-    confirm --false "$1"
+    _deprecated "use confirm --false <question>"
 }
 
 # Deprecated: Ask yes/no question with default to yes.
 # Use `confirm --true <question>` instead, see @confirm.
 ask_yes() {
     _deprecated "use confirm --true <question>"
-    confirm --true "$1"
 }
 
 # Deprecated: Ask a free question.
 # Use `ask <question>` instead, see @ask.
 ask_input() {
     _deprecated "use ask string <question>"
-    ask "$@"
 }
 
 # Ask for an input element

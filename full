@@ -72,8 +72,7 @@ done
 echo "${escaped_args[*]}"
 }
 contains(){
-_deprecated "use array <array-name> has <value>" warn
-array "$1" has "$2"
+_deprecated "use array <array-name> has <value>"
 }
 array(){
 is integer --name=arguments --max=3 --die -- $#
@@ -373,11 +372,9 @@ esac
 }
 timer_start(){
 _deprecated "Use: timer start"
-timer start
 }
 timer_stop(){
 _deprecated "Use: timer stop"
-timer stop
 }
 export TEXTDOMAIN=bashlib
 export TEXTDOMAINDIR=$BASHLIB_HOME/locale
@@ -883,46 +880,16 @@ is(){
 check "$@" >/dev/null
 }
 num_parameters(){
-_deprecated "Use: is integer $# --min=<val> --max=<val>" warn
-eval set -- "$(option_parse $'- min +\n- max +\n- die +' "$@")"
-local min max die
-while true;do
-case "$1" in
---min)min=$2
-shift 2
-;;
---max)max=$2
-shift 2
-;;
---die)die=$2
-shift 2
-;;
---)shift
-break
-;;
-*)die "$(gettext "Unrecognized option"): $1"
-esac
-done
-_die(){
-read -r line func file <<<"$(caller 1)"
-echo "Check ${FUNCNAME[1]}: $1 ($func in $file:$line)" >&2
-[ -z "$die" ]||die "$die"
-return 1
-}
-[ -z "$min" ]||(($#>=min))||_die "[$*] $# < $min (min)"||return 1
-[ -z "$max" ]||(($#<=max))||_die "[$*] $# > $max (max)"||return 1
+_deprecated "Use: is integer $# --min=<val> --max=<val>"
 }
 is_empty(){
 _deprecated "Use: is empty -- <value>"
-is empty -- "$1"
 }
 is_integer(){
-_deprecated "Use: is integer <value>" warn
-is integer -- "$1"
+_deprecated "Use: is integer <value>"
 }
 is_float(){
-_deprecated "Use: is float -- <value>" warn
-is float -- "$1"
+_deprecated "Use: is float -- <value>"
 }
 trim_start(){
 is integer --name=arguments --max=2 --die -- $#
@@ -1224,16 +1191,13 @@ done
 stty echo </dev/tty
 }
 ask_no(){
-_deprecated "use confirm --false <question>" warn
-confirm --false "$1"
+_deprecated "use confirm --false <question>"
 }
 ask_yes(){
 _deprecated "use confirm --true <question>"
-confirm --true "$1"
 }
 ask_input(){
 _deprecated "use ask string <question>"
-ask "$@"
 }
 ask(){
 local default empty negative timeout
@@ -2144,7 +2108,6 @@ ip)jq -r .query <<<"$_ip_extern_json";;
 *)jq -r ".$1" <<<"$_ip_extern_json"
 esac
 }
-detect_extern_ip(){ _deprecated "use ip_extern instead";}
 declare -A _os_detected
 os_detect(){
 is integer --name=arguments --max=1 --die -- $#
@@ -2232,8 +2195,6 @@ fi
 *)echo "${_os_detected["$1"]}"
 esac
 }
-detect_os(){ _deprecated "use os_detect data";}
-system_info(){ _deprecated "use os_detect info";}
 disk_free(){
 local opt="" free_operator free_percent free_bytes collect
 eval set -- "$(option_parse $'l locale -\nc collect +\nf free +' "$@")"
@@ -2357,7 +2318,6 @@ fi
 done
 return 0
 }
-countdown(){ _deprecated "use pause <text> --timeout=<duration> --abort";}
 LOCK_SLEEP=10
 _lock_remove(){
 pid=$(cat "$lockfile")||true
@@ -2446,109 +2406,16 @@ variables store $self "$ident" "$@"
 esac
 }
 env_store(){
-_deprecated "Use: variables store..." warn
-debug "env_store $*"
-eval set -- "$(option_parse $'d disk -\np path +' "$@")"
-local opt="-m"
-while true;do
-case "$1" in
--d|--disk)opt=""
-shift
-;;
--p|--path)opt="$1 $2"
-shift 2
-;;
---)shift
-break
-;;
-*)shift
-esac
-done
-local ident=$1
-shift||true
-declare -p "$@"|sed 's/^declare\b/declare -g/' >"$(mktemp $opt --extension=env "$ident")"
+_deprecated "Use: variables store..."
 }
 env_restore(){
-_deprecated "Use: variables restore..." warn
-debug "env_restore $*"
-eval set -- "$(option_parse $'d disk -\np path +' "$@")"
-local opt="-m"
-while true;do
-case "$1" in
--d|--disk)opt=""
-shift
-;;
--p|--path)opt="$1 $2"
-shift 2
-;;
---)shift
-break
-;;
-*)shift
-esac
-done
-local ident="${1-}" shm_env
-shift||true
-shm_env="$(mktemp $opt -e env "$ident")"
-[ -s "$shm_env" ]||return 0
-if [[ $# -gt 0 ]];then
-temp="$(mktemp -me env-sub "${ident}_$BASHPID")"
-grep -E "$(tr ' ' '|' <<<"$*")" "$shm_env" >"$temp"||true
-source "$temp"||true
-rm -r "$temp"||true
-else
-source "$shm_env" 2>/dev/null||true
-fi
+_deprecated "Use: variables restore..."
 }
 env_clean(){
-_deprecated "Use: variables clean..." warn
-is integer --name=arguments --max=1 --die -- $#
-debug "env_clean $*"
-eval set -- "$(option_parse $'d disk -\np path +' "$@")"
-local opt="-m"
-while true;do
-case "$1" in
--d|--disk)opt=""
-shift
-;;
--p|--path)opt="$1 $2"
-shift 2
-;;
---)shift
-break
-;;
-*)shift
-esac
-done
-rm -f "$(mktemp $opt -e env "$1")"
+_deprecated "Use: variables clean..."
 }
 env_change(){
-_deprecated "Use: variables change..." warn
-eval set -- "$(option_parse $'d disk -\np path +' "$@")"
-local opt
-while true;do
-case "$1" in
--d|--disk)opt="$opt $1"
-shift
-;;
--p|--path)opt="$opt $1 $2"
-shift 2
-;;
---)shift
-break
-;;
-*)shift
-esac
-done
-is set --name=ident --die -- "$1"
-is set --name=command --die -- "$2"
-local ident=$1
-shift||true
-local command=$1
-shift||true
-env_restore $opt "$ident"
-eval "$command"
-env_store $opt "$ident" "$@"
+_deprecated "Use: variables change..."
 }
 declare -A _async_running
 STEPS_VARIABLES=
@@ -2792,20 +2659,16 @@ fi
 return "$rc"
 }
 remote_term(){
-_deprecated "Use: remote --terminal ... instead" warn
-remote --terminal "$@"
+_deprecated "Use: remote --terminal ... instead"
 }
 remote_term_line(){
-_deprecated "Use: @remote --terminal --line-based ..." warn
-remote --terminal --line-based "$@"
+_deprecated "Use: @remote --terminal --line-based ..."
 }
 remote_file(){
-_deprecated "se: remote --file <file>" warn
-remote --file "$@"
+_deprecated "se: remote --file <file>"
 }
 remote_console(){
-_deprecated "Use: remote console" warn
-remote "$@" console
+_deprecated "Use: remote console"
 }
 upload(){
 local _login host jump
@@ -2861,63 +2724,19 @@ local dir=${2:-.}
 rsync -av $ssh:"$1" "$dir"
 }
 remote_bashlib(){
-_deprecated "Use: remote bashlib <module> <command>" warn
-local opt
-eval set -- "$(option_parse $'+l login +\nh host +\nj jump +' "$@")"
-while true;do
-case "$1" in
--l|--login|-h|--host|-j|--jump)opt+=" $1 $2"&&shift 2;;
---)shift&&break;;
-*)die "$(gettext "Unrecognized option"): $1"
-esac
-done
-is set --name=module --die -- "$1"
-local list modules
-list="$(_module_resolve "${1-}")"
-IFS=',' read -ra modules <<<"$list"
-debug "Modules: ${modules[*]}"
-shift
-local pattern='^#!/usr/bin/env'" bash|source "'/dev/null'
-(echo "#!/usr/bin/env" bash
-echo "DEBUG=${DEBUG:-}"
-echo "BASHLIB_LOADER=remote"
-if [[ ${modules[0]} =~ ^(full|base)$ ]];then
-grep -Ev "$pattern" "$BASHLIB_HOME/${modules[0]}"
-modules=("${modules[@]:1}")
-else
-grep -Ev "$pattern" "$BASHLIB_HOME"/base
-fi
-for module in "${modules[@]}";do
-if [ "$module" = "configs" ];then
-for f in "$BASHLIB_HOME"/config/*;do
-if [[ -f $f && $f != *.* ]];then
-grep -Ev "$pattern" "$f"
-fi
-done
-else
-grep -Ev "$pattern" "$BASHLIB_HOME/$module"
-fi
-done
-(($#==0))||debug "Running: $*"
-(($#==0))||escape_args "$@"
-[ ! -p /dev/stdin ]||debug "Running piped command!"
-[ ! -p /dev/stdin ]||cat </dev/stdin)|shfmt -mn|remote $opt
+_deprecated "Use: remote bashlib <module> <command>"
 }
 remote_install(){
-_deprecated "use remote_bashlib software install" warn
-remote_bashlib software install "$@"
+_deprecated "use remote_bashlib software install"
 }
 remote_system_info(){
-_deprecated "use remote_bashlib os system_info" warn
-remote_bashlib os system_info "$@"
+_deprecated "use remote_bashlib os system_info"
 }
 remote_df(){
-_deprecated "use remote_bashlib os disk_free" warn
-remote_bashlib os disk_free "$@"
+_deprecated "use remote_bashlib os disk_free"
 }
 remote_lvm(){
-_deprecated "use remote_bashlib os uses_lvm" warn
-remote_bashlib os uses_lvm "$@"
+_deprecated "use remote_bashlib os uses_lvm"
 }
 boot_wait(){
 eval set -- "$(option_parse $'q quiet -' "$@")"

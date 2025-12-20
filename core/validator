@@ -257,72 +257,26 @@ is() {
 
 # Deprecated: Check that a specific number of parameters are given
 # Use: is integer $# --min=1 --max=2
-# Usage:    num_parameters "$@" --min 1 --die "Zu viele Parameter: $USAGE"
-# Options:  min=<int>     # at least <int> elements are needed
-#           max=<int>     # not more than <int> elements are allowed
-#           die=<string>  # exit with this message if not
 num_parameters() {
-    _deprecated "Use: is integer $# --min=<val> --max=<val>" warn
-    # parameter parsing
-    eval set -- "$(option_parse $'- min +\n- max +\n- die +' "$@")"
-    local min max die
-    while true; do
-        case "$1" in
-        --min)
-            min=$2
-            shift 2
-            ;;
-        --max)
-            max=$2
-            shift 2
-            ;;
-        --die)
-            die=$2
-            shift 2
-            ;;
-        --)
-            shift
-            break
-            ;;
-        *) die "$(gettext "Unrecognized option"): $1" ;;
-        esac
-    done
-    # processing
-    _die() {
-        read -r line func file <<<"$(caller 1)"
-        echo "Check ${FUNCNAME[1]}: $1 (${func} in ${file}:${line})" >&2
-        [ -z "$die" ] || die "$die"
-        return 1
-    }
-    [ -z "$min" ] || (($# >= min)) || _die "[$*] $# < $min (min)" || return 1
-    [ -z "$max" ] || (($# <= max)) || _die "[$*] $# > $max (max)" || return 1
+    _deprecated "Use: is integer $# --min=<val> --max=<val>"
 }
 
 # Deprecated: Test if given value is an empty string or undefined
 # Use: is empty <value>
-# Usage:    is_empty <var>
-# Status:   0 => true
 is_empty() {
     _deprecated "Use: is empty -- <value>"
-    is empty -- "$1"
 }
 
 # Deprecated: Test if given value is an integer
 # Use: is integer <value>
-# Usage:    is_integer <value>
-# Status:   0 => is integer
 is_integer() {
-    _deprecated "Use: is integer <value>" warn
-    is integer -- "$1"
+    _deprecated "Use: is integer <value>"
 }
 
 # Deprecated: Test if given value is an float
 # Use: is integer <value>
-# Usage:    is_float <value>
-# Status:   0 => is float
 is_float() {
-    _deprecated "Use: is float -- <value>" warn
-    is float -- "$1"
+    _deprecated "Use: is float -- <value>"
 }
 
 ######################################################################################
