@@ -34,6 +34,7 @@ If you already use it jump directly to the [module description](https://gitlab.c
     - [Error handling](#error-handling)
     - [Version control](#version-control)
   - [Installation](#installation)
+    - [Switch Version](#switch-version)
   - [Usage](#usage)
   - [Configuration](#configuration)
     - [Environment](#environment)
@@ -126,8 +127,9 @@ The message is level `CRITICAL`, the first line is `WARN`, further calls are `NO
 
 ### Version control
 
-As the project is in the moment more a single man show I will reduce the overhead of branching and work directly in the master branch, so see it as ongoing development.
-Tags will be set if specific milestones are reached and noted in the [changelog](./CHANGELOG.md).
+We use master and develop branch here. If you stay with the master branch you should always have a fully functional bash lib.
+While we make changes to the develop branch we will merge this from time to time with the master, after ensuring everything is functional. This changes comes with a new version tag.
+See all the changes in the [changelog](./CHANGELOG.md).
 
 ## Installation
 
@@ -157,6 +159,12 @@ Therefore the following steps will be done:
 
 The update will be the same, you only need to download the new files and overwrite the old ones.
 If you want to remove it later the commands will be shown while installing/updating, too.
+
+### Switch Version
+
+By default the latest version from master branch will be used, also if you run the installer from another tag or branch.
+
+If you specifically want to switch you can always replace your bashlib home with the GitLab Download archive of any other version. But keep in mind that the installer will always overwrite with the newest master version if run to update.
 
 ## Usage
 
