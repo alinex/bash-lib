@@ -53,6 +53,8 @@ The configuration module contains a lot of general configuration settings for th
 
 | Variable/Function | Description |
 | --- | --- |
+| ``$QUEUE_MAX_NUM`` | Maximum number of parallel tasks for queue |
+| ``$QUEUE_MAX_LOAD`` | Percentage of 1 Minute Load per CPU (100% 8Cpu => 8.0) |
 | ``$MOUNT_COLOR_LIMIT`` | Array: Color limits per mount (regex critical error warn ok) used in [`df`](functiondf.md) |
 | ``$MATTERMOST_API`` | Mattermost API URL used together with `$MATTERMOST_TOKEN` and silently disables mattermost functions if not set |
 | ``$MATTERMOST_TOKEN`` | Mattermost API Token used in [`mattermost`](functionmattermost.md) [`mattermost_repost`](functionmattermost_repost.md) [`mattermost_reaction`](functionmattermost_reaction.md) |
@@ -72,6 +74,8 @@ The configuration module contains a lot of general configuration settings for th
 | ``$POWERDNS_API`` | PowerDNS API URL used together with `$POWERDNS_TOKEN` and silently disables powerdns function if not set |
 | ``$POWERDNS_TOKEN`` | PowerDNS API Token used together with `$POWERDNS_API` in dns function |
 | ``$PLUSSERVER_PORTAL`` | Base URL for Portal to Provider Plusserver |
+| ``$TRIVY_DEFAULT_TIMEOUT`` | Maximum time to generate trivy security report |
+| ``$TRIVY_CACHE_SERVER`` | Optional, use specified trivy server for caching of the internet databases |
 | ``$CONFLUENCE_OUTAGE`` | Atlassian confluence page id for outage information [`confluence_outage`](functionconfluence_outage.md) |
 
 ## Core
@@ -362,7 +366,6 @@ Module for process control
 | Variable/Function | Description |
 | --- | --- |
 | ``$STEPS_VARIABLES`` | Set the variables which should be stored with step control |
-| ``$ASYNC_QUEUE_MAX`` | Maximum number of parallel tasks for queue |
 | [`sudo_allow`](function/sudo_allow.md) | Check if sudo is needed for command |
 | [`sudo`](function/sudo.md) | Sudo overwrite to only use sudo if needed |
 | [`repeat`](function/repeat.md) | Execute command in N times |
@@ -383,9 +386,7 @@ Module for process control
 | [`async`](function/async.md) | Run the given command asynchronous ang go on in the calling routine (short form of async_name) |
 | [`async_name`](function/async_name.md) | Alternative to async in which this call is given a name to refer in async_wait |
 | [`async_wait`](function/async_wait.md) | Check if the command is done or wait here till it is so |
-| [`queue`](function/queue.md) | Add command to process queue |
-| [`queue_name`](function/queue_name.md) | Add command to process queue |
-| [`queue_running`](function/queue_running.md) | Is a queue running |
+| [`queue`](function/queue.md) | Run bash commands parallel with limits from a queue. |
 | [`random`](function/random.md) | Return a random string in specific length |
 
 ### Remote Module

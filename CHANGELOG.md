@@ -13,6 +13,7 @@ As this is not driven by releases and therefore tags are not used it is an ongoi
 - combine all remote* functions together into [remote](doc/function/remote.md)
 - combine env_* functions into [variables](doc/function/variables.md)
 - added [jira](doc/function/jira.md) function to work with issues
+- completed the [queue](doc/function/queue.md) for parallel job execution
 - add support for Arch/Manjaro/Kali Linux and RedHat/CentOS/Fedora
 
 ## 21. November 2025 - V2.1.0

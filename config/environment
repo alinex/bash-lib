@@ -4,7 +4,16 @@
 # The configuration module contains a lot of general configuration settings for the bash-lib modules itself. Most of them are specific to the individual environment so they need to be set in the local `overwrite` config.
 
 ######################################################################################
-### Host Specifica
+### process
+######################################################################################
+
+# Maximum number of parallel tasks for queue
+QUEUE_MAX_NUM=2
+# Percentage of 1 Minute Load per CPU (100% 8Cpu => 8.0)
+QUEUE_MAX_LOAD=100
+
+######################################################################################
+### Host Specific
 ######################################################################################
 
 # Array: Color limits per mount (regex critical error warn ok) used in @df

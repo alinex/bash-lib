@@ -395,13 +395,13 @@ if [ -n "$bestChoice" ]&&[[ ! $func =~ ^is$|^check$ ]];then
 printf "Triggered at %s:%d (%s)\n" "$src" "$line" "$func"|warn >&2
 bestChoice=""
 fi
-printf "\033[1m%s:%d (%s)\n" "$src" "$line" "$func"|([ -n "$1" ]&&( ((frame==1))&&warn||notice)||debug 5)
+printf "\033[1m%s:%d (%s)\n" "$src" "$line" "$func"|([ -n "$1" ]&&( ((frame==1))&&warn||notice)||debug 5) >&2
 awk -v n="$line" '
             NR>=n-2 && NR<=n+2 {
                 gsub(/^[ \t]+/, "", $0)  # Remove leading spaces/tabs
                 printf "%4d: %s\n", NR, $0
                 if(NR==n+2) exit
-            }' "$src"|sed "/$line:/s/^/"$'\033[1m'"/;/$line:/s/$/"$'\033[22m'"/"|([ -n "$1" ]&&info||debug 6)
+            }' "$src"|sed "/$line:/s/^/"$'\033[1m'"/;/$line:/s/$/"$'\033[22m'"/"|([ -n "$1" ]&&info||debug 6) >&2
 ((frame++))||true
 done
 }
@@ -553,7 +553,7 @@ local text trap line func src
 text="$(input "$@")"
 [[ $text != *"Uncaught exception at"* ]]||trap=1
 echo -e "$CC_CRITICAL$text in ${FUNCNAME[1]}$CC_RESET" >&2
-_stacktrace "$trap" 2>&1
+_stacktrace "$trap"
 if command -v log >/dev/null;then
 log critical "$text"
 _stacktrace "$trap" 2>&1|log critical

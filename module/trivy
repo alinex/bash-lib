@@ -12,7 +12,10 @@ source /dev/null
 #
 # ```
 # trivy.json - the original output of trivy containing all vulnerabilities
-#
+# <severity>/
+#   <type>/
+#       <cve-id>/
+#           report.json
 # ```
 #
 # After use you should remove this temporary folder to reclaim space.
@@ -24,7 +27,7 @@ source /dev/null
 #           trivy [<options>] docker <image>
 # Options:  t, timeout <duration>   set the timeout for the job in <int>m or <int>h
 #           o, only-os              let `root` command only scan OS without filesystem traversal
-# Output:   <report-path>
+# Output:   <report-path> or nothing if no vulnerabilities found
 # Return:   1 if there are at least one CRITICAL or HIGH vulnerabilities
 trivy() {
     is enum --name=command --allow="root files docker" --die -- "$1" && local command="$1" && shift
@@ -44,7 +47,8 @@ trivy() {
     # processing
     install trivy
     local work cmd opt="--exit-code 0 --no-progress --skip-version-check --timeout $timeout -f json"
-    work="$(mktemp --directory "$$")"
+    local source="$1"
+    work="$(mktemp --directory "${$}_trivy")"
     cmd="$(command -v trivy)"
     opt+=" -o $work/trivy.json"
     is empty -- "$DEBUG" || opt+=" --debug"
@@ -52,13 +56,51 @@ trivy() {
     case $command in
     root)
         is empty -- "$onlyOS" || opt+=" --pkg-types os"
+        source="$(hostname -f)"
         sudo $cmd rootfs $opt $exclude / 2>&1 | sed 's/[^A-Z]*T[^A-Z]*//' | debug
         ;;
     files) command $cmd fs $opt "$1" 2>&1 | sed 's/[^A-Z]*T[^A-Z]*//' | debug ;;
     docker) command $cmd image $opt --input "$1" 2>&1 | sed 's/[^A-Z]*T[^A-Z]*//' | debug ;;
     esac
+    # Splitting
+    debug "Optimize JSON structure for splitting..."
+    jq '.Results[]?|. as $g|.Vulnerabilities[]?|{Class: $g.Class, Target: $g.Target, Type: $g.Type}*.' "$work"/trivy.json >"$work"/split.json
+    debug "Splitting JSON..."
+    mkdir "$work"/split
+    csplit -f "$work"/split/ -b '%06d' -zs $work/split.json /^{/ "{*}"
+    rm "$work"/split.json
+    # skip if nothing found
+    local found
+    found="$(ls -1 "$work"/split/ | wc -l)"
+    if ((found == 0)); then
+        debug "Nothing found."
+        rm -r "$work"
+        return 0
+    fi
+    debug "Found $found reports."
+
+    # Output folder
     echo "$work"
 }
+trivy_test() {
+    work="$1"
+    source="test"
 
-# split by severity
-# split by type
+    # Loop over entries and create report
+    local num
+    for file in "$work"/split/*; do
+        num="$(basename "$file")"
+        queue add _trivy_report "$work" "$file" "$source"
+    done
+    queue wait
+    #rm -r "$work"/split
+}
+
+_trivy_report() {
+    work="$1"
+    file="$2"
+    source="$3"
+    debug "$2: checking"
+    sleep 10
+    debug "$2: done sleeping"
+}

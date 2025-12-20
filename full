@@ -395,13 +395,13 @@ if [ -n "$bestChoice" ]&&[[ ! $func =~ ^is$|^check$ ]];then
 printf "Triggered at %s:%d (%s)\n" "$src" "$line" "$func"|warn >&2
 bestChoice=""
 fi
-printf "\033[1m%s:%d (%s)\n" "$src" "$line" "$func"|([ -n "$1" ]&&( ((frame==1))&&warn||notice)||debug 5)
+printf "\033[1m%s:%d (%s)\n" "$src" "$line" "$func"|([ -n "$1" ]&&( ((frame==1))&&warn||notice)||debug 5) >&2
 awk -v n="$line" '
             NR>=n-2 && NR<=n+2 {
                 gsub(/^[ \t]+/, "", $0)  # Remove leading spaces/tabs
                 printf "%4d: %s\n", NR, $0
                 if(NR==n+2) exit
-            }' "$src"|sed "/$line:/s/^/"$'\033[1m'"/;/$line:/s/$/"$'\033[22m'"/"|([ -n "$1" ]&&info||debug 6)
+            }' "$src"|sed "/$line:/s/^/"$'\033[1m'"/;/$line:/s/$/"$'\033[22m'"/"|([ -n "$1" ]&&info||debug 6) >&2
 ((frame++))||true
 done
 }
@@ -553,7 +553,7 @@ local text trap line func src
 text="$(input "$@")"
 [[ $text != *"Uncaught exception at"* ]]||trap=1
 echo -e "$CC_CRITICAL$text in ${FUNCNAME[1]}$CC_RESET" >&2
-_stacktrace "$trap" 2>&1
+_stacktrace "$trap"
 if command -v log >/dev/null;then
 log critical "$text"
 _stacktrace "$trap" 2>&1|log critical
@@ -2407,17 +2407,17 @@ return 0
 }
 variables(){
 eval set -- "$(option_parse $'d disk -\np path +\nc clean -' "$@")"
-local opt="-m" command clean
+local self opt="-m" command clean
 while true;do
 case "$1" in
--d|--disk)opt=""&&shift;;
--p|--path)opt="$1 $2"&&shift 2;;
--c|--clean)clean=1&&shift;;
+-d|--disk)self+=" -d"&&opt=""&&shift;;
+-p|--path)self+=" -p \"$2\""&&opt="$1 $2"&&shift 2;;
+-c|--clean)self+=" -c"&&clean=1&&shift;;
 --)shift&&break;;
 *)shift
 esac
 done
-command="$(check enum --name=command --allow="store restore clean" --die -- "$1")"
+command="$(check enum --name=command --allow="store restore clean change" --die -- "$1")"
 shift
 local ident=$1
 shift||true
@@ -2440,9 +2440,9 @@ clean)rm -f "$file";;
 change)is set --name=cmd-line --die -- "$1"
 local command=$1
 shift||true
-variables restore $opt "$ident"
+variables restore $self "$ident"
 eval "$command"
-variables store $opt "$ident" "$@"
+variables store $self "$ident" "$@"
 esac
 }
 env_store(){
@@ -2628,59 +2628,45 @@ declare -p _STEPS 2>/dev/null|grep -q 'declare -A'&&echo echo "Failed: Step $1 a
 fi
 return "$code"
 }
-ASYNC_QUEUE_MAX=2
-declare -a _queue
-declare _queue_control_pid
-_queue_control(){
-local name pid free first params
-while true;do
-sleep 1
-variables restore queue
-if ((${#_async_running[@]}>0));then
-for name in "${!_async_running[@]}";do
-pid="${_async_running["$name"]}"
-if ! kill -0 "$pid" 2>/dev/null;then
-steps_done "$name"
-variables change queue "unset _async_running[\"$name\"]" _queue _async_running
-fi
-done||true
-fi
-variables restore queue
-debug "Task queue: $$ $BASHPID async ${#_async_running[@]} queue ${#_queue[@]}"
-((${#_queue[@]}>0||${#_async_running[@]}>0))||return 0
-free=$((ASYNC_QUEUE_MAX-${#_async_running[@]}))
-if ((free>0));then
-for _ in $(seq 1 "$free");do
-((${#_queue[@]}>0))||break
-first="${_queue[0]}"
-variables change queue '_queue=("${_queue[@]:1}")' _queue _async_running
-IFS=$'\x1f' read -r -a params <<<"$first"
-async_name "${params[@]}"
-done
-fi
-done
-variables clean queue
-}
+_queue_jobs=()
+declare -A _queue_running
 queue(){
-is set --name=command --die -- "$1"
-queue_name "$1" "$@"
-}
-queue_name(){
-is set --name=name --die -- "$1"
-is set --name=command --die -- "$2"
-! steps_check "$1"||return 0
-local entry
-entry=$(printf "%s\x1f" "$@")
-entry=${entry%$'\x1f'}
-variables change queue "_queue+=(\"$entry\")" _queue _async_running
-if [ -z "$_queue_control_pid" ];then
-_queue_control&
-_queue_control_pid=$!
+is enum --name=command --allow="add run" --die -- "$1"&&local command="$1"&&shift
+case $command in
+add)is set --name=job --die -- "$1"
+_queue_job+=("$*")
+debug "add ${#_queue_job[@]}: $*"
+;;
+run)is empty -- "$1"||is integer --name=parallel --min 1 --die
+is empty -- "$2"||is integer --name=load-percent --min 1 --die
+local max="${1:-$QUEUE_MAX_NUM}"
+local load="${2:-$QUEUE_MAX_LOAD}"
+debug "${#_queue_job[@]} Jobs to be done..."
+while true;do
+for pid in "${!_queue_running[@]}";do
+if [[ ! -d /proc/$pid ]];then
+debug "finished ${_queue_running[$pid]}"
+unset "_queue_running[$pid]"
 fi
-}
-queue_running(){
-is integer --name=arguments --max=0 --die -- $#
-[ -n "$_queue_control_pid" ]&&kill -0 "$_queue_control_pid"
+done
+if ((${#_queue_running[@]}<max))&&(($(cut -d' ' -f1 /proc/loadavg|sed 's/\.//;s/^0*//')/$(nproc)<load));then
+if ((${#_queue_job[@]}>0));then
+local job="${_queue_job[0]}"
+_queue_job=("${_queue_job[@]:1}")
+debug "start $job (${#_queue_job[@]} jobs remaining)"
+eval "$job"&
+_queue_running[$!]="$job"
+elif ((${#_queue_running[@]}==0));then
+break
+else
+sleep 1
+fi
+else
+debug "Limit reached: Running ${#_queue_running[@]} (max), Load: $(($(cut -d' ' -f1 /proc/loadavg|sed 's/\.//;s/^0*//')/$(nproc)))% (max $load%)"
+sleep 1
+fi
+done
+esac
 }
 random(){
 is integer --name=arguments --max=2 --die -- $#
@@ -3277,8 +3263,6 @@ tail -n +2 <<<"$input"|tac
 *)die "Usage: tsv {to|crop} [<value>]"
 esac
 }
-TRIVY_DEFAULT_TIMEOUT=60m
-TRIVY_CACHE_SERVER=http://operations.host.office.grp:8080
 trivy(){
 is enum --name=command --allow="root files docker" --die -- "$1"&&local command="$1"&&shift
 local timeout
@@ -3295,18 +3279,52 @@ esac
 done
 install trivy
 local work cmd opt="--exit-code 0 --no-progress --skip-version-check --timeout $timeout -f json"
-work="$(mktemp --directory "$$")"
+local source="$1"
+work="$(mktemp --directory "$$_trivy")"
 cmd="$(command -v trivy)"
 opt+=" -o $work/trivy.json"
 is empty -- "$DEBUG"||opt+=" --debug"
 is empty -- "$TRIVY_CACHE_SERVER"||opt+=" --server $TRIVY_CACHE_SERVER"
 case $command in
 root)is empty -- "$onlyOS"||opt+=" --pkg-types os"
+source="$(hostname -f)"
 sudo $cmd rootfs $opt $exclude / 2>&1|sed 's/[^A-Z]*T[^A-Z]*//'|debug
 ;;
 files)command $cmd fs $opt "$1" 2>&1|sed 's/[^A-Z]*T[^A-Z]*//'|debug;;
 docker)command $cmd image $opt --input "$1" 2>&1|sed 's/[^A-Z]*T[^A-Z]*//'|debug
 esac
+debug "Optimize JSON structure for splitting..."
+jq '.Results[]?|. as $g|.Vulnerabilities[]?|{Class: $g.Class, Target: $g.Target, Type: $g.Type}*.' "$work"/trivy.json >"$work"/split.json
+debug "Splitting JSON..."
+mkdir "$work"/split
+csplit -f "$work"/split/ -b '%06d' -zs $work/split.json /^{/ "{*}"
+rm "$work"/split.json
+local found
+found="$(ls -1 "$work"/split/|wc -l)"
+if ((found==0));then
+debug "Nothing found."
+rm -r "$work"
+return 0
+fi
+debug "Found $found reports."
 echo "$work"
+}
+trivy_test(){
+work="$1"
+source="test"
+local num
+for file in "$work"/split/*;do
+num="$(basename "$file")"
+queue add _trivy_report "$work" "$file" "$source"
+done
+queue wait
+}
+_trivy_report(){
+work="$1"
+file="$2"
+source="$3"
+debug "$2: checking"
+sleep 10
+debug "$2: done sleeping"
 }
 source $BASHLIB_HOME/configs

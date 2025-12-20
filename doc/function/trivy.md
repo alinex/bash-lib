@@ -8,7 +8,10 @@ It will run the security analysis and output the directory in which you find all
 
 ```
 trivy.json - the original output of trivy containing all vulnerabilities
-
+<severity>/
+  <type>/
+      <cve-id>/
+          report.json
 ```
 
 After use you should remove this temporary folder to reclaim space.
@@ -33,7 +36,7 @@ o, only-os              let `root` command only scan OS without filesystem trave
 
 ### Output (stdout)
 
-`<report-path>`
+`<report-path>` or nothing if no vulnerabilities found
 
 ### Return (exit code)
 
