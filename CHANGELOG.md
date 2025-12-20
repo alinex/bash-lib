@@ -2,7 +2,7 @@
 
 As this is not driven by releases and therefore tags are not used it is an ongoing update so we will divide the changelog into months. If you need a special version instead of the newest one, please select it in git by date.
 
-## December Version - in development
+## December Version - v2.2.0
 
 - let functions validate parameters using [is](doc/function/is.md) and [check](doc/function/check.md)
 - filesystem checks for `is` and `check` function
@@ -15,6 +15,7 @@ As this is not driven by releases and therefore tags are not used it is an ongoi
 - added [jira](doc/function/jira.md) function to work with issues
 - completed the [queue](doc/function/queue.md) for parallel job execution
 - add support for Arch/Manjaro/Kali Linux and RedHat/CentOS/Fedora
+- switch to git flow in development to have a more stable master branch
 
 ## 21. November 2025 - V2.1.0
 
