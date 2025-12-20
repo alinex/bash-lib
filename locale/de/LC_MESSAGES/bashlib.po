@@ -154,35 +154,35 @@ msgstr ""
 "\"$name\" enthält \"${val}\" es sind aber nur folgende Werte erlaubt: $allow"
 
 #: core/validator:179
-#, fuzzy, sh-format
+#, sh-format
 msgid ""
 "The \"$name\" has to be an integer or human duration but »${val}« was given"
-msgstr "\"$name\" muss eine Zahl sein aber »${val}« wurde angegeben"
+msgstr "\"$name\" muss eine Zahl oder eine Zeitdauer sein aber »${val}« wurde angegeben"
 
 #: core/validator:184
-#, fuzzy, sh-format
+#, sh-format
 msgid "The \"$name\" ${val} has to be an existing path"
-msgstr "\"$name\" muss mit einem Wert gesetzt werden"
+msgstr "\"$name\" ${val} muss ein existierender Pfad sein"
 
 #: core/validator:189
-#, fuzzy, sh-format
+#, sh-format
 msgid "The \"$name\" ${val} has to be an existing file"
-msgstr "\"$name\" muss mit einem Wert gesetzt werden"
+msgstr "\"$name\" ${val} muss eine existierende Datei sein"
 
 #: core/validator:194
-#, fuzzy, sh-format
+#, sh-format
 msgid "The \"$name\" ${val} has to be an existing directory"
-msgstr "\"$name\" muss mit einem Wert gesetzt werden"
+msgstr "\"$name\" ${val} muss ein existierendes Verzeichnis sein"
 
 #: core/validator:199
-#, fuzzy, sh-format
+#, sh-format
 msgid "The \"$name\" ${val} has to be a file readable for user"
-msgstr "\"$name\" muss mit einem Wert gesetzt werden"
+msgstr "\"$name\" ${val} muss eine für den Benutzer lesbare Datei sein"
 
 #: core/validator:204
-#, fuzzy, sh-format
+#, sh-format
 msgid "The \"$name\" ${val} has to be a file writable for user"
-msgstr "\"$name\" muss mit einem Wert gesetzt werden"
+msgstr "\"$name\" ${val} muss eine für den Benutzer schreibbare Datei sein"
 
 #: core/validator:207
 #, sh-format

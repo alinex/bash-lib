@@ -8,12 +8,12 @@
 ######################################################################################
 
 # Maximum number of parallel tasks for queue
-#QUEUE_MAX_NUM=2
+#QUEUE_MAX_NUM=10
 # Percentage of 1 Minute Load per CPU (100% 8Cpu => 8.0)
-#QUEUE_MAX_LOAD=100
+#QUEUE_MAX_LOAD=75
 
 ######################################################################################
-### Host Specifica
+### Host Specific
 ######################################################################################
 
 # Default login if no `--login` or `$login` available
@@ -61,9 +61,9 @@ IP_SEGMENT_PATTERN=(
 #GRAFANA_API=http://grafana.mycompany.net/api
 
 # Prometheus API URLs as space separated list
-#PROMETHEUS_API=http://prometheus.mycompany.net/api/v1
+#PROMETHEUS_API=http://prometheus.my-company.net/api/v1
 # Prometheus host names as space separated list
-#PROMETHEUS_HOST=prometheus.mycompany.net
+#PROMETHEUS_HOST=prometheus.my-company.net
 
 ######################################################################################
 ### Atlassian

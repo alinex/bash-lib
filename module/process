@@ -568,6 +568,7 @@ declare -A _queue_running
 # Run bash commands parallel with limits from a queue.
 # The queue first collects all jobs and then you execute them all in parallel. Therefore you can give a max number of parallel calls and a max percentage load limit for then to start the next job.
 # You may also set the limits using environment $QUEUE_MAX_NUM and $QUEUE_MAX_LOAD.
+# If the server is over the configured load limit one job will always run, but parallel execution will only start if possible.
 # Usage:    queue add <job> [<args>...]             # add job to queue
 #           queue run [<parallel>] [<load-percent>] # run the queue with specified limits
 queue() {
@@ -585,7 +586,7 @@ queue() {
         is empty -- "$2" || is integer --name=load-percent --min 1 --die
         local max="${1:-$QUEUE_MAX_NUM}"
         local load="${2:-$QUEUE_MAX_LOAD}"
-        debug "${#_queue_job[@]} Jobs to be done..."
+        debug "${#_queue_job[@]} Jobs to be run..."
         while true; do
             # check for finished jobs
             for pid in "${!_queue_running[@]}"; do
@@ -594,9 +595,10 @@ queue() {
                     unset "_queue_running[$pid]"
                 fi
             done
-            # check if possible to run
-            if ((${#_queue_running[@]} < max)) &&
-                (($(cut -d' ' -f1 /proc/loadavg | sed 's/\.//;s/^0*//') / $(nproc) < load)); then
+            # check if possible to run (nothing is running or below limit)
+            if ((${#_queue_running[@]} == 0)) ||
+                ( ((${#_queue_running[@]} < max)) &&
+                    (($(cut -d' ' -f1 /proc/loadavg | sed 's/\.//;s/^0*//') / $(nproc) < load))); then
                 # get next job
                 if ((${#_queue_job[@]} > 0)); then
                     local job="${_queue_job[0]}"

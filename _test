@@ -29,12 +29,6 @@ while true; do
 done
 ################################################################################################
 
-queue add sleep 10
-queue add sleep 5
-queue add sleep 8
-queue run
-exit
-
 #trivy files /home/alex/dvb/divibib-search-api
 trivy_test /tmp/_test_2594541
 exit

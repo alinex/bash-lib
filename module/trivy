@@ -92,7 +92,7 @@ trivy_test() {
         num="$(basename "$file")"
         queue add _trivy_report "$work" "$file" "$source"
     done
-    queue wait
+    queue run
     #rm -r "$work"/split
 }
 
