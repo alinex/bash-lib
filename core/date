@@ -9,6 +9,7 @@ source /dev/null
 ######################################################################################
 
 # Get current timestamp
+#
 # Usage:    now
 # Output:   <seconds> since 1970
 # shellcheck disable=SC2120
@@ -23,7 +24,9 @@ now() {
 ######################################################################################
 
 # Calculate difference in seconds
+#
 # The two dates to compare can be unix timestamps (seconds since 1970) or a parsable date format.
+#
 # Usage:    date_diff <start> <end> # timestamp or date string
 # Output:   <seconds> negative if <start> behind <end>
 date_diff() {
@@ -38,7 +41,9 @@ date_diff() {
 }
 
 # Format date in different named versions or format string
+#
 # The `<value>` can be unix timestamp (seconds since 1970) or a parsable date format.
+#
 # Usage:    date_format <format> [<value>] # use now if missing
 #           <format>:   iso         2025-10-01T12:00:00+02:00
 #                       iso-date    2025-10-01
@@ -80,8 +85,10 @@ date_format() {
 ######################################################################################
 
 # Format duration in different numbers or human readable
+#
 # This function can convert into seconds and back into human format as you like. Months or years are not possible because they are not accurately, better use 30d or 365d for that.
-# Usage:    duration_format <format> <value|human format>
+#
+# Usage:    duration_format <format> <seconds>|<human>
 #           <format>:   seconds
 #                       minutes     # using floor 110s = 1
 #                       hours       # using floor
@@ -102,6 +109,10 @@ duration_format() {
     human) _format_duration "$value" ;;
     esac
 }
+
+# Read seconds or parse human format
+#
+# Usage:    _parse_duration <seconds>|<human>
 _parse_duration() {
     local input="$1"
     local total=0
@@ -138,6 +149,10 @@ _parse_duration() {
     done < <(grep -Eo '[+-]?[0-9]+[[:alpha:]]*' <<<"$input" | sed -E 's/^([+-]?[0-9]+)([[:alpha:]]*)$/\1 \2/')
     printf '%d\n' "$total"
 }
+
+# Format duration in human format
+#
+# Usage:    _format_duration <seconds>
 _format_duration() {
     local total="$1"
     local sign=""
@@ -170,7 +185,9 @@ _format_duration() {
 _timer_start=0
 
 # Start/stop the timer
+#
 # After `timer stop` it will return the elapsed time.
+#
 # Usage:    timer start
 #           timer stop
 # Output:   <seconds>.<milliseconds> # after stop

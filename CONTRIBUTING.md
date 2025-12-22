@@ -193,7 +193,7 @@ To contribute to BashLib is the dame as to any other GitLab repository.
    Make sure:
 
    - Source branch: your fork’s feature/my-new-feature
-   - Target branch: the original repo’s main https://gitlab.com/alinex/bash-lib.git
+   - Target branch: the original repo’s develop branch https://gitlab.com/alinex/bash-lib/-/tree/develop
    - Add a title, description, and any reviewers.
    - Submit the MR 🎉
 

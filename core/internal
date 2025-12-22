@@ -18,6 +18,7 @@ source gettext.sh
 ######################################################################################
 
 # Define the calling function as deprecated and output this message if used
+#
 # Usage:    _deprecated [<warn>]   if `<warn>` is set go on, else die
 # Error:    DEPRECATED: ask_input at task_find in /home/alex/bin/dvb/cleanup:206 please use ask string
 #           > _stacktrace          at die() in /home/alex/dvb/bash-lib/core/misc:59
@@ -35,6 +36,7 @@ _deprecated() {
 }
 
 # Display stack trace from called position upwards
+#
 # Usage:    _stacktrace [<trap-flag>]
 # Output:   Debug Level 5:
 #           > _stacktrace          /home/alex/dvb/bash-lib/core/validator:76 (is)

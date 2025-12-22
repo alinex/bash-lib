@@ -150,6 +150,7 @@ CC_INVERS=$'\033[7m'
 ######################################################################################
 
 # Show complete color table
+#
 # Usage:  color_table
 # Output: human formatted Table in defined colors and styles
 color_table() {
@@ -194,4 +195,3 @@ color_table() {
   echo -e "\t${CC_HEADING}CC_HEADING${CC_RESET}"
   echo -e "\t${CC_INVERS}CC_INVERS${CC_RESET}"
 }
-#color_table

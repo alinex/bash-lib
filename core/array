@@ -13,6 +13,7 @@ contains() {
 }
 
 # Array analyzation.
+#
 # This can be used for easy array access functions. The array itself is not given by value but by name, so no `$` before the name.
 #
 # The following commands ar<string-input>e possible:
@@ -58,7 +59,9 @@ array() {
 ######################################################################################
 
 # Join array elements by delimiter
+#
 # Convert all elements in array into a string separated by delimiter (default is `,`).
+#
 # Usage:        join <array-name> [<delimiter>]
 # Variables:    <array-name> to read values to join
 # Output:       <string>
@@ -77,6 +80,7 @@ join() {
 
 # Splits string by delimiter into array
 # The delimiter defaults to `,`.
+#
 # Usage:        split <string> <array-name> [<delimiter>]
 # Variables:    <array-name> to store values
 split() {
@@ -94,6 +98,7 @@ split() {
 ######################################################################################
 
 # Methods to work with assoziative arrays (hashes)
+#
 # After declaring a variable as associative array: `declare -A <array-name>` this commands may help working with it. The array itself is not given by value but by name, so no `$` before the name.
 #
 # As an assoziative array not allows all characters for the key, the key can be:
