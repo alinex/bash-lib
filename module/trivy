@@ -23,7 +23,12 @@ TRIVY_JIRA_ISSUE_TYPE=Code
 #           data.json
 # ```
 #
-# The original trivy
+# The pure trivy data will be optimized by:
+#
+# - downgrade security level if published in the last days
+# - add exploit information
+# - downgrade if node development package
+# - connect with jira ticket management
 #
 # After use you should remove this temporary folder to reclaim space.
 #
@@ -120,7 +125,12 @@ trivy_test() {
     JIRA_FIELD_VERSION=customfield_10089
     JIRA_FIELD_LINKS=customfield_10092
     JIRA_FIELD_FREIGABE=customfield_10094
-    _trivy_jira[field_]="$(jq '.fields[] | select(.name == "'"$JIRA_FIELD_VORKOMMEN'").key' -r <<<"$fields")"
+    _trivy_jira[field_sources]="$(jq '.fields[] | select(.name == "'"$JIRA_FIELD_VORKOMMEN'").key' -r <<<"$fields")"
+    _trivy_jira[field_team]="$(jq '.fields[] | select(.name == "'"$JIRA_FIELD_TEAM'").key' -r <<<"$fields")"
+    _trivy_jira[field_rating]="$(jq '.fields[] | select(.name == "'"$JIRA_FIELD_FREMDEINSCHAETZUNG'").key' -r <<<"$fields")"
+    _trivy_jira[field_version]="$(jq '.fields[] | select(.name == "'"$JIRA_FIELD_VERSION'").key' -r <<<"$fields")"
+    _trivy_jira[field_links]="$(jq '.fields[] | select(.name == "'"$JIRA_FIELD_LINKS'").key' -r <<<"$fields")"
+    _trivy_jira[field_approval]="$(jq '.fields[] | select(.name == "'"$JIRA_FIELD_FREIGABE'").key' -r <<<"$fields")"
 
     curl -s --request GET --url "https://${ATLASSIAN_DOMAIN}.atlassian.net/rest/api/3/issue/createmeta/${_trivy_jira[board]}/issuetypes/${_trivy_jira[issueType]}" --user "$ATLASSIAN_USER:$ATLASSIAN_TOKEN" --header 'Accept: application/json' | jq
 

@@ -1,23 +1,29 @@
 # Last Changes
 
-As this is not driven by releases and therefore tags are not used it is an ongoing update so we will divide the changelog into months. If you need a special version instead of the newest one, please select it in git by date.
+Newest changes will always take part in the development branch. You only may use them if you manually install this.
+But on release they will be merged with semantical versioning into the master branch and will get available to new installs or updates.
 
 ## Newest Development (not released)
 
+- add [trivy](doc/function/trivy.md) security scanning
+- enhanced [jira](doc/function/jira.md) to get meta information and work with ADF
+- combine the [trap](doc/function/trap.md) functions together
+- add `$CONFIG` to load special config file
+- optimize function documentation
 - move down deprecated methods
 
-## December Version - v2.2.0
+## 22. December 2025 - v2.2.0
 
-- let functions validate parameters using [is](doc/function/is.md) and [check](doc/function/check.md)
+- add [log](./doc/function/log.md) support
+- completed the [queue](doc/function/queue.md) for parallel job execution
 - filesystem checks for `is` and `check` function
+- functions validate parameters using [is](doc/function/is.md) and [check](doc/function/check.md)
 - extend stack traces to show also code lines through [die](doc/function/die.md)
 - catch each error and output a failure with stack trace through [die](doc/function/die.md)
-- add [log](./doc/function/log.md) support
 - combine `timer_start` and `timer_end` into [timer](doc/function/timer.md)
 - combine all remote* functions together into [remote](doc/function/remote.md)
 - combine env_* functions into [variables](doc/function/variables.md)
 - added [jira](doc/function/jira.md) function to work with issues
-- completed the [queue](doc/function/queue.md) for parallel job execution
 - add support for Arch/Manjaro/Kali Linux and RedHat/CentOS/Fedora
 - switch to git flow in development to have a more stable master branch
 
