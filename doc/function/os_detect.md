@@ -2,6 +2,20 @@
 
 ## Detect OS settings
 
+### Usage
+
+```bash
+os_detect <format>
+```
+
+### Output (stdout)
+
+- `<tsv-table>` for data
+- `<value>` else
+
+
+### Description
+
 The following formats are possible:
 
 - data - all values with `<name>	<value>`
@@ -19,15 +33,3 @@ The following formats are possible:
 - architecture - x86_64, i686, i386, armv7l, aarch64...
 - machine_id
 - virtual_machine - `false` or `true`
-
-### Usage
-
-```bash
-os_detect <format>
-```
-
-### Output (stdout)
-
-- `<tsv-table>` for data
-- `<value>` else
-

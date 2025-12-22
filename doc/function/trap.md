@@ -1,16 +1,16 @@
-# trap_add
+# trap
 
-## Deprecated: Set or add an additional trap without overwriting existing ones
+## Set or add an additional trap without overwriting existing ones
 
 ### Usage
 
 ```bash
-trap_add <code> <signal>
+trap add <code> <signal>
+trap remove <code> <signal>
 ```
 
 ### Description
 
-Use: trap add...
 
 This is done by adding the new code as additional command before the existing ones if the trap is already set.
 

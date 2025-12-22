@@ -7,11 +7,13 @@
 ### IP handling
 ######################################################################################
 
-# Show the IP addresses.
+# Show the IP addresses
+#
 # The possible response formats are:
 #
 # - `main` - (default) to return only the main IP
 # - `data` - complete data table tab separated
+#
 # Usage:    ip_intern <format>
 # Output:   <ip>
 # shellcheck disable=SC2120
@@ -28,6 +30,7 @@ ip_intern() {
 }
 
 # Find info about IP by configured patterns.
+#
 # Possible types are like in the configuration:
 #
 # - provider
@@ -35,6 +38,7 @@ ip_intern() {
 # - vmware
 #
 # If no pattern matches there won't be any return value
+#
 # Usage:    ip_pattern <type> [<ip>]
 # Output:   <value> of first matching line
 # Return:   1 if no match found
@@ -64,6 +68,7 @@ ip_pattern() {
 _ip_extern_json=
 
 # Run  os detection and set the constants
+#
 # The following formats are possible:
 #
 # - data - all values with `<name>\t<value>`
@@ -80,6 +85,7 @@ _ip_extern_json=
 # - org
 # - as
 # - ip
+#
 # Usage:    ip_extern <format>
 # Output:   <tsv-table> for data
 #           <value> else

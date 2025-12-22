@@ -27,6 +27,7 @@ _module_resolve() {
 }
 
 # Run command on remote host.
+#
 # You can let it use the `$server` and `$login` variables or give it in the options.
 #
 # If you use a pseudo `--terminal`, `\r\n` may be contained in output, remove with @nocr.`
@@ -195,6 +196,7 @@ remote_console() {
 }
 
 # Upload file
+#
 # Usage:    upload [<options>] <source> <dest>
 # Options:  # following options, only before `<source>`
 #           l, login <user>
@@ -230,6 +232,7 @@ upload() {
 }
 
 # Download file
+#
 # Usage:    download [<options>] <source> <dest>
 # Options:  # following options, only before `<source>`
 #           l, login <user>
@@ -310,6 +313,7 @@ remote_lvm() {
 }
 
 # Wait till reboot is finished
+#
 # Usage:    boot_wait [<options>]
 # Options:  l, login <user>
 #           h, host <host>

@@ -2,11 +2,6 @@
 
 ## Query all managed DNS servers to get a complete list of domain names
 
-It will output only the header line if no DNS system is available. Possible DNS systems are:
-
-- [`powerdns`](powerdns.md) - PowerDNS https://www.powerdns.com/
-- [`plusserver_dns`](plusserver_dns.md) - the DNS in the Plusserver Cloud https://www.plusserver.com/
-
 ### Usage
 
 ```bash
@@ -29,3 +24,10 @@ NAME        TYPE    CONTENT         TTL
 and more...
 ```
 
+
+### Description
+
+It will output only the header line if no DNS system is available. Possible DNS systems are:
+
+- [`powerdns`](powerdns.md) - PowerDNS https://www.powerdns.com/
+- [`plusserver_dns`](plusserver_dns.md) - the DNS in the Plusserver Cloud https://www.plusserver.com/

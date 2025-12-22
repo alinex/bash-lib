@@ -2,8 +2,6 @@
 
 ## Check if sudo is needed for command
 
-This will [`die`](die.md) if
-
 ### Usage
 
 ```bash
@@ -15,3 +13,7 @@ sudo_allow <command-line>
 - 0 if allowed
 - [`die`](die.md) if not allowed
 - 
+
+### Description
+
+This will [`die`](die.md) if

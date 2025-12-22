@@ -2,6 +2,14 @@
 
 ## Return a random string in specific length
 
+### Usage
+
+```bash
+random <pattern> [<length>]
+```
+
+### Description
+
 The default length is 16.
 
 The `<pattern>` is a list of allowed characters in range:
@@ -17,9 +25,3 @@ The `<pattern>` is a list of allowed characters in range:
 - HEX - `0-9A-F`
 - directly give pattern
 
-
-### Usage
-
-```bash
-random <pattern> [<length>]
-```

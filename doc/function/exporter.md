@@ -2,8 +2,6 @@
 
 ## Get exporter list
 
-The result can be filtered by additional argument specification.
-
 ### Usage
 
 ```bash
@@ -23,3 +21,7 @@ Tab separated list without header:
 
 - 0 without output if no `$PROMETHEUS_HOST` + `$PROMETHEUS_API`
 - 
+
+### Description
+
+The result can be filtered by additional argument specification.

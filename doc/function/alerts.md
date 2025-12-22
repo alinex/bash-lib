@@ -2,8 +2,6 @@
 
 ## Get Grafana alerts
 
-The list can be filtered by options and a specific output format can be selected.
-
 ### Usage
 
 ```bash
@@ -34,3 +32,7 @@ q, quiet                             # return only status code
 - `<num>` - at least one alert
 - 0 - without output if no `$GRAFANA_API` + `$GRAFANA_TOKEN`
 - 
+
+### Description
+
+The list can be filtered by options and a specific output format can be selected.

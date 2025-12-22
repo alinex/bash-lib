@@ -38,6 +38,7 @@ _install_mongosh() {
 }
 
 # Install software package
+#
 # Usage:    install <command>...
 install() {
     is set --name=command --die -- "$1"
@@ -159,6 +160,7 @@ install() {
 }
 
 # Check for installed commands
+#
 # Usage:    installed <command>...
 # Return:   0 if all installed
 #           1 if missing at least one
@@ -176,6 +178,7 @@ installed() {
 ######################################################################################
 
 # Parse semantic version number
+#
 # Usage:    semver <string>
 #           <string> | semver
 # Output:   The following fields separated by spaces:
@@ -194,6 +197,7 @@ semver() {
 }
 
 # Calculate difference
+#
 # Usage:    semver_diff [-h] <first> <second> # can already be parsed or not
 # Options:  -h,--human      # to show it user friendly
 # Error:    <int> which is:

@@ -2,9 +2,6 @@
 
 ## Additional logging (at the moment only into files).
 
-After initializing a log using `start` the default output options will additionally write into log. But you can also specifically write t it using the log function.
-Multiple log with different levels are possible.
-
 ### Usage
 
 ```bash
@@ -36,3 +33,8 @@ z, compress - only for file logging
 2025-12-02 14:10:04 ERROR This is only a test
 ````
 
+
+### Description
+
+After initializing a log using `start` the default output options will additionally write into log. But you can also specifically write t it using the log function.
+Multiple log with different levels are possible.

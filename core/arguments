@@ -32,8 +32,8 @@ source /dev/null
 #               the options are at the start
 #               then the double dash `--` also if not given
 #               and at last all other arguments
-# Example:      eval set -- "$(option_parse <spec> "$@")"
-#               &base_script includes a simple example
+# Example:      - eval set -- "$(option_parse <spec> "$@")"
+#               - &base_script includes a simple example
 option_parse() {
     local opt name type desc short="" long="" spec="$1" permute
     [ -n "$spec" ] || die "$(gettext 'A specification string is needed as first argument')"

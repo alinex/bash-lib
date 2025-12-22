@@ -11,3 +11,5 @@
 /bats-core
 /oldlib
 /scripts
+# made by docker tests
+/yay

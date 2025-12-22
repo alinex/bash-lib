@@ -2,8 +2,6 @@
 
 ## Format date in different named versions or format string
 
-The `<value>` can be unix timestamp (seconds since 1970) or a parsable date format.
-
 ### Usage
 
 ```bash
@@ -24,4 +22,10 @@ date_format <format> [<value>] # use now if missing
 ### Output (stdout)
 
 `<string>` in selected format
+
+
+### Description
+
+
+The `<value>` can be unix timestamp (seconds since 1970) or a parsable date format.
 

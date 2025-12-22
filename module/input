@@ -12,6 +12,7 @@ declare -F "color_256" >/dev/null || source "$BASHLIB_HOME"/module/color
 ######################################################################################
 
 # Wait for some time or user input
+#
 # Usage:    pause <message>
 #           <message> | pause
 # Options:  T, timeout <duration>    # time after which the default will be used
@@ -60,7 +61,9 @@ pause() {
 }
 
 # Ask a yes/no question.
+#
 # The default can be yes or no and if a default is set <return> will use it. Additional to a default a timeout can be set meaning to use default if timeout is reached. If an invalid character is typed, the timeout will restart.
+#
 # Usage:    confirm <question>
 # Options:  t, true                  # default: yes
 #           f, false                 # default: no
@@ -182,6 +185,7 @@ ask_input() {
 }
 
 # Ask for an input element
+#
 # This will also validate while typing if you select the correct format. So you can only input characters matching the input format.
 # Possible formats are:
 #
@@ -194,6 +198,7 @@ ask_input() {
 # - `time` - a time with hour and minute can be given
 #
 # If another format is needed, you can fall back to string and validate on your own after you got the response.
+#
 # Usage:    ask <format> <question>
 # Options:  e, empty                 # allow empty value
 #           n, allow-negative        # on number, integer, float
@@ -405,6 +410,7 @@ ask() {
 }
 
 # Calculate password strength
+#
 # Usage:    _password_strength <password>
 # Output:   <int> 0 (weakest) up to 100 (strongest)
 _password_strength() {
@@ -442,11 +448,13 @@ _password_strength() {
 }
 
 # Select from list (extended version of native select)
+#
 # The given list will be printed as numerical options from which you select one by typing it's number. Number validation is on, so you can only input a valid number. No return-key needed if the full number is given.
 # Each list entry can be a single `<text>` or `<key>|<name>` while the `<name>` is shown the `<key>` will be returned if selected.
 #
 # With the options a default can be given, which will be selected using return-key or a timeout till this is used.
 # With the option `--exit` the additional entry will break by returning `exit`.
+#
 # Usage:    choose [-t] <entry>...
 #           <list> | choose [-t]
 # Options:  t, title <title>         # display text line above selection
@@ -607,10 +615,12 @@ choose() {
 }
 
 # Run tasks as selected by user
+#
 # Often the functions are also named `check-...` for the ones which will return tasks and `task-...` for the ones really doing the job. The first one may do a lot of analyzation and output user information on stdout.
 # The '|' character is not possible within the commands. If a pipe is necessary put it within a function. Also some commands can be disabled in the list by preceding the command with an `#` character.
 #
 # If there are no tasks defined or the dynamic list will return no tasks it will end with a success message.
+#
 # Usage:    tasks <entry>...
 #           # <entry>       := <check-fn> or "<task-line>"
 #           # <check-fn>    := function called to return up to multiple <task-lines>

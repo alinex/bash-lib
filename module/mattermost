@@ -14,6 +14,7 @@ source /dev/null
 declare -A _mattermost_cache
 
 # Get my user id
+#
 # Usage:    _mattermost_user
 # Output:   <user-id>
 _mattermost_user() {
@@ -29,6 +30,7 @@ _mattermost_user() {
 }
 
 # Get team id by name
+#
 # Usage:    _mattermost_team <name>
 # Output:   <team-id>
 _mattermost_team() {
@@ -45,6 +47,7 @@ _mattermost_team() {
 }
 
 # Get channel id by team-id and name
+#
 # Usage:    channel <team-id> <display_name>
 # Output:   <channel-id>
 _mattermost_channel() {
@@ -73,6 +76,7 @@ _mattermost_channel_by_post() {
 }
 
 # New post in channel
+#
 # Usage:    _mattermost_post <channel-id> <message> [<attachments>]
 # Output:   <channel-id>/<post-id>
 _mattermost_post() {
@@ -95,6 +99,7 @@ _mattermost_post() {
 }
 
 # Repost in channel
+#
 # Usage:    _mattermost_repost <channel-id> <post-id> <message> [<attachments>] -> <channel-id>/<post-id>
 _mattermost_repost() {
     local att=""
@@ -115,6 +120,7 @@ _mattermost_repost() {
 }
 
 # Add reaction to post
+#
 # Usage:    _mattermost_reaction <post-id> <smiley>
 _mattermost_reaction() {
     local json
@@ -126,6 +132,7 @@ _mattermost_reaction() {
 }
 
 # Repost in channel
+#
 # Usage:    _mattermost_delete <post-id>
 _mattermost_delete() {
     debug "DELETE mattermost/posts"
@@ -134,6 +141,7 @@ _mattermost_delete() {
 }
 
 # Find channels by predefined pattern
+#
 # Usage:    _mattermost_find_channels <name>
 # Output:   `<team-id>/<channel-id>` ... # first main, following links
 #           `<team-id>/<channel-id>` ... # one line per team matching
@@ -196,6 +204,7 @@ _mattermost_find_channels() {
 mattermost_post_ids=""
 
 # Send a message to Mattermost
+#
 # Usage:    mattermost <channel-name> <text> [<attachments>]
 # Globals:  $MATTERMOST_API + $MATTERMOST_TOKEN to access API
 # Output:   <post-id list>
@@ -230,7 +239,9 @@ mattermost() {
 }
 
 # Create an attachment json to be used in post
+#
 # Find free linkable icons under https://icons8.de/icons/all
+#
 # Usage:    mattermost_attachment
 #           mattermost_post <channel-id> "" "$(mattermost_attachment --color ...)"
 # Globals:  $MATTERMOST_API + $MATTERMOST_TOKEN to access API
@@ -297,7 +308,9 @@ mattermost_attachment() {
 }
 
 # Add reaction to existing post
+#
 # This can only be called if a @mattermost call was used previously.
+#
 # Usage:    mattermost_reaction <emoji>
 # Globals:  $MATTERMOST_API + $MATTERMOST_TOKEN to access API
 # Options:  l, links     # also post this to the links
@@ -346,7 +359,9 @@ mattermost_reaction() {
 }
 
 # Add response to mattermost posting
+#
 # This can only be called if a @mattermost call was used previously.
+#
 # Usage:    mattermost_response <text> [<attachments>]
 # Globals:  $MATTERMOST_API + $MATTERMOST_TOKEN to access API
 # Returns:  0 without action if no $MATTERMOST_API + $MATTERMOST_TOKEN

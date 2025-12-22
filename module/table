@@ -16,6 +16,7 @@ use module/software
 ######################################################################################
 
 # Convert TSV data into visual table
+#
 # Usage:    tsv2table <tsv>
 #           <tsv> | tsv2table
 # Output:   <table>
@@ -27,6 +28,7 @@ tsv2table() {
 }
 
 # Convert TSV data into markdown table
+#
 # Usage:    tsv2md <tsv>
 #           <tsv> | tsv2md
 # Output:   <md>
@@ -42,7 +44,8 @@ tsv2md() {
 # csv
 ######################################################################################
 
-# Transform comma separated table.
+# Transform comma separated table
+#
 # Usage:    <string> | csv {to} <param>...
 #           <string> | csv to {tsv}              # convert
 csv() {
@@ -71,7 +74,8 @@ for row in reader:
 # tsv
 ######################################################################################
 
-# Transform tab separated table.
+# Transform tab separated table
+#
 # Usage:    <string> | tsv {to|crop} <param>...
 #           <string> | tsv to {csv|pprint}              # convert
 #           <string> | tsv crop <num|name> <width>      # crop column

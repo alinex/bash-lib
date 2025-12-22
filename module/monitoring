@@ -13,7 +13,9 @@ source /dev/null
 ######################################################################################
 
 # Get exporter list
+#
 # The result can be filtered by additional argument specification.
+#
 # Usage:    exporter [<field>=<value>]...
 # Globals:  $PROMETHEUS_HOST + $PROMETHEUS_API
 # Output:   Tab separated list without header:
@@ -70,7 +72,9 @@ exporter() {
 }
 
 # Scrape Prometheus exporter url now
+#
 # The metrics can be filtered by <pattern> argument.
+#
 # Usage:    scrape <url> <pattern>
 # Output:   Tab separated list:
 #           `<metric>    [<value>=<text>],...    <value>`
@@ -91,7 +95,9 @@ scrape() {
 }
 
 # Get Grafana alerts
+#
 # The list can be filtered by options and a specific output format can be selected.
+#
 # Usage:    alerts [<format>]                       # tsv, json, console, mattermost
 #           alerts -i "^$server" console || echo "" # will print the alerts with an empty line if there are some
 # Options:  a, alertname <regexp>               # select alert name
@@ -204,6 +210,7 @@ alerts() {
 }
 
 # Prom ql ausführen
+#
 # Usage:    prometheus <prom-ql>
 # Globals:  $PROMETHEUS_API to query
 # Returns:  0 - without output if no $PROMETHEUS_API
@@ -225,6 +232,7 @@ prometheus() {
 }
 
 # Change scrape interval to scrape now and set back
+#
 # Usage:    prometheus_scrape_now <job> [<timeout>]
 # Globals:  $PROMETHEUS_HOST to change config temporarily
 # Returns:  0 - without output if no $PROMETHEUS_HOST

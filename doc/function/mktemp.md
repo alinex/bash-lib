@@ -2,11 +2,6 @@
 
 ## Make a temporary file, which can be recognizable/individual
 
-As the same invocation from the same program will get the same file it can be called multiple times, as long as no `--random` is set.
-The file will be conducted out of the program name and the given `<identifier>`.
-
-You should remove this file by yourself if it is no longer needed. The files will be available in `/tmp` folder for about 3 unused days (managed by your os) and in memory till the next reboot.
-
 ### Usage
 
 ```bash
@@ -29,4 +24,13 @@ mktemp [<identifier>]       # use default temp if no identifier given
 `<path>`
 Debug: path and if it is created
 Debug: remove after TTL
+
+
+### Description
+
+
+As the same invocation from the same program will get the same file it can be called multiple times, as long as no `--random` is set.
+The file will be conducted out of the program name and the given `<identifier>`.
+
+You should remove this file by yourself if it is no longer needed. The files will be available in `/tmp` folder for about 3 unused days (managed by your os) and in memory till the next reboot.
 

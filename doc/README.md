@@ -201,8 +201,9 @@ The core functions contains essential parts which may also be used while loading
 | --- | --- |
 | ``$CURL_HTTP_CODE`` | Last HTTP return code from curl |
 | [`use`](function/use.md) | Load bashlib module |
-| [`trap_add`](function/trap_add.md) | Set or add an additional trap without overwriting existing ones |
-| [`trap_remove`](function/trap_remove.md) | Remove a specific trap |
+| [`trap`](function/trap.md) | Set or add an additional trap without overwriting existing ones |
+| [`trap_add`](function/trap_add.md) | Deprecated: Set or add an additional trap without overwriting existing ones |
+| [`trap_remove`](function/trap_remove.md) | Deprecated: Remove a specific trap |
 | [`mktemp`](function/mktemp.md) | Make a temporary file, which can be recognizable/individual |
 | [`curl`](function/curl.md) | Curl with added error handling |
 
@@ -260,7 +261,7 @@ This covers Atlassian API for Jira and confluence.
 | Variable/Function | Description |
 | --- | --- |
 | [`confluence`](function/confluence.md) | Get page content from Confluence using API |
-| [`jira`](function/jira.md) | https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issues/#api-group-issues |
+| [`jira`](function/jira.md) | Jira API calls |
 
 ### Database Module
 

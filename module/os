@@ -12,6 +12,7 @@ source /dev/null
 declare -A _os_detected
 
 # Detect OS settings
+#
 # The following formats are possible:
 #
 # - data - all values with `<name>\t<value>`
@@ -29,6 +30,7 @@ declare -A _os_detected
 # - architecture - x86_64, i686, i386, armv7l, aarch64...
 # - machine_id
 # - virtual_machine - `false` or `true`
+#
 # Usage:    os_detect <format>
 # Output:   - <tsv-table> for data
 #           - <value> else
@@ -133,9 +135,11 @@ os_detect() {
 ######################################################################################
 
 # Disk free with visual display
+#
 # The lines will be colorized based on `$MOUNT_COLOR_LIMIT`` setting, which contains sets of 5 entries (pattern critical error warn ok). The first matching pattern will decide the color limits.
 #
 # If a `--free` condition and `--collect` is given all disks violating this will be collected as string within the collection variable for further use.
+#
 # Usage:    disk_free [options] [<mount>...]            # show table
 # Options:  l, local     # only list local devices
 #           c, collect <variable-name>
@@ -230,6 +234,7 @@ disk_free() {
 }
 
 # Check if LVM is used
+#
 # Usage:    uses_lvm
 # Return:   0 for uses LVM
 #           1 if not
@@ -245,6 +250,7 @@ uses_lvm() {
 ######################################################################################
 
 # Has tty present
+#
 # Usage:    has_ttyp
 # Status:   0 || 1
 has_tty() {

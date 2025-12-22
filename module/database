@@ -16,6 +16,7 @@ use module/software
 ######################################################################################
 
 # Run command on Mongo DB
+#
 # Usage:    mongo "" <command>            # global command
 #           mongo <database> <command>    # work in database
 # Global:   $server

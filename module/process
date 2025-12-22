@@ -7,7 +7,9 @@
 ######################################################################################
 
 # Check if sudo is needed for command
-# This will @die if
+#
+# This will @die if the user is not allowed to use `sudo`.
+#
 # Usage:    sudo_allow <command-line>
 # Return:   0 if allowed
 #           @die if not allowed
@@ -20,6 +22,7 @@ sudo_allow() {
 }
 
 # Sudo overwrite to only use sudo if needed
+#
 # Usage:    sudo <command-line>
 sudo() {
     if ((EUID != 0)) && command -v sudo >/dev/null; then
@@ -34,6 +37,7 @@ sudo() {
 ######################################################################################
 
 # Execute command in N times
+#
 # Usage:    repeat <N> <command> [<params>]...
 repeat() {
     is integer --name=num --min=0 --die -- "$1"
@@ -49,8 +53,10 @@ repeat() {
 }
 
 # Retry a command multiple times until it succeeds
+#
 # Using escalating delay between attempts. Delay is 2 * n + random up to 30s, then 30s + random after that.
 # For large numbers of retries the max delay is effectively the retry count in minutes.
+#
 # Usage:    retry <N> <command> [<params>]...
 function retry {
     is integer --name=num --min=0 --die -- "$1"
@@ -89,9 +95,11 @@ _lock_remove() {
 }
 
 # Set a lock or wait till it can be set
+#
 # In any part of your script you can surround a block with @lock and @unlock statements. The
 # process will wait on the lock statement till no other process with the same lock is running
 # before going on.
+#
 # Usage:    lock
 # Files:    /tmp/<prog>_lockfile        # hard link to active process
 #           /tmp/<prog>_lockfile.<pid>  # active or waiting process
@@ -124,7 +132,9 @@ lock() {
 }
 
 # Set the lock or exit with optional error message
+#
 # While another program is running with this lock active it will @die.
+#
 # Usage:    lock_exit
 # Files:    /tmp/<prog>-lockfile        # hard link to active process
 #           /tmp/<prog>-lockfile.<pid>  # active or waiting process
@@ -147,6 +157,7 @@ lock_exit() {
 }
 
 # Remove the lock
+#
 # Usage:    unlock
 # shellcheck disable=SC2120
 unlock() {
@@ -168,6 +179,7 @@ unlock() {
 ######################################################################################
 
 # Store variables into shared memory/file
+#
 # The <ident> specifies also who will use the same file.
 # To get the same file in all your invocations of this script only use a fixed string here.
 # To have a different file for each script invocation include `$$` or '${$}'.
@@ -179,6 +191,7 @@ unlock() {
 # - `restore` all or some variables
 # - `clean` remove the store
 # - `change` run a command which will change the variables in the store
+#
 # Usage:    variables store [<ident>] [<variable>]...   # store complete or only listed variables (ident can be empty string)
 #           variables restore [<ident>] [<variable>]... # restore all or defined variables
 #           variables clean [<ident>]                   # remove the store
@@ -283,6 +296,7 @@ declare -A _async_running
 STEPS_VARIABLES=
 
 # Initialize step control
+#
 # Usage:    steps_init
 # Example:  steps_init
 #           # sync | async | queue calls
@@ -297,6 +311,7 @@ steps_init() {
 }
 
 # Check if step already finished successful
+#
 # Usage:    steps_check <name>
 # Exit:     0 if done else not done or with failure
 steps_check() {
@@ -315,6 +330,7 @@ steps_check() {
 }
 
 # Set step as successfully done
+#
 # Usage:    steps_done <name>   # finished one step
 #           steps_done          # completely finished -> cleanup
 steps_done() {
@@ -336,8 +352,10 @@ steps_done() {
 }
 
 # Run the given command with optional step control
+#
 # This will use the command itself as name. If you run the same command multiple times use
 # async_name directly.
+#
 # Usage:    sync <command> [<params>...]
 sync() {
     is set --name=command --die -- "$1"
@@ -346,6 +364,7 @@ sync() {
 }
 
 # Alternative to sync in which this call is given a name to refer
+#
 # Usage:     sync <name> <cmd> [<params>...]
 sync_name() {
     is set --name=name --die -- "$1"
@@ -364,8 +383,10 @@ sync_name() {
 }
 
 # Run the given command asynchronous ang go on in the calling routine (short form of async_name)
+#
 # This will use the command itself as name. If you run the same command multiple times use
 # async_name directly.
+#
 # Usage:    async <command> [<params>...]
 # Example:  ```bash
 #           async task1
@@ -381,6 +402,7 @@ async() {
 }
 
 # Alternative to async in which this call is given a name to refer in async_wait
+#
 # Usage:    async <name> <cmd> [<params>...]
 async_name() {
     is set --name=name --die -- "$1"
@@ -395,6 +417,7 @@ async_name() {
 }
 
 # Check if the command is done or wait here till it is so
+#
 # Usage:    async_wait          # to wait for all to be done
 #           async_wait <name>   # to wait for specific command to finish
 async_wait() {
@@ -418,9 +441,11 @@ _queue_jobs=()
 declare -A _queue_running
 
 # Run bash commands parallel with limits from a queue.
+#
 # The queue first collects all jobs and then you execute them all in parallel. Therefore you can give a max number of parallel calls and a max percentage load limit for then to start the next job.
 # You may also set the limits using environment $QUEUE_MAX_NUM and $QUEUE_MAX_LOAD.
 # If the server is over the configured load limit one job will always run, but parallel execution will only start if possible.
+#
 # Usage:    queue add <job> [<args>...]             # add job to queue
 #           queue run [<parallel>] [<load-percent>] # run the queue with specified limits
 queue() {
@@ -479,6 +504,7 @@ queue() {
 ######################################################################################
 
 # Return a random string in specific length
+#
 # The default length is 16.
 #
 # The `<pattern>` is a list of allowed characters in range:
@@ -493,6 +519,7 @@ queue() {
 # - hex - `0-9a-f`
 # - HEX - `0-9A-F`
 # - directly give pattern
+#
 # Usage:    random <pattern> [<length>]
 random() {
     is integer --name=arguments --max=2 --die -- $#
