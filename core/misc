@@ -9,11 +9,13 @@ source /dev/null
 ######################################################################################
 
 # Load bashlib module
+#
 # This can be used to load a special additional module as needed. If you try to load something which is already loaded it will do nothing.
 #
 # The core modules are always loaded, so you won't need to load them.
 # Something from the module folder can be loaded manually if you are started with only the base library.
 # And finally the extra folder has always to be loaded individually.
+#
 # Usage:    use [<folder>/]<module>
 # Globals:  $BASHLIB_LOADER to know which loader was used
 use() {
@@ -33,44 +35,67 @@ use() {
     source "$BASHLIB_HOME/$module"
 }
 
+######################################################################################
+### Trap
+######################################################################################
+
 # Set or add an additional trap without overwriting existing ones
+#
 # This is done by adding the new code as additional command before the existing ones if the trap is already set.
-# Usage:    trap_add <code> <signal>
-trap_add() {
-    is integer --name=arguments --min=2 --max=2 --die -- $#
-    is set --name=code --die -- "$1"
-    is enum --name=signal --allow="SIGINT SIGTERM SIGHUP SIGQUIT SIGUSR1 SIGALRM EXIT ERR DEBUG" --die -- "$2"
-    local new="$1"
-    local sig="$2"
+#
+# Usage:    trap add <code> <signal>
+#           trap remove <code> <signal>
+trap() {
+    is integer --name=arguments --min=3 --max=3 --die -- $#
+    is enum --name=command --allow="add remove" --die -- "$1" && local command="$1" && shift
+    is set --name=code --die -- "$1" && local code="$1"
+    is enum --name=signal --allow="SIGINT SIGTERM SIGHUP SIGQUIT SIGUSR1 SIGALRM EXIT ERR DEBUG" --die -- "$2" && local sig="$2"
     # processing
-    local old
-    old="$(trap -p "$sig" | awk -F"'" '{print $2}')"
-    if [[ -n "$old" ]]; then
-        # shellcheck disable=SC2064
-        trap "$new; $old" "$sig"
-    else
+    case $command in
+    add)
+        local old
+        old="$(trap -p "$sig" | awk -F"'" '{print $2}')"
+        debug 3 "add $code to $sig"
+        if [[ -n "$old" ]]; then
+            # shellcheck disable=SC2064
+            trap "$code; $old" "$sig"
+        else
+            # shellcheck disable=SC2064
+            trap "$code" "$sig"
+        fi
+        ;;
+    remove)
+        local current new
+        current="$(trap -p "$sig" | awk -F"'" '{print $2}')"
+        debug 3 "remove $code from $sig"
+        # shellcheck disable=SC2001
+        new="$(echo "$current" | sed "s#;* *$code##")"
         # shellcheck disable=SC2064
         trap "$new" "$sig"
-    fi
+        ;;
+    esac
 }
 
-# Remove a specific trap
+# Deprecated: Set or add an additional trap without overwriting existing ones
+# Use: trap add...
+#
+# This is done by adding the new code as additional command before the existing ones if the trap is already set.
+#
+# Usage:    trap_add <code> <signal>
+trap_add() {
+    _deprecated "Use: trap add..." warn
+    trap add "$@"
+}
+
+# Deprecated: Remove a specific trap
+# Use: trap remove...
+#
 # Not the whole trap is removed, but only the given code.
+#
 # Usage:    trap_remove <cmd> <signal>
 trap_remove() {
-    is integer --name=arguments --min=2 --max=2 --die -- $#
-    is set --name=code --die -- "$1"
-    is enum --name=signal --allow="SIGINT SIGTERM SIGHUP SIGQUIT SIGUSR1 SIGALRM EXIT ERR DEBUG" --die -- "$2"
-    local remove="$1"
-    local sig="$2"
-    # processing
-    local current new
-    debug 3 "remove $remove from $sig"
-    current="$(trap -p "$sig" | awk -F"'" '{print $2}')"
-    # shellcheck disable=SC2001
-    new="$(echo "$current" | sed "s#;* *$remove##")"
-    # shellcheck disable=SC2064
-    trap "$new" "$sig"
+    _deprecated "Use: trap remove..." warn
+    trap remove "$@"
 }
 
 ######################################################################################
@@ -78,10 +103,12 @@ trap_remove() {
 ######################################################################################
 
 # Make a temporary file, which can be recognizable/individual
+#
 # As the same invocation from the same program will get the same file it can be called multiple times, as long as no `--random` is set.
 # The file will be conducted out of the program name and the given `<identifier>`.
 #
 # You should remove this file by yourself if it is no longer needed. The files will be available in `/tmp` folder for about 3 unused days (managed by your os) and in memory till the next reboot.
+#
 # Usage:    mktemp [<identifier>]       # use default temp if no identifier given
 # Options:  -d, --directory             # to make a directory instead of a file
 #           -m, --memory                # use shared memory
@@ -137,6 +164,13 @@ mktemp() {
         disown
     )
 }
+
+# Remove temp file or folder after TTL
+#
+# This should be called asynchronous in the background an will remove the path if the time to live (TTL) in seconds is reached.
+# If program is stopped before, the file will stay.
+#
+# Usage:    _rm_temp <ttl> <path>
 _rm_temp() {
     local wait="$1" file="$2"
     while [ -e "$result" ] && ((wait > 0)); do
