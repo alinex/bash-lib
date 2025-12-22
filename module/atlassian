@@ -33,7 +33,7 @@ confluence() {
 # - https://atlas-doc-parser.readthedocs.io/en/latest/index.html
 
 # https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issues/#api-group-issues
-#
+
 # Jira API calls
 # To connect the $ATLASSIAN_USER and $ATLASSIAN_TOKEN is needed.
 # Jira API V3 is used there: https://developer.atlassian.com/cloud/jira/platform/rest/v3/intro which brings some elements in the [Atlassian Document Format](https://developer.atlassian.com/cloud/jira/platform/apis/document/structure/).
@@ -54,9 +54,12 @@ confluence() {
 #           jira update <ticket-id> <json>
 #           jira create <json>
 #           jira delete <issueId>|<key>
+#           jira project <key>
 #           jira json <json> set <field> <value>
 #           jira json <json> get <field>
 #           jira json <json> remove <field>
+#           jira adf parse <json>
+#           jira adf format <md>
 # Output:   - get: <json>
 #           - search: <issueId> list, each in a separate line
 #           - create: <issueId> which was just created
@@ -66,7 +69,7 @@ jira() {
     is set --name=JIRA_HOST --die -- "$JIRA_HOST"
     is set --name=ATLASSIAN_USER --die -- "$ATLASSIAN_USER"
     is set --name=ATLASSIAN_TOKEN --die -- "$ATLASSIAN_TOKEN"
-    is enum --name=command --allow="get search create delete json" --die -- "$1" && local command="$1" && shift
+    is enum --name=command --allow="get search create delete project json adf" --die -- "$1" && local command="$1" && shift
     # processing
     case "$command" in
     get)
@@ -94,6 +97,12 @@ jira() {
         debug "DELETE $1"
         _jira GET "issue/$1"
         ;;
+    project)
+        is set --name=arguments --max=1 --die -- $#
+        is set --name=projectId-or-key --die -- "$1"
+        debug "GET $1"
+        _jira GET "project/$1"
+        ;;
     json)
         local empty='{"fields":{}}'
         local json="${1:-$empty}" && shift
@@ -103,6 +112,158 @@ jira() {
         set) jq --arg v "$2" ".fields.$field = \$v" <<<"$json" ;;
         get) jq ".fields.$field" <<<"$json" ;;
         remove) jq "del(.fields.$field)" <<<"$json" ;;
+        esac
+        ;;
+    adf)
+        is enum --name=sub-command --allow="parse format" --die -- "$1" && local subCommand="$1" && shift
+        case "$subCommand" in
+        parse)
+            is set --name=json --die -- "$1" && local json="$1"
+            jq -r '
+    def para(p):
+      p.content[]?.text // "";
+
+    .content[] |
+    if .type == "paragraph" then
+      para(.) + "\n"
+
+    elif .type == "bulletList" then
+      (
+        .content
+        | map("- " + para(.content[0]))
+        | join("\n")
+      ) + "\n\n"
+
+    elif .type == "orderedList" then
+      (
+        .content
+        | to_entries
+        | map("\(.key + 1). " + para(.value.content[0]))
+        | join("\n")
+      ) + "\n\n"
+
+    elif .type == "codeBlock" then
+      "```\n" + (.content[0].text) + "\n```\n\n"
+
+    else
+      ""
+    end
+  ' <<<"$1" | sed -E '
+    s/<strong>(.+?)<\/strong>/**\1**/g
+    s/<em>(.+?)<\/em>/*\1*/g
+    s/<code>(.+?)<\/code>/`\1`/g
+  '
+            ;;
+        format)
+            is set --name=text --die -- "$1"
+            jq -n --arg text "$text" '
+    def paragraph(t):
+      { type: "paragraph", content: [{ type: "text", text: t }] };
+
+    def bullet(items):
+      {
+        type: "bulletList",
+        content: items | map({
+          type: "listItem",
+          content: [ paragraph(.) ]
+        })
+      };
+
+    def ordered(items):
+      {
+        type: "orderedList",
+        attrs: { order: 1 },
+        content: items | map({
+          type: "listItem",
+          content: [ paragraph(.) ]
+        })
+      };
+
+    ($text | split("\n")) as $lines
+    | reduce $lines[] as $line (
+        { out: [], mode: null, buf: [], pbuf: [] };
+
+        # empty line → flush paragraph or list
+        if $line == "" then
+          if .mode == "ul" then
+            .out += [ bullet(.buf) ]
+            | .buf = [] | .mode = null
+          elif .mode == "ol" then
+            .out += [ ordered(.buf) ]
+            | .buf = [] | .mode = null
+          elif (.pbuf | length) > 0 then
+            .out += [ paragraph(.pbuf | join("\n")) ]
+            | .pbuf = []
+          else .
+          end
+
+        # bullet list
+        elif ($line | startswith("- ")) then
+          if (.pbuf | length) > 0 then
+            .out += [ paragraph(.pbuf | join("\n")) ]
+            | .pbuf = []
+          else .
+          end
+          | if .mode == "ul" then
+              .buf += [ $line[2:] ]
+            else
+              if .mode == "ol" then
+                .out += [ ordered(.buf) ]
+              end
+              | .mode = "ul"
+              | .buf = [ $line[2:] ]
+            end
+
+        # ordered list
+        elif ($line | test("^[0-9]+\\. ")) then
+          if (.pbuf | length) > 0 then
+            .out += [ paragraph(.pbuf | join("\n")) ]
+            | .pbuf = []
+          else .
+          end
+          | if .mode == "ol" then
+              .buf += [ ($line | sub("^[0-9]+\\. "; "")) ]
+            else
+              if .mode == "ul" then
+                .out += [ bullet(.buf) ]
+              end
+              | .mode = "ol"
+              | .buf = [ ($line | sub("^[0-9]+\\. "; "")) ]
+            end
+
+        # normal text → append to paragraph buffer
+        else
+          if .mode == "ul" then
+            .out += [ bullet(.buf) ]
+            | .buf = [] | .mode = null
+          elif .mode == "ol" then
+            .out += [ ordered(.buf) ]
+            | .buf = [] | .mode = null
+          else .
+          end
+          | .pbuf += [ $line ]
+        end
+      )
+    # flush leftovers
+    | (
+        .out
+        + (if .mode == "ul" then [ bullet(.buf) ]
+           elif .mode == "ol" then [ ordered(.buf) ]
+           else [] end)
+        + (if (.pbuf | length) > 0 then [ paragraph(.pbuf | join("\n")) ]
+           else [] end)
+      )
+    | {
+        type: "doc",
+        version: 1,
+        content: .
+      }
+  ' | sed -E '
+    s/\*\*(.+?)\*\*/<strong>\1<\/strong>/g
+    s/\*(.+?)\*/<em>\1<\/em>/g
+    s/`([^`]+)`/<code>\1<\/code>/g
+  '
+            ;;
         esac
         ;;
     esac

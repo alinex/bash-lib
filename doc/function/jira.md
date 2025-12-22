@@ -27,9 +27,12 @@ jira search <jql>
 jira update <ticket-id> <json>
 jira create <json>
 jira delete <issueId>|<key>
+jira project <key>
 jira json <json> set <field> <value>
 jira json <json> get <field>
 jira json <json> remove <field>
+jira adf parse <json>
+jira adf format <md>
 ```
 
 ### Output (stdout)
