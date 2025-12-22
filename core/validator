@@ -7,6 +7,7 @@
 ######################################################################################
 
 # Validate and sanitize values.
+#
 # This validation is possible using the `check` and @is function.
 # - `check` should be used for sanitize because it will output the value
 # - @is should be used for checking only validity or stop processing on problem because no value is output
@@ -210,6 +211,7 @@ check() {
 }
 
 # Validate and sanitize values.
+#
 # This validation is possible using the @check and `is` function.
 # - @check should be used for sanitize because it will output the value
 # - `is` should be used for checking only validity or stop processing on problem because no value is output
@@ -284,6 +286,7 @@ is_float() {
 ######################################################################################
 
 # Trim leading whitespace or given character
+#
 # Usage:    trim_start <value> [<characters>]
 # Output:   <string>
 # See:      https://stackoverflow.com/a/3352015
@@ -297,6 +300,7 @@ trim_start() {
 }
 
 # Trim trailing whitespace or given character
+#
 # Usage:    trim_end <value> [<characters>]
 # Output:   <string>
 # See:      https://stackoverflow.com/a/3352015
@@ -310,6 +314,7 @@ trim_end() {
 }
 
 # Trim leading and trailing whitespace or given character
+#
 # Usage:    trim <value> [<characters>]
 # Output:   <string>
 # See:      https://stackoverflow.com/a/3352015
@@ -320,7 +325,9 @@ trim() {
 }
 
 # Convert string into only alphanumeric values
+#
 # This is needed to use it as a key in associative arrays. All other characters are converted into underscore.
+#
 # Usage:    to_alphanum <string>
 #           <string> | to_alphanum
 # Output:   <alnum>
@@ -333,6 +340,7 @@ to_alphanum() {
 }
 
 # Return the value or if it is a variable name which is not empty return it's value
+#
 # Usage:    value_if_variable <name>
 # Output:   <string>
 value_if_variable() {
