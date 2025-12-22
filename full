@@ -416,31 +416,35 @@ esac
 debug 5 "Loading module $module"
 source "$BASHLIB_HOME/$module"
 }
-trap_add(){
-is integer --name=arguments --min=2 --max=2 --die -- $#
-is set --name=code --die -- "$1"
-is enum --name=signal --allow="SIGINT SIGTERM SIGHUP SIGQUIT SIGUSR1 SIGALRM EXIT ERR DEBUG" --die -- "$2"
-local new="$1"
-local sig="$2"
-local old
+trap(){
+is integer --name=arguments --min=3 --max=3 --die -- $#
+is enum --name=command --allow="add remove" --die -- "$1"&&local command="$1"&&shift
+is set --name=code --die -- "$1"&&local code="$1"
+is enum --name=signal --allow="SIGINT SIGTERM SIGHUP SIGQUIT SIGUSR1 SIGALRM EXIT ERR DEBUG" --die -- "$2"&&local sig="$2"
+case $command in
+add)local old
 old="$(trap -p "$sig"|awk -F"'" '{print $2}')"
+debug 3 "add $code to $sig"
 if [[ -n $old ]];then
-trap "$new; $old" "$sig"
+trap "$code; $old" "$sig"
 else
-trap "$new" "$sig"
+trap "$code" "$sig"
 fi
+;;
+remove)local current new
+current="$(trap -p "$sig"|awk -F"'" '{print $2}')"
+debug 3 "remove $code from $sig"
+new="$(echo "$current"|sed "s#;* *$code##")"
+trap "$new" "$sig"
+esac
+}
+trap_add(){
+_deprecated "Use: trap add..." warn
+trap add "$@"
 }
 trap_remove(){
-is integer --name=arguments --min=2 --max=2 --die -- $#
-is set --name=code --die -- "$1"
-is enum --name=signal --allow="SIGINT SIGTERM SIGHUP SIGQUIT SIGUSR1 SIGALRM EXIT ERR DEBUG" --die -- "$2"
-local remove="$1"
-local sig="$2"
-local current new
-debug 3 "remove $remove from $sig"
-current="$(trap -p "$sig"|awk -F"'" '{print $2}')"
-new="$(echo "$current"|sed "s#;* *$remove##")"
-trap "$new" "$sig"
+_deprecated "Use: trap remove..." warn
+trap remove "$@"
 }
 mktemp(){
 eval set -- "$(option_parse $'d directory -\ne extension +\nm memory -\np path +\nr random -\nT ttl +' "$@")"
@@ -938,7 +942,7 @@ jira(){
 is set --name=JIRA_HOST --die -- "$JIRA_HOST"
 is set --name=ATLASSIAN_USER --die -- "$ATLASSIAN_USER"
 is set --name=ATLASSIAN_TOKEN --die -- "$ATLASSIAN_TOKEN"
-is enum --name=command --allow="get search create delete project json adf" --die -- "$1"&&local command="$1"&&shift
+is enum --name=command --allow="get search create delete project fields json adf" --die -- "$1"&&local command="$1"&&shift
 case "$command" in
 get)is set --name=arguments --max=1 --die -- $#
 is set --name=issueId-or-key --die -- "$1"
@@ -965,6 +969,12 @@ project)is set --name=arguments --max=1 --die -- $#
 is set --name=projectId-or-key --die -- "$1"
 debug "GET $1"
 _jira GET "project/$1"
+;;
+fields)is set --name=arguments --max=2 --die -- $#
+is set --name=projectId-or-key --die -- "$1"
+is set --name=issueTypeId --die -- "$2"
+debug "GET $1"
+_jira GET "issue/createmeta/$1/issuetypes/$2"
 ;;
 json)local empty='{"fields":{}}'
 local json="${1:-$empty}"&&shift
@@ -3236,7 +3246,8 @@ tail -n +2 <<<"$input"|tac
 esac
 }
 TRIVY_EXPLOITS_URL=https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json
-TRIVY_JIRA_SECURITY_BOARD=SEC
+TRIVY_JIRA_BOARD=SEC
+TRIVY_JIRA_ISSUE_TYPE=Code
 trivy(){
 is enum --name=command --allow="root files docker" --die -- "$1"&&local command="$1"&&shift
 local timeout
@@ -3296,7 +3307,19 @@ trivy_test(){
 work="$1"
 source="test"
 rm -r "$work"/split/critical "$work"/split/high "$work"/split/medium "$work"/split/low 2>/dev/null||true
-_trivy_jira[board]="$(jira project "$TRIVY_JIRA_SECURITY_BOARD"|jq .id -r)"
+local project
+project="$(jira project "$TRIVY_JIRA_BOARD")"
+_trivy_jira[board]="$(jq .id -r <<<"$project")"
+_trivy_jira[issueType]="$(jq '.issueTypes[] | select(.name == "'"$TRIVY_JIRA_ISSUE_TYPE".'").id' -r <<<"$project")"
+fields="$(jira fields "${_trivy_jira[board]}" "${_trivy_jira[issueType]}")"
+JIRA_FIELD_VORKOMMEN=customfield_10090
+JIRA_FIELD_TEAM=customfield_10001
+JIRA_FIELD_FREMDEINSCHAETZUNG=customfield_10091
+JIRA_FIELD_VERSION=customfield_10089
+JIRA_FIELD_LINKS=customfield_10092
+JIRA_FIELD_FREIGABE=customfield_10094
+_trivy_jira[field_]="$(jq '.fields[] | select(.name == "'"$JIRA_FIELD_VORKOMMEN'").key' -r <<<"$fields")"
+curl -s --request GET --url "https://$ATLASSIAN_DOMAIN.atlassian.net/rest/api/3/issue/createmeta/${_trivy_jira[board]}/issuetypes/${_trivy_jira[issueType]}" --user "$ATLASSIAN_USER:$ATLASSIAN_TOKEN" --header 'Accept: application/json'|jq
 local num
 for file in "$work"/split/*;do
 num="$(basename "$file")"
@@ -3342,21 +3365,22 @@ info "$id at $target: $action" >&2
 changes+=("{\"Severity\": \"MEDIUM\",\"OriginalSeverity\": \"$severity\"}")
 rules+=("{\"Title\": \"NPM Dev Dependency\",\"Description\": \"$action.\"}")
 fi
-if is set -- "$TRIVY_JIRA_SECURITY_BOARD"&&[[ $severity == "HIGH" || $severity == "CRITICAL" ]];then
+if is set -- "$TRIVY_JIRA_BOARD"&&[[ $severity == "HIGH" || $severity == "CRITICAL" ]];then
 local issue jira
 issue="$(jira search "project = ${_trivy_jira[board]} AND summary ~ $id ORDER BY created ASC"|head -1)"
 if is empty -- "$issue";then
-local fields priority=Low
+local fields priority=Low title description
 case $severity in
 HIGH)priority=Major;;
 CRITICAL)priority=Critical
 esac
+title="$(jq .Title -r <<<"$json")"
+description="$(jq .Description -r <<<"$json")"
 jira json fields set project "${_trivy_jira[board]}"
 jira json fields set priority "$priority"
 jira json fields set summary "$id"
-jira json fields set description '{"version": 1, "type": "doc", "content": []}'
-"description": $(jq -n --arg t "$title" --arg d "$description" '$t+"\n\n"+$d'),
-"issuetype": { "id": $SECURITY_BOARD_ISSUE_TYPE },
+jira json fields set description "$(jira adf format "$title"$'\n\n'"$description")"
+jira json fields set issuetype "{\"id\": \"${_trivy_jira[issueType]}\"}"
 "$JIRA_FIELD_VORKOMMEN": "$SOURCE $target ($type)",
 "$JIRA_FIELD_FREMDEINSCHAETZUNG": "$severity (CVSS Rating $cvss)",
 "$JIRA_FIELD_VERSION": "Installiert ist Version $installed gefixt ab Version $fixed $fixstatus",

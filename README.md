@@ -204,15 +204,29 @@ Load it directly in bash with the above `source` commands.
 
 The configuration is under `config/` folder and will be loaded in alphabetically order. For your configuration change only the `overwrite` and `secrets` which are linked to your local configuration folder.
 
+The configuration is the same for the whole host. To make program specific configuration overwrite it in your program after loading the bashlib. And you may also run the same program with different configuration by defining an additional configuration file to load using environment, see below.
+
 ### Environment
 
 There is a build in `DEBUG=1` flag, which you can set to do some specific debugging steps within the code. This is aimed to be used for development and bug fixing.
 
-Ideally you will also switch to use the loader from your script if `DEBUG` is set:
+```bash
+DEBUG=9 my-script
+```
+
+Ideally you will also switch to use the loader from within your script if `DEBUG` is set:
 
 ```bash
 test -z "${DEBUG-}" && source "$BASHLIB_HOME"/full || source "$BASHLIB_HOME"/loader
 ```
+
+You may also set an additional configuration file using `CONFIG` which can overwrite the host specific setting:
+
+```bash
+CONFIG=/home/user/special-setup my-script
+```
+
+But you cannot overwrite the configuration settings by environment.
 
 ## Latest Changes
 

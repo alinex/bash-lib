@@ -416,31 +416,35 @@ esac
 debug 5 "Loading module $module"
 source "$BASHLIB_HOME/$module"
 }
-trap_add(){
-is integer --name=arguments --min=2 --max=2 --die -- $#
-is set --name=code --die -- "$1"
-is enum --name=signal --allow="SIGINT SIGTERM SIGHUP SIGQUIT SIGUSR1 SIGALRM EXIT ERR DEBUG" --die -- "$2"
-local new="$1"
-local sig="$2"
-local old
+trap(){
+is integer --name=arguments --min=3 --max=3 --die -- $#
+is enum --name=command --allow="add remove" --die -- "$1"&&local command="$1"&&shift
+is set --name=code --die -- "$1"&&local code="$1"
+is enum --name=signal --allow="SIGINT SIGTERM SIGHUP SIGQUIT SIGUSR1 SIGALRM EXIT ERR DEBUG" --die -- "$2"&&local sig="$2"
+case $command in
+add)local old
 old="$(trap -p "$sig"|awk -F"'" '{print $2}')"
+debug 3 "add $code to $sig"
 if [[ -n $old ]];then
-trap "$new; $old" "$sig"
+trap "$code; $old" "$sig"
 else
-trap "$new" "$sig"
+trap "$code" "$sig"
 fi
+;;
+remove)local current new
+current="$(trap -p "$sig"|awk -F"'" '{print $2}')"
+debug 3 "remove $code from $sig"
+new="$(echo "$current"|sed "s#;* *$code##")"
+trap "$new" "$sig"
+esac
+}
+trap_add(){
+_deprecated "Use: trap add..." warn
+trap add "$@"
 }
 trap_remove(){
-is integer --name=arguments --min=2 --max=2 --die -- $#
-is set --name=code --die -- "$1"
-is enum --name=signal --allow="SIGINT SIGTERM SIGHUP SIGQUIT SIGUSR1 SIGALRM EXIT ERR DEBUG" --die -- "$2"
-local remove="$1"
-local sig="$2"
-local current new
-debug 3 "remove $remove from $sig"
-current="$(trap -p "$sig"|awk -F"'" '{print $2}')"
-new="$(echo "$current"|sed "s#;* *$remove##")"
-trap "$new" "$sig"
+_deprecated "Use: trap remove..." warn
+trap remove "$@"
 }
 mktemp(){
 eval set -- "$(option_parse $'d directory -\ne extension +\nm memory -\np path +\nr random -\nT ttl +' "$@")"
