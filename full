@@ -510,7 +510,7 @@ local file res
 array args has '-o'||file=$(mktemp -r)
 local opt
 [ -z "$file" ]||opt="-o $file"
-debug "command curl -s -w \"Error: %{url_effective} with RC:%{http_code}\" $opt -L $(escape_args "$@")"
+debug "curl -s $opt -L $(escape_args "$@")"
 res=$(command curl -s -w "%{url_effective} with RC:%{http_code}" $opt -L "$@"|tail -1)
 debug "Response: $res"
 CURL_HTTP_CODE=${res: -3}
@@ -556,8 +556,8 @@ log critical "$text"
 _stacktrace "$trap" 2>&1|log critical
 fi
 sleep 1
-kill -- -$$ 2>/dev/null
-exit 143
+set +eE
+exit 0
 }
 help(){
 is integer --name=arguments --min=2 --max=4 --die -- $#
@@ -717,6 +717,31 @@ wait "$_spinner_pid" 2>/dev/null
 _spinner_pid=""
 printf "    \b\b\b\b"
 printf '\e[?25h'
+}
+logo(){
+a=$'\033[36m'
+b=$'\033[33m\033[1m'
+c=$'\033[43m\033[30m\033[1m'
+r=$'\033[0m'
+u=$'\033[4m'
+p="$(printf '%*s' $((($(tput cols)-80)/2)))"
+t="$(printf '%*s' $((($(tput cols)-${#1})/2)))"
+echo
+echo "$p$a                         $b  __   ____     ___"
+echo "$p$a           ######  ##### $b ▕  ▏ ▕    ╲   ▕   ▏ $a  ########### #####       #####"
+echo "$p$a          ######## ##### $b ▕  ▏ ▕     ╲  ▕   ▏ $a ############  #####     #####"
+echo "$p$a         ######### ##### $b ▕  ▏ ▕  ▕╲  ╲ ▕   ▏ $a #####          #####   #####"
+echo "$p$a        ########## ##### $b ▕  ▏ ▕  ▕ ╲  ╲▕   ▏ $a #####           ##### #####"
+echo "$p$a       ##### ##### ##### $b ▕  ▏ ▕  ▕  ╲  ▔   ▏ $a ############     #########"
+echo "$p$a      #####  ##### ##### $b ▕  ▏ ▕  ▕   ╲     ▏ $a ############     #########"
+echo "$p$a     #####   ##### ##### $b ▕  ▏ ▕  ▕    ╲    ▏ $a #####           ##### #####"
+echo "$p$a    #####    ##### ##### $b  ▔▔   ▔▔▔     ▔▔▔▔  $a #####          #####   #####"
+echo "$p$a   ##### ######### ########################### ############  #####     #####"
+echo "$p$a  ##### ##########  #########################   ########### #####       ##### $r"
+echo "$p$b▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄$r$c"
+echo "$t$1$r"
+echo "$p$b▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀$r"
+echo
 }
 check(){
 eval set -- "$(option_parse $'n name +\nd die -\ns sanitize -\n- min +\n- max +\n- allow +' "$@")"
@@ -938,38 +963,43 @@ jira(){
 is set --name=JIRA_HOST --die -- "$JIRA_HOST"
 is set --name=ATLASSIAN_USER --die -- "$ATLASSIAN_USER"
 is set --name=ATLASSIAN_TOKEN --die -- "$ATLASSIAN_TOKEN"
-is enum --name=command --allow="get search create delete project fields json adf" --die -- "$1"&&local command="$1"&&shift
+is enum --name=command --allow="get search create update delete project fields json adf" --die -- "$1"&&local command="$1"&&shift
 case "$command" in
 get)is set --name=arguments --max=1 --die -- $#
 is set --name=issueId-or-key --die -- "$1"
-debug "GET $1"
+debug "GET issue $1"
 _jira GET "issue/$1"
 ;;
 search)is set --name=arguments --max=1 --die -- $#
 is set --name=jql --die -- "$1"
-debug "SEARCH $1"
+debug "SEARCH issue $1"
 local res rc=0
 _jira GET "search/jql?jql=$(urlencode "$1")"|jq .issues[].id -r
 ;;
 create)is set --name=arguments --max=1 --die -- $#
 is set --name=json --die -- "$1"
-debug "CREATE Issue ${jq-r '.fields.summary' <<<"$1"}"
+debug "CREATE issue ${jq-r '.fields.summary' <<<"$1"}"
 _jira POST issue "$1"|jq .id
+;;
+update)is set --name=arguments --max=1 --die -- $#
+is set --name=json --die -- "$1"
+debug "UPDATE issue $1"
+_jira PUT issue/$1 >/dev/null
 ;;
 delete)is set --name=arguments --max=1 --die -- $#
 is set --name=issueId-or-key --die -- "$1"
-debug "DELETE $1"
+debug "DELETE issue $1"
 _jira GET "issue/$1"
 ;;
 project)is set --name=arguments --max=1 --die -- $#
 is set --name=projectId-or-key --die -- "$1"
-debug "GET $1"
+debug "GET project $1"
 _jira GET "project/$1"
 ;;
 fields)is set --name=arguments --max=2 --die -- $#
 is set --name=projectId-or-key --die -- "$1"
 is set --name=issueTypeId --die -- "$2"
-debug "GET $1"
+debug "GET fields $1/$2"
 _jira GET "issue/createmeta/$1/issuetypes/$2"
 ;;
 json)local empty='{"fields":{}}'
@@ -1135,7 +1165,7 @@ _jira(){
 local METHOD=$1
 local REST="$2"
 local DATA="$3"
-local api=/rest/api/3
+local api=rest/api/3
 local res rc=0 num=0 retry=3
 while ((num<=retry));do
 ((num==0))||debug "Retry $num"
@@ -3244,6 +3274,13 @@ esac
 TRIVY_EXPLOITS_URL=https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json
 TRIVY_JIRA_BOARD=SEC
 TRIVY_JIRA_ISSUE_TYPE=Code
+TRIVY_JIRA_FIELD_SOURCES=Vorkommen
+TRIVY_JIRA_FIELD_RATING=Fremdeinschätzung
+TRIVY_JIRA_FIELD_VERSION=Version
+TRIVY_JIRA_FIELD_LINKS=Links
+TRIVY_JIRA_FIELD_APPROVAL=Freigabe
+TRIVY_JIRA_APPROVAL_TEMP="Ok für 30 Tage"
+TRIVY_JIRA_APPROVAL_IRRELEVANT="Irrelevant"
 trivy(){
 is enum --name=command --allow="root files docker" --die -- "$1"&&local command="$1"&&shift
 local timeout
@@ -3291,6 +3328,23 @@ debug "Found $found reports."
 mkdir -p "$_trivy_cache/jira"
 ! is file -- "$_trivy_cache/exploits.json"||find "$_trivy_cache/exploits.json" -mmin +1440 -delete
 is file -- "$_trivy_cache/exploits.json"||curl -s "$TRIVY_EXPLOITS_URL" -o "$_trivy_cache/exploits.json"
+local project
+project="$(jira project "$TRIVY_JIRA_BOARD")"
+_trivy_jira[board]="$(jq .id -r <<<"$project")"
+is set -- "${_trivy_jira[board]}"||die "Could not find JIRA Board ID for $TRIVY_JIRA_BOARD!"
+_trivy_jira[issueType]="$(jq '.issueTypes[] | select(.name == "'"$TRIVY_JIRA_ISSUE_TYPE"'").id' -r <<<"$project")"
+is set -- "${_trivy_jira[issueType]}"||die "Could not find JIRA Issue Type ID for $TRIVY_JIRA_BOARD/$TRIVY_JIRA_ISSUE_TYPE!"
+fields="$(jira fields "${_trivy_jira[board]}" "${_trivy_jira[issueType]}")"
+_trivy_jira[field_sources]="$(jq '.fields[] | select(.name == "'"$TRIVY_JIRA_FIELD_SOURCES"'").key' -r <<<"$fields")"
+is set -- "${_trivy_jira[field_sources]}"||die "Could not find JIRA Field \"$TRIVY_JIRA_FIELD_SOURCES\" in $TRIVY_JIRA_BOARD/$TRIVY_JIRA_ISSUE_TYPE!"
+_trivy_jira[field_rating]="$(jq '.fields[] | select(.name == "'"$TRIVY_JIRA_FIELD_RATING"'").key' -r <<<"$fields")"
+is set -- "${_trivy_jira[field_rating]}"||die "Could not find JIRA Field \"$TRIVY_JIRA_FIELD_RATING\" in $TRIVY_JIRA_BOARD/$TRIVY_JIRA_ISSUE_TYPE!"
+_trivy_jira[field_version]="$(jq '.fields[] | select(.name == "'"$TRIVY_JIRA_FIELD_VERSION"'").key' -r <<<"$fields")"
+is set -- "${_trivy_jira[field_version]}"||die "Could not find JIRA Field \"$TRIVY_JIRA_FIELD_VERSION\" in $TRIVY_JIRA_BOARD/$TRIVY_JIRA_ISSUE_TYPE!"
+_trivy_jira[field_links]="$(jq '.fields[] | select(.name == "'"$TRIVY_JIRA_FIELD_LINKS"'").key' -r <<<"$fields")"
+is set -- "${_trivy_jira[field_links]}"||die "Could not find JIRA Field \"$TRIVY_JIRA_FIELD_LINKS\" in $TRIVY_JIRA_BOARD/$TRIVY_JIRA_ISSUE_TYPE!"
+_trivy_jira[field_approval]="$(jq '.fields[] | select(.name == "'"$TRIVY_JIRA_FIELD_APPROVAL"'").key' -r <<<"$fields")"
+is set -- "${_trivy_jira[field_approval]}"||die "Could not find JIRA Field \"$TRIVY_JIRA_FIELD_APPROVAL\" in $TRIVY_JIRA_BOARD/$TRIVY_JIRA_ISSUE_TYPE!"
 local num
 for file in "$work"/split/*;do
 num="$(basename "$file")"
@@ -3306,21 +3360,20 @@ rm -r "$work"/split/critical "$work"/split/high "$work"/split/medium "$work"/spl
 local project
 project="$(jira project "$TRIVY_JIRA_BOARD")"
 _trivy_jira[board]="$(jq .id -r <<<"$project")"
-_trivy_jira[issueType]="$(jq '.issueTypes[] | select(.name == "'"$TRIVY_JIRA_ISSUE_TYPE".'").id' -r <<<"$project")"
+is set -- "${_trivy_jira[board]}"||die "Could not find JIRA Board ID for $TRIVY_JIRA_BOARD!"
+_trivy_jira[issueType]="$(jq '.issueTypes[] | select(.name == "'"$TRIVY_JIRA_ISSUE_TYPE"'").id' -r <<<"$project")"
+is set -- "${_trivy_jira[issueType]}"||die "Could not find JIRA Issue Type ID for $TRIVY_JIRA_BOARD/$TRIVY_JIRA_ISSUE_TYPE!"
 fields="$(jira fields "${_trivy_jira[board]}" "${_trivy_jira[issueType]}")"
-JIRA_FIELD_VORKOMMEN=customfield_10090
-JIRA_FIELD_TEAM=customfield_10001
-JIRA_FIELD_FREMDEINSCHAETZUNG=customfield_10091
-JIRA_FIELD_VERSION=customfield_10089
-JIRA_FIELD_LINKS=customfield_10092
-JIRA_FIELD_FREIGABE=customfield_10094
-_trivy_jira[field_sources]="$(jq '.fields[] | select(.name == "'"$JIRA_FIELD_VORKOMMEN'").key' -r <<<"$fields")"
-_trivy_jira[field_team]="$(jq '.fields[] | select(.name == "'"$JIRA_FIELD_TEAM'").key' -r <<<"$fields")"
-_trivy_jira[field_rating]="$(jq '.fields[] | select(.name == "'"$JIRA_FIELD_FREMDEINSCHAETZUNG'").key' -r <<<"$fields")"
-_trivy_jira[field_version]="$(jq '.fields[] | select(.name == "'"$JIRA_FIELD_VERSION'").key' -r <<<"$fields")"
-_trivy_jira[field_links]="$(jq '.fields[] | select(.name == "'"$JIRA_FIELD_LINKS'").key' -r <<<"$fields")"
-_trivy_jira[field_approval]="$(jq '.fields[] | select(.name == "'"$JIRA_FIELD_FREIGABE'").key' -r <<<"$fields")"
-curl -s --request GET --url "https://$ATLASSIAN_DOMAIN.atlassian.net/rest/api/3/issue/createmeta/${_trivy_jira[board]}/issuetypes/${_trivy_jira[issueType]}" --user "$ATLASSIAN_USER:$ATLASSIAN_TOKEN" --header 'Accept: application/json'|jq
+_trivy_jira[field_sources]="$(jq '.fields[] | select(.name == "'"$TRIVY_JIRA_FIELD_SOURCES"'").key' -r <<<"$fields")"
+is set -- "${_trivy_jira[field_sources]}"||die "Could not find JIRA Field \"$TRIVY_JIRA_FIELD_SOURCES\" in $TRIVY_JIRA_BOARD/$TRIVY_JIRA_ISSUE_TYPE!"
+_trivy_jira[field_rating]="$(jq '.fields[] | select(.name == "'"$TRIVY_JIRA_FIELD_RATING"'").key' -r <<<"$fields")"
+is set -- "${_trivy_jira[field_rating]}"||die "Could not find JIRA Field \"$TRIVY_JIRA_FIELD_RATING\" in $TRIVY_JIRA_BOARD/$TRIVY_JIRA_ISSUE_TYPE!"
+_trivy_jira[field_version]="$(jq '.fields[] | select(.name == "'"$TRIVY_JIRA_FIELD_VERSION"'").key' -r <<<"$fields")"
+is set -- "${_trivy_jira[field_version]}"||die "Could not find JIRA Field \"$TRIVY_JIRA_FIELD_VERSION\" in $TRIVY_JIRA_BOARD/$TRIVY_JIRA_ISSUE_TYPE!"
+_trivy_jira[field_links]="$(jq '.fields[] | select(.name == "'"$TRIVY_JIRA_FIELD_LINKS"'").key' -r <<<"$fields")"
+is set -- "${_trivy_jira[field_links]}"||die "Could not find JIRA Field \"$TRIVY_JIRA_FIELD_LINKS\" in $TRIVY_JIRA_BOARD/$TRIVY_JIRA_ISSUE_TYPE!"
+_trivy_jira[field_approval]="$(jq '.fields[] | select(.name == "'"$TRIVY_JIRA_FIELD_APPROVAL"'").key' -r <<<"$fields")"
+is set -- "${_trivy_jira[field_approval]}"||die "Could not find JIRA Field \"$TRIVY_JIRA_FIELD_APPROVAL\" in $TRIVY_JIRA_BOARD/$TRIVY_JIRA_ISSUE_TYPE!"
 local num
 for file in "$work"/split/*;do
 num="$(basename "$file")"
@@ -3367,31 +3420,67 @@ changes+=("{\"Severity\": \"MEDIUM\",\"OriginalSeverity\": \"$severity\"}")
 rules+=("{\"Title\": \"NPM Dev Dependency\",\"Description\": \"$action.\"}")
 fi
 if is set -- "$TRIVY_JIRA_BOARD"&&[[ $severity == "HIGH" || $severity == "CRITICAL" ]];then
-local issue jira
+local issue created
 issue="$(jira search "project = ${_trivy_jira[board]} AND summary ~ $id ORDER BY created ASC"|head -1)"
 if is empty -- "$issue";then
-local fields priority=Low title description
+local fields priority=Low title description cvss installed fixed fixStatus
 case $severity in
 HIGH)priority=Major;;
 CRITICAL)priority=Critical
 esac
 title="$(jq .Title -r <<<"$json")"
 description="$(jq .Description -r <<<"$json")"
-jira json fields set project "${_trivy_jira[board]}"
+cvss="$(jq '.CVSS[]?.V3Score' -r <<<"$json")"|tr $'\n' '\;'|sed 's/;$//;s/;/; /g'
+installed="$(jq .InstalledVersion -r <<<"$json")"
+fixed="$(jq .FixedVersion -r <<<"$json")"
+[ "$fixed" != "null" ]||fixed="-"
+fixStatus="$(jq .Status -r <<<"$json")"
+[ "$fixStatus" != "null" ]||fixStatus="-"
++ jira json fields set project "${_trivy_jira[board]}"
 jira json fields set priority "$priority"
 jira json fields set summary "$id"
 jira json fields set description "$(jira adf format "$title"$'\n\n'"$description")"
 jira json fields set issuetype "{\"id\": \"${_trivy_jira[issueType]}\"}"
-"$JIRA_FIELD_VORKOMMEN": "$SOURCE $target ($type)",
-"$JIRA_FIELD_FREMDEINSCHAETZUNG": "$severity (CVSS Rating $cvss)",
-"$JIRA_FIELD_VERSION": "Installiert ist Version $installed gefixt ab Version $fixed $fixstatus",
-"$JIRA_FIELD_LINKS": $(jq -n --arg t "$links" '$t'),
-"labels": ["cve", "$(echo "$SOURCE"|sed 's#.*ekz.de/##;s#/-/.*##;s#[/.]#", "#g')"]
+jira json fields set ${_trivy_jira[field_sources]} "$(jira adf format "$source $target ($type)")"
+jira json fields set ${_trivy_jira[field_rating]} "$(jira adf format "$severity (CVSS Rating $cvss)")"
+jira json fields set ${_trivy_jira[field_version]} "$(jira adf format "Installiert ist Version $installed gefixt ab Version $fixed $fixStatus")"
+jira json fields set ${_trivy_jira[field_links]} "$(jira adf format "$links")"
+jira json fields set labels "[\"cve\", \"$(sed 's#.*ekz.de/##;s#/-/.*##;s#[/.]#", "#g' <<<"$source")\"]"
 issue="$(jira create "$fields")"
+created=1
 fi
-warn xxx $issue >&2
+local jira deploy commentDate
 jira="$(jira get "$issue")"
-warn "Jira $issue" >&2
+deploy="$(jq '.fields.'"${_trivy_jira[field_approval]}"'?.value' -r <<<"$jira")"
+commentDate=$(jq '.fields.comment.comments[].updated' -r <<<"$jira"|sort|tail -1)
+if [[ $severity == "HIGH" || $severity == "CRITICAL" ]];then
+if ([ "$deploy" = "$TRIVY_JIRA_APPROVAL_IRRELEVANT" ]||([ "$deploy" = "$TRIVY_JIRA_APPROVAL_TEMP" ]&&(($(date_diff "$(now)" "$commentDate")<$(duration_format seconds '30d')))));then
+action="Downgrade $severity -> MEDIUM because of Jira status '$deploy'"
+info "$id at $target: $action" >&2
+changes+=("{\"Severity\": \"MEDIUM\",\"OriginalSeverity\": \"$severity\"}")
+rules+=("{\"Title\": \"Jira Approval\",\"Description\": \"$action.\"}")
+fi
+fi
+if is set -- "$created";then
+local sources new update addLabel=()
+sources="$(jira fields get "${_trivy_jira[field_sources]}")"
+[ "$sources" = "null" ]&&sources=""||sources="$(jira adf parse "$sources")"
+if is set -- "$sources";then
+new="$(echo -e "$sources\n$(date +%Y-%m) > $source $target ($type)"|sed -n '/>/p'|sort -t'>' -r -k2,1|sort -t'>' -u -r -k2)"
+else
+new="$(date +%Y-%m) $source > $target ($type)"
+fi
+for label in $(echo "$source"|sed 's#.*ekz.de/##;s#/-/.*##;s#[/.]# #g');do
+[[ ! $labels =~ $label ]]||continue
+addLabel+=('{"add": "'$label'"}')
+done
+update="{\"update\":{\"${_trivy_jira[field_sources]}\":[{\"set\":$(jira adf format "$new")}]}, {\"labels\":[$(join "$addLabels")]}}}"
+issue="$(jira update "$update")"
+fi
+action="Add information from Jira"
+info "$id at $target: $action" >&2
+changes+=("{\"Jira\": {\"id\": $issue, \"key\": $(jq .key <<<"$jira"), \"approval\": \"$deploy\", \"lastComment\": \"$commentDate\"}}")
+rules+=("{\"Title\": \"Jira Info\",\"Description\": \"$action.\"}")
 fi
 is empty -- "$rules"||changes+=("{\"Rules\": [$(join rules)]}")
 for change in "${changes[@]}";do

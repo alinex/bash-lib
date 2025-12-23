@@ -53,7 +53,7 @@ debug() {
 
 # Output error message and exit
 #
-# Usage:    die <message>
+# Usage:    die <message> [<source>:<line>]
 #           <message> | die
 # Error:    # Example if called for deprecated call:
 #           ```
@@ -79,10 +79,14 @@ die() {
         log critical "$text"
         _stacktrace "$trap" 2>&1 | log critical
     fi
-    # sends SIGTERM to process group → process receives SIGTERM
-    sleep 1 # to let output pipes finish
-    kill -- -$$ 2>/dev/null
-    exit 143
+    if [[ $- == *i* ]]; then
+        return 143
+    else
+        sleep 1 # to let output pipes finish
+        # sends SIGTERM to process group → process receives SIGTERM
+        kill -- -$$ 2>/dev/null
+        exit 143
+    fi
 }
 
 ######################################################################################

@@ -232,6 +232,7 @@ Module with output and user interaction helpers.
 | [`horizontal_line`](function/horizontal_line.md) | Show a horizontal line |
 | [`spinner_start`](function/spinner_start.md) | Function to start the spinner in the background |
 | [`spinner_stop`](function/spinner_stop.md) | Function to stop the spinner |
+| [`logo`](function/logo.md) | Output Logo with title text |
 
 ### Validator Module
 
@@ -447,4 +448,5 @@ Module with divibib specific helpers.
 
 | Variable/Function | Description |
 | --- | --- |
+| [`logo`](function/logo.md) | divibib Logo with title text |
 | [`confluence_outage`](function/confluence_outage.md) | Get outage information |

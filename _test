@@ -29,14 +29,6 @@ while true; do
 done
 ################################################################################################
 
-use extra/divibib
-logo TEST
-exit
-
-jira fields 10134 10057 | jq '.fields[] | select(.name == "Vorkommen").key'
-
-exit
-
 #trivy files /home/alex/dvb/divibib-search-api
 trivy_test /tmp/_test_816357_trivy
 exit

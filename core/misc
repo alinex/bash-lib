@@ -204,7 +204,7 @@ curl() {
     array args has '-o' || file=$(mktemp -r)
     local opt
     [ -z "$file" ] || opt="-o $file"
-    debug "command curl -s -w \"Error: %{url_effective} with RC:%{http_code}\" $opt -L $(escape_args "$@")"
+    debug "curl -s $opt -L $(escape_args "$@")"
     # shellcheck disable=SC2086
     res=$(command curl -s -w "%{url_effective} with RC:%{http_code}" $opt -L "$@" | tail -1)
     debug "Response: $res"

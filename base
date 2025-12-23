@@ -510,7 +510,7 @@ local file res
 array args has '-o'||file=$(mktemp -r)
 local opt
 [ -z "$file" ]||opt="-o $file"
-debug "command curl -s -w \"Error: %{url_effective} with RC:%{http_code}\" $opt -L $(escape_args "$@")"
+debug "curl -s $opt -L $(escape_args "$@")"
 res=$(command curl -s -w "%{url_effective} with RC:%{http_code}" $opt -L "$@"|tail -1)
 debug "Response: $res"
 CURL_HTTP_CODE=${res: -3}
@@ -556,8 +556,8 @@ log critical "$text"
 _stacktrace "$trap" 2>&1|log critical
 fi
 sleep 1
-kill -- -$$ 2>/dev/null
-exit 143
+set +eE
+exit 0
 }
 help(){
 is integer --name=arguments --min=2 --max=4 --die -- $#
@@ -717,6 +717,31 @@ wait "$_spinner_pid" 2>/dev/null
 _spinner_pid=""
 printf "    \b\b\b\b"
 printf '\e[?25h'
+}
+logo(){
+a=$'\033[36m'
+b=$'\033[33m\033[1m'
+c=$'\033[43m\033[30m\033[1m'
+r=$'\033[0m'
+u=$'\033[4m'
+p="$(printf '%*s' $((($(tput cols)-80)/2)))"
+t="$(printf '%*s' $((($(tput cols)-${#1})/2)))"
+echo
+echo "$p$a                         $b  __   ____     ___"
+echo "$p$a           ######  ##### $b ▕  ▏ ▕    ╲   ▕   ▏ $a  ########### #####       #####"
+echo "$p$a          ######## ##### $b ▕  ▏ ▕     ╲  ▕   ▏ $a ############  #####     #####"
+echo "$p$a         ######### ##### $b ▕  ▏ ▕  ▕╲  ╲ ▕   ▏ $a #####          #####   #####"
+echo "$p$a        ########## ##### $b ▕  ▏ ▕  ▕ ╲  ╲▕   ▏ $a #####           ##### #####"
+echo "$p$a       ##### ##### ##### $b ▕  ▏ ▕  ▕  ╲  ▔   ▏ $a ############     #########"
+echo "$p$a      #####  ##### ##### $b ▕  ▏ ▕  ▕   ╲     ▏ $a ############     #########"
+echo "$p$a     #####   ##### ##### $b ▕  ▏ ▕  ▕    ╲    ▏ $a #####           ##### #####"
+echo "$p$a    #####    ##### ##### $b  ▔▔   ▔▔▔     ▔▔▔▔  $a #####          #####   #####"
+echo "$p$a   ##### ######### ########################### ############  #####     #####"
+echo "$p$a  ##### ##########  #########################   ########### #####       ##### $r"
+echo "$p$b▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄$r$c"
+echo "$t$1$r"
+echo "$p$b▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀$r"
+echo
 }
 check(){
 eval set -- "$(option_parse $'n name +\nd die -\ns sanitize -\n- min +\n- max +\n- allow +' "$@")"

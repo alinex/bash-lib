@@ -76,45 +76,51 @@ jira() {
   is set --name=JIRA_HOST --die -- "$JIRA_HOST"
   is set --name=ATLASSIAN_USER --die -- "$ATLASSIAN_USER"
   is set --name=ATLASSIAN_TOKEN --die -- "$ATLASSIAN_TOKEN"
-  is enum --name=command --allow="get search create delete project fields json adf" --die -- "$1" && local command="$1" && shift
+  is enum --name=command --allow="get search create update delete project fields json adf" --die -- "$1" && local command="$1" && shift
   # processing
   case "$command" in
   get)
     is set --name=arguments --max=1 --die -- $#
     is set --name=issueId-or-key --die -- "$1"
-    debug "GET $1"
+    debug "GET issue $1"
     _jira GET "issue/$1"
     ;;
   search)
     is set --name=arguments --max=1 --die -- $#
     is set --name=jql --die -- "$1"
-    debug "SEARCH $1"
+    debug "SEARCH issue $1"
     local res rc=0
     _jira GET "search/jql?jql=$(urlencode "$1")" | jq .issues[].id -r
     ;;
   create)
     is set --name=arguments --max=1 --die -- $#
     is set --name=json --die -- "$1"
-    debug "CREATE Issue ${jq-r '.fields.summary' <<<"$1"}"
+    debug "CREATE issue ${jq-r '.fields.summary' <<<"$1"}"
     _jira POST issue "$1" | jq .id
+    ;;
+  update)
+    is set --name=arguments --max=1 --die -- $#
+    is set --name=json --die -- "$1"
+    debug "UPDATE issue $1"
+    _jira PUT issue/$1 >/dev/null
     ;;
   delete)
     is set --name=arguments --max=1 --die -- $#
     is set --name=issueId-or-key --die -- "$1"
-    debug "DELETE $1"
+    debug "DELETE issue $1"
     _jira GET "issue/$1"
     ;;
   project)
     is set --name=arguments --max=1 --die -- $#
     is set --name=projectId-or-key --die -- "$1"
-    debug "GET $1"
+    debug "GET project $1"
     _jira GET "project/$1"
     ;;
   fields)
     is set --name=arguments --max=2 --die -- $#
     is set --name=projectId-or-key --die -- "$1"
     is set --name=issueTypeId --die -- "$2"
-    debug "GET $1"
+    debug "GET fields $1/$2"
     _jira GET "issue/createmeta/$1/issuetypes/$2"
     ;;
   json)
@@ -288,7 +294,7 @@ _jira() {
   local METHOD=$1
   local REST="$2"
   local DATA="$3"
-  local api=/rest/api/3
+  local api=rest/api/3
   local res rc=0 num=0 retry=3
   while ((num <= retry)); do
     ((num == 0)) || debug "Retry $num"

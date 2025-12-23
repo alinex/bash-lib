@@ -42,6 +42,8 @@ trivy.json - the original output of trivy containing all vulnerabilities
           data.json
 ```
 
+After use you should remove this temporary folder to reclaim space.
+
 The pure trivy data will be optimized by:
 
 - downgrade security level if published in the last days
@@ -49,7 +51,16 @@ The pure trivy data will be optimized by:
 - downgrade if node development package
 - connect with jira ticket management
 
-After use you should remove this temporary folder to reclaim space.
+The jira ticket management needs some setup to work, all `JIRA_TRIVY_*` settings have to be set defined and therefore you need a board there you manage this tickets.
+Please make sure the custom fields are created for each of the setting. The approval needs also two defined values for temporarily allowed or irrelevant = always allowed.
+
+An Example is Board SEC with an `IssueType=Code`  which has the fields:
+
+- Sources as text field to store information of there this was found
+. Rating as text field containing the values from CVSS
+- Version as text field containing the installed and fixed version
+- Links as text field for all the references from trivy
+- Approval as enumeration with: Null, Blocked, Irrelevant, Allowed for 30 days
 
 Warning: This will overwrite the original trivy command, so if you want to use trivy directly while bashlib is loaded, use `command trivy ....`
 
