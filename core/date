@@ -80,6 +80,22 @@ date_format() {
         die "Date format '$value' not parsable!"
 }
 
+# Sleep until given date
+#
+# Causes the running process to wait until the given date.
+# If the date is in the past, it immediately returns.
+#
+# Usage:    sleep_until <date>
+sleep_until() {
+    is integer --name=arguments --max=1 --die -- $#
+    is set --name=date --die -- "$1"
+    # processing
+    local secs
+    secs="$(date_diff "$(now)" "$1")"
+    ((secs > 0)) || die "Date has to be in the future for sleep_until"
+    sleep "$secs"
+}
+
 ######################################################################################
 ### Duration intervals
 ######################################################################################

@@ -40,10 +40,14 @@ teardown_file() {
     assert [ -e "$output" ]
     assert_output "/tmp/bats-exec-test_test"
 }
-# bats test_tags=mktemp
-@test "mktemp: with extension" {
-    run mktemp test -e env
+
+######################################################################################
+# first
+######################################################################################
+
+# bats test_tags=first
+@test "first: find element" {
+    run first "" "" one two
     assert_success
-    assert [ -e "$output" ]
-    assert_output "/tmp/bats-exec-test_test.env"
+    assert_output one
 }

@@ -291,6 +291,14 @@ esac
 value="${2-$(now)}"
 is integer -- "$value"&&eval "date -d @$value $format"||eval "date -d \"$value\" $format"||die "Date format '$value' not parsable!"
 }
+sleep_until(){
+is integer --name=arguments --max=1 --die -- $#
+is set --name=date --die -- "$1"
+local secs
+secs="$(date_diff "$(now)" "$1")"
+((secs>0))||die "Date has to be in the future for sleep_until"
+sleep "$secs"
+}
 duration_format(){
 is integer --name=arguments --max=2 --die -- $#
 is enum --name=format --allow="seconds minutes hours days human" --die -- "$1"
@@ -524,6 +532,16 @@ error "Error: $res" >&2
 return 1
 fi
 }
+first(){
+local value
+for value in "$@";do
+if [[ $value ]];then
+echo "$value"
+return 0
+fi
+done
+return 1
+}
 debug(){
 local level=1 func text sign='>'
 is integer --name=arguments --max=2 --die -- $#
@@ -555,9 +573,13 @@ if command -v log >/dev/null;then
 log critical "$text"
 _stacktrace "$trap" 2>&1|log critical
 fi
+if [[ $- == *i* ]];then
+return 143
+else
 sleep 1
-set +eE
-exit 0
+kill -- -$$ 2>/dev/null
+exit 143
+fi
 }
 help(){
 is integer --name=arguments --min=2 --max=4 --die -- $#

@@ -84,6 +84,12 @@ setup() {
     assert_success
 }
 
+# bats test_tags=sleep_until
+@test "sleep_until: wait 5 secs" {
+    run sleep_until "$(($(now) + 5))"
+    assert_success
+}
+
 ######################################################################################
 # duration_format
 ######################################################################################

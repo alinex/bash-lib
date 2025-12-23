@@ -5,7 +5,7 @@
 ### Usage
 
 ```bash
-die <message>
+die <message> [<source>:<line>]
 <message> | die
 ```
 

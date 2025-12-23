@@ -5,7 +5,10 @@ But on release they will be merged with semantical versioning into the master br
 
 ## Newest Development (not released)
 
+- new is/check validators: true/false
 - add [trivy](doc/function/trivy.md) security scanning
+- add [sleep_until](doc/function/sleep_until.md)
+- add [first](doc/function/first.md)
 - enhanced [jira](doc/function/jira.md) to get meta information and work with ADF
 - add `$CONFIG` to load special config file
 - optimize function documentation

@@ -221,3 +221,17 @@ curl() {
         return 1
     fi
 }
+
+# Get the first value that is non-empty
+#
+# Usage: first <value>...
+first() {
+    local value
+    for value in "$@"; do
+        if [[ $value ]]; then
+            echo "$value"
+            return 0
+        fi
+    done
+    return 1
+}

@@ -188,6 +188,7 @@ Some helpers to work easier with dates.
 | [`now`](function/now.md) | Get current timestamp |
 | [`date_diff`](function/date_diff.md) | Calculate difference in seconds |
 | [`date_format`](function/date_format.md) | Format date in different named versions or format string |
+| [`sleep_until`](function/sleep_until.md) | Sleep until given date |
 | [`duration_format`](function/duration_format.md) | Format duration in different numbers or human readable |
 | [`timer`](function/timer.md) | Start/stop the timer |
 | [`timer_start`](function/timer_start.md) | Deprecated: Start the timer |
@@ -205,6 +206,7 @@ The core functions contains essential parts which may also be used while loading
 | [`trap_remove`](function/trap_remove.md) | Remove a specific trap |
 | [`mktemp`](function/mktemp.md) | Make a temporary file, which can be recognizable/individual |
 | [`curl`](function/curl.md) | Curl with added error handling |
+| [`first`](function/first.md) | Get the first value that is non-empty |
 
 ### Output Module
 

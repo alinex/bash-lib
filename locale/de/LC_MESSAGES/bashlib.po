@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-23 20:05+0100\n"
+"POT-Creation-Date: 2025-12-23 21:04+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -37,11 +37,11 @@ msgstr "Optionen"
 msgid "argument is not a valid number!"
 msgstr "Argument ist nicht ganzzahlig"
 
-#: core/output:102
+#: core/output:104
 msgid "Help"
 msgstr "Hilfe"
 
-#: core/date:145
+#: core/date:161
 msgid "Invalid duration unit"
 msgstr "Ungültige Einheit für Zeitdauer"
 
