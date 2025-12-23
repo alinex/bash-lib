@@ -406,3 +406,35 @@ spinner_stop() {
     printf "    \b\b\b\b" # Clear spinner character
     printf '\e[?25h'      # make cursor visible again
 }
+
+# Output Logo with title text
+#
+# You may overwrite this function with one displaying your own logo by loading it from your `extra/mycompany-logo` or so.
+#
+# Usage:    logo <text>
+# Output:   ASCII art logo including title
+logo() {
+    a=$'\033[36m'                # cyan
+    b=$'\033[33m\033[1m'         # yellow bold
+    c=$'\033[43m\033[30m\033[1m' # yellow bg + black bold
+    r=$'\033[0m'                 # reset
+    u=$'\033[4m'                 # underline
+    p="$(printf '%*s' $((($(tput cols) - 80) / 2)))"
+    t="$(printf '%*s' $((($(tput cols) - ${#1}) / 2)))"
+    echo
+    echo "$p$a                         $b  __   ____     ___"
+    echo "$p$a           ######  ##### $b ▕  ▏ ▕    ╲   ▕   ▏ $a  ########### #####       #####"
+    echo "$p$a          ######## ##### $b ▕  ▏ ▕     ╲  ▕   ▏ $a ############  #####     #####"
+    echo "$p$a         ######### ##### $b ▕  ▏ ▕  ▕╲  ╲ ▕   ▏ $a #####          #####   #####"
+    echo "$p$a        ########## ##### $b ▕  ▏ ▕  ▕ ╲  ╲▕   ▏ $a #####           ##### #####"
+    echo "$p$a       ##### ##### ##### $b ▕  ▏ ▕  ▕  ╲  ▔   ▏ $a ############     #########"
+    echo "$p$a      #####  ##### ##### $b ▕  ▏ ▕  ▕   ╲     ▏ $a ############     #########"
+    echo "$p$a     #####   ##### ##### $b ▕  ▏ ▕  ▕    ╲    ▏ $a #####           ##### #####"
+    echo "$p$a    #####    ##### ##### $b  ▔▔   ▔▔▔     ▔▔▔▔  $a #####          #####   #####"
+    echo "$p$a   ##### ######### ########################### ############  #####     #####"
+    echo "$p$a  ##### ##########  #########################   ########### #####       ##### $r"
+    echo "$p$b▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄$r$c"
+    echo "$t$1$r"
+    echo "$p$b▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀$r"
+    echo
+}

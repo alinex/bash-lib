@@ -29,6 +29,10 @@ while true; do
 done
 ################################################################################################
 
+use extra/divibib
+logo TEST
+exit
+
 jira fields 10134 10057 | jq '.fields[] | select(.name == "Vorkommen").key'
 
 exit
