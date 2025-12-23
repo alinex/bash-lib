@@ -29,6 +29,7 @@ o, only-os              let `root` command only scan OS without filesystem trave
 
 ### Description
 
+
 If not installed it will install trivy and then use it.
 It will run the security analysis and output the directory in which you find all data:
 
@@ -41,8 +42,14 @@ trivy.json - the original output of trivy containing all vulnerabilities
           data.json
 ```
 
-The original trivy
+The pure trivy data will be optimized by:
+
+- downgrade security level if published in the last days
+- add exploit information
+- downgrade if node development package
+- connect with jira ticket management
 
 After use you should remove this temporary folder to reclaim space.
 
 Warning: This will overwrite the original trivy command, so if you want to use trivy directly while bashlib is loaded, use `command trivy ....`
+

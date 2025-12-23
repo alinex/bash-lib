@@ -201,9 +201,8 @@ The core functions contains essential parts which may also be used while loading
 | --- | --- |
 | ``$CURL_HTTP_CODE`` | Last HTTP return code from curl |
 | [`use`](function/use.md) | Load bashlib module |
-| [`trap`](function/trap.md) | Set or add an additional trap without overwriting existing ones |
-| [`trap_add`](function/trap_add.md) | Deprecated: Set or add an additional trap without overwriting existing ones |
-| [`trap_remove`](function/trap_remove.md) | Deprecated: Remove a specific trap |
+| [`trap_add`](function/trap_add.md) | Set or add an additional trap without overwriting existing ones |
+| [`trap_remove`](function/trap_remove.md) | Remove a specific trap |
 | [`mktemp`](function/mktemp.md) | Make a temporary file, which can be recognizable/individual |
 | [`curl`](function/curl.md) | Curl with added error handling |
 
@@ -314,7 +313,7 @@ Logging addition for output module.
 
 | Variable/Function | Description |
 | --- | --- |
-| [`log`](function/log.md) | Additional logging (at the moment only into files). |
+| [`log`](function/log.md) | Additional logging (at the moment only into files) |
 
 ### Mattermost Module
 
@@ -345,7 +344,7 @@ Module with network functions.
 
 | Variable/Function | Description |
 | --- | --- |
-| [`ip_intern`](function/ip_intern.md) | Show the IP addresses. |
+| [`ip_intern`](function/ip_intern.md) | Show the IP addresses |
 | [`ip_pattern`](function/ip_pattern.md) | Find info about IP by configured patterns. |
 | [`ip_extern`](function/ip_extern.md) | Run  os detection and set the constants |
 
@@ -429,8 +428,8 @@ Module with modifiers for csv/tsv tables.
 | --- | --- |
 | [`tsv2table`](function/tsv2table.md) | Convert TSV data into visual table |
 | [`tsv2md`](function/tsv2md.md) | Convert TSV data into markdown table |
-| [`csv`](function/csv.md) | Transform comma separated table. |
-| [`tsv`](function/tsv.md) | Transform tab separated table. |
+| [`csv`](function/csv.md) | Transform comma separated table |
+| [`tsv`](function/tsv.md) | Transform tab separated table |
 
 ### Trivy Module
 

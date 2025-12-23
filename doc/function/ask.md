@@ -35,6 +35,7 @@ T, timeout <duration>    # time till default is used
 
 ### Description
 
+
 This will also validate while typing if you select the correct format. So you can only input characters matching the input format.
 Possible formats are:
 
@@ -47,3 +48,4 @@ Possible formats are:
 - `time` - a time with hour and minute can be given
 
 If another format is needed, you can fall back to string and validate on your own after you got the response.
+

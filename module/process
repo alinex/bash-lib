@@ -128,7 +128,7 @@ lock() {
         _lock_remove
     done
     # if the locking process exits without unlocking, delete our lock
-    trap_add unlock EXIT
+    trap add unlock EXIT
 }
 
 # Set the lock or exit with optional error message

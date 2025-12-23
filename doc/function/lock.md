@@ -20,6 +20,8 @@ lock
 
 ### Description
 
+
 In any part of your script you can surround a block with [`lock`](lock.md) and [`unlock`](unlock.md) statements. The
 process will wait on the lock statement till no other process with the same lock is running
 before going on.
+

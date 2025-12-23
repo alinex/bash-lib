@@ -16,4 +16,6 @@ sudo_allow <command-line>
 
 ### Description
 
-This will [`die`](die.md) if
+
+This will [`die`](die.md) if the user is not allowed to use `sudo`.
+

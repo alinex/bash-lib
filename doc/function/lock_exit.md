@@ -16,4 +16,6 @@ lock_exit
 
 ### Description
 
+
 While another program is running with this lock active it will [`die`](die.md).
+

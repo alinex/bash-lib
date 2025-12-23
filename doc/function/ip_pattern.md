@@ -19,6 +19,7 @@ ip_pattern <type> [<ip>]
 
 ### Description
 
+
 Possible types are like in the configuration:
 
 - provider
@@ -26,3 +27,4 @@ Possible types are like in the configuration:
 - vmware
 
 If no pattern matches there won't be any return value
+

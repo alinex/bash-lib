@@ -16,3 +16,7 @@ prometheus_scrape_now <job> [<timeout>]
 
 - 0 - without output if no `$PROMETHEUS_HOST`
 - 
+
+### Description
+
+

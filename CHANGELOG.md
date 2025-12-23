@@ -7,7 +7,6 @@ But on release they will be merged with semantical versioning into the master br
 
 - add [trivy](doc/function/trivy.md) security scanning
 - enhanced [jira](doc/function/jira.md) to get meta information and work with ADF
-- combine the [trap](doc/function/trap.md) functions together
 - add `$CONFIG` to load special config file
 - optimize function documentation
 - move down deprecated methods

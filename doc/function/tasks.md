@@ -38,8 +38,10 @@ Wähle eine der obigen Optionen: [1]
 
 ### Description
 
+
 Often the functions are also named `check-...` for the ones which will return tasks and `task-...` for the ones really doing the job. The first one may do a lot of analyzation and output user information on stdout.
 The '|' character is not possible within the commands. If a pipe is necessary put it within a function. Also some commands can be disabled in the list by preceding the command with an `#` character.
 
 If there are no tasks defined or the dynamic list will return no tasks it will end with a success message.
+
 Option    t, title `<title>`             # display text line above selection

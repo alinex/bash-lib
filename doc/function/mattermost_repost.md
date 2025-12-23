@@ -19,4 +19,6 @@ mattermost_response <text> [<attachments>]
 
 ### Description
 
+
 This can only be called if a [`mattermost`](mattermost.md) call was used previously.
+

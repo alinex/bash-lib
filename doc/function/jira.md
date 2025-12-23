@@ -5,20 +5,27 @@
 ### Usage
 
 ```bash
-jira <command> <options>...
-jira get <issueId>|<key>
-jira search <jql>
-jira update <ticket-id> <json>
-jira create <json>
-jira delete <issueId>|<key>
-jira project <key>
-jira fields <projectId>|<key> <issueTypeId>
+jira get <issueId>|<key>                      # get an jira issue
+jira search <jql>                             # search jira issue id
+jira update <ticket-id> <json>                # update jira issue
+jira create <json>                            # create new jira issue
+jira delete <issueId>|<key>                   # delete jira issue
+jira project <key>                            # get project information
+jira fields <projectId>|<key> <issueTypeId>   # get fields by project and issue type
+# work with the issue json:
 jira json <json> set <field> <value>
 jira json <json> get <field>
 jira json <json> remove <field>
+# convert atlassian document format:
 jira adf parse <json>
 jira adf format <md>
 ```
+
+### Globals
+
+- `$JIRA_HOST`
+- `$ATLASSIAN_USER`
+- `$ATLASSIAN_TOKEN`
 
 ### Output (stdout)
 
@@ -33,6 +40,7 @@ jira adf format <md>
 - 
 
 ### Description
+
 
 To connect the `$ATLASSIAN_USER` and `$ATLASSIAN_TOKEN` is needed.
 Jira API V3 is used there: https://developer.atlassian.com/cloud/jira/platform/rest/v3/intro which brings some elements in the [Atlassian Document Format](https://developer.atlassian.com/cloud/jira/platform/apis/document/structure/).

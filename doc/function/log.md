@@ -1,6 +1,6 @@
 # log
 
-## Additional logging (at the moment only into files).
+## Additional logging (at the moment only into files)
 
 ### Usage
 
@@ -36,5 +36,7 @@ z, compress - only for file logging
 
 ### Description
 
+
 After initializing a log using `start` the default output options will additionally write into log. But you can also specifically write t it using the log function.
 Multiple log with different levels are possible.
+

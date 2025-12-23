@@ -1,6 +1,6 @@
 # ip_intern
 
-## Show the IP addresses.
+## Show the IP addresses
 
 ### Usage
 
@@ -15,7 +15,9 @@ ip_intern <format>
 
 ### Description
 
+
 The possible response formats are:
 
 - `main` - (default) to return only the main IP
 - `data` - complete data table tab separated
+

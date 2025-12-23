@@ -16,6 +16,7 @@ os_detect <format>
 
 ### Description
 
+
 The following formats are possible:
 
 - data - all values with `<name>	<value>`
@@ -33,3 +34,4 @@ The following formats are possible:
 - architecture - x86_64, i686, i386, armv7l, aarch64...
 - machine_id
 - virtual_machine - `false` or `true`
+

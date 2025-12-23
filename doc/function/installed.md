@@ -13,3 +13,7 @@ installed <command>...
 - 0 if all installed
 - 1 if missing at least one
 - 
+
+### Description
+
+
