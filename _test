@@ -30,6 +30,7 @@ done
 ################################################################################################
 
 #trivy files /home/alex/dvb/divibib-search-api
+QUEUE_MAX_NUM=1
 trivy_test /tmp/_test_816357_trivy
 exit
 

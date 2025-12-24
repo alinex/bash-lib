@@ -475,9 +475,7 @@ while [ -e "$result" ];do
 result="$path/$(basename "$0")$ident$RANDOM$ext"
 done
 fi
-if [ -e "$result" ];then
-debug "already exists $result"
-else
+if [ ! -e "$result" ];then
 if is set -- "$dir";then
 debug "create dir $result"
 mkdir -p "$result"
@@ -504,7 +502,8 @@ curl(){
 local args=() i=1 store
 while [[ $i -le $# ]];do
 if [[ ${!i} == "--store" ]];then
-store=1
+((i++))
+store=${!i}
 shift "$i"
 i=1
 continue
@@ -522,7 +521,7 @@ debug "curl -s $opt -L $(escape_args "$@")"
 res=$(command curl -s -w "%{url_effective} with RC:%{http_code}" $opt -L "$@"|tail -1)
 debug "Response: $res"
 CURL_HTTP_CODE=${res: -3}
-[ -z "$store" ]||variables store curl CURL_HTTP_CODE
+[ -z "$store" ]||variables store "$store" CURL_HTTP_CODE
 if [ -n "$file" ];then
 cat "$file"
 rm "$file"
@@ -1208,8 +1207,8 @@ local api=rest/api/3
 local res rc=0 num=0 retry=3
 while ((num<=retry));do
 ((num==0))||debug "Retry $num"
-res="$(curl --store --request "$METHOD" --url "$JIRA_HOST/$api/$REST" --user "$ATLASSIAN_USER:$ATLASSIAN_TOKEN" --data "$DATA" -H "Content-Type: application/json")"||rc=$?
-variables restore --clean curl
+res="$(curl --store $$ --request "$METHOD" --url "$JIRA_HOST/$api/$REST" --user "$ATLASSIAN_USER:$ATLASSIAN_TOKEN" --data "$DATA" -H "Content-Type: application/json")"||rc=$?
+variables restore --clean $$
 if ((rc==0));then
 echo "$res"
 return
@@ -3414,6 +3413,8 @@ _trivy_jira[field_links]="$(jq '.fields[] | select(.name == "'"$TRIVY_JIRA_FIELD
 is set -- "${_trivy_jira[field_links]}"||die "Could not find JIRA Field \"$TRIVY_JIRA_FIELD_LINKS\" in $TRIVY_JIRA_BOARD/$TRIVY_JIRA_ISSUE_TYPE!"
 _trivy_jira[field_approval]="$(jq '.fields[] | select(.name == "'"$TRIVY_JIRA_FIELD_APPROVAL"'").key' -r <<<"$fields")"
 is set -- "${_trivy_jira[field_approval]}"||die "Could not find JIRA Field \"$TRIVY_JIRA_FIELD_APPROVAL\" in $TRIVY_JIRA_BOARD/$TRIVY_JIRA_ISSUE_TYPE!"
+_trivy_report "/tmp/_test_816357_trivy" "/tmp/_test_816357_trivy/split/000000" "test"
+return 0
 local num
 for file in "$work"/split/*;do
 num="$(basename "$file")"
@@ -3424,6 +3425,7 @@ queue run
 _trivy_cache=/tmp/trivy-cache
 declare -A _trivy_jira
 _trivy_report(){
+debug "trivy_report \"$1\" \"$2\" \"$3\""
 local work="$1"
 local file="$2"
 local source="$3"

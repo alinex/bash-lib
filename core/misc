@@ -132,9 +132,7 @@ mktemp() {
             result="$path/$(basename "$0")$ident$RANDOM$ext"
         done
     fi
-    if [ -e "$result" ]; then
-        debug "already exists $result"
-    else
+    if [ ! -e "$result" ]; then
         if is set -- "$dir"; then
             debug "create dir $result"
             mkdir -p "$result"
@@ -176,10 +174,11 @@ CURL_HTTP_CODE=""
 # Curl with added error handling
 # This will load the content into a temporary shared memory file while running.
 #
-# The information of the CURL_* variables are stored in an environment file, if `--store` is added, and you get them set in your process parent using `variables restore curl` there.
+# The information of the CURL_* variables are stored in an environment file, if `--store <name>` is added, and you get them set in your process parent using `variables restore <name>` there. Best is to use the pid `$$` there, to be possible in parallel calls.
+#
 # Usage:    like curl
 # Options:  default Options like in vanilla curl
-#           store   # if set `variable store` will be called
+#           store <name>  # if set `variables store <name>` will be called
 # Globals:  `CURL_HTTP_CODE` set with last code
 # Error:    `<text>` if not RC:2xx
 # Return:   0 if RC:2xx
@@ -189,7 +188,8 @@ curl() {
     local args=() i=1 store
     while [[ $i -le $# ]]; do
         if [[ "${!i}" == "--store" ]]; then
-            store=1
+            ((i++))
+            store=${!i}
             shift "$i"
             i=1
             continue
@@ -210,7 +210,7 @@ curl() {
     debug "Response: $res"
     CURL_HTTP_CODE=${res:(-3)}
     # store variables
-    [ -z "$store" ] || variables store curl CURL_HTTP_CODE
+    [ -z "$store" ] || variables store "$store" CURL_HTTP_CODE
     # output response
     if [ -n "$file" ]; then
         cat "$file"

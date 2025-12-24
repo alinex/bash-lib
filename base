@@ -475,9 +475,7 @@ while [ -e "$result" ];do
 result="$path/$(basename "$0")$ident$RANDOM$ext"
 done
 fi
-if [ -e "$result" ];then
-debug "already exists $result"
-else
+if [ ! -e "$result" ];then
 if is set -- "$dir";then
 debug "create dir $result"
 mkdir -p "$result"
@@ -504,7 +502,8 @@ curl(){
 local args=() i=1 store
 while [[ $i -le $# ]];do
 if [[ ${!i} == "--store" ]];then
-store=1
+((i++))
+store=${!i}
 shift "$i"
 i=1
 continue
@@ -522,7 +521,7 @@ debug "curl -s $opt -L $(escape_args "$@")"
 res=$(command curl -s -w "%{url_effective} with RC:%{http_code}" $opt -L "$@"|tail -1)
 debug "Response: $res"
 CURL_HTTP_CODE=${res: -3}
-[ -z "$store" ]||variables store curl CURL_HTTP_CODE
+[ -z "$store" ]||variables store "$store" CURL_HTTP_CODE
 if [ -n "$file" ];then
 cat "$file"
 rm "$file"

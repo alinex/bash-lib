@@ -298,8 +298,8 @@ _jira() {
   local res rc=0 num=0 retry=3
   while ((num <= retry)); do
     ((num == 0)) || debug "Retry $num"
-    res="$(curl --store --request "$METHOD" --url "$JIRA_HOST/$api/$REST" --user "$ATLASSIAN_USER:$ATLASSIAN_TOKEN" --data "$DATA" -H "Content-Type: application/json")" || rc=$?
-    variables restore --clean curl
+    res="$(curl --store $$ --request "$METHOD" --url "$JIRA_HOST/$api/$REST" --user "$ATLASSIAN_USER:$ATLASSIAN_TOKEN" --data "$DATA" -H "Content-Type: application/json")" || rc=$?
+    variables restore --clean $$
     if ((rc == 0)); then
       echo "$res"
       return
