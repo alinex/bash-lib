@@ -211,15 +211,22 @@ curl() {
     CURL_HTTP_CODE=${res:(-3)}
     # store variables
     [ -z "$store" ] || variables store "$store" CURL_HTTP_CODE
+    # output error
+    if [[ ! "$CURL_HTTP_CODE" =~ ^2[0-9]{2}$ ]]; then
+        error "Error: $res" >&2
+        if [ -e "$file" ]; then
+            local val
+            val="$(cat "$file")"
+            [[ "$val" =~ ^\{ ]] && jq . <<<"$val" | warn >&2 || warn "$val" >&2
+        fi
+    fi
     # output response
     if [ -n "$file" ]; then
         cat "$file"
         rm "$file"
     fi
-    if [[ ! "$CURL_HTTP_CODE" =~ ^2[0-9]{2}$ ]]; then
-        error "Error: $res" >&2
-        return 1
-    fi
+    # check for error code
+    [[ "$CURL_HTTP_CODE" =~ ^2[0-9]{2}$ ]]
 }
 
 # Get the first value that is non-empty
