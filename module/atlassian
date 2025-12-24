@@ -58,12 +58,12 @@ confluence() {
 #           jira project <key>                            # get project information
 #           jira fields <projectId>|<key> <issueTypeId>   # get fields by project and issue type
 #           # work with the issue json:
-#           jira json <json> set <field> <value>
-#           jira json <json> get <field>
+#           jira json <json> set <field> [adf] <value>    # set field with the possibility to format (from markdown) adf fields
+#           jira json <json> get <field> [md]             # get field value with possible format adf field as markdown
 #           jira json <json> remove <field>
 #           # convert atlassian document format:
-#           jira adf parse <json>
-#           jira adf format <md>
+#           jira md_to_adf <json>
+#           jira adf_to_md <md>
 # Global:   $JIRA_HOST
 #           $ATLASSIAN_USER
 #           $ATLASSIAN_TOKEN
@@ -76,7 +76,7 @@ jira() {
   is set --name=JIRA_HOST --die -- "$JIRA_HOST"
   is set --name=ATLASSIAN_USER --die -- "$ATLASSIAN_USER"
   is set --name=ATLASSIAN_TOKEN --die -- "$ATLASSIAN_TOKEN"
-  is enum --name=command --allow="get search create update delete project fields json adf" --die -- "$1" && local command="$1" && shift
+  is enum --name=command --allow="get search create update delete project fields json adf_to_md md_to_adf" --die -- "$1" && local command="$1" && shift
   # processing
   case "$command" in
   get)
@@ -124,22 +124,37 @@ jira() {
     _jira GET "issue/createmeta/$1/issuetypes/$2"
     ;;
   json)
-    local empty='{"fields":{}}'
-    local json="${1:-$empty}" && shift
+    local empty='{"fields":{}}' var="$1"
+    local json="${!1:-$empty}" && shift
     is enum --name=sub-command --allow="set get remove" --die -- "$1" && local subCommand="$1" && shift
     is set --name=field --die -- "$1" && local field="$1"
     case "$subCommand" in
-    set) jq --arg v "$2" ".fields.$field = \$v" <<<"$json" ;;
-    get) jq ".fields.$field" <<<"$json" ;;
-    remove) jq "del(.fields.$field)" <<<"$json" ;;
+    set)
+      if [ -z "$2" ] || [[ "$2" == "adf" && -z "$3" ]]; then
+        jira json $var remove $field
+      elif [ "$2" = "adf" ] && [ -n "$3" ]; then
+        local val
+        [[ "$3" =~ ^\{ ]] && val="$3" || val="$(jira md_to_adf "$3")"
+        debug "in:  $3"
+        debug "adf: $val"
+        printf -v "$var" '%s' "$(jq --argjson v "$val" ".fields.$field = \$v" <<<"$json")"
+      elif is integer -- "$2"; then
+        printf -v "$var" '%s' "$(jq ".fields.$field = $2" <<<"$json")"
+      else
+        printf -v "$var" '%s' "$(jq --arg v "$2" ".fields.$field = \$v" <<<"$json")"
+      fi
+      ;;
+    get)
+      local val
+      val="$(jq ".fields.$field" <<<"$json")"
+      [[ "$2" == "md" && "$val" =~ ^\{ ]] && jira adf_to_md "$val" || echo "$val"
+      ;;
+    remove) printf -v "$var" '%s' "$(jq "del(.fields.$field)" <<<"$json")" ;;
     esac
     ;;
-  adf)
-    is enum --name=sub-command --allow="parse format" --die -- "$1" && local subCommand="$1" && shift
-    case "$subCommand" in
-    parse)
-      is set --name=json --die -- "$1" && local json="$1"
-      jq -r '
+  adf_to_md)
+    is set --name=json --die -- "$1" && local json="$1"
+    jq -r '
     def para(p):
       p.content[]?.text // "";
 
@@ -173,10 +188,10 @@ jira() {
     s/<em>(.+?)<\/em>/*\1*/g
     s/<code>(.+?)<\/code>/`\1`/g
   '
-      ;;
-    format)
-      is set --name=text --die -- "$1"
-      jq -n --arg text "$text" '
+    ;;
+  md_to_adf)
+    is set --name=text --die -- "$1"
+    jq -n --arg text "$1" '
     def paragraph(t):
       { type: "paragraph", content: [{ type: "text", text: t }] };
 
@@ -283,8 +298,6 @@ jira() {
     s/\*(.+?)\*/<em>\1<\/em>/g
     s/`([^`]+)`/<code>\1<\/code>/g
   '
-      ;;
-    esac
     ;;
   esac
 }
