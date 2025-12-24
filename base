@@ -808,6 +808,22 @@ else
 [ -z "$die" ]&&return 1||die "$(eval_gettext 'The value »${val}« for "$name" could not be read as true or false')"
 fi
 ;;
+true)if
+[[ ${val,,} =~ ^(true|t|1|yes|y|ja|j)$ ]]
+then
+res=1
+else
+[ -z "$die" ]&&return 1||die "$(eval_gettext 'The value »${val}« for "$name" should be true but was »${val}«')"
+fi
+;;
+false)if
+[[ -z $val || ${val,,} =~ ^(false|f|0|no|n|nein)$ ]]
+then
+res=0
+else
+[ -z "$die" ]&&return 1||die "$(eval_gettext 'The value »${val}« for "$name" should be false but was »${val}«')"
+fi
+;;
 integer)if
 [ -n "$sanitize" ]
 then
@@ -969,6 +985,7 @@ else
 echo "$_name"
 fi
 }
+echo "${!1}"
 [[ $- =~ i ]]||set -eE
 set -o pipefail
 is set -- "${BASH_VERSION:-}"||die "No bash CLI! This can only be run under bash"

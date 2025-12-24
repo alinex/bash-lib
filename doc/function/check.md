@@ -54,6 +54,8 @@ The following checks are implemented:
 - `set` will fail if no value given
 - `empty` will fail if not empty like ""
 - `bool` will transform the value to `1` or `0` and allows: true/false, t/f, 1/0, yes/no, y/j/n, ja/nein, ""
+- `true` should be a boolean true
+- `false` should be a boolean false
 - `integer` will check for a number maybe within a range
 - `float` will check for a number maybe within a range
 - `enum' will check against valid words using `--allow="word1 word2"``

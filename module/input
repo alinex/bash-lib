@@ -268,20 +268,21 @@ ask() {
     # external editor
     if [ "$format" = "editor" ]; then
         notice "$(gettext "Input through system editor...")"
+        EDITOR=$(first "$VISUAL" "$EDITOR" vi)
         while true; do
             sleep 2
             local answer
             answer="$(mktemp --random editor)"
             echo "$prompt" >"$answer"
             if [ -n "$timeout" ]; then
-                debug timeout "$timeout" "${EDITOR:-vi}" "$answer"
-                ${EDITOR:-vi} "$answer" &
+                debug timeout "$timeout" "$EDITOR" "$answer"
+                $EDITOR "$answer" &
                 sleep "$timeout"
                 pkill -TERM -P $! || true
                 stty sane
                 debug "------"
             else
-                ${EDITOR:-vi} "$answer"
+                $EDITOR "$answer"
             fi
             input=$(grep -v -F "$prompt" "$answer") || true
             rm "$answer"
