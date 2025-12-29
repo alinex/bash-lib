@@ -546,6 +546,48 @@ fi
 done
 return 1
 }
+CUR_UP=$'\033[A'
+CUR_DOWN=$'\033[B'
+CUR_RIGHT=$'\033[C'
+CUR_LEFT=$'\033[D'
+CUR_NEXT=$'\033[E'
+CUR_PREVIOUS=$'\033[F'
+CUR_POS1=$'\033[G'
+CUR_TOP=$'\033[H'
+CUR_STORE=$'\033[7'
+CUR_RESTORE=$'\033[8'
+CUR_SHOW=$'\033[?25h'
+CUR_HIDE=$'\033[?25l'
+cursor(){
+local num="${2:-1}" col="${3:-1}"
+is enum --name=direction --allow="up down right left row pos next previous" --die -- "$1"
+is integer --name=num --min=1 --die -- "$num"
+is integer --name=col --min=1 --die -- "$col"
+is integer --name=arguments --max=3 --die -- $#
+case "$1" in
+up)echo $'\033['$num'A';;
+down)echo $'\033['$num'B';;
+right)echo $'\033['$num'C';;
+left)echo $'\033['$num'D';;
+row)echo $'\033['$num'H';;
+pos)echo $'\033['"$num;$col"'H';;
+next)echo $'\033['$num'E';;
+previous)echo $'\033['$num'F'
+esac
+}
+SCROLL_UP=$'\033[M'
+CLEAR_SCREEN=$'\033[2J'
+CLEAR_UP=$'\033[1J'
+CLEAR_DOWN=$'\033[0J'
+CLEAR_EOL=$'\033[0K'
+CLEAR_SOL=$'\033[1K'
+CLEAR_LINE=$'\033[2K'
+SCREEN_RESTORE=$'\033[?47l'
+SCREEN_SAVE=$'\033[?47h'
+erase_line(){
+_deprecated "Use $CLEAR_LINE" warn
+echo "$CLEAR_LINE"
+}
 debug(){
 local level=1 func text sign='>'
 is integer --name=arguments --max=2 --die -- $#
@@ -676,10 +718,6 @@ urlencode(){
 install jq
 input "$@"|jq -sRr @uri|sed 's/%0A$//'
 }
-erase_line(){
-is integer --name=arguments --max=0 --die -- $#
-printf '%b' $'\e[1K\r'
-}
 horizontal_line(){
 is integer --name=arguments --max=1 --die -- $#
 is empty -- "$1"||is enum --name=format --allow="light bold double half full"--die -- "$1"
@@ -722,7 +760,7 @@ weather)spinner='🌤🌥🌦🌧🌨🌩🌪';;
 *)spinner='-\|/'
 esac
 local back=$((size+1))
-printf '\e[?25l'
+printf '\033[?25l'
 (while
 true
 do
@@ -742,7 +780,7 @@ kill "$_spinner_pid" >/dev/null 2>&1
 wait "$_spinner_pid" 2>/dev/null
 _spinner_pid=""
 printf "    \b\b\b\b"
-printf '\e[?25h'
+printf '\033[?25h'
 }
 logo(){
 a=$'\033[36m'
@@ -1023,10 +1061,11 @@ is set --name=json --die -- "$1"
 debug "CREATE issue ${jq-r '.fields.summary' <<<"$1"}"
 _jira POST issue "$1"|jq .id -r
 ;;
-update)is set --name=arguments --max=1 --die -- $#
-is set --name=json --die -- "$1"
+update)is set --name=arguments --max=2 --die -- $#
+is set --name=issueId-or-key --die -- "$1"
+is set --name=json --die -- "$2"
 debug "UPDATE issue $1"
-_jira PUT issue/$1 >/dev/null
+_jira PUT issue/$1 "$2" >/dev/null
 ;;
 delete)is set --name=arguments --max=1 --die -- $#
 is set --name=issueId-or-key --die -- "$1"
@@ -1069,6 +1108,7 @@ fi
 ;;
 get)local val
 val="$(jq ".fields.$field" <<<"$json")"
+[ ! "$val" = null ]||val=""
 [[ $2 == "md" && $val =~ ^\{ ]]&&jira adf_to_md "$val"||echo "$val"
 ;;
 remove)printf -v "$var" '%s' "$(jq "del(.fields.$field)" <<<"$json")"
@@ -3493,14 +3533,8 @@ changes+=("{\"Severity\": \"MEDIUM\",\"OriginalSeverity\": \"$severity\"}")
 rules+=("{\"Title\": \"NPM Dev Dependency\",\"Description\": \"$action.\"}")
 fi
 if is set -- "$TRIVY_JIRA_BOARD"&&[[ $severity == "HIGH" || $severity == "CRITICAL" ]];then
-local issue created
+local issue created title description cvss installed fixed fixStatus links
 issue="$(jira search "project = ${_trivy_jira[board]} AND summary ~ $id ORDER BY created ASC"|head -1)"
-if is empty -- "$issue";then
-local fields priority=Low title description cvss installed fixed fixStatus
-case $severity in
-HIGH)priority=Major;;
-CRITICAL)priority=Critical
-esac
 title="$(jq .Title -r <<<"$json")"
 description="$(jq .Description -r <<<"$json")"
 cvss="$(jq '.CVSS[]?.V3Score' -r <<<"$json")"|tr $'\n' '\;'|sed 's/;$//;s/;/; /g'
@@ -3510,36 +3544,23 @@ fixed="$(jq .FixedVersion -r <<<"$json")"
 fixStatus="$(jq .Status -r <<<"$json")"
 [ "$fixStatus" != "null" ]||fixStatus="-"
 links="$(jq '.References[]?' -r <<<"$json"|sed 's/^/- /')"
-echo "$fields"
-debug "-------------------------------------"
+if is empty -- "$issue";then
+local fields priority=Low
+case $severity in
+HIGH)priority=Major;;
+CRITICAL)priority=Critical
+esac
 jira json fields set project json "{\"id\":${_trivy_jira[board]}}"
 jira json fields set issuetype json "{\"id\":${_trivy_jira[issueType]}}"
-echo "$fields"
-debug "-------------------------------------"
 jira json fields set priority json "{\"name\":\"$priority\"}"
-echo "$fields"
-debug "-------------------------------------"
 jira json fields set summary "$id"
-echo "$fields"
-debug "-------------------------------------"
 jira json fields set description adf "$title"$'\n\n'"$description"
-echo "$fields"
-debug "-------------------------------------"
 jira json fields set ${_trivy_jira[field_sources]} adf "$(date +%Y-%m) > $source $target ($type)"
-echo "$fields"
-debug "-------------------------------------"
 jira json fields set ${_trivy_jira[field_rating]} adf "$severity (CVSS Rating ${cvss:--})"
-echo "$fields"
-debug "-------------------------------------"
 jira json fields set ${_trivy_jira[field_version]} adf "Installiert ist Version $installed gefixt ab Version $fixed $fixStatus"
-echo "$fields"
-debug "-------------------------------------"
 jira json fields set ${_trivy_jira[field_links]} adf "$links"
-echo "$fields"
-debug "-------------------------------------"
+jira json fields set ${_trivy_jira[field_sources]} adf "$(date +%Y-%m) > $source"
 jira json fields set labels json "[\"cve\", \"$(sed 's#.*ekz.de/##;s#/-/.*##;s#[/.]#", "#g' <<<"$source")\"]"
-echo "$fields"
-debug "-------------------------------------"
 issue="$(jira create "$fields")"
 created=1
 fi
@@ -3555,21 +3576,51 @@ changes+=("{\"Severity\": \"MEDIUM\",\"OriginalSeverity\": \"$severity\"}")
 rules+=("{\"Title\": \"Jira Approval\",\"Description\": \"$action.\"}")
 fi
 fi
-if is set -- "$created";then
-local sources new update addLabel=()
-sources="$(jira fields "${_trivy_jira[field_sources]}")"
-[ "$sources" = "null" ]&&sources=""||sources="$(jira adf parse "$sources")"
-if is set -- "$sources";then
-new="$(echo -e "$sources\n$(date +%Y-%m) > $source $target ($type)"|sed -n '/>/p'|sort -t'>' -r -k2,1|sort -t'>' -u -r -k2)"
-else
-new="$(date +%Y-%m) $source > $target ($type)"
+if ! is set -- "$created";then
+local old new fields update
+old="$(jira json jira get description adf)"
+new="$title"$'\n\n'"$description"
+if [[ $new != "$old" ]];then
+jira json fields set description adf "$new"
+update=1
 fi
+old="$(jira json jira get adf "${_trivy_jira[field_sources]}")"
+new="$(echo -e "$old\n$(date +%Y-%m) > $source $target ($type)"|sed -n '/>/p'|sort -t'>' -r -k2,1|sort -t'>' -u -r -k2)"
+if [[ $new != "$old" ]];then
+jira json fields set ${_trivy_jira[field_sources]} adf "$new"
+update=1
+fi
+old="$(jira json jira get adf "${_trivy_jira[field_rating]}")"
+new="$severity (CVSS Rating ${cvss:--})"
+if [[ $new != "$old" ]];then
+jira json fields set ${_trivy_jira[field_rating]} adf "$new"
+update=1
+fi
+old="$(jira json jira get adf "${_trivy_jira[field_version]}")"
+new="Installiert ist Version $installed gefixt ab Version $fixed $fixStatus"
+if [[ $new != "$old" ]];then
+jira json fields set ${_trivy_jira[field_version]} adf "$new"
+update=1
+fi
+old="$(jira json jira get adf "${_trivy_jira[field_links]}")"
+new="$links"
+if [[ $new != "$old" ]];then
+jira json fields set ${_trivy_jira[field_links]} adf "$new"
+update=1
+fi
+local labels addLabel=()
+labels="$(jq '.fields.labels[]' -r <<<"$jira")"
 for label in $(echo "$source"|sed 's#.*ekz.de/##;s#/-/.*##;s#[/.]# #g');do
 [[ ! $labels =~ $label ]]||continue
 addLabel+=('{"add": "'$label'"}')
 done
-update="{\"update\":{\"${_trivy_jira[field_sources]}\":[{\"set\":$(jira adf format "$new")}]}, {\"labels\":[$(join "$addLabels")]}}}"
-issue="$(jira update "$update")"
+if is set -- "$update";then
+update="$fields"
+if ((${#addLabel[@]}>0));then
+fields="$(jq --argjson l "[$(join $json ",")]" '.update = { "labels": $l }' <<<"$fields")"
+fi
+jira update "$issue" "$fields"
+fi
 fi
 action="Add information from Jira"
 info "$id at $target: $action" >&2

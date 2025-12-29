@@ -214,6 +214,29 @@ Module with output and user interaction helpers.
 
 | Variable/Function | Description |
 | --- | --- |
+| ``$CUR_UP`` | Cursor up 1 line |
+| ``$CUR_DOWN`` |  Cursor down 1 line |
+| ``$CUR_RIGHT`` |  Cursor right 1 col |
+| ``$CUR_LEFT`` | Cursor left 1 col |
+| ``$CUR_NEXT`` | Next Line (down, col 1) |
+| ``$CUR_PREVIOUS`` | Previous Line (up, col 1) |
+| ``$CUR_POS1`` | Cursor to start of line |
+| ``$CUR_TOP`` | Cursor to top-left |
+| ``$CUR_STORE`` | Save cursor pos |
+| ``$CUR_RESTORE`` | Restore cursor pos |
+| ``$CUR_SHOW`` | Show cursor |
+| ``$CUR_HIDE`` | Hide cursor |
+| ``$SCROLL_UP`` | Reverse Index (up, scroll) |
+| ``$CLEAR_SCREEN`` | Clear entire screen |
+| ``$CLEAR_UP`` | Clear from start of screen to cursor |
+| ``$CLEAR_DOWN`` | Clear from cursor to end of screen |
+| ``$CLEAR_EOL`` | Clear from cursor to end of line |
+| ``$CLEAR_SOL`` | Clear from start of line to cursor |
+| ``$CLEAR_LINE`` | Clear entire line |
+| ``$SCREEN_RESTORE`` | restore screen |
+| ``$SCREEN_SAVE`` | save screen |
+| [`cursor`](function/cursor.md) | Move cursor on console |
+| [`erase_line`](function/erase_line.md) | Deprecated: Remove current line |
 | [`debug`](function/debug.md) | Write message to STDERR if in DEBUG mode else do nothing |
 | [`die`](function/die.md) | Output error message and exit |
 | [`help`](function/help.md) | Show help page and exit |
@@ -230,7 +253,6 @@ Module with output and user interaction helpers.
 | [`html2md`](function/html2md.md) | Convert HTML to markdown (simplified version) |
 | [`nocr`](function/nocr.md) | Remove carriage return from line endings |
 | [`urlencode`](function/urlencode.md) | Encode message to be used within the url |
-| [`erase_line`](function/erase_line.md) | Remove current line |
 | [`horizontal_line`](function/horizontal_line.md) | Show a horizontal line |
 | [`spinner_start`](function/spinner_start.md) | Function to start the spinner in the background |
 | [`spinner_stop`](function/spinner_stop.md) | Function to stop the spinner |

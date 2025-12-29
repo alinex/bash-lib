@@ -11,6 +11,7 @@ But on release they will be merged with semantical versioning into the master br
 - add [first](doc/function/first.md)
 - enhanced [jira](doc/function/jira.md) to get meta information and work with ADF
 - add `$CONFIG` to load special config file
+- add escape sequences and function for cursor management on terminal
 - optimize function documentation
 - move down deprecated methods
 

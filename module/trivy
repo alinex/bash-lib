@@ -229,54 +229,36 @@ _trivy_report() {
     fi
     # jira issues
     if is set -- "$TRIVY_JIRA_BOARD" && [[ "$severity" = "HIGH" || "$severity" = "CRITICAL" ]]; then
-        local issue created
+        # get information
+        local issue created title description cvss installed fixed fixStatus links
         issue="$(jira search "project = ${_trivy_jira[board]} AND summary ~ $id ORDER BY created ASC" | head -1)"
+        title="$(jq .Title -r <<<"$json")"
+        description="$(jq .Description -r <<<"$json")"
+        cvss="$(jq '.CVSS[]?.V3Score' -r <<<"$json")" | tr $'\n' '\;' | sed 's/;$//;s/;/; /g'
+        installed="$(jq .InstalledVersion -r <<<"$json")"
+        fixed="$(jq .FixedVersion -r <<<"$json")"
+        [ "$fixed" != "null" ] || fixed="-"
+        fixStatus="$(jq .Status -r <<<"$json")"
+        [ "$fixStatus" != "null" ] || fixStatus="-"
+        links="$(jq '.References[]?' -r <<<"$json" | sed 's/^/- /')"
         if is empty -- "$issue"; then
             # create new jira issue
-            local fields priority=Low title description cvss installed fixed fixStatus
+            local fields priority=Low
             case $severity in
             HIGH) priority=Major ;;
             CRITICAL) priority=Critical ;;
             esac
-            title="$(jq .Title -r <<<"$json")"
-            description="$(jq .Description -r <<<"$json")"
-            cvss="$(jq '.CVSS[]?.V3Score' -r <<<"$json")" | tr $'\n' '\;' | sed 's/;$//;s/;/; /g'
-            installed="$(jq .InstalledVersion -r <<<"$json")"
-            fixed="$(jq .FixedVersion -r <<<"$json")"
-            [ "$fixed" != "null" ] || fixed="-"
-            fixStatus="$(jq .Status -r <<<"$json")"
-            [ "$fixStatus" != "null" ] || fixStatus="-"
-            links="$(jq '.References[]?' -r <<<"$json" | sed 's/^/- /')"
-            echo "$fields"
-            debug "-------------------------------------"
             jira json fields set project json "{\"id\":${_trivy_jira[board]}}"
             jira json fields set issuetype json "{\"id\":${_trivy_jira[issueType]}}"
-            echo "$fields"
-            debug "-------------------------------------"
             jira json fields set priority json "{\"name\":\"$priority\"}"
-            echo "$fields"
-            debug "-------------------------------------"
             jira json fields set summary "$id"
-            echo "$fields"
-            debug "-------------------------------------"
             jira json fields set description adf "$title"$'\n\n'"$description"
-            echo "$fields"
-            debug "-------------------------------------"
             jira json fields set ${_trivy_jira[field_sources]} adf "$(date +%Y-%m) > $source $target ($type)"
-            echo "$fields"
-            debug "-------------------------------------"
             jira json fields set ${_trivy_jira[field_rating]} adf "$severity (CVSS Rating ${cvss:--})"
-            echo "$fields"
-            debug "-------------------------------------"
             jira json fields set ${_trivy_jira[field_version]} adf "Installiert ist Version $installed gefixt ab Version $fixed $fixStatus"
-            echo "$fields"
-            debug "-------------------------------------"
             jira json fields set ${_trivy_jira[field_links]} adf "$links"
-            echo "$fields"
-            debug "-------------------------------------"
+            jira json fields set ${_trivy_jira[field_sources]} adf "$(date +%Y-%m) > $source"
             jira json fields set labels json "[\"cve\", \"$(sed 's#.*ekz.de/##;s#/-/.*##;s#[/.]#", "#g' <<<"$source")\"]"
-            echo "$fields"
-            debug "-------------------------------------"
             issue="$(jira create "$fields")"
             created=1
         fi
@@ -296,22 +278,57 @@ _trivy_report() {
             fi
         fi
         # update jira
-        if is set -- "$created"; then
-            local sources new update addLabel=()
-            sources="$(jira fields "${_trivy_jira[field_sources]}")"
-            [ "$sources" = "null" ] && sources="" || sources="$(jira adf parse "$sources")"
-            if is set -- "$sources"; then
-                new="$(echo -e "$sources\n$(date +%Y-%m) > $source $target ($type)" | sed -n '/>/p' | sort -t'>' -r -k2,1 | sort -t'>' -u -r -k2)"
-            else
-                new="$(date +%Y-%m) $source > $target ($type)"
+        if ! is set -- "$created"; then
+            local old new fields update
+            # update description
+            old="$(jira json jira get description adf)"
+            new="$title"$'\n\n'"$description"
+            if [[ "$new" != "$old" ]]; then
+                jira json fields set description adf "$new"
+                update=1
             fi
-            #jira PUT /rest/api/3/issue/$issue "$data"
+            # update sources
+            old="$(jira json jira get adf "${_trivy_jira[field_sources]}")"
+            new="$(echo -e "$old\n$(date +%Y-%m) > $source $target ($type)" | sed -n '/>/p' | sort -t'>' -r -k2,1 | sort -t'>' -u -r -k2)"
+            if [[ "$new" != "$old" ]]; then
+                jira json fields set ${_trivy_jira[field_sources]} adf "$new"
+                update=1
+            fi
+            # update rating
+            old="$(jira json jira get adf "${_trivy_jira[field_rating]}")"
+            new="$severity (CVSS Rating ${cvss:--})"
+            if [[ "$new" != "$old" ]]; then
+                jira json fields set ${_trivy_jira[field_rating]} adf "$new"
+                update=1
+            fi
+            # update version
+            old="$(jira json jira get adf "${_trivy_jira[field_version]}")"
+            new="Installiert ist Version $installed gefixt ab Version $fixed $fixStatus"
+            if [[ "$new" != "$old" ]]; then
+                jira json fields set ${_trivy_jira[field_version]} adf "$new"
+                update=1
+            fi
+            # update links
+            old="$(jira json jira get adf "${_trivy_jira[field_links]}")"
+            new="$links"
+            if [[ "$new" != "$old" ]]; then
+                jira json fields set ${_trivy_jira[field_links]} adf "$new"
+                update=1
+            fi
+            # update labels
+            local labels addLabel=()
+            labels="$(jq '.fields.labels[]' -r <<<"$jira")"
             for label in $(echo "$source" | sed 's#.*ekz.de/##;s#/-/.*##;s#[/.]# #g'); do
                 [[ ! "$labels" =~ $label ]] || continue
                 addLabel+=('{"add": "'$label'"}')
             done
-            update="{\"update\":{\"${_trivy_jira[field_sources]}\":[{\"set\":$(jira adf format "$new")}]}, {\"labels\":[$(join "$addLabels")]}}}"
-            issue="$(jira update "$update")"
+            if is set -- "$update"; then
+                update="$fields"
+                if ((${#addLabel[@]} > 0)); then
+                    fields="$(jq --argjson l "[$(join $json ",")]" '.update = { "labels": $l }' <<<"$fields")"
+                fi
+                jira update "$issue" "$fields"
+            fi
         fi
         action="Add information from Jira"
         info "$id at $target: $action" >&2

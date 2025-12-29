@@ -1,6 +1,6 @@
 # erase_line
 
-## Remove current line
+## Deprecated: Remove current line
 
 ### Usage
 
@@ -10,6 +10,7 @@ erase_line
 
 ### Description
 
+Use `$CLEAR_LINE`
 
 When printed to a terminal, it will erase everything from the current cursor position backward to the beginning of the line.
 

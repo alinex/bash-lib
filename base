@@ -546,6 +546,48 @@ fi
 done
 return 1
 }
+CUR_UP=$'\033[A'
+CUR_DOWN=$'\033[B'
+CUR_RIGHT=$'\033[C'
+CUR_LEFT=$'\033[D'
+CUR_NEXT=$'\033[E'
+CUR_PREVIOUS=$'\033[F'
+CUR_POS1=$'\033[G'
+CUR_TOP=$'\033[H'
+CUR_STORE=$'\033[7'
+CUR_RESTORE=$'\033[8'
+CUR_SHOW=$'\033[?25h'
+CUR_HIDE=$'\033[?25l'
+cursor(){
+local num="${2:-1}" col="${3:-1}"
+is enum --name=direction --allow="up down right left row pos next previous" --die -- "$1"
+is integer --name=num --min=1 --die -- "$num"
+is integer --name=col --min=1 --die -- "$col"
+is integer --name=arguments --max=3 --die -- $#
+case "$1" in
+up)echo $'\033['$num'A';;
+down)echo $'\033['$num'B';;
+right)echo $'\033['$num'C';;
+left)echo $'\033['$num'D';;
+row)echo $'\033['$num'H';;
+pos)echo $'\033['"$num;$col"'H';;
+next)echo $'\033['$num'E';;
+previous)echo $'\033['$num'F'
+esac
+}
+SCROLL_UP=$'\033[M'
+CLEAR_SCREEN=$'\033[2J'
+CLEAR_UP=$'\033[1J'
+CLEAR_DOWN=$'\033[0J'
+CLEAR_EOL=$'\033[0K'
+CLEAR_SOL=$'\033[1K'
+CLEAR_LINE=$'\033[2K'
+SCREEN_RESTORE=$'\033[?47l'
+SCREEN_SAVE=$'\033[?47h'
+erase_line(){
+_deprecated "Use $CLEAR_LINE" warn
+echo "$CLEAR_LINE"
+}
 debug(){
 local level=1 func text sign='>'
 is integer --name=arguments --max=2 --die -- $#
@@ -676,10 +718,6 @@ urlencode(){
 install jq
 input "$@"|jq -sRr @uri|sed 's/%0A$//'
 }
-erase_line(){
-is integer --name=arguments --max=0 --die -- $#
-printf '%b' $'\e[1K\r'
-}
 horizontal_line(){
 is integer --name=arguments --max=1 --die -- $#
 is empty -- "$1"||is enum --name=format --allow="light bold double half full"--die -- "$1"
@@ -722,7 +760,7 @@ weather)spinner='🌤🌥🌦🌧🌨🌩🌪';;
 *)spinner='-\|/'
 esac
 local back=$((size+1))
-printf '\e[?25l'
+printf '\033[?25l'
 (while
 true
 do
@@ -742,7 +780,7 @@ kill "$_spinner_pid" >/dev/null 2>&1
 wait "$_spinner_pid" 2>/dev/null
 _spinner_pid=""
 printf "    \b\b\b\b"
-printf '\e[?25h'
+printf '\033[?25h'
 }
 logo(){
 a=$'\033[36m'

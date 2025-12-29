@@ -5,6 +5,92 @@ source /dev/null
 # Module with output and user interaction helpers.
 
 ######################################################################################
+### Escape Sequences
+######################################################################################
+
+# Cursor up 1 line
+CUR_UP=$'\033[A'
+#  Cursor down 1 line
+CUR_DOWN=$'\033[B'
+#  Cursor right 1 col
+CUR_RIGHT=$'\033[C'
+# Cursor left 1 col
+CUR_LEFT=$'\033[D'
+# Next Line (down, col 1)
+CUR_NEXT=$'\033[E'
+# Previous Line (up, col 1)
+CUR_PREVIOUS=$'\033[F'
+# Cursor to start of line
+CUR_POS1=$'\033[G'
+# Cursor to top-left
+CUR_TOP=$'\033[H'
+# Save cursor pos
+CUR_STORE=$'\033[7' # or \033[s
+# Restore cursor pos
+CUR_RESTORE=$'\033[8' # or \033[u
+# Show cursor
+CUR_SHOW=$'\033[?25h'
+# Hide cursor
+CUR_HIDE=$'\033[?25l'
+
+# Move cursor on console
+#
+# Possible directions are: up, down, right, left
+# Move to col 1 with: next, previous
+#
+# Usage:    cursor <direction> <num>
+#           cursor row <num>
+cursor() {
+    local num="${2:-1}" col="${3:-1}"
+    is enum --name=direction --allow="up down right left row pos next previous" --die -- "$1"
+    is integer --name=num --min=1 --die -- "$num"
+    is integer --name=col --min=1 --die -- "$col"
+    is integer --name=arguments --max=3 --die -- $#
+    case "$1" in
+    up) echo $'\033['$num'A' ;;
+    down) echo $'\033['$num'B' ;;
+    right) echo $'\033['$num'C' ;;
+    left) echo $'\033['$num'D' ;;
+    row) echo $'\033['$num'H' ;;
+    pos) echo $'\033['"$num;$col"'H' ;;
+    next) echo $'\033['$num'E' ;;
+    previous) echo $'\033['$num'F' ;;
+    esac
+}
+
+# Reverse Index (up, scroll)
+SCROLL_UP=$'\033[M'
+
+# Clear entire screen
+CLEAR_SCREEN=$'\033[2J'
+# Clear from start of screen to cursor
+CLEAR_UP=$'\033[1J'
+# Clear from cursor to end of screen
+CLEAR_DOWN=$'\033[0J'
+# Clear from cursor to end of line
+CLEAR_EOL=$'\033[0K'
+# Clear from start of line to cursor
+CLEAR_SOL=$'\033[1K'
+# Clear entire line
+CLEAR_LINE=$'\033[2K'
+
+# restore screen
+SCREEN_RESTORE=$'\033[?47l'
+# save screen
+SCREEN_SAVE=$'\033[?47h'
+
+# Deprecated: Remove current line
+# Use $CLEAR_LINE
+#
+# When printed to a terminal, it will erase everything from the current cursor position backward to the beginning of the line.
+#
+# Usage:    erase_line
+erase_line() {
+    _deprecated "Use $CLEAR_LINE" warn
+    echo "$CLEAR_LINE"
+}
+
+######################################################################################
 ### Debug and Error Handling
 ######################################################################################
 
@@ -286,17 +372,6 @@ urlencode() {
 # Visual effects
 ######################################################################################
 
-# Remove current line
-#
-# When printed to a terminal, it will erase everything from the current cursor position backward to the beginning of the line.
-#
-# Usage:    erase_line
-erase_line() {
-    is integer --name=arguments --max=0 --die -- $#
-    # processing
-    printf '%b' $'\e[1K\r'
-}
-
 # Show a horizontal line
 #
 # It will go over the full width of terminal, but be at least 60 characters wide.
@@ -382,7 +457,7 @@ spinner_start() {
     esac
     local back=$((size + 1))
     # Spinner function running in background loop
-    printf '\e[?25l' # make cursor invisible
+    printf '\033[?25l' # make cursor invisible
     (
         while true; do
             for ((i = 0; i < ${#spinner}; i += chars)); do
@@ -408,7 +483,7 @@ spinner_stop() {
     wait "$_spinner_pid" 2>/dev/null
     _spinner_pid=""
     printf "    \b\b\b\b" # Clear spinner character
-    printf '\e[?25h'      # make cursor visible again
+    printf '\033[?25h'    # make cursor visible again
 }
 
 # Output Logo with title text

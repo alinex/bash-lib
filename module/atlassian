@@ -99,10 +99,11 @@ jira() {
     _jira POST issue "$1" | jq .id -r
     ;;
   update)
-    is set --name=arguments --max=1 --die -- $#
-    is set --name=json --die -- "$1"
+    is set --name=arguments --max=2 --die -- $#
+    is set --name=issueId-or-key --die -- "$1"
+    is set --name=json --die -- "$2"
     debug "UPDATE issue $1"
-    _jira PUT issue/$1 >/dev/null
+    _jira PUT issue/$1 "$2" >/dev/null
     ;;
   delete)
     is set --name=arguments --max=1 --die -- $#
@@ -149,6 +150,7 @@ jira() {
     get)
       local val
       val="$(jq ".fields.$field" <<<"$json")"
+      [ ! "$val" = null ] || val=""
       [[ "$2" == "md" && "$val" =~ ^\{ ]] && jira adf_to_md "$val" || echo "$val"
       ;;
     remove) printf -v "$var" '%s' "$(jq "del(.fields.$field)" <<<"$json")" ;;
