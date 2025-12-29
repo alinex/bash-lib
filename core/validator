@@ -370,5 +370,3 @@ value_if_variable() {
         echo "$_name"
     fi
 }
-
-echo "${!1}"

@@ -522,14 +522,19 @@ res=$(command curl -s -w "%{url_effective} with RC:%{http_code}" $opt -L "$@"|ta
 debug "Response: $res"
 CURL_HTTP_CODE=${res: -3}
 [ -z "$store" ]||variables store "$store" CURL_HTTP_CODE
+if [[ ! $CURL_HTTP_CODE =~ ^2[0-9]{2}$ ]];then
+error "Error: $res" >&2
+if [ -e "$file" ];then
+local val
+val="$(cat "$file")"
+[[ $val =~ ^\{ ]]&&jq . <<<"$val"|warn >&2||warn "$val" >&2
+fi
+fi
 if [ -n "$file" ];then
 cat "$file"
 rm "$file"
 fi
-if [[ ! $CURL_HTTP_CODE =~ ^2[0-9]{2}$ ]];then
-error "Error: $res" >&2
-return 1
-fi
+[[ $CURL_HTTP_CODE =~ ^2[0-9]{2}$ ]]
 }
 first(){
 local value
@@ -984,7 +989,6 @@ else
 echo "$_name"
 fi
 }
-echo "${!1}"
 [[ $- =~ i ]]||set -eE
 set -o pipefail
 is set -- "${BASH_VERSION:-}"||die "No bash CLI! This can only be run under bash"

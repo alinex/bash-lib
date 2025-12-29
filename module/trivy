@@ -45,10 +45,10 @@ TRIVY_JIRA_APPROVAL_IRRELEVANT="Irrelevant"
 #
 # An Example is Board SEC with an `IssueType=Code`  which has the fields:
 #
-# - Sources as text field to store information of there this was found
-# . Rating as text field containing the values from CVSS
-# - Version as text field containing the installed and fixed version
-# - Links as text field for all the references from trivy
+# - Sources as textarea field to store information of there this was found
+# . Rating as textarea field containing the values from CVSS
+# - Version as textarea field containing the installed and fixed version
+# - Links as textarea field for all the references from trivy
 # - Approval as enumeration with: Null, Blocked, Irrelevant, Allowed for 30 days
 #
 # Warning: This will overwrite the original trivy command, so if you want to use trivy directly while bashlib is loaded, use `command trivy ....`
@@ -246,12 +246,14 @@ _trivy_report() {
             [ "$fixed" != "null" ] || fixed="-"
             fixStatus="$(jq .Status -r <<<"$json")"
             [ "$fixStatus" != "null" ] || fixStatus="-"
+            links="$(jq '.References[]?' -r <<<"$json" | sed 's/^/- /')"
             echo "$fields"
             debug "-------------------------------------"
-            jira json fields set project "${_trivy_jira[board]}"
+            jira json fields set project json "{\"id\":${_trivy_jira[board]}}"
+            jira json fields set issuetype json "{\"id\":${_trivy_jira[issueType]}}"
             echo "$fields"
             debug "-------------------------------------"
-            jira json fields set priority "$priority"
+            jira json fields set priority json "{\"name\":\"$priority\"}"
             echo "$fields"
             debug "-------------------------------------"
             jira json fields set summary "$id"
@@ -260,13 +262,10 @@ _trivy_report() {
             jira json fields set description adf "$title"$'\n\n'"$description"
             echo "$fields"
             debug "-------------------------------------"
-            jira json fields set issuetype "{\"id\": \"${_trivy_jira[issueType]}\"}"
+            jira json fields set ${_trivy_jira[field_sources]} adf "$(date +%Y-%m) > $source $target ($type)"
             echo "$fields"
             debug "-------------------------------------"
-            jira json fields set ${_trivy_jira[field_sources]} adf "$source $target ($type)"
-            echo "$fields"
-            debug "-------------------------------------"
-            jira json fields set ${_trivy_jira[field_rating]} adf "$severity (CVSS Rating $cvss)"
+            jira json fields set ${_trivy_jira[field_rating]} adf "$severity (CVSS Rating ${cvss:--})"
             echo "$fields"
             debug "-------------------------------------"
             jira json fields set ${_trivy_jira[field_version]} adf "Installiert ist Version $installed gefixt ab Version $fixed $fixStatus"
@@ -275,7 +274,7 @@ _trivy_report() {
             jira json fields set ${_trivy_jira[field_links]} adf "$links"
             echo "$fields"
             debug "-------------------------------------"
-            jira json fields set labels "[\"cve\", \"$(sed 's#.*ekz.de/##;s#/-/.*##;s#[/.]#", "#g' <<<"$source")\"]"
+            jira json fields set labels json "[\"cve\", \"$(sed 's#.*ekz.de/##;s#/-/.*##;s#[/.]#", "#g' <<<"$source")\"]"
             echo "$fields"
             debug "-------------------------------------"
             issue="$(jira create "$fields")"
@@ -299,7 +298,7 @@ _trivy_report() {
         # update jira
         if is set -- "$created"; then
             local sources new update addLabel=()
-            sources="$(jira fields get "${_trivy_jira[field_sources]}")"
+            sources="$(jira fields "${_trivy_jira[field_sources]}")"
             [ "$sources" = "null" ] && sources="" || sources="$(jira adf parse "$sources")"
             if is set -- "$sources"; then
                 new="$(echo -e "$sources\n$(date +%Y-%m) > $source $target ($type)" | sed -n '/>/p' | sort -t'>' -r -k2,1 | sort -t'>' -u -r -k2)"

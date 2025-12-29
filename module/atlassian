@@ -58,8 +58,8 @@ confluence() {
 #           jira project <key>                            # get project information
 #           jira fields <projectId>|<key> <issueTypeId>   # get fields by project and issue type
 #           # work with the issue json:
-#           jira json <json> set <field> [adf] <value>    # set field with the possibility to format (from markdown) adf fields
-#           jira json <json> get <field> [md]             # get field value with possible format adf field as markdown
+#           jira json <json> set <field> [adf|json] <value>   # set field with the possibility to format (from markdown) adf fields
+#           jira json <json> get <field> [md]                 # get field value with possible format adf field as markdown
 #           jira json <json> remove <field>
 #           # convert atlassian document format:
 #           jira md_to_adf <json>
@@ -96,7 +96,7 @@ jira() {
     is set --name=arguments --max=1 --die -- $#
     is set --name=json --die -- "$1"
     debug "CREATE issue ${jq-r '.fields.summary' <<<"$1"}"
-    _jira POST issue "$1" | jq .id
+    _jira POST issue "$1" | jq .id -r
     ;;
   update)
     is set --name=arguments --max=1 --die -- $#
@@ -130,8 +130,10 @@ jira() {
     is set --name=field --die -- "$1" && local field="$1"
     case "$subCommand" in
     set)
-      if [ -z "$2" ] || [[ "$2" == "adf" && -z "$3" ]]; then
+      if [ -z "$2" ] || [[ "$2" =~ ^adf$|^json$ && -z "$3" ]]; then
         jira json $var remove $field
+      elif [ "$2" = "json" ] && [ -n "$3" ]; then
+        printf -v "$var" '%s' "$(jq --argjson v "$3" ".fields.$field = \$v" <<<"$json")"
       elif [ "$2" = "adf" ] && [ -n "$3" ]; then
         local val
         [[ "$3" =~ ^\{ ]] && val="$3" || val="$(jira md_to_adf "$3")"

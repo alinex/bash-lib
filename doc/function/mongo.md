@@ -5,8 +5,14 @@
 ### Usage
 
 ```bash
-mongo "" <command>            # global command
-mongo <database> <command>    # work in database
+mongo [<options>] "" <command>            # global command
+mongo [<options>] <database> <command>    # work in database
+```
+
+### Options
+
+```bash
+h, host <host>          # destination host
 ```
 
 ### Globals

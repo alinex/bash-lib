@@ -13,12 +13,12 @@ jira delete <issueId>|<key>                   # delete jira issue
 jira project <key>                            # get project information
 jira fields <projectId>|<key> <issueTypeId>   # get fields by project and issue type
 # work with the issue json:
-jira json <json> set <field> <value>
-jira json <json> get <field>
+jira json <json> set <field> [adf|json] <value>   # set field with the possibility to format (from markdown) adf fields
+jira json <json> get <field> [md]                 # get field value with possible format adf field as markdown
 jira json <json> remove <field>
 # convert atlassian document format:
-jira adf parse <json>
-jira adf format <md>
+jira md_to_adf <json>
+jira adf_to_md <md>
 ```
 
 ### Globals

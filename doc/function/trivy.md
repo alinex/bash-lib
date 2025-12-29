@@ -56,10 +56,10 @@ Please make sure the custom fields are created for each of the setting. The appr
 
 An Example is Board SEC with an `IssueType=Code`  which has the fields:
 
-- Sources as text field to store information of there this was found
-. Rating as text field containing the values from CVSS
-- Version as text field containing the installed and fixed version
-- Links as text field for all the references from trivy
+- Sources as textarea field to store information of there this was found
+. Rating as textarea field containing the values from CVSS
+- Version as textarea field containing the installed and fixed version
+- Links as textarea field for all the references from trivy
 - Approval as enumeration with: Null, Blocked, Irrelevant, Allowed for 30 days
 
 Warning: This will overwrite the original trivy command, so if you want to use trivy directly while bashlib is loaded, use `command trivy ....`
