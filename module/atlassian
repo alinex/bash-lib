@@ -134,26 +134,24 @@ jira() {
       if [ -z "$2" ] || [[ "$2" =~ ^adf$|^json$ && -z "$3" ]]; then
         jira json $var remove $field
       elif [ "$2" = "json" ] && [ -n "$3" ]; then
-        printf -v "$var" '%s' "$(jq --argjson v "$3" ".fields.$field = \$v" <<<"$json")"
+        printf -v "$var" '%s' "$(jq -c --argjson v "$3" ".fields.$field = \$v" <<<"$json")"
       elif [ "$2" = "adf" ] && [ -n "$3" ]; then
         local val
         [[ "$3" =~ ^\{ ]] && val="$3" || val="$(jira md_to_adf "$3")"
-        debug "in:  $3"
-        debug "adf: $val"
-        printf -v "$var" '%s' "$(jq --argjson v "$val" ".fields.$field = \$v" <<<"$json")"
+        printf -v "$var" '%s' "$(jq -c --argjson v "$val" ".fields.$field = \$v" <<<"$json")"
       elif is integer -- "$2"; then
-        printf -v "$var" '%s' "$(jq ".fields.$field = $2" <<<"$json")"
+        printf -v "$var" '%s' "$(jq -c ".fields.$field = $2" <<<"$json")"
       else
-        printf -v "$var" '%s' "$(jq --arg v "$2" ".fields.$field = \$v" <<<"$json")"
+        printf -v "$var" '%s' "$(jq -c --arg v "$2" ".fields.$field = \$v" <<<"$json")"
       fi
       ;;
     get)
       local val
-      val="$(jq ".fields.$field" <<<"$json")"
+      val="$(jq -c ".fields.$field" <<<"$json")"
       [ ! "$val" = null ] || val=""
       [[ "$2" == "md" && "$val" =~ ^\{ ]] && jira adf_to_md "$val" || echo "$val"
       ;;
-    remove) printf -v "$var" '%s' "$(jq "del(.fields.$field)" <<<"$json")" ;;
+    remove) printf -v "$var" '%s' "$(jq -c "del(.fields.$field)" <<<"$json")" ;;
     esac
     ;;
   adf_to_md)
@@ -195,7 +193,7 @@ jira() {
     ;;
   md_to_adf)
     is set --name=text --die -- "$1"
-    jq -n --arg text "$1" '
+    jq -c -n --arg text "$1" '
     def paragraph(t):
       { type: "paragraph", content: [{ type: "text", text: t }] };
 

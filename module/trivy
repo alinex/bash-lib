@@ -167,8 +167,8 @@ trivy_test() {
     _trivy_jira[field_approval]="$(jq '.fields[] | select(.name == "'"$TRIVY_JIRA_FIELD_APPROVAL"'").key' -r <<<"$fields")"
     is set -- "${_trivy_jira[field_approval]}" || die "Could not find JIRA Field \"$TRIVY_JIRA_FIELD_APPROVAL\" in $TRIVY_JIRA_BOARD/$TRIVY_JIRA_ISSUE_TYPE!"
 
-    _trivy_report "/tmp/_test_816357_trivy" "/tmp/_test_816357_trivy/split/000000" "test"
-    return 0
+    #_trivy_report "/tmp/_test_816357_trivy" "/tmp/_test_816357_trivy/split/000000" "test"
+    #return 0
     # Loop over entries
     local num
     for file in "$work"/split/*; do
