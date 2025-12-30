@@ -167,7 +167,7 @@ check() {
     length)
         val=${#val}
         if [[ -n "$min" ]] && [[ "$min" == "$max" ]]; then
-            if ((res != min)); then
+            if ((val != min)); then
                 [ -z "$die" ] && return 1 || die "$(eval_gettext 'The length of "$name" has to be exactly $min but »${res}« is $val characters long')"
             fi
         elif [[ -n "$min" && -n "$max" ]]; then
