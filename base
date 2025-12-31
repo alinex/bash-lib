@@ -34,7 +34,7 @@ opt_descriptions[$name]="$desc"
 opt_type[$name]=$type
 opt_short[$name]=$opt
 done <<<"$1"
-echo "$(gettext "Options"):"
+printf '%s\n' "$(gettext "Options"):"
 for name in "${!opt_descriptions[@]}";do
 local type_text=""
 local short_text=""
@@ -48,28 +48,24 @@ printf "  %-40s %s\n" "$short_text--$name$type_text" "${opt_descriptions[$name]}
 done
 }
 input(){
-test -p /dev/stdin&&(($#==0))&&cat -||echo "$*"
+test -p /dev/stdin&&(($#==0))&&cat -||printf '%s' "$*"
 }
 input_args(){
 local num=${1-}
 local start=$((num+2))
 is set --name="num" --die -- "$num"
 ((num>0))||die "<num>=$num $(gettext 'argument is not a valid number!')"
-test -p /dev/stdin&&(($#<num+2))&&cat -||echo "${@:start}"
+test -p /dev/stdin&&(($#<num+2))&&cat -||echo -n "${@:start}"
 }
 input_lines(){
 if [ -p /dev/stdin ]&&is empty -- "$1";then
 cat -
 else
-for arg in "$@";do echo "$arg";done
+printf '%s\n' "$@"
 fi
 }
 escape_args(){
-local escaped_args=()
-for arg in "$@";do
-escaped_args+=("$(printf '%q' "$arg")")
-done
-echo "${escaped_args[*]}"
+printf '%q\n' "$@"
 }
 contains(){
 _deprecated "use array <array-name> has <value>"
@@ -92,7 +88,7 @@ return 1
 indexof)for i in "${!arr[@]}"
 do
 if [ "${arr[i]}" = "$value" ];then
-echo "$i"
+printf '%s' "$i"
 return 0
 fi
 done
@@ -108,7 +104,7 @@ local joined="${array[0]}"
 for element in "${array[@]:1}";do
 joined+="$sep$element"
 done
-echo "$joined"
+printf '%s' "$joined"
 }
 split(){
 is integer --name=arguments --max=3 --die -- $#
@@ -139,7 +135,7 @@ simple)key="${3//[^a-zA-Z0-9_]/_}"
 esac
 case "$cmd" in
 set)is set --name=key --die -- "$3"&&arr["$key"]="$value";;
-get)is set --name=key --die -- "$3"&&echo "${arr["$key"]}";;
+get)is set --name=key --die -- "$3"&&printf '%s' "${arr["$key"]}";;
 unset)is set --name=key --die -- "$3"&&unset 'arr[$key]';;
 has)is set --name=key --die -- "$3"&&[[ -v arr["$key"] ]];;
 contains)is set --name=value --die -- "$3"
@@ -235,14 +231,14 @@ local rows=15
 for c in $(seq 0 "$cols");do
 for r in $(seq 0 "$rows");do
 num=$((r*cols+c))
-echo -ne "\t$(color_256 "$num")FG $num"
+printf "\t$(color_256 "$num")FG $num"
 done
 echo ""
 done
 for c in $(seq 0 "$cols");do
 for r in $(seq 0 "$rows");do
 num=$((r*cols+c))
-echo -ne "\t$(color_256_bg "$num")BG $num$CC_RESET"
+printf "\t$(color_256_bg "$num")BG $num$CC_RESET"
 done
 echo ""
 done
@@ -270,17 +266,17 @@ local start end
 end="${2:-$(now)}"
 is integer -- "$1"&&start="$1"||start=$(date -d "$1" +%s)||die "Date format '$1' not parsable!"
 is integer -- "$end"&&end="$end"||end=$(date -d "$end" +%s)||die "Date format '$2' not parsable!"
-echo $((end-start))
+printf '%s' $((end-start))
 }
 date_format(){
 is integer --name=arguments --max=2 --die -- $#
 is set --name=format --die -- "$1"
-local value format
+local value format opt
 case $1 in
 iso)format="-Iseconds";;
 iso-date)format="-I";;
-zulu)format="-u +%Y-%m-%dT%H:%M:%SZ";;
-sql)format='+"%Y-%m-%d %H:%M:%S"';;
+zulu)opt="-u"&&format="+%Y-%m-%dT%H:%M:%SZ";;
+sql)format="+%Y-%m-%d %H:%M:%S";;
 unix)format="+%s";;
 eu-date)format="+%Y-%m-%d";;
 us-date)format="+%m/%d/%Y";;
@@ -291,7 +287,7 @@ time-short)format="+%H:%M";;
 *)format="+$1"
 esac
 value="${2-$(now)}"
-is integer -- "$value"&&eval "date -d @$value '$format'"||eval "date -d \"$value\" '$format'"||die "Date format '$value' not parsable!"
+is integer -- "$value"&&eval "date -d @$value '$format'"||eval "date -d \"$value\" $opt '$format'"||die "Date format '$value' not parsable!"
 }
 sleep_until(){
 is integer --name=arguments --max=1 --die -- $#
@@ -307,10 +303,10 @@ is enum --name=format --allow="seconds minutes hours days human" --die -- "$1"
 local value
 is integer -- "$2"&&value="$2"||value="$(_parse_duration "$2")"
 case $1 in
-seconds)echo "$value";;
-minutes)echo $((value/60));;
-hours)echo $((value/3600));;
-days)echo $((value/86400));;
+seconds)printf '%s' "$value";;
+minutes)printf '%s' $((value/60));;
+hours)printf '%s' $((value/3600));;
+days)printf '%s' $((value/86400));;
 human)_format_duration "$value"
 esac
 }
@@ -363,7 +359,7 @@ local out=""
 ((m))&&out+="${m}m "
 ((s))&&out+="${s}s "
 is empty -- "$out"&&out="0s"&&sign=""||true
-echo "$sign${out% }"
+printf '%s' "$sign${out% }"
 }
 _timer_start=0
 timer(){
@@ -371,7 +367,7 @@ case $1 in
 start)_timer_start=$(date +%s.%N)
 ;;
 stop)local seconds nano len
-IFS='.' read -r seconds nano <<<"$(echo "$(date +%s.%N) - $_timer_start"|bc)"
+IFS='.' read -r seconds nano < <(printf '%s' "$(date +%s.%N) - $_timer_start"|bc)
 len=$((4-${#seconds}))
 ((len>=0))||len=0
 LANG=C printf "%0.${len}f\n" "$seconds.$nano"

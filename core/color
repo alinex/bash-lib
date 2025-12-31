@@ -175,14 +175,14 @@ color_table() {
   for c in $(seq 0 "$cols"); do
     for r in $(seq 0 "$rows"); do
       num=$((r * cols + c))
-      echo -ne "\t$(color_256 "$num")FG $num"
+      printf "\t$(color_256 "$num")FG $num"
     done
     echo ""
   done
   for c in $(seq 0 "$cols"); do
     for r in $(seq 0 "$rows"); do
       num=$((r * cols + c))
-      echo -ne "\t$(color_256_bg "$num")BG $num${CC_RESET}"
+      printf "\t$(color_256_bg "$num")BG $num${CC_RESET}"
     done
     echo ""
   done

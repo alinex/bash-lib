@@ -44,7 +44,7 @@ pause() {
     else
         stty -echo </dev/tty
         while ((timeout > 0)); do
-            echo -ne "\r${CC_NOTICE}$text${CC_RESET} $(duration_format human "$timeout")     "
+            printf "\r%s" "${CC_NOTICE}$text${CC_RESET} $(duration_format human "$timeout")     "
             if read -r -s -t 1 -n 1 _ </dev/tty; then
                 if [ -n "$abort" ]; then
                     echo -e "\b\b\b\b$(gettext 'aborted by user')    "
@@ -53,7 +53,7 @@ pause() {
                 fi
             fi
             ((timeout--))
-            ((timeout > 0)) || echo -ne "\r${CC_NOTICE}$text${CC_RESET} 0s      "
+            ((timeout > 0)) || printf "\r%s" "${CC_NOTICE}$text${CC_RESET} 0s      "
         done
         stty echo </dev/tty
     fi

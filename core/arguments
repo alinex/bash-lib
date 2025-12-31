@@ -84,7 +84,7 @@ option_help() {
         opt_type[$name]=$type
         opt_short[$name]=$opt
     done <<<"$1"
-    echo "$(gettext "Options"):"
+    printf '%s\n' "$(gettext "Options"):"
     for name in "${!opt_descriptions[@]}"; do
         local type_text=""
         local short_text=""
@@ -112,7 +112,7 @@ option_help() {
 # Output:   <string-input> or
 #           <string-params> separated by spaces
 input() {
-    test -p /dev/stdin && (($# == 0)) && cat - || echo "$*"
+    test -p /dev/stdin && (($# == 0)) && cat - || printf '%s' "$*"
 }
 
 # Collect string from stdin (not more than defined parameters) or concatenate the parameters
@@ -130,7 +130,7 @@ input_args() {
     local start=$((num + 2))
     is set --name="num" --die -- "$num"
     ((num > 0)) || die "<num>=$num $(gettext 'argument is not a valid number!')"
-    test -p /dev/stdin && (($# < num + 2)) && cat - || echo "${@:$start}"
+    test -p /dev/stdin && (($# < num + 2)) && cat - || echo -n "${@:$start}"
 }
 
 # Collect string from stdin (no parameters) or parameters each as a line
@@ -146,7 +146,7 @@ input_lines() {
     if [ -p /dev/stdin ] && is empty -- "$1"; then
         cat -
     else
-        for arg in "$@"; do echo "$arg"; done
+        printf '%s\n' "$@"
     fi
 }
 
@@ -159,9 +159,5 @@ input_lines() {
 # Usage:    escape_args <arguments>
 # Output:   <args> with backslash escapes
 escape_args() {
-    local escaped_args=()
-    for arg in "$@"; do
-        escaped_args+=("$(printf '%q' "$arg")")
-    done
-    echo "${escaped_args[*]}"
+    printf '%q\n' "$@"
 }

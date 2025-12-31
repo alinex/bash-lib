@@ -45,7 +45,7 @@ array() {
     indexof)
         for i in "${!arr[@]}"; do
             if [ "${arr[i]}" = "$value" ]; then
-                echo "$i"
+                printf '%s' "$i"
                 return 0
             fi
         done
@@ -75,7 +75,7 @@ join() {
     for element in "${array[@]:1}"; do
         joined+="${sep}${element}"
     done
-    echo "$joined"
+    printf '%s' "$joined"
 }
 
 # Splits string by delimiter into array
@@ -146,7 +146,7 @@ hash() {
     # processing
     case "$cmd" in
     set) is set --name=key --die -- "$3" && arr["$key"]="$value" ;;
-    get) is set --name=key --die -- "$3" && echo "${arr["$key"]}" ;;
+    get) is set --name=key --die -- "$3" && printf '%s' "${arr["$key"]}" ;;
     unset) is set --name=key --die -- "$3" && unset 'arr[$key]' ;;
     has) is set --name=key --die -- "$3" && [[ -v arr["$key"] ]] ;;
     contains)
