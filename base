@@ -269,7 +269,7 @@ is integer --name=arguments --max=2 --die -- $#
 local start end
 end="${2:-$(now)}"
 is integer -- "$1"&&start="$1"||start=$(date -d "$1" +%s)||die "Date format '$1' not parsable!"
-is integer -- "$end"&&end="$2"||end=$(date -d "$end" +%s)||die "Date format '$2' not parsable!"
+is integer -- "$end"&&end="$end"||end=$(date -d "$end" +%s)||die "Date format '$2' not parsable!"
 echo $((end-start))
 }
 date_format(){

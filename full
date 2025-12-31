@@ -269,7 +269,7 @@ is integer --name=arguments --max=2 --die -- $#
 local start end
 end="${2:-$(now)}"
 is integer -- "$1"&&start="$1"||start=$(date -d "$1" +%s)||die "Date format '$1' not parsable!"
-is integer -- "$end"&&end="$2"||end=$(date -d "$end" +%s)||die "Date format '$2' not parsable!"
+is integer -- "$end"&&end="$end"||end=$(date -d "$end" +%s)||die "Date format '$2' not parsable!"
 echo $((end-start))
 }
 date_format(){
@@ -3568,7 +3568,7 @@ jira json fields set summary "$id"
 jira json fields set description adf "$title"$'\n\n'"$description"
 jira json fields set ${_trivy_jira[field_sources]} adf "$(date +%Y-%m) > $source $target ($type)"
 jira json fields set ${_trivy_jira[field_rating]} adf "$severity (CVSS Rating ${cvss:--})"
-jira json fields set ${_trivy_jira[field_version]} adf "Gefixt ab Version $fixed $fixStatus"
+jira json fields set ${_trivy_jira[field_version]} adf "Gefixt ab Version ${fixed:--} $fixStatus"
 jira json fields set ${_trivy_jira[field_links]} adf "$links"
 jira json fields set ${_trivy_jira[field_sources]} adf "$(date +%Y-%m) > $sourceLine"
 jira json fields set labels json "[\"cve\", \"$(sed 's#.*ekz.de/##;s#/-/.*##;s#[/.]#", "#g' <<<"$source")\"]"
@@ -3608,7 +3608,7 @@ jira json fields set ${_trivy_jira[field_rating]} adf "$new"
 update=1
 fi
 old="$(jira json jira get "${_trivy_jira[field_version]}" md)"
-new="Gefixt ab Version $fixed $fixStatus"
+new="Gefixt ab Version ${fixed:--} $fixStatus"
 if [[ $new != "$old" ]];then
 jira json fields set ${_trivy_jira[field_version]} adf "$new"
 update=1
@@ -3659,8 +3659,8 @@ echo "$severity $id $title" >>"$file"
 echo "--------------------------------------------------------------------------------" >>"$file"
 echo "$description" >>"$file"
 echo "    " >>"$file"
-echo "Rating: $severity (CVSS Rating $cvss)" >>"$file"
-echo "Status: Gefixt ab Version $fixed $fixStatus" >>"$file"
+echo "Rating: $severity (CVSS Rating ${cvss:--})" >>"$file"
+echo "Status: Gefixt ab Version ${fixed:--} $fixStatus" >>"$file"
 debug "$date"
 debug "date $(date_format human-date "$date")"
 debug "age $(duration_format days "$(date_diff "$date")")"

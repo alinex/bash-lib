@@ -17,4 +17,5 @@ date_diff <start> [<end>] # timestamp or date string
 
 
 The two dates to compare can be unix timestamps (seconds since 1970) or a parsable date format.
+If no `<end>` is given, it will use the current time as end.
 
