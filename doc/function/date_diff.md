@@ -5,7 +5,7 @@
 ### Usage
 
 ```bash
-date_diff <start> <end> # timestamp or date string
+date_diff <start> [<end>] # timestamp or date string
 ```
 
 ### Output (stdout)

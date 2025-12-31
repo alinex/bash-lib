@@ -267,8 +267,9 @@ date +%s
 date_diff(){
 is integer --name=arguments --max=2 --die -- $#
 local start end
+end="${2:-$(now)}"
 is integer -- "$1"&&start="$1"||start=$(date -d "$1" +%s)||die "Date format '$1' not parsable!"
-is integer -- "$2"&&end="$2"||end=$(date -d "$2" +%s)||die "Date format '$2' not parsable!"
+is integer -- "$end"&&end="$2"||end=$(date -d "$end" +%s)||die "Date format '$2' not parsable!"
 echo $((end-start))
 }
 date_format(){
@@ -283,13 +284,14 @@ sql)format='+"%Y-%m-%d %H:%M:%S"';;
 unix)format="+%s";;
 eu-date)format="+%Y-%m-%d";;
 us-date)format="+%m/%d/%Y";;
-human-date)format="+%A, %B %d, %Y";;
+human)format="$(gettext "+%A, %B %d, %Y at %H:%M:%S")";;
+human-date)format="$(gettext "+%A, %B %d, %Y")";;
 time)format="+%H:%M:%S";;
 time-short)format="+%H:%M";;
 *)format="+$1"
 esac
 value="${2-$(now)}"
-is integer -- "$value"&&eval "date -d @$value $format"||eval "date -d \"$value\" $format"||die "Date format '$value' not parsable!"
+is integer -- "$value"&&eval "date -d @$value '$format'"||eval "date -d \"$value\" '$format'"||die "Date format '$value' not parsable!"
 }
 sleep_until(){
 is integer --name=arguments --max=1 --die -- $#
@@ -3509,7 +3511,7 @@ debug "trivy_report \"$1\" \"$2\" \"$3\""
 local work="$1"
 local file="$2"
 local source="$3"
-local type severity target id json title pkgPath description cvss installed sourceLine
+local type severity target id json title pkgPath description cvss installed sourceLine date
 json="$(cat "$file")"
 type="$(jq .Type -r <<<"$json")"
 severity="$(jq .Severity -r <<<"$json")"
@@ -3522,10 +3524,9 @@ description="$(jq .Description -r <<<"$json")"
 cvss="$(jq '.CVSS[]?.V3Score' -r <<<"$json")"|tr $'\n' '\;'|sed 's/;$//;s/;/; /g'
 installed="$(jq .InstalledVersion -r <<<"$json")"
 sourceLine="$source $target ($type) $pkgPath - Version $installed"
-local changes=() rules=() action
-local date
 date="$(jq .PublishedDate -r <<<"$json")"
 test ! "$date" = "null"||date=""
+local changes=() rules=() action
 if (($(date_format unix "$date")>$(now)-$(duration_format seconds 3d)))&&[[ $severity == "HIGH" || $severity == "CRITICAL" ]];then
 action="Downgrade $severity -> MEDIUM because it was published less than 3 days ago"
 info "$id at $target: $action" >&2
@@ -3659,6 +3660,11 @@ echo "--------------------------------------------------------------------------
 echo "$description" >>"$file"
 echo "    " >>"$file"
 echo "Rating: $severity (CVSS Rating $cvss)" >>"$file"
+echo "Status: Gefixt ab Version $fixed $fixStatus" >>"$file"
+debug "$date"
+debug "date $(date_format human-date "$date")"
+debug "age $(duration_format days "$(date_diff "$date")")"
+echo "Datum:  Sicherheitslücke bekannt seit $(date_format human-date "$date") (vor $(duration_format days "$(date_diff "$date")") Tagen)" >>"$file"
 echo "    " >>"$file"
 echo "Sources:" >>"$file"
 fi

@@ -53,6 +53,7 @@ date_diff() {
 #                       unix        1759312800
 #                       eu-date     01.10.2025
 #                       us-date     10/01/2025
+#                       human       Mittwoch, Oktober 01, 2025 at 12:00:00
 #                       human-date  Mittwoch, Oktober 01, 2025
 #                       time        12:00:00
 #                       time-short  12:00
@@ -71,8 +72,8 @@ date_format() {
     unix) format="+%s" ;;
     eu-date) format="+%Y-%m-%d" ;;
     us-date) format="+%m/%d/%Y" ;;
-    human) format="+%A, %B %d, %Y at %H:%M:%S" ;;
-    human-date) format="+%A, %B %d, %Y" ;;
+    human) format="$(gettext "+%A, %B %d, %Y at %H:%M:%S")" ;;
+    human-date) format="$(gettext "+%A, %B %d, %Y")" ;;
     time) format="+%H:%M:%S" ;;
     time-short) format="+%H:%M" ;;
     *) format="+$1" ;;
