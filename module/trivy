@@ -139,8 +139,26 @@ trivy() {
         queue add _trivy_report "$work" "$file" "$source"
     done
     queue run
-    #rm -r "$work"/split
-
+    rm -r "$work"/split
+    # Finalize reports
+    for folder in $(find "$work" -mindepth 3 -type d); do
+        cat "$folder/header.txt" "$folder/sources.txt" "$folder/footer.txt" >"$folder/report.txt"
+        rm "$folder/header.txt" "$folder/sources.txt" "$folder/footer.txt"
+        cat "$folder/report.tsv" >>"$work"/list.tsv
+        rm "$folder/report.tsv"
+        if is file -- "$folder/expired.tsv"; then
+            cat "$folder/expired.tsv" >>"$work"/expired.tsv
+            rm "$folder/expired.tsv"
+        fi
+        if is file -- "$folder/blocked.tsv"; then
+            cat "$folder/blocked.tsv" >>"$work"/blocked.tsv
+            rm "$folder/blocked.tsv"
+        fi
+        if is file -- "$folder/prom.txt"; then
+            cat "$folder/prom.txt" >>"$work"/prom.txt
+            rm "$folder/prom.txt"
+        fi
+    done
     # Output folder
     echo "$work"
 }
@@ -176,10 +194,28 @@ trivy_test() {
         queue add _trivy_report "$work" "$file" "$source"
     done
     queue run
-    # Create reports
-
-    #rm -r "$work"/split
+    #    rm -r "$work"/split
+    # Finalize reports
+    for folder in $(find "$work" -mindepth 3 -type d); do
+        cat "$folder/header.txt" "$folder/sources.txt" "$folder/footer.txt" >"$folder/report.txt"
+        rm "$folder/header.txt" "$folder/sources.txt" "$folder/footer.txt"
+        cat "$folder/report.tsv" >>"$work"/list.tsv
+        rm "$folder/report.tsv"
+        if is file -- "$folder/expired.tsv"; then
+            cat "$folder/expired.tsv" >>"$work"/expired.tsv
+            rm "$folder/expired.tsv"
+        fi
+        if is file -- "$folder/blocked.tsv"; then
+            cat "$folder/blocked.tsv" >>"$work"/blocked.tsv
+            rm "$folder/blocked.tsv"
+        fi
+        if is file -- "$folder/prom.txt"; then
+            cat "$folder/prom.txt" >>"$work"/prom.txt
+            rm "$folder/prom.txt"
+        fi
+    done
 }
+
 _trivy_cache=/tmp/trivy-cache
 declare -A _trivy_jira
 _trivy_report() {
@@ -188,7 +224,7 @@ _trivy_report() {
     local file="$2"
     local source="$3"
     # initialize data and structure
-    local type severity target id json title pkgPath description cvss installed sourceLine
+    local type severity target id json title pkgPath description cvss installed sourceLine date fixed fixStatus links
     json="$(cat "$file")"
     type="$(jq .Type -r <<<"$json")"
     severity="$(jq .Severity -r <<<"$json")"
@@ -201,12 +237,16 @@ _trivy_report() {
     cvss="$(jq '.CVSS[]?.V3Score' -r <<<"$json")" | tr $'\n' '\;' | sed 's/;$//;s/;/; /g'
     installed="$(jq .InstalledVersion -r <<<"$json")"
     sourceLine="$source $target ($type) $pkgPath - Version $installed"
+    fixed="$(jq .FixedVersion -r <<<"$json")"
+    [ "$fixed" != "null" ] || fixed="-"
+    fixStatus="$(jq .Status -r <<<"$json")"
+    [ "$fixStatus" != "null" ] || fixStatus="-"
+    date="$(jq .PublishedDate -r <<<"$json")"
+    test ! "$date" = "null" || date=""
+    links="$(jq '.References[]?' -r <<<"$json" | sed 's/^/- /')"
     # collect json changes
     local changes=() rules=() action
     # new findings
-    local date
-    date="$(jq .PublishedDate -r <<<"$json")"
-    test ! "$date" = "null" || date=""
     if (($(date_format unix "$date") > $(now) - $(duration_format seconds 3d))) &&
         [[ "$severity" = "HIGH" || "$severity" = "CRITICAL" ]]; then
         action="Downgrade $severity -> MEDIUM because it was published less than 3 days ago"
@@ -233,15 +273,11 @@ _trivy_report() {
         rules+=("{\"Title\": \"NPM Dev Dependency\",\"Description\": \"$action.\"}")
     fi
     # jira issues
+    local issue key approval comments expired
     if is set -- "$TRIVY_JIRA_BOARD" && [[ "$severity" = "HIGH" || "$severity" = "CRITICAL" ]]; then
         # get information
-        local issue created fixed fixStatus links
+        local created
         issue="$(jira search "project = ${_trivy_jira[board]} AND summary ~ $id ORDER BY created ASC" | head -1)"
-        fixed="$(jq .FixedVersion -r <<<"$json")"
-        [ "$fixed" != "null" ] || fixed="-"
-        fixStatus="$(jq .Status -r <<<"$json")"
-        [ "$fixStatus" != "null" ] || fixStatus="-"
-        links="$(jq '.References[]?' -r <<<"$json" | sed 's/^/- /')"
         if is empty -- "$issue"; then
             # create new jira issue
             local fields priority=Low
@@ -256,26 +292,34 @@ _trivy_report() {
             jira json fields set description adf "$title"$'\n\n'"$description"
             jira json fields set ${_trivy_jira[field_sources]} adf "$(date +%Y-%m) > $source $target ($type)"
             jira json fields set ${_trivy_jira[field_rating]} adf "$severity (CVSS Rating ${cvss:--})"
-            jira json fields set ${_trivy_jira[field_version]} adf "Gefixt ab Version $fixed $fixStatus"
+            jira json fields set ${_trivy_jira[field_version]} adf "Gefixt ab Version ${fixed:--} $fixStatus"
             jira json fields set ${_trivy_jira[field_links]} adf "$links"
             jira json fields set ${_trivy_jira[field_sources]} adf "$(date +%Y-%m) > $sourceLine"
             jira json fields set labels json "[\"cve\", \"$(sed 's#.*ekz.de/##;s#/-/.*##;s#[/.]#", "#g' <<<"$source")\"]"
             issue="$(jira create "$fields")"
             created=1
         fi
-        local jira deploy commentDate
+        local jira deploy commentDate jiraStatus assignee
         jira="$(jira get "$issue")"
         deploy="$(jq '.fields.'"${_trivy_jira[field_approval]}"'?.value' -r <<<"$jira")"
-        commentDate=$(jq '.fields.comment.comments[].updated' -r <<<"$jira" | sort | tail -1)
+        commentDate="$(jq '.fields.comment.comments[].updated' -r <<<"$jira" | sort | tail -1)"
+        key="$(jq .key -r <<<"$jira")"
+        jiraStatus="$(jq .fields.status.name -r <<<"$jira")"
+        assignee="$(jq .fields.assignee.displayName -r <<<"$jira")"
+        local date author comments=()
+        while IFS=$'\t' read -r date author comment; do
+            comments+=("$date $author: $(jira adf_to_md "$comment" | grep -v ^$)")
+        done < <(jq '.fields.comment.comments[-3:][] | [.updated, .updateAuthor.displayName, (.body | @json)] | @tsv' -r <<<"$jira" | tac)
         # downgrade
         if [[ "$severity" = "HIGH" || "$severity" = "CRITICAL" ]]; then
-            if ([ "$deploy" = "$TRIVY_JIRA_APPROVAL_IRRELEVANT" ] || ([ "$deploy" = "$TRIVY_JIRA_APPROVAL_TEMP" ] && (($(date_diff "$(now)" "$commentDate") < $(duration_format seconds '30d'))))); then
+            if ([ "$deploy" = "$TRIVY_JIRA_APPROVAL_IRRELEVANT" ] || ([ "$deploy" = "$TRIVY_JIRA_APPROVAL_TEMP" ] && (($(date_diff "$commentDate") <= $(duration_format seconds '30d'))))); then
                 action="Downgrade $severity -> MEDIUM because of Jira status '$deploy'"
                 info "$id at $target: $action" >&2
                 changes+=("{\"Severity\": \"MEDIUM\",\"OriginalSeverity\": \"$severity\"}")
                 rules+=("{\"Title\": \"Jira Approval\",\"Description\": \"$action.\"}")
-            #elif [ "$deploy" = "$TRIVY_JIRA_APPROVAL_TEMP" ] && is set -- "$commentDate" && (($(date_diff "$(now)" "$commentDate") > $(duration_format seconds '30d'))); then
-            #    expired=1
+            fi
+            if ([ "$deploy" = "$TRIVY_JIRA_APPROVAL_TEMP" ] && (($(date_diff "$commentDate") > $(duration_format seconds '30d')))); then
+                expired=1
             fi
         fi
         # update jira
@@ -304,7 +348,7 @@ _trivy_report() {
             fi
             # update version
             old="$(jira json jira get "${_trivy_jira[field_version]}" md)"
-            new="Gefixt ab Version $fixed $fixStatus"
+            new="Gefixt ab Version ${fixed:--} $fixStatus"
             if [[ "$new" != "$old" ]]; then
                 jira json fields set ${_trivy_jira[field_version]} adf "$new"
                 update=1
@@ -333,7 +377,7 @@ _trivy_report() {
         fi
         action="Add information from Jira"
         info "$id at $target: $action" >&2
-        changes+=("{\"Jira\": {\"id\": $issue, \"key\": $(jq .key <<<"$jira"), \"approval\": \"$deploy\", \"lastComment\": \"$commentDate\"}}")
+        changes+=("{\"Jira\": {\"id\": $issue, \"key\": \"$key\", \"approval\": \"$deploy\", \"lastComment\": \"$commentDate\"}}")
         rules+=("{\"Title\": \"Jira Info\",\"Description\": \"$action.\"}")
     fi
     # store json changes
@@ -345,49 +389,65 @@ _trivy_report() {
     local folder="$work/${severity,,}/$type/$id"
     mkdir -p "$folder"
     echo "$json" >"$folder/data.json"
+    # get more information for reports
+    local exploitDate exploitVendor exploitProduct issue key approval lastComment
+    exploitDate="$(jq .Exploited.dateAdded -r <<<"$json")"
+    test ! "$exploitDate" = "null" || exploitDate=""
+    if is set -- "$exploitDate"; then
+        exploitVendor="$(jq .Exploited.vendorProject -r <<<"$json")"
+        exploitProduct="$(jq .Exploited.product -r <<<"$json")"
+    fi
     # create console text
     file="$folder/header.txt"
     if ! is file -- "$file"; then
         # set color
         case $severity in
-        CRITICAL) echo -n "$CC_CRITICAL" >"$file" ;;
-        HIGH) echo -n "$CC_ERROR" >"$file" ;;
-        MEDIUM) echo -n "$CC_WARN" >"$file" ;;
-        *) echo "" >"$file" ;;
+        CRITICAL) printf "$CC_CRITICAL" >"$file" ;;
+        HIGH) printf "$CC_ERROR" >"$file" ;;
+        MEDIUM) printf "$CC_WARN" >"$file" ;;
+        *) printf "" >"$file" ;;
         esac
         echo "================================================================================" >>"$file"
         echo "$severity $id $title" >>"$file"
         echo "--------------------------------------------------------------------------------" >>"$file"
         echo "$description" >>"$file"
         echo "    " >>"$file"
-        echo "Rating: $severity (CVSS Rating $cvss)" >>"$file"
+        echo "Rating: $severity (CVSS Rating ${cvss:--})" >>"$file"
+        echo "Status: Gefixt ab Version ${fixed:--} $fixStatus" >>"$file"
+        echo "Datum:  Sicherheitslücke bekannt seit $(date_format human-date "$date") (vor $(duration_format days "$(date_diff "$date")") Tagen)" >>"$file"
         echo "    " >>"$file"
-        #test -z "$fixed" || echo -n " gefixt ab Version $fixed" >>$file_txt
-        #test -z "$fixstatus" || echo -n " $fixstatus" >>$file_txt
-        #test -z "$date" || echo "Eintragung vom: $date (vor $age)" >>$file
-        #echo "$exploited" | jq '"Exploit bekannt seit "+.dateAdded+" bei "+.vendorProject+" "+.product' -r >>$file_txt
-        #echo "$exploited" | jq '.notes' -r >>$file_txt
-        #echo "Jira Ticket: https://ekz-gruppe.atlassian.net/browse/$issue" >>$file_txt
-        #echo "Status: $status    Priorität: $priority    Zuständig: $assignee    Deploy: $deploy" >>$file_txt
-        #echo "Letzte Kommentare:" >>$file_txt
-        #echo -e "$comments" | sed 's/^/- /' >>$file_txt
+        is empty -- "$exploitDate" || printf "Exploit bekannt seit $exploitDate bei $exploitVendor $exploitProduct\n\n" >>"$file"
+        if is set -- "$issue"; then
+            printf "Jira Ticket: https://ekz-gruppe.atlassian.net/browse/$issue\n" >>"$file"
+            printf "             $jiraStatus    Zuständig: $assignee\n" >>"$file"
+            printf "             Deploy: ${approval:-Undefiniert}\n" >>"$file"
+            printf "Letzte Kommentare:\n$(join comments $'\n' | sed 's/^/             /')" >>"$file"
+        fi
         echo "Sources:" >>"$file"
     fi
     file="$folder/sources.txt"
     echo "- $sourceLine" >>"$file"
     file="$folder/footer.txt"
     if ! is file -- "$file"; then
-        true
-        #test -z "$links" || echo -e "Links:\n$links" >>$file_txt
+        echo "Links:\n$links" >>"$file"
+        printf "$CC_RESET"
     fi
-
-    ## create markdown file
-    #file="$folder/report.md"
-    #if ! is file -- "$file"; then
-    #    echo "  Title:      $title" >"$file"
-    #fi
-    ## create csv line
-    #file="$folder/report.csv"
-    #echo -e "$severity\t$type\t$id\t$title" >>"$file"
-
+    # create csv line
+    file="$folder/report.tsv"
+    printf "$severity\t$type\t$id\t$title" >>"$file"
+    # mark as expired or blocked
+    is empty -- "$expired" || cat "$file" >"$folder/expired.tsv"
+    [[ "$severity" = "LOW" || "$severity" = "MEDIUM" ]] || cat "$file" >"$folder/blocked.tsv"
+    # prometheus
+    file="$folder/prom.txt"
+    if [[ "$severity" = "HIGH" || "$severity" = "CRITICAL" ]]; then
+        case $severity in
+        LOW) value=1 ;;
+        MEDIUM) value=10 ;;
+        HIGH) value=100 ;;
+        CRITICAL) value=1000 ;;
+        *) value=0 ;;
+        esac
+        echo "divibib_trivy_vulnerability{type=\"$type\",target=\"$target\",package=\"$pkgPath\",severity=\"$severity\",cve=\"$id\"} $value" >>"$file"
+    fi
 }
