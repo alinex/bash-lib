@@ -9,29 +9,29 @@ source /dev/null
 ######################################################################################
 
 # Cursor up 1 line
-CUR_UP=$'\033[A'
+CURSOR_UP=$'\033[A'
 #  Cursor down 1 line
-CUR_DOWN=$'\033[B'
+CURSOR_DOWN=$'\033[B'
 #  Cursor right 1 col
-CUR_RIGHT=$'\033[C'
+CURSOR_RIGHT=$'\033[C'
 # Cursor left 1 col
-CUR_LEFT=$'\033[D'
+CURSOR_LEFT=$'\033[D'
 # Next Line (down, col 1)
-CUR_NEXT=$'\033[E'
+CURSOR_NEXT=$'\033[E'
 # Previous Line (up, col 1)
-CUR_PREVIOUS=$'\033[F'
+CURSOR_PREVIOUS=$'\033[F'
 # Cursor to start of line
-CUR_POS1=$'\033[G'
+CURSOR_POS1=$'\033[G'
 # Cursor to top-left
-CUR_TOP=$'\033[H'
+CURSOR_TOP=$'\033[H'
 # Save cursor pos
-CUR_STORE=$'\033[7' # or \033[s
+CURSOR_STORE=$'\033[7' # or \033[s
 # Restore cursor pos
-CUR_RESTORE=$'\033[8' # or \033[u
+CURSOR_RESTORE=$'\033[8' # or \033[u
 # Show cursor
-CUR_SHOW=$'\033[?25h'
+CURSOR_SHOW=$'\033[?25h'
 # Hide cursor
-CUR_HIDE=$'\033[?25l'
+CURSOR_HIDE=$'\033[?25l'
 
 # Move cursor on console
 #
@@ -40,6 +40,7 @@ CUR_HIDE=$'\033[?25l'
 #
 # Usage:    cursor <direction> <num>
 #           cursor row <num>
+#           cursor pos <row> <col>
 cursor() {
     local num="${2:-1}" col="${3:-1}"
     is enum --name=direction --allow="up down right left row pos next previous" --die -- "$1"
@@ -47,14 +48,34 @@ cursor() {
     is integer --name=col --min=1 --die -- "$col"
     is integer --name=arguments --max=3 --die -- $#
     case "$1" in
-    up) echo $'\033['$num'A' ;;
-    down) echo $'\033['$num'B' ;;
-    right) echo $'\033['$num'C' ;;
-    left) echo $'\033['$num'D' ;;
-    row) echo $'\033['$num'H' ;;
-    pos) echo $'\033['"$num;$col"'H' ;;
-    next) echo $'\033['$num'E' ;;
-    previous) echo $'\033['$num'F' ;;
+    up) echo -n $'\033['$num'A' ;;
+    down) echo -n $'\033['$num'B' ;;
+    right) echo -n $'\033['$num'C' ;;
+    left) echo -n $'\033['$num'D' ;;
+    row) echo -n $'\033['$num'H' ;;
+    pos) echo -n $'\033['"$num;$col"'H' ;;
+    next) echo -n $'\033['$num'E' ;;
+    previous) echo -n $'\033['$num'F' ;;
+    esac
+}
+
+# Change characters
+#
+# Usage:    character repeat <num> <character>
+#           character delete <num>                  # delete character on the right side
+#           character erase <num>                   # delete characters on the left side
+character() {
+    local num="$2"
+    is enum --name=command --allow="repeat" --die -- "$1"
+    is integer --name=num --min=1 --die -- "$num"
+    case "$1" in
+    repeat)
+        is set --name=character --min=1 --die -- "$3"
+        is length --name=character --min=1 --max=1 --die -- "$3"
+        ((num == 1)) && echo -n "$3" || echo -n "$3"$'\033['$((num - 1))'b'
+        ;;
+    delete) echo -n $'\033['$num'P' ;;
+    erase) echo -n $'\033['$num'X' ;;
     esac
 }
 
@@ -87,7 +108,7 @@ SCREEN_SAVE=$'\033[?47h'
 # Usage:    erase_line
 erase_line() {
     _deprecated "Use $CLEAR_LINE" warn
-    echo "$CLEAR_LINE"
+    echo -n "$CLEAR_LINE"
 }
 
 ######################################################################################
@@ -402,7 +423,7 @@ horizontal_line() {
     local cols
     read -r _ cols < <(stty size)
     ((cols > 60)) || cols=60
-    printf "%.0s$char" $(seq 1 "$cols")
+    character repeat $cols "$char"
 }
 
 _spinner_pid=""
@@ -457,7 +478,7 @@ spinner_start() {
     esac
     local back=$((size + 1))
     # Spinner function running in background loop
-    printf '\033[?25l' # make cursor invisible
+    printf $CUR_HIDE # make cursor invisible
     (
         while true; do
             for ((i = 0; i < ${#spinner}; i += chars)); do
@@ -483,7 +504,7 @@ spinner_stop() {
     wait "$_spinner_pid" 2>/dev/null
     _spinner_pid=""
     printf "    \b\b\b\b" # Clear spinner character
-    printf '\033[?25h'    # make cursor visible again
+    printf $CUR_SHOW      # make cursor visible again
 }
 
 # Output Logo with title text

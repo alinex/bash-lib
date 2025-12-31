@@ -188,14 +188,19 @@ _trivy_report() {
     local file="$2"
     local source="$3"
     # initialize data and structure
-    local type severity target id folder json
+    local type severity target id json title pkgPath description cvss installed sourceLine
     json="$(cat "$file")"
     type="$(jq .Type -r <<<"$json")"
     severity="$(jq .Severity -r <<<"$json")"
     target="$(jq .Target -r <<<"$json")"
     id="$(jq .VulnerabilityID -r <<<"$json")"
-    folder="$work/${severity,,}/$type/$id"
-    mkdir -p "$folder"
+    title="$(jq .Title -r <<<"$json")"
+    pkgPath="$(jq .PkgPath -r <<<"$json")"
+    test ! "$pkgPath" = "null" || pkgPath=""
+    description="$(jq .Description -r <<<"$json")"
+    cvss="$(jq '.CVSS[]?.V3Score' -r <<<"$json")" | tr $'\n' '\;' | sed 's/;$//;s/;/; /g'
+    installed="$(jq .InstalledVersion -r <<<"$json")"
+    sourceLine="$source $target ($type) $pkgPath - Version $installed"
     # collect json changes
     local changes=() rules=() action
     # new findings
@@ -230,12 +235,8 @@ _trivy_report() {
     # jira issues
     if is set -- "$TRIVY_JIRA_BOARD" && [[ "$severity" = "HIGH" || "$severity" = "CRITICAL" ]]; then
         # get information
-        local issue created title description cvss installed fixed fixStatus links
+        local issue created fixed fixStatus links
         issue="$(jira search "project = ${_trivy_jira[board]} AND summary ~ $id ORDER BY created ASC" | head -1)"
-        title="$(jq .Title -r <<<"$json")"
-        description="$(jq .Description -r <<<"$json")"
-        cvss="$(jq '.CVSS[]?.V3Score' -r <<<"$json")" | tr $'\n' '\;' | sed 's/;$//;s/;/; /g'
-        installed="$(jq .InstalledVersion -r <<<"$json")"
         fixed="$(jq .FixedVersion -r <<<"$json")"
         [ "$fixed" != "null" ] || fixed="-"
         fixStatus="$(jq .Status -r <<<"$json")"
@@ -255,9 +256,9 @@ _trivy_report() {
             jira json fields set description adf "$title"$'\n\n'"$description"
             jira json fields set ${_trivy_jira[field_sources]} adf "$(date +%Y-%m) > $source $target ($type)"
             jira json fields set ${_trivy_jira[field_rating]} adf "$severity (CVSS Rating ${cvss:--})"
-            jira json fields set ${_trivy_jira[field_version]} adf "Installiert ist Version $installed gefixt ab Version $fixed $fixStatus"
+            jira json fields set ${_trivy_jira[field_version]} adf "Gefixt ab Version $fixed $fixStatus"
             jira json fields set ${_trivy_jira[field_links]} adf "$links"
-            jira json fields set ${_trivy_jira[field_sources]} adf "$(date +%Y-%m) > $source"
+            jira json fields set ${_trivy_jira[field_sources]} adf "$(date +%Y-%m) > $sourceLine"
             jira json fields set labels json "[\"cve\", \"$(sed 's#.*ekz.de/##;s#/-/.*##;s#[/.]#", "#g' <<<"$source")\"]"
             issue="$(jira create "$fields")"
             created=1
@@ -288,28 +289,28 @@ _trivy_report() {
                 update=1
             fi
             # update sources
-            old="$(jira json jira get adf "${_trivy_jira[field_sources]}")"
-            new="$(echo -e "$old\n$(date +%Y-%m) > $source $target ($type)" | sed -n '/>/p' | sort -t'>' -r -k2,1 | sort -t'>' -u -r -k2)"
+            old="$(jira json jira get "${_trivy_jira[field_sources]}" md)"
+            new="$(echo -e "$old\n$(date +%Y-%m) > $sourceLine" | sed -n '/>/p' | sort -t'>' -r -k2,1 | sort -t'>' -u -r -k2)"
             if [[ "$new" != "$old" ]]; then
                 jira json fields set ${_trivy_jira[field_sources]} adf "$new"
                 update=1
             fi
             # update rating
-            old="$(jira json jira get adf "${_trivy_jira[field_rating]}")"
+            old="$(jira json jira get "${_trivy_jira[field_rating]}" md)"
             new="$severity (CVSS Rating ${cvss:--})"
             if [[ "$new" != "$old" ]]; then
                 jira json fields set ${_trivy_jira[field_rating]} adf "$new"
                 update=1
             fi
             # update version
-            old="$(jira json jira get adf "${_trivy_jira[field_version]}")"
-            new="Installiert ist Version $installed gefixt ab Version $fixed $fixStatus"
+            old="$(jira json jira get "${_trivy_jira[field_version]}" md)"
+            new="Gefixt ab Version $fixed $fixStatus"
             if [[ "$new" != "$old" ]]; then
                 jira json fields set ${_trivy_jira[field_version]} adf "$new"
                 update=1
             fi
             # update links
-            old="$(jira json jira get adf "${_trivy_jira[field_links]}")"
+            old="$(jira json jira get "${_trivy_jira[field_links]}" md)"
             new="$links"
             if [[ "$new" != "$old" ]]; then
                 jira json fields set ${_trivy_jira[field_links]} adf "$new"
@@ -340,5 +341,53 @@ _trivy_report() {
     for change in "${changes[@]}"; do
         json="$(jq -n --argjson o "$json" --argjson c "$change" '$o * $c')"
     done
+    severity="$(jq .Severity -r <<<"$json")"
+    local folder="$work/${severity,,}/$type/$id"
+    mkdir -p "$folder"
     echo "$json" >"$folder/data.json"
+    # create console text
+    file="$folder/header.txt"
+    if ! is file -- "$file"; then
+        # set color
+        case $severity in
+        CRITICAL) echo -n "$CC_CRITICAL" >"$file" ;;
+        HIGH) echo -n "$CC_ERROR" >"$file" ;;
+        MEDIUM) echo -n "$CC_WARN" >"$file" ;;
+        *) echo "" >"$file" ;;
+        esac
+        echo "================================================================================" >>"$file"
+        echo "$severity $id $title" >>"$file"
+        echo "--------------------------------------------------------------------------------" >>"$file"
+        echo "$description" >>"$file"
+        echo "    " >>"$file"
+        echo "Rating: $severity (CVSS Rating $cvss)" >>"$file"
+        echo "    " >>"$file"
+        #test -z "$fixed" || echo -n " gefixt ab Version $fixed" >>$file_txt
+        #test -z "$fixstatus" || echo -n " $fixstatus" >>$file_txt
+        #test -z "$date" || echo "Eintragung vom: $date (vor $age)" >>$file
+        #echo "$exploited" | jq '"Exploit bekannt seit "+.dateAdded+" bei "+.vendorProject+" "+.product' -r >>$file_txt
+        #echo "$exploited" | jq '.notes' -r >>$file_txt
+        #echo "Jira Ticket: https://ekz-gruppe.atlassian.net/browse/$issue" >>$file_txt
+        #echo "Status: $status    Priorität: $priority    Zuständig: $assignee    Deploy: $deploy" >>$file_txt
+        #echo "Letzte Kommentare:" >>$file_txt
+        #echo -e "$comments" | sed 's/^/- /' >>$file_txt
+        echo "Sources:" >>"$file"
+    fi
+    file="$folder/sources.txt"
+    echo "- $sourceLine" >>"$file"
+    file="$folder/footer.txt"
+    if ! is file -- "$file"; then
+        true
+        #test -z "$links" || echo -e "Links:\n$links" >>$file_txt
+    fi
+
+    ## create markdown file
+    #file="$folder/report.md"
+    #if ! is file -- "$file"; then
+    #    echo "  Title:      $title" >"$file"
+    #fi
+    ## create csv line
+    #file="$folder/report.csv"
+    #echo -e "$severity\t$type\t$id\t$title" >>"$file"
+
 }

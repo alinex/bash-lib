@@ -214,18 +214,18 @@ Module with output and user interaction helpers.
 
 | Variable/Function | Description |
 | --- | --- |
-| ``$CUR_UP`` | Cursor up 1 line |
-| ``$CUR_DOWN`` |  Cursor down 1 line |
-| ``$CUR_RIGHT`` |  Cursor right 1 col |
-| ``$CUR_LEFT`` | Cursor left 1 col |
-| ``$CUR_NEXT`` | Next Line (down, col 1) |
-| ``$CUR_PREVIOUS`` | Previous Line (up, col 1) |
-| ``$CUR_POS1`` | Cursor to start of line |
-| ``$CUR_TOP`` | Cursor to top-left |
-| ``$CUR_STORE`` | Save cursor pos |
-| ``$CUR_RESTORE`` | Restore cursor pos |
-| ``$CUR_SHOW`` | Show cursor |
-| ``$CUR_HIDE`` | Hide cursor |
+| ``$CURSOR_UP`` | Cursor up 1 line |
+| ``$CURSOR_DOWN`` |  Cursor down 1 line |
+| ``$CURSOR_RIGHT`` |  Cursor right 1 col |
+| ``$CURSOR_LEFT`` | Cursor left 1 col |
+| ``$CURSOR_NEXT`` | Next Line (down, col 1) |
+| ``$CURSOR_PREVIOUS`` | Previous Line (up, col 1) |
+| ``$CURSOR_POS1`` | Cursor to start of line |
+| ``$CURSOR_TOP`` | Cursor to top-left |
+| ``$CURSOR_STORE`` | Save cursor pos |
+| ``$CURSOR_RESTORE`` | Restore cursor pos |
+| ``$CURSOR_SHOW`` | Show cursor |
+| ``$CURSOR_HIDE`` | Hide cursor |
 | ``$SCROLL_UP`` | Reverse Index (up, scroll) |
 | ``$CLEAR_SCREEN`` | Clear entire screen |
 | ``$CLEAR_UP`` | Clear from start of screen to cursor |
@@ -236,6 +236,7 @@ Module with output and user interaction helpers.
 | ``$SCREEN_RESTORE`` | restore screen |
 | ``$SCREEN_SAVE`` | save screen |
 | [`cursor`](function/cursor.md) | Move cursor on console |
+| [`character`](function/character.md) | Change characters |
 | [`erase_line`](function/erase_line.md) | Deprecated: Remove current line |
 | [`debug`](function/debug.md) | Write message to STDERR if in DEBUG mode else do nothing |
 | [`die`](function/die.md) | Output error message and exit |

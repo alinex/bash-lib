@@ -546,18 +546,18 @@ fi
 done
 return 1
 }
-CUR_UP=$'\033[A'
-CUR_DOWN=$'\033[B'
-CUR_RIGHT=$'\033[C'
-CUR_LEFT=$'\033[D'
-CUR_NEXT=$'\033[E'
-CUR_PREVIOUS=$'\033[F'
-CUR_POS1=$'\033[G'
-CUR_TOP=$'\033[H'
-CUR_STORE=$'\033[7'
-CUR_RESTORE=$'\033[8'
-CUR_SHOW=$'\033[?25h'
-CUR_HIDE=$'\033[?25l'
+CURSOR_UP=$'\033[A'
+CURSOR_DOWN=$'\033[B'
+CURSOR_RIGHT=$'\033[C'
+CURSOR_LEFT=$'\033[D'
+CURSOR_NEXT=$'\033[E'
+CURSOR_PREVIOUS=$'\033[F'
+CURSOR_POS1=$'\033[G'
+CURSOR_TOP=$'\033[H'
+CURSOR_STORE=$'\033[7'
+CURSOR_RESTORE=$'\033[8'
+CURSOR_SHOW=$'\033[?25h'
+CURSOR_HIDE=$'\033[?25l'
 cursor(){
 local num="${2:-1}" col="${3:-1}"
 is enum --name=direction --allow="up down right left row pos next previous" --die -- "$1"
@@ -565,14 +565,27 @@ is integer --name=num --min=1 --die -- "$num"
 is integer --name=col --min=1 --die -- "$col"
 is integer --name=arguments --max=3 --die -- $#
 case "$1" in
-up)echo $'\033['$num'A';;
-down)echo $'\033['$num'B';;
-right)echo $'\033['$num'C';;
-left)echo $'\033['$num'D';;
-row)echo $'\033['$num'H';;
-pos)echo $'\033['"$num;$col"'H';;
-next)echo $'\033['$num'E';;
-previous)echo $'\033['$num'F'
+up)echo -n $'\033['$num'A';;
+down)echo -n $'\033['$num'B';;
+right)echo -n $'\033['$num'C';;
+left)echo -n $'\033['$num'D';;
+row)echo -n $'\033['$num'H';;
+pos)echo -n $'\033['"$num;$col"'H';;
+next)echo -n $'\033['$num'E';;
+previous)echo -n $'\033['$num'F'
+esac
+}
+character(){
+local num="$2"
+is enum --name=command --allow="repeat" --die -- "$1"
+is integer --name=num --min=1 --die -- "$num"
+case "$1" in
+repeat)is set --name=character --min=1 --die -- "$3"
+is length --name=character --min=1 --max=1 --die -- "$3"
+((num==1))&&echo -n "$3"||echo -n "$3"$'\033['$((num-1))'b'
+;;
+delete)echo -n $'\033['$num'P';;
+erase)echo -n $'\033['$num'X'
 esac
 }
 SCROLL_UP=$'\033[M'
@@ -586,7 +599,7 @@ SCREEN_RESTORE=$'\033[?47l'
 SCREEN_SAVE=$'\033[?47h'
 erase_line(){
 _deprecated "Use $CLEAR_LINE" warn
-echo "$CLEAR_LINE"
+echo -n "$CLEAR_LINE"
 }
 debug(){
 local level=1 func text sign='>'
@@ -732,7 +745,7 @@ esac
 local cols
 read -r _ cols < <(stty size)
 ((cols>60))||cols=60
-printf "%.0s$char" $(seq 1 "$cols")
+character repeat $cols "$char"
 }
 _spinner_pid=""
 spinner_start(){
@@ -760,7 +773,7 @@ weather)spinner='🌤🌥🌦🌧🌨🌩🌪';;
 *)spinner='-\|/'
 esac
 local back=$((size+1))
-printf '\033[?25l'
+printf $CUR_HIDE
 (while
 true
 do
@@ -780,7 +793,7 @@ kill "$_spinner_pid" >/dev/null 2>&1
 wait "$_spinner_pid" 2>/dev/null
 _spinner_pid=""
 printf "    \b\b\b\b"
-printf '\033[?25h'
+printf $CUR_SHOW
 }
 logo(){
 a=$'\033[36m'
@@ -920,7 +933,7 @@ fi
 ;;
 length)val=${#val}
 if [[ -n $min ]]&&[[ $min == "$max" ]];then
-if ((res!=min));then
+if ((val!=min));then
 [ -z "$die" ]&&return 1||die "$(eval_gettext 'The length of "$name" has to be exactly $min but »${res}« is $val characters long')"
 fi
 elif [[ -n $min && -n $max ]];then
@@ -1093,25 +1106,23 @@ set)if
 then
 jira json $var remove $field
 elif [ "$2" = "json" ]&&[ -n "$3" ];then
-printf -v "$var" '%s' "$(jq --argjson v "$3" ".fields.$field = \$v" <<<"$json")"
+printf -v "$var" '%s' "$(jq -c --argjson v "$3" ".fields.$field = \$v" <<<"$json")"
 elif [ "$2" = "adf" ]&&[ -n "$3" ];then
 local val
 [[ $3 =~ ^\{ ]]&&val="$3"||val="$(jira md_to_adf "$3")"
-debug "in:  $3"
-debug "adf: $val"
-printf -v "$var" '%s' "$(jq --argjson v "$val" ".fields.$field = \$v" <<<"$json")"
+printf -v "$var" '%s' "$(jq -c --argjson v "$val" ".fields.$field = \$v" <<<"$json")"
 elif is integer -- "$2";then
-printf -v "$var" '%s' "$(jq ".fields.$field = $2" <<<"$json")"
+printf -v "$var" '%s' "$(jq -c ".fields.$field = $2" <<<"$json")"
 else
-printf -v "$var" '%s' "$(jq --arg v "$2" ".fields.$field = \$v" <<<"$json")"
+printf -v "$var" '%s' "$(jq -c --arg v "$2" ".fields.$field = \$v" <<<"$json")"
 fi
 ;;
 get)local val
-val="$(jq ".fields.$field" <<<"$json")"
+val="$(jq -c ".fields.$field" <<<"$json")"
 [ ! "$val" = null ]||val=""
 [[ $2 == "md" && $val =~ ^\{ ]]&&jira adf_to_md "$val"||echo "$val"
 ;;
-remove)printf -v "$var" '%s' "$(jq "del(.fields.$field)" <<<"$json")"
+remove)printf -v "$var" '%s' "$(jq -c "del(.fields.$field)" <<<"$json")"
 esac
 ;;
 adf_to_md)is set --name=json --die -- "$1"&&local json="$1"
@@ -1151,7 +1162,7 @@ jq -r '
   '
 ;;
 md_to_adf)is set --name=text --die -- "$1"
-jq -n --arg text "$1" '
+jq -c -n --arg text "$1" '
     def paragraph(t):
       { type: "paragraph", content: [{ type: "text", text: t }] };
 
@@ -3484,8 +3495,6 @@ _trivy_jira[field_links]="$(jq '.fields[] | select(.name == "'"$TRIVY_JIRA_FIELD
 is set -- "${_trivy_jira[field_links]}"||die "Could not find JIRA Field \"$TRIVY_JIRA_FIELD_LINKS\" in $TRIVY_JIRA_BOARD/$TRIVY_JIRA_ISSUE_TYPE!"
 _trivy_jira[field_approval]="$(jq '.fields[] | select(.name == "'"$TRIVY_JIRA_FIELD_APPROVAL"'").key' -r <<<"$fields")"
 is set -- "${_trivy_jira[field_approval]}"||die "Could not find JIRA Field \"$TRIVY_JIRA_FIELD_APPROVAL\" in $TRIVY_JIRA_BOARD/$TRIVY_JIRA_ISSUE_TYPE!"
-_trivy_report "/tmp/_test_816357_trivy" "/tmp/_test_816357_trivy/split/000000" "test"
-return 0
 local num
 for file in "$work"/split/*;do
 num="$(basename "$file")"
@@ -3500,14 +3509,19 @@ debug "trivy_report \"$1\" \"$2\" \"$3\""
 local work="$1"
 local file="$2"
 local source="$3"
-local type severity target id folder json
+local type severity target id json title pkgPath description cvss installed sourceLine
 json="$(cat "$file")"
 type="$(jq .Type -r <<<"$json")"
 severity="$(jq .Severity -r <<<"$json")"
 target="$(jq .Target -r <<<"$json")"
 id="$(jq .VulnerabilityID -r <<<"$json")"
-folder="$work/${severity,,}/$type/$id"
-mkdir -p "$folder"
+title="$(jq .Title -r <<<"$json")"
+pkgPath="$(jq .PkgPath -r <<<"$json")"
+test ! "$pkgPath" = "null"||pkgPath=""
+description="$(jq .Description -r <<<"$json")"
+cvss="$(jq '.CVSS[]?.V3Score' -r <<<"$json")"|tr $'\n' '\;'|sed 's/;$//;s/;/; /g'
+installed="$(jq .InstalledVersion -r <<<"$json")"
+sourceLine="$source $target ($type) $pkgPath - Version $installed"
 local changes=() rules=() action
 local date
 date="$(jq .PublishedDate -r <<<"$json")"
@@ -3533,12 +3547,8 @@ changes+=("{\"Severity\": \"MEDIUM\",\"OriginalSeverity\": \"$severity\"}")
 rules+=("{\"Title\": \"NPM Dev Dependency\",\"Description\": \"$action.\"}")
 fi
 if is set -- "$TRIVY_JIRA_BOARD"&&[[ $severity == "HIGH" || $severity == "CRITICAL" ]];then
-local issue created title description cvss installed fixed fixStatus links
+local issue created fixed fixStatus links
 issue="$(jira search "project = ${_trivy_jira[board]} AND summary ~ $id ORDER BY created ASC"|head -1)"
-title="$(jq .Title -r <<<"$json")"
-description="$(jq .Description -r <<<"$json")"
-cvss="$(jq '.CVSS[]?.V3Score' -r <<<"$json")"|tr $'\n' '\;'|sed 's/;$//;s/;/; /g'
-installed="$(jq .InstalledVersion -r <<<"$json")"
 fixed="$(jq .FixedVersion -r <<<"$json")"
 [ "$fixed" != "null" ]||fixed="-"
 fixStatus="$(jq .Status -r <<<"$json")"
@@ -3557,9 +3567,9 @@ jira json fields set summary "$id"
 jira json fields set description adf "$title"$'\n\n'"$description"
 jira json fields set ${_trivy_jira[field_sources]} adf "$(date +%Y-%m) > $source $target ($type)"
 jira json fields set ${_trivy_jira[field_rating]} adf "$severity (CVSS Rating ${cvss:--})"
-jira json fields set ${_trivy_jira[field_version]} adf "Installiert ist Version $installed gefixt ab Version $fixed $fixStatus"
+jira json fields set ${_trivy_jira[field_version]} adf "Gefixt ab Version $fixed $fixStatus"
 jira json fields set ${_trivy_jira[field_links]} adf "$links"
-jira json fields set ${_trivy_jira[field_sources]} adf "$(date +%Y-%m) > $source"
+jira json fields set ${_trivy_jira[field_sources]} adf "$(date +%Y-%m) > $sourceLine"
 jira json fields set labels json "[\"cve\", \"$(sed 's#.*ekz.de/##;s#/-/.*##;s#[/.]#", "#g' <<<"$source")\"]"
 issue="$(jira create "$fields")"
 created=1
@@ -3584,25 +3594,25 @@ if [[ $new != "$old" ]];then
 jira json fields set description adf "$new"
 update=1
 fi
-old="$(jira json jira get adf "${_trivy_jira[field_sources]}")"
-new="$(echo -e "$old\n$(date +%Y-%m) > $source $target ($type)"|sed -n '/>/p'|sort -t'>' -r -k2,1|sort -t'>' -u -r -k2)"
+old="$(jira json jira get "${_trivy_jira[field_sources]}" md)"
+new="$(echo -e "$old\n$(date +%Y-%m) > $sourceLine"|sed -n '/>/p'|sort -t'>' -r -k2,1|sort -t'>' -u -r -k2)"
 if [[ $new != "$old" ]];then
 jira json fields set ${_trivy_jira[field_sources]} adf "$new"
 update=1
 fi
-old="$(jira json jira get adf "${_trivy_jira[field_rating]}")"
+old="$(jira json jira get "${_trivy_jira[field_rating]}" md)"
 new="$severity (CVSS Rating ${cvss:--})"
 if [[ $new != "$old" ]];then
 jira json fields set ${_trivy_jira[field_rating]} adf "$new"
 update=1
 fi
-old="$(jira json jira get adf "${_trivy_jira[field_version]}")"
-new="Installiert ist Version $installed gefixt ab Version $fixed $fixStatus"
+old="$(jira json jira get "${_trivy_jira[field_version]}" md)"
+new="Gefixt ab Version $fixed $fixStatus"
 if [[ $new != "$old" ]];then
 jira json fields set ${_trivy_jira[field_version]} adf "$new"
 update=1
 fi
-old="$(jira json jira get adf "${_trivy_jira[field_links]}")"
+old="$(jira json jira get "${_trivy_jira[field_links]}" md)"
 new="$links"
 if [[ $new != "$old" ]];then
 jira json fields set ${_trivy_jira[field_links]} adf "$new"
@@ -3631,6 +3641,32 @@ is empty -- "$rules"||changes+=("{\"Rules\": [$(join rules)]}")
 for change in "${changes[@]}";do
 json="$(jq -n --argjson o "$json" --argjson c "$change" '$o * $c')"
 done
+severity="$(jq .Severity -r <<<"$json")"
+local folder="$work/${severity,,}/$type/$id"
+mkdir -p "$folder"
 echo "$json" >"$folder/data.json"
+file="$folder/header.txt"
+if ! is file -- "$file";then
+case $severity in
+CRITICAL)echo -n "$CC_CRITICAL" >"$file";;
+HIGH)echo -n "$CC_ERROR" >"$file";;
+MEDIUM)echo -n "$CC_WARN" >"$file";;
+*)echo "" >"$file"
+esac
+echo "================================================================================" >>"$file"
+echo "$severity $id $title" >>"$file"
+echo "--------------------------------------------------------------------------------" >>"$file"
+echo "$description" >>"$file"
+echo "    " >>"$file"
+echo "Rating: $severity (CVSS Rating $cvss)" >>"$file"
+echo "    " >>"$file"
+echo "Sources:" >>"$file"
+fi
+file="$folder/sources.txt"
+echo "- $sourceLine" >>"$file"
+file="$folder/footer.txt"
+if ! is file -- "$file";then
+true
+fi
 }
 source $BASHLIB_HOME/configs

@@ -7,6 +7,7 @@
 ```bash
 cursor <direction> <num>
 cursor row <num>
+cursor pos <row> <col>
 ```
 
 ### Description
