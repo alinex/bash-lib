@@ -39,7 +39,7 @@ date_diff() {
     is integer -- "$end" && end="$end" || end=$(date -d "$end" +%s) ||
         die "Date format '$2' not parsable!"
     # processing
-    echo $((end - start))
+    printf '%s' $((end - start))
 }
 
 # Format date in different named versions or format string
@@ -64,12 +64,12 @@ date_format() {
     is integer --name=arguments --max=2 --die -- $#
     is set --name=format --die -- "$1"
     # processing
-    local value format
+    local value format opt
     case $1 in
     iso) format="-Iseconds" ;;
     iso-date) format="-I" ;;
-    zulu) format="-u +%Y-%m-%dT%H:%M:%SZ" ;;
-    sql) format="+\"%Y-%m-%d %H:%M:%S\"" ;;
+    zulu) opt="-u" && format="+%Y-%m-%dT%H:%M:%SZ" ;;
+    sql) format="+%Y-%m-%d %H:%M:%S" ;;
     unix) format="+%s" ;;
     eu-date) format="+%Y-%m-%d" ;;
     us-date) format="+%m/%d/%Y" ;;
@@ -80,7 +80,7 @@ date_format() {
     *) format="+$1" ;;
     esac
     value="${2-$(now)}"
-    is integer -- "$value" && eval "date -d @$value '$format'" || eval "date -d \"$value\" '$format'" ||
+    is integer -- "$value" && eval "date -d @$value '$format'" || eval "date -d \"$value\" $opt '$format'" ||
         die "Date format '$value' not parsable!"
 }
 
@@ -122,10 +122,10 @@ duration_format() {
     is integer -- "$2" && value="$2" || value="$(_parse_duration "$2")"
     # processing
     case $1 in
-    seconds) echo "$value" ;;
-    minutes) echo $((value / 60)) ;;
-    hours) echo $((value / 3600)) ;;
-    days) echo $((value / 86400)) ;;
+    seconds) printf '%s' "$value" ;;
+    minutes) printf '%s' $((value / 60)) ;;
+    hours) printf '%s' $((value / 3600)) ;;
+    days) printf '%s' $((value / 86400)) ;;
     human) _format_duration "$value" ;;
     esac
 }
@@ -195,7 +195,7 @@ _format_duration() {
     ((s)) && out+="${s}s "
     # If total was exactly 0
     is empty -- "$out" && out="0s" && sign="" || true
-    echo "${sign}${out% }"
+    printf '%s' "${sign}${out% }"
 }
 
 ######################################################################################
@@ -218,7 +218,7 @@ timer() {
         ;;
     stop)
         local seconds nano len
-        IFS='.' read -r seconds nano <<<"$(echo "$(date +%s.%N) - $_timer_start" | bc)"
+        IFS='.' read -r seconds nano < <(printf '%s' "$(date +%s.%N) - $_timer_start" | bc)
         len=$((4 - ${#seconds}))
         ((len >= 0)) || len=0
         LANG=C printf "%0.${len}f\n" "$seconds.$nano"
