@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC2034
 # shellcheck source=base
 source /dev/null
 
@@ -9,29 +10,29 @@ source /dev/null
 ######################################################################################
 
 # Cursor up 1 line
-CURSOR_UP=$'\033[A'
+CURSOR_UP=$'\e[A'
 #  Cursor down 1 line
-CURSOR_DOWN=$'\033[B'
+CURSOR_DOWN=$'\e[B'
 #  Cursor right 1 col
-CURSOR_RIGHT=$'\033[C'
+CURSOR_RIGHT=$'\e[C'
 # Cursor left 1 col
-CURSOR_LEFT=$'\033[D'
+CURSOR_LEFT=$'\e[D'
 # Next Line (down, col 1)
-CURSOR_NEXT=$'\033[E'
+CURSOR_NEXT=$'\e[E'
 # Previous Line (up, col 1)
-CURSOR_PREVIOUS=$'\033[F'
+CURSOR_PREVIOUS=$'\e[F'
 # Cursor to start of line
-CURSOR_POS1=$'\033[G'
+CURSOR_POS1=$'\e[G'
 # Cursor to top-left
-CURSOR_TOP=$'\033[H'
+CURSOR_TOP=$'\e[H'
 # Save cursor pos
-CURSOR_STORE=$'\033[7' # or \033[s
+CURSOR_STORE=$'\e[7' # or \e[s
 # Restore cursor pos
-CURSOR_RESTORE=$'\033[8' # or \033[u
+CURSOR_RESTORE=$'\e[8' # or \e[u
 # Show cursor
-CURSOR_SHOW=$'\033[?25h'
+CURSOR_SHOW=$'\e[?25h'
 # Hide cursor
-CURSOR_HIDE=$'\033[?25l'
+CURSOR_HIDE=$'\e[?25l'
 
 # Move cursor on console
 #
@@ -45,17 +46,19 @@ cursor() {
     local num="${2:-1}" col="${3:-1}"
     is enum --name=direction --allow="up down right left row pos next previous" --die -- "$1"
     is integer --name=num --min=1 --die -- "$num"
-    is integer --name=col --min=1 --die -- "$col"
     is integer --name=arguments --max=3 --die -- $#
     case "$1" in
-    up) echo -n $'\033['$num'A' ;;
-    down) echo -n $'\033['$num'B' ;;
-    right) echo -n $'\033['$num'C' ;;
-    left) echo -n $'\033['$num'D' ;;
-    row) echo -n $'\033['$num'H' ;;
-    pos) echo -n $'\033['"$num;$col"'H' ;;
-    next) echo -n $'\033['$num'E' ;;
-    previous) echo -n $'\033['$num'F' ;;
+    up) printf '\e[%sA' "$num" ;;
+    down) printf '\e[%sB' "$num" ;;
+    right) printf '\e[%sC' "$num" ;;
+    left) printf '\e[%sD' "$num" ;;
+    row) printf '\e[%sH' "$num" ;;
+    pos)
+        is integer --name=col --min=1 --die -- "$col"
+        printf '\e[%s;%sH' "$num" "$col"
+        ;;
+    next) printf '\e[%sE' "$num" ;;
+    previous) printf '\e[%sF' "$num" ;;
     esac
 }
 
@@ -72,33 +75,33 @@ character() {
     repeat)
         is set --name=character --min=1 --die -- "$3"
         is length --name=character --min=1 --max=1 --die -- "$3"
-        ((num == 1)) && echo -n "$3" || echo -n "$3"$'\033['$((num - 1))'b'
+        ((num == 1)) && printf '%s' "$3" || printf '%s\e[%sb' "$3" $((num - 1))
         ;;
-    delete) echo -n $'\033['$num'P' ;;
-    erase) echo -n $'\033['$num'X' ;;
+    delete) printf '\e[%sP' "$num" ;;
+    erase) printf '\e[%sX' "$num" ;;
     esac
 }
 
 # Reverse Index (up, scroll)
-SCROLL_UP=$'\033[M'
+SCROLL_UP=$'\e[M'
 
 # Clear entire screen
-CLEAR_SCREEN=$'\033[2J'
+CLEAR_SCREEN=$'\e[2J'
 # Clear from start of screen to cursor
-CLEAR_UP=$'\033[1J'
+CLEAR_UP=$'\e[1J'
 # Clear from cursor to end of screen
-CLEAR_DOWN=$'\033[0J'
+CLEAR_DOWN=$'\e[0J'
 # Clear from cursor to end of line
-CLEAR_EOL=$'\033[0K'
+CLEAR_EOL=$'\e[0K'
 # Clear from start of line to cursor
-CLEAR_SOL=$'\033[1K'
+CLEAR_SOL=$'\e[1K'
 # Clear entire line
-CLEAR_LINE=$'\033[2K'
+CLEAR_LINE=$'\e[2K'
 
 # restore screen
-SCREEN_RESTORE=$'\033[?47l'
+SCREEN_RESTORE=$'\e[?47l'
 # save screen
-SCREEN_SAVE=$'\033[?47h'
+SCREEN_SAVE=$'\e[?47h'
 
 # Deprecated: Remove current line
 # Use $CLEAR_LINE
@@ -108,7 +111,8 @@ SCREEN_SAVE=$'\033[?47h'
 # Usage:    erase_line
 erase_line() {
     _deprecated "Use $CLEAR_LINE" warn
-    echo -n "$CLEAR_LINE"
+    # shellcheck disable=SC2059
+    printf "$CLEAR_LINE"
 }
 
 ######################################################################################
@@ -180,7 +184,7 @@ die() {
     text="$(input "$@")"
     [[ "$text" != *"Uncaught exception at"* ]] || trap=1
     # output
-    echo -e "${CC_CRITICAL}$text in ${FUNCNAME[1]}${CC_RESET}" >&2
+    printf "${CC_CRITICAL}%s${CC_RESET}\n" "$text in ${FUNCNAME[1]}" >&2
     _stacktrace "$trap"
     if command -v log >/dev/null; then
         log critical "$text"
@@ -210,14 +214,13 @@ help() {
     # processing
     heading "$(gettext Help): $1"
     info "Usage: $2"
-    echo ""
+    printf '\n'
     if is set -- "$3"; then
         option_help "$3"
-        echo ""
+        printf '\n'
     fi
     if is set -- "$4"; then
-        echo "$4"
-        echo
+        printf '%s\n\n' "$4"
     fi
     exit 0
 }
@@ -248,7 +251,7 @@ critical() {
     local text
     text="$(input "$@")"
     is set -- "$text" || return 0
-    printf "%s\n" "${CC_CRITICAL}$text${CC_RESET}"
+    printf '%s\n' "${CC_CRITICAL}$text${CC_RESET}"
     ((${#_log_active[@]} == 0)) || log critical "$text"
 }
 
@@ -261,7 +264,7 @@ error() {
     local text
     text="$(input "$@")"
     is set -- "$text" || return 0
-    printf "%s\n" "${CC_ERROR}$text${CC_RESET}"
+    printf '%s\n' "${CC_ERROR}$text${CC_RESET}"
     ((${#_log_active[@]} == 0)) || log error "$text"
 }
 
@@ -275,7 +278,7 @@ warn() {
     local text
     text="$(input "$@")"
     is set -- "$text" || return 0
-    printf "%s\n" "${CC_WARN}$text${CC_RESET}"
+    printf '%s\n' "${CC_WARN}$text${CC_RESET}"
     ((${#_log_active[@]} == 0)) || log warn "$text"
 }
 
@@ -289,7 +292,7 @@ notice() {
     local text
     text="$(input "$@")"
     is set -- "$text" || return 0
-    printf "%s\n" "${CC_NOTICE}$text${CC_RESET}"
+    printf '%s\n' "${CC_NOTICE}$text${CC_RESET}"
     ((${#_log_active[@]} == 0)) || log notice "$text"
 }
 
@@ -302,7 +305,7 @@ info() {
     local text
     text="$(input "$@")"
     is set -- "$text" || return 0
-    printf "%s\n" "$text"
+    printf '%s\n' "$text"
     ((${#_log_active[@]} == 0)) || log info "$text"
 }
 
@@ -315,7 +318,7 @@ ok() {
     local text
     text="$(input "$@")"
     is set -- "$text" || return 0
-    echo -e "${CC_OK}$text${CC_RESET}"
+    printf "${CC_OK}%s${CC_RESET}\n" "$text"
     ((${#_log_active[@]} == 0)) || log notice "$text"
 }
 
@@ -328,7 +331,7 @@ invers() {
     local text
     text="$(input "$@")"
     is set -- "$text" || return 0
-    echo -e "${CC_INVERS}$text${CC_RESET}"
+    printf "${CC_INVERS}%s${CC_RESET}\n" "$text"
     ((${#_log_active[@]} == 0)) || log info "$text"
 }
 
@@ -341,7 +344,7 @@ color() {
     local text
     text="$(input_args 1 "$@")"
     is set -- "$text" || return 0
-    echo -e "${CC_ERROR}$text${CC_RESET}"
+    printf "${CC_ERROR}%s${CC_RESET}\n" "$text"
     ((${#_log_active[@]} == 0)) || log info "$text"
 }
 
@@ -423,7 +426,7 @@ horizontal_line() {
     local cols
     read -r _ cols < <(stty size)
     ((cols > 60)) || cols=60
-    character repeat $cols "$char"
+    printf '%s\n' "$(character repeat "$cols" "$char")"
 }
 
 _spinner_pid=""
@@ -478,7 +481,8 @@ spinner_start() {
     esac
     local back=$((size + 1))
     # Spinner function running in background loop
-    printf $CUR_HIDE # make cursor invisible
+    # shellcheck disable=SC2059
+    printf "$CUR_HIDE" # make cursor invisible
     (
         while true; do
             for ((i = 0; i < ${#spinner}; i += chars)); do
@@ -504,37 +508,39 @@ spinner_stop() {
     wait "$_spinner_pid" 2>/dev/null
     _spinner_pid=""
     printf "    \b\b\b\b" # Clear spinner character
-    printf $CUR_SHOW      # make cursor visible again
+    # shellcheck disable=SC2059
+    printf "$CUR_SHOW" # make cursor visible again
 }
 
 # Output Logo with title text
 #
-# You may overwrite this function with one displaying your own logo by loading it from your `extra/mycompany-logo` or so.
+# You may overwrite this function with one displaying your own logo by loading it from your `extra/my-company-logo` or so.
 #
 # Usage:    logo <text>
 # Output:   ASCII art logo including title
+# shellcheck disable=SC2059
 logo() {
-    a=$'\033[36m'                # cyan
-    b=$'\033[33m\033[1m'         # yellow bold
-    c=$'\033[43m\033[30m\033[1m' # yellow bg + black bold
-    r=$'\033[0m'                 # reset
-    u=$'\033[4m'                 # underline
-    p="$(printf '%*s' $((($(tput cols) - 80) / 2)))"
-    t="$(printf '%*s' $((($(tput cols) - ${#1}) / 2)))"
-    echo
-    echo "$p$a                         $b  __   ____     ___"
-    echo "$p$a           ######  ##### $b ▕  ▏ ▕    ╲   ▕   ▏ $a  ########### #####       #####"
-    echo "$p$a          ######## ##### $b ▕  ▏ ▕     ╲  ▕   ▏ $a ############  #####     #####"
-    echo "$p$a         ######### ##### $b ▕  ▏ ▕  ▕╲  ╲ ▕   ▏ $a #####          #####   #####"
-    echo "$p$a        ########## ##### $b ▕  ▏ ▕  ▕ ╲  ╲▕   ▏ $a #####           ##### #####"
-    echo "$p$a       ##### ##### ##### $b ▕  ▏ ▕  ▕  ╲  ▔   ▏ $a ############     #########"
-    echo "$p$a      #####  ##### ##### $b ▕  ▏ ▕  ▕   ╲     ▏ $a ############     #########"
-    echo "$p$a     #####   ##### ##### $b ▕  ▏ ▕  ▕    ╲    ▏ $a #####           ##### #####"
-    echo "$p$a    #####    ##### ##### $b  ▔▔   ▔▔▔     ▔▔▔▔  $a #####          #####   #####"
-    echo "$p$a   ##### ######### ########################### ############  #####     #####"
-    echo "$p$a  ##### ##########  #########################   ########### #####       ##### $r"
-    echo "$p$b▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄$r$c"
-    echo "$t$1$r"
-    echo "$p$b▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀$r"
-    echo
+    a=$'\e[36m'            # cyan
+    b=$'\e[33m\e[1m'       # yellow bold
+    c=$'\e[43m\e[30m\e[1m' # yellow bg + black bold
+    r=$'\e[0m'             # reset
+    u=$'\e[4m'             # underline
+    p="$(character repeat $((($(tput cols) - 80) / 2)) ' ')"
+    t="$(character repeat $((($(tput cols) - ${#1}) / 2)) ' ')"
+    printf '\n'
+    printf "$p$a                         $b  __   ____     ___\n"
+    printf "$p$a           ######  ##### $b ▕  ▏ ▕    ╲   ▕   ▏ $a  ########### #####       #####\n"
+    printf "$p$a          ######## ##### $b ▕  ▏ ▕     ╲  ▕   ▏ $a ############  #####     #####\n"
+    printf "$p$a         ######### ##### $b ▕  ▏ ▕  ▕╲  ╲ ▕   ▏ $a #####          #####   #####\n"
+    printf "$p$a        ########## ##### $b ▕  ▏ ▕  ▕ ╲  ╲▕   ▏ $a #####           ##### #####\n"
+    printf "$p$a       ##### ##### ##### $b ▕  ▏ ▕  ▕  ╲  ▔   ▏ $a ############     #########\n"
+    printf "$p$a      #####  ##### ##### $b ▕  ▏ ▕  ▕   ╲     ▏ $a ############     #########\n"
+    printf "$p$a     #####   ##### ##### $b ▕  ▏ ▕  ▕    ╲    ▏ $a #####           ##### #####\n"
+    printf "$p$a    #####    ##### ##### $b  ▔▔   ▔▔▔     ▔▔▔▔  $a #####          #####   #####\n"
+    printf "$p$a   ##### ######### ######""#####################"" ############  #####     #####\n"
+    printf "$p$a  ##### ##########  #####""#################### ""  ########### #####       ##### $r\n"
+    printf "$p$b▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄""▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄""▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄$r$c\n"
+    printf "$t%s$r\n" "$1"
+    printf "$p$b▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀""▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀""▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀$r\n"
+    printf '\n'
 }

@@ -14,6 +14,7 @@ But on release they will be merged with semantical versioning into the master br
 - add escape sequences and function for cursor management on terminal
 - optimize function documentation
 - move down deprecated methods
+- optimize code echo and escape sequences
 
 ## 22. December 2025 - v2.2.0
 

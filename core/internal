@@ -32,7 +32,7 @@ _deprecated() {
     IFS=$' \t\n' read -r line func file <<<"$(caller 1)"
     local message="DEPRECATED: ${FUNCNAME[1]} at ${func} in ${file}:${line} $1"
     # shellcheck disable=SC2015
-    [ -n "$2" ] && echo -e "${CC_WARN}$message (update it)${CC_RESET}" >&2 || die "$message"
+    [ -n "$2" ] && printf "${CC_WARN}%s${CC_RESET}" "$message (update it)" >&2 || die "$message"
 }
 
 # Display stack trace from called position upwards

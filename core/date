@@ -36,7 +36,7 @@ date_diff() {
     end="${2:-$(now)}"
     is integer -- "$1" && start="$1" || start=$(date -d "$1" +%s) ||
         die "Date format '$1' not parsable!"
-    is integer -- "$end" && end="$end" || end=$(date -d "$end" +%s) ||
+    is integer -- "$end" || end=$(date -d "$end" +%s) ||
         die "Date format '$2' not parsable!"
     # processing
     printf '%s' $((end - start))

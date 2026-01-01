@@ -223,7 +223,7 @@ check() {
         ;;
     *) die "$(eval_gettext 'A check named ${check} is not defined')" ;;
     esac
-    echo "$res"
+    printf '%s' "$res"
 }
 
 # Validate and sanitize values.
@@ -312,7 +312,7 @@ trim_start() {
     local char="${2:-[:space:]}"
     # processing
     # shellcheck disable=SC2295
-    echo "${str#"${str%%[!$char]*}"}"
+    printf '%s' "${str#"${str%%[!$char]*}"}"
 }
 
 # Trim trailing whitespace or given character
@@ -326,7 +326,7 @@ trim_end() {
     local char="${2:-[:space:]}"
     # processing
     # shellcheck disable=SC2295
-    echo "${str%"${str##*[!$char]}"}"
+    printf '%s' "${str%"${str##*[!$char]}"}"
 }
 
 # Trim leading and trailing whitespace or given character
@@ -352,7 +352,7 @@ to_alphanum() {
     local text
     text="$(input "$@")"
     # processing
-    echo "${text//[^a-zA-Z0-9_]/_}"
+    printf '%s' "${text//[^a-zA-Z0-9_]/_}"
 }
 
 # Return the value or if it is a variable name which is not empty return it's value
@@ -365,8 +365,8 @@ value_if_variable() {
     # processing
     if [[ "$_name" =~ ^[a-zA-Z_][a-zA-Z0-9_]*$ ]] &&
         [ -n "${!_name-}" ]; then
-        echo "${!_name}"
+        printf '%s' "${!_name}"
     else
-        echo "$_name"
+        printf '%s' "$_name"
     fi
 }

@@ -78,7 +78,7 @@ trap_remove() {
     debug 3 "remove $remove from $sig"
     current="$(trap -p "$sig" | awk -F"'" '{print $2}')"
     # shellcheck disable=SC2001
-    new="$(echo "$current" | sed "s#;* *$remove##")"
+    new="$(printf '%s' "$current" | sed "s#;* *$remove##")"
     # shellcheck disable=SC2064
     trap "$new" "$sig"
 }
@@ -141,7 +141,7 @@ mktemp() {
             touch "$result"
         fi
     fi
-    echo "$result"
+    printf '%s' "$result"
     is empty -- "$ttl" || (
         _rm_temp "$ttl" "$result" >/dev/null 2>&1 &
         disown
@@ -217,6 +217,7 @@ curl() {
         if [ -e "$file" ]; then
             local val
             val="$(cat "$file")"
+            # shellcheck disable=SC2015
             [[ "$val" =~ ^\{ ]] && jq . <<<"$val" | warn >&2 || warn "$val" >&2
         fi
     fi
@@ -236,7 +237,7 @@ first() {
     local value
     for value in "$@"; do
         if [[ $value ]]; then
-            echo "$value"
+            printf '%s' "$value"
             return 0
         fi
     done
