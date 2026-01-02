@@ -65,7 +65,7 @@ printf '%s\n' "$@"
 fi
 }
 escape_args(){
-printf '%q\n' "$@"
+printf '%q ' "$@"
 }
 contains(){
 _deprecated "use array <array-name> has <value>"

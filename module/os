@@ -147,6 +147,7 @@ os_detect() {
 # Output:   # same as `df` command but colorized
 disk_free() {
     # parameter parsing
+    debug "$*"
     local opt="" free_operator free_percent free_bytes collect
     eval set -- "$(option_parse $'l locale -\nc collect +\nf free +' "$@")"
     while true; do
@@ -179,7 +180,8 @@ disk_free() {
         *) die "$(gettext "Unrecognized option"): $1" ;;
         esac
     done
-    debug "collect into $collect ($free_operator ${free_percent}%/${free_bytes}B)"
+    debug "$*"
+    is empty -- "$collect" || debug "collect into $collect ($free_operator ${free_percent}%/${free_bytes}B)"
     # processing
     local firstLine="" percent mount device limit_c limit_e limit_w limit_o
     IFS=$'\n'
@@ -218,14 +220,16 @@ disk_free() {
                 echo "$line"
             fi
             # collection limit
-            # shellcheck disable=SC1105
-            if [ -n "$free_operator" ]; then
-                if [ -n "$free_percent" ] &&
-                    eval "(( 100 - percent $free_operator free_percent ))"; then
-                    collect+="${mount} "
-                elif [ -n "$free_bytes" ] &&
-                    eval "(( bytes $free_operator free_bytes ))"; then
-                    collect+="${mount} "
+            if is set -- "$collect"; then
+                # shellcheck disable=SC1105
+                if [ -n "$free_operator" ]; then
+                    if [ -n "$free_percent" ] &&
+                        eval "(( 100 - percent $free_operator free_percent ))"; then
+                        collect+="${mount} "
+                    elif [ -n "$free_bytes" ] &&
+                        eval "(( bytes $free_operator free_bytes ))"; then
+                        collect+="${mount} "
+                    fi
                 fi
             fi
         fi

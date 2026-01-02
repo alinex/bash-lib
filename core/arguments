@@ -159,5 +159,5 @@ input_lines() {
 # Usage:    escape_args <arguments>
 # Output:   <args> with backslash escapes
 escape_args() {
-    printf '%q\n' "$@"
+    printf '%q ' "$@"
 }
