@@ -29,12 +29,11 @@ while true; do
 done
 ################################################################################################
 
-printf "Line 1\nLine 2$(cursor up 2)B\n"
+#QUEUE_MAX_NUM=1
+trivy_test /tmp/_test_1474058_trivy
 exit
 
-#trivy files /home/alex/dvb/divibib-search-api
-#QUEUE_MAX_NUM=1
-trivy_test /tmp/_test_816357_trivy
+trivy files /home/alex/dvb/divibib-search-api
 exit
 
 task1() { echo "task1"; }

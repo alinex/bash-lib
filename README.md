@@ -1,6 +1,37 @@
 # BASH-LIB Generation 2
 
-This is the updated version of my personal library used to easily write powerful bash scripts which may work locally, partly remote or completely remote interactive or automatic.
+This is my personal library used to easily write powerful bash scripts which may work locally, partly remote or completely remote interactive or automatic.
+It brings powerful functions, makes your code easier readable and helps finding problems...
+
+I use it privately and at work for:
+
+- monitoring and server comparison
+- changing servers like upgrades, enlarge disks, fix or install complex software
+- updates which are partly manual
+- security analysis using trivy
+- and other common tasks
+
+If you already use it jump directly to the [module description](https://gitlab.com/alinex/bash-lib/-/blob/master/doc/README.md).
+
+## Table of Contents
+
+- [BASH-LIB Generation 2](#bash-lib-generation-2)
+  - [Table of Contents](#table-of-contents)
+  - [Changes to Generation 1](#changes-to-generation-1)
+  - [Distributions](#distributions)
+  - [Architecture](#architecture)
+    - [Quality](#quality)
+    - [Error handling](#error-handling)
+    - [Version control](#version-control)
+  - [Installation](#installation)
+    - [Switch Version](#switch-version)
+  - [Usage](#usage)
+  - [Configuration](#configuration)
+    - [Environment](#environment)
+  - [Latest Changes](#latest-changes)
+  - [Contributing](#contributing)
+
+## Changes to Generation 1
 
 Version 2 is a complete rework of the library meaning it is another toolset and you could not upgrade to it.
 Some functionalities from the older version will no longer be available like logging while a lot of new possibilities are included.
@@ -21,25 +52,6 @@ The downside against Version 1 may be:
 - no backward compatibility - everything is new
 - no automatic conversion from the older versions
 - needs bash v4.2 (February 2011)
-
-If you already use it jump directly to the [module description](https://gitlab.com/alinex/bash-lib/-/blob/master/doc/README.md).
-
-## Table of Contents
-
-- [BASH-LIB Generation 2](#bash-lib-generation-2)
-  - [Table of Contents](#table-of-contents)
-  - [Distributions](#distributions)
-  - [Architecture](#architecture)
-    - [Quality](#quality)
-    - [Error handling](#error-handling)
-    - [Version control](#version-control)
-  - [Installation](#installation)
-    - [Switch Version](#switch-version)
-  - [Usage](#usage)
-  - [Configuration](#configuration)
-    - [Environment](#environment)
-  - [Latest Changes](#latest-changes)
-  - [Contributing](#contributing)
 
 ## Distributions
 
