@@ -42,11 +42,11 @@ os_detect() {
         # get values
         _os_detected["os"]="$(
             case "$(uname -s)" in
-            "Darwin") echo MacOS ;;
-            "SunOS") echo Solaris ;;
-            "GNU"*) echo Linux ;;
-            *"BSD" | "DragonFly" | "Bitrig") echo BSD ;;
-            "CYGWIN"* | "MSYS"* | "MINGW"*) echo Windows ;;
+            "Darwin") printf MacOS ;;
+            "SunOS") printf Solaris ;;
+            "GNU"*) printf Linux ;;
+            *"BSD" | "DragonFly" | "Bitrig") printf BSD ;;
+            "CYGWIN"* | "MSYS"* | "MINGW"*) printf Windows ;;
             *) uname -s ;;
             esac
         )"
@@ -106,27 +106,27 @@ os_detect() {
             esac
         )"
         _os_detected["machine_id"]="$(cat /etc/machine-id /var/lib/dbus/machine-id /var/db/dbus/machine-id /sys/class/dmi/id/board_serial 2>/dev/null | head -n 1 || true)"
-        _os_detected["virtual_machine"]="$(grep -q '^flags.* hypervisor' /proc/cpuinfo && echo true || echo false)"
+        _os_detected["virtual_machine"]="$(grep -q '^flags.* hypervisor' /proc/cpuinfo && printf true || printf false)"
         for key in "${!_os_detected[@]}"; do
-            echo -e "$key=${_os_detected[$key]}"
+            printf '%s=%s' "$key" "${_os_detected[$key]}"
         done | debug
     fi
     # make output
     case ${1-} in
     data)
         for key in "${!_os_detected[@]}"; do
-            echo -e "$key\t${_os_detected[$key]}"
+            printf '%s\n' "$key\t${_os_detected[$key]}"
         done
         ;;
     info)
-        echo -n "${_os_detected[os]} system with kernel ${_os_detected[kernel]} on ${_os_detected[architecture]} (${_os_detected[cpu_num]}x ${_os_detected[cpu_model]})"
-        [ "${_os_detected["virtual_machine"]}" = "true" ] && echo "virtual machine" || echo
-        echo "${_os_detected[distribution]} version ${_os_detected[revision_number]} (${_os_detected[revision_name]})"
+        printf '%s' "${_os_detected[os]} system with kernel ${_os_detected[kernel]} on ${_os_detected[architecture]} (${_os_detected[cpu_num]}x ${_os_detected[cpu_model]})"
+        [ "${_os_detected["virtual_machine"]}" = "true" ] && printf 'virtual machine\n' || printf '\n'
+        printf '%s\n' "${_os_detected[distribution]} version ${_os_detected[revision_number]} (${_os_detected[revision_name]})"
         if [ -n "${_os_detected[base_revision_number]}" ] && [ ! "${_os_detected[revision_number]}" = "${_os_detected[base_revision_number]}" ]; then
-            echo "Based on ${_os_detected[base]} version ${_os_detected[base_revision_number]} (${_os_detected[base_revision_name]})"
+            printf '%s\n' "Based on ${_os_detected[base]} version ${_os_detected[base_revision_number]} (${_os_detected[base_revision_name]})"
         fi
         ;;
-    *) echo "${_os_detected["$1"]}" ;;
+    *) printf '%s\n' "${_os_detected["$1"]}" ;;
     esac
 }
 
@@ -189,7 +189,7 @@ disk_free() {
     for line in $(df -h $opt -x tmpfs -x efivarfs -x devtmpfs -x squashfs "$@"); do
         if [ -z "$firstLine" ]; then
             firstLine=1
-            echo -e "${CC_INVERSE}$line${CC_RESET}"
+            printf "${CC_INVERSE}%s${CC_RESET}\n" "$line"
         else
             percent=$(echo "$line" | xargs echo | cut -d' ' -f5 | sed 's/%//')
             bytes=$(echo "$line" | xargs echo | cut -d' ' -f4)
@@ -217,7 +217,7 @@ disk_free() {
             elif ((percent == limit_o)); then
                 ok "$line"
             else
-                echo "$line"
+                printf '%s\n' "$line"
             fi
             # collection limit
             if is set -- "$collect"; then

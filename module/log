@@ -91,7 +91,7 @@ log() {
                 path+="_$(date_format "$rotate")"
             fi
             # log entry
-            echo "$(date_format sql) ${1^^} $(uncolorize "$text")" >>"$path"
+            printf '%s %s %s\n' "$(date_format sql)" "${1^^}" "$(uncolorize "$text")" >>"$path"
         done
         ;;
     *) die "Unrecognized command $1: start, stop or any log level allowed" ;;

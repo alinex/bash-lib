@@ -122,7 +122,7 @@ tsv() {
             ((${#orig} <= width)) || line[idx]="${orig:0:width-1}…"
             (
                 IFS="$separator"
-                echo "${line[*]}"
+                printf '%s\n' "${line[*]}"
             )
         done <<<"$input"
         ;;
@@ -137,7 +137,7 @@ tsv() {
         # sort
         (
             IFS="$separator"
-            echo "${cols[*]}"
+            printf '%s\n' "${cols[*]}"
         )
         tail -n +2 <<<"$input" | sort -t $'\t' "-k${col},${col}${type}"
         ;;

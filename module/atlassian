@@ -149,7 +149,7 @@ jira() {
       local val
       val="$(jq -c ".fields.$field" <<<"$json")"
       [ ! "$val" = null ] || val=""
-      [[ "$2" == "md" && "$val" =~ ^\{ ]] && jira adf_to_md "$val" || echo "$val"
+      [[ "$2" == "md" && "$val" =~ ^\{ ]] && jira adf_to_md "$val" || printf '%s' "$val"
       ;;
     remove) printf -v "$var" '%s' "$(jq -c "del(.fields.$field)" <<<"$json")" ;;
     esac
@@ -316,16 +316,16 @@ _jira() {
     res="$(curl --store $$ --request "$METHOD" --url "$JIRA_HOST/$api/$REST" --user "$ATLASSIAN_USER:$ATLASSIAN_TOKEN" --data "$DATA" -H "Content-Type: application/json")" || rc=$?
     variables restore --clean $$
     if ((rc == 0)); then
-      echo "$res"
+      printf '%s' "$res"
       return
     else
       # error code handling without retry
       case $CURL_HTTP_CODE in
-      400 | 404) (echo -n "HTTP Code $CURL_HTTP_CODE: " && jq .errorMessages[] -r <<<"$res" || echo "$res") | die ;;
+      400 | 404) (printf "HTTP Code $CURL_HTTP_CODE: " && jq .errorMessages[] -r <<<"$res" || printf '%s' "$res") | die ;;
       esac
     fi
     ((num++)) || true
     sleep $(((num + 1) ** 2))
   done
-  (echo -n "HTTP Code $CURL_HTTP_CODE: " && jq .errorMessages[] -r <<<"$res" || echo "$res") | die
+  (printf "HTTP Code $CURL_HTTP_CODE: " && jq .errorMessages[] -r <<<"$res" || printf '%s' "$res") | die
 }

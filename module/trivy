@@ -160,7 +160,7 @@ trivy() {
         fi
     done
     # Output folder
-    echo "$work"
+    printf '%s' "$work"
 }
 trivy_test() {
     work="$1"
@@ -331,7 +331,7 @@ _trivy_report() {
             fi
             # update sources
             old="$(jira json jira get "${_trivy_jira[field_sources]}" md)"
-            new="$(echo -e "$old\n$(date +%Y-%m) > $sourceLine" | sed -n '/>/p' | sort -t'>' -r -k2,1 | sort -t'>' -u -r -k2)"
+            new="$(printf '%s' "$old\n$(date +%Y-%m) > $sourceLine" | sed -n '/>/p' | sort -t'>' -r -k2,1 | sort -t'>' -u -r -k2)"
             if [[ "$new" != "$old" ]]; then
                 jira json fields set ${_trivy_jira[field_sources]} adf "$new"
                 update=1
@@ -360,7 +360,7 @@ _trivy_report() {
             # update labels
             local labels addLabel=()
             labels="$(jq '.fields.labels[]' -r <<<"$jira")"
-            for label in $(echo "$source" | sed 's#.*ekz.de/##;s#/-/.*##;s#[/.]# #g'); do
+            for label in $(sed 's#.*ekz.de/##;s#/-/.*##;s#[/.]# #g' <<<"$source"); do
                 [[ ! "$labels" =~ $label ]] || continue
                 addLabel+=('{"add": "'$label'"}')
             done
@@ -385,7 +385,7 @@ _trivy_report() {
     severity="$(jq .Severity -r <<<"$json")"
     local folder="$work/${severity,,}/$type/$id"
     mkdir -p "$folder"
-    echo "$json" >"$folder/data.json"
+    printf '%s\n' "$json" >"$folder/data.json"
     # get more information for reports
     local exploitDate exploitVendor exploitProduct issue key approval lastComment
     exploitDate="$(jq .Exploited.dateAdded -r <<<"$json")"
@@ -404,15 +404,15 @@ _trivy_report() {
         MEDIUM) printf "$CC_WARN" >"$file" ;;
         *) printf "" >"$file" ;;
         esac
-        echo "================================================================================" >>"$file"
-        echo "$severity $id $title" >>"$file"
-        echo "--------------------------------------------------------------------------------" >>"$file"
-        echo "$description" >>"$file"
-        echo "    " >>"$file"
-        echo "Rating: $severity (CVSS Rating ${cvss:--})" >>"$file"
-        echo "Status: Gefixt ab Version ${fixed:--} $fixStatus" >>"$file"
-        echo "Datum:  Sicherheitslücke bekannt seit $(date_format human-date "$date") (vor $(duration_format days "$(date_diff "$date")") Tagen)" >>"$file"
-        echo "    " >>"$file"
+        printf '%s\n' "================================================================================" >>"$file"
+        printf '%s\n' "$severity $id $title" >>"$file"
+        printf '%s\n' "--------------------------------------------------------------------------------" >>"$file"
+        printf '%s\n' "$description" >>"$file"
+        printf '%s\n' "    " >>"$file"
+        printf '%s\n' "Rating: $severity (CVSS Rating ${cvss:--})" >>"$file"
+        printf '%s\n' "Status: Gefixt ab Version ${fixed:--} $fixStatus" >>"$file"
+        printf '%s\n' "Datum:  Sicherheitslücke bekannt seit $(date_format human-date "$date") (vor $(duration_format days "$(date_diff "$date")") Tagen)" >>"$file"
+        printf '%s\n' "    " >>"$file"
         is empty -- "$exploitDate" || printf "Exploit bekannt seit $exploitDate bei $exploitVendor $exploitProduct\n\n" >>"$file"
         if is set -- "$issue"; then
             printf "Jira Ticket: https://ekz-gruppe.atlassian.net/browse/$issue\n" >>"$file"
@@ -420,13 +420,13 @@ _trivy_report() {
             printf "             Deploy: ${approval:-Undefiniert}\n" >>"$file"
             printf "Letzte Kommentare:\n$(join comments $'\n' | sed 's/^/             /')" >>"$file"
         fi
-        echo "Sources:" >>"$file"
+        printf 'Sources:\n' >>"$file"
     fi
     file="$folder/sources.txt"
-    echo "- $sourceLine" >>"$file"
+    printf '%s\n' "- $sourceLine" >>"$file"
     file="$folder/footer.txt"
     if ! is file -- "$file"; then
-        echo "Links:\n$links" >>"$file"
+        printf '%s\n' "Links:\n$links" >>"$file"
         printf "$CC_RESET"
     fi
     # create tsv line
@@ -445,6 +445,6 @@ _trivy_report() {
         CRITICAL) value=1000 ;;
         *) value=0 ;;
         esac
-        echo "divibib_trivy_vulnerability{type=\"$type\",target=\"$target\",package=\"$pkgPath\",severity=\"$severity\",cve=\"$id\"} $value" >>"$file"
+        printf '%s\n' "divibib_trivy_vulnerability{type=\"$type\",target=\"$target\",package=\"$pkgPath\",severity=\"$severity\",cve=\"$id\"} $value" >>"$file"
     fi
 }

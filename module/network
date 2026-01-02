@@ -22,7 +22,7 @@ ip_intern() {
     install ip
     case ${1-} in
     data)
-        echo -e "$(gettext "IP\tInterface")"
+        printf '%s\n' "$(gettext "IP\tInterface")"
         ip -o addr show | awk 'BEGIN { OFS="\t" } $2 != "lo" {print $4, $2}'
         ;;
     *) ip route get 1 | awk '{print $7; exit}' ;;
@@ -57,7 +57,7 @@ ip_pattern() {
     # find pattern
     for ((i = 0; i < ${#lookup[@]}; i += 2)); do
         if [[ "$ip" =~ ${lookup[i]} ]]; then
-            echo "${lookup[i + 1]}"
+            printf '%s\n' "${lookup[i + 1]}"
             return 0
         fi
         debug 7 "$ip =~ ${lookup[i]} => false"

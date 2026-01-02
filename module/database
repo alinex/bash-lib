@@ -53,5 +53,5 @@ mongo() {
 
 # Run command on Postgres
 postgres() {
-    echo "TODO"
+    printf '%s' "TODO"
 }

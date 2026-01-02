@@ -109,7 +109,7 @@ lock() {
     local lockfile logged pid
     lockfile="$(mktemp 'lockfile')"
     # make a file with our PID
-    echo $$ >"$lockfile.$$" 2>/dev/null || die "$(gettext "Failed to create PID lockfile"): $lockfile.$$"
+    printf $$ >"$lockfile.$$" 2>/dev/null || die "$(gettext "Failed to create PID lockfile"): $lockfile.$$"
     # remove old lock if no longer running
     _lock_remove
     # try it, till it works
@@ -117,13 +117,13 @@ lock() {
     while ! ln "$lockfile.$$" "$lockfile" 2>/dev/null; do
         if ((logged == 0)); then # write message once
             pid="$(cat "$lockfile")"
-            echo "$(eval_gettext "Waiting for unlock in \$lockfile by PID \$pid")..." >&1
+            printf '%s\n' "$(eval_gettext "Waiting for unlock in \$lockfile by PID \$pid")..." >&1
             logged=1
         fi
         # if the symlink failed, wait for the current lock holder to exit
         sleep "$LOCK_SLEEP"
         # make a file with our PID, if no longer existent
-        echo $$ >"$lockfile.$$" 2>/dev/null
+        printf $$ >"$lockfile.$$" 2>/dev/null
         # check again for zombies
         _lock_remove
     done
@@ -143,7 +143,7 @@ lock_exit() {
     local lockfile logged pid
     lockfile="$(mktemp 'lockfile')"
     # make a file with our PID
-    echo $$ >"$lockfile.$$" 2>/dev/null || die "$(gettext "Failed to create PID lockfile"): $lockfile.$$"
+    printf $$ >"$lockfile.$$" 2>/dev/null || die "$(gettext "Failed to create PID lockfile"): $lockfile.$$"
     # move old lock if no longer running
     _lock_remove
     # try to symlink it
@@ -307,7 +307,7 @@ steps_init() {
     variables restore steps
     declare -p _STEPS
     variables store steps _STEPS "$STEPS_VARIABLES" # initial store
-    echo "$(gettext "Work steps are logged so that you can resume work mid-process")..." >&2
+    printf '%s\n' "$(gettext "Work steps are logged so that you can resume work mid-process")..." >&2
 }
 
 # Check if step already finished successful
@@ -322,7 +322,7 @@ steps_check() {
     declare -p _STEPS 2>/dev/null | grep -q 'declare -A' || return 1 # return not found if no step control
     if [ -n "${_STEPS["$name"]}" ]; then
         # shellcheck disable=SC2005
-        echo "$(eval_gettext "Job \$name already done in this run, skipping")" >&2
+        printf '%s\n' "$(eval_gettext "Job \$name already done in this run, skipping")" >&2
         return 0
     else
         return 1
@@ -344,7 +344,7 @@ steps_done() {
         # shellcheck disable=SC2155
         local date="$(date_format sql)"
         # shellcheck disable=SC2005
-        echo "$(eval_gettext "Finished: Step \$name at \$date")" >&2
+        printf '%s\n' "$(eval_gettext "Finished: Step \$name at \$date")" >&2
         variables store steps _STEPS "$STEPS_VARIABLES"
     else
         variables clean steps
@@ -377,7 +377,7 @@ sync_name() {
     # shellcheck disable=SC2034
     date="$(date_format sql)"
     # shellcheck disable=SC2005
-    declare -p _STEPS 2>/dev/null | grep -q 'declare -A' && echo "$(eval_gettext "Started: step \$name at \$date")" >&2 || true
+    declare -p _STEPS 2>/dev/null | grep -q 'declare -A' && printf '%s\n' "$(eval_gettext "Started: step \$name at \$date")" >&2 || true
     "$@"
     steps_done "$name"
 }
@@ -411,7 +411,7 @@ async_name() {
     shift
     # processing
     ! steps_check "$name" || return
-    declare -p _STEPS 2>/dev/null | grep -q 'declare -A' && echo "Started: step $name at $(date_format sql)" >&2 || true
+    declare -p _STEPS 2>/dev/null | grep -q 'declare -A' && printf '%s\n' "Started: step $name at $(date_format sql)" >&2 || true
     "$@" &
     variables change queue "_async_running[\"$name\"]=$!" _queue _async_running
 }
@@ -428,7 +428,7 @@ async_wait() {
         steps_done "$1"
         variables change queue "unset async_running[\"$1\"]" _queue _async_running
     else
-        declare -p _STEPS 2>/dev/null | grep -q 'declare -A' && echo echo "Failed: Step $1 at $(date_format sql)" >&2 || true
+        declare -p _STEPS 2>/dev/null | grep -q 'declare -A' && printf '%s\n' "Failed: Step $1 at $(date_format sql)" >&2 || true
     fi
     return "$code"
 }
@@ -548,5 +548,5 @@ random() {
     while ((${#result} < length)); do
         result+="$(head /dev/urandom | tr -dc "$pattern")"
     done
-    echo "${result:0:$length}"
+    printf '%s' "${result:0:$length}"
 }

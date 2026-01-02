@@ -18,10 +18,10 @@ _module_resolve() {
     local init=1 module line
     for module in "${modules[@]}"; do
         [[ "$module" =~ ^(full|base|.*/.*)$ ]] || module="module/$module"
-        [ -n "$init" ] && init= || echo -n ,
-        echo -n "$module"
+        [ -n "$init" ] && init= || printf ,
+        printf '%s' "$module"
         while read -r line; do
-            echo -n ",$(_module_resolve "$line")"
+            printf '%s' ",$(_module_resolve "$line")"
         done < <(grep '^use ' "$BASHLIB_HOME/$module" | sed 's/^use //' || true)
     done
 }
@@ -103,9 +103,9 @@ remote() {
         local pattern='^#!/usr/bin/env'" bash|source "'/dev/null'
         # shellcheck disable=SC2086
         (
-            echo "#!/usr/bin/env" bash
-            echo "DEBUG=${DEBUG:-}"
-            echo "BASHLIB_LOADER=remote"
+            printf '%s\n' "#!/usr/bin/env bash"
+            printf '%s\n' "DEBUG=${DEBUG:-}"
+            printf '%s\n' "BASHLIB_LOADER=remote"
             # load base
             if [[ "${modules[0]}" =~ ^(full|base)$ ]]; then
                 grep -Ev "$pattern" "$BASHLIB_HOME/${modules[0]}"
@@ -336,10 +336,10 @@ boot_wait() {
     is integer --name=arguments --max=0 --die -- $#
     # processing
     local uptime seconds=15
-    echo -ne "Warten bis der Reboot fertig ist" >&2
+    printf '%s' "$(gettext 'Wait till reboot is done')" >&2
     sleep "$seconds"
     while true; do
-        [ -n "$quiet" ] || echo -ne "\r$(eval_gettext "Wait until the reboot is complete (\$seconds seconds)")" >&2
+        [ -n "$quiet" ] || printf '%s' "\r$(eval_gettext "Wait until the reboot is complete (\$seconds seconds)")" >&2
         uptime=$(remote cut -d"' '" -f1 /proc/uptime 2>/dev/null | sed 's/[ .].*//')
         if ((uptime > 0 && uptime < 300)); then
             break
@@ -349,5 +349,5 @@ boot_wait() {
         fi
     done
     [ -n "$quiet" ] || remote uptime --since
-    [ -n "$quiet" ] || echo ""
+    [ -n "$quiet" ] || printf '\n'
 }

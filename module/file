@@ -22,7 +22,7 @@ basename() {
     local path
     path="$(input "$@")"
     path="${path%/}"
-    echo "${path##*/}"
+    printf '%s' "${path##*/}"
 }
 
 # Strip last component from file path
@@ -38,10 +38,10 @@ dirname() {
     # processing
     local path
     path="$(input "$@")"
-    [[ $path == '/' ]] && echo '/' && return 0
-    [[ $path =~ ^'../' ]] && echo '.' && return 0
-    [[ ! $path =~ / ]] && echo '.' && return 0
-    echo "${path%/*}"
+    [[ $path == '/' ]] && printf '/' && return 0
+    [[ $path =~ ^'../' ]] && printf '.' && return 0
+    [[ ! $path =~ / ]] && printf '.' && return 0
+    printf '%s' "${path%/*}"
 }
 
 # Returns the extension of the path
@@ -56,9 +56,8 @@ extname() {
     # processing
     local path
     path="$(input "$@")"
-    [[ $path =~ ^\. ]] && echo '' && return
-    [[ ! $path =~ \. ]] && echo '' && return
-    echo ".${path##*.}"
+    [[ $path =~ ^\. || ! $path =~ \. ]] && return
+    printf '%s' ".${path##*.}"
 }
 
 # Get the path from the called command

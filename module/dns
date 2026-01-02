@@ -32,7 +32,7 @@ source /dev/null
 dns_list() {
     is integer --name=arguments --max=1 --die -- $#
     # processing
-    echo $'NAME\tTYPE\tCONTENT\tTTL'
+    printf '%s\n' "$(gettext 'NAME\tTYPE\tCONTENT\tTTL')"
     powerdns "$1" | tail -n +2 || true
     plusserver_dns "$1" | tail -n +2 || true
 }
@@ -56,7 +56,7 @@ powerdns() {
         debug "Disabled because POWERDNS_API and POWERDNS_TOKEN are not both set"
         return 0
     fi
-    echo $'NAME\tTYPE\tCONTENT\tTTL'
+    printf '%s\n' "$(gettext 'NAME\tTYPE\tCONTENT\tTTL')"
     curl -s -H "X-API-Key:$POWERDNS_TOKEN" "$POWERDNS_API/servers/localhost/search-data?q=*&max=10000" |
         jq -r '.[] | select(.object_type == "record" and .disabled == false) | [(.name | sub("\\.$"; "")), .type, (.content | sub("\\.$"; "")), .ttl] | @tsv' |
         grep -E "$1"
@@ -90,9 +90,8 @@ plusserver_dns() {
     # shellcheck disable=SC2012
     time="$(ls -lt ~/Downloads/csv_list*.csv | head -1 | cut -d' ' -f 6-8)"
     warn "$(eval_gettext "To update \$PLUSSERVER_PORTAL/services/nameservers -> download CSV (manually).")" >&2
-    test -n "$list" || die "Keine lokale DNS Liste gefunden, bitte herunterladen."
-    echo "Benutze $list vom $time." >&2
-    echo "" >&2
+    test -n "$list" || die "$(gettext 'No local DNS list found, please download it.')"
+    printf '%s\n\n' "$(eval_gettext 'Use $list from $time.')" >&2
     # reformat csv -> tsv
     # shellcheck disable=SC1010
     mlr --icsv --ifs ';' --otsv \
