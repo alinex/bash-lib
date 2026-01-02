@@ -109,6 +109,7 @@ lock() {
     local lockfile logged pid
     lockfile="$(mktemp 'lockfile')"
     # make a file with our PID
+    # shellcheck disable=SC2059
     printf $$ >"$lockfile.$$" 2>/dev/null || die "$(gettext "Failed to create PID lockfile"): $lockfile.$$"
     # remove old lock if no longer running
     _lock_remove
@@ -123,6 +124,7 @@ lock() {
         # if the symlink failed, wait for the current lock holder to exit
         sleep "$LOCK_SLEEP"
         # make a file with our PID, if no longer existent
+        # shellcheck disable=SC2059
         printf $$ >"$lockfile.$$" 2>/dev/null
         # check again for zombies
         _lock_remove
@@ -143,6 +145,7 @@ lock_exit() {
     local lockfile logged pid
     lockfile="$(mktemp 'lockfile')"
     # make a file with our PID
+    # shellcheck disable=SC2059
     printf $$ >"$lockfile.$$" 2>/dev/null || die "$(gettext "Failed to create PID lockfile"): $lockfile.$$"
     # move old lock if no longer running
     _lock_remove

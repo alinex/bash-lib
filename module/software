@@ -19,7 +19,7 @@ _repo_debian_trivy() {
 _repo_redhat_epel() {
     is set -- "$major" || major="$(grep ^VERSION_ID /etc/os-release | sed 's/.*="//;s/\..*//')"
     if ! dnf repolist | grep -q epel; then
-        dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-${major}.noarch.rpm
+        dnf install -y "https://dl.fedoraproject.org/pub/epel/epel-release-latest-${major}.noarch.rpm"
     fi
 }
 # manual installs
@@ -269,7 +269,7 @@ semver_diff() {
     # output
     local step
     if [ -n "$human" ]; then
-        printf "$1 -> $2 "
+        printf '%s' "$1 -> $2 "
         if ((num == 0)); then
             gettext "are identical versions"
             printf '\n'

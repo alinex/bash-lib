@@ -284,17 +284,17 @@ mattermost_attachment() {
             json="$(jq --arg i "$color" '. + {color: $i}' <<<"$json")"
             shift 2
             ;;
-        --text) json="$(jq --arg i "$2" '. + {text: $i}') <<<"$json"" && shift 2 ;;
-        --author) json="$(jq --arg i "$2" '. + {author_name: $i}') <<<"$json"" && shift 2 ;;
-        --avatar) json="$(jq --arg i "$2" '. + {author_icon: $i}') <<<"$json"" && shift 2 ;;
-        --home) json="$(jq --arg i "$2" '. + {author_link: $i}') <<<"$json"" && shift 2 ;;
-        --title) json="$(jq --arg i "$2" '. + {title: $i}') <<<"$json"" && shift 2 ;;
-        --link) json="$(jq --arg i "$2" '. + {title_link: $i}') <<<"$json"" && shift 2 ;;
-        --image) json="$(jq --arg i "$2" '. + {image_url: $i}') <<<"$json"" && shift 2 ;;
-        --thumb) json="$(jq --arg i "$2" '. + {thumb_url: $i}') <<<"$json"" && shift 2 ;;
+        --text) json="$(jq --arg i "$2" '. + {text: $i}' <<<"$json")" && shift 2 ;;
+        --author) json="$(jq --arg i "$2" '. + {author_name: $i}' <<<"$json")" && shift 2 ;;
+        --avatar) json="$(jq --arg i "$2" '. + {author_icon: $i}' <<<"$json")" && shift 2 ;;
+        --home) json="$(jq --arg i "$2" '. + {author_link: $i}' <<<"$json")" && shift 2 ;;
+        --title) json="$(jq --arg i "$2" '. + {title: $i}' <<<"$json")" && shift 2 ;;
+        --link) json="$(jq --arg i "$2" '. + {title_link: $i}' <<<"$json")" && shift 2 ;;
+        --image) json="$(jq --arg i "$2" '. + {image_url: $i}' <<<"$json")" && shift 2 ;;
+        --thumb) json="$(jq --arg i "$2" '. + {thumb_url: $i}' <<<"$json")" && shift 2 ;;
         --fields) fields="$2" && shift 2 ;;
-        --footer) json="$(jq --arg i "$2" '. + {footer: $i}') <<<"$json"" && shift 2 ;;
-        --logo) json="$(jq --arg i "$2" '. + {footer_image: $i}') <<<"$json"" && shift 2 ;;
+        --footer) json="$(jq --arg i "$2" '. + {footer: $i}' <<<"$json")" && shift 2 ;;
+        --logo) json="$(jq --arg i "$2" '. + {footer_image: $i}' <<<"$json")" && shift 2 ;;
         --) shift && break ;;
         *) die "$(gettext "Unrecognized option"): $1" ;;
         esac
@@ -302,7 +302,7 @@ mattermost_attachment() {
     # adding fields to json
     if [ -n "$fields" ]; then
         [[ "$fields" == \[* ]] || fields="[$fields]"
-        json="$(jq ". + {fields: $fields}") <<<"$json""
+        json="$(jq ". + {fields: $fields}" <<<"$json")"
     fi
     printf '%s' "$json"
 }

@@ -88,6 +88,7 @@ plusserver_dns() {
     # shellcheck disable=SC2012
     list="$(ls -lt ~/Downloads/csv_list*.csv | head -1 | cut -d' ' -f 9-)"
     # shellcheck disable=SC2012
+    # shellcheck disable=SC2034
     time="$(ls -lt ~/Downloads/csv_list*.csv | head -1 | cut -d' ' -f 6-8)"
     warn "$(eval_gettext "To update \$PLUSSERVER_PORTAL/services/nameservers -> download CSV (manually).")" >&2
     test -n "$list" || die "$(gettext 'No local DNS list found, please download it.')"

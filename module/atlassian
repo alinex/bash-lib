@@ -103,7 +103,7 @@ jira() {
     is set --name=issueId-or-key --die -- "$1"
     is set --name=json --die -- "$2"
     debug "UPDATE issue $1"
-    _jira PUT issue/$1 "$2" >/dev/null
+    _jira PUT "issue/$1" "$2" >/dev/null
     ;;
   delete)
     is set --name=arguments --max=1 --die -- $#
@@ -132,7 +132,7 @@ jira() {
     case "$subCommand" in
     set)
       if [ -z "$2" ] || [[ "$2" =~ ^adf$|^json$ && -z "$3" ]]; then
-        jira json $var remove $field
+        jira json "$var" remove "$field"
       elif [ "$2" = "json" ] && [ -n "$3" ]; then
         printf -v "$var" '%s' "$(jq -c --argjson v "$3" ".fields.$field = \$v" <<<"$json")"
       elif [ "$2" = "adf" ] && [ -n "$3" ]; then
@@ -218,7 +218,7 @@ jira() {
 
     ($text | split("\n")) as $lines
     | reduce $lines[] as $line (
-        { out: [], mode: null, buf: [], pbuf: [] };
+        { out: [], mode: null, buf: [], pBuf: [] };
 
         # empty line → flush paragraph or list
         if $line == "" then
@@ -228,17 +228,17 @@ jira() {
           elif .mode == "ol" then
             .out += [ ordered(.buf) ]
             | .buf = [] | .mode = null
-          elif (.pbuf | length) > 0 then
-            .out += [ paragraph(.pbuf | join("\n")) ]
-            | .pbuf = []
+          elif (.pBuf | length) > 0 then
+            .out += [ paragraph(.pBuf | join("\n")) ]
+            | .pBuf = []
           else .
           end
 
         # bullet list
         elif ($line | startswith("- ")) then
-          if (.pbuf | length) > 0 then
-            .out += [ paragraph(.pbuf | join("\n")) ]
-            | .pbuf = []
+          if (.pBuf | length) > 0 then
+            .out += [ paragraph(.pBuf | join("\n")) ]
+            | .pBuf = []
           else .
           end
           | if .mode == "ul" then
@@ -253,9 +253,9 @@ jira() {
 
         # ordered list
         elif ($line | test("^[0-9]+\\. ")) then
-          if (.pbuf | length) > 0 then
-            .out += [ paragraph(.pbuf | join("\n")) ]
-            | .pbuf = []
+          if (.pBuf | length) > 0 then
+            .out += [ paragraph(.pBuf | join("\n")) ]
+            | .pBuf = []
           else .
           end
           | if .mode == "ol" then
@@ -278,7 +278,7 @@ jira() {
             | .buf = [] | .mode = null
           else .
           end
-          | .pbuf += [ $line ]
+          | .pBuf += [ $line ]
         end
       )
     # flush leftovers
@@ -287,7 +287,7 @@ jira() {
         + (if .mode == "ul" then [ bullet(.buf) ]
            elif .mode == "ol" then [ ordered(.buf) ]
            else [] end)
-        + (if (.pbuf | length) > 0 then [ paragraph(.pbuf | join("\n")) ]
+        + (if (.pBuf | length) > 0 then [ paragraph(.pBuf | join("\n")) ]
            else [] end)
       )
     | {
@@ -320,6 +320,7 @@ _jira() {
       return
     else
       # error code handling without retry
+      # shellcheck disable=SC2059
       case $CURL_HTTP_CODE in
       400 | 404) (printf "HTTP Code $CURL_HTTP_CODE: " && jq .errorMessages[] -r <<<"$res" || printf '%s' "$res") | die ;;
       esac
@@ -327,5 +328,6 @@ _jira() {
     ((num++)) || true
     sleep $(((num + 1) ** 2))
   done
+  # shellcheck disable=SC2059
   (printf "HTTP Code $CURL_HTTP_CODE: " && jq .errorMessages[] -r <<<"$res" || printf '%s' "$res") | die
 }
