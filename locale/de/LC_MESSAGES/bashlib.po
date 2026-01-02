@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-02 08:07+0100\n"
+"POT-Creation-Date: 2026-01-02 14:24+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -174,7 +174,12 @@ msgid "\"$name\" is set to \"${val}\" but has to be one of: $allow"
 msgstr ""
 "\"$name\" enthält \"${val}\" es sind aber nur folgende Werte erlaubt: $allow"
 
-#: core/validator:196
+#: core/validator:195
+#, fuzzy, sh-format
+msgid "The \"$name\" has to be a parsable date format but »${val}« was given"
+msgstr "\"$name\" muss eine Fließkommazahl sein aber »${val}« wurde angegeben"
+
+#: core/validator:201
 #, sh-format
 msgid ""
 "The \"$name\" has to be an integer or human duration but »${val}« was given"
@@ -182,32 +187,32 @@ msgstr ""
 "\"$name\" muss eine Zahl oder eine Zeitdauer sein aber »${val}« wurde "
 "angegeben"
 
-#: core/validator:201
+#: core/validator:206
 #, sh-format
 msgid "The \"$name\" ${val} has to be an existing path"
 msgstr "\"$name\" ${val} muss ein existierender Pfad sein"
 
-#: core/validator:206
+#: core/validator:211
 #, sh-format
 msgid "The \"$name\" ${val} has to be an existing file"
 msgstr "\"$name\" ${val} muss eine existierende Datei sein"
 
-#: core/validator:211
+#: core/validator:216
 #, sh-format
 msgid "The \"$name\" ${val} has to be an existing directory"
 msgstr "\"$name\" ${val} muss ein existierendes Verzeichnis sein"
 
-#: core/validator:216
+#: core/validator:221
 #, sh-format
 msgid "The \"$name\" ${val} has to be a file readable for user"
 msgstr "\"$name\" ${val} muss eine für den Benutzer lesbare Datei sein"
 
-#: core/validator:221
+#: core/validator:226
 #, sh-format
 msgid "The \"$name\" ${val} has to be a file writable for user"
 msgstr "\"$name\" ${val} muss eine für den Benutzer schreibbare Datei sein"
 
-#: core/validator:224
+#: core/validator:229
 #, sh-format
 msgid "A check named ${check} is not defined"
 msgstr "Eine Prüfung namens ${check} ist nicht definiert"

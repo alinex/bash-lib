@@ -953,6 +953,12 @@ if [[ " $allow " != *" $val "* ]];then
 [ -z "$die" ]&&return 1||die "$(eval_gettext '"$name" is set to "${val}" but has to be one of: $allow')"
 fi
 ;;
+date)if
+! res=$(date_format unix "$val")
+then
+[ -z "$die" ]&&return 1||die "$(eval_gettext 'The "$name" has to be a parsable date format but »${val}« was given')"
+fi
+;;
 duration)[[ $res =~ ^-?[0-9] ]]&&res="$(duration_format seconds "$val")"||true
 if [[ ! $res =~ ^-?[0-9]+$ ]];then
 [ -z "$die" ]&&return 1||die "$(eval_gettext 'The "$name" has to be an integer or human duration but »${val}« was given')"
