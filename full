@@ -1442,8 +1442,7 @@ local countdown="$timeout"
 if is set -- "$default";then
 ((default==0))&&prompt="$prompt [$(gettext "No")]"||prompt="$prompt [$(gettext "Yes")]"
 fi
-printf "$CC_NOTICE%s$CC_RESET " "$prompt?" >/dev/tty
-stty -echo </dev/tty
+printf "$CC_NOTICE%s$CC_RESET $CURSOR_STORE" "$prompt?" >/dev/tty
 while IFS= read -r -s -t 1 -n 1 char </dev/tty||rc=$?;do
 if [ -n "$invalid" ];then
 invalid=0
@@ -1455,8 +1454,8 @@ rc=0
 if [ -n "$timeout" ];then
 ((countdown--))
 if ((countdown>0));then
-i_text="  $(duration_format human "$countdown")     "
-printf '%s\n' "$i_text$(character repeat "${#i_text}" '\b')" >/dev/tty
+i_text="$(duration_format human "$countdown")"
+printf "$CURSOR_RESTORE$CLEAR_EOL%s" "$i_text" >/dev/tty
 continue
 fi
 else
@@ -1466,17 +1465,17 @@ fi
 if [[ $char == "" ]];then
 if [ -n "$default" ];then
 if ((default==1));then
-printf '%s     \n' "$(gettext "Yes")" >/dev/tty
+printf "$CURSOR_RESTORE$CLEAR_EOL%s\n" "$(gettext "Yes")" >/dev/tty
 stty echo </dev/tty
 return 0
 else
-printf '%s     \n' "$(gettext "No")" >/dev/tty
+printf "$CURSOR_RESTORE$CLEAR_EOL%s\n" "$(gettext "No")" >/dev/tty
 stty echo </dev/tty
 return 1
 fi
 elif [ -n "$i_text" ];then
 i_text="$(gettext 'value needed')"
-printf "   $CC_RED%s$CC_RESET$(character repeat $((${#i_text}+3)) '\b')" "$i_text" >/dev/tty
+printf "$CURSOR_RESTORE$CLEAR_EOL$CC_RED%s$CC_RESET" "$i_text" >/dev/tty
 invalid=1
 fi
 elif [[ $char == $'\e' ]];then
@@ -1485,16 +1484,16 @@ while [[ $seq == "[" || $seq =~ [0-9A-Za-z~] ]];do
 read -r -s -n 1 -t 0.01 seq||break
 done
 elif [[ $char =~ [JjYy] ]];then
-printf '%s\n' "$(gettext "Yes")" >/dev/tty
+printf "$CURSOR_RESTORE$CLEAR_EOL%s\n" "$(gettext "Yes")" >/dev/tty
 stty echo </dev/tty
 return 0
 elif [[ $char =~ [Nn] ]];then
-printf '%s\n' "$(gettext "No")" >/dev/tty
+printf "$CURSOR_RESTORE$CLEAR_EOL%s\n" "$(gettext "No")" >/dev/tty
 stty echo </dev/tty
 return 1
 else
 i_text="$(gettext 'invalid character')"
-printf "   $CC_RED%s$CC_RESET$(character repeat $((${#i_text}+3)))" "$i_text" >/dev/tty
+printf "$CURSOR_RESTORE$CLEAR_EOL$CC_RED%s$CC_RESET" "$i_text" >/dev/tty
 invalid=1
 fi
 i_text=""
