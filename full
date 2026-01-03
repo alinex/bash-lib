@@ -552,8 +552,8 @@ CURSOR_NEXT=$'\e[E'
 CURSOR_PREVIOUS=$'\e[F'
 CURSOR_POS1=$'\e[G'
 CURSOR_TOP=$'\e[H'
-CURSOR_STORE=$'\e[7'
-CURSOR_RESTORE=$'\e[8'
+CURSOR_STORE=$'\e[s'
+CURSOR_RESTORE=$'\e[u'
 CURSOR_SHOW=$'\e[?25h'
 CURSOR_HIDE=$'\e[?25l'
 cursor(){
@@ -1082,7 +1082,7 @@ update)is set --name=arguments --max=2 --die -- $#
 is set --name=issueId-or-key --die -- "$1"
 is set --name=json --die -- "$2"
 debug "UPDATE issue $1"
-_jira PUT issue/$1 "$2" >/dev/null
+_jira PUT "issue/$1" "$2" >/dev/null
 ;;
 delete)is set --name=arguments --max=1 --die -- $#
 is set --name=issueId-or-key --die -- "$1"
@@ -1108,7 +1108,7 @@ case "$subCommand" in
 set)if
 [ -z "$2" ]||[[ $2 =~ ^adf$|^json$ && -z $3 ]]
 then
-jira json $var remove $field
+jira json "$var" remove "$field"
 elif [ "$2" = "json" ]&&[ -n "$3" ];then
 printf -v "$var" '%s' "$(jq -c --argjson v "$3" ".fields.$field = \$v" <<<"$json")"
 elif [ "$2" = "adf" ]&&[ -n "$3" ];then
@@ -1191,7 +1191,7 @@ jq -c -n --arg text "$1" '
 
     ($text | split("\n")) as $lines
     | reduce $lines[] as $line (
-        { out: [], mode: null, buf: [], pbuf: [] };
+        { out: [], mode: null, buf: [], pBuf: [] };
 
         # empty line → flush paragraph or list
         if $line == "" then
@@ -1201,17 +1201,17 @@ jq -c -n --arg text "$1" '
           elif .mode == "ol" then
             .out += [ ordered(.buf) ]
             | .buf = [] | .mode = null
-          elif (.pbuf | length) > 0 then
-            .out += [ paragraph(.pbuf | join("\n")) ]
-            | .pbuf = []
+          elif (.pBuf | length) > 0 then
+            .out += [ paragraph(.pBuf | join("\n")) ]
+            | .pBuf = []
           else .
           end
 
         # bullet list
         elif ($line | startswith("- ")) then
-          if (.pbuf | length) > 0 then
-            .out += [ paragraph(.pbuf | join("\n")) ]
-            | .pbuf = []
+          if (.pBuf | length) > 0 then
+            .out += [ paragraph(.pBuf | join("\n")) ]
+            | .pBuf = []
           else .
           end
           | if .mode == "ul" then
@@ -1226,9 +1226,9 @@ jq -c -n --arg text "$1" '
 
         # ordered list
         elif ($line | test("^[0-9]+\\. ")) then
-          if (.pbuf | length) > 0 then
-            .out += [ paragraph(.pbuf | join("\n")) ]
-            | .pbuf = []
+          if (.pBuf | length) > 0 then
+            .out += [ paragraph(.pBuf | join("\n")) ]
+            | .pBuf = []
           else .
           end
           | if .mode == "ol" then
@@ -1251,7 +1251,7 @@ jq -c -n --arg text "$1" '
             | .buf = [] | .mode = null
           else .
           end
-          | .pbuf += [ $line ]
+          | .pBuf += [ $line ]
         end
       )
     # flush leftovers
@@ -1260,7 +1260,7 @@ jq -c -n --arg text "$1" '
         + (if .mode == "ul" then [ bullet(.buf) ]
            elif .mode == "ol" then [ ordered(.buf) ]
            else [] end)
-        + (if (.pbuf | length) > 0 then [ paragraph(.pbuf | join("\n")) ]
+        + (if (.pBuf | length) > 0 then [ paragraph(.pBuf | join("\n")) ]
            else [] end)
       )
     | {
@@ -1401,22 +1401,22 @@ text="$(input "$@")"
 if is empty -- "$text";then
 is set -- "$timeout"&&is empty -- "$abort"&&text="$(gettext 'Please wait to go on')"||text="$(gettext 'Press any key to continue...')"
 fi
-printf '%s' "$CC_NOTICE$text$CC_RESET "
+printf "$CC_NOTICE%s$CC_RESET $CURSOR_STORE" "$text"
 if is empty -- "$timeout";then
 read -n 1 -s -r _ </dev/tty
 else
 stty -echo </dev/tty
 while ((timeout>0));do
-printf "\r%s" "$CC_NOTICE$text$CC_RESET $(duration_format human "$timeout")     "
+printf "$CURSOR_RESTORE$CLEAR_EOL%s " "$(duration_format human "$timeout")"
 if read -r -s -t 1 -n 1 _ </dev/tty;then
 if [ -n "$abort" ];then
-printf '\b\b\b\b%s    \n' "$(gettext 'aborted by user')"
+printf "$CURSOR_RESTORE%s\n" "$(gettext 'go on by user')"
 stty echo </dev/tty
 return 1
 fi
 fi
 ((timeout--))
-((timeout>0))||printf "\r%s" "$CC_NOTICE$text$CC_RESET 0s      "
+((timeout>0))||printf "$CURSOR_RESTORE$CLEAR_EOL%s" "0s"
 done
 stty echo </dev/tty
 fi
@@ -2141,24 +2141,24 @@ esac
 json="$(jq --arg i "$color" '. + {color: $i}' <<<"$json")"
 shift 2
 ;;
---text)json="$(jq --arg i "$2" '. + {text: $i}') <<<"$json""&&shift 2;;
---author)json="$(jq --arg i "$2" '. + {author_name: $i}') <<<"$json""&&shift 2;;
---avatar)json="$(jq --arg i "$2" '. + {author_icon: $i}') <<<"$json""&&shift 2;;
---home)json="$(jq --arg i "$2" '. + {author_link: $i}') <<<"$json""&&shift 2;;
---title)json="$(jq --arg i "$2" '. + {title: $i}') <<<"$json""&&shift 2;;
---link)json="$(jq --arg i "$2" '. + {title_link: $i}') <<<"$json""&&shift 2;;
---image)json="$(jq --arg i "$2" '. + {image_url: $i}') <<<"$json""&&shift 2;;
---thumb)json="$(jq --arg i "$2" '. + {thumb_url: $i}') <<<"$json""&&shift 2;;
+--text)json="$(jq --arg i "$2" '. + {text: $i}' <<<"$json")"&&shift 2;;
+--author)json="$(jq --arg i "$2" '. + {author_name: $i}' <<<"$json")"&&shift 2;;
+--avatar)json="$(jq --arg i "$2" '. + {author_icon: $i}' <<<"$json")"&&shift 2;;
+--home)json="$(jq --arg i "$2" '. + {author_link: $i}' <<<"$json")"&&shift 2;;
+--title)json="$(jq --arg i "$2" '. + {title: $i}' <<<"$json")"&&shift 2;;
+--link)json="$(jq --arg i "$2" '. + {title_link: $i}' <<<"$json")"&&shift 2;;
+--image)json="$(jq --arg i "$2" '. + {image_url: $i}' <<<"$json")"&&shift 2;;
+--thumb)json="$(jq --arg i "$2" '. + {thumb_url: $i}' <<<"$json")"&&shift 2;;
 --fields)fields="$2"&&shift 2;;
---footer)json="$(jq --arg i "$2" '. + {footer: $i}') <<<"$json""&&shift 2;;
---logo)json="$(jq --arg i "$2" '. + {footer_image: $i}') <<<"$json""&&shift 2;;
+--footer)json="$(jq --arg i "$2" '. + {footer: $i}' <<<"$json")"&&shift 2;;
+--logo)json="$(jq --arg i "$2" '. + {footer_image: $i}' <<<"$json")"&&shift 2;;
 --)shift&&break;;
 *)die "$(gettext "Unrecognized option"): $1"
 esac
 done
 if [ -n "$fields" ];then
 [[ $fields == \[* ]]||fields="[$fields]"
-json="$(jq ". + {fields: $fields}") <<<"$json""
+json="$(jq ". + {fields: $fields}" <<<"$json")"
 fi
 printf '%s' "$json"
 }
@@ -3091,7 +3091,7 @@ printf '%s' "deb [signed-by=/usr/share/keyrings/trivy.gpg] https://aquasecurity.
 _repo_redhat_epel(){
 is set -- "$major"||major="$(grep ^VERSION_ID /etc/os-release|sed 's/.*="//;s/\..*//')"
 if ! dnf repolist|grep -q epel;then
-dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-$major.noarch.rpm
+dnf install -y "https://dl.fedoraproject.org/pub/epel/epel-release-latest-$major.noarch.rpm"
 fi
 }
 _install_yq(){
@@ -3275,7 +3275,7 @@ num=-1
 fi
 local step
 if [ -n "$human" ];then
-printf "$1 -> $2 "
+printf '%s' "$1 -> $2 "
 if ((num==0));then
 gettext "are identical versions"
 printf '\n'
@@ -3402,9 +3402,8 @@ TRIVY_JIRA_APPROVAL_TEMP="Ok für 30 Tage"
 TRIVY_JIRA_APPROVAL_IRRELEVANT="Irrelevant"
 trivy(){
 is enum --name=command --allow="root files docker" --die -- "$1"&&local command="$1"&&shift
-local timeout
+local timeout onlyOS
 timeout=${TRIVY_DEFAULT_TIMEOUT:-60m}
-local _login host jump term lines file
 eval set -- "$(option_parse $'t timeout +\no only-os -' "$@")"
 while true;do
 case "$1" in
@@ -3425,7 +3424,7 @@ is empty -- "$TRIVY_CACHE_SERVER"||opt+=" --server $TRIVY_CACHE_SERVER"
 case $command in
 root)is empty -- "$onlyOS"||opt+=" --pkg-types os"
 source="$(hostname -f)"
-sudo $cmd rootfs $opt $exclude / 2>&1|sed 's/[^A-Z]*T[^A-Z]*//'|debug
+sudo "$cmd" rootfs $opt $exclude / 2>&1|sed 's/[^A-Z]*T[^A-Z]*//'|debug
 ;;
 files)command $cmd fs $opt "$1" 2>&1|sed 's/[^A-Z]*T[^A-Z]*//'|debug;;
 docker)command $cmd image $opt --input "$1" 2>&1|sed 's/[^A-Z]*T[^A-Z]*//'|debug
@@ -3434,7 +3433,7 @@ debug "Optimize JSON structure for splitting..."
 jq '.Results[]?|. as $g|.Vulnerabilities[]?|{Class: $g.Class, Target: $g.Target, Type: $g.Type}*.' "$work"/trivy.json >"$work"/split.json
 debug "Splitting JSON..."
 mkdir "$work"/split
-csplit -f "$work"/split/ -b '%06d' -zs $work/split.json /^{/ "{*}"
+csplit -f "$work"/split/ -b '%06d' -zs "$work"/split.json /^{/ "{*}"
 rm "$work"/split.json
 local found
 found="$(ls -1 "$work"/split/|wc -l)"
@@ -3471,7 +3470,7 @@ queue add _trivy_report "$work" "$file" "$source"
 done
 queue run
 rm -r "$work"/split
-for folder in $(find "$work" -mindepth 3 -type d);do
+while read -r folder;do
 cat "$folder/header.txt" "$folder/sources.txt" "$folder/footer.txt" >"$folder/report.txt"
 rm "$folder/header.txt" "$folder/sources.txt" "$folder/footer.txt"
 cat "$folder/report.tsv" >>"$work"/list.tsv
@@ -3488,7 +3487,7 @@ if is file -- "$folder/prom.txt";then
 cat "$folder/prom.txt" >>"$work"/prom.txt
 rm "$folder/prom.txt"
 fi
-done
+done < <(find "$work" -mindepth 3 -type d)
 printf '%s' "$work"
 }
 trivy_test(){
@@ -3518,7 +3517,7 @@ num="$(basename "$file")"
 queue add _trivy_report "$work" "$file" "$source"
 done
 queue run
-for folder in $(find "$work" -mindepth 3 -type d);do
+while read -r folder;do
 cat "$folder/header.txt" "$folder/sources.txt" "$folder/footer.txt" >"$folder/report.txt"
 rm "$folder/header.txt" "$folder/sources.txt" "$folder/footer.txt"
 cat "$folder/report.tsv" >>"$work"/list.tsv
@@ -3535,7 +3534,7 @@ if is file -- "$folder/prom.txt";then
 cat "$folder/prom.txt" >>"$work"/prom.txt
 rm "$folder/prom.txt"
 fi
-done
+done < <(find "$work" -mindepth 3 -type d)
 }
 _trivy_cache=/tmp/trivy-cache
 declare -A _trivy_jira
@@ -3554,7 +3553,7 @@ title="$(jq .Title -r <<<"$json")"
 pkgPath="$(jq .PkgPath -r <<<"$json")"
 test ! "$pkgPath" = "null"||pkgPath=""
 description="$(jq .Description -r <<<"$json")"
-cvss="$(jq '.CVSS[]?.V3Score' -r <<<"$json")"|tr $'\n' '\;'|sed 's/;$//;s/;/; /g'
+cvss="$(jq '.CVSS[]?.V3Score' -r <<<"$json"|tr $'\n' '\;'|sed 's/;$//;s/;/; /g')"
 installed="$(jq .InstalledVersion -r <<<"$json")"
 sourceLine="$source $target ($type) $pkgPath - Version $installed"
 fixed="$(jq .FixedVersion -r <<<"$json")"
@@ -3572,14 +3571,14 @@ changes+=("{\"Severity\": \"MEDIUM\",\"OriginalSeverity\": \"$severity\"}")
 rules+=("{\"Title\": \"Just Published\",\"Description\": \"$action.\"}")
 fi
 local exploited
-exploited="$(jq '.vulnerabilities[]|select(.cveID=="'$id'")' "$_trivy_cache/exploits.json")"
+exploited="$(jq '.vulnerabilities[]|select(.cveID=="'"$id"'")' "$_trivy_cache/exploits.json")"
 if is set -- "$exploited";then
 action="Add information of known exploits and cancel downgrades in case of just published"
 info "$id at $target: $action" >&2
 changes+=("{\"Exploited\": $exploited, \"Severity\": \"$severity\"}")
 rules+=("{\"Title\": \"Exploited\",\"Description\": \"$action.\"}")
 fi
-if [ "$type" = "npm" ]&&[[ $severity == "HIGH" || $severity == "CRITICAL" ]]&&is file -- "$target"&&[ "$(jq '.packages|with_entries(select(.key|contains("'pkgname'")))|.[]|select(has("dev"))|[.dev]|any' $target/package-lock.json)" = "true" ];then
+if [ "$type" = "npm" ]&&[[ $severity == "HIGH" || $severity == "CRITICAL" ]]&&is file -- "$target"&&[ "$(jq '.packages|with_entries(select(.key|contains("'"$pkgName"'")))|.[]|select(has("dev"))|[.dev]|any' "$target"/package-lock.json)" = "true" ];then
 action="Downgrade $severity -> MEDIUM because it is a dev dependency"
 info "$id at $target: $action" >&2
 changes+=("{\"Severity\": \"MEDIUM\",\"OriginalSeverity\": \"$severity\"}")
@@ -3600,11 +3599,11 @@ jira json fields set issuetype json "{\"id\":${_trivy_jira[issueType]}}"
 jira json fields set priority json "{\"name\":\"$priority\"}"
 jira json fields set summary "$id"
 jira json fields set description adf "$title"$'\n\n'"$description"
-jira json fields set ${_trivy_jira[field_sources]} adf "$(date +%Y-%m) > $source $target ($type)"
-jira json fields set ${_trivy_jira[field_rating]} adf "$severity (CVSS Rating ${cvss:--})"
-jira json fields set ${_trivy_jira[field_version]} adf "Gefixt ab Version ${fixed:--} $fixStatus"
-jira json fields set ${_trivy_jira[field_links]} adf "$links"
-jira json fields set ${_trivy_jira[field_sources]} adf "$(date +%Y-%m) > $sourceLine"
+jira json fields set "${_trivy_jira[field_sources]}" adf "$(date +%Y-%m) > $source $target ($type)"
+jira json fields set "${_trivy_jira[field_rating]}" adf "$severity (CVSS Rating ${cvss:--})"
+jira json fields set "${_trivy_jira[field_version]}" adf "Gefixt ab Version ${fixed:--} $fixStatus"
+jira json fields set "${_trivy_jira[field_links]}" adf "$links"
+jira json fields set "${_trivy_jira[field_sources]}" adf "$(date +%Y-%m) > $sourceLine"
 jira json fields set labels json "[\"cve\", \"$(sed 's#.*ekz.de/##;s#/-/.*##;s#[/.]#", "#g' <<<"$source")\"]"
 issue="$(jira create "$fields")"
 created=1
@@ -3642,37 +3641,37 @@ fi
 old="$(jira json jira get "${_trivy_jira[field_sources]}" md)"
 new="$(printf '%s' "$old\n$(date +%Y-%m) > $sourceLine"|sed -n '/>/p'|sort -t'>' -r -k2,1|sort -t'>' -u -r -k2)"
 if [[ $new != "$old" ]];then
-jira json fields set ${_trivy_jira[field_sources]} adf "$new"
+jira json fields set "${_trivy_jira[field_sources]}" adf "$new"
 update=1
 fi
 old="$(jira json jira get "${_trivy_jira[field_rating]}" md)"
 new="$severity (CVSS Rating ${cvss:--})"
 if [[ $new != "$old" ]];then
-jira json fields set ${_trivy_jira[field_rating]} adf "$new"
+jira json fields set "${_trivy_jira[field_rating]}" adf "$new"
 update=1
 fi
 old="$(jira json jira get "${_trivy_jira[field_version]}" md)"
 new="Gefixt ab Version ${fixed:--} $fixStatus"
 if [[ $new != "$old" ]];then
-jira json fields set ${_trivy_jira[field_version]} adf "$new"
+jira json fields set "${_trivy_jira[field_version]}" adf "$new"
 update=1
 fi
 old="$(jira json jira get "${_trivy_jira[field_links]}" md)"
 new="$links"
 if [[ $new != "$old" ]];then
-jira json fields set ${_trivy_jira[field_links]} adf "$new"
+jira json fields set "${_trivy_jira[field_links]}" adf "$new"
 update=1
 fi
 local labels addLabel=()
 labels="$(jq '.fields.labels[]' -r <<<"$jira")"
 for label in $(sed 's#.*ekz.de/##;s#/-/.*##;s#[/.]# #g' <<<"$source");do
 [[ ! $labels =~ $label ]]||continue
-addLabel+=('{"add": "'$label'"}')
+addLabel+=('{"add": "'"$label"'"}')
 done
 if is set -- "$update";then
 update="$fields"
 if ((${#addLabel[@]}>0));then
-fields="$(jq --argjson l "[$(join $json ",")]" '.update = { "labels": $l }' <<<"$fields")"
+fields="$(jq --argjson l "[$(join json ",")]" '.update = { "labels": $l }' <<<"$fields")"
 fi
 jira update "$issue" "$fields"
 fi
@@ -3690,7 +3689,7 @@ severity="$(jq .Severity -r <<<"$json")"
 local folder="$work/${severity,,}/$type/$id"
 mkdir -p "$folder"
 printf '%s\n' "$json" >"$folder/data.json"
-local exploitDate exploitVendor exploitProduct issue key approval lastComment
+local exploitDate exploitVendor exploitProduct issue key approval
 exploitDate="$(jq .Exploited.dateAdded -r <<<"$json")"
 test ! "$exploitDate" = "null"||exploitDate=""
 if is set -- "$exploitDate";then
@@ -3699,36 +3698,37 @@ exploitProduct="$(jq .Exploited.product -r <<<"$json")"
 fi
 file="$folder/header.txt"
 if ! is file -- "$file";then
+{
 case $severity in
-CRITICAL)printf "$CC_CRITICAL" >"$file";;
-HIGH)printf "$CC_ERROR" >"$file";;
-MEDIUM)printf "$CC_WARN" >"$file";;
-*)printf "" >"$file"
+CRITICAL)printf "$CC_CRITICAL";;
+HIGH)printf "$CC_ERROR";;
+MEDIUM)printf "$CC_WARN";;
+*)printf ""
 esac
-printf '%s\n' "================================================================================" >>"$file"
-printf '%s\n' "$severity $id $title" >>"$file"
-printf '%s\n' "--------------------------------------------------------------------------------" >>"$file"
-printf '%s\n' "$description" >>"$file"
-printf '%s\n' "    " >>"$file"
-printf '%s\n' "Rating: $severity (CVSS Rating ${cvss:--})" >>"$file"
-printf '%s\n' "Status: Gefixt ab Version ${fixed:--} $fixStatus" >>"$file"
-printf '%s\n' "Datum:  Sicherheitslücke bekannt seit $(date_format human-date "$date") (vor $(duration_format days "$(date_diff "$date")") Tagen)" >>"$file"
-printf '%s\n' "    " >>"$file"
-is empty -- "$exploitDate"||printf "Exploit bekannt seit $exploitDate bei $exploitVendor $exploitProduct\n\n" >>"$file"
+printf '%s\n' "================================================================================"
+printf '%s\n' "$severity $id $title"
+printf '%s\n' "--------------------------------------------------------------------------------"
+printf '%s\n' "$description"
+printf '%s\n' "    "
+printf '%s\n' "Rating: $severity (CVSS Rating ${cvss:--})"
+printf '%s\n' "Status: Gefixt ab Version ${fixed:--} $fixStatus"
+printf '%s\n' "Datum:  Sicherheitslücke bekannt seit $(date_format human-date "$date") (vor $(duration_format days "$(date_diff "$date")") Tagen)"
+printf '%s\n' "    "
+is empty -- "$exploitDate"||printf '%s' "Exploit bekannt seit $exploitDate bei $exploitVendor $exploitProduct\n\n"
 if is set -- "$issue";then
-printf "Jira Ticket: https://ekz-gruppe.atlassian.net/browse/$issue\n" >>"$file"
-printf "             $jiraStatus    Zuständig: $assignee\n" >>"$file"
-printf "             Deploy: ${approval:-Undefiniert}\n" >>"$file"
-printf "Letzte Kommentare:\n$(join comments $'\n'|sed 's/^/             /')" >>"$file"
+printf '%s\n' "Jira Ticket: https://ekz-gruppe.atlassian.net/browse/$issue"
+printf '%s\n' "             $jiraStatus    Zuständig: $assignee"
+printf '%s\n' "             Deploy: ${approval:-Undefiniert}"
+printf '%s\n' "Letzte Kommentare:\n$(join comments $'\n'|sed 's/^/             /')"
 fi
-printf 'Sources:\n' >>"$file"
+printf 'Sources:\n'
+} >>"$file"
 fi
 file="$folder/sources.txt"
 printf '%s\n' "- $sourceLine" >>"$file"
 file="$folder/footer.txt"
 if ! is file -- "$file";then
-printf '%s\n' "Links:\n$links" >>"$file"
-printf "$CC_RESET"
+printf "%s$CC_RESET\n" "Links:\n$links" >>"$file"
 fi
 file="$folder/report.tsv"
 printf '%s\t%s\t%s\t%s\n' "$severity" "$type" "$id" "$title" >>"$file"

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-02 21:22+0100\n"
+"POT-Creation-Date: 2026-01-03 22:27+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,9 +17,9 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: core/misc:121 core/validator:73 core/array:134 module/os:180 module/trivy:76
+#: core/misc:121 core/validator:73 core/array:134 module/os:180 module/trivy:75
 #: module/monitoring:143 module/input:31 module/input:86 module/input:222
-#: module/input:485 module/input:654 module/log:63 module/remote:78
+#: module/input:486 module/input:655 module/log:63 module/remote:78
 #: module/remote:217 module/remote:265 module/remote:333 module/database:33
 #: module/mattermost:299 module/mattermost:336 module/software:230
 msgid "Unrecognized option"
@@ -73,7 +73,7 @@ msgstr "\"$name\" muss mit einem Wert gesetzt werden"
 #: core/validator:92
 #, sh-format
 msgid "The \"$name\" has to be empty but has »${val}«"
-msgstr "\"$name\" sollte leer sein enthält aber »${val}«"
+msgstr "\"$name\" sollte leer sein, enthält aber »${val}«"
 
 #: core/validator:101
 #, sh-format
@@ -83,50 +83,48 @@ msgstr ""
 "identifiziert werden"
 
 #: core/validator:108
-#, fuzzy, sh-format
+#, sh-format
 msgid "The value »${val}« for \"$name\" should be true but was »${val}«"
 msgstr ""
-"Der Wert »${val}« für \"$name\" konnte weder als wahr noch als falsch "
-"identifiziert werden"
+"Der Wert »${val}« für \"$name\" sollte wahr sein, war aber »${val}«"
 
 #: core/validator:115
-#, fuzzy, sh-format
+#, sh-format
 msgid "The value »${val}« for \"$name\" should be false but was »${val}«"
 msgstr ""
-"Der Wert »${val}« für \"$name\" konnte weder als wahr noch als falsch "
-"identifiziert werden"
+"Der Wert »${val}« für \"$name\" sollte falsch sein, war aber »${val}«"
 
 #: core/validator:123
 #, sh-format
 msgid "The \"$name\" has to be an integer but »${val}« was given"
-msgstr "\"$name\" muss eine Zahl sein aber »${val}« wurde angegeben"
+msgstr "\"$name\" muss eine Zahl sein, aber »${val}« wurde angegeben"
 
 #: core/validator:127 core/validator:152
 #, sh-format
 msgid "The \"$name\" has to be exactly $min but »${val}« was given"
-msgstr "\"$name\" muss genau $min sein aber »${val}« wurde angegeben"
+msgstr "\"$name\" muss genau $min sein, aber »${val}« wurde angegeben"
 
 #: core/validator:131 core/validator:156
 #, sh-format
 msgid "The \"$name\" has to be between $min and $max but »${val}« was given"
 msgstr ""
-"\"$name\" muss zwischen $min und $max sein aber »${val}« wurde angegeben"
+"\"$name\" muss zwischen $min und $max sein, aber »${val}« wurde angegeben"
 
 #: core/validator:135 core/validator:160
 #, sh-format
 msgid "The \"$name\" has to at least $min but »${val}« was given"
-msgstr "\"$name\" muss mindestens $min sein aber »${val}« wurde angegeben"
+msgstr "\"$name\" muss mindestens $min sein, aber »${val}« wurde angegeben"
 
 #: core/validator:139 core/validator:164
 #, sh-format
 msgid "The \"$name\" has to not be more than $max but »${val}« was given"
 msgstr ""
-"\"$name\" darf nicht größer als $max sein aber »${val}« wurde angegeben"
+"\"$name\" darf nicht größer als $max sein, aber »${val}« wurde angegeben"
 
 #: core/validator:148
 #, sh-format
 msgid "The \"$name\" has to be a float but »${val}« was given"
-msgstr "\"$name\" muss eine Fließkommazahl sein aber »${val}« wurde angegeben"
+msgstr "\"$name\" muss eine Fließkommazahl sein, aber »${val}« wurde angegeben"
 
 #: core/validator:172
 #, sh-format
@@ -134,7 +132,7 @@ msgid ""
 "The length of \"$name\" has to be exactly $min but »${res}« is $val "
 "characters long"
 msgstr ""
-"Die Länge von \"$name\" muss genau $min sein aber »${res}« ist $val Zeichen "
+"Die Länge von \"$name\" muss genau $min sein, aber »${res}« ist $val Zeichen "
 "lang"
 
 #: core/validator:176
@@ -143,7 +141,7 @@ msgid ""
 "The length of \"$name\" has to be between $min and $max but »${res}« is $val "
 "characters long"
 msgstr ""
-"Die Länge von \"$name\" muss zwischen $min und $max sein aber »${res}« ist "
+"Die Länge von \"$name\" muss zwischen $min und $max sein, aber »${res}« ist "
 "$val Zeichen lang"
 
 #: core/validator:180
@@ -152,7 +150,7 @@ msgid ""
 "The length of \"$name\" has to be at least $min but »${res}« is $val "
 "characters long"
 msgstr ""
-"Die Länge von \"$name\" muss mindestens $min sein aber »${res}« ist $val "
+"Die Länge von \"$name\" muss mindestens $min sein, aber »${res}« ist $val "
 "Zeichen lang"
 
 #: core/validator:184
@@ -161,7 +159,7 @@ msgid ""
 "The length of \"$name\" has to be not more than $max but »${res}« is $val "
 "characters long"
 msgstr ""
-"Die Länge von \"$name\" darf nicht größer als $max sein aber »${res}« ist "
+"Die Länge von \"$name\" darf nicht größer als $max sein, aber »${res}« ist "
 "$val Zeichen lang"
 
 #: core/validator:189
@@ -177,14 +175,14 @@ msgstr ""
 #: core/validator:196
 #, fuzzy, sh-format
 msgid "The \"$name\" has to be a parsable date format but »${val}« was given"
-msgstr "\"$name\" muss eine Fließkommazahl sein aber »${val}« wurde angegeben"
+msgstr "\"$name\" muss ein lesbares Datum sein, aber »${val}« wurde angegeben"
 
 #: core/validator:202
 #, sh-format
 msgid ""
 "The \"$name\" has to be an integer or human duration but »${val}« was given"
 msgstr ""
-"\"$name\" muss eine Zahl oder eine Zeitdauer sein aber »${val}« wurde "
+"\"$name\" muss eine Zahl oder eine Zeitdauer sein, aber »${val}« wurde "
 "angegeben"
 
 #: core/validator:207
@@ -221,7 +219,7 @@ msgstr "Eine Prüfung namens ${check} ist nicht definiert"
 msgid "NAME\\tTYPE\\tCONTENT\\tTTL"
 msgstr "NAME\\tTYP\\tINHALT\\tTTL"
 
-#: module/dns:92
+#: module/dns:93
 #, sh-format
 msgid ""
 "To update $PLUSSERVER_PORTAL/services/nameservers -> download CSV (manually)."
@@ -229,11 +227,11 @@ msgstr ""
 "Für Update $PLUSSERVER_PORTAL/services/nameservers -> CSV herunterladen "
 "(manuell)."
 
-#: module/dns:93
+#: module/dns:94
 msgid "No local DNS list found, please download it."
 msgstr "Keine lokale DNS Liste gefunden, bitte herunterladen."
 
-#: module/dns:94
+#: module/dns:95
 #, sh-format
 msgid "Use $list from $time."
 msgstr "Benutze $list vom $time."
@@ -272,8 +270,8 @@ msgid "Press any key to continue..."
 msgstr "Taste drücken um fortzufahren..."
 
 #: module/input:50
-msgid "aborted by user"
-msgstr "Abbruch durch Benutzer"
+msgid "go on by user"
+msgstr "Weiter durch Benutzer"
 
 #: module/input:91
 msgid "Should this be done"
@@ -287,11 +285,11 @@ msgstr "Nein"
 msgid "Yes"
 msgstr "Ja"
 
-#: module/input:138 module/input:354 module/input:574
+#: module/input:138 module/input:355 module/input:575
 msgid "value needed"
 msgstr "Wert notwendig"
 
-#: module/input:160 module/input:380 module/input:600
+#: module/input:160 module/input:381 module/input:601
 msgid "invalid character"
 msgstr "ungültiges Zeichen"
 
@@ -327,43 +325,43 @@ msgstr "Gib eine kurze Zeile ein"
 msgid "Input through system editor..."
 msgstr "Eingabe mit dem Systemeditor..."
 
-#: module/input:336
+#: module/input:337
 msgid "incomplete"
 msgstr "unvollständig"
 
-#: module/input:391
+#: module/input:392
 msgid "bad"
 msgstr "schlecht"
 
-#: module/input:393
+#: module/input:394
 msgid "weak"
 msgstr "schwach"
 
-#: module/input:395
+#: module/input:396
 msgid "good"
 msgstr "gut"
 
-#: module/input:397
+#: module/input:398
 msgid "strong"
 msgstr "stark"
 
-#: module/input:531
+#: module/input:532
 msgid "Select one of the above options"
 msgstr "Wähle eine der obigen Optionen"
 
-#: module/input:674
+#: module/input:675
 msgid "Could not get task list from command"
 msgstr "Befehlsliste konnte nicht von der Funktion gelesen werden"
 
-#: module/input:681
+#: module/input:682
 msgid "No tasks found to be executed."
 msgstr "Keine Aufgaben zum Ausführen gefunden."
 
-#: module/input:687
+#: module/input:688
 msgid "Exit"
 msgstr "Beenden"
 
-#: module/input:694
+#: module/input:695
 #, sh-format
 msgid "Got error $error running $task"
 msgstr "Beim Aufruf von $task kam es zum Fehler $error"
@@ -372,31 +370,31 @@ msgstr "Beim Aufruf von $task kam es zum Fehler $error"
 msgid "Failed to remove lockfile"
 msgstr "Lockfile konnte nicht entfernt werden"
 
-#: module/process:112 module/process:146
+#: module/process:113 module/process:149
 msgid "Failed to create PID lockfile"
 msgstr "PID Lockfile konnte nicht erstellt werden"
 
-#: module/process:120
+#: module/process:121
 #, sh-format
 msgid "Waiting for unlock in $lockfile by PID $pid"
 msgstr "Warten, bis zur Freigabe in $lockfile durch PID $pid"
 
-#: module/process:310
+#: module/process:313
 msgid "Work steps are logged so that you can resume work mid-process"
 msgstr ""
 "Arbeitsschritte werden protokolliert um auch mittendrin wieder aufzusetzen"
 
-#: module/process:325
+#: module/process:328
 #, sh-format
 msgid "Job $name already done in this run, skipping"
 msgstr "Der Job $name wurde bereits ausgeführt, überspringe diesen"
 
-#: module/process:347
+#: module/process:350
 #, sh-format
 msgid "Finished: Step $name at $date"
 msgstr "Fertig: Schritt $name um $date"
 
-#: module/process:380
+#: module/process:383
 #, sh-format
 msgid "Started: step $name at $date"
 msgstr "Start: Schritt $name um $date"

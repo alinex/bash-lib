@@ -38,22 +38,22 @@ pause() {
     if is empty -- "$text"; then
         is set -- "$timeout" && is empty -- "$abort" && text="$(gettext 'Please wait to go on')" || text="$(gettext 'Press any key to continue...')"
     fi
-    printf '%s' "${CC_NOTICE}$text${CC_RESET} "
+    printf "${CC_NOTICE}%s${CC_RESET} ${CURSOR_STORE}" "$text"
     if is empty -- "$timeout"; then
         read -n 1 -s -r _ </dev/tty
     else
         stty -echo </dev/tty
         while ((timeout > 0)); do
-            printf "\r%s" "${CC_NOTICE}$text${CC_RESET} $(duration_format human "$timeout")     "
+            printf "${CURSOR_RESTORE}${CLEAR_EOL}%s " "$(duration_format human "$timeout")"
             if read -r -s -t 1 -n 1 _ </dev/tty; then
                 if [ -n "$abort" ]; then
-                    printf '\b\b\b\b%s    \n' "$(gettext 'aborted by user')"
+                    printf "$CURSOR_RESTORE%s\n" "$(gettext 'go on by user')"
                     stty echo </dev/tty
                     return 1
                 fi
             fi
             ((timeout--))
-            ((timeout > 0)) || printf "\r%s" "${CC_NOTICE}$text${CC_RESET} 0s      "
+            ((timeout > 0)) || printf "${CURSOR_RESTORE}${CLEAR_EOL}%s" "0s"
         done
         stty echo </dev/tty
     fi

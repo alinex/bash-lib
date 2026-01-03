@@ -26,9 +26,9 @@ CURSOR_POS1=$'\e[G'
 # Cursor to top-left
 CURSOR_TOP=$'\e[H'
 # Save cursor pos
-CURSOR_STORE=$'\e[7' # or \e[s
+CURSOR_STORE=$'\e[s'
 # Restore cursor pos
-CURSOR_RESTORE=$'\e[8' # or \e[u
+CURSOR_RESTORE=$'\e[u'
 # Show cursor
 CURSOR_SHOW=$'\e[?25h'
 # Hide cursor

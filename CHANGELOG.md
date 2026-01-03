@@ -3,18 +3,23 @@
 Newest changes will always take part in the development branch. You only may use them if you manually install this.
 But on release they will be merged with semantical versioning into the master branch and will get available to new installs or updates.
 
+## In development
+
+- switch [check](doc/function/check.md) -> [is](doc/function/is.md) (because `is` is more used)
+
 ## Newest Development (not released)
 
-- new is/check validators: true/false
 - add [trivy](doc/function/trivy.md) security scanning
+- add [jira](doc/function/jira.md) search, get, create, update and delete for issues with included ADF parser/formatter
+- new [is](doc/function/is.md)/[check](doc/function/check.md) validators: true/false, date
 - add [sleep_until](doc/function/sleep_until.md)
 - add [first](doc/function/first.md)
-- enhanced [jira](doc/function/jira.md) to get meta information and work with ADF
 - add `$CONFIG` to load special config file
 - add escape sequences and function for cursor management on terminal
+- add [logo](doc/function/logo.md) to display it
+- optimize code echo and escape sequences
 - optimize function documentation
 - move down deprecated methods
-- optimize code echo and escape sequences
 
 ## 22. December 2025 - v2.2.0
 
