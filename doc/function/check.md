@@ -1,6 +1,6 @@
 # check
 
-## Validate and sanitize values.
+## Deprecated:Validate and sanitize values.
 
 ### Usage
 
@@ -38,6 +38,7 @@ Use in code:
 
 ### Description
 
+Use is ... --output
 
 This validation is possible using the `check` and [`is`](is.md) function.
 - `check` should be used for sanitize because it will output the value

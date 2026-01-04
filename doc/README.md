@@ -265,7 +265,7 @@ Validators to make this easier and more readable.
 
 | Variable/Function | Description |
 | --- | --- |
-| [`check`](function/check.md) | Validate and sanitize values. |
+| [`check`](function/check.md) | Deprecated:Validate and sanitize values. |
 | [`is`](function/is.md) | Validate and sanitize values. |
 | [`num_parameters`](function/num_parameters.md) | Deprecated: Check that a specific number of parameters are given |
 | [`is_empty`](function/is_empty.md) | Deprecated: Test if given value is an empty string or undefined |

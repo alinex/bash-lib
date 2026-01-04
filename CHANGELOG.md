@@ -3,14 +3,12 @@
 Newest changes will always take part in the development branch. You only may use them if you manually install this.
 But on release they will be merged with semantical versioning into the master branch and will get available to new installs or updates.
 
-## In development
-
-- switch [check](doc/function/check.md) -> [is](doc/function/is.md) (because `is` is more used)
-
 ## Newest Development (not released)
 
 - add [trivy](doc/function/trivy.md) security scanning
 - add [jira](doc/function/jira.md) search, get, create, update and delete for issues with included ADF parser/formatter
+- add `--message` option to [is](doc/function/is.md) for usage information
+- [is](doc/function/is.md) now also handles check with --output option
 - new [is](doc/function/is.md)/[check](doc/function/check.md) validators: true/false, date
 - add [sleep_until](doc/function/sleep_until.md)
 - add [first](doc/function/first.md)

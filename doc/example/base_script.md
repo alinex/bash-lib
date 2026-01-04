@@ -39,7 +39,7 @@ while true; do
     *) die "Unrecognized option: $1" ;;
     esac
 done
-is integer --name=arguments --max=1 --die -- $#
+is integer --name=arguments --max=1 --die --message="Usage: $USAGE" -- $#
 
 header "$TITLE"
 ```

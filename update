@@ -8,7 +8,7 @@ command -v shfmt >/dev/null || sudo apt install -y shfmt
 
 echo "#!/usr/bin/env bash" >"$BASHLIB_HOME/full"
 echo "BASHLIB_LOADER=\${BASHLIB_LOADER:-full}" >>"$BASHLIB_HOME/full"
-printf "- full "
+echo -n '- full '
 for folder in core module; do
     echo -n "$folder "
     for f in "$BASHLIB_HOME/$folder"/*; do

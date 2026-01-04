@@ -11,31 +11,36 @@ is <check> [options] -- <value>
 ### Options
 
 ```bash
-d, die              # stop with error instead of return state
-n, name=<string>    # name the variable for the `die` message
+d, die              # used in [`is`](is.md) to stop with error instead of return state
+o, output           # will output the sanitized value
+n, name=<string>    # used in [`is`](is.md) to display variable name in `die` message
+m, message=<string> # additional message like usage
+s, sanitize         # for integer
 min=<num>           # for integer
 max=<num>           # for integer
 allow=<words>       # for enum (space separated)
 ```
 
+### Output (stdout)
+
+`<value>`             # may be sanitized
+
 ### Examples
 
 Check arguments:
 
-- `is integer --name=arguments --max=2 $#` # mostly only check max, if all args are checked separately
-
-Use in code:
-
-- `if is integer age --min=18 -- "`$1`"; then ...`
-- `if ! is integer "`$DEBUG`"; then ...`
+- `is integer --name=arguments --max=2 -- $# >/dev/null` # mostly only check max, if all args are checked separately
+- `name="$(is integer --name=age --sanitize --min=0 --output -- "`$1`")"`
+- `init="$(is bool --name=init --output -- "`$1`")"`
+- `if is integer age --min=18 -- "`$1`"; then`
 
 
 ### Description
 
 
-This validation is possible using the [`check`](check.md) and `is` function.
-- [`check`](check.md) should be used for sanitize because it will output the value
-- `is` should be used for checking only validity or stop processing on problem because no value is output
+This validation is possible using the `check` and [`is`](is.md) function.
+- `check` should be used for sanitize because it will output the value
+- [`is`](is.md) should be used for checking only validity or stop processing on problem because no value is output
 
 Every parameter should be checked to prevent failure later in the code.
 For such checks you run it with the `--die` option to stop processing if wrong.
@@ -54,7 +59,7 @@ The following checks are implemented:
 - `float` will check for a number maybe within a range
 - `enum' will check against valid words using `--allow="word1 word2"``
 - `length` check that the length is within range (like integer)
-- `date` check that the input is parsable as date
+- `date` check that the input is parsable as date and return unix timestamp
 - `duration` check and parse the [`duration_format`](duration_format.md)
 - `path` check that value is an existing path (any type)
 - `file` check that value is an existing file
