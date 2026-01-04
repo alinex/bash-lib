@@ -125,13 +125,7 @@ Enter short text:
 
 ```
 
-And if a timeout and default/empty is given together it will use the default after the timeout ends:
-
-```bash
-$ source $BASHLIB_HOME/full
-$ confirm --timeout=30s --false
-Should this be done [No]? No
-```
+And if a timeout and default/empty is given together it will use the default after the timeout ends.
 
 Now you can also ask for numeric formats which will be checked while typing. So you can't enter an invalid string here:
 

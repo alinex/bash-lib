@@ -261,7 +261,7 @@ ask() {
     editor) prompt="${2:-$(gettext "Enter text here")}" ;;
     *) prompt="${2:-$(gettext "Enter short line")}" ;;
     esac
-    local input="" char="" seq invalid i_text u_text q
+    local input="" char="" seq i_text q
     local countdown="$timeout"
     local nl=$'\n'
     [ -z "$default" ] && [ -z "$empty" ] || prompt="$prompt [$default]"
@@ -302,20 +302,15 @@ ask() {
     # shellcheck disable=SC2229
     # shellcheck disable=SC2086
     while IFS= read -r -s -t 1 -n 1 char </dev/tty || rc=$?; do
-        # remove error
-        if [ -n "$invalid" ]; then
-            invalid=0
-            printf ' %.0s' {1..30} >/dev/tty
-            printf '\b%.0s' {1..30} >/dev/tty
-        fi
+        # shellcheck disable=SC2059
+        printf "${CLEAR_EOL}" >/dev/tty
         # check for countdown if timeout of read reached
         if ((rc == 142)); then
             rc=0
             if [ -n "$timeout" ]; then
                 ((countdown--))
                 if ((countdown > 0)); then
-                    i_text="  $(duration_format human "$countdown")     "
-                    printf '%s' "$i_text$(printf '\b%.0s' $(seq 1 ${#i_text}))" >/dev/tty
+                    printf "${CURSOR_STORE}   %s${CURSOR_RESTORE}" "$(duration_format human "$countdown")" >/dev/tty
                     continue
                 fi
             else
@@ -331,30 +326,30 @@ ask() {
             # end if final pattern reached
             elif [ -n "$final" ]; then
                 if [[ "$input" =~ $final ]]; then
-                    printf '          \n' >/dev/tty
+                    # shellcheck disable=SC2059
+                    printf '\n' >/dev/tty
                     break
                 else
-                    i_text="$(gettext 'incomplete')"
-                    printf "   ${CC_RED}%s${CC_RESET}" "$i_text$(printf '\b%.0s' $(seq 1 $((${#i_text} + 3))))" >/dev/tty
-                    invalid=1
+                    printf "${CURSOR_STORE}   ${CC_RED}%s${CC_RESET}${CURSOR_RESTORE}" "$(gettext 'incomplete')" >/dev/tty
                 fi
             # end if input done
             elif [ -n "$input" ]; then
-                printf '          \n' >/dev/tty
+                # shellcheck disable=SC2059
+                printf "${CLEAR_EOL}\n" >/dev/tty
                 break
             # end if default possible
             elif [ -n "$default" ]; then
+                # shellcheck disable=SC2059
                 input="$default"
-                printf '          \n' >/dev/tty
+                # shellcheck disable=SC2059
+                printf "${CLEAR_EOL}\n" >/dev/tty
                 break
             # end if empty allowed
             elif [ -n "$empty" ]; then
                 printf '\n' >/dev/tty
                 break
             elif [ -n "$i_text" ]; then
-                i_text="$(gettext 'value needed')"
-                printf "   ${CC_RED}%s${CC_RESET}" "$i_text$(printf '\b%.0s' $(seq 1 $((${#i_text} + 3))))" >/dev/tty
-                invalid=1
+                printf "${CURSOR_STORE}   ${CC_RED}%s${CC_RESET}${CURSOR_RESTORE}" "$(gettext 'value needed')" >/dev/tty
             fi
         # Handle backspace
         elif [[ $char == $'\177' ]]; then
@@ -378,9 +373,7 @@ ask() {
                     char=.
                 fi
                 if [[ ! "$input$char" =~ $pattern ]]; then
-                    i_text="$(gettext 'invalid character')"
-                    printf "   ${CC_RED}%s${CC_RESET}" "$i_text$(printf '\b%.0s' $(seq 1 $((${#i_text} + 3))))" >/dev/tty
-                    invalid=1
+                    printf "${CURSOR_STORE}   ${CC_RED}%s${CC_RESET}${CURSOR_RESTORE}" "$(gettext 'invalid character')" >/dev/tty
                     continue
                 fi
             fi
@@ -397,9 +390,7 @@ ask() {
                 else
                     i_text="${CC_GREEN}$(gettext 'strong')${CC_RESET}"
                 fi
-                u_text="$(uncolorize "$i_text")"
-                printf '   %s' "$i_text$(printf '\b%.0s' $(seq 1 $((${#u_text} + 3))))" >/dev/tty
-                invalid=1
+                printf '${CURSOR_STORE}   %s${CURSOR_RESTORE}' "$i_text" >/dev/tty
             fi
         fi
         i_text=""
@@ -526,7 +517,7 @@ choose() {
     [ -z "$end" ] || pattern="(x|$pattern)"
     pattern="^$pattern$"
     # question
-    local input="" char="" i_text invalid
+    local input="" char="" i_text
     local countdown="$timeout"
     # shellcheck disable=SC2155
     local question="$(gettext "Select one of the above options")"
@@ -536,20 +527,15 @@ choose() {
     # shellcheck disable=SC2086
     # shellcheck disable=SC2229
     while read -r -s -t 1 -n 1 char </dev/tty || rc=$?; do
-        # remove error
-        if [ -n "$invalid" ]; then
-            invalid=0
-            printf ' %.0s' {1..30} >/dev/tty
-            printf '\b%.0s' {1..30} >/dev/tty
-        fi
+        # shellcheck disable=SC2059
+        printf "${CLEAR_EOL}"
         # check for countdown if timeout of read reached
         if ((rc == 142)); then
             rc=0
             if [ -n "$timeout" ]; then
                 ((countdown--))
                 if ((countdown > 0)); then
-                    i_text="  $(duration_format human "$countdown")     "
-                    printf '%s' "$i_text$(printf '\b%.0s' $(seq 1 ${#i_text}))" >/dev/tty
+                    printf "${CURSOR_STORE}   %s${CURSOR_RESTORE}" "$(duration_format human "$countdown")" >/dev/tty
                     continue
                 fi
             else
@@ -560,21 +546,22 @@ choose() {
         if [[ $char == "" ]]; then
             # end if number completed TODO
             if [ -n "$final" ]; then
-                printf '          \n' >/dev/tty
+                # shellcheck disable=SC2059
+                printf "${CLEAR_EOL}\n" >/dev/tty
                 break
             # end if input done
             elif [ -n "$input" ]; then
-                printf '          \n' >/dev/tty
+                # shellcheck disable=SC2059
+                printf "${CLEAR_EOL}\n" >/dev/tty
                 break
             # end if default possible
             elif [ -n "$default" ]; then
                 input="$default"
-                printf '          \n' >/dev/tty
+                # shellcheck disable=SC2059
+                printf "${CLEAR_EOL}\n" >/dev/tty
                 break
             else
-                i_text="$(gettext 'value needed')"
-                printf '%s\n' "   ${CC_RED}$i_text${CC_RESET}$(printf '\b%.0s' $(seq 1 $((${#i_text} + 3))))" >/dev/tty
-                invalid=1
+                printf "${CURSOR_STORE}   %s${CURSOR_RESTORE}" "$(gettext 'value needed')" >/dev/tty
             fi
         # Handle backspace
         elif [[ $char == $'\177' ]]; then
@@ -598,9 +585,7 @@ choose() {
         # next character
         else
             if [[ ! "$input$char" =~ $pattern ]]; then
-                i_text="$(gettext 'invalid character')"
-                printf '%s' "   ${CC_RED}$i_text${CC_RESET}$(printf '\b%.0s' $(seq 1 $((${#i_text} + 3))))" >/dev/tty
-                invalid=1
+                printf "${CURSOR_STORE}   ${CC_RED}%s${CC_RESET}${CURSOR_RESTORE}" "$(gettext 'invalid character')" >/dev/tty
                 continue
             fi
             input+="$char"

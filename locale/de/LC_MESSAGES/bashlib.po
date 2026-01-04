@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-04 20:56+0100\n"
+"POT-Creation-Date: 2026-01-04 21:58+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -19,7 +19,7 @@ msgstr ""
 
 #: core/misc:121 core/validator:73 core/array:134 module/os:180 module/trivy:75
 #: module/monitoring:143 module/input:31 module/input:86 module/input:222
-#: module/input:486 module/input:655 module/log:63 module/remote:78
+#: module/input:477 module/input:640 module/log:63 module/remote:78
 #: module/remote:217 module/remote:265 module/remote:333 module/database:33
 #: module/mattermost:299 module/mattermost:336 module/software:230
 msgid "Unrecognized option"
@@ -283,11 +283,11 @@ msgstr "Nein"
 msgid "Yes"
 msgstr "Ja"
 
-#: module/input:138 module/input:355 module/input:575
+#: module/input:138 module/input:352 module/input:564
 msgid "value needed"
 msgstr "Wert notwendig"
 
-#: module/input:160 module/input:381 module/input:601
+#: module/input:160 module/input:376 module/input:588
 msgid "invalid character"
 msgstr "ungültiges Zeichen"
 
@@ -323,43 +323,43 @@ msgstr "Gib eine kurze Zeile ein"
 msgid "Input through system editor..."
 msgstr "Eingabe mit dem Systemeditor..."
 
-#: module/input:337
+#: module/input:333
 msgid "incomplete"
 msgstr "unvollständig"
 
-#: module/input:392
+#: module/input:385
 msgid "bad"
 msgstr "schlecht"
 
-#: module/input:394
+#: module/input:387
 msgid "weak"
 msgstr "schwach"
 
-#: module/input:396
+#: module/input:389
 msgid "good"
 msgstr "gut"
 
-#: module/input:398
+#: module/input:391
 msgid "strong"
 msgstr "stark"
 
-#: module/input:532
+#: module/input:523
 msgid "Select one of the above options"
 msgstr "Wähle eine der obigen Optionen"
 
-#: module/input:675
+#: module/input:660
 msgid "Could not get task list from command"
 msgstr "Befehlsliste konnte nicht von der Funktion gelesen werden"
 
-#: module/input:682
+#: module/input:667
 msgid "No tasks found to be executed."
 msgstr "Keine Aufgaben zum Ausführen gefunden."
 
-#: module/input:688
+#: module/input:673
 msgid "Exit"
 msgstr "Beenden"
 
-#: module/input:695
+#: module/input:680
 #, sh-format
 msgid "Got error $error running $task"
 msgstr "Beim Aufruf von $task kam es zum Fehler $error"

@@ -1555,7 +1555,7 @@ text)prompt="${2:-$(gettext "Enter text (end with empty line)")}";;
 editor)prompt="${2:-$(gettext "Enter text here")}";;
 *)prompt="${2:-$(gettext "Enter short line")}"
 esac
-local input="" char="" seq invalid i_text u_text q
+local input="" char="" seq i_text q
 local countdown="$timeout"
 local nl=$'\n'
 [ -z "$default" ]&&[ -z "$empty" ]||prompt="$prompt [$default]"
@@ -1591,18 +1591,13 @@ fi
 printf "$CC_NOTICE%s: $CC_RESET" "$prompt" >/dev/tty
 stty -echo </dev/tty
 while IFS= read -r -s -t 1 -n 1 char </dev/tty||rc=$?;do
-if [ -n "$invalid" ];then
-invalid=0
-printf ' %.0s' {1..30} >/dev/tty
-printf '\b%.0s' {1..30} >/dev/tty
-fi
+printf "$CLEAR_EOL" >/dev/tty
 if ((rc==142));then
 rc=0
 if [ -n "$timeout" ];then
 ((countdown--))
 if ((countdown>0));then
-i_text="  $(duration_format human "$countdown")     "
-printf '%s' "$i_text$(printf '\b%.0s' $(seq 1 ${#i_text}))" >/dev/tty
+printf "$CURSOR_STORE   %s$CURSOR_RESTORE" "$(duration_format human "$countdown")" >/dev/tty
 continue
 fi
 else
@@ -1615,27 +1610,23 @@ input+=$'\n'
 printf '\n'
 elif [ -n "$final" ];then
 if [[ $input =~ $final ]];then
-printf '          \n' >/dev/tty
+printf '\n' >/dev/tty
 break
 else
-i_text="$(gettext 'incomplete')"
-printf "   $CC_RED%s$CC_RESET" "$i_text$(printf '\b%.0s' $(seq 1 $((${#i_text}+3))))" >/dev/tty
-invalid=1
+printf "$CURSOR_STORE   $CC_RED%s$CC_RESET$CURSOR_RESTORE" "$(gettext 'incomplete')" >/dev/tty
 fi
 elif [ -n "$input" ];then
-printf '          \n' >/dev/tty
+printf "$CLEAR_EOL\n" >/dev/tty
 break
 elif [ -n "$default" ];then
 input="$default"
-printf '          \n' >/dev/tty
+printf "$CLEAR_EOL\n" >/dev/tty
 break
 elif [ -n "$empty" ];then
 printf '\n' >/dev/tty
 break
 elif [ -n "$i_text" ];then
-i_text="$(gettext 'value needed')"
-printf "   $CC_RED%s$CC_RESET" "$i_text$(printf '\b%.0s' $(seq 1 $((${#i_text}+3))))" >/dev/tty
-invalid=1
+printf "$CURSOR_STORE   $CC_RED%s$CC_RESET$CURSOR_RESTORE" "$(gettext 'value needed')" >/dev/tty
 fi
 elif [[ $char == $'\177' ]];then
 if [ ${#input} -gt 0 ];then
@@ -1654,9 +1645,7 @@ if [ "$format" = "float" ]&&[ "$char" = "," ];then
 char=.
 fi
 if [[ ! "$input$char" =~ $pattern ]];then
-i_text="$(gettext 'invalid character')"
-printf "   $CC_RED%s$CC_RESET" "$i_text$(printf '\b%.0s' $(seq 1 $((${#i_text}+3))))" >/dev/tty
-invalid=1
+printf "$CURSOR_STORE   $CC_RED%s$CC_RESET$CURSOR_RESTORE" "$(gettext 'invalid character')" >/dev/tty
 continue
 fi
 fi
@@ -1673,9 +1662,7 @@ i_text="$(gettext 'good')"
 else
 i_text="$CC_GREEN$(gettext 'strong')$CC_RESET"
 fi
-u_text="$(uncolorize "$i_text")"
-printf '   %s' "$i_text$(printf '\b%.0s' $(seq 1 $((${#u_text}+3))))" >/dev/tty
-invalid=1
+printf '${CURSOR_STORE}   %s${CURSOR_RESTORE}' "$i_text" >/dev/tty
 fi
 fi
 i_text=""
@@ -1761,25 +1748,20 @@ fi
 ((length==1))||pattern="(0|$pattern)"
 [ -z "$end" ]||pattern="(x|$pattern)"
 pattern="^$pattern$"
-local input="" char="" i_text invalid
+local input="" char="" i_text
 local countdown="$timeout"
 local question="$(gettext "Select one of the above options")"
 [ -z "$default" ]&&timeout=""||question="$question [$default]"
 printf '%s: ' "$question" >/dev/tty
 stty -echo </dev/tty
 while read -r -s -t 1 -n 1 char </dev/tty||rc=$?;do
-if [ -n "$invalid" ];then
-invalid=0
-printf ' %.0s' {1..30} >/dev/tty
-printf '\b%.0s' {1..30} >/dev/tty
-fi
+printf "$CLEAR_EOL"
 if ((rc==142));then
 rc=0
 if [ -n "$timeout" ];then
 ((countdown--))
 if ((countdown>0));then
-i_text="  $(duration_format human "$countdown")     "
-printf '%s' "$i_text$(printf '\b%.0s' $(seq 1 ${#i_text}))" >/dev/tty
+printf "$CURSOR_STORE   %s$CURSOR_RESTORE" "$(duration_format human "$countdown")" >/dev/tty
 continue
 fi
 else
@@ -1788,19 +1770,17 @@ fi
 fi
 if [[ $char == "" ]];then
 if [ -n "$final" ];then
-printf '          \n' >/dev/tty
+printf "$CLEAR_EOL\n" >/dev/tty
 break
 elif [ -n "$input" ];then
-printf '          \n' >/dev/tty
+printf "$CLEAR_EOL\n" >/dev/tty
 break
 elif [ -n "$default" ];then
 input="$default"
-printf '          \n' >/dev/tty
+printf "$CLEAR_EOL\n" >/dev/tty
 break
 else
-i_text="$(gettext 'value needed')"
-printf '%s\n' "   $CC_RED$i_text$CC_RESET$(printf '\b%.0s' $(seq 1 $((${#i_text}+3))))" >/dev/tty
-invalid=1
+printf "$CURSOR_STORE   %s$CURSOR_RESTORE" "$(gettext 'value needed')" >/dev/tty
 fi
 elif [[ $char == $'\177' ]];then
 if [ ${#input} -gt 0 ];then
@@ -1819,9 +1799,7 @@ stty echo </dev/tty
 return 0
 else
 if [[ ! "$input$char" =~ $pattern ]];then
-i_text="$(gettext 'invalid character')"
-printf '%s' "   $CC_RED$i_text$CC_RESET$(printf '\b%.0s' $(seq 1 $((${#i_text}+3))))" >/dev/tty
-invalid=1
+printf "$CURSOR_STORE   $CC_RED%s$CC_RESET$CURSOR_RESTORE" "$(gettext 'invalid character')" >/dev/tty
 continue
 fi
 input+="$char"
