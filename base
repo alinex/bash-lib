@@ -1,5 +1,167 @@
 #!/usr/bin/env bash
 BASHLIB_LOADER=${BASHLIB_LOADER:-base}
+COLORS=$(tput colors 2>/dev/null||echo 0)
+CC_RESET=$'\e[0m'
+CC_RESET_FG=$'\e[39m'
+CC_RESET_BG=$'\e[49m'
+CC_INTENSITY_BOLD=$'\e[1m'
+CC_INTENSITY_LIGHT=$'\e[2m'
+CC_INTENSITY_OFF=$'\e[22m'
+CC_ITALIC=$'\e[3m'
+CC_ITALIC_OFF=$'\e[23m'
+CC_UNDERLINE=$'\e[4m'
+CC_UNDERLINE_OFF=$'\e[24m'
+CC_INVERSE=$'\e[7m'
+CC_INVERSE_OFF=$'\e[27m'
+CC_DASHED=$'\e[9m'
+CC_DASHED_OFF=$'\e[29m'
+CC_BLACK=$'\e[30m'
+CC_RED=$'\e[31m'
+CC_GREEN=$'\e[32m'
+CC_YELLOW=$'\e[33m'
+CC_BLUE=$'\e[34m'
+CC_MAGENTA=$'\e[35m'
+CC_CYAN=$'\e[36m'
+CC_WHITE=$'\e[37m'
+CC_BLACK_BOLD=$'\e[90m'
+CC_RED_BOLD=$'\e[91m'
+CC_GREEN_BOLD=$'\e[92m'
+CC_YELLOW_BOLD=$'\e[93m'
+CC_BLUE_BOLD=$'\e[94m'
+CC_MAGENTA_BOLD=$'\e[95m'
+CC_CYAN_BOLD=$'\e[96m'
+CC_WHITE_BOLD=$'\e[97m'
+CC_BLACK_BG=$'\e[40m'
+CC_RED_BG=$'\e[41m'
+CC_GREEN_BG=$'\e[42m'
+CC_YELLOW_BG=$'\e[43m'
+CC_BLUE_BG=$'\e[44m'
+CC_MAGENTA_BG=$'\e[45m'
+CC_CYAN_BG=$'\e[46m'
+CC_BLACK_BOLD_BG=$'\e[100m'
+CC_RED_BOLD_BG=$'\e[101m'
+CC_GREEN_BOLD_BG=$'\e[102m'
+CC_YELLOW_BOLD_BG=$'\e[103m'
+CC_BLUE_BOLD_BG=$'\e[104m'
+CC_MAGENTA_BOLD_BG=$'\e[105m'
+CC_CYAN_BOLD_BG=$'\e[106m'
+color_256(){
+is integer --name=arguments --max=1 --die -- $#
+local num
+num="$(check integer --name=num "$1" --sanitize --min=0 --max=255 --die)"
+echo $'\e[38;5;'"$num"'m'
+}
+color_256_bg(){
+is integer --name=arguments --max=1 --die -- $#
+local num
+num="$(check integer --name=num "$1" --sanitize --min=0 --max=255 --die)"
+echo $'\e[48;5;'"$num"'m'
+}
+CC_CRITICAL=$'\e[1;45m'
+CC_ERROR=$'\e[1;31m'
+CC_WARN=$'\e[1;33m'
+CC_NOTICE=$'\e[1;34m'
+CC_OK=$'\e[1;32m'
+CC_HEADING=$'\e[44m'
+CC_INVERS=$'\e[7m'
+color_table(){
+is integer --name=arguments --max=0 --die -- $#
+echo "Basic Colors:"
+echo -e "\t${CC_BLACK}CC_BLACK\t${CC_BLACK_BOLD}CC_BLACK_BOLD\t${CC_BLACK_BG}CC_BLACK_BG\t${CC_BLACK_BOLD_BG}CC_BLACK_BOLD_BG$CC_RESET"
+echo -e "\t${CC_RED}CC_RED\t\t${CC_RED_BOLD}CC_RED_BOLD\t${CC_RED_BG}CC_RED_BG\t${CC_RED_BOLD_BG}CC_RED_BOLD_BG$CC_RESET"
+echo -e "\t${CC_GREEN}CC_GREEN\t${CC_GREEN_BOLD}CC_GREEN_BOLD\t${CC_GREEN_BG}CC_GREEN_BG\t${CC_GREEN_BOLD_BG}CC_GREEN_BOLD_BG$CC_RESET"
+echo -e "\t${CC_YELLOW}CC_YELLOW\t${CC_YELLOW_BOLD}CC_YELLOW_BOLD\t${CC_YELLOW_BG}CC_YELLOW_BG\t${CC_YELLOW_BOLD_BG}CC_YELLOW_BOLD_BG$CC_RESET"
+echo -e "\t${CC_BLUE}CC_BLUE\t\t${CC_BLUE_BOLD}CC_BLUE_BOLD\t${CC_BLUE_BG}CC_BLUE_BG\t${CC_BLUE_BOLD_BG}CC_BLUE_BOLD_BG$CC_RESET"
+echo -e "\t${CC_MAGENTA}CC_MAGENTA\t${CC_MAGENTA_BOLD}CC_MAGENTA_BOLD\t${CC_MAGENTA_BG}CC_MAGENTA_BG\t${CC_MAGENTA_BOLD_BG}CC_MAGENTA_BOLD_BG$CC_RESET"
+echo -e "\t${CC_CYAN}CC_CYAN\t\t${CC_CYAN_BOLD}CC_CYAN_BOLD\t${CC_CYAN_BG}CC_CYAN_BG\t${CC_CYAN_BOLD_BG}CC_CYAN_BOLD_BG$CC_RESET"
+echo "Special Formats:"
+echo -e "\t${CC_INTENSITY_BOLD}CC_INTENSITY_BOLD\t${CC_INTENSITY_LIGHT}CC_INTENSITY_LIGHT$CC_RESET"
+echo -e "\t${CC_ITALIC}CC_ITALIC$CC_RESET"
+echo -e "\t${CC_UNDERLINE}CC_UNDERLINE$CC_RESET"
+echo -e "\t${CC_DASHED}CC_DASHED$CC_RESET"
+echo -e "\t${CC_INVERSE}CC_INVERSE$CC_RESET"
+echo "256 Color palette:"
+local cols=15
+local rows=15
+for c in $(seq 0 "$cols");do
+for r in $(seq 0 "$rows");do
+num=$((r*cols+c))
+printf '%s' "\t$(color_256 "$num")FG $num"
+done
+echo ""
+done
+for c in $(seq 0 "$cols");do
+for r in $(seq 0 "$rows");do
+num=$((r*cols+c))
+printf '%s' "\t$(color_256_bg "$num")BG $num$CC_RESET"
+done
+echo ""
+done
+echo "Context specific colors:"
+echo -e "\t${CC_CRITICAL}CC_CRITICAL$CC_RESET"
+echo -e "\t${CC_ERROR}CC_ERROR$CC_RESET"
+echo -e "\t${CC_WARN}CC_WARN$CC_RESET"
+echo -e "\t${CC_NOTICE}CC_NOTICE$CC_RESET"
+echo -e "\t${CC_OK}CC_OK$CC_RESET"
+echo -e "\t${CC_HEADING}CC_HEADING$CC_RESET"
+echo -e "\t${CC_INVERS}CC_INVERS$CC_RESET"
+}
+CURSOR_UP=$'\e[A'
+CURSOR_DOWN=$'\e[B'
+CURSOR_RIGHT=$'\e[C'
+CURSOR_LEFT=$'\e[D'
+CURSOR_NEXT=$'\e[E'
+CURSOR_PREVIOUS=$'\e[F'
+CURSOR_POS1=$'\e[G'
+CURSOR_TOP=$'\e[H'
+CURSOR_STORE=$'\e[s'
+CURSOR_RESTORE=$'\e[u'
+CURSOR_SHOW=$'\e[?25h'
+CURSOR_HIDE=$'\e[?25l'
+cursor(){
+local num="${2:-1}" col="${3:-1}"
+is enum --name=direction --allow="up down right left row pos next previous" --die -- "$1"
+is integer --name=num --min=1 --die -- "$num"
+is integer --name=arguments --max=3 --die -- $#
+case "$1" in
+up)printf '\e[%sA' "$num";;
+down)printf '\e[%sB' "$num";;
+right)printf '\e[%sC' "$num";;
+left)printf '\e[%sD' "$num";;
+row)printf '\e[%sH' "$num";;
+pos)is integer --name=col --min=1 --die -- "$col"
+printf '\e[%s;%sH' "$num" "$col"
+;;
+next)printf '\e[%sE' "$num";;
+previous)printf '\e[%sF' "$num"
+esac
+}
+character(){
+local num="$2"
+is enum --name=command --allow="repeat" --die -- "$1"
+is integer --name=num --min=1 --die -- "$num"
+case "$1" in
+repeat)is set --name=character --min=1 --die -- "$3"
+is length --name=character --min=1 --max=1 --die -- "$3"
+((num==1))&&printf '%s' "$3"||printf '%s\e[%sb' "$3" $((num-1))
+;;
+delete)printf '\e[%sP' "$num";;
+erase)printf '\e[%sX' "$num"
+esac
+}
+SCROLL_UP=$'\e[M'
+CLEAR_SCREEN=$'\e[2J'
+CLEAR_UP=$'\e[1J'
+CLEAR_DOWN=$'\e[0J'
+CLEAR_EOL=$'\e[0K'
+CLEAR_SOL=$'\e[1K'
+CLEAR_LINE=$'\e[2K'
+SCREEN_RESTORE=$'\e[?47l'
+SCREEN_SAVE=$'\e[?47h'
+erase_line(){
+_deprecated "Use $CLEAR_LINE" warn
+printf "$CLEAR_LINE"
+}
 option_parse(){
 local opt name type desc short="" long="" spec="$1" permute
 [ -n "$spec" ]||die "$(gettext 'A specification string is needed as first argument')"
@@ -144,112 +306,6 @@ for key in "${!arr[@]}";do
 done
 return 1
 esac
-}
-COLORS=$(tput colors 2>/dev/null||echo 0)
-CC_RESET=$'\e[0m'
-CC_RESET_FG=$'\e[39m'
-CC_RESET_BG=$'\e[49m'
-CC_INTENSITY_BOLD=$'\e[1m'
-CC_INTENSITY_LIGHT=$'\e[2m'
-CC_INTENSITY_OFF=$'\e[22m'
-CC_ITALIC=$'\e[3m'
-CC_ITALIC_OFF=$'\e[23m'
-CC_UNDERLINE=$'\e[4m'
-CC_UNDERLINE_OFF=$'\e[24m'
-CC_INVERSE=$'\e[7m'
-CC_INVERSE_OFF=$'\e[27m'
-CC_DASHED=$'\e[9m'
-CC_DASHED_OFF=$'\e[29m'
-CC_BLACK=$'\e[30m'
-CC_RED=$'\e[31m'
-CC_GREEN=$'\e[32m'
-CC_YELLOW=$'\e[33m'
-CC_BLUE=$'\e[34m'
-CC_MAGENTA=$'\e[35m'
-CC_CYAN=$'\e[36m'
-CC_WHITE=$'\e[37m'
-CC_BLACK_BOLD=$'\e[90m'
-CC_RED_BOLD=$'\e[91m'
-CC_GREEN_BOLD=$'\e[92m'
-CC_YELLOW_BOLD=$'\e[93m'
-CC_BLUE_BOLD=$'\e[94m'
-CC_MAGENTA_BOLD=$'\e[95m'
-CC_CYAN_BOLD=$'\e[96m'
-CC_WHITE_BOLD=$'\e[97m'
-CC_BLACK_BG=$'\e[40m'
-CC_RED_BG=$'\e[41m'
-CC_GREEN_BG=$'\e[42m'
-CC_YELLOW_BG=$'\e[43m'
-CC_BLUE_BG=$'\e[44m'
-CC_MAGENTA_BG=$'\e[45m'
-CC_CYAN_BG=$'\e[46m'
-CC_BLACK_BOLD_BG=$'\e[100m'
-CC_RED_BOLD_BG=$'\e[101m'
-CC_GREEN_BOLD_BG=$'\e[102m'
-CC_YELLOW_BOLD_BG=$'\e[103m'
-CC_BLUE_BOLD_BG=$'\e[104m'
-CC_MAGENTA_BOLD_BG=$'\e[105m'
-CC_CYAN_BOLD_BG=$'\e[106m'
-color_256(){
-is integer --name=arguments --max=1 --die -- $#
-local num
-num="$(check integer --name=num "$1" --sanitize --min=0 --max=255 --die)"
-echo $'\e[38;5;'"$num"'m'
-}
-color_256_bg(){
-is integer --name=arguments --max=1 --die -- $#
-local num
-num="$(check integer --name=num "$1" --sanitize --min=0 --max=255 --die)"
-echo $'\e[48;5;'"$num"'m'
-}
-CC_CRITICAL=$'\e[1;45m'
-CC_ERROR=$'\e[1;31m'
-CC_WARN=$'\e[1;33m'
-CC_NOTICE=$'\e[1;34m'
-CC_OK=$'\e[1;32m'
-CC_HEADING=$'\e[44m'
-CC_INVERS=$'\e[7m'
-color_table(){
-is integer --name=arguments --max=0 --die -- $#
-echo "Basic Colors:"
-echo -e "\t${CC_BLACK}CC_BLACK\t${CC_BLACK_BOLD}CC_BLACK_BOLD\t${CC_BLACK_BG}CC_BLACK_BG\t${CC_BLACK_BOLD_BG}CC_BLACK_BOLD_BG$CC_RESET"
-echo -e "\t${CC_RED}CC_RED\t\t${CC_RED_BOLD}CC_RED_BOLD\t${CC_RED_BG}CC_RED_BG\t${CC_RED_BOLD_BG}CC_RED_BOLD_BG$CC_RESET"
-echo -e "\t${CC_GREEN}CC_GREEN\t${CC_GREEN_BOLD}CC_GREEN_BOLD\t${CC_GREEN_BG}CC_GREEN_BG\t${CC_GREEN_BOLD_BG}CC_GREEN_BOLD_BG$CC_RESET"
-echo -e "\t${CC_YELLOW}CC_YELLOW\t${CC_YELLOW_BOLD}CC_YELLOW_BOLD\t${CC_YELLOW_BG}CC_YELLOW_BG\t${CC_YELLOW_BOLD_BG}CC_YELLOW_BOLD_BG$CC_RESET"
-echo -e "\t${CC_BLUE}CC_BLUE\t\t${CC_BLUE_BOLD}CC_BLUE_BOLD\t${CC_BLUE_BG}CC_BLUE_BG\t${CC_BLUE_BOLD_BG}CC_BLUE_BOLD_BG$CC_RESET"
-echo -e "\t${CC_MAGENTA}CC_MAGENTA\t${CC_MAGENTA_BOLD}CC_MAGENTA_BOLD\t${CC_MAGENTA_BG}CC_MAGENTA_BG\t${CC_MAGENTA_BOLD_BG}CC_MAGENTA_BOLD_BG$CC_RESET"
-echo -e "\t${CC_CYAN}CC_CYAN\t\t${CC_CYAN_BOLD}CC_CYAN_BOLD\t${CC_CYAN_BG}CC_CYAN_BG\t${CC_CYAN_BOLD_BG}CC_CYAN_BOLD_BG$CC_RESET"
-echo "Special Formats:"
-echo -e "\t${CC_INTENSITY_BOLD}CC_INTENSITY_BOLD\t${CC_INTENSITY_LIGHT}CC_INTENSITY_LIGHT$CC_RESET"
-echo -e "\t${CC_ITALIC}CC_ITALIC$CC_RESET"
-echo -e "\t${CC_UNDERLINE}CC_UNDERLINE$CC_RESET"
-echo -e "\t${CC_DASHED}CC_DASHED$CC_RESET"
-echo -e "\t${CC_INVERSE}CC_INVERSE$CC_RESET"
-echo "256 Color palette:"
-local cols=15
-local rows=15
-for c in $(seq 0 "$cols");do
-for r in $(seq 0 "$rows");do
-num=$((r*cols+c))
-printf '%s' "\t$(color_256 "$num")FG $num"
-done
-echo ""
-done
-for c in $(seq 0 "$cols");do
-for r in $(seq 0 "$rows");do
-num=$((r*cols+c))
-printf '%s' "\t$(color_256_bg "$num")BG $num$CC_RESET"
-done
-echo ""
-done
-echo "Context specific colors:"
-echo -e "\t${CC_CRITICAL}CC_CRITICAL$CC_RESET"
-echo -e "\t${CC_ERROR}CC_ERROR$CC_RESET"
-echo -e "\t${CC_WARN}CC_WARN$CC_RESET"
-echo -e "\t${CC_NOTICE}CC_NOTICE$CC_RESET"
-echo -e "\t${CC_OK}CC_OK$CC_RESET"
-echo -e "\t${CC_HEADING}CC_HEADING$CC_RESET"
-echo -e "\t${CC_INVERS}CC_INVERS$CC_RESET"
 }
 BASHLIB_HOME=${BASHLIB_HOME:-$HOME/bashlib}
 DEBUG=${DEBUG-}
@@ -543,62 +599,6 @@ return 0
 fi
 done
 return 1
-}
-CURSOR_UP=$'\e[A'
-CURSOR_DOWN=$'\e[B'
-CURSOR_RIGHT=$'\e[C'
-CURSOR_LEFT=$'\e[D'
-CURSOR_NEXT=$'\e[E'
-CURSOR_PREVIOUS=$'\e[F'
-CURSOR_POS1=$'\e[G'
-CURSOR_TOP=$'\e[H'
-CURSOR_STORE=$'\e[s'
-CURSOR_RESTORE=$'\e[u'
-CURSOR_SHOW=$'\e[?25h'
-CURSOR_HIDE=$'\e[?25l'
-cursor(){
-local num="${2:-1}" col="${3:-1}"
-is enum --name=direction --allow="up down right left row pos next previous" --die -- "$1"
-is integer --name=num --min=1 --die -- "$num"
-is integer --name=arguments --max=3 --die -- $#
-case "$1" in
-up)printf '\e[%sA' "$num";;
-down)printf '\e[%sB' "$num";;
-right)printf '\e[%sC' "$num";;
-left)printf '\e[%sD' "$num";;
-row)printf '\e[%sH' "$num";;
-pos)is integer --name=col --min=1 --die -- "$col"
-printf '\e[%s;%sH' "$num" "$col"
-;;
-next)printf '\e[%sE' "$num";;
-previous)printf '\e[%sF' "$num"
-esac
-}
-character(){
-local num="$2"
-is enum --name=command --allow="repeat" --die -- "$1"
-is integer --name=num --min=1 --die -- "$num"
-case "$1" in
-repeat)is set --name=character --min=1 --die -- "$3"
-is length --name=character --min=1 --max=1 --die -- "$3"
-((num==1))&&printf '%s' "$3"||printf '%s\e[%sb' "$3" $((num-1))
-;;
-delete)printf '\e[%sP' "$num";;
-erase)printf '\e[%sX' "$num"
-esac
-}
-SCROLL_UP=$'\e[M'
-CLEAR_SCREEN=$'\e[2J'
-CLEAR_UP=$'\e[1J'
-CLEAR_DOWN=$'\e[0J'
-CLEAR_EOL=$'\e[0K'
-CLEAR_SOL=$'\e[1K'
-CLEAR_LINE=$'\e[2K'
-SCREEN_RESTORE=$'\e[?47l'
-SCREEN_SAVE=$'\e[?47h'
-erase_line(){
-_deprecated "Use $CLEAR_LINE" warn
-printf "$CLEAR_LINE"
 }
 debug(){
 local level=1 func text sign='>'

@@ -80,34 +80,9 @@ The configuration module contains a lot of general configuration settings for th
 
 ## Core
 
-### Arguments Module
+### Ansi Module
 
-This should help to read function parameters/arguments in different ways.
-
-| Variable/Function | Description |
-| --- | --- |
-| [`option_parse`](function/option_parse.md) | Parse arguments based on given specification |
-| [`option_help`](function/option_help.md) | Print help for options defined in options specification |
-| [`input`](function/input.md) | Collect string from stdin (no parameters) or concatenate the parameters |
-| [`input_args`](function/input_args.md) | Collect string from stdin (not more than defined parameters) or concatenate the parameters |
-| [`input_lines`](function/input_lines.md) | Collect string from stdin (no parameters) or parameters each as a line |
-| [`escape_args`](function/escape_args.md) | Escape all args into single string, this could not be used directly in commands as arguments only through eval |
-
-### Array Module
-
-Helper functions to work with arrays and associative arrays (hashes).
-
-| Variable/Function | Description |
-| --- | --- |
-| [`contains`](function/contains.md) | Deprecated: Check if value is contained in array |
-| [`array`](function/array.md) | Array analyzation. |
-| [`join`](function/join.md) | Join array elements by delimiter |
-| [`split`](function/split.md) | Splits string by delimiter into array |
-| [`hash`](function/hash.md) | Methods to work with assoziative arrays (hashes) |
-
-### Color Module
-
-This module contains color specifications to be used in console output.
+This module contains ANSI escape constants and helpers for color, cursor move, clear and more.
 
 | Variable/Function | Description |
 | --- | --- |
@@ -163,9 +138,58 @@ This module contains color specifications to be used in console output.
 | ``$CC_OK`` | Set color for success messages |
 | ``$CC_HEADING`` | Set color for block headings |
 | ``$CC_INVERS`` | Set color for highlighted parts like table header |
+| ``$CURSOR_UP`` | Cursor up 1 line |
+| ``$CURSOR_DOWN`` |  Cursor down 1 line |
+| ``$CURSOR_RIGHT`` |  Cursor right 1 col |
+| ``$CURSOR_LEFT`` | Cursor left 1 col |
+| ``$CURSOR_NEXT`` | Next Line (down, col 1) |
+| ``$CURSOR_PREVIOUS`` | Previous Line (up, col 1) |
+| ``$CURSOR_POS1`` | Cursor to start of line |
+| ``$CURSOR_TOP`` | Cursor to top-left |
+| ``$CURSOR_STORE`` | Save cursor pos |
+| ``$CURSOR_RESTORE`` | Restore cursor pos |
+| ``$CURSOR_SHOW`` | Show cursor |
+| ``$CURSOR_HIDE`` | Hide cursor |
+| ``$SCROLL_UP`` | Reverse Index (up, scroll) |
+| ``$CLEAR_SCREEN`` | Clear entire screen |
+| ``$CLEAR_UP`` | Clear from start of screen to cursor |
+| ``$CLEAR_DOWN`` | Clear from cursor to end of screen |
+| ``$CLEAR_EOL`` | Clear from cursor to end of line |
+| ``$CLEAR_SOL`` | Clear from start of line to cursor |
+| ``$CLEAR_LINE`` | Clear entire line |
+| ``$SCREEN_RESTORE`` | restore screen |
+| ``$SCREEN_SAVE`` | save screen |
 | [`color_256`](function/color_256.md) | Get color code for text color number |
 | [`color_256_bg`](function/color_256_bg.md) | Get color code for background color number |
 | [`color_table`](function/color_table.md) | Show complete color table |
+| [`cursor`](function/cursor.md) | Move cursor on console |
+| [`character`](function/character.md) | Change characters |
+| [`erase_line`](function/erase_line.md) | Deprecated: Remove current line |
+
+### Arguments Module
+
+This should help to read function parameters/arguments in different ways.
+
+| Variable/Function | Description |
+| --- | --- |
+| [`option_parse`](function/option_parse.md) | Parse arguments based on given specification |
+| [`option_help`](function/option_help.md) | Print help for options defined in options specification |
+| [`input`](function/input.md) | Collect string from stdin (no parameters) or concatenate the parameters |
+| [`input_args`](function/input_args.md) | Collect string from stdin (not more than defined parameters) or concatenate the parameters |
+| [`input_lines`](function/input_lines.md) | Collect string from stdin (no parameters) or parameters each as a line |
+| [`escape_args`](function/escape_args.md) | Escape all args into single string, this could not be used directly in commands as arguments only through eval |
+
+### Array Module
+
+Helper functions to work with arrays and associative arrays (hashes).
+
+| Variable/Function | Description |
+| --- | --- |
+| [`contains`](function/contains.md) | Deprecated: Check if value is contained in array |
+| [`array`](function/array.md) | Array analyzation. |
+| [`join`](function/join.md) | Join array elements by delimiter |
+| [`split`](function/split.md) | Splits string by delimiter into array |
+| [`hash`](function/hash.md) | Methods to work with assoziative arrays (hashes) |
 
 ### Config Module
 
@@ -214,30 +238,6 @@ Module with output and user interaction helpers.
 
 | Variable/Function | Description |
 | --- | --- |
-| ``$CURSOR_UP`` | Cursor up 1 line |
-| ``$CURSOR_DOWN`` |  Cursor down 1 line |
-| ``$CURSOR_RIGHT`` |  Cursor right 1 col |
-| ``$CURSOR_LEFT`` | Cursor left 1 col |
-| ``$CURSOR_NEXT`` | Next Line (down, col 1) |
-| ``$CURSOR_PREVIOUS`` | Previous Line (up, col 1) |
-| ``$CURSOR_POS1`` | Cursor to start of line |
-| ``$CURSOR_TOP`` | Cursor to top-left |
-| ``$CURSOR_STORE`` | Save cursor pos |
-| ``$CURSOR_RESTORE`` | Restore cursor pos |
-| ``$CURSOR_SHOW`` | Show cursor |
-| ``$CURSOR_HIDE`` | Hide cursor |
-| ``$SCROLL_UP`` | Reverse Index (up, scroll) |
-| ``$CLEAR_SCREEN`` | Clear entire screen |
-| ``$CLEAR_UP`` | Clear from start of screen to cursor |
-| ``$CLEAR_DOWN`` | Clear from cursor to end of screen |
-| ``$CLEAR_EOL`` | Clear from cursor to end of line |
-| ``$CLEAR_SOL`` | Clear from start of line to cursor |
-| ``$CLEAR_LINE`` | Clear entire line |
-| ``$SCREEN_RESTORE`` | restore screen |
-| ``$SCREEN_SAVE`` | save screen |
-| [`cursor`](function/cursor.md) | Move cursor on console |
-| [`character`](function/character.md) | Change characters |
-| [`erase_line`](function/erase_line.md) | Deprecated: Remove current line |
 | [`debug`](function/debug.md) | Write message to STDERR if in DEBUG mode else do nothing |
 | [`die`](function/die.md) | Output error message and exit |
 | [`help`](function/help.md) | Show help page and exit |
