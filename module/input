@@ -90,7 +90,7 @@ confirm() {
     local prompt
     prompt="${1:-$(gettext "Should this be done")}"
     # processing
-    local char="" seq i_text invalid rc
+    local char="" seq rc
     local countdown="$timeout"
     if is set -- "$default"; then
         ((default == 0)) && prompt="$prompt [$(gettext "No")]" || prompt="$prompt [$(gettext "Yes")]"
@@ -101,20 +101,14 @@ confirm() {
     # shellcheck disable=SC2086
     # shellcheck disable=SC2229
     while IFS= read -r -s -t 1 -n 1 char </dev/tty || rc=$?; do
-        # remove error
-        if [ -n "$invalid" ]; then
-            invalid=0
-            printf ' %.0s' {1..30} >/dev/tty
-            printf '\b%.0s' {1..30} >/dev/tty
-        fi
+        printf "${CLEAR_EOF}" >/dev/tty
         # check for countdown if timeout of read reached
         if ((rc == 142)); then
             rc=0
             if [ -n "$timeout" ]; then
                 ((countdown--))
                 if ((countdown > 0)); then
-                    i_text="$(duration_format human "$countdown")"
-                    printf "${CURSOR_RESTORE}${CLEAR_EOL}%s" "$i_text" >/dev/tty
+                    printf "${CURSOR_RESTORE}${CLEAR_EOL}%s" "$(duration_format human "$countdown")" >/dev/tty
                     continue
                 fi
             else
@@ -134,10 +128,8 @@ confirm() {
                     stty echo </dev/tty
                     return 1
                 fi
-            elif [ -n "$i_text" ]; then
-                i_text="$(gettext 'value needed')"
-                printf "${CURSOR_RESTORE}${CLEAR_EOL}${CC_RED}%s${CC_RESET}" "$i_text" >/dev/tty
-                invalid=1
+            else
+                printf "${CURSOR_RESTORE}${CLEAR_EOL}${CC_RED}%s${CC_RESET}" "$(gettext 'value needed')" >/dev/tty
             fi
         # ignore escape sequences
         elif [[ $char == $'\e' ]]; then
@@ -157,11 +149,8 @@ confirm() {
             stty echo </dev/tty
             return 1
         else
-            i_text="$(gettext 'invalid character')"
-            printf "${CURSOR_RESTORE}${CLEAR_EOL}${CC_RED}%s${CC_RESET}" "$i_text" >/dev/tty
-            invalid=1
+            printf "${CURSOR_RESTORE}${CLEAR_EOL}${CC_RED}%s${CC_RESET}" "$(gettext 'invalid character')" >/dev/tty
         fi
-        i_text=""
     done
     stty echo </dev/tty
 }
@@ -347,7 +336,7 @@ ask() {
             elif [ -n "$empty" ]; then
                 printf '\n' >/dev/tty
                 break
-            elif [ -n "$i_text" ]; then
+            else
                 printf "${CURSOR_STORE}   ${CC_RED}%s${CC_RESET}${CURSOR_RESTORE}" "$(gettext 'value needed')" >/dev/tty
             fi
         # Handle backspace
@@ -392,7 +381,6 @@ ask() {
                 printf '${CURSOR_STORE}   %s${CURSOR_RESTORE}' "$i_text" >/dev/tty
             fi
         fi
-        i_text=""
     done
     stty echo </dev/tty
     debug 4 "Octal result: $(od -An -to1 -v <<<"$input")"
@@ -516,7 +504,7 @@ choose() {
     [ -z "$end" ] || pattern="(x|$pattern)"
     pattern="^$pattern$"
     # question
-    local input="" char="" i_text
+    local input="" char=""
     local countdown="$timeout"
     # shellcheck disable=SC2155
     local question="$(gettext "Select one of the above options")"
