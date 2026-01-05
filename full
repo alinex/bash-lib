@@ -2277,7 +2277,7 @@ shift 2
 *)die "$(gettext "Unrecognized option"): $1"
 esac
 done
-install jq mlr
+install jq
 local list
 list="$(curl -H "Authorization: Bearer $GRAFANA_TOKEN" "$GRAFANA_API/alertmanager/grafana/api/v2/alerts")"||die "$(gettext "Could not get alerts from Grafana!")"
 list="$(jq 'sort_by(.startsAt) | .[] '"$filter" <<<"$list")"||die "$(gettext "Parse error in Grafana alerts list with filter"): $filter"
@@ -2303,7 +2303,7 @@ mattermost)list="$(jq -s '.[] | {
                 )
             }' <<<"$list"|jq -s .)"
 ;;
-*)header="$(printf '%s\n' "$(gettext "Severity\tNetwork\tInstance\tSummary\tStart")")"
+*)header="$(printf "$(gettext "Severity\tNetwork\tInstance\tSummary\tStart")\n")"
 list="$header"$'\n'"$(jq -r '[.labels.severity, .labels.net, .labels.instance, .annotations.summary, (.startsAt| split(".")[0]| strptime("%Y-%m-%dT%H:%M:%S")| strftime("%Y-%m-%d %H:%M:%S"))] | @tsv' <<<"$list")"
 esac
 case $format in

@@ -462,7 +462,7 @@ _password_strength() {
 # Output:   selected `<line>`
 # Return:   `exit 0` # if run with `--exit` and this was chosen
 # Example:  &input#choose shows all possible use cases
-# TODO > 10 entries make two columns using mlr display
+# TODO > 10 entries make two columns using
 choose() {
     # parameter parsing
     local end default timeout

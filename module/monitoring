@@ -144,7 +144,7 @@ alerts() {
         esac
     done
     # processing
-    install jq mlr
+    install jq
     local list
     list="$(curl -H "Authorization: Bearer $GRAFANA_TOKEN" "$GRAFANA_API/alertmanager/grafana/api/v2/alerts")" ||
         die "$(gettext "Could not get alerts from Grafana!")"
@@ -176,7 +176,8 @@ alerts() {
             }' <<<"$list" | jq -s .)"
         ;;
     *)
-        header="$(printf '%s\n' "$(gettext "Severity\tNetwork\tInstance\tSummary\tStart")")"
+        # shellcheck disable=SC2059
+        header="$(printf "$(gettext "Severity\tNetwork\tInstance\tSummary\tStart")\n")"
         list="$header"$'\n'"$(jq -r '[.labels.severity, .labels.net, .labels.instance, .annotations.summary, (.startsAt| split(".")[0]| strptime("%Y-%m-%dT%H:%M:%S")| strftime("%Y-%m-%d %H:%M:%S"))] | @tsv' <<<"$list")"
         ;;
     esac

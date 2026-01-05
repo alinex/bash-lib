@@ -50,4 +50,4 @@ With the options a default can be given, which will be selected using return-key
 With the option `--exit` the additional entry will break by returning `exit`.
 
 Entry:    `<entry>` := `<string>` | `<key>` "|" `<display>` # whitespace around values are removed
-TODO >` 10 entries make two columns using mlr display
+TODO >` 10 entries make two columns using
