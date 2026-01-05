@@ -281,7 +281,6 @@ ask() {
                 sleep "$timeout"
                 pkill -TERM -P $! || true
                 stty sane
-                debug "------"
             else
                 $EDITOR "$answer"
             fi
@@ -528,7 +527,7 @@ choose() {
     # shellcheck disable=SC2229
     while read -r -s -t 1 -n 1 char </dev/tty || rc=$?; do
         # shellcheck disable=SC2059
-        printf "${CLEAR_EOL}"
+        printf "${CLEAR_EOL}" >/dev/tty
         # check for countdown if timeout of read reached
         if ((rc == 142)); then
             rc=0
@@ -671,7 +670,7 @@ tasks() {
         _default="$(value_if_variable "$_default")"
         # shellcheck disable=SC2086
         task=$(choose "$title" -x "$(gettext "Exit")" $opt -d "$_default" "$list" </dev/null)
-        debug "chosen $task"
+        #task="$(uncolorize "$task")"
         [[ "$task" != "exit" ]] || break
         local error
         # shellcheck disable=SC2034
