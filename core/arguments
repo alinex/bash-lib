@@ -46,7 +46,7 @@ option_parse() {
     while IFS=$' \t\n' read -r opt name type desc; do
         [[ "$opt" =~ ^# ]] && continue # skip comments
         [[ -z "$opt" ]] && continue    # skip empty lines
-        if [[ $type == *? ]]; then
+        if [[ $type == *\? ]]; then
             [ "${opt}" = "-" ] || short+="${opt}::"
             long+="${name}::,"
         elif [ ! "$type" = "-" ]; then
@@ -84,7 +84,7 @@ option_help() {
         [[ "$opt" =~ ^# ]] && continue # skip comments
         is empty -- "$opt" && continue # skip empty lines
         opt_descriptions[$name]="$desc"
-        [[ $type == *? ]] && opt_type[$name]="[${type%?}]" || opt_type[$name]=$type
+        [[ $type == *\? ]] && opt_type[$name]="[${type%?}]" || opt_type[$name]=$type
         opt_short[$name]=$opt
     done <<<"$1"
     printf '%s\n' "$(gettext "Options"):"

@@ -48,13 +48,13 @@ CC_CYAN_BOLD_BG=$'\e[106m'
 color_256(){
 is integer --name=arguments --max=1 --die -- $#
 local num
-num="$(check integer --name=num "$1" --sanitize --min=0 --max=255 --die)"
+num="$(is integer --name=num "$1" --sanitize --min=0 --max=255 --die --output)"
 echo $'\e[38;5;'"$num"'m'
 }
 color_256_bg(){
 is integer --name=arguments --max=1 --die -- $#
 local num
-num="$(check integer --name=num "$1" --sanitize --min=0 --max=255 --die)"
+num="$(is integer --name=num "$1" --sanitize --min=0 --max=255 --die --output)"
 echo $'\e[48;5;'"$num"'m'
 }
 CC_CRITICAL=$'\e[1;45m'
@@ -172,7 +172,10 @@ fi
 while IFS=$' \t\n' read -r opt name type desc;do
 [[ $opt =~ ^# ]]&&continue
 [[ -z $opt ]]&&continue
-if [ ! "$type" = "-" ];then
+if [[ $type == *\? ]];then
+[ "$opt" = "-" ]||short+="$opt::"
+long+="$name::,"
+elif [ ! "$type" = "-" ];then
 [ "$opt" = "-" ]||short+="$opt:"
 long+="$name:,"
 else
@@ -193,7 +196,7 @@ while read -r opt name type desc;do
 [[ $opt =~ ^# ]]&&continue
 is empty -- "$opt"&&continue
 opt_descriptions[$name]="$desc"
-opt_type[$name]=$type
+[[ $type == *\? ]]&&opt_type[$name]="[${type%?}]"||opt_type[$name]=$type
 opt_short[$name]=$opt
 done <<<"$1"
 printf '%s\n' "$(gettext "Options"):"
@@ -233,13 +236,12 @@ contains(){
 _deprecated "use array <array-name> has <value>"
 }
 array(){
-is integer --name=arguments --max=3 --die -- $#
+local cmd value
 is set --name=array-name --die -- "$1"
-is enum --name=command --allow="has indexof" --die -- "$2"
-is set --name=value --die -- "$3"
+is enum --name=command --allow="has indexof" --die --output=cmd -- "$2"
+is set --name=value --die --output=value -- "$3"
+is integer --name=arguments --max=3 --die -- $#
 declare -n arr="$1"
-local cmd="$2"
-local value="$3"
 case "$cmd" in
 has)for e in "${arr[@]}"
 do
@@ -281,7 +283,7 @@ local keyFormat="simple"
 eval set -- "$(option_parse $'k key-format +' "$@")"
 while true;do
 case "$1" in
--k|--key-format)keyFormat="$(check enum --allow="simple base64" -- "$2")"&&shift 2;;
+-k|--key-format)is enum --allow="simple base64" --output -- "$2"&&keyFormat="$2"&&shift 2;;
 --)shift&&break;;
 *)die "$(gettext "Unrecognized option"): $1"
 esac
@@ -823,13 +825,13 @@ _deprecated "Use is ... --output" warn
 is --output "$@"
 }
 is(){
-eval set -- "$(option_parse $'n name +\nd die -\ns sanitize -\n- min +\n- max +\n- allow +\no output -\nm message +' "$@")"
+eval set -- "$(option_parse $'n name +\nd die -\ns sanitize -\n- min +\n- max +\n- allow +\no output ?\nm message +' "$@")"
 local name die sanitize min max allow message output
 while true;do
 case "$1" in
 -n|--name)name="$2"&&shift 2;;
 -m|--message)message="; $2"&&shift 2;;
--o|--output)output=1&&shift;;
+-o|--output)output="${2:--}"&&shift 2;;
 -d|--die)die=1&&shift;;
 -s|--sanitize)sanitize=1&&shift;;
 --min)[[ $2 =~ ^[-+]?[0-9]+([.][0-9]+)?$ ]]&&min="$2"&&shift 2||die "$(printf "$(gettext "Parameter %s needs number")" min)";;
@@ -1002,7 +1004,9 @@ fi
 ;;
 *)die "$(eval_gettext 'A check named ${check} is not defined')"
 esac
-[ -z "$output" ]||printf '%s' "$res"
+if [ -n "$output" ];then
+[ "$output" = "-" ]&&printf '%s' "$res"||printf -v "$output" '%s' "$res"
+fi
 }
 num_parameters(){
 _deprecated "Use: is integer $# --min=<val> --max=<val>"

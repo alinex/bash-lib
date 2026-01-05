@@ -27,13 +27,12 @@ contains() {
 #               - <index-num> for `indexof`
 # Return:       0 if ok, 1 if entry not found
 array() {
-    is integer --name=arguments --max=3 --die -- $#
+    local cmd value
     is set --name=array-name --die -- "$1"
-    is enum --name=command --allow="has indexof" --die -- "$2"
-    is set --name=value --die -- "$3"
+    is enum --name=command --allow="has indexof" --die --output=cmd -- "$2"
+    is set --name=value --die --output=value -- "$3"
+    is integer --name=arguments --max=3 --die -- $#
     declare -n arr="$1"
-    local cmd="$2"
-    local value="$3"
     # processing
     case "$cmd" in
     has)

@@ -9,6 +9,7 @@ BASHLIB_LOADER=${BASHLIB_LOADER:-loader}
 for folder in core module; do
     for f in "${BASHLIB_HOME:-.}/$folder"/*; do
         if [[ -f "$f" && "$f" != *.* ]]; then
+            [ -z "$DEBUG" ] || echo "loading $f" >&2
             source "$f"
         fi
     done

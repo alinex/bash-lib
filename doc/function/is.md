@@ -12,7 +12,7 @@ is <check> [options] -- <value>
 
 ```bash
 d, die              # used in [`is`](is.md) to stop with error instead of return state
-o, output           # will output the sanitized value
+o, output=[<variable-name>]  # will write the sanitized value into variable or output it to stdout
 n, name=<string>    # used in [`is`](is.md) to display variable name in `die` message
 m, message=<string> # additional message like usage
 s, sanitize         # for integer
@@ -27,10 +27,10 @@ allow=<words>       # for enum (space separated)
 
 ### Examples
 
-Check arguments:
-
+- [`is`](../example/is.md) explains some regular use cases
 - `is integer --name=arguments --max=2 -- $# >/dev/null` # mostly only check max, if all args are checked separately
 - `name="$(is integer --name=age --sanitize --min=0 --output -- "`$1`")"`
+- `is integer --name=age --sanitize --min=0 --output=name -- "`$1`"`
 - `init="$(is bool --name=init --output -- "`$1`")"`
 - `if is integer age --min=18 -- "`$1`"; then`
 

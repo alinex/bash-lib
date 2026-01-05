@@ -8,13 +8,14 @@ But on release they will be merged with semantical versioning into the master br
 - add [trivy](doc/function/trivy.md) security scanning
 - add [jira](doc/function/jira.md) search, get, create, update and delete for issues with included ADF parser/formatter
 - add `--message` option to [is](doc/function/is.md) for usage information
-- [is](doc/function/is.md) now also handles check with --output option
+- [is](doc/function/is.md) now also handles check with --output option into variable or stdout
 - new [is](doc/function/is.md)/[check](doc/function/check.md) validators: true/false, date
 - add [sleep_until](doc/function/sleep_until.md)
 - add [first](doc/function/first.md)
 - add `$CONFIG` to load special config file
 - add escape sequences and function for cursor management on terminal
 - add [logo](doc/function/logo.md) to display it
+- option_parse with support for optional values
 - rename color -> ansi module and add the cursor, character and clear codes
 - optimize code echo and escape sequences
 - optimize function documentation

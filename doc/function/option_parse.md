@@ -6,7 +6,7 @@
 
 ```bash
 option_parse <spec> <arguments>
-<spec> lines := <short-letter>|- <long-word> <type>|- <description>
+<spec> lines := <short-letter>|- <long-word> <type>?|- <description>
 ```
 
 ### Output (stdout)
@@ -31,7 +31,7 @@ The key for this is the specification string, which consists of a list of lines 
 
 - `<short-letter>` only one letter allowed, but you can set it to `-` if no short option needed
 - `<long-word>` the long option which have to be there, use dashed words if multiple
-- `<type>` set to `-` if no value needed, else the type of value to be printed in help or `+` in internal function for undefined type
+- `<type>` append '?' at the end if the value is optional or set to `-` if no value needed, else the type of value to be printed in help or `+` in internal function for undefined type
 - `<description>` only for the help message
 
 For internal functions we don't need the [`option_help`](option_help.md) command, so the type of options in the `<spec>` will be shortened to +/- and a `<description>` is not needed.

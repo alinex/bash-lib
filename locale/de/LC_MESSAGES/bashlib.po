@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-05 10:11+0100\n"
+"POT-Creation-Date: 2026-01-05 20:44+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: core/misc:121 core/validator:129 core/array:134 module/os:180
+#: core/misc:121 core/validator:129 core/array:133 module/os:180
 #: module/trivy:75 module/monitoring:143 module/input:31 module/input:86
 #: module/input:211 module/input:464 module/input:627 module/log:63
 #: module/remote:78 module/remote:217 module/remote:265 module/remote:333
@@ -30,11 +30,11 @@ msgstr "Unbekannte Option"
 msgid "A specification string is needed as first argument"
 msgstr "Ein Text zur Spezifikation ist als erstes ARgument notwendig"
 
-#: core/arguments:87
+#: core/arguments:90
 msgid "Options"
 msgstr "Optionen"
 
-#: core/arguments:132
+#: core/arguments:135
 msgid "argument is not a valid number!"
 msgstr "Argument ist nicht ganzzahlig"
 
