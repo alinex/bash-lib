@@ -16,7 +16,7 @@ source /dev/null
 #
 # - <short-letter> only one letter allowed, but you can set it to `-` if no short option needed
 # - <long-word> the long option which have to be there, use dashed words if multiple
-# - <type> set to `-` if no value needed, else the type of value to be printed in help or `+` in internal function for undefined type
+# - <type> append '?' at the end if the value is optional or set to `-` if no value needed, else the type of value to be printed in help or `+` in internal function for undefined type
 # - <description> only for the help message
 #
 # For internal functions we don't need the @option_help command, so the type of options in the `<spec>` will be shortened to +/- and a <description> is not needed.
@@ -27,7 +27,7 @@ source /dev/null
 # Also multiple short options can be put together with only the last may need a value.
 #
 # Usage:        option_parse <spec> <arguments>
-#               <spec> lines := <short-letter>|- <long-word> <type>|- <description>
+#               <spec> lines := <short-letter>|- <long-word> <type>?|- <description>
 # Output:       **parsed and ordered options <string>**
 #               the options are at the start
 #               then the double dash `--` also if not given
@@ -46,7 +46,10 @@ option_parse() {
     while IFS=$' \t\n' read -r opt name type desc; do
         [[ "$opt" =~ ^# ]] && continue # skip comments
         [[ -z "$opt" ]] && continue    # skip empty lines
-        if [ ! "$type" = "-" ]; then
+        if [[ $type == *? ]]; then
+            [ "${opt}" = "-" ] || short+="${opt}::"
+            long+="${name}::,"
+        elif [ ! "$type" = "-" ]; then
             [ "${opt}" = "-" ] || short+="${opt}:"
             long+="${name}:,"
         else
@@ -81,7 +84,7 @@ option_help() {
         [[ "$opt" =~ ^# ]] && continue # skip comments
         is empty -- "$opt" && continue # skip empty lines
         opt_descriptions[$name]="$desc"
-        opt_type[$name]=$type
+        [[ $type == *? ]] && opt_type[$name]="[${type%?}]" || opt_type[$name]=$type
         opt_short[$name]=$opt
     done <<<"$1"
     printf '%s\n' "$(gettext "Options"):"
