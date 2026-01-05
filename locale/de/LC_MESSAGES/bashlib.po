@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-04 22:29+0100\n"
+"POT-Creation-Date: 2026-01-05 08:38+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -19,7 +19,7 @@ msgstr ""
 
 #: core/misc:121 core/validator:129 core/array:134 module/os:180
 #: module/trivy:75 module/monitoring:143 module/input:31 module/input:86
-#: module/input:222 module/input:477 module/input:640 module/log:63
+#: module/input:222 module/input:476 module/input:639 module/log:63
 #: module/remote:78 module/remote:217 module/remote:265 module/remote:333
 #: module/database:33 module/mattermost:299 module/mattermost:336
 #: module/software:230
@@ -256,7 +256,7 @@ msgstr "Es konnten keine Grafana Alerts abgerufen werden!"
 msgid "Parse error in Grafana alerts list with filter"
 msgstr "Fehler beim Parsen der Grafana Alarmliste mit Filter"
 
-#: module/monitoring:179
+#: module/monitoring:180
 msgid "Severity\\tNetwork\\tInstance\\tSummary\\tStart"
 msgstr "Schweregrad\\tNetz\\tInstanz\\tZusammenfassung\\tStart"
 
@@ -284,11 +284,11 @@ msgstr "Nein"
 msgid "Yes"
 msgstr "Ja"
 
-#: module/input:138 module/input:352 module/input:564
+#: module/input:138 module/input:351 module/input:563
 msgid "value needed"
 msgstr "Wert notwendig"
 
-#: module/input:160 module/input:376 module/input:588
+#: module/input:160 module/input:375 module/input:587
 msgid "invalid character"
 msgstr "ungültiges Zeichen"
 
@@ -324,43 +324,43 @@ msgstr "Gib eine kurze Zeile ein"
 msgid "Input through system editor..."
 msgstr "Eingabe mit dem Systemeditor..."
 
-#: module/input:333
+#: module/input:332
 msgid "incomplete"
 msgstr "unvollständig"
 
-#: module/input:385
+#: module/input:384
 msgid "bad"
 msgstr "schlecht"
 
-#: module/input:387
+#: module/input:386
 msgid "weak"
 msgstr "schwach"
 
-#: module/input:389
+#: module/input:388
 msgid "good"
 msgstr "gut"
 
-#: module/input:391
+#: module/input:390
 msgid "strong"
 msgstr "stark"
 
-#: module/input:523
+#: module/input:522
 msgid "Select one of the above options"
 msgstr "Wähle eine der obigen Optionen"
 
-#: module/input:660
+#: module/input:659
 msgid "Could not get task list from command"
 msgstr "Befehlsliste konnte nicht von der Funktion gelesen werden"
 
-#: module/input:667
+#: module/input:666
 msgid "No tasks found to be executed."
 msgstr "Keine Aufgaben zum Ausführen gefunden."
 
-#: module/input:673
+#: module/input:672
 msgid "Exit"
 msgstr "Beenden"
 
-#: module/input:680
+#: module/input:679
 #, sh-format
 msgid "Got error $error running $task"
 msgstr "Beim Aufruf von $task kam es zum Fehler $error"

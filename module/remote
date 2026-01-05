@@ -339,7 +339,7 @@ boot_wait() {
     printf '%s' "$(gettext 'Wait till reboot is done')" >&2
     sleep "$seconds"
     while true; do
-        [ -n "$quiet" ] || printf '%s' "\r$(eval_gettext "Wait until the reboot is complete (\$seconds seconds)")" >&2
+        [ -n "$quiet" ] || printf '\r%s' "$(eval_gettext "Wait until the reboot is complete (\$seconds seconds)")" >&2
         uptime=$(remote cut -d"' '" -f1 /proc/uptime 2>/dev/null | sed 's/[ .].*//')
         if ((uptime > 0 && uptime < 300)); then
             break

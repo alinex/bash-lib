@@ -1576,7 +1576,6 @@ $EDITOR "$answer"&
 sleep "$timeout"
 pkill -TERM -P $!||true
 stty sane
-debug "------"
 else
 $EDITOR "$answer"
 fi
@@ -1758,7 +1757,7 @@ local question="$(gettext "Select one of the above options")"
 printf '%s: ' "$question" >/dev/tty
 stty -echo </dev/tty
 while read -r -s -t 1 -n 1 char </dev/tty||rc=$?;do
-printf "$CLEAR_EOL"
+printf "$CLEAR_EOL" >/dev/tty
 if ((rc==142));then
 rc=0
 if [ -n "$timeout" ];then
@@ -1854,7 +1853,6 @@ fi
 done
 _default="$(value_if_variable "$_default")"
 task=$(choose "$title" -x "$(gettext "Exit")" $opt -d "$_default" "$list" </dev/null)
-debug "chosen $task"
 [[ $task != "exit" ]]||break
 local error
 if ! eval "$task";then
