@@ -129,7 +129,7 @@ hash() {
     eval set -- "$(option_parse $'k key-format +' "$@")"
     while true; do
         case "$1" in
-        -k | --key-format) keyFormat="$(check enum --allow="simple base64" -- "$2")" && shift 2 ;;
+        -k | --key-format) is enum --allow="simple base64" --output -- "$2" && keyFormat="$2" && shift 2 ;;
         --) shift && break ;;
         *) die "$(gettext "Unrecognized option"): $1" ;;
         esac

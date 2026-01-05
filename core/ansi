@@ -110,7 +110,7 @@ CC_CYAN_BOLD_BG=$'\e[106m'
 color_256() {
   is integer --name=arguments --max=1 --die -- $#
   local num
-  num="$(check integer --name=num "$1" --sanitize --min=0 --max=255 --die)"
+  num="$(is integer --name=num "$1" --sanitize --min=0 --max=255 --die --output)"
   # processing
   echo $'\e[38;5;'"$num"'m'
 }
@@ -121,7 +121,7 @@ color_256() {
 color_256_bg() {
   is integer --name=arguments --max=1 --die -- $#
   local num
-  num="$(check integer --name=num "$1" --sanitize --min=0 --max=255 --die)"
+  num="$(is integer --name=num "$1" --sanitize --min=0 --max=255 --die --output)"
   # processing
   echo $'\e[48;5;'"$num"'m'
 }

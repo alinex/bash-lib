@@ -1327,7 +1327,7 @@ printf '%s' "TODO"
 }
 dns_list(){
 is integer --name=arguments --max=1 --die -- $#
-printf '%s\n' "$(gettext 'NAME\tTYPE\tCONTENT\tTTL')"
+printf "$(gettext 'NAME\tTYPE\tCONTENT\tTTL')\n"
 powerdns "$1"|tail -n +2||true
 plusserver_dns "$1"|tail -n +2||true
 }
@@ -1337,7 +1337,7 @@ if [ -z "$POWERDNS_API" ]||[ -z "$POWERDNS_TOKEN" ];then
 debug "Disabled because POWERDNS_API and POWERDNS_TOKEN are not both set"
 return 0
 fi
-printf '%s\n' "$(gettext 'NAME\tTYPE\tCONTENT\tTTL')"
+printf "$(gettext 'NAME\tTYPE\tCONTENT\tTTL')\n"
 curl -s -H "X-API-Key:$POWERDNS_TOKEN" "$POWERDNS_API/servers/localhost/search-data?q=*&max=10000"|jq -r '.[] | select(.object_type == "record" and .disabled == false) | [(.name | sub("\\.$"; "")), .type, (.content | sub("\\.$"; "")), .ttl] | @tsv'|grep -E "$1"
 }
 plusserver_dns(){
@@ -1440,25 +1440,20 @@ done
 is integer --name=arguments --max=1 --die -- $#
 local prompt
 prompt="${1:-$(gettext "Should this be done")}"
-local char="" seq i_text invalid rc
+local char="" seq rc
 local countdown="$timeout"
 if is set -- "$default";then
 ((default==0))&&prompt="$prompt [$(gettext "No")]"||prompt="$prompt [$(gettext "Yes")]"
 fi
 printf "$CC_NOTICE%s$CC_RESET $CURSOR_STORE" "$prompt?" >/dev/tty
 while IFS= read -r -s -t 1 -n 1 char </dev/tty||rc=$?;do
-if [ -n "$invalid" ];then
-invalid=0
-printf ' %.0s' {1..30} >/dev/tty
-printf '\b%.0s' {1..30} >/dev/tty
-fi
+printf "$CLEAR_EOF" >/dev/tty
 if ((rc==142));then
 rc=0
 if [ -n "$timeout" ];then
 ((countdown--))
 if ((countdown>0));then
-i_text="$(duration_format human "$countdown")"
-printf "$CURSOR_RESTORE$CLEAR_EOL%s" "$i_text" >/dev/tty
+printf "$CURSOR_RESTORE$CLEAR_EOL%s" "$(duration_format human "$countdown")" >/dev/tty
 continue
 fi
 else
@@ -1476,10 +1471,8 @@ printf "$CURSOR_RESTORE$CLEAR_EOL%s\n" "$(gettext "No")" >/dev/tty
 stty echo </dev/tty
 return 1
 fi
-elif [ -n "$i_text" ];then
-i_text="$(gettext 'value needed')"
-printf "$CURSOR_RESTORE$CLEAR_EOL$CC_RED%s$CC_RESET" "$i_text" >/dev/tty
-invalid=1
+else
+printf "$CURSOR_RESTORE$CLEAR_EOL$CC_RED%s$CC_RESET" "$(gettext 'value needed')" >/dev/tty
 fi
 elif [[ $char == $'\e' ]];then
 read -r -s -n 1 -t 0.01 seq
@@ -1495,11 +1488,8 @@ printf "$CURSOR_RESTORE$CLEAR_EOL%s\n" "$(gettext "No")" >/dev/tty
 stty echo </dev/tty
 return 1
 else
-i_text="$(gettext 'invalid character')"
-printf "$CURSOR_RESTORE$CLEAR_EOL$CC_RED%s$CC_RESET" "$i_text" >/dev/tty
-invalid=1
+printf "$CURSOR_RESTORE$CLEAR_EOL$CC_RED%s$CC_RESET" "$(gettext 'invalid character')" >/dev/tty
 fi
-i_text=""
 done
 stty echo </dev/tty
 }
@@ -1627,7 +1617,7 @@ break
 elif [ -n "$empty" ];then
 printf '\n' >/dev/tty
 break
-elif [ -n "$i_text" ];then
+else
 printf "$CURSOR_STORE   $CC_RED%s$CC_RESET$CURSOR_RESTORE" "$(gettext 'value needed')" >/dev/tty
 fi
 elif [[ $char == $'\177' ]];then
@@ -1667,7 +1657,6 @@ fi
 printf '${CURSOR_STORE}   %s${CURSOR_RESTORE}' "$i_text" >/dev/tty
 fi
 fi
-i_text=""
 done
 stty echo </dev/tty
 debug 4 "Octal result: $(od -An -to1 -v <<<"$input")"
@@ -1750,7 +1739,7 @@ fi
 ((length==1))||pattern="(0|$pattern)"
 [ -z "$end" ]||pattern="(x|$pattern)"
 pattern="^$pattern$"
-local input="" char="" i_text
+local input="" char=""
 local countdown="$timeout"
 local question="$(gettext "Select one of the above options")"
 [ -z "$default" ]&&timeout=""||question="$question [$default]"
@@ -3047,7 +3036,7 @@ local uptime seconds=15
 printf '%s' "$(gettext 'Wait till reboot is done')" >&2
 sleep "$seconds"
 while true;do
-[ -n "$quiet" ]||printf '%s' "\r$(eval_gettext 'Wait until the reboot is complete ($seconds seconds)')" >&2
+[ -n "$quiet" ]||printf '\r%s' "$(eval_gettext 'Wait until the reboot is complete ($seconds seconds)')" >&2
 uptime=$(remote cut -d"' '" -f1 /proc/uptime 2>/dev/null|sed 's/[ .].*//')
 if ((uptime>0&&uptime<300));then
 break

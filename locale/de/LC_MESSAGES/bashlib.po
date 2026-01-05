@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-05 08:38+0100\n"
+"POT-Creation-Date: 2026-01-05 10:11+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -19,7 +19,7 @@ msgstr ""
 
 #: core/misc:121 core/validator:129 core/array:134 module/os:180
 #: module/trivy:75 module/monitoring:143 module/input:31 module/input:86
-#: module/input:222 module/input:476 module/input:639 module/log:63
+#: module/input:211 module/input:464 module/input:627 module/log:63
 #: module/remote:78 module/remote:217 module/remote:265 module/remote:333
 #: module/database:33 module/mattermost:299 module/mattermost:336
 #: module/software:230
@@ -276,91 +276,91 @@ msgstr "Weiter durch Benutzer"
 msgid "Should this be done"
 msgstr "Soll dies durchgeführt werden"
 
-#: module/input:96 module/input:133 module/input:156
+#: module/input:96 module/input:127 module/input:148
 msgid "No"
 msgstr "Nein"
 
-#: module/input:96 module/input:129 module/input:151
+#: module/input:96 module/input:123 module/input:143
 msgid "Yes"
 msgstr "Ja"
 
-#: module/input:138 module/input:351 module/input:563
+#: module/input:132 module/input:340 module/input:551
 msgid "value needed"
 msgstr "Wert notwendig"
 
-#: module/input:160 module/input:375 module/input:587
+#: module/input:152 module/input:364 module/input:575
 msgid "invalid character"
 msgstr "ungültiges Zeichen"
 
-#: module/input:233
+#: module/input:222
 msgid "Enter integer number"
 msgstr "Gib eine Nummer ein"
 
-#: module/input:242
+#: module/input:231
 msgid "Enter float number"
 msgstr "Gib eine Fließkommazahl ein"
 
-#: module/input:252
+#: module/input:241
 msgid "Enter password"
 msgstr "Gib das Passwort ein"
 
-#: module/input:256
+#: module/input:245
 msgid "Enter time"
 msgstr "Gib die Zeit an"
 
-#: module/input:260
+#: module/input:249
 msgid "Enter text (end with empty line)"
 msgstr "Gib einen Text ein (Beenden mit Leerzeile)"
 
-#: module/input:261
+#: module/input:250
 msgid "Enter text here"
 msgstr "Gib einen Text ein"
 
-#: module/input:262
+#: module/input:251
 msgid "Enter short line"
 msgstr "Gib eine kurze Zeile ein"
 
-#: module/input:270
+#: module/input:259
 msgid "Input through system editor..."
 msgstr "Eingabe mit dem Systemeditor..."
 
-#: module/input:332
+#: module/input:321
 msgid "incomplete"
 msgstr "unvollständig"
 
-#: module/input:384
+#: module/input:373
 msgid "bad"
 msgstr "schlecht"
 
-#: module/input:386
+#: module/input:375
 msgid "weak"
 msgstr "schwach"
 
-#: module/input:388
+#: module/input:377
 msgid "good"
 msgstr "gut"
 
-#: module/input:390
+#: module/input:379
 msgid "strong"
 msgstr "stark"
 
-#: module/input:522
+#: module/input:510
 msgid "Select one of the above options"
 msgstr "Wähle eine der obigen Optionen"
 
-#: module/input:659
+#: module/input:647
 msgid "Could not get task list from command"
 msgstr "Befehlsliste konnte nicht von der Funktion gelesen werden"
 
-#: module/input:666
+#: module/input:654
 msgid "No tasks found to be executed."
 msgstr "Keine Aufgaben zum Ausführen gefunden."
 
-#: module/input:672
+#: module/input:660
 msgid "Exit"
 msgstr "Beenden"
 
-#: module/input:679
+#: module/input:667
 #, sh-format
 msgid "Got error $error running $task"
 msgstr "Beim Aufruf von $task kam es zum Fehler $error"

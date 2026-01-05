@@ -7,147 +7,6 @@ setup() {
 }
 
 ######################################################################################
-# check
-######################################################################################
-
-# bats test_tags=check
-@test "check: should check for set" {
-    run check set "x"
-    assert_success
-    assert_output "x"
-}
-# bats test_tags=check
-@test "check: should fail for set" {
-    run check set ""
-    assert_failure
-}
-# bats test_tags=check
-@test "check: should die for set" {
-    run check set "" --die
-    assert_failure
-    assert_output -p '"argument" muss mit einem Wert gesetzt werden'
-}
-# bats test_tags=check
-@test "check: should die for set (named argument)" {
-    run check set "" --name=age --die
-    assert_failure
-    assert_output -p '"age" muss mit einem Wert gesetzt werden'
-}
-
-# bats test_tags=check
-@test "check: should check for empty" {
-    run check empty ""
-    assert_success
-    assert_output ""
-}
-# bats test_tags=check
-@test "check: should fail for empty" {
-    run check empty "x"
-    assert_failure
-}
-
-# bats test_tags=check
-@test "check: should check for bool true" {
-    run check bool "true"
-    assert_success
-    assert_output "1"
-}
-# bats test_tags=check
-@test "check: should check for bool false" {
-    run check bool "F"
-    assert_success
-    assert_output "0"
-}
-# bats test_tags=check
-@test "check: should fail for bool" {
-    run check bool "?"
-    assert_failure
-}
-
-# bats test_tags=check
-@test "check: should check for integer" {
-    run check integer 5
-    assert_success
-    assert_output "5"
-}
-# bats test_tags=check
-@test "check: should check for integer (negative)" {
-    run check integer -- -5
-    assert_success
-    assert_output "-5"
-}
-# bats test_tags=check
-@test "check: should fail for integer" {
-    run check integer five
-    assert_failure
-}
-# bats test_tags=check
-@test "check: should check for integer with sanitize" {
-    run check integer 5.27k --sanitize
-    assert_success
-    assert_output "5"
-}
-# bats test_tags=check
-@test "check: should check for integer with min" {
-    run check integer 6 --min=5
-    assert_success
-    assert_output "6"
-}
-# bats test_tags=check
-@test "check: should fail for integer with min" {
-    run check integer 3 --min=5
-    assert_failure
-}
-# bats test_tags=check
-@test "check: should check for integer with max" {
-    run check integer 3 --max=5
-    assert_success
-    assert_output "3"
-}
-# bats test_tags=check
-@test "check: should fail for integer with max" {
-    run check integer 6 --max=5
-    assert_failure
-}
-
-# bats test_tags=check
-@test "check: should check for float" {
-    run check float 5.8
-    assert_success
-    assert_output "5.8"
-}
-
-# bats test_tags=check
-@test "check: should check for enum" {
-    run check enum test --allow="check test run doc"
-    assert_success
-    assert_output "test"
-}
-# bats test_tags=check
-@test "check: should fail for enum" {
-    run check enum init --allow="check test run doc"
-    assert_failure
-}
-
-# bats test_tags=check
-@test "check: should check for duration (number)" {
-    run check duration -- 600
-    assert_success
-    assert_output "600"
-}
-# bats test_tags=check
-@test "check: should check for duration (human)" {
-    run check duration -- 1h30m
-    assert_success
-    assert_output "5400"
-}
-# bats test_tags=check
-@test "check: should fail for duration" {
-    run check duration init
-    assert_failure
-}
-
-######################################################################################
 # is
 ######################################################################################
 
@@ -161,6 +20,18 @@ setup() {
 @test "is: should fail for set" {
     run is set ""
     assert_failure
+}
+# bats test_tags=is
+@test "is: should die for set" {
+    run is set "" --die
+    assert_failure
+    assert_output -p '"argument" muss mit einem Wert gesetzt werden'
+}
+# bats test_tags=is
+@test "is: should die for set (named argument)" {
+    run is set "" --name=age --die
+    assert_failure
+    assert_output -p '"age" muss mit einem Wert gesetzt werden'
 }
 
 # bats test_tags=is
@@ -200,9 +71,21 @@ setup() {
     assert_output ""
 }
 # bats test_tags=is
+@test "is: should check for integer (negative)" {
+    run is integer --output -- -5
+    assert_success
+    assert_output "-5"
+}
+# bats test_tags=is
 @test "is: should fail for integer" {
     run is integer five
     assert_failure
+}
+# bats test_tags=is
+@test "is: should check for integer with sanitize" {
+    run is integer --sanitize --output -- 5.27k
+    assert_success
+    assert_output "5"
 }
 # bats test_tags=is
 @test "is: should check for integer with min" {
@@ -243,6 +126,24 @@ setup() {
 # bats test_tags=is
 @test "is: should fail for enum" {
     run is enum init --allow="check test run doc"
+    assert_failure
+}
+
+# bats test_tags=is
+@test "is: should check for duration (number)" {
+    run is duration --output -- 600
+    assert_success
+    assert_output "600"
+}
+# bats test_tags=is
+@test "is: should check for duration (human)" {
+    run is duration --output -- 1h30m
+    assert_success
+    assert_output "5400"
+}
+# bats test_tags=is
+@test "is: should fail for duration" {
+    run is duration init
     assert_failure
 }
 
