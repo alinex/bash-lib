@@ -8,6 +8,12 @@
 sync <command> [<params>...]
 ```
 
+### Options
+
+```bash
+-n, --name=<string>
+```
+
 ### Description
 
 

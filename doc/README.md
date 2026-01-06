@@ -407,7 +407,6 @@ Module for process control
 | [`steps`](function/steps.md) | Step control allows jobs to resume on another run. |
 | [`sync`](function/sync.md) | Run the given command with optional step control |
 | [`async`](function/async.md) | Run the given command asynchronous ang go on in the calling routine (short form of async_name) |
-| [`async_name`](function/async_name.md) | Alternative to async in which this call is given a name to refer in async_wait |
 | [`async_wait`](function/async_wait.md) | Check if the command is done or wait here till it is so |
 | [`queue`](function/queue.md) | Run bash commands parallel with limits from a queue. |
 | [`random`](function/random.md) | Return a random string in specific length |

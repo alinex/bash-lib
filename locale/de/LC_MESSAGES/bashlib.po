@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-06 17:24+0100\n"
+"POT-Creation-Date: 2026-01-06 21:25+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -20,9 +20,9 @@ msgstr ""
 #: core/misc:121 core/validator:129 core/array:133 module/os:180
 #: module/trivy:75 module/monitoring:143 module/input:31 module/input:86
 #: module/input:211 module/input:464 module/input:627 module/log:63
-#: module/process:382 module/remote:78 module/remote:217 module/remote:265
-#: module/remote:333 module/database:33 module/mattermost:299
-#: module/mattermost:336 module/software:230
+#: module/process:381 module/process:423 module/process:457 module/remote:78
+#: module/remote:217 module/remote:265 module/remote:333 module/database:33
+#: module/mattermost:299 module/mattermost:336 module/software:230
 msgid "Unrecognized option"
 msgstr "Unbekannte Option"
 
@@ -393,9 +393,14 @@ msgstr "Der Job »$name« wurde bereits ausgeführt, überspringe diesen"
 msgid "Finished: Step »$name« at $date"
 msgstr "Fertig: Schritt »$name« um $date"
 
-#: module/process:393
+#: module/process:393 module/process:436
 #, sh-format
 msgid "Started: step »$name« at $date"
+msgstr "Start: Schritt »$name« um $date"
+
+#: module/process:513
+#, fuzzy, sh-format
+msgid "Queued: step »$name« at $date"
 msgstr "Start: Schritt »$name« um $date"
 
 #: module/remote:339

@@ -5,8 +5,8 @@
 ### Usage
 
 ```bash
-steps init [<name>]
-steps end
+steps init [<name>]     # to start step control
+steps end               # to end step control
 ```
 
 ### Description

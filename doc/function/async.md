@@ -8,6 +8,12 @@
 async <command> [<params>...]
 ```
 
+### Options
+
+```bash
+-n, --name=<string>
+```
+
 ### Examples
 
 
