@@ -404,11 +404,8 @@ Module for process control
 | [`env_restore`](function/env_restore.md) | Deprecated: Restore environment from shared memory/file |
 | [`env_clean`](function/env_clean.md) | Deprecated: Remove stored environment from shared memory/file |
 | [`env_change`](function/env_change.md) | Deprecated: Change environment in shared memory/file |
-| [`steps_init`](function/steps_init.md) | Initialize step control |
-| [`steps_check`](function/steps_check.md) | Check if step already finished successful |
-| [`steps_done`](function/steps_done.md) | Set step as successfully done |
+| [`steps`](function/steps.md) | Step control allows jobs to resume on another run. |
 | [`sync`](function/sync.md) | Run the given command with optional step control |
-| [`sync_name`](function/sync_name.md) | Alternative to sync in which this call is given a name to refer |
 | [`async`](function/async.md) | Run the given command asynchronous ang go on in the calling routine (short form of async_name) |
 | [`async_name`](function/async_name.md) | Alternative to async in which this call is given a name to refer in async_wait |
 | [`async_wait`](function/async_wait.md) | Check if the command is done or wait here till it is so |
