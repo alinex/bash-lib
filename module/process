@@ -311,6 +311,7 @@ steps() {
     init)
         is integer --name=arguments --max=2 --die -- $#
         _STEPS_NAME=${2:-all}
+        debug "start step control"
         declare -g -A _STEPS
         variables restore "steps_${_STEPS_NAME}"
         variables store "steps_${_STEPS_NAME}" _STEPS $STEPS_VARIABLES # initial store
@@ -318,6 +319,7 @@ steps() {
         ;;
     end)
         is integer --name=arguments --max=1 --die -- $#
+        debug "end step control"
         _steps_done
         ;;
     esac
@@ -330,16 +332,10 @@ steps() {
 _steps_check() {
     local name="$1"
     is set --name=name --die -- "$1"
-    is integer --name=arguments --max=1 --die -- $#
+    is integer --name=arguments --max=2 --die -- $#
     # processing
     is set -- "$_STEPS_NAME" || return 1 # return not found if no step control
-    if [ -n "${_STEPS["$name"]}" ]; then
-        # shellcheck disable=SC2005
-        printf '%s\n' "$(eval_gettext "Job »\$name« already done in this run, skipping")" >&2
-        return 0
-    else
-        return 1
-    fi
+    [ -n "${_STEPS["$name"]}" ] && return 0 || return 1
 }
 
 # Set step as successfully done
@@ -347,15 +343,11 @@ _steps_check() {
 # Usage:    steps_done <name>   # finished one step
 #           steps_done          # completely finished -> cleanup
 _steps_done() {
-    is integer --name=arguments --max=1 --die -- $#
+    is integer --name=arguments --max=2 --die -- $#
     # processing
     is set -- "$_STEPS_NAME" || return 0 # do nothing if no step control
     if [ -n "$1" ]; then
         _STEPS["$1"]=1
-        # shellcheck disable=SC2155
-        local date="$(date_format sql)"
-        # shellcheck disable=SC2005
-        printf '%s\n' "$(eval_gettext "Finished: Step »\$name« at \$date")" >&2
         variables store "steps_${_STEPS_NAME}" _STEPS $STEPS_VARIABLES
     else
         variables clean "steps_${_STEPS_NAME}"
@@ -365,121 +357,117 @@ _steps_done() {
 
 # Run the given command with optional step control
 #
-# This will use the command itself as name. If you run the same command multiple times use
-# async_name directly.
+# The command and arguments given will be called like directly run. But if @steps is started it will check if already done.
+# Further in `--verbose` mode a message for start and end will be printed on STDERR with the command or the given `--name`.
 #
-# Usage:    sync <command> [<params>...]
-# Options:  -n, --name=<string>
+# Usage:    sync [<options>] <command> [<params>...]
+# Options:  v, verbose           # display notice/info message
+#           n, name=<string>     # define name or use command with args
+# Stderr:   - notice message for start (in verbose mode)
+#           - info message for finish (in verbose mode)
 sync() {
     # parameter parsing
-    eval set -- "$(option_parse $'n name +' "$@")"
-    local name
+    eval set -- "$(option_parse $'+n name +\nv verbose -' "$@")"
+    local name verbose message
     while true; do
         case "$1" in
         -n | --name) name="$2" && shift 2 ;;
+        --verbose) verbose=1 && shift ;;
         --) shift && break ;;
         *) die "$(gettext "Unrecognized option"): $1" ;;
         esac
     done
+    is integer --name=arguments --min=1 --die -- $#
     [ -n "$name" ] || name="$*"
     # processing
-    is set --name=command --die -- "$2"
-    if is set "$_STEPS_NAME"; then
-        _steps_check "$name" && return || true
-        local date
-        # shellcheck disable=SC2034
-        date="$(date_format sql)"
-        # shellcheck disable=SC2005
-        is set -- "$_STEPS_NAME" && printf '%s\n' "$(eval_gettext "Started: step »\$name« at \$date")" >&2 || true
-        "$@"
-        _steps_done "$name"
-    else
-        "$@"
+    if _steps_check "$name"; then
+        message="$(eval_gettext 'Skip: $name (already done)')"
+        is set -- "$verbose" && warn "$message" >&2 || debug "$message"
+        return
     fi
+    message="$(eval_gettext 'Start: $name')"
+    is set -- "$verbose" && notice "$message" >&2 || debug "$message"
+    "$@"
+    message="$(eval_gettext 'Finished: $name')"
+    is set -- "$verbose" && info "$message" >&2 || debug "$message"
+    _steps_done "$name" "$verbose"
 }
 
-# Run the given command asynchronous ang go on in the calling routine (short form of async_name)
+# Run the given command asynchronous ang go on in the calling routine
 #
-# This will use the command itself as name. If you run the same command multiple times use
-# async_name directly.
+# While this command runs you may start more @async commands and use @asny_wait to wait for a specific one to end or all to end.
 #
-# Usage:    async <command> [<params>...]
-# Options:  -n, --name=<string>
+# The command and arguments given will be called like directly run. But if @steps is started it will check if already done.
+# Further in `--verbose` mode a message for start and end will be printed on STDERR with the command or the given `--name`.
+#
+# Usage:    async [<options>] <command> [<params>...]
+#           async [<options>] wait [<command> [<params>...]]
+# Options:  v, verbose           # display notice/info message
+#           n, name=<string>     # define name or use command with args
+# Stderr:   - notice message for start (in verbose mode)
+#           - info message for finish (in verbose mode)
 # Example:  ```bash
 #           async task1
 #           async task2
-#           async_wait task1
+#           async wait task1
 #           async task3
 #           wait # for all to end
 #           ```
 async() {
     # parameter parsing
-    eval set -- "$(option_parse $'n name +' "$@")"
-    local name
+    eval set -- "$(option_parse $'+n name +\nv verbose -' "$@")"
+    local name verbose message
     while true; do
         case "$1" in
         -n | --name) name="$2" && shift 2 ;;
+        --verbose) verbose=1 && shift ;;
         --) shift && break ;;
         *) die "$(gettext "Unrecognized option"): $1" ;;
         esac
     done
+    is integer --name=arguments --min=1 --die -- $#
     [ -n "$name" ] || name="$*"
-    async_wait "$name" --check
-    # processing
-    is set --name=command --die -- "$2"
-    if is set "$_STEPS_NAME"; then
-        _steps_check "$name" && return || true
-        local date
-        # shellcheck disable=SC2034
-        date="$(date_format sql)"
-        # shellcheck disable=SC2005
-        is set -- "$_STEPS_NAME" && printf '%s\n' "$(eval_gettext "Started: step »\$name« at \$date")" >&2 || true
+    # detect finished ones and wait for it
+    _async_done
+    if [ "$1" = "wait" ]; then
+        local pid
+        if [ "$name" = "wait" ]; then
+            for name in "${!_async_running[@]}"; do
+                hash _async_running has "$name" || continue
+                IFS=$'\t' read pid _ <<<"$(hash _async_running get "$name")"
+                wait "$pid" || true
+                _async_done
+            done
+        else
+            hash _async_running has "$name" || return 0
+            IFS=$'\t' read pid _ <<<"$(hash _async_running get "$name")"
+            wait "$pid" || true
+            _async_done
+        fi
+        return 0
     fi
+    # processing
+    if _steps_check "$name"; then
+        message="$(eval_gettext 'Skip: $name (already done)')"
+        is set -- "$verbose" && warn "$message" >&2 || debug "$message"
+        return
+    fi
+    message="$(eval_gettext 'Start: $name')"
+    is set -- "$verbose" && notice "$message" >&2 || debug "$message"
     "$@" &
-    hash _async_running set "$name" $!
+    hash _async_running set "$name" $!$'\t'"$verbose"
 }
 
-# Check if the command is done or wait here till it is so
-#
-# Usage:    async_wait                 # to wait for all to be done
-#           async_wait --name=<name>   # to wait for specific command to finish
-# Options:  -n, name=<string>
-#           -c, check
-async_wait() {
-    # parameter parsing
-    eval set -- "$(option_parse $'n name +\nc check -' "$@")"
-    local name check
-    while true; do
-        case "$1" in
-        -n | --name) name="$2" && shift 2 ;;
-        -c | --check) check=1 && shift ;;
-        --) shift && break ;;
-        *) die "$(gettext "Unrecognized option"): $1" ;;
-        esac
+_async_done() {
+    local check pid verbose
+    for check in "${!_async_running[@]}"; do
+        IFS=$'\t' read -r pid verbose <<<"${_async_running[$check]}"
+        if ! kill -0 "$pid" 2>/dev/null; then
+            message="$(eval_gettext 'Finished: $check')"
+            is set -- "$verbose" && info "$message" >&2 || debug "$message"
+            hash _async_running unset "$check"
+        fi
     done
-    [ -n "$name" ] || name="$*"
-    # processing
-    if is set -- "$check"; then
-        local check pid
-        for check in "${!_async_running[@]}"; do
-            pid=${_async_running[$check]}
-            if ! kill -0 "$pid" 2>/dev/null; then
-                async_wait "$check"
-            fi
-        done
-    elif is set -- "$name"; then
-        local code=0
-        hash _async_running has "$name" || return 0
-        wait "$(hash _async_running get "$name")"
-        hash _async_running unset "$name"
-        _steps_done "$name"
-        async_wait "$name" --check
-    else
-        local check
-        for check in "${!_async_running[@]}"; do
-            async_wait "$check"
-        done
-    fi
 }
 
 ######################################################################################
@@ -495,41 +483,56 @@ declare -A _queue_running
 # You may also set the limits using environment $QUEUE_MAX_NUM and $QUEUE_MAX_LOAD.
 # If the server is over the configured load limit one job will always run, but parallel execution will only start if possible.
 #
-# Usage:    queue add <job> [<args>...]             # add job to queue
-#           queue run [<parallel>] [<load-percent>] # run the queue with specified limits
+# Usage:    queue [<options>] add <job> [<args>...]             # add job to queue
+#           queue [--progress] run [<parallel>] [<load-percent>] # run the queue with specified limits
+# Options:  v, verbose           # display notice/info message
+#           n, name=<string>     # define name or use command with args
+#           p, progress          # show progress
+# Stderr:   - notice message for start (in verbose mode)
+#           - info message for finish (in verbose mode)
+#           - info with progress of queue
 queue() {
+    eval set -- "$(option_parse $'+n name +\nv verbose -' "$@")"
+    local name verbose=0 message progress
+    while true; do
+        case "$1" in
+        -n | --name) name="$2" && shift 2 ;;
+        --verbose) verbose=1 && shift ;;
+        --progress) progress=1 && shift ;;
+        --) shift && break ;;
+        *) die "$(gettext "Unrecognized option"): $1" ;;
+        esac
+    done
     is enum --name=command --allow="add run" --die -- "$1" && local command="$1" && shift
+    [ -n "$name" ] || name="$*"
     # processing
     case $command in
     add)
         is set --name=job --die -- "$1"
-        if is set "$_STEPS_NAME"; then
-            local name="$*"
-            _steps_check "$name" && return || true
-            local date
-            # shellcheck disable=SC2034
-            date="$(date_format sql)"
-            # shellcheck disable=SC2005
-            is set -- "$_STEPS_NAME" && printf '%s\n' "$(eval_gettext "Queued: step »\$name« at \$date")" >&2 || true
-        else
-            # add job
-            _queue_job+=("$*")
-            debug "add ${#_queue_job[@]}: $*"
+        if _steps_check "$name"; then
+            message="$(eval_gettext 'Skip: $name (already done)')"
+            is set -- "$verbose" && warn "$message" >&2 || debug "$message"
+            return
         fi
+        message="$(eval_gettext 'Queue: $name')"
+        is true -- "$verbose" && info "$message" >&2 || debug "$message"
+        _queue_jobs+=("$(printf '%s\t%s\t%s' "$name" "$verbose" "$*")")
         ;;
     run)
-        is empty -- "$1" || is integer --name=parallel --min 1 --die
-        is empty -- "$2" || is integer --name=load-percent --min 1 --die
+        is empty -- "$1" || is integer --name=parallel --min 1 --die "$1"
+        is empty -- "$2" || is integer --name=load-percent --min 1 --die "$2"
         local max="${1:-$QUEUE_MAX_NUM}"
         local load="${2:-$QUEUE_MAX_LOAD}"
-        debug "${#_queue_job[@]} Jobs to be run..."
+        local job total=${#_queue_jobs[@]} started=0
+        debug "$total Jobs to be run..."
         while true; do
             # check for finished jobs
             for pid in "${!_queue_running[@]}"; do
                 if [[ ! -d /proc/$pid ]]; then
-                    local name="${_queue_running[$pid]}"
+                    IFS=$'\t' read -r name verbose <<<"${_queue_running[$pid]}"
                     _steps_done "$name"
-                    debug "finished $name"
+                    message="$(eval_gettext 'Finished: $name')"
+                    is true -- "$verbose" && info "$message" >&2 || debug "$message"
                     unset "_queue_running[$pid]"
                 fi
             done
@@ -538,13 +541,16 @@ queue() {
                 ( ((${#_queue_running[@]} < max)) &&
                     (($(cut -d' ' -f1 /proc/loadavg | sed 's/\.//;s/^0*//') / $(nproc) < load))); then
                 # get next job
-                if ((${#_queue_job[@]} > 0)); then
-                    local job="${_queue_job[0]}"
-                    _queue_job=("${_queue_job[@]:1}")
+                if ((${#_queue_jobs[@]} > 0)); then
+                    IFS=$'\t' read -r name verbose job <<<"${_queue_jobs[0]}"
+                    _queue_jobs=("${_queue_jobs[@]:1}") # remove first
                     # run job
-                    debug "start $job (${#_queue_job[@]} jobs remaining)"
+                    message="$(eval_gettext 'Start: $name')"
+                    is true -- "$verbose" && notice "$message" >&2 || debug "$message"
                     eval "$job" &
-                    _queue_running[$!]="$job"
+                    ((started++)) || true
+                    is empty -- "$progress" || info "$(eval_gettext 'Queued $started/$total jobs')"
+                    _queue_running[$!]="$name"$'\t'"$verbose"
                 # end if no new jobs and nothing running
                 elif ((${#_queue_running[@]} == 0)); then
                     break

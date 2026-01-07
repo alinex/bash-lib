@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-06 21:25+0100\n"
+"POT-Creation-Date: 2026-01-07 21:38+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -20,7 +20,7 @@ msgstr ""
 #: core/misc:121 core/validator:129 core/array:133 module/os:180
 #: module/trivy:75 module/monitoring:143 module/input:31 module/input:86
 #: module/input:211 module/input:464 module/input:627 module/log:63
-#: module/process:381 module/process:423 module/process:457 module/remote:78
+#: module/process:377 module/process:425 module/process:503 module/remote:78
 #: module/remote:217 module/remote:265 module/remote:333 module/database:33
 #: module/mattermost:299 module/mattermost:336 module/software:230
 msgid "Unrecognized option"
@@ -378,30 +378,40 @@ msgstr "PID Lockfile konnte nicht erstellt werden"
 msgid "Waiting for unlock in $lockfile by PID $pid"
 msgstr "Warten, bis zur Freigabe in $lockfile durch PID $pid"
 
-#: module/process:317
+#: module/process:318
 msgid "Work steps are logged so that you can resume work mid-process"
 msgstr ""
 "Arbeitsschritte werden protokolliert um auch mittendrin wieder aufzusetzen"
 
-#: module/process:338
+#: module/process:384 module/process:451 module/process:513
 #, sh-format
-msgid "Job »$name« already done in this run, skipping"
-msgstr "Der Job »$name« wurde bereits ausgeführt, überspringe diesen"
+msgid "Skip: $name (already done)"
+msgstr ""
 
-#: module/process:358
+#: module/process:388 module/process:455 module/process:548
 #, sh-format
-msgid "Finished: Step »$name« at $date"
+msgid "Start: $name"
+msgstr ""
+
+#: module/process:391 module/process:534
+#, fuzzy, sh-format
+msgid "Finished: $name"
 msgstr "Fertig: Schritt »$name« um $date"
 
-#: module/process:393 module/process:436
+#: module/process:466
 #, sh-format
-msgid "Started: step »$name« at $date"
-msgstr "Start: Schritt »$name« um $date"
+msgid "Finished: $check"
+msgstr ""
 
-#: module/process:513
-#, fuzzy, sh-format
-msgid "Queued: step »$name« at $date"
-msgstr "Start: Schritt »$name« um $date"
+#: module/process:517
+#, sh-format
+msgid "Queue: $name"
+msgstr ""
+
+#: module/process:552
+#, sh-format
+msgid "Queued $started/$total jobs"
+msgstr ""
 
 #: module/remote:339
 msgid "Wait till reboot is done"
@@ -451,6 +461,18 @@ msgid "is a downgrade of one patch version"
 msgid_plural "is a downgrade of $step patch versions"
 msgstr[0] "ist ein Downgrade von einer Patchversion"
 msgstr[1] "ist ein Downgrade von $step Patchversionen"
+
+#, sh-format
+#~ msgid "Job »$name« already done in this run, skipping"
+#~ msgstr "Der Job »$name« wurde bereits ausgeführt, überspringe diesen"
+
+#, sh-format
+#~ msgid "Started: step »$name« at $date"
+#~ msgstr "Start: Schritt »$name« um $date"
+
+#, fuzzy, sh-format
+#~ msgid "Queued: step »$name« at $date"
+#~ msgstr "Start: Schritt »$name« um $date"
 
 #, sh-format
 #~ msgid "No file to execute remotely under $file"

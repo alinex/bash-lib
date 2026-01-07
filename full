@@ -2712,34 +2712,29 @@ is enum --allow="init end" --die -- "$1"
 case $1 in
 init)is integer --name=arguments --max=2 --die -- $#
 _STEPS_NAME=${2:-all}
+debug "start step control"
 declare -g -A _STEPS
 variables restore "steps_$_STEPS_NAME"
 variables store "steps_$_STEPS_NAME" _STEPS $STEPS_VARIABLES
 printf '%s\n' "$(gettext "Work steps are logged so that you can resume work mid-process")..." >&2
 ;;
 end)is integer --name=arguments --max=1 --die -- $#
+debug "end step control"
 _steps_done
 esac
 }
 _steps_check(){
 local name="$1"
 is set --name=name --die -- "$1"
-is integer --name=arguments --max=1 --die -- $#
+is integer --name=arguments --max=2 --die -- $#
 is set -- "$_STEPS_NAME"||return 1
-if [ -n "${_STEPS["$name"]}" ];then
-printf '%s\n' "$(eval_gettext 'Job »$name« already done in this run, skipping')" >&2
-return 0
-else
-return 1
-fi
+[ -n "${_STEPS["$name"]}" ]&&return 0||return 1
 }
 _steps_done(){
-is integer --name=arguments --max=1 --die -- $#
+is integer --name=arguments --max=2 --die -- $#
 is set -- "$_STEPS_NAME"||return 0
 if [ -n "$1" ];then
 _STEPS["$1"]=1
-local date="$(date_format sql)"
-printf '%s\n' "$(eval_gettext 'Finished: Step »$name« at $date')" >&2
 variables store "steps_$_STEPS_NAME" _STEPS $STEPS_VARIABLES
 else
 variables clean "steps_$_STEPS_NAME"
@@ -2747,122 +2742,135 @@ _STEPS_NAME=""
 fi
 }
 sync(){
-eval set -- "$(option_parse $'n name +' "$@")"
-local name
+eval set -- "$(option_parse $'+n name +\nv verbose -' "$@")"
+local name verbose message
 while true;do
 case "$1" in
 -n|--name)name="$2"&&shift 2;;
+--verbose)verbose=1&&shift;;
 --)shift&&break;;
 *)die "$(gettext "Unrecognized option"): $1"
 esac
 done
+is integer --name=arguments --min=1 --die -- $#
 [ -n "$name" ]||name="$*"
-is set --name=command --die -- "$2"
-if is set "$_STEPS_NAME";then
-_steps_check "$name"&&return||true
-local date
-date="$(date_format sql)"
-is set -- "$_STEPS_NAME"&&printf '%s\n' "$(eval_gettext 'Started: step »$name« at $date')" >&2||true
-"$@"
-_steps_done "$name"
-else
-"$@"
+if _steps_check "$name";then
+message="$(eval_gettext 'Skip: $name (already done)')"
+is set -- "$verbose"&&warn "$message" >&2||debug "$message"
+return
 fi
+message="$(eval_gettext 'Start: $name')"
+is set -- "$verbose"&&notice "$message" >&2||debug "$message"
+"$@"
+message="$(eval_gettext 'Finished: $name')"
+is set -- "$verbose"&&info "$message" >&2||debug "$message"
+_steps_done "$name" "$verbose"
 }
 async(){
-eval set -- "$(option_parse $'n name +' "$@")"
-local name
+eval set -- "$(option_parse $'+n name +\nv verbose -' "$@")"
+local name verbose message
 while true;do
 case "$1" in
 -n|--name)name="$2"&&shift 2;;
+--verbose)verbose=1&&shift;;
 --)shift&&break;;
 *)die "$(gettext "Unrecognized option"): $1"
 esac
 done
+is integer --name=arguments --min=1 --die -- $#
 [ -n "$name" ]||name="$*"
-async_wait "$name" --check
-is set --name=command --die -- "$2"
-if is set "$_STEPS_NAME";then
-_steps_check "$name"&&return||true
-local date
-date="$(date_format sql)"
-is set -- "$_STEPS_NAME"&&printf '%s\n' "$(eval_gettext 'Started: step »$name« at $date')" >&2||true
-fi
-"$@"&
-hash _async_running set "$name" $!
-}
-async_wait(){
-eval set -- "$(option_parse $'n name +\nc check -' "$@")"
-local name check
-while true;do
-case "$1" in
--n|--name)name="$2"&&shift 2;;
--c|--check)check=1&&shift;;
---)shift&&break;;
-*)die "$(gettext "Unrecognized option"): $1"
-esac
+_async_done
+if [ "$1" = "wait" ];then
+local pid
+if [ "$name" = "wait" ];then
+for name in "${!_async_running[@]}";do
+hash _async_running has "$name"||continue
+IFS=$'\t' read pid _ <<<"$(hash _async_running get "$name")"
+wait "$pid"||true
+_async_done
 done
-[ -n "$name" ]||name="$*"
-if is set -- "$check";then
-local check pid
-for check in "${!_async_running[@]}";do
-pid=${_async_running[$check]}
-if ! kill -0 "$pid" 2>/dev/null;then
-async_wait "$check"
-fi
-done
-elif is set -- "$name";then
-local code=0
-hash _async_running has "$name"||return 0
-wait "$(hash _async_running get "$name")"
-hash _async_running unset "$name"
-_steps_done "$name"
-async_wait "$name" --check
 else
-local check
-for check in "${!_async_running[@]}";do
-async_wait "$check"
-done
+hash _async_running has "$name"||return 0
+IFS=$'\t' read pid _ <<<"$(hash _async_running get "$name")"
+wait "$pid"||true
+_async_done
 fi
+return 0
+fi
+if _steps_check "$name";then
+message="$(eval_gettext 'Skip: $name (already done)')"
+is set -- "$verbose"&&warn "$message" >&2||debug "$message"
+return
+fi
+message="$(eval_gettext 'Start: $name')"
+is set -- "$verbose"&&notice "$message" >&2||debug "$message"
+"$@"&
+hash _async_running set "$name" $!$'\t'"$verbose"
+}
+_async_done(){
+local check pid verbose
+for check in "${!_async_running[@]}";do
+IFS=$'\t' read -r pid verbose <<<"${_async_running[$check]}"
+if ! kill -0 "$pid" 2>/dev/null;then
+message="$(eval_gettext 'Finished: $check')"
+is set -- "$verbose"&&info "$message" >&2||debug "$message"
+hash _async_running unset "$check"
+fi
+done
 }
 _queue_jobs=()
 declare -A _queue_running
 queue(){
+eval set -- "$(option_parse $'+n name +\nv verbose -' "$@")"
+local name verbose=0 message progress
+while true;do
+case "$1" in
+-n|--name)name="$2"&&shift 2;;
+--verbose)verbose=1&&shift;;
+--progress)progress=1&&shift;;
+--)shift&&break;;
+*)die "$(gettext "Unrecognized option"): $1"
+esac
+done
 is enum --name=command --allow="add run" --die -- "$1"&&local command="$1"&&shift
+[ -n "$name" ]||name="$*"
 case $command in
 add)is set --name=job --die -- "$1"
-if is set "$_STEPS_NAME";then
-local name="$*"
-_steps_check "$name"&&return||true
-local date
-date="$(date_format sql)"
-is set -- "$_STEPS_NAME"&&printf '%s\n' "$(eval_gettext 'Queued: step »$name« at $date')" >&2||true
-else
-_queue_job+=("$*")
-debug "add ${#_queue_job[@]}: $*"
+if _steps_check "$name";then
+message="$(eval_gettext 'Skip: $name (already done)')"
+is set -- "$verbose"&&warn "$message" >&2||debug "$message"
+return
 fi
+message="$(eval_gettext 'Queue: $name')"
+is true -- "$verbose"&&info "$message" >&2||debug "$message"
+_queue_jobs+=("$(printf '%s\t%s\t%s' "$name" "$verbose" "$*")")
 ;;
-run)is empty -- "$1"||is integer --name=parallel --min 1 --die
-is empty -- "$2"||is integer --name=load-percent --min 1 --die
+run)is empty -- "$1"||is integer --name=parallel --min 1 --die "$1"
+is empty -- "$2"||is integer --name=load-percent --min 1 --die "$2"
 local max="${1:-$QUEUE_MAX_NUM}"
 local load="${2:-$QUEUE_MAX_LOAD}"
-debug "${#_queue_job[@]} Jobs to be run..."
+local job total=${#_queue_jobs[@]} started=0
+debug "$total Jobs to be run..."
 while true;do
 for pid in "${!_queue_running[@]}";do
 if [[ ! -d /proc/$pid ]];then
-local name="${_queue_running[$pid]}"
+IFS=$'\t' read -r name verbose <<<"${_queue_running[$pid]}"
 _steps_done "$name"
-debug "finished $name"
+message="$(eval_gettext 'Finished: $name')"
+is true -- "$verbose"&&info "$message" >&2||debug "$message"
 unset "_queue_running[$pid]"
 fi
 done
 if ((${#_queue_running[@]}==0))||( ((${#_queue_running[@]}<max))&&(($(cut -d' ' -f1 /proc/loadavg|sed 's/\.//;s/^0*//')/$(nproc)<load)));then
-if ((${#_queue_job[@]}>0));then
-local job="${_queue_job[0]}"
-_queue_job=("${_queue_job[@]:1}")
-debug "start $job (${#_queue_job[@]} jobs remaining)"
+if ((${#_queue_jobs[@]}>0));then
+IFS=$'\t' read -r name verbose job <<<"${_queue_jobs[0]}"
+_queue_jobs=("${_queue_jobs[@]:1}")
+message="$(eval_gettext 'Start: $name')"
+is true -- "$verbose"&&notice "$message" >&2||debug "$message"
 eval "$job"&
-_queue_running[$!]="$job"
+((started++))||true
+is empty -- "$progress"||info "$(eval_gettext 'Queued $started/$total jobs')"
+_queue_running[$!]="$name"$'\t'"$verbose"
 elif ((${#_queue_running[@]}==0));then
 break
 else

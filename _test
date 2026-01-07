@@ -29,15 +29,23 @@ while true; do
 done
 ################################################################################################
 
-steps init
+queue add sleep 5
+queue add sleep 4
+queue add sleep 3
+queue add sleep 8
+queue add sleep 2
+queue run
+exit
+
+#steps init
 echo start
 async sleep 5
-async sleep 4
-async_wait sleep 5
+async --verbose sleep 4
+async wait sleep 5
 async sleep 3
-async_wait
+async wait
 echo end
-steps end
+#steps end
 exit
 
 #QUEUE_MAX_NUM=1
