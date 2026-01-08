@@ -7,6 +7,30 @@
 ### IP handling
 ######################################################################################
 
+# Get IP of given hostname
+#
+# Usage:    ip [<option>] host.de
+# Options:  v, version=<int>    # ip version 4 or 6
+# Output:   one ip address
+ip() {
+    eval set -- "$(option_parse $'v version +' "$@")"
+    local type=hosts
+    while true; do
+        case "$1" in
+        -v | --version)
+            (($2 == 4)) && type=ahostsv4 || true
+            (($2 == 6)) && type=ahostsv6 || true
+            shift 2
+            ;;
+        --) shift && break ;;
+        *) die "$(gettext "Unrecognized option"): $1" ;;
+        esac
+    done
+    is set --name=host --die -- "$1"
+    # processing
+    getent "$type" "$1" | awk '{print $1}' | head -n1
+}
+
 # Show the IP addresses
 #
 # The possible response formats are:
