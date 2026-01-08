@@ -74,6 +74,25 @@ IP_SEGMENT_PATTERN=(
 # Atlassian Jira URL to connect to
 #JIRA_HOST=https://my-company.atlassian.net
 
+# Security Board key in Jira (if trivy vulnerabilities are managed using Jira)
+#TRIVY_JIRA_BOARD=SEC
+# Type of issue to use for these (if trivy vulnerabilities are managed using Jira)
+#TRIVY_JIRA_ISSUE_TYPE=Code
+# Field name for multiline text of sources (if trivy vulnerabilities are managed using Jira)
+#TRIVY_JIRA_FIELD_SOURCES=Vorkommen
+# Field name for rating string (if trivy vulnerabilities are managed using Jira)
+#TRIVY_JIRA_FIELD_RATING=Fremdeinschätzung
+# Field name for fixed version string (if trivy vulnerabilities are managed using Jira)
+#TRIVY_JIRA_FIELD_VERSION=Version
+# Field name for multiline text with further links (if trivy vulnerabilities are managed using Jira)
+#TRIVY_JIRA_FIELD_LINKS=Links
+# Field name for approval status (if trivy vulnerabilities are managed using Jira)
+#TRIVY_JIRA_FIELD_APPROVAL=Freigabe
+# Value in approval field for "allowed for 30 days" (if trivy vulnerabilities are managed using Jira)
+#TRIVY_JIRA_APPROVAL_TEMP="Ok für 30 Tage"
+# Value in approval field for irrelevant/always allowed (if trivy vulnerabilities are managed using Jira)
+#TRIVY_JIRA_APPROVAL_IRRELEVANT="Irrelevant"
+
 ######################################################################################
 ### Remote API
 ######################################################################################

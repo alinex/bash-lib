@@ -67,6 +67,25 @@ CONFLUENCE_API=
 # Atlassian jira API URL used together with $ATLASSIAN_USER and $ATLASSIAN_TOKEN and silently disables @jira functions if not set
 JIRA_API=
 
+# Security Board key in Jira (if trivy vulnerabilities are managed using Jira)
+TRIVY_JIRA_BOARD=
+# Type of issue to use for these (if trivy vulnerabilities are managed using Jira)
+TRIVY_JIRA_ISSUE_TYPE=
+# Field name for multiline text of sources (if trivy vulnerabilities are managed using Jira)
+TRIVY_JIRA_FIELD_SOURCES=
+# Field name for rating string (if trivy vulnerabilities are managed using Jira)
+TRIVY_JIRA_FIELD_RATING=
+# Field name for fixed version string (if trivy vulnerabilities are managed using Jira)
+TRIVY_JIRA_FIELD_VERSION=
+# Field name for multiline text with further links (if trivy vulnerabilities are managed using Jira)
+TRIVY_JIRA_FIELD_LINKS=
+# Field name for approval status (if trivy vulnerabilities are managed using Jira)
+TRIVY_JIRA_FIELD_APPROVAL=
+# Value in approval field for "allowed for 30 days" (if trivy vulnerabilities are managed using Jira)
+TRIVY_JIRA_APPROVAL_TEMP=
+# Value in approval field for irrelevant/always allowed (if trivy vulnerabilities are managed using Jira)
+TRIVY_JIRA_APPROVAL_IRRELEVANT=
+
 ######################################################################################
 ### Remote
 ######################################################################################
