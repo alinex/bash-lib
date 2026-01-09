@@ -50,6 +50,7 @@ TRIVY_EXPLOITS_URL=https://www.cisa.gov/sites/default/files/feeds/known_exploite
 # Options:  t, timeout <duration>   # set the timeout for the job in <int>m or <int>h
 #           o, only-os              # let `root` command only scan OS without filesystem traversal
 #           e, exclude <dirs>       # additional excludes
+#           p, progress             # show progress
 # GLobal:   $TRIVY_DEFAULT_TIMEOUT
 #           $TRIVY_CACHE_SERVER
 #           $TRIVY_ROOT_EXCLUDE
@@ -66,15 +67,16 @@ TRIVY_EXPLOITS_URL=https://www.cisa.gov/sites/default/files/feeds/known_exploite
 # Return:   1 if there are at least one CRITICAL or HIGH vulnerabilities
 trivy() {
     is enum --name=command --allow="root files docker" --die -- "$1" && local command="$1" && shift
-    local timeout onlyOS exclude
+    local timeout onlyOS exclude progress
     timeout=${TRIVY_DEFAULT_TIMEOUT:-60m}
     # parameter parsing
-    eval set -- "$(option_parse $'t timeout +\no only-os -\ne exclude +' "$@")"
+    eval set -- "$(option_parse $'t timeout +\no only-os -\ne exclude +\np progress -' "$@")"
     while true; do
         case "$1" in
         -t | --timeout) timeout="$2" && shift 2 ;;
         -o | --only-os) onlyOS=1 && shift ;;
         -e | --exclude) exclude="$2" && shift 2 ;;
+        -p | --progress) progress=1 && shift ;;
         --) shift && break ;;
         *) die "$(gettext "Unrecognized option"): $1" ;;
         esac
@@ -89,6 +91,7 @@ trivy() {
     is empty -- "$DEBUG" || opt+=" --debug"
     is empty -- "$TRIVY_CACHE_SERVER" || opt+=" --server $TRIVY_CACHE_SERVER"
     # shellcheck disable=SC2086
+    echo "----"
     case $command in
     root)
         exclude+=" $TRIVY_ROOT_EXCLUDE"
@@ -385,7 +388,7 @@ _trivy_report() {
                 jira update "$issue" "$fields"
             fi
         fi
-        action="Add information from Jira"
+        action="$(gettext 'Add information from Jira')"
         info "$(eval_gettext '$id at $target'): $action" >&2
         changes+=("{\"Jira\": {\"id\": $issue, \"key\": \"$key\", \"approval\": \"$deploy\", \"lastComment\": \"$commentDate\"}}")
         rules+=("{\"Title\": \"Jira Info\",\"Description\": \"$action.\"}")
@@ -425,13 +428,13 @@ _trivy_report() {
             printf '%s\n' "--------------------------------------------------------------------------------"
             printf '%s\n' "$description"
             printf '%s\n' "    "
-            local value="${cvss:--}" date
+            local value="${cvss:--}" human
             printf '%s\n' "$(eval_gettext 'Rating: $severity (CVSS rating $value)')"
             value="${fixed:--}"
             printf '%s\n' "$(eval_gettext 'Status: Fixed from version $value $fixStatus')"
-            date="$(date_format human-date "$date")"
+            human="$(date_format human-date "$date")"
             value="$(duration_format days "$(date_diff "$date")")"
-            printf '%s\n' "$(eval_gettext 'Date:   Vulnerability known since $date ($value days ago)')"
+            printf '%s\n' "$(eval_gettext 'Date:   Vulnerability known since $human ($value days ago)')"
             printf '%s\n' "    "
             is empty -- "$exploitDate" || printf '%s\n\n' "$(eval_gettext 'Exploit known since $exploitDate at $exploitVendor $exploitProduct')"
             if is set -- "$issue"; then

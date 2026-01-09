@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-09 14:29+0100\n"
+"POT-Creation-Date: 2026-01-09 14:42+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,7 +18,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 
 #: core/misc:121 core/validator:129 core/array:133 module/os:180
-#: module/network:26 module/trivy:79 module/monitoring:143 module/input:31
+#: module/network:26 module/trivy:81 module/monitoring:143 module/input:31
 #: module/input:86 module/input:211 module/input:464 module/input:627
 #: module/log:63 module/process:377 module/process:425 module/process:503
 #: module/remote:78 module/remote:217 module/remote:265 module/remote:333
@@ -240,7 +240,7 @@ msgstr "Benutze $list vom $time."
 msgid "IP\\tInterface"
 msgstr "IP\\tSchnittstelle"
 
-#: module/trivy:262
+#: module/trivy:265
 #, sh-format
 msgid ""
 "Downgrade $severity -> MEDIUM because it was published less than 3 days ago"
@@ -248,68 +248,72 @@ msgstr ""
 "Herunterstufen $severity -> MEDIUM, weil diese Lücke erst in den letzten 3 "
 "Tagen veröffentlicht wurde"
 
-#: module/trivy:271
+#: module/trivy:274
 msgid ""
 "Add information of known exploits and cancel downgrades in case of just "
 "published"
 msgstr ""
-"Füge informationen zu bekannten Exploits hinzu und streiche mögliche "
+"Füge Informationen zu bekannten Exploits hinzu und streiche mögliche "
 "Herunterstufungen durch kürzliches publizieren"
 
-#: module/trivy:280
+#: module/trivy:283
 #, sh-format
 msgid "Downgrade $severity -> MEDIUM because it is a dev dependency"
 msgstr ""
 "Herunterstufen $severity -> MEDIUM, weil es sich um eine reine "
 "Entwicklungsabhängigkeit handelt"
 
-#: module/trivy:325
+#: module/trivy:328
 #, sh-format
 msgid "Downgrade $severity -> MEDIUM because of Jira status $deploy"
 msgstr "Herunterstufen $severity -> MEDIUM, durch Jira Status $deploy"
 
-#: module/trivy:326 module/trivy:389
+#: module/trivy:329 module/trivy:392
 #, sh-format
 msgid "$id at $target"
 msgstr "$id in $target"
 
-#: module/trivy:429
+#: module/trivy:391
+msgid "Add information from Jira"
+msgstr "Hinzufügen der Jira Informationen"
+
+#: module/trivy:432
 #, sh-format
 msgid "Rating: $severity (CVSS rating $value)"
 msgstr "Einstufung: $severity (CVSS Wert $value)"
 
-#: module/trivy:431
+#: module/trivy:434
 #, sh-format
 msgid "Status: Fixed from version $value $fixStatus"
 msgstr "Status: Gelöst in Version $value $fixStatus"
 
-#: module/trivy:434
-#, sh-format
-msgid "Date:   Vulnerability known since $date ($value days ago)"
+#: module/trivy:437
+#, fuzzy, sh-format
+msgid "Date:   Vulnerability known since $human ($value days ago)"
 msgstr "Datum:  Sicherheitslücke bekannt seit $date (vor $value Tagen)"
 
-#: module/trivy:436
+#: module/trivy:439
 #, sh-format
 msgid "Exploit known since $exploitDate at $exploitVendor $exploitProduct"
 msgstr "Exploit bekannt seit $exploitDate bei $exploitVendor $exploitProduct"
 
-#: module/trivy:439
+#: module/trivy:442
 msgid "Responsible"
 msgstr "Zuständig"
 
-#: module/trivy:440
+#: module/trivy:443
 msgid "Deploy"
 msgstr "Deploy"
 
-#: module/trivy:441
+#: module/trivy:444
 msgid "Last comments"
 msgstr "Letzte Kommentare"
 
-#: module/trivy:443
+#: module/trivy:446
 msgid "Sources"
 msgstr "Quellen"
 
-#: module/trivy:450
+#: module/trivy:453
 msgid "Links"
 msgstr "Links"
 
