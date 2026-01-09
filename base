@@ -184,7 +184,7 @@ long+="$name,"
 fi
 done <<<"$spec"
 shift
-getopt -o "$permute$short" --long "$long" -n "$0" -- "$@"
+getopt -q -o "$permute$short" --long "$long" -n "$0" -- "$@"
 }
 option_help(){
 is set --name=spec --die -- "$1"

@@ -16,6 +16,7 @@ But on release they will be merged with semantical versioning into the master br
 - add `$CONFIG` to load special config file
 - add escape sequences and function for cursor management on terminal
 - add [logo](doc/function/logo.md) to display it
+- rename `config/overwrite` to `config/local`
 - option_parse with support for optional values
 - rename color -> ansi module and add the cursor, character and clear codes
 - optimize code echo and escape sequences

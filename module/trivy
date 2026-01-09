@@ -8,16 +8,6 @@ source /dev/null
 
 TRIVY_EXPLOITS_URL=https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json
 
-TRIVY_JIRA_BOARD=SEC
-TRIVY_JIRA_ISSUE_TYPE=Code
-TRIVY_JIRA_FIELD_SOURCES=Vorkommen
-TRIVY_JIRA_FIELD_RATING=Fremdeinschätzung
-TRIVY_JIRA_FIELD_VERSION=Version
-TRIVY_JIRA_FIELD_LINKS=Links
-TRIVY_JIRA_FIELD_APPROVAL=Freigabe
-TRIVY_JIRA_APPROVAL_TEMP="Ok für 30 Tage"
-TRIVY_JIRA_APPROVAL_IRRELEVANT="Irrelevant"
-
 # Run a trivy security analysis.
 #
 # If not installed it will install trivy and then use it.
@@ -250,7 +240,7 @@ _trivy_report() {
     # shellcheck disable=SC2119
     if (($(date_format unix "$date") > $(now) - $(duration_format seconds 3d))) &&
         [[ "$severity" = "HIGH" || "$severity" = "CRITICAL" ]]; then
-        action="Downgrade $severity -> MEDIUM because it was published less than 3 days ago"
+        action="$(eval_gettext 'Downgrade $severity -> MEDIUM because it was published less than 3 days ago')"
         info "$id at $target: $action" >&2
         changes+=("{\"Severity\": \"MEDIUM\",\"OriginalSeverity\": \"$severity\"}")
         rules+=("{\"Title\": \"Just Published\",\"Description\": \"$action.\"}")
@@ -259,7 +249,7 @@ _trivy_report() {
     local exploited
     exploited="$(jq '.vulnerabilities[]|select(.cveID=="'"$id"'")' "$_trivy_cache/exploits.json")"
     if is set -- "$exploited"; then
-        action="Add information of known exploits and cancel downgrades in case of just published"
+        action="$(gettext 'Add information of known exploits and cancel downgrades in case of just published')"
         info "$id at $target: $action" >&2
         changes+=("{\"Exploited\": $exploited, \"Severity\": \"$severity\"}")
         rules+=("{\"Title\": \"Exploited\",\"Description\": \"$action.\"}")
@@ -268,7 +258,7 @@ _trivy_report() {
     if [ "$type" = "npm" ] &&
         [[ "$severity" = "HIGH" || "$severity" = "CRITICAL" ]] && is file -- "$target" &&
         [ "$(jq '.packages|with_entries(select(.key|contains("'"$pkgName"'")))|.[]|select(has("dev"))|[.dev]|any' "$target"/package-lock.json)" = "true" ]; then
-        action="Downgrade $severity -> MEDIUM because it is a dev dependency"
+        action="$(eval_gettext 'Downgrade $severity -> MEDIUM because it is a dev dependency')"
         info "$id at $target: $action" >&2
         changes+=("{\"Severity\": \"MEDIUM\",\"OriginalSeverity\": \"$severity\"}")
         rules+=("{\"Title\": \"NPM Dev Dependency\",\"Description\": \"$action.\"}")
@@ -291,7 +281,7 @@ _trivy_report() {
             jira json fields set priority json "{\"name\":\"$priority\"}"
             jira json fields set summary "$id"
             jira json fields set description adf "$title"$'\n\n'"$description"
-            jira json fields set "${_trivy_jira[field_rating]}" adf "$severity (CVSS Rating ${cvss:--})"
+            jira json fields set "${_trivy_jira[field_rating]}" adf "$severity (CVSS rating ${cvss:--})"
             jira json fields set "${_trivy_jira[field_version]}" adf "Gefixt ab Version ${fixed:--} $fixStatus"
             jira json fields set "${_trivy_jira[field_links]}" adf "$links"
             jira json fields set "${_trivy_jira[field_sources]}" adf "$(date +%Y-%m) > $sourceLine"
@@ -313,8 +303,8 @@ _trivy_report() {
         # downgrade
         if [[ "$severity" = "HIGH" || "$severity" = "CRITICAL" ]]; then
             if ([ "$deploy" = "$TRIVY_JIRA_APPROVAL_IRRELEVANT" ] || ([ "$deploy" = "$TRIVY_JIRA_APPROVAL_TEMP" ] && (($(date_diff "$commentDate") <= $(duration_format seconds '30d'))))); then
-                action="Downgrade $severity -> MEDIUM because of Jira status '$deploy'"
-                info "$id at $target: $action" >&2
+                action="$(eval_gettext 'Downgrade $severity -> MEDIUM because of Jira status $deploy')"
+                info "$(eval_gettext '$id at $target'): $action" >&2
                 changes+=("{\"Severity\": \"MEDIUM\",\"OriginalSeverity\": \"$severity\"}")
                 rules+=("{\"Title\": \"Jira Approval\",\"Description\": \"$action.\"}")
             fi
@@ -377,7 +367,7 @@ _trivy_report() {
             fi
         fi
         action="Add information from Jira"
-        info "$id at $target: $action" >&2
+        info "$(eval_gettext '$id at $target'): $action" >&2
         changes+=("{\"Jira\": {\"id\": $issue, \"key\": \"$key\", \"approval\": \"$deploy\", \"lastComment\": \"$commentDate\"}}")
         rules+=("{\"Title\": \"Jira Info\",\"Description\": \"$action.\"}")
     fi
@@ -416,25 +406,29 @@ _trivy_report() {
             printf '%s\n' "--------------------------------------------------------------------------------"
             printf '%s\n' "$description"
             printf '%s\n' "    "
-            printf '%s\n' "Rating: $severity (CVSS Rating ${cvss:--})"
-            printf '%s\n' "Status: Gefixt ab Version ${fixed:--} $fixStatus"
-            printf '%s\n' "Datum:  Sicherheitslücke bekannt seit $(date_format human-date "$date") (vor $(duration_format days "$(date_diff "$date")") Tagen)"
+            local value="${cvss:--}" date
+            printf '%s\n' "$(eval_gettext 'Rating: $severity (CVSS rating $value)')"
+            value="${fixed:--}"
+            printf '%s\n' "$(eval_gettext 'Status: Fixed from version $value $fixStatus')"
+            date="$(date_format human-date "$date")"
+            value="$(duration_format days "$(date_diff "$date")")"
+            printf '%s\n' "$(eval_gettext 'Date:   Vulnerability known since $date ($value days ago)')"
             printf '%s\n' "    "
-            is empty -- "$exploitDate" || printf '%s' "Exploit bekannt seit $exploitDate bei $exploitVendor $exploitProduct\n\n"
+            is empty -- "$exploitDate" || printf '%s\n\n' "$(eval_gettext 'Exploit known since $exploitDate at $exploitVendor $exploitProduct')"
             if is set -- "$issue"; then
-                printf '%s\n' "Jira Ticket: https://ekz-gruppe.atlassian.net/browse/$issue"
-                printf '%s\n' "             $jiraStatus    Zuständig: $assignee"
-                printf '%s\n' "             Deploy: ${approval:-Undefiniert}"
-                printf '%s\n' "Letzte Kommentare:\n$(join comments $'\n' | sed 's/^/             /')"
+                printf '%s\n' "Jira Issue: https://ekz-gruppe.atlassian.net/browse/$issue"
+                printf '%s\n' "            $jiraStatus    $(gettext 'Responsible'): $assignee"
+                printf '%s\n' "            $(gettext 'Deploy'): ${approval:-Undefiniert}"
+                printf '%s\n' "$(gettext 'Last comments'):\n$(join comments $'\n' | sed 's/^/             /')"
             fi
-            printf 'Sources:\n'
+            printf '%s:\n' "$(gettext 'Sources')"
         } >>"$file"
     fi
     file="$folder/sources.txt"
     printf '%s\n' "- $sourceLine" >>"$file"
     file="$folder/footer.txt"
     if ! is file -- "$file"; then
-        printf "%s$CC_RESET\n" "Links:\n$links" >>"$file"
+        printf "%s$CC_RESET\n" "$(gettext 'Links'):\n$links" >>"$file"
     fi
     # create tsv line
     file="$folder/report.tsv"

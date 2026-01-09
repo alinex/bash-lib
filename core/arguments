@@ -59,7 +59,7 @@ option_parse() {
     done <<<"$spec"
     shift
     # parse
-    getopt -o "$permute$short" --long "$long" -n "$0" -- "$@"
+    getopt -q -o "$permute$short" --long "$long" -n "$0" -- "$@"
 }
 
 # Print help for options defined in options specification

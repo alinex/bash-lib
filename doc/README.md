@@ -49,13 +49,16 @@ The BashLib contains some core functionality and optional modules which are list
 
 ### Environment Module
 
-The configuration module contains a lot of general configuration settings for the bash-lib modules itself. Most of them are specific to the individual environment so they need to be set in the local `overwrite` config.
+The configuration module contains a lot of general configuration settings for the bash-lib modules itself. Most of them are specific to the individual environment so they need to be set in the `local` config.
 
 | Variable/Function | Description |
 | --- | --- |
 | ``$QUEUE_MAX_NUM`` | Maximum number of parallel tasks for queue |
 | ``$QUEUE_MAX_LOAD`` | Percentage of 1 Minute Load per CPU (100% 8Cpu => 8.0) |
+| ``$REMOTE_LOGIN_DEFAULT`` | Default login if no `--login` or ``$login`` available |
 | ``$MOUNT_COLOR_LIMIT`` | Array: Color limits per mount (regex critical error warn ok) used in [`df`](functiondf.md) |
+| ``$IP_PROVIDER_PATTERN`` | Array: Provider selection per ip (regex provider) used in [`ip_pattern`](functionip_pattern.md) |
+| ``$IP_SEGMENT_PATTERN`` | Array: Network segment selection per ip (regex segment) used in [`ip_pattern`](functionip_pattern.md) |
 | ``$MATTERMOST_API`` | Mattermost API URL used together with `$MATTERMOST_TOKEN` and silently disables mattermost functions if not set |
 | ``$MATTERMOST_TOKEN`` | Mattermost API Token used in [`mattermost`](functionmattermost.md) [`mattermost_repost`](functionmattermost_repost.md) [`mattermost_reaction`](functionmattermost_reaction.md) |
 | ``$MATTERMOST_CHANNEL_PATTERN`` | Array: Channel per pattern (team regex channel) used in [`mattermost`](functionmattermost.md) ("-"" = no selection for team) |
@@ -69,6 +72,15 @@ The configuration module contains a lot of general configuration settings for th
 | ``$JIRA_HOST`` | Atlassian Jira URL this can be https://my-company.atlassian.net |
 | ``$CONFLUENCE_API`` | Atlassian confluence API URL used together with `$ATLASSIAN_USER` and `$ATLASSIAN_TOKEN` and silently disables [`confluence`](functionconfluence.md) functions if not set |
 | ``$JIRA_API`` | Atlassian jira API URL used together with `$ATLASSIAN_USER` and `$ATLASSIAN_TOKEN` and silently disables [`jira`](functionjira.md) functions if not set |
+| ``$TRIVY_JIRA_BOARD`` | Security Board key in Jira (if trivy vulnerabilities are managed using Jira) |
+| ``$TRIVY_JIRA_ISSUE_TYPE`` | Type of issue to use for these (if trivy vulnerabilities are managed using Jira) |
+| ``$TRIVY_JIRA_FIELD_SOURCES`` | Field name for multiline text of sources (if trivy vulnerabilities are managed using Jira) |
+| ``$TRIVY_JIRA_FIELD_RATING`` | Field name for rating string (if trivy vulnerabilities are managed using Jira) |
+| ``$TRIVY_JIRA_FIELD_VERSION`` | Field name for fixed version string (if trivy vulnerabilities are managed using Jira) |
+| ``$TRIVY_JIRA_FIELD_LINKS`` | Field name for multiline text with further links (if trivy vulnerabilities are managed using Jira) |
+| ``$TRIVY_JIRA_FIELD_APPROVAL`` | Field name for approval status (if trivy vulnerabilities are managed using Jira) |
+| ``$TRIVY_JIRA_APPROVAL_TEMP`` | Value in approval field for "allowed for 30 days" (if trivy vulnerabilities are managed using Jira) |
+| ``$TRIVY_JIRA_APPROVAL_IRRELEVANT`` | Value in approval field for irrelevant/always allowed (if trivy vulnerabilities are managed using Jira) |
 | ``$REMOTE_LOGIN_DEFAULT`` | Default login if no `--login` or ``$login`` available |
 | ``$MONGO_ADMIN_USERPASS`` | Hash: Mongo Admin User Logins `<host> = <username>:<password>` but use `_` instead of `.` in hostname |
 | ``$POWERDNS_API`` | PowerDNS API URL used together with `$POWERDNS_TOKEN` and silently disables powerdns function if not set |
@@ -370,6 +382,7 @@ Module with network functions.
 
 | Variable/Function | Description |
 | --- | --- |
+| [`ip`](function/ip.md) | Get IP of given hostname |
 | [`ip_intern`](function/ip_intern.md) | Show the IP addresses |
 | [`ip_pattern`](function/ip_pattern.md) | Find info about IP by configured patterns. |
 | [`ip_extern`](function/ip_extern.md) | Run  os detection and set the constants |
@@ -409,6 +422,7 @@ Module for process control
 | [`async`](function/async.md) | Run the given command asynchronous ang go on in the calling routine |
 | [`queue`](function/queue.md) | Run bash commands parallel with limits from a queue. |
 | [`random`](function/random.md) | Return a random string in specific length |
+| [`process`](function/process.md) | Process control |
 
 ### Remote Module
 

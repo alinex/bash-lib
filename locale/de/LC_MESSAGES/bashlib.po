@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-07 21:38+0100\n"
+"POT-Creation-Date: 2026-01-09 14:09+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,11 +18,12 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 
 #: core/misc:121 core/validator:129 core/array:133 module/os:180
-#: module/trivy:75 module/monitoring:143 module/input:31 module/input:86
-#: module/input:211 module/input:464 module/input:627 module/log:63
-#: module/process:377 module/process:425 module/process:503 module/remote:78
-#: module/remote:217 module/remote:265 module/remote:333 module/database:33
-#: module/mattermost:299 module/mattermost:336 module/software:230
+#: module/network:26 module/trivy:65 module/monitoring:143 module/input:31
+#: module/input:86 module/input:211 module/input:464 module/input:627
+#: module/log:63 module/process:377 module/process:425 module/process:503
+#: module/remote:78 module/remote:217 module/remote:265 module/remote:333
+#: module/database:33 module/mattermost:299 module/mattermost:336
+#: module/software:230
 msgid "Unrecognized option"
 msgstr "Unbekannte Option"
 
@@ -235,9 +236,82 @@ msgstr "Keine lokale DNS Liste gefunden, bitte herunterladen."
 msgid "Use $list from $time."
 msgstr "Benutze $list vom $time."
 
-#: module/network:25
+#: module/network:49
 msgid "IP\\tInterface"
 msgstr "IP\\tSchnittstelle"
+
+#: module/trivy:243
+#, sh-format
+msgid ""
+"Downgrade $severity -> MEDIUM because it was published less than 3 days ago"
+msgstr ""
+"Herunterstufen $severity -> MEDIUM, weil diese Lücke erst in den letzten 3 "
+"Tagen veröffentlicht wurde"
+
+#: module/trivy:252
+msgid ""
+"Add information of known exploits and cancel downgrades in case of just "
+"published"
+msgstr ""
+"Füge informationen zu bekannten Exploits hinzu und streiche mögliche "
+"Herunterstufungen durch kürzliches publizieren"
+
+#: module/trivy:261
+#, sh-format
+msgid "Downgrade $severity -> MEDIUM because it is a dev dependency"
+msgstr ""
+"Herunterstufen $severity -> MEDIUM, weil es sich um eine reine "
+"Entwicklungsabhängigkeit handelt"
+
+#: module/trivy:306
+#, sh-format
+msgid "Downgrade $severity -> MEDIUM because of Jira status $deploy"
+msgstr "Herunterstufen $severity -> MEDIUM, durch Jira Status $deploy"
+
+#: module/trivy:307 module/trivy:370
+#, sh-format
+msgid "$id at $target"
+msgstr "$id in $target"
+
+#: module/trivy:410
+#, sh-format
+msgid "Rating: $severity (CVSS rating $value)"
+msgstr "Einstufung: $severity (CVSS Wert $value)"
+
+#: module/trivy:412
+#, sh-format
+msgid "Status: Fixed from version $value $fixStatus"
+msgstr "Status: Gelöst in Version $value $fixStatus"
+
+#: module/trivy:415
+#, sh-format
+msgid "Date:   Vulnerability known since $date ($value days ago)"
+msgstr "Datum:  Sicherheitslücke bekannt seit $date (vor $value Tagen)"
+
+#: module/trivy:417
+#, sh-format
+msgid "Exploit known since $exploitDate at $exploitVendor $exploitProduct"
+msgstr "Exploit bekannt seit $exploitDate bei $exploitVendor $exploitProduct"
+
+#: module/trivy:420
+msgid "Responsible"
+msgstr "Zuständig"
+
+#: module/trivy:421
+msgid "Deploy"
+msgstr "Deploy"
+
+#: module/trivy:422
+msgid "Last comments"
+msgstr "Letzte Kommentare"
+
+#: module/trivy:424
+msgid "Sources"
+msgstr "Quellen"
+
+#: module/trivy:431
+msgid "Links"
+msgstr "Links"
 
 #: module/monitoring:70
 msgid "Could not get exporters from Prometheus!"
@@ -386,32 +460,32 @@ msgstr ""
 #: module/process:384 module/process:451 module/process:513
 #, sh-format
 msgid "Skip: $name (already done)"
-msgstr ""
+msgstr "Abbrechen: $name (bereits durchgeführt)"
 
 #: module/process:388 module/process:455 module/process:548
 #, sh-format
 msgid "Start: $name"
-msgstr ""
+msgstr "Starte: $name"
 
 #: module/process:391 module/process:534
-#, fuzzy, sh-format
+#, sh-format
 msgid "Finished: $name"
-msgstr "Fertig: Schritt »$name« um $date"
+msgstr "Fertig: $name"
 
 #: module/process:466
 #, sh-format
 msgid "Finished: $check"
-msgstr ""
+msgstr "Fertig: $check"
 
 #: module/process:517
 #, sh-format
 msgid "Queue: $name"
-msgstr ""
+msgstr "Warteschlange: $name"
 
 #: module/process:552
 #, sh-format
 msgid "Queued $started/$total jobs"
-msgstr ""
+msgstr "Warteschlange $started/$total Jobs"
 
 #: module/remote:339
 msgid "Wait till reboot is done"
@@ -461,6 +535,9 @@ msgid "is a downgrade of one patch version"
 msgid_plural "is a downgrade of $step patch versions"
 msgstr[0] "ist ein Downgrade von einer Patchversion"
 msgstr[1] "ist ein Downgrade von $step Patchversionen"
+
+#~ msgid "Zuständig"
+#~ msgstr "Zuständig"
 
 #, sh-format
 #~ msgid "Job »$name« already done in this run, skipping"

@@ -32,7 +32,7 @@ wait # for all to end
 ### Description
 
 
-While this command runs you may start more [`async`](async.md) commands and use [`asny_wait`](asny_wait.md) to wait for a specific one to end or all to end.
+While this command runs you may start more [`async`](async.md) commands and use [`async_wait`](async_wait.md) to wait for a specific one to end or all to end.
 
 The command and arguments given will be called like directly run. But if [`steps`](steps.md) is started it will check if already done.
 Further in `--verbose` mode a message for start and end will be printed on STDERR with the command or the given `--name`.

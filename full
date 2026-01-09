@@ -184,7 +184,7 @@ long+="$name,"
 fi
 done <<<"$spec"
 shift
-getopt -o "$permute$short" --long "$long" -n "$0" -- "$@"
+getopt -q -o "$permute$short" --long "$long" -n "$0" -- "$@"
 }
 option_help(){
 is set --name=spec --die -- "$1"
@@ -2351,6 +2351,22 @@ remote true 2>/dev/null||continue
 remote /etc/prometheus/config-builder/update >/dev/null
 done
 }
+ip(){
+eval set -- "$(option_parse $'v version +' "$@")"
+local type=hosts
+while true;do
+case "$1" in
+-v|--version)(($2==4))&&type=ahostsv4||true
+(($2==6))&&type=ahostsv6||true
+shift 2
+;;
+--)shift&&break;;
+*)die "$(gettext "Unrecognized option"): $1"
+esac
+done
+is set --name=host --die -- "$1"
+getent "$type" "$1"|awk '{print $1}'|head -n1
+}
 ip_intern(){
 is integer --name=arguments --max=1 --die -- $#
 install ip
@@ -2911,6 +2927,58 @@ result+="$(head /dev/urandom|tr -dc "$pattern")"
 done
 printf '%s' "${result:0:length}"
 }
+process(){
+local command
+is enum --allow="list info wait kill" --die --output=command -- "$1"
+is set --name=process-id-or-name --die -- "$2"
+is integer --name=arguments --max=3 --die -- $#
+local list
+if is integer -- "$2";then
+kill -0 "$2" >/dev/null||die "No process with pid $2"
+list=("$2")
+else
+mapfile -t list < <(pgrep "$2")
+[ -n "$list" ]||mapfile -t list < <(pgrep -f "$2")
+fi
+local pid current parent
+for pid in "${list[@]}";do
+current="$pid"
+while true;do
+parent=$(ps -o ppid= -p "$current" 2>/dev/null)
+[[ -z $parent || $parent == "1" ]]&&echo "$current"&&break||current="$parent"
+done
+done|sort -nu|mapfile -t list
+case $command in
+list)local tree_pid
+for pid in "${list[@]}";do
+printf '%s (%s)' "$(ps -p "$pid" -o comm=)" "$pid"
+tree_pid=($(_process_children "$pid"))
+tree_pid+=("$pid")
+ps -o pcpu,rss --no-headers -p "$(IFS=, echo "${tree_pid[*]}")"|awk '{ cpu+=$1; mem+=$2; count++ } END { printf " %.2f%% CPU %.2f MB in %d processes\n", cpu, mem/1024, count }'||true
+done
+;;
+info)local comm tree_pid
+for pid in "${list[@]}";do
+[ -n "$comm" ]||comm="$(basename "$(ps -p "$pid" -o args=|cut -d' ' -f1)")"
+tree_pid+=($(_process_children "$pid"))
+tree_pid+=("$pid")
+done
+printf '%s' "$comm"
+echo "> ${#tree_pid[@]}"
+ps -o pcpu,rss --no-headers -p "$(IFS=, echo "${tree_pid[*]}")"|awk '{ cpu+=$1; mem+=$2; count++ } END { printf " %.2f%% CPU %.2f MB in %d processes\n", cpu, mem/1024, count }'||true
+;;
+wait);;
+kill)
+esac
+}
+_process_children(){
+local parent="$1" children
+children=$(pgrep -P "$parent"||true)
+for child in $children;do
+echo "$child"
+_process_children "$child"
+done
+}
 _module_resolve(){
 local modules=()
 split "$1" modules ,
@@ -3423,15 +3491,6 @@ tail -n +2 <<<"$input"|tac
 esac
 }
 TRIVY_EXPLOITS_URL=https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json
-TRIVY_JIRA_BOARD=SEC
-TRIVY_JIRA_ISSUE_TYPE=Code
-TRIVY_JIRA_FIELD_SOURCES=Vorkommen
-TRIVY_JIRA_FIELD_RATING=Fremdeinschätzung
-TRIVY_JIRA_FIELD_VERSION=Version
-TRIVY_JIRA_FIELD_LINKS=Links
-TRIVY_JIRA_FIELD_APPROVAL=Freigabe
-TRIVY_JIRA_APPROVAL_TEMP="Ok für 30 Tage"
-TRIVY_JIRA_APPROVAL_IRRELEVANT="Irrelevant"
 trivy(){
 is enum --name=command --allow="root files docker" --die -- "$1"&&local command="$1"&&shift
 local timeout onlyOS
@@ -3575,7 +3634,7 @@ debug "trivy_report \"$1\" \"$2\" \"$3\""
 local work="$1"
 local file="$2"
 local source="$3"
-local type severity target id json title pkgPath description cvss installed sourceLine date fixed fixStatus links
+local type severity target id json title pkgName pkgPath description cvss installed sourceLine date fixed fixStatus links
 json="$(cat "$file")"
 type="$(jq .Type -r <<<"$json")"
 severity="$(jq .Severity -r <<<"$json")"
@@ -3584,6 +3643,8 @@ id="$(jq .VulnerabilityID -r <<<"$json")"
 title="$(jq .Title -r <<<"$json")"
 pkgPath="$(jq .PkgPath -r <<<"$json")"
 test ! "$pkgPath" = "null"||pkgPath=""
+pkgName="$(jq .PkgName -r <<<"$json")"
+test ! "$pkgName" = "null"||pkgName=""
 description="$(jq .Description -r <<<"$json")"
 cvss="$(jq '.CVSS[]?.V3Score' -r <<<"$json"|tr $'\n' '\;'|sed 's/;$//;s/;/; /g')"
 installed="$(jq .InstalledVersion -r <<<"$json")"
@@ -3597,7 +3658,7 @@ test ! "$date" = "null"||date=""
 links="$(jq '.References[]?' -r <<<"$json"|sed 's/^/- /')"
 local changes=() rules=() action
 if (($(date_format unix "$date")>$(now)-$(duration_format seconds 3d)))&&[[ $severity == "HIGH" || $severity == "CRITICAL" ]];then
-action="Downgrade $severity -> MEDIUM because it was published less than 3 days ago"
+action="$(eval_gettext 'Downgrade $severity -> MEDIUM because it was published less than 3 days ago')"
 info "$id at $target: $action" >&2
 changes+=("{\"Severity\": \"MEDIUM\",\"OriginalSeverity\": \"$severity\"}")
 rules+=("{\"Title\": \"Just Published\",\"Description\": \"$action.\"}")
@@ -3605,13 +3666,13 @@ fi
 local exploited
 exploited="$(jq '.vulnerabilities[]|select(.cveID=="'"$id"'")' "$_trivy_cache/exploits.json")"
 if is set -- "$exploited";then
-action="Add information of known exploits and cancel downgrades in case of just published"
+action="$(gettext 'Add information of known exploits and cancel downgrades in case of just published')"
 info "$id at $target: $action" >&2
 changes+=("{\"Exploited\": $exploited, \"Severity\": \"$severity\"}")
 rules+=("{\"Title\": \"Exploited\",\"Description\": \"$action.\"}")
 fi
 if [ "$type" = "npm" ]&&[[ $severity == "HIGH" || $severity == "CRITICAL" ]]&&is file -- "$target"&&[ "$(jq '.packages|with_entries(select(.key|contains("'"$pkgName"'")))|.[]|select(has("dev"))|[.dev]|any' "$target"/package-lock.json)" = "true" ];then
-action="Downgrade $severity -> MEDIUM because it is a dev dependency"
+action="$(eval_gettext 'Downgrade $severity -> MEDIUM because it is a dev dependency')"
 info "$id at $target: $action" >&2
 changes+=("{\"Severity\": \"MEDIUM\",\"OriginalSeverity\": \"$severity\"}")
 rules+=("{\"Title\": \"NPM Dev Dependency\",\"Description\": \"$action.\"}")
@@ -3631,8 +3692,7 @@ jira json fields set issuetype json "{\"id\":${_trivy_jira[issueType]}}"
 jira json fields set priority json "{\"name\":\"$priority\"}"
 jira json fields set summary "$id"
 jira json fields set description adf "$title"$'\n\n'"$description"
-jira json fields set "${_trivy_jira[field_sources]}" adf "$(date +%Y-%m) > $source $target ($type)"
-jira json fields set "${_trivy_jira[field_rating]}" adf "$severity (CVSS Rating ${cvss:--})"
+jira json fields set "${_trivy_jira[field_rating]}" adf "$severity (CVSS rating ${cvss:--})"
 jira json fields set "${_trivy_jira[field_version]}" adf "Gefixt ab Version ${fixed:--} $fixStatus"
 jira json fields set "${_trivy_jira[field_links]}" adf "$links"
 jira json fields set "${_trivy_jira[field_sources]}" adf "$(date +%Y-%m) > $sourceLine"
@@ -3653,8 +3713,8 @@ comments+=("$date $author: $(jira adf_to_md "$comment"|grep -v ^$)")
 done < <(jq '.fields.comment.comments[-3:][] | [.updated, .updateAuthor.displayName, (.body | @json)] | @tsv' -r <<<"$jira"|tac)
 if [[ $severity == "HIGH" || $severity == "CRITICAL" ]];then
 if ([ "$deploy" = "$TRIVY_JIRA_APPROVAL_IRRELEVANT" ]||([ "$deploy" = "$TRIVY_JIRA_APPROVAL_TEMP" ]&&(($(date_diff "$commentDate")<=$(duration_format seconds '30d')))));then
-action="Downgrade $severity -> MEDIUM because of Jira status '$deploy'"
-info "$id at $target: $action" >&2
+action="$(eval_gettext 'Downgrade $severity -> MEDIUM because of Jira status $deploy')"
+info "$(eval_gettext '$id at $target'): $action" >&2
 changes+=("{\"Severity\": \"MEDIUM\",\"OriginalSeverity\": \"$severity\"}")
 rules+=("{\"Title\": \"Jira Approval\",\"Description\": \"$action.\"}")
 fi
@@ -3671,7 +3731,7 @@ jira json fields set description adf "$new"
 update=1
 fi
 old="$(jira json jira get "${_trivy_jira[field_sources]}" md)"
-new="$(printf '%s' "$old\n$(date +%Y-%m) > $sourceLine"|sed -n '/>/p'|sort -t'>' -r -k2,1|sort -t'>' -u -r -k2)"
+new="$(printf '%s\n%s' "$old" "$(date +%Y-%m) > $sourceLine"|sed -n '/>/p'|sort -t'>' -k1,1r -k2,2)"
 if [[ $new != "$old" ]];then
 jira json fields set "${_trivy_jira[field_sources]}" adf "$new"
 update=1
@@ -3701,15 +3761,15 @@ for label in $(sed 's#.*ekz.de/##;s#/-/.*##;s#[/.]# #g' <<<"$source");do
 addLabel+=('{"add": "'"$label"'"}')
 done
 if is set -- "$update";then
-update="$fields"
+update=1
 if ((${#addLabel[@]}>0));then
-fields="$(jq --argjson l "[$(join json ",")]" '.update = { "labels": $l }' <<<"$fields")"
+fields="$(jq --argjson l "[$(join addLabel ",")]" '.update = { "labels": $l }' <<<"$fields")"
 fi
 jira update "$issue" "$fields"
 fi
 fi
 action="Add information from Jira"
-info "$id at $target: $action" >&2
+info "$(eval_gettext '$id at $target'): $action" >&2
 changes+=("{\"Jira\": {\"id\": $issue, \"key\": \"$key\", \"approval\": \"$deploy\", \"lastComment\": \"$commentDate\"}}")
 rules+=("{\"Title\": \"Jira Info\",\"Description\": \"$action.\"}")
 fi
@@ -3742,25 +3802,29 @@ printf '%s\n' "$severity $id $title"
 printf '%s\n' "--------------------------------------------------------------------------------"
 printf '%s\n' "$description"
 printf '%s\n' "    "
-printf '%s\n' "Rating: $severity (CVSS Rating ${cvss:--})"
-printf '%s\n' "Status: Gefixt ab Version ${fixed:--} $fixStatus"
-printf '%s\n' "Datum:  Sicherheitslücke bekannt seit $(date_format human-date "$date") (vor $(duration_format days "$(date_diff "$date")") Tagen)"
+local value="${cvss:--}" date
+printf '%s\n' "$(eval_gettext 'Rating: $severity (CVSS rating $value)')"
+value="${fixed:--}"
+printf '%s\n' "$(eval_gettext 'Status: Fixed from version $value $fixStatus')"
+date="$(date_format human-date "$date")"
+value="$(duration_format days "$(date_diff "$date")")"
+printf '%s\n' "$(eval_gettext 'Date:   Vulnerability known since $date ($value days ago)')"
 printf '%s\n' "    "
-is empty -- "$exploitDate"||printf '%s' "Exploit bekannt seit $exploitDate bei $exploitVendor $exploitProduct\n\n"
+is empty -- "$exploitDate"||printf '%s\n\n' "$(eval_gettext 'Exploit known since $exploitDate at $exploitVendor $exploitProduct')"
 if is set -- "$issue";then
-printf '%s\n' "Jira Ticket: https://ekz-gruppe.atlassian.net/browse/$issue"
-printf '%s\n' "             $jiraStatus    Zuständig: $assignee"
-printf '%s\n' "             Deploy: ${approval:-Undefiniert}"
-printf '%s\n' "Letzte Kommentare:\n$(join comments $'\n'|sed 's/^/             /')"
+printf '%s\n' "Jira Issue: https://ekz-gruppe.atlassian.net/browse/$issue"
+printf '%s\n' "            $jiraStatus    $(gettext 'Responsible'): $assignee"
+printf '%s\n' "            $(gettext 'Deploy'): ${approval:-Undefiniert}"
+printf '%s\n' "$(gettext 'Last comments'):\n$(join comments $'\n'|sed 's/^/             /')"
 fi
-printf 'Sources:\n'
+printf '%s:\n' "$(gettext 'Sources')"
 } >>"$file"
 fi
 file="$folder/sources.txt"
 printf '%s\n' "- $sourceLine" >>"$file"
 file="$folder/footer.txt"
 if ! is file -- "$file";then
-printf "%s$CC_RESET\n" "Links:\n$links" >>"$file"
+printf "%s$CC_RESET\n" "$(gettext 'Links'):\n$links" >>"$file"
 fi
 file="$folder/report.tsv"
 printf '%s\t%s\t%s\t%s\n' "$severity" "$type" "$id" "$title" >>"$file"
