@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # shellcheck disable=SC2034
 
-# The configuration module contains a lot of general configuration settings for the bash-lib modules itself. Most of them are specific to the individual environment so they need to be set in the local `overwrite` config.
+# The configuration module contains a lot of general configuration settings for the bash-lib modules itself. Most of them are specific to the individual environment so they need to be set in the `local` config.
 
 ######################################################################################
 ### process
@@ -16,10 +16,26 @@ QUEUE_MAX_LOAD=75
 ### Host Specific
 ######################################################################################
 
+# Default login if no `--login` or `$login` available
+REMOTE_LOGIN_DEFAULT=operator
+
 # Array: Color limits per mount (regex critical error warn ok) used in @df
 MOUNT_COLOR_LIMIT=(
     ".*" 100 90 80 50
 )
+
+# Array: Provider selection per ip (regex provider) used in @ip_pattern
+IP_PROVIDER_PATTERN=(
+    ".*" Unknown
+)
+# Array: Network segment selection per ip (regex segment) used in @ip_pattern
+IP_SEGMENT_PATTERN=(
+    ".*" other
+)
+# Array: Network segment selection per ip (regex segment) used in @ip_pattern
+#IP_VMWARE_PATTERN=(
+#    ".*" "https://myvmware.company.net/ui"
+#)
 
 ######################################################################################
 ### Mattermost

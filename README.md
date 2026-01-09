@@ -214,7 +214,7 @@ Load it directly in bash with the above `source` commands.
 
 ## Configuration
 
-The configuration is under `config/` folder and will be loaded in alphabetically order. For your configuration change only the `overwrite` and `secrets` which are linked to your local configuration folder.
+The configuration is under `config/` folder and will be loaded in alphabetically order. For your configuration change only the `local` and `secrets` which are linked to your local configuration folder.
 
 The configuration is the same for the whole host. To make program specific configuration overwrite it in your program after loading the bashlib. And you may also run the same program with different configuration by defining an additional configuration file to load using environment, see below.
 

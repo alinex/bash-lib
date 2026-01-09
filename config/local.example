@@ -24,15 +24,15 @@ MOUNT_COLOR_LIMIT=(
     ".*" 100 90 80 50
 )
 
-# Array: Provider selection per ip (regex provider) used in ???
+# Array: Provider selection per ip (regex provider) used in @ip_pattern
 IP_PROVIDER_PATTERN=(
     ".*" Unknown
 )
-# Array: Network segment selection per ip (regex segment) used in ???
+# Array: Network segment selection per ip (regex segment) used in @ip_pattern
 IP_SEGMENT_PATTERN=(
     ".*" other
 )
-# Array: Network segment selection per ip (regex segment) used in ???
+# Array: Network segment selection per ip (regex segment) used in @ip_pattern
 #IP_VMWARE_PATTERN=(
 #    ".*" "https://myvmware.company.net/ui"
 #)
