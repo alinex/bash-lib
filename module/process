@@ -395,7 +395,7 @@ sync() {
 
 # Run the given command asynchronous ang go on in the calling routine
 #
-# While this command runs you may start more @async commands and use @asny_wait to wait for a specific one to end or all to end.
+# While this command runs you may start more @async commands and use @async_wait to wait for a specific one to end or all to end.
 #
 # The command and arguments given will be called like directly run. But if @steps is started it will check if already done.
 # Further in `--verbose` mode a message for start and end will be printed on STDERR with the command or the given `--name`.
@@ -616,4 +616,83 @@ random() {
         result+="$(head /dev/urandom | tr -dc "$pattern")"
     done
     printf '%s' "${result:0:$length}"
+}
+
+######################################################################################
+# OS Process
+######################################################################################
+
+# Process control
+#
+# This function will work on the main pid for the matching process groups:
+#
+# - if a <pid> is given the top parent of this is used
+# - if a name is given matching process groups in name or path are searched and their top parents are used
+#
+# Usage:    process info <pid>|<string>     # show summary for all matching processes
+#           process list <pid>|<string>     # show list of process groups (one summary per group)
+#           process tree <pid>|<string>     # show process trees
+#           process wait [<options>] <pid>|<string>
+#           process kill <pid>|<string> [<signal>]
+# Options:  w, watch        # (for wait) watch health status till done
+#           t, timeout      # (for wait) end with
+process() {
+    local command
+    is enum --allow="list info wait kill" --die --output=command -- "$1"
+    is set --name=process-id-or-name --die -- "$2"
+    is integer --name=arguments --max=3 --die -- $#
+    # get pid
+    local list
+    if is integer -- "$2"; then
+        kill -0 "$2" >/dev/null || die "No process with pid $2"
+        list=("$2")
+    else
+        mapfile -t list < <(pgrep "$2")
+        [ -n "$list" ] || mapfile -t list < <(pgrep -f "$2")
+    fi
+    # get main pid
+    local pid current parent
+    for pid in "${list[@]}"; do
+        current="$pid"
+        while true; do
+            parent=$(ps -o ppid= -p "$current" 2>/dev/null)
+            [[ -z "$parent" || "$parent" == "1" ]] && echo "$current" && break || current="$parent"
+        done
+    done | sort -nu | mapfile -t list
+    # processing
+    case $command in
+    list)
+        local tree_pid
+        for pid in "${list[@]}"; do
+            printf '%s (%s)' "$(ps -p "$pid" -o comm=)" "$pid"
+            tree_pid=($(_process_children "$pid"))
+            tree_pid+=("$pid") # Include root PID
+            ps -o pcpu,rss --no-headers -p "$(IFS=, echo "${tree_pid[*]}")" |
+                awk '{ cpu+=$1; mem+=$2; count++ } END { printf " %.2f%% CPU %.2f MB in %d processes\n", cpu, mem/1024, count }' || true
+        done
+        ;;
+    info)
+        local comm tree_pid
+        for pid in "${list[@]}"; do
+            [ -n "$comm" ] || comm="$(basename "$(ps -p "$pid" -o args= | cut -d' ' -f1)")"
+            tree_pid+=($(_process_children "$pid"))
+            tree_pid+=("$pid") # Include root PID
+        done
+        printf '%s' "$comm"
+        echo "> ${#tree_pid[@]}"
+        ps -o pcpu,rss --no-headers -p "$(IFS=, echo "${tree_pid[*]}")" |
+            awk '{ cpu+=$1; mem+=$2; count++ } END { printf " %.2f%% CPU %.2f MB in %d processes\n", cpu, mem/1024, count }' || true
+        ;;
+    wait) ;;
+    kill) ;;
+    esac
+}
+
+_process_children() {
+    local parent="$1" children
+    children=$(pgrep -P "$parent" || true)
+    for child in $children; do
+        echo "$child"
+        _process_children "$child"
+    done
 }
