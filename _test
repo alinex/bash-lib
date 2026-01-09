@@ -30,8 +30,7 @@ done
 ################################################################################################
 
 process tree mattermost
-process kill mattermost SIGTERM
-sleep 3
+process wait mattermost --watch
 process tree mattermost
 exit
 

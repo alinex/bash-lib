@@ -2928,7 +2928,16 @@ done
 printf '%s' "${result:0:length}"
 }
 process(){
-local command
+local command watch timeout
+eval set -- "$(option_parse $'t timeout +\nw watch -' "$@")"
+while true;do
+case "$1" in
+-t|--timeout)timeout="$(duration_format seconds "$2")"&&shift 2;;
+-w|--watch)watch=1&&shift;;
+--)shift&&break;;
+*)die "$(gettext "Unrecognized option"): $1"
+esac
+done
 is enum --allow="info list tree wait kill" --die --output=command -- "$1"
 is set --name=process-id-or-name --die -- "$2"
 is integer --name=arguments --max=3 --die -- $#
@@ -2968,11 +2977,23 @@ _process_tree "$pid"
 done
 ;;
 wait)local pid
+start="$(date +%s)"
 for pid in "${list[@]}";do
 while kill -0 "$pid" 2>/dev/null;do
+if [ -n "$watch" ];then
+local pcpu
+pcpu="$(trim "$(ps -o pcpu= -p "$pid")")"||true
+printf "$CURSOR_POS1$CLEAR_LINE%s" "$(eval_gettext 'Waiting for $pid ($pcpu% CPU)')"
+fi
+if [ -n "$timeout" ]&&(($(date +%s)-start>timeout));then
+printf "$CURSOR_POS1$CLEAR_LINE"
+warn "$(eval_gettext 'Timeout after ${timeout}s')"
+return 1
+fi
 sleep 0.1
 done
 done
+printf "$CURSOR_POS1$CLEAR_LINE"
 ;;
 kill)local pid signal="${3:-SIGTERM}"
 for pid in "${list[@]}";do

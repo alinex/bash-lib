@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-09 21:53+0100\n"
+"POT-Creation-Date: 2026-01-09 22:41+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -21,9 +21,9 @@ msgstr ""
 #: module/network:26 module/trivy:81 module/monitoring:143 module/input:31
 #: module/input:86 module/input:211 module/input:464 module/input:627
 #: module/log:63 module/process:377 module/process:425 module/process:503
-#: module/remote:78 module/remote:217 module/remote:265 module/remote:333
-#: module/database:33 module/mattermost:299 module/mattermost:336
-#: module/software:230
+#: module/process:650 module/remote:78 module/remote:217 module/remote:265
+#: module/remote:333 module/database:33 module/mattermost:299
+#: module/mattermost:336 module/software:230
 msgid "Unrecognized option"
 msgstr "Unbekannte Option"
 
@@ -491,13 +491,23 @@ msgstr "Warteschlange: $name"
 msgid "Queued $started/$total jobs"
 msgstr "Warteschlange $started/$total Jobs"
 
-#: module/process:649
+#: module/process:660
 msgid "No process with pid $2"
 msgstr "Kein Prozess mit PID $2"
 
-#: module/process:654
+#: module/process:665
 msgid "No processes found for $2"
 msgstr "Keine Prozesse für $2 gefunden"
+
+#: module/process:708
+#, sh-format
+msgid "Waiting for $pid ($pcpu% CPU)"
+msgstr "Warten auf $pid ($pcpu% CPU)"
+
+#: module/process:712
+#, sh-format
+msgid "Timeout after ${timeout}s"
+msgstr "Abbruch nach ${timeout}s"
 
 #: module/remote:339
 msgid "Wait till reboot is done"
