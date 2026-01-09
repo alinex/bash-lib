@@ -104,7 +104,7 @@ tsv() {
                 }' <<<"$input"
             ;;
         pprint)
-            column -t -s $'\t' <<<"$input" | less -S
+            column -t -s $'\t' <<<"$input"
             ;;
         *) die "Allowed formats are only csv, not [$format]" ;;
         esac

@@ -29,6 +29,12 @@ while true; do
 done
 ################################################################################################
 
+process tree mattermost
+process kill mattermost SIGTERM
+sleep 3
+process tree mattermost
+exit
+
 #queue add sleep 5
 #queue add sleep 4
 #queue add sleep 3

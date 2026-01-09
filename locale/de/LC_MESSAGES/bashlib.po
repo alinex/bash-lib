@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-09 14:42+0100\n"
+"POT-Creation-Date: 2026-01-09 21:53+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -288,9 +288,9 @@ msgid "Status: Fixed from version $value $fixStatus"
 msgstr "Status: Gelöst in Version $value $fixStatus"
 
 #: module/trivy:437
-#, fuzzy, sh-format
+#, sh-format
 msgid "Date:   Vulnerability known since $human ($value days ago)"
-msgstr "Datum:  Sicherheitslücke bekannt seit $date (vor $value Tagen)"
+msgstr "Datum:  Sicherheitslücke bekannt seit $human (vor $value Tagen)"
 
 #: module/trivy:439
 #, sh-format
@@ -490,6 +490,14 @@ msgstr "Warteschlange: $name"
 #, sh-format
 msgid "Queued $started/$total jobs"
 msgstr "Warteschlange $started/$total Jobs"
+
+#: module/process:649
+msgid "No process with pid $2"
+msgstr "Kein Prozess mit PID $2"
+
+#: module/process:654
+msgid "No processes found for $2"
+msgstr "Keine Prozesse für $2 gefunden"
 
 #: module/remote:339
 msgid "Wait till reboot is done"

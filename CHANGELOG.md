@@ -10,6 +10,7 @@ But on release they will be merged with semantical versioning into the master br
 - add `--message` option to [is](doc/function/is.md) for usage information
 - [is](doc/function/is.md) now also handles check with --output option into variable or stdout
 - new [is](doc/function/is.md)/[check](doc/function/check.md) validators: true/false, date
+- add [process](doc/function/process.md) analyzation and management
 - add [sleep_until](doc/function/sleep_until.md)
 - add [first](doc/function/first.md)
 - add [ip](doc/function/ip.md) to resolve hosts
