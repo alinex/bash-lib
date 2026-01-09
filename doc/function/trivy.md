@@ -14,9 +14,25 @@ trivy [<options>] docker <image>
 ### Options
 
 ```bash
-t, timeout <duration>   set the timeout for the job in <int>m or <int>h
-o, only-os              let `root` command only scan OS without filesystem traversal
+t, timeout <duration>   # set the timeout for the job in <int>m or <int>h
+o, only-os              # let `root` command only scan OS without filesystem traversal
+e, exclude <dirs>       # additional excludes
 ```
+
+### Globals
+
+- `$TRIVY_DEFAULT_TIMEOUT`
+- `$TRIVY_CACHE_SERVER`
+- `$TRIVY_ROOT_EXCLUDE`
+- `$TRIVY_JIRA_BOARD`
+- `$TRIVY_JIRA_ISSUE_TYPE`
+- `$TRIVY_JIRA_FIELD_SOURCES`
+- `$TRIVY_JIRA_FIELD_RATING`
+- `$TRIVY_JIRA_FIELD_VERSION`
+- `$TRIVY_JIRA_FIELD_LINKS`
+- `$TRIVY_JIRA_FIELD_APPROVAL`
+- `$TRIVY_JIRA_APPROVAL_TEMP`
+- `$TRIVY_JIRA_APPROVAL_IRRELEVANT`
 
 ### Output (stdout)
 

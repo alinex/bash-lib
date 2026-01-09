@@ -47,20 +47,34 @@ TRIVY_EXPLOITS_URL=https://www.cisa.gov/sites/default/files/feeds/known_exploite
 #           trivy [<options>] files <path>
 #           trivy [<options>] docker <file>
 #           trivy [<options>] docker <image>
-# Options:  t, timeout <duration>   set the timeout for the job in <int>m or <int>h
-#           o, only-os              let `root` command only scan OS without filesystem traversal
+# Options:  t, timeout <duration>   # set the timeout for the job in <int>m or <int>h
+#           o, only-os              # let `root` command only scan OS without filesystem traversal
+#           e, exclude <dirs>       # additional excludes
+# GLobal:   $TRIVY_DEFAULT_TIMEOUT
+#           $TRIVY_CACHE_SERVER
+#           $TRIVY_ROOT_EXCLUDE
+#           $TRIVY_JIRA_BOARD
+#           $TRIVY_JIRA_ISSUE_TYPE
+#           $TRIVY_JIRA_FIELD_SOURCES
+#           $TRIVY_JIRA_FIELD_RATING
+#           $TRIVY_JIRA_FIELD_VERSION
+#           $TRIVY_JIRA_FIELD_LINKS
+#           $TRIVY_JIRA_FIELD_APPROVAL
+#           $TRIVY_JIRA_APPROVAL_TEMP
+#           $TRIVY_JIRA_APPROVAL_IRRELEVANT
 # Output:   <report-path> or nothing if no vulnerabilities found
 # Return:   1 if there are at least one CRITICAL or HIGH vulnerabilities
 trivy() {
     is enum --name=command --allow="root files docker" --die -- "$1" && local command="$1" && shift
-    local timeout onlyOS
+    local timeout onlyOS exclude
     timeout=${TRIVY_DEFAULT_TIMEOUT:-60m}
     # parameter parsing
-    eval set -- "$(option_parse $'t timeout +\no only-os -' "$@")"
+    eval set -- "$(option_parse $'t timeout +\no only-os -\ne exclude +' "$@")"
     while true; do
         case "$1" in
         -t | --timeout) timeout="$2" && shift 2 ;;
         -o | --only-os) onlyOS=1 && shift ;;
+        -e | --exclude) exclude="$2" && shift 2 ;;
         --) shift && break ;;
         *) die "$(gettext "Unrecognized option"): $1" ;;
         esac
@@ -77,9 +91,14 @@ trivy() {
     # shellcheck disable=SC2086
     case $command in
     root)
+        exclude+=" $TRIVY_ROOT_EXCLUDE"
+        local excludeOption
+        for path in $exclude; do
+            excludeOption+=" --skip-dirs $path"
+        done
         is empty -- "$onlyOS" || opt+=" --pkg-types os"
         source="$(hostname -f)"
-        sudo "$cmd" rootfs $opt $exclude / 2>&1 | sed 's/[^A-Z]*T[^A-Z]*//' | debug
+        sudo "$cmd" rootfs $opt $excludeOption / 2>&1 | sed 's/[^A-Z]*T[^A-Z]*//' | debug
         ;;
     files) command $cmd fs $opt "$1" 2>&1 | sed 's/[^A-Z]*T[^A-Z]*//' | debug ;;
     docker) command $cmd image $opt --input "$1" 2>&1 | sed 's/[^A-Z]*T[^A-Z]*//' | debug ;;

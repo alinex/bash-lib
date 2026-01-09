@@ -88,6 +88,7 @@ The configuration module contains a lot of general configuration settings for th
 | ``$PLUSSERVER_PORTAL`` | Base URL for Portal to Provider Plusserver |
 | ``$TRIVY_DEFAULT_TIMEOUT`` | Maximum time to generate trivy security report |
 | ``$TRIVY_CACHE_SERVER`` | Optional, use specified trivy server for caching of the internet databases |
+| ``$TRIVY_ROOT_EXCLUDE`` | Paths to prevent in root scans |
 | ``$CONFLUENCE_OUTAGE`` | Atlassian confluence page id for outage information [`confluence_outage`](functionconfluence_outage.md) |
 
 ## Core
