@@ -159,8 +159,7 @@ CLEAR_LINE=$'\e[2K'
 SCREEN_RESTORE=$'\e[?47l'
 SCREEN_SAVE=$'\e[?47h'
 erase_line(){
-_deprecated "Use $CLEAR_LINE" warn
-printf "$CLEAR_LINE"
+_deprecated "Use $CLEAR_LINE"
 }
 option_parse(){
 local opt name type desc short="" long="" spec="$1" permute
@@ -231,9 +230,6 @@ fi
 }
 escape_args(){
 printf '%q ' "$@"
-}
-contains(){
-_deprecated "use array <array-name> has <value>"
 }
 array(){
 local cmd value
@@ -433,12 +429,6 @@ debug "Measurement: $seconds.$nano"
 ;;
 *)die "Command $1 undefined, use: start stop"
 esac
-}
-timer_start(){
-_deprecated "Use: timer start"
-}
-timer_stop(){
-_deprecated "Use: timer stop"
 }
 export TEXTDOMAIN=bashlib
 export TEXTDOMAINDIR=$BASHLIB_HOME/locale
@@ -820,10 +810,6 @@ printf "$t%s$r\n" "$1"
 printf "$p$b▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀""▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀""▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀$r\n"
 printf '\n'
 }
-check(){
-_deprecated "Use is ... --output" warn
-is --output "$@"
-}
 is(){
 eval set -- "$(option_parse $'n name +\nd die -\ns sanitize -\n- min +\n- max +\n- allow +\no output ?\nm message +' "$@")"
 local name die sanitize min max allow message output
@@ -1007,18 +993,6 @@ esac
 if [ -n "$output" ];then
 [ "$output" = "-" ]&&printf '%s' "$res"||printf -v "$output" '%s' "$res"
 fi
-}
-num_parameters(){
-_deprecated "Use: is integer $# --min=<val> --max=<val>"
-}
-is_empty(){
-_deprecated "Use: is empty -- <value>"
-}
-is_integer(){
-_deprecated "Use: is integer <value>"
-}
-is_float(){
-_deprecated "Use: is float -- <value>"
 }
 trim_start(){
 is integer --name=arguments --max=2 --die -- $#
@@ -1331,7 +1305,7 @@ printf '%s' "TODO"
 }
 dns_list(){
 is integer --name=arguments --max=1 --die -- $#
-printf "$(gettext 'NAME\tTYPE\tCONTENT\tTTL')\n"
+printf '%s\t%s\t%s\t%s\n' "$(gettext 'NAME')" "$(gettext 'TYPE')" "$(gettext 'CONTENT')" "$(gettext 'TTL')"
 powerdns "$1"|tail -n +2||true
 plusserver_dns "$1"|tail -n +2||true
 }
@@ -1341,7 +1315,7 @@ if [ -z "$POWERDNS_API" ]||[ -z "$POWERDNS_TOKEN" ];then
 debug "Disabled because POWERDNS_API and POWERDNS_TOKEN are not both set"
 return 0
 fi
-printf "$(gettext 'NAME\tTYPE\tCONTENT\tTTL')\n"
+printf '%s\t%s\t%s\t%s\n' "$(gettext 'NAME')" "$(gettext 'TYPE')" "$(gettext 'CONTENT')" "$(gettext 'TTL')"
 curl -s -H "X-API-Key:$POWERDNS_TOKEN" "$POWERDNS_API/servers/localhost/search-data?q=*&max=10000"|jq -r '.[] | select(.object_type == "record" and .disabled == false) | [(.name | sub("\\.$"; "")), .type, (.content | sub("\\.$"; "")), .ttl] | @tsv'|grep -E "$1"
 }
 plusserver_dns(){
@@ -1451,7 +1425,7 @@ if is set -- "$default";then
 fi
 printf "$CC_NOTICE%s$CC_RESET $CURSOR_STORE" "$prompt?" >/dev/tty
 while IFS= read -r -s -t 1 -n 1 char </dev/tty||rc=$?;do
-printf "$CLEAR_EOF" >/dev/tty
+printf "$CLEAR_EOL" >/dev/tty
 if ((rc==142));then
 rc=0
 if [ -n "$timeout" ];then
@@ -2943,12 +2917,14 @@ is set --name=process-id-or-name --die -- "$2"
 is integer --name=arguments --max=3 --die -- $#
 local list
 if is integer -- "$2";then
-kill -0 "$2" >/dev/null||die "$(eval_gettext 'No process with pid $2')"
+local pid="$2"
+kill -0 "$2" >/dev/null||die "$(eval_gettext 'No process with pid $pid')"
 list=("$2")
 else
 mapfile -t list < <(pgrep "$2"|_process_main_pid|sort -nu||true)
 [ -n "$list" ]||mapfile -t list < <(pgrep -f "$2"|_process_main_pid|sort -nu||true)
-[ -n "$list" ]||die "$(eval_gettext 'No processes found for $2')"
+local search="$2"
+[ -n "$list" ]||die "$(eval_gettext 'No processes found for $search')"
 fi
 debug "pids: ${list[*]}"
 case $command in
@@ -3034,7 +3010,7 @@ read -r pcpu rss < <(ps -o pcpu,rss --no-headers -p "$1")
 printf '%s%s\t%s\t%s\t%s\n' "$2" "$(_process_name "$1")" "$1" "$pcpu" "$rss"
 children=$(pgrep -P "$1"||true)
 for child in $children;do
-_process_tree "$child" "$indent  "
+_process_tree "$child" "$2  "
 done
 }
 _module_resolve(){
@@ -3590,7 +3566,7 @@ debug "Optimize JSON structure for splitting..."
 jq '.Results[]?|. as $g|.Vulnerabilities[]?|{Class: $g.Class, Target: $g.Target, Type: $g.Type}*.' "$work"/trivy.json >"$work"/split.json
 debug "Splitting JSON..."
 mkdir "$work"/split
-csplit -f "$work"/split/ -b '%06d' -zs "$work"/split.json /^{/ "{*}"
+csplit -f "$work"/split/ -b '%06d' -zs "$work"/split.json /^\{/ "{*}"
 rm "$work"/split.json
 local found
 found="$(ls -1 "$work"/split/|wc -l)"

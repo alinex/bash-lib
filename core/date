@@ -227,15 +227,3 @@ timer() {
     *) die "Command $1 undefined, use: start stop" ;;
     esac
 }
-
-# Deprecated: Start the timer
-# Use @timer like `timer start`.
-timer_start() {
-    _deprecated "Use: timer start"
-}
-
-# Deprecated: Stop the timer and calculate elapsed time
-# Use @timer like `timer stop`.
-timer_stop() {
-    _deprecated "Use: timer stop"
-}

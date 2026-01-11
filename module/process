@@ -661,14 +661,16 @@ process() {
     # get pid
     local list
     if is integer -- "$2"; then
-        kill -0 "$2" >/dev/null || die "$(eval_gettext 'No process with pid $2')"
+        local pid="$2"
+        kill -0 "$2" >/dev/null || die "$(eval_gettext 'No process with pid $pid')"
         list=("$2")
     else
         mapfile -t list < <(pgrep "$2" | _process_main_pid | sort -nu || true)
         # shellcheck disable=SC2128
         [ -n "$list" ] || mapfile -t list < <(pgrep -f "$2" | _process_main_pid | sort -nu || true)
         # shellcheck disable=SC2128
-        [ -n "$list" ] || die "$(eval_gettext 'No processes found for $2')"
+        local search="$2"
+        [ -n "$list" ] || die "$(eval_gettext 'No processes found for $search')"
     fi
     debug "pids: ${list[*]}"
     # processing

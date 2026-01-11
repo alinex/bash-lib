@@ -6,12 +6,6 @@
 ### Array analyzing
 ######################################################################################
 
-# Deprecated: Check if value is contained in array
-# Use array <array-name> has <value>
-contains() {
-    _deprecated "use array <array-name> has <value>"
-}
-
 # Array analyzation.
 #
 # This can be used for easy array access functions. The array itself is not given by value but by name, so no `$` before the name.

@@ -159,8 +159,7 @@ CLEAR_LINE=$'\e[2K'
 SCREEN_RESTORE=$'\e[?47l'
 SCREEN_SAVE=$'\e[?47h'
 erase_line(){
-_deprecated "Use $CLEAR_LINE" warn
-printf "$CLEAR_LINE"
+_deprecated "Use $CLEAR_LINE"
 }
 option_parse(){
 local opt name type desc short="" long="" spec="$1" permute
@@ -231,9 +230,6 @@ fi
 }
 escape_args(){
 printf '%q ' "$@"
-}
-contains(){
-_deprecated "use array <array-name> has <value>"
 }
 array(){
 local cmd value
@@ -433,12 +429,6 @@ debug "Measurement: $seconds.$nano"
 ;;
 *)die "Command $1 undefined, use: start stop"
 esac
-}
-timer_start(){
-_deprecated "Use: timer start"
-}
-timer_stop(){
-_deprecated "Use: timer stop"
 }
 export TEXTDOMAIN=bashlib
 export TEXTDOMAINDIR=$BASHLIB_HOME/locale
@@ -820,10 +810,6 @@ printf "$t%s$r\n" "$1"
 printf "$p$b▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀""▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀""▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀$r\n"
 printf '\n'
 }
-check(){
-_deprecated "Use is ... --output" warn
-is --output "$@"
-}
 is(){
 eval set -- "$(option_parse $'n name +\nd die -\ns sanitize -\n- min +\n- max +\n- allow +\no output ?\nm message +' "$@")"
 local name die sanitize min max allow message output
@@ -1007,18 +993,6 @@ esac
 if [ -n "$output" ];then
 [ "$output" = "-" ]&&printf '%s' "$res"||printf -v "$output" '%s' "$res"
 fi
-}
-num_parameters(){
-_deprecated "Use: is integer $# --min=<val> --max=<val>"
-}
-is_empty(){
-_deprecated "Use: is empty -- <value>"
-}
-is_integer(){
-_deprecated "Use: is integer <value>"
-}
-is_float(){
-_deprecated "Use: is float -- <value>"
 }
 trim_start(){
 is integer --name=arguments --max=2 --die -- $#

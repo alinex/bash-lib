@@ -300,12 +300,6 @@ SCREEN_SAVE=$'\e[?47h'
 
 # Deprecated: Remove current line
 # Use $CLEAR_LINE
-#
-# When printed to a terminal, it will erase everything from the current cursor position backward to the beginning of the line.
-#
-# Usage:    erase_line
 erase_line() {
-  _deprecated "Use $CLEAR_LINE" warn
-  # shellcheck disable=SC2059
-  printf "$CLEAR_LINE"
+  _deprecated "Use $CLEAR_LINE"
 }
