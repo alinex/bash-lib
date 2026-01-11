@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# shellcheck source=base
+source /dev/null
 
 # Module for process control
 
@@ -314,6 +316,7 @@ steps() {
         debug "start step control"
         declare -g -A _STEPS
         variables restore "steps_${_STEPS_NAME}"
+        # shellcheck disable=SC2086
         variables store "steps_${_STEPS_NAME}" _STEPS $STEPS_VARIABLES # initial store
         printf '%s\n' "$(gettext "Work steps are logged so that you can resume work mid-process")..." >&2
         ;;
@@ -348,6 +351,7 @@ _steps_done() {
     is set -- "$_STEPS_NAME" || return 0 # do nothing if no step control
     if [ -n "$1" ]; then
         _STEPS["$1"]=1
+        # shellcheck disable=SC2086
         variables store "steps_${_STEPS_NAME}" _STEPS $STEPS_VARIABLES
     else
         variables clean "steps_${_STEPS_NAME}"
@@ -661,7 +665,9 @@ process() {
         list=("$2")
     else
         mapfile -t list < <(pgrep "$2" | _process_main_pid | sort -nu || true)
+        # shellcheck disable=SC2128
         [ -n "$list" ] || mapfile -t list < <(pgrep -f "$2" | _process_main_pid | sort -nu || true)
+        # shellcheck disable=SC2128
         [ -n "$list" ] || die "$(eval_gettext 'No processes found for $2')"
     fi
     debug "pids: ${list[*]}"
@@ -671,6 +677,7 @@ process() {
         local pid comm tree_pid
         for pid in "${list[@]}"; do
             [ -n "$comm" ] || comm="$(_process_name "$pid")"
+            # shellcheck disable=SC2207
             tree_pid+=($(_process_children "$pid"))
             tree_pid+=("$pid") # Include root PID
         done
@@ -684,6 +691,7 @@ process() {
         printf '%s\t%s\t%s\t%s\t%s\n' Command PID 'CPU %' 'RSS MB' Processes
         for pid in "${list[@]}"; do
             printf '%s\t%s' "$(_process_name "$pid")" "$pid"
+            # shellcheck disable=SC2207
             tree_pid=($(_process_children "$pid"))
             tree_pid+=("$pid") # Include root PID
             ps -o pcpu,rss --no-headers -p "$(IFS=, echo "${tree_pid[*]}")" |
@@ -763,7 +771,7 @@ _process_tree() {
     printf '%s%s\t%s\t%s\t%s\n' "$2" "$(_process_name "$1")" "$1" "$pcpu" "$rss"
     children=$(pgrep -P "$1" || true)
     for child in $children; do
-        _process_tree "$child" "$indent  "
+        _process_tree "$child" "$2  "
     done
 
 }

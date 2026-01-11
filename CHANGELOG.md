@@ -3,7 +3,7 @@
 Newest changes will always take part in the development branch. You only may use them if you manually install this.
 But on release they will be merged with semantical versioning into the master branch and will get available to new installs or updates.
 
-## Newest Development (not released)
+## Newest Development - v2.3.0
 
 - add [trivy](doc/function/trivy.md) security scanning
 - add [jira](doc/function/jira.md) search, get, create, update and delete for issues with included ADF parser/formatter

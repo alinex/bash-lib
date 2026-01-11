@@ -92,6 +92,7 @@ trivy() {
     is empty -- "$TRIVY_CACHE_SERVER" || opt+=" --server $TRIVY_CACHE_SERVER"
     # shellcheck disable=SC2086
     echo "----"
+    # shellcheck disable=SC2086
     case $command in
     root)
         exclude+=" $TRIVY_ROOT_EXCLUDE"
@@ -111,7 +112,7 @@ trivy() {
     jq '.Results[]?|. as $g|.Vulnerabilities[]?|{Class: $g.Class, Target: $g.Target, Type: $g.Type}*.' "$work"/trivy.json >"$work"/split.json
     debug "Splitting JSON..."
     mkdir "$work"/split
-    csplit -f "$work"/split/ -b '%06d' -zs "$work"/split.json /^{/ "{*}"
+    csplit -f "$work"/split/ -b '%06d' -zs "$work"/split.json /^\{/ "{*}"
     rm "$work"/split.json
     # skip if nothing found
     local found
@@ -407,6 +408,7 @@ _trivy_report() {
     local exploitDate exploitVendor exploitProduct issue key approval
     exploitDate="$(jq .Exploited.dateAdded -r <<<"$json")"
     test ! "$exploitDate" = "null" || exploitDate=""
+    # shellcheck disable=SC2034
     if is set -- "$exploitDate"; then
         exploitVendor="$(jq .Exploited.vendorProject -r <<<"$json")"
         exploitProduct="$(jq .Exploited.product -r <<<"$json")"
@@ -432,6 +434,7 @@ _trivy_report() {
             printf '%s\n' "$(eval_gettext 'Rating: $severity (CVSS rating $value)')"
             value="${fixed:--}"
             printf '%s\n' "$(eval_gettext 'Status: Fixed from version $value $fixStatus')"
+            # shellcheck disable=SC2034
             human="$(date_format human-date "$date")"
             value="$(duration_format days "$(date_diff "$date")")"
             printf '%s\n' "$(eval_gettext 'Date:   Vulnerability known since $human ($value days ago)')"

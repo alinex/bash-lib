@@ -101,7 +101,8 @@ confirm() {
     # shellcheck disable=SC2086
     # shellcheck disable=SC2229
     while IFS= read -r -s -t 1 -n 1 char </dev/tty || rc=$?; do
-        printf "${CLEAR_EOF}" >/dev/tty
+        # shellcheck disable=SC2059
+        printf "${CLEAR_EOL}" >/dev/tty
         # check for countdown if timeout of read reached
         if ((rc == 142)); then
             rc=0
