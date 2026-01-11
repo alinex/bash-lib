@@ -217,19 +217,19 @@ msgstr "Eine Prüfung namens ${check} ist nicht definiert"
 
 #: module/dns:35 module/dns:59
 msgid "NAME"
-msgstr ""
+msgstr "NAME"
 
 #: module/dns:35 module/dns:59
 msgid "TYPE"
-msgstr ""
+msgstr "TYP"
 
 #: module/dns:35 module/dns:59
 msgid "CONTENT"
-msgstr ""
+msgstr "INHALT"
 
 #: module/dns:35 module/dns:59
 msgid "TTL"
-msgstr ""
+msgstr "TTL"
 
 #: module/dns:93
 #, sh-format
@@ -504,14 +504,14 @@ msgid "Queued $started/$total jobs"
 msgstr "Warteschlange $started/$total Jobs"
 
 #: module/process:665
-#, fuzzy, sh-format
+#, sh-format
 msgid "No process with pid $pid"
-msgstr "Kein Prozess mit PID $2"
+msgstr "Kein Prozess mit PID $pid"
 
 #: module/process:673
-#, fuzzy, sh-format
+#, sh-format
 msgid "No processes found for $search"
-msgstr "Keine Prozesse für $2 gefunden"
+msgstr "Keine Prozesse für $search gefunden"
 
 #: module/process:718
 #, sh-format
