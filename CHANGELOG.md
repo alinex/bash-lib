@@ -1,19 +1,41 @@
 # Last Changes
 
-As this is not driven by releases and therefore tags are not used it is an ongoing update so we will divide the changelog into months. If you need a special version instead of the newest one, please select it in git by date.
+Newest changes will always take part in the development branch. You only may use them if you manually install this.
+But on release they will be merged with semantical versioning into the master branch and will get available to new installs or updates.
 
-## December Version - v2.2.0
+## 11. January 2026 - v2.3.0
 
-- let functions validate parameters using [is](doc/function/is.md) and [check](doc/function/check.md)
+- add [trivy](doc/function/trivy.md) security scanning
+- add [jira](doc/function/jira.md) search, get, create, update and delete for issues with included ADF parser/formatter
+- add `--message` option to [is](doc/function/is.md) for usage information
+- [is](doc/function/is.md) now also handles check with --output option into variable or stdout
+- new [is](doc/function/is.md)/[check](doc/function/check.md) validators: true/false, date
+- add [process](doc/function/process.md) analyzation and management
+- add [sleep_until](doc/function/sleep_until.md)
+- add [first](doc/function/first.md)
+- add [ip](doc/function/ip.md) to resolve hosts
+- add `$CONFIG` to load special config file
+- add escape sequences and function for cursor management on terminal
+- add [logo](doc/function/logo.md) to display it
+- rename `config/overwrite` to `config/local`
+- option_parse with support for optional values
+- rename color -> ansi module and add the cursor, character and clear codes
+- optimize code echo and escape sequences
+- optimize function documentation
+- move down deprecated methods
+
+## 22. December 2025 - v2.2.0
+
+- add [log](./doc/function/log.md) support
+- completed the [queue](doc/function/queue.md) for parallel job execution
 - filesystem checks for `is` and `check` function
+- functions validate parameters using [is](doc/function/is.md) and [check](doc/function/check.md)
 - extend stack traces to show also code lines through [die](doc/function/die.md)
 - catch each error and output a failure with stack trace through [die](doc/function/die.md)
-- add [log](./doc/function/log.md) support
 - combine `timer_start` and `timer_end` into [timer](doc/function/timer.md)
 - combine all remote* functions together into [remote](doc/function/remote.md)
 - combine env_* functions into [variables](doc/function/variables.md)
 - added [jira](doc/function/jira.md) function to work with issues
-- completed the [queue](doc/function/queue.md) for parallel job execution
 - add support for Arch/Manjaro/Kali Linux and RedHat/CentOS/Fedora
 - switch to git flow in development to have a more stable master branch
 

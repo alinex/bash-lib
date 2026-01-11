@@ -12,6 +12,7 @@ source /dev/null
 declare -A _os_detected
 
 # Detect OS settings
+#
 # The following formats are possible:
 #
 # - data - all values with `<name>\t<value>`
@@ -29,6 +30,7 @@ declare -A _os_detected
 # - architecture - x86_64, i686, i386, armv7l, aarch64...
 # - machine_id
 # - virtual_machine - `false` or `true`
+#
 # Usage:    os_detect <format>
 # Output:   - <tsv-table> for data
 #           - <value> else
@@ -40,11 +42,11 @@ os_detect() {
         # get values
         _os_detected["os"]="$(
             case "$(uname -s)" in
-            "Darwin") echo MacOS ;;
-            "SunOS") echo Solaris ;;
-            "GNU"*) echo Linux ;;
-            *"BSD" | "DragonFly" | "Bitrig") echo BSD ;;
-            "CYGWIN"* | "MSYS"* | "MINGW"*) echo Windows ;;
+            "Darwin") printf MacOS ;;
+            "SunOS") printf Solaris ;;
+            "GNU"*) printf Linux ;;
+            *"BSD" | "DragonFly" | "Bitrig") printf BSD ;;
+            "CYGWIN"* | "MSYS"* | "MINGW"*) printf Windows ;;
             *) uname -s ;;
             esac
         )"
@@ -104,41 +106,40 @@ os_detect() {
             esac
         )"
         _os_detected["machine_id"]="$(cat /etc/machine-id /var/lib/dbus/machine-id /var/db/dbus/machine-id /sys/class/dmi/id/board_serial 2>/dev/null | head -n 1 || true)"
-        _os_detected["virtual_machine"]="$(grep -q '^flags.* hypervisor' /proc/cpuinfo && echo true || echo false)"
+        _os_detected["virtual_machine"]="$(grep -q '^flags.* hypervisor' /proc/cpuinfo && printf true || printf false)"
         for key in "${!_os_detected[@]}"; do
-            echo -e "$key=${_os_detected[$key]}"
+            printf '%s=%s' "$key" "${_os_detected[$key]}"
         done | debug
     fi
     # make output
     case ${1-} in
     data)
         for key in "${!_os_detected[@]}"; do
-            echo -e "$key\t${_os_detected[$key]}"
+            printf '%s\n' "$key\t${_os_detected[$key]}"
         done
         ;;
     info)
-        echo -n "${_os_detected[os]} system with kernel ${_os_detected[kernel]} on ${_os_detected[architecture]} (${_os_detected[cpu_num]}x ${_os_detected[cpu_model]})"
-        [ "${_os_detected["virtual_machine"]}" = "true" ] && echo "virtual machine" || echo
-        echo "${_os_detected[distribution]} version ${_os_detected[revision_number]} (${_os_detected[revision_name]})"
+        printf '%s' "${_os_detected[os]} system with kernel ${_os_detected[kernel]} on ${_os_detected[architecture]} (${_os_detected[cpu_num]}x ${_os_detected[cpu_model]})"
+        [ "${_os_detected["virtual_machine"]}" = "true" ] && printf 'virtual machine\n' || printf '\n'
+        printf '%s\n' "${_os_detected[distribution]} version ${_os_detected[revision_number]} (${_os_detected[revision_name]})"
         if [ -n "${_os_detected[base_revision_number]}" ] && [ ! "${_os_detected[revision_number]}" = "${_os_detected[base_revision_number]}" ]; then
-            echo "Based on ${_os_detected[base]} version ${_os_detected[base_revision_number]} (${_os_detected[base_revision_name]})"
+            printf '%s\n' "Based on ${_os_detected[base]} version ${_os_detected[base_revision_number]} (${_os_detected[base_revision_name]})"
         fi
         ;;
-    *) echo "${_os_detected["$1"]}" ;;
+    *) printf '%s\n' "${_os_detected["$1"]}" ;;
     esac
 }
-
-detect_os() { _deprecated "use os_detect data"; }
-system_info() { _deprecated "use os_detect info"; }
 
 ######################################################################################
 ### Disk
 ######################################################################################
 
 # Disk free with visual display
+#
 # The lines will be colorized based on `$MOUNT_COLOR_LIMIT`` setting, which contains sets of 5 entries (pattern critical error warn ok). The first matching pattern will decide the color limits.
 #
 # If a `--free` condition and `--collect` is given all disks violating this will be collected as string within the collection variable for further use.
+#
 # Usage:    disk_free [options] [<mount>...]            # show table
 # Options:  l, local     # only list local devices
 #           c, collect <variable-name>
@@ -146,6 +147,7 @@ system_info() { _deprecated "use os_detect info"; }
 # Output:   # same as `df` command but colorized
 disk_free() {
     # parameter parsing
+    debug "$*"
     local opt="" free_operator free_percent free_bytes collect
     eval set -- "$(option_parse $'l locale -\nc collect +\nf free +' "$@")"
     while true; do
@@ -178,7 +180,8 @@ disk_free() {
         *) die "$(gettext "Unrecognized option"): $1" ;;
         esac
     done
-    debug "collect into $collect ($free_operator ${free_percent}%/${free_bytes}B)"
+    debug "$*"
+    is empty -- "$collect" || debug "collect into $collect ($free_operator ${free_percent}%/${free_bytes}B)"
     # processing
     local firstLine="" percent mount device limit_c limit_e limit_w limit_o
     IFS=$'\n'
@@ -186,7 +189,7 @@ disk_free() {
     for line in $(df -h $opt -x tmpfs -x efivarfs -x devtmpfs -x squashfs "$@"); do
         if [ -z "$firstLine" ]; then
             firstLine=1
-            echo -e "${CC_INVERSE}$line${CC_RESET}"
+            printf "${CC_INVERSE}%s${CC_RESET}\n" "$line"
         else
             percent=$(echo "$line" | xargs echo | cut -d' ' -f5 | sed 's/%//')
             bytes=$(echo "$line" | xargs echo | cut -d' ' -f4)
@@ -214,17 +217,19 @@ disk_free() {
             elif ((percent == limit_o)); then
                 ok "$line"
             else
-                echo "$line"
+                printf '%s\n' "$line"
             fi
             # collection limit
-            # shellcheck disable=SC1105
-            if [ -n "$free_operator" ]; then
-                if [ -n "$free_percent" ] &&
-                    eval "(( 100 - percent $free_operator free_percent ))"; then
-                    collect+="${mount} "
-                elif [ -n "$free_bytes" ] &&
-                    eval "(( bytes $free_operator free_bytes ))"; then
-                    collect+="${mount} "
+            if is set -- "$collect"; then
+                # shellcheck disable=SC1105
+                if [ -n "$free_operator" ]; then
+                    if [ -n "$free_percent" ] &&
+                        eval "(( 100 - percent $free_operator free_percent ))"; then
+                        collect+="${mount} "
+                    elif [ -n "$free_bytes" ] &&
+                        eval "(( bytes $free_operator free_bytes ))"; then
+                        collect+="${mount} "
+                    fi
                 fi
             fi
         fi
@@ -233,6 +238,7 @@ disk_free() {
 }
 
 # Check if LVM is used
+#
 # Usage:    uses_lvm
 # Return:   0 for uses LVM
 #           1 if not
@@ -248,6 +254,7 @@ uses_lvm() {
 ######################################################################################
 
 # Has tty present
+#
 # Usage:    has_ttyp
 # Status:   0 || 1
 has_tty() {

@@ -2,12 +2,10 @@
 
 ## Format duration in different numbers or human readable
 
-This function can convert into seconds and back into human format as you like. Months or years are not possible because they are not accurately, better use 30d or 365d for that.
-
 ### Usage
 
 ```bash
-duration_format <format> <value|human format>
+duration_format <format> <seconds>|<human>
 <format>:   seconds
             minutes     # using floor 110s = 1
             hours       # using floor
@@ -18,4 +16,10 @@ duration_format <format> <value|human format>
 ### Output (stdout)
 
 `<duration>` in selected format
+
+
+### Description
+
+
+This function can convert into seconds and back into human format as you like. Months or years are not possible because they are not accurately, better use 30d or 365d for that.
 

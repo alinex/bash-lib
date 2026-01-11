@@ -2,8 +2,12 @@
 # shellcheck source=base
 source /dev/null
 
+# load each config file
 for f in "$BASHLIB_HOME"/config/*; do
     if [[ -f "$f" && "$f" != *.* ]]; then
+        [ -z "$DEBUG" ] || echo "loading $f" >&2
         source "$f"
     fi
 done
+# load additional config
+[ -z "$CONFIG" ] || [ ! -r "$CONFIG" ] || source "$CONFIG"

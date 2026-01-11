@@ -2,8 +2,6 @@
 
 ## Splits string by delimiter into array
 
-The delimiter defaults to `,`.
-
 ### Usage
 
 ```bash
@@ -14,3 +12,8 @@ split <string> <array-name> [<delimiter>]
 
 - `<array-name>` to store values
 - 
+
+### Description
+
+The delimiter defaults to `,`.
+

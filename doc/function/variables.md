@@ -2,18 +2,6 @@
 
 ## Store variables into shared memory/file
 
-The `<ident>` specifies also who will use the same file.
-To get the same file in all your invocations of this script only use a fixed string here.
-To have a different file for each script invocation include `$$` or '${$}'.
-Or to have another file in each sub process include `$BASHPID`.
-
-You may do the following:
-
-- `store` all or some variables
-- `restore` all or some variables
-- `clean` remove the store
-- `change` run a command which will change the variables in the store
-
 ### Usage
 
 ```bash
@@ -48,4 +36,20 @@ variables store # save changes
 ....
 variables clean # everything done remove progress
 ```
+
+
+### Description
+
+
+The `<ident>` specifies also who will use the same file.
+To get the same file in all your invocations of this script only use a fixed string here.
+To have a different file for each script invocation include `$$` or '${$}'.
+Or to have another file in each sub process include `$BASHPID`.
+
+You may do the following:
+
+- `store` all or some variables
+- `restore` all or some variables
+- `clean` remove the store
+- `change` run a command which will change the variables in the store
 

@@ -67,3 +67,14 @@ setup() {
     assert_success
     assert_output 60162
 }
+# bats test_tags=jira
+@test "jira: should create json" {
+    if [ -z "$JIRA_HOST" ]; then
+        skip "Because JIRA_HOST not set."
+    fi
+    SECURITY_BOARD_ID=10134
+    export fields=""
+    run jira json fields set project 10123
+    assert_success
+    assert [ "$fields" = '{"project": 10123}' ]
+}

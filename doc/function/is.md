@@ -2,9 +2,45 @@
 
 ## Validate and sanitize values.
 
-This validation is possible using the [`check`](check.md) and `is` function.
-- [`check`](check.md) should be used for sanitize because it will output the value
-- `is` should be used for checking only validity or stop processing on problem because no value is output
+### Usage
+
+```bash
+is <check> [options] -- <value>
+```
+
+### Options
+
+```bash
+d, die              # used in [`is`](is.md) to stop with error instead of return state
+o, output=[<variable-name>]  # will write the sanitized value into variable or output it to stdout
+n, name=<string>    # used in [`is`](is.md) to display variable name in `die` message
+m, message=<string> # additional message like usage
+s, sanitize         # for integer
+min=<num>           # for integer
+max=<num>           # for integer
+allow=<words>       # for enum (space separated)
+```
+
+### Output (stdout)
+
+`<value>`             # may be sanitized
+
+### Examples
+
+- [`is`](../example/is.md) explains some regular use cases
+- `is integer --name=arguments --max=2 -- $# >/dev/null` # mostly only check max, if all args are checked separately
+- `name="$(is integer --name=age --sanitize --min=0 --output -- "`$1`")"`
+- `is integer --name=age --sanitize --min=0 --output=name -- "`$1`"`
+- `init="$(is bool --name=init --output -- "`$1`")"`
+- `if is integer age --min=18 -- "`$1`"; then`
+
+
+### Description
+
+
+This validation is possible using the `check` and [`is`](is.md) function.
+- `check` should be used for sanitize because it will output the value
+- [`is`](is.md) should be used for checking only validity or stop processing on problem because no value is output
 
 Every parameter should be checked to prevent failure later in the code.
 For such checks you run it with the `--die` option to stop processing if wrong.
@@ -17,10 +53,13 @@ The following checks are implemented:
 - `set` will fail if no value given
 - `empty` will fail if not empty like ""
 - `bool` will transform the value to `1` or `0` and allows: true/false, t/f, 1/0, yes/no, y/j/n, ja/nein, ""
+- `true` should be a boolean true
+- `false` should be a boolean false
 - `integer` will check for a number maybe within a range
 - `float` will check for a number maybe within a range
 - `enum' will check against valid words using `--allow="word1 word2"``
 - `length` check that the length is within range (like integer)
+- `date` check that the input is parsable as date and return unix timestamp
 - `duration` check and parse the [`duration_format`](duration_format.md)
 - `path` check that value is an existing path (any type)
 - `file` check that value is an existing file
@@ -29,31 +68,3 @@ The following checks are implemented:
 - `writable` check that value is a file writable by user
 
 Exit:     with message if incorrect value
-
-### Usage
-
-```bash
-is <check> [options] -- <value>
-```
-
-### Options
-
-```bash
-d, die              # stop with error instead of return state
-n, name=<string>    # name the variable for the `die` message
-min=<num>           # for integer
-max=<num>           # for integer
-allow=<words>       # for enum (space separated)
-```
-
-### Examples
-
-Check arguments:
-
-- `is integer --name=arguments --max=2 $#` # mostly only check max, if all args are checked separately
-
-Use in code:
-
-- `if is integer age --min=18 -- "`$1`"; then ...`
-- `if ! is integer "`$DEBUG`"; then ...`
-

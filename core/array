@@ -7,17 +7,13 @@
 ######################################################################################
 
 # Deprecated: Check if value is contained in array
-# Usage:        contains <array-name> <match>
-# Example:  ```bash
-#           x=( one two three )
-#           contains x two && echo YES || echo NO
-#           ```
+# Use array <array-name> has <value>
 contains() {
-    _deprecated "use array <array-name> has <value>" warn
-    array "$1" has "$2"
+    _deprecated "use array <array-name> has <value>"
 }
 
 # Array analyzation.
+#
 # This can be used for easy array access functions. The array itself is not given by value but by name, so no `$` before the name.
 #
 # The following commands ar<string-input>e possible:
@@ -31,13 +27,12 @@ contains() {
 #               - <index-num> for `indexof`
 # Return:       0 if ok, 1 if entry not found
 array() {
-    is integer --name=arguments --max=3 --die -- $#
+    local cmd value
     is set --name=array-name --die -- "$1"
-    is enum --name=command --allow="has indexof" --die -- "$2"
-    is set --name=value --die -- "$3"
+    is enum --name=command --allow="has indexof" --die --output=cmd -- "$2"
+    is set --name=value --die --output=value -- "$3"
+    is integer --name=arguments --max=3 --die -- $#
     declare -n arr="$1"
-    local cmd="$2"
-    local value="$3"
     # processing
     case "$cmd" in
     has)
@@ -49,7 +44,7 @@ array() {
     indexof)
         for i in "${!arr[@]}"; do
             if [ "${arr[i]}" = "$value" ]; then
-                echo "$i"
+                printf '%s' "$i"
                 return 0
             fi
         done
@@ -63,7 +58,9 @@ array() {
 ######################################################################################
 
 # Join array elements by delimiter
+#
 # Convert all elements in array into a string separated by delimiter (default is `,`).
+#
 # Usage:        join <array-name> [<delimiter>]
 # Variables:    <array-name> to read values to join
 # Output:       <string>
@@ -77,11 +74,12 @@ join() {
     for element in "${array[@]:1}"; do
         joined+="${sep}${element}"
     done
-    echo "$joined"
+    printf '%s' "$joined"
 }
 
 # Splits string by delimiter into array
 # The delimiter defaults to `,`.
+#
 # Usage:        split <string> <array-name> [<delimiter>]
 # Variables:    <array-name> to store values
 split() {
@@ -99,6 +97,7 @@ split() {
 ######################################################################################
 
 # Methods to work with assoziative arrays (hashes)
+#
 # After declaring a variable as associative array: `declare -A <array-name>` this commands may help working with it. The array itself is not given by value but by name, so no `$` before the name.
 #
 # As an assoziative array not allows all characters for the key, the key can be:
@@ -129,7 +128,7 @@ hash() {
     eval set -- "$(option_parse $'k key-format +' "$@")"
     while true; do
         case "$1" in
-        -k | --key-format) keyFormat="$(check enum --allow="simple base64" -- "$2")" && shift 2 ;;
+        -k | --key-format) is enum --allow="simple base64" --output -- "$2" && keyFormat="$2" && shift 2 ;;
         --) shift && break ;;
         *) die "$(gettext "Unrecognized option"): $1" ;;
         esac
@@ -146,7 +145,7 @@ hash() {
     # processing
     case "$cmd" in
     set) is set --name=key --die -- "$3" && arr["$key"]="$value" ;;
-    get) is set --name=key --die -- "$3" && echo "${arr["$key"]}" ;;
+    get) is set --name=key --die -- "$3" && printf '%s' "${arr["$key"]}" ;;
     unset) is set --name=key --die -- "$3" && unset 'arr[$key]' ;;
     has) is set --name=key --die -- "$3" && [[ -v arr["$key"] ]] ;;
     contains)

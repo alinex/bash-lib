@@ -5,10 +5,14 @@
 ### Usage
 
 ```bash
-escape_args "$@"
+escape_args <arguments>
 ```
 
 ### Output (stdout)
 
 `<args>` with backslash escapes
+
+
+### Description
+
 

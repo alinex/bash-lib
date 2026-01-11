@@ -16,11 +16,24 @@ use module/software
 ######################################################################################
 
 # Run command on Mongo DB
-# Usage:    mongo "" <command>            # global command
-#           mongo <database> <command>    # work in database
+#
+# Usage:    mongo [<options>] "" <command>            # global command
+#           mongo [<options>] <database> <command>    # work in database
+# Options:  h, host <host>          # destination host
 # Global:   $server
 #           $MONGO_ADMIN_USERPASS
 mongo() {
+    # parameter parsing
+    local host="$server"
+    eval set -- "$(option_parse $'h host +' "$@")"
+    while true; do
+        case "$1" in
+        -h | --host) host="$2" && shift 2 ;;
+        --) shift && break ;;
+        *) die "$(gettext "Unrecognized option"): $1" ;;
+        esac
+    done
+    debug "$*"
     is integer --name=arguments --max=2 --die -- $#
     is set --name=command --die -- "$2"
     # processing
@@ -28,9 +41,9 @@ mongo() {
     install mongosh
     # shellcheck disable=SC2001
     # shellcheck disable=SC2154
-    cluster="$(sed 's/^[^.]*\.//' <<<"$server")"
+    cluster="$(sed 's/^[^.]*\.//' <<<"$host")"
     debug "Use settings for $cluster"
-    command mongosh "mongodb://$(hash MONGO_ADMIN_USERPASS get "$cluster")@$server:27017/$1" \
+    command mongosh "mongodb://$(hash MONGO_ADMIN_USERPASS get "$cluster")@$host:27017/$1" \
         --eval "print(EJSON.stringify($2))"
 }
 
@@ -40,5 +53,5 @@ mongo() {
 
 # Run command on Postgres
 postgres() {
-    echo "TODO"
+    printf '%s' "TODO"
 }

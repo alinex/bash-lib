@@ -2,6 +2,21 @@
 
 ## Run  os detection and set the constants
 
+### Usage
+
+```bash
+ip_extern <format>
+```
+
+### Output (stdout)
+
+`<tsv-table>` for data
+`<value>` else
+
+
+### Description
+
+
 The following formats are possible:
 
 - data - all values with `<name>	<value>`
@@ -18,15 +33,4 @@ The following formats are possible:
 - org
 - as
 - ip
-
-### Usage
-
-```bash
-ip_extern <format>
-```
-
-### Output (stdout)
-
-`<tsv-table>` for data
-`<value>` else
 

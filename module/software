@@ -14,12 +14,12 @@ _repo_debian_trivy() {
     sudo apt-get update
     sudo apt-get install -y wget gnupg lsb-release
     wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | gpg --dearmor | sudo tee /usr/share/keyrings/trivy.gpg >/dev/null
-    echo "deb [signed-by=/usr/share/keyrings/trivy.gpg] https://aquasecurity.github.io/trivy-repo/deb generic main" | sudo tee -a /etc/apt/sources.list.d/trivy.list
+    printf '%s' "deb [signed-by=/usr/share/keyrings/trivy.gpg] https://aquasecurity.github.io/trivy-repo/deb generic main" | sudo tee -a /etc/apt/sources.list.d/trivy.list
 }
 _repo_redhat_epel() {
     is set -- "$major" || major="$(grep ^VERSION_ID /etc/os-release | sed 's/.*="//;s/\..*//')"
     if ! dnf repolist | grep -q epel; then
-        dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-${major}.noarch.rpm
+        dnf install -y "https://dl.fedoraproject.org/pub/epel/epel-release-latest-${major}.noarch.rpm"
     fi
 }
 # manual installs
@@ -38,6 +38,7 @@ _install_mongosh() {
 }
 
 # Install software package
+#
 # Usage:    install <command>...
 install() {
     is set --name=command --die -- "$1"
@@ -159,6 +160,7 @@ install() {
 }
 
 # Check for installed commands
+#
 # Usage:    installed <command>...
 # Return:   0 if all installed
 #           1 if missing at least one
@@ -176,6 +178,7 @@ installed() {
 ######################################################################################
 
 # Parse semantic version number
+#
 # Usage:    semver <string>
 #           <string> | semver
 # Output:   The following fields separated by spaces:
@@ -194,6 +197,7 @@ semver() {
 }
 
 # Calculate difference
+#
 # Usage:    semver_diff [-h] <first> <second> # can already be parsed or not
 # Options:  -h,--human      # to show it user friendly
 # Error:    <int> which is:
@@ -265,44 +269,36 @@ semver_diff() {
     # output
     local step
     if [ -n "$human" ]; then
-        echo -n "$1 -> $2 "
+        printf '%s' "$1 -> $2 "
         if ((num == 0)); then
             gettext "are identical versions"
-            echo
+            printf '\n'
         elif ((num >= 1000000000)); then
             step=$((num / 1000000000))
-            eval_ngettext "is an upgrade of one major version" "is an upgrade of \$step major versions" "$step"
-            echo
+            printf '%s\n' "$(eval_ngettext "is an upgrade of one major version" "is an upgrade of \$step major versions" "$step")"
         elif ((num >= 1000000)); then
             step=$((num / 1000000))
-            eval_ngettext "is an upgrade of one minor version" "is an upgrade of \$step minor versions" "$step"
-            echo
+            printf '%s\n' "$(eval_ngettext "is an upgrade of one minor version" "is an upgrade of \$step minor versions" "$step")"
         elif ((num >= 1000)); then
             step=$((num / 1000))
-            eval_ngettext "is an upgrade of one patch version" "is an upgrade of \$step patch versions" "$step"
-            echo
+            printf '%s\n' "$(eval_ngettext "is an upgrade of one patch version" "is an upgrade of \$step patch versions" "$step")"
         elif ((num >= 1)); then
-            gettext "is a developer upgrade"
-            echo
+            printf '%s\n' "$(gettext "is a developer upgrade")"
         elif ((num >= -1000)); then
-            gettext "is a developer downgrade"
-            echo
+            printf '%s\n' "$(gettext "is a developer downgrade")"
         elif ((num >= 1000000)); then
             step=$((num / -1000))
-            eval_ngettext "is a downgrade of one patch version" "is a downgrade of \$step patch versions" "$step"
-            echo
+            printf '%s\n' "$(eval_ngettext "is a downgrade of one patch version" "is a downgrade of \$step patch versions" "$step")"
         elif ((num >= 1000000000)); then
             step=$((num / -1000000))
-            eval_ngettext "is an upgrade of one minor version" "is an upgrade of \$step minor versions" "$step"
-            echo
+            printf '%s\n' "$(eval_ngettext "is an upgrade of one minor version" "is an upgrade of \$step minor versions" "$step")"
         else
             step=$((num / 1000000000))
-            eval_ngettext "is an upgrade of one major version" "is an upgrade of \$step major versions" "$step"
-            echo
+            printf '%s\n' "$(eval_ngettext "is an upgrade of one major version" "is an upgrade of \$step major versions" "$step")"
         fi
         return 0
     else
-        echo "$num"
+        printf '%s\n' "$num"
     fi
     # return code
     ((num == 0)) && return 0 || return 1

@@ -14,6 +14,7 @@ source /dev/null
 declare -A _mattermost_cache
 
 # Get my user id
+#
 # Usage:    _mattermost_user
 # Output:   <user-id>
 _mattermost_user() {
@@ -25,10 +26,11 @@ _mattermost_user() {
         )" ||
             die "Could not find myself in mattermost!"
     fi
-    echo "${_mattermost_cache["__u"]}"
+    printf '%s' "${_mattermost_cache["__u"]}"
 }
 
 # Get team id by name
+#
 # Usage:    _mattermost_team <name>
 # Output:   <team-id>
 _mattermost_team() {
@@ -41,10 +43,11 @@ _mattermost_team() {
             die "Could not get ID of team $1 in mattermost!"
     fi
     [ -n "${_mattermost_cache["__t_$1"]}" ] || die "Team $1 does not exist in mattermost."
-    echo "${_mattermost_cache["__t_$1"]}"
+    printf '%s' "${_mattermost_cache["__t_$1"]}"
 }
 
 # Get channel id by team-id and name
+#
 # Usage:    channel <team-id> <display_name>
 # Output:   <channel-id>
 _mattermost_channel() {
@@ -59,7 +62,7 @@ _mattermost_channel() {
             die "Could not get ID of channel $1/$2 in mattermost!"
     fi
     [ -n "${_mattermost_cache[$cache]}" ] || die "Channel $2 does not exist in mattermost (team $1)"
-    echo "${_mattermost_cache[$cache]}"
+    printf '%s' "${_mattermost_cache[$cache]}"
 }
 
 # Get channel by <post-id>
@@ -73,6 +76,7 @@ _mattermost_channel_by_post() {
 }
 
 # New post in channel
+#
 # Usage:    _mattermost_post <channel-id> <message> [<attachments>]
 # Output:   <channel-id>/<post-id>
 _mattermost_post() {
@@ -91,10 +95,11 @@ _mattermost_post() {
     ) ||
         die "Could not send new post to mattermost!"
     debug "-> $pid"
-    echo "$1/$pid"
+    printf '%s' "$1/$pid"
 }
 
 # Repost in channel
+#
 # Usage:    _mattermost_repost <channel-id> <post-id> <message> [<attachments>] -> <channel-id>/<post-id>
 _mattermost_repost() {
     local att=""
@@ -111,10 +116,11 @@ _mattermost_repost() {
             jq '.id' -r
     ) ||
         die "Could not send repost to mattermost!"
-    echo "$1/$pid"
+    printf '%s' "$1/$pid"
 }
 
 # Add reaction to post
+#
 # Usage:    _mattermost_reaction <post-id> <smiley>
 _mattermost_reaction() {
     local json
@@ -126,6 +132,7 @@ _mattermost_reaction() {
 }
 
 # Repost in channel
+#
 # Usage:    _mattermost_delete <post-id>
 _mattermost_delete() {
     debug "DELETE mattermost/posts"
@@ -134,6 +141,7 @@ _mattermost_delete() {
 }
 
 # Find channels by predefined pattern
+#
 # Usage:    _mattermost_find_channels <name>
 # Output:   `<team-id>/<channel-id>` ... # first main, following links
 #           `<team-id>/<channel-id>` ... # one line per team matching
@@ -141,7 +149,7 @@ _mattermost_find_channels() {
     id() {
         local val
         val=$(_mattermost_channel "$1" "$2") || exit 1
-        echo -n "$1/$val "
+        printf '%s' "$1/$val "
     }
     local channel=${1:-$server}
     local divibib ekz result
@@ -181,7 +189,7 @@ _mattermost_find_channels() {
                 fi
             done
         fi
-        echo ""
+        printf '\n'
     done
     shopt -u nocasematch
     ((missing < 2)) || die "Could not detect mattermost channel for $1"
@@ -196,6 +204,7 @@ _mattermost_find_channels() {
 mattermost_post_ids=""
 
 # Send a message to Mattermost
+#
 # Usage:    mattermost <channel-name> <text> [<attachments>]
 # Globals:  $MATTERMOST_API + $MATTERMOST_TOKEN to access API
 # Output:   <post-id list>
@@ -230,7 +239,9 @@ mattermost() {
 }
 
 # Create an attachment json to be used in post
+#
 # Find free linkable icons under https://icons8.de/icons/all
+#
 # Usage:    mattermost_attachment
 #           mattermost_post <channel-id> "" "$(mattermost_attachment --color ...)"
 # Globals:  $MATTERMOST_API + $MATTERMOST_TOKEN to access API
@@ -270,20 +281,20 @@ mattermost_attachment() {
             info) color="#0000FF" ;;
             default) color="#808080" ;;
             esac
-            json="$(echo "$json" | jq --arg i "$color" '. + {color: $i}')"
+            json="$(jq --arg i "$color" '. + {color: $i}' <<<"$json")"
             shift 2
             ;;
-        --text) json="$(echo "$json" | jq --arg i "$2" '. + {text: $i}')" && shift 2 ;;
-        --author) json="$(echo "$json" | jq --arg i "$2" '. + {author_name: $i}')" && shift 2 ;;
-        --avatar) json="$(echo "$json" | jq --arg i "$2" '. + {author_icon: $i}')" && shift 2 ;;
-        --home) json="$(echo "$json" | jq --arg i "$2" '. + {author_link: $i}')" && shift 2 ;;
-        --title) json="$(echo "$json" | jq --arg i "$2" '. + {title: $i}')" && shift 2 ;;
-        --link) json="$(echo "$json" | jq --arg i "$2" '. + {title_link: $i}')" && shift 2 ;;
-        --image) json="$(echo "$json" | jq --arg i "$2" '. + {image_url: $i}')" && shift 2 ;;
-        --thumb) json="$(echo "$json" | jq --arg i "$2" '. + {thumb_url: $i}')" && shift 2 ;;
+        --text) json="$(jq --arg i "$2" '. + {text: $i}' <<<"$json")" && shift 2 ;;
+        --author) json="$(jq --arg i "$2" '. + {author_name: $i}' <<<"$json")" && shift 2 ;;
+        --avatar) json="$(jq --arg i "$2" '. + {author_icon: $i}' <<<"$json")" && shift 2 ;;
+        --home) json="$(jq --arg i "$2" '. + {author_link: $i}' <<<"$json")" && shift 2 ;;
+        --title) json="$(jq --arg i "$2" '. + {title: $i}' <<<"$json")" && shift 2 ;;
+        --link) json="$(jq --arg i "$2" '. + {title_link: $i}' <<<"$json")" && shift 2 ;;
+        --image) json="$(jq --arg i "$2" '. + {image_url: $i}' <<<"$json")" && shift 2 ;;
+        --thumb) json="$(jq --arg i "$2" '. + {thumb_url: $i}' <<<"$json")" && shift 2 ;;
         --fields) fields="$2" && shift 2 ;;
-        --footer) json="$(echo "$json" | jq --arg i "$2" '. + {footer: $i}')" && shift 2 ;;
-        --logo) json="$(echo "$json" | jq --arg i "$2" '. + {footer_image: $i}')" && shift 2 ;;
+        --footer) json="$(jq --arg i "$2" '. + {footer: $i}' <<<"$json")" && shift 2 ;;
+        --logo) json="$(jq --arg i "$2" '. + {footer_image: $i}' <<<"$json")" && shift 2 ;;
         --) shift && break ;;
         *) die "$(gettext "Unrecognized option"): $1" ;;
         esac
@@ -291,13 +302,15 @@ mattermost_attachment() {
     # adding fields to json
     if [ -n "$fields" ]; then
         [[ "$fields" == \[* ]] || fields="[$fields]"
-        json="$(echo "$json" | jq ". + {fields: $fields}")"
+        json="$(jq ". + {fields: $fields}" <<<"$json")"
     fi
-    echo "$json"
+    printf '%s' "$json"
 }
 
 # Add reaction to existing post
+#
 # This can only be called if a @mattermost call was used previously.
+#
 # Usage:    mattermost_reaction <emoji>
 # Globals:  $MATTERMOST_API + $MATTERMOST_TOKEN to access API
 # Options:  l, links     # also post this to the links
@@ -346,7 +359,9 @@ mattermost_reaction() {
 }
 
 # Add response to mattermost posting
+#
 # This can only be called if a @mattermost call was used previously.
+#
 # Usage:    mattermost_response <text> [<attachments>]
 # Globals:  $MATTERMOST_API + $MATTERMOST_TOKEN to access API
 # Returns:  0 without action if no $MATTERMOST_API + $MATTERMOST_TOKEN

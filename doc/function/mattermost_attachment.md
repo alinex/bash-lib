@@ -2,8 +2,6 @@
 
 ## Create an attachment json to be used in post
 
-Find free linkable icons under https://icons8.de/icons/all
-
 ### Usage
 
 ```bash
@@ -40,3 +38,9 @@ logo <url>        # footer image
 
 - 0 without action if no `$MATTERMOST_API` + `$MATTERMOST_TOKEN`
 - 
+
+### Description
+
+
+Find free linkable icons under https://icons8.de/icons/all
+

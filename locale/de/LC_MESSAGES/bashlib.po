@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-19 14:37+0100\n"
+"POT-Creation-Date: 2026-01-09 22:41+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,179 +17,209 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: core/misc:109 core/validator:69 core/validator:287 core/array:134
-#: module/os:178 module/trivy:44 module/monitoring:137 module/input:30
-#: module/input:83 module/input:220 module/input:479 module/input:646
-#: module/log:61 module/remote:77 module/remote:258 module/remote:305
-#: module/remote:354 module/remote:448 module/mattermost:288
-#: module/mattermost:323 module/software:226
+#: core/misc:121 core/validator:129 core/array:133 module/os:180
+#: module/network:26 module/trivy:81 module/monitoring:143 module/input:31
+#: module/input:86 module/input:211 module/input:464 module/input:627
+#: module/log:63 module/process:377 module/process:425 module/process:503
+#: module/process:650 module/remote:78 module/remote:217 module/remote:265
+#: module/remote:333 module/database:33 module/mattermost:299
+#: module/mattermost:336 module/software:230
 msgid "Unrecognized option"
 msgstr "Unbekannte Option"
 
-#: core/arguments:36
+#: core/arguments:39
 msgid "A specification string is needed as first argument"
 msgstr "Ein Text zur Spezifikation ist als erstes ARgument notwendig"
 
-#: core/arguments:82
+#: core/arguments:90
 msgid "Options"
 msgstr "Optionen"
 
-#: core/arguments:122
+#: core/arguments:135
 msgid "argument is not a valid number!"
 msgstr "Argument ist nicht ganzzahlig"
 
-#: core/output:96
+#: core/output:105
 msgid "Help"
 msgstr "Hilfe"
 
-#: core/date:134
+#: core/date:76
+msgid "+%A, %B %d, %Y at %H:%M:%S"
+msgstr "+%A, %d. %B %Y um %H:%M:%S"
+
+#: core/date:77
+msgid "+%A, %B %d, %Y"
+msgstr "+%A, %d. %B %Y"
+
+#: core/date:165
 msgid "Invalid duration unit"
 msgstr "Ungültige Einheit für Zeitdauer"
 
-#: core/validator:65 core/validator:66
+#: core/validator:125 core/validator:126
 msgid "Parameter %s needs number"
 msgstr "Der Parameter %s muß eine Zahl sein"
 
-#: core/validator:67
+#: core/validator:127
 msgid "A list of words is needed"
 msgstr "Eine Wortliste ist notwendig"
 
-#: core/validator:75
+#: core/validator:135
 msgid "Incorrect call"
 msgstr "Ungültige Aufruf"
 
-#: core/validator:83
+#: core/validator:143
 #, sh-format
 msgid "The \"$name\" has to be set with a value"
 msgstr "\"$name\" muss mit einem Wert gesetzt werden"
 
-#: core/validator:88
+#: core/validator:148
 #, sh-format
 msgid "The \"$name\" has to be empty but has »${val}«"
-msgstr "\"$name\" sollte leer sein enthält aber »${val}«"
+msgstr "\"$name\" sollte leer sein, enthält aber »${val}«"
 
-#: core/validator:97
+#: core/validator:157
 #, sh-format
 msgid "The value »${val}« for \"$name\" could not be read as true or false"
 msgstr ""
 "Der Wert »${val}« für \"$name\" konnte weder als wahr noch als falsch "
 "identifiziert werden"
 
-#: core/validator:105
+#: core/validator:164
+#, sh-format
+msgid "The value »${val}« for \"$name\" should be true but was »${val}«"
+msgstr "Der Wert »${val}« für \"$name\" sollte wahr sein, war aber »${val}«"
+
+#: core/validator:171
+#, sh-format
+msgid "The value »${val}« for \"$name\" should be false but was »${val}«"
+msgstr "Der Wert »${val}« für \"$name\" sollte falsch sein, war aber »${val}«"
+
+#: core/validator:179
 #, sh-format
 msgid "The \"$name\" has to be an integer but »${val}« was given"
-msgstr "\"$name\" muss eine Zahl sein aber »${val}« wurde angegeben"
+msgstr "\"$name\" muss eine Zahl sein, aber »${val}« wurde angegeben"
 
-#: core/validator:109 core/validator:134
+#: core/validator:183 core/validator:208
 #, sh-format
 msgid "The \"$name\" has to be exactly $min but »${val}« was given"
-msgstr "\"$name\" muss genau $min sein aber »${val}« wurde angegeben"
+msgstr "\"$name\" muss genau $min sein, aber »${val}« wurde angegeben"
 
-#: core/validator:113 core/validator:138
+#: core/validator:187 core/validator:212
 #, sh-format
 msgid "The \"$name\" has to be between $min and $max but »${val}« was given"
 msgstr ""
-"\"$name\" muss zwischen $min und $max sein aber »${val}« wurde angegeben"
+"\"$name\" muss zwischen $min und $max sein, aber »${val}« wurde angegeben"
 
-#: core/validator:117 core/validator:142
+#: core/validator:191 core/validator:216
 #, sh-format
 msgid "The \"$name\" has to at least $min but »${val}« was given"
-msgstr "\"$name\" muss mindestens $min sein aber »${val}« wurde angegeben"
+msgstr "\"$name\" muss mindestens $min sein, aber »${val}« wurde angegeben"
 
-#: core/validator:121 core/validator:146
+#: core/validator:195 core/validator:220
 #, sh-format
 msgid "The \"$name\" has to not be more than $max but »${val}« was given"
 msgstr ""
-"\"$name\" darf nicht größer als $max sein aber »${val}« wurde angegeben"
+"\"$name\" darf nicht größer als $max sein, aber »${val}« wurde angegeben"
 
-#: core/validator:130
+#: core/validator:204
 #, sh-format
 msgid "The \"$name\" has to be a float but »${val}« was given"
-msgstr "\"$name\" muss eine Fließkommazahl sein aber »${val}« wurde angegeben"
+msgstr "\"$name\" muss eine Fließkommazahl sein, aber »${val}« wurde angegeben"
 
-#: core/validator:154
+#: core/validator:228
 #, sh-format
 msgid ""
 "The length of \"$name\" has to be exactly $min but »${res}« is $val "
 "characters long"
 msgstr ""
-"Die Länge von \"$name\" muss genau $min sein aber »${res}« ist $val Zeichen "
+"Die Länge von \"$name\" muss genau $min sein, aber »${res}« ist $val Zeichen "
 "lang"
 
-#: core/validator:158
+#: core/validator:232
 #, sh-format
 msgid ""
 "The length of \"$name\" has to be between $min and $max but »${res}« is $val "
 "characters long"
 msgstr ""
-"Die Länge von \"$name\" muss zwischen $min und $max sein aber »${res}« ist "
+"Die Länge von \"$name\" muss zwischen $min und $max sein, aber »${res}« ist "
 "$val Zeichen lang"
 
-#: core/validator:162
+#: core/validator:236
 #, sh-format
 msgid ""
 "The length of \"$name\" has to be at least $min but »${res}« is $val "
 "characters long"
 msgstr ""
-"Die Länge von \"$name\" muss mindestens $min sein aber »${res}« ist $val "
+"Die Länge von \"$name\" muss mindestens $min sein, aber »${res}« ist $val "
 "Zeichen lang"
 
-#: core/validator:166
+#: core/validator:240
 #, sh-format
 msgid ""
 "The length of \"$name\" has to be not more than $max but »${res}« is $val "
 "characters long"
 msgstr ""
-"Die Länge von \"$name\" darf nicht größer als $max sein aber »${res}« ist "
+"Die Länge von \"$name\" darf nicht größer als $max sein, aber »${res}« ist "
 "$val Zeichen lang"
 
-#: core/validator:171
+#: core/validator:245
 msgid "A list with --allow=<words> is needed for enum check"
 msgstr "Eine Liste mit --allow=<words> wird für den enum Check benötigt"
 
-#: core/validator:173
+#: core/validator:247
 #, sh-format
 msgid "\"$name\" is set to \"${val}\" but has to be one of: $allow"
 msgstr ""
 "\"$name\" enthält \"${val}\" es sind aber nur folgende Werte erlaubt: $allow"
 
-#: core/validator:179
+#: core/validator:252
+#, sh-format
+msgid "The \"$name\" has to be a parsable date format but »${val}« was given"
+msgstr "\"$name\" muss ein lesbares Datum sein, aber »${val}« wurde angegeben"
+
+#: core/validator:258
 #, sh-format
 msgid ""
 "The \"$name\" has to be an integer or human duration but »${val}« was given"
-msgstr "\"$name\" muss eine Zahl oder eine Zeitdauer sein aber »${val}« wurde angegeben"
+msgstr ""
+"\"$name\" muss eine Zahl oder eine Zeitdauer sein, aber »${val}« wurde "
+"angegeben"
 
-#: core/validator:184
+#: core/validator:263
 #, sh-format
 msgid "The \"$name\" ${val} has to be an existing path"
 msgstr "\"$name\" ${val} muss ein existierender Pfad sein"
 
-#: core/validator:189
+#: core/validator:268
 #, sh-format
 msgid "The \"$name\" ${val} has to be an existing file"
 msgstr "\"$name\" ${val} muss eine existierende Datei sein"
 
-#: core/validator:194
+#: core/validator:273
 #, sh-format
 msgid "The \"$name\" ${val} has to be an existing directory"
 msgstr "\"$name\" ${val} muss ein existierendes Verzeichnis sein"
 
-#: core/validator:199
+#: core/validator:278
 #, sh-format
 msgid "The \"$name\" ${val} has to be a file readable for user"
 msgstr "\"$name\" ${val} muss eine für den Benutzer lesbare Datei sein"
 
-#: core/validator:204
+#: core/validator:283
 #, sh-format
 msgid "The \"$name\" ${val} has to be a file writable for user"
 msgstr "\"$name\" ${val} muss eine für den Benutzer schreibbare Datei sein"
 
-#: core/validator:207
+#: core/validator:286
 #, sh-format
 msgid "A check named ${check} is not defined"
 msgstr "Eine Prüfung namens ${check} ist nicht definiert"
 
-#: module/dns:87
+#: module/dns:35 module/dns:59
+msgid "NAME\\tTYPE\\tCONTENT\\tTTL"
+msgstr "NAME\\tTYP\\tINHALT\\tTTL"
+
+#: module/dns:93
 #, sh-format
 msgid ""
 "To update $PLUSSERVER_PORTAL/services/nameservers -> download CSV (manually)."
@@ -197,200 +227,323 @@ msgstr ""
 "Für Update $PLUSSERVER_PORTAL/services/nameservers -> CSV herunterladen "
 "(manuell)."
 
-#: module/network:23
+#: module/dns:94
+msgid "No local DNS list found, please download it."
+msgstr "Keine lokale DNS Liste gefunden, bitte herunterladen."
+
+#: module/dns:95
+#, sh-format
+msgid "Use $list from $time."
+msgstr "Benutze $list vom $time."
+
+#: module/network:49
 msgid "IP\\tInterface"
 msgstr "IP\\tSchnittstelle"
 
-#: module/monitoring:68
+#: module/trivy:265
+#, sh-format
+msgid ""
+"Downgrade $severity -> MEDIUM because it was published less than 3 days ago"
+msgstr ""
+"Herunterstufen $severity -> MEDIUM, weil diese Lücke erst in den letzten 3 "
+"Tagen veröffentlicht wurde"
+
+#: module/trivy:274
+msgid ""
+"Add information of known exploits and cancel downgrades in case of just "
+"published"
+msgstr ""
+"Füge Informationen zu bekannten Exploits hinzu und streiche mögliche "
+"Herunterstufungen durch kürzliches publizieren"
+
+#: module/trivy:283
+#, sh-format
+msgid "Downgrade $severity -> MEDIUM because it is a dev dependency"
+msgstr ""
+"Herunterstufen $severity -> MEDIUM, weil es sich um eine reine "
+"Entwicklungsabhängigkeit handelt"
+
+#: module/trivy:328
+#, sh-format
+msgid "Downgrade $severity -> MEDIUM because of Jira status $deploy"
+msgstr "Herunterstufen $severity -> MEDIUM, durch Jira Status $deploy"
+
+#: module/trivy:329 module/trivy:392
+#, sh-format
+msgid "$id at $target"
+msgstr "$id in $target"
+
+#: module/trivy:391
+msgid "Add information from Jira"
+msgstr "Hinzufügen der Jira Informationen"
+
+#: module/trivy:432
+#, sh-format
+msgid "Rating: $severity (CVSS rating $value)"
+msgstr "Einstufung: $severity (CVSS Wert $value)"
+
+#: module/trivy:434
+#, sh-format
+msgid "Status: Fixed from version $value $fixStatus"
+msgstr "Status: Gelöst in Version $value $fixStatus"
+
+#: module/trivy:437
+#, sh-format
+msgid "Date:   Vulnerability known since $human ($value days ago)"
+msgstr "Datum:  Sicherheitslücke bekannt seit $human (vor $value Tagen)"
+
+#: module/trivy:439
+#, sh-format
+msgid "Exploit known since $exploitDate at $exploitVendor $exploitProduct"
+msgstr "Exploit bekannt seit $exploitDate bei $exploitVendor $exploitProduct"
+
+#: module/trivy:442
+msgid "Responsible"
+msgstr "Zuständig"
+
+#: module/trivy:443
+msgid "Deploy"
+msgstr "Deploy"
+
+#: module/trivy:444
+msgid "Last comments"
+msgstr "Letzte Kommentare"
+
+#: module/trivy:446
+msgid "Sources"
+msgstr "Quellen"
+
+#: module/trivy:453
+msgid "Links"
+msgstr "Links"
+
+#: module/monitoring:70
 msgid "Could not get exporters from Prometheus!"
 msgstr "Es konnten keine Exporter von Prometheus ermittelt werden!"
 
-#: module/monitoring:85
+#: module/monitoring:89
 #, sh-format
 msgid "Could not scrape the Prometheus exporter at $url!"
 msgstr "Der Prometheus Exporter unter $url konnte nicht abgefragt werden!"
 
-#: module/monitoring:144
+#: module/monitoring:150
 msgid "Could not get alerts from Grafana!"
 msgstr "Es konnten keine Grafana Alerts abgerufen werden!"
 
-#: module/monitoring:145
+#: module/monitoring:151
 msgid "Parse error in Grafana alerts list with filter"
 msgstr "Fehler beim Parsen der Grafana Alarmliste mit Filter"
 
-#: module/monitoring:173
+#: module/monitoring:180
 msgid "Severity\\tNetwork\\tInstance\\tSummary\\tStart"
 msgstr "Schweregrad\\tNetz\\tInstanz\\tZusammenfassung\\tStart"
 
-#: module/input:38
+#: module/input:39
 msgid "Please wait to go on"
 msgstr "Warte bis es weiter geht"
 
-#: module/input:38
+#: module/input:39
 msgid "Press any key to continue..."
 msgstr "Taste drücken um fortzufahren..."
 
-#: module/input:49
-msgid "aborted by user"
-msgstr "Abbruch durch Benutzer"
+#: module/input:50
+msgid "go on by user"
+msgstr "Weiter durch Benutzer"
 
-#: module/input:88
+#: module/input:91
 msgid "Should this be done"
 msgstr "Soll dies durchgeführt werden"
 
-#: module/input:93 module/input:130 module/input:153
+#: module/input:96 module/input:127 module/input:148
 msgid "No"
 msgstr "Nein"
 
-#: module/input:93 module/input:126 module/input:148
+#: module/input:96 module/input:123 module/input:143
 msgid "Yes"
 msgstr "Ja"
 
-#: module/input:135 module/input:351 module/input:568
+#: module/input:132 module/input:340 module/input:551
 msgid "value needed"
 msgstr "Wert notwendig"
 
-#: module/input:157 module/input:377 module/input:594
+#: module/input:152 module/input:364 module/input:575
 msgid "invalid character"
 msgstr "ungültiges Zeichen"
 
-#: module/input:231
+#: module/input:222
 msgid "Enter integer number"
 msgstr "Gib eine Nummer ein"
 
-#: module/input:240
+#: module/input:231
 msgid "Enter float number"
 msgstr "Gib eine Fließkommazahl ein"
 
-#: module/input:250
+#: module/input:241
 msgid "Enter password"
 msgstr "Gib das Passwort ein"
 
-#: module/input:254
+#: module/input:245
 msgid "Enter time"
 msgstr "Gib die Zeit an"
 
-#: module/input:258
+#: module/input:249
 msgid "Enter text (end with empty line)"
 msgstr "Gib einen Text ein (Beenden mit Leerzeile)"
 
-#: module/input:259
+#: module/input:250
 msgid "Enter text here"
 msgstr "Gib einen Text ein"
 
-#: module/input:260
+#: module/input:251
 msgid "Enter short line"
 msgstr "Gib eine kurze Zeile ein"
 
-#: module/input:268
+#: module/input:259
 msgid "Input through system editor..."
 msgstr "Eingabe mit dem Systemeditor..."
 
-#: module/input:333
+#: module/input:321
 msgid "incomplete"
 msgstr "unvollständig"
 
-#: module/input:388
+#: module/input:373
 msgid "bad"
 msgstr "schlecht"
 
-#: module/input:390
+#: module/input:375
 msgid "weak"
 msgstr "schwach"
 
-#: module/input:392
+#: module/input:377
 msgid "good"
 msgstr "gut"
 
-#: module/input:394
+#: module/input:379
 msgid "strong"
 msgstr "stark"
 
-#: module/input:525
+#: module/input:510
 msgid "Select one of the above options"
 msgstr "Wähle eine der obigen Optionen"
 
-#: module/input:666
+#: module/input:647
 msgid "Could not get task list from command"
 msgstr "Befehlsliste konnte nicht von der Funktion gelesen werden"
 
-#: module/input:673
+#: module/input:654
 msgid "No tasks found to be executed."
 msgstr "Keine Aufgaben zum Ausführen gefunden."
 
-#: module/input:679
+#: module/input:660
 msgid "Exit"
 msgstr "Beenden"
 
-#: module/input:686
+#: module/input:667
 #, sh-format
 msgid "Got error $error running $task"
 msgstr "Beim Aufruf von $task kam es zum Fehler $error"
 
-#: module/process:90
+#: module/process:94
 msgid "Failed to remove lockfile"
 msgstr "Lockfile konnte nicht entfernt werden"
 
-#: module/process:106 module/process:138
+#: module/process:113 module/process:149
 msgid "Failed to create PID lockfile"
 msgstr "PID Lockfile konnte nicht erstellt werden"
 
-#: module/process:114
+#: module/process:121
 #, sh-format
 msgid "Waiting for unlock in $lockfile by PID $pid"
 msgstr "Warten, bis zur Freigabe in $lockfile durch PID $pid"
 
-#: module/process:444
+#: module/process:318
 msgid "Work steps are logged so that you can resume work mid-process"
 msgstr ""
 "Arbeitsschritte werden protokolliert um auch mittendrin wieder aufzusetzen"
 
-#: module/process:458
+#: module/process:384 module/process:451 module/process:513
 #, sh-format
-msgid "Job $name already done in this run, skipping"
-msgstr "Der Job $name wurde bereits ausgeführt, überspringe diesen"
+msgid "Skip: $name (already done)"
+msgstr "Abbrechen: $name (bereits durchgeführt)"
 
-#: module/process:479
+#: module/process:388 module/process:455 module/process:548
 #, sh-format
-msgid "Finished: Step $name at $date"
-msgstr "Fertig: Schritt $name um $date"
+msgid "Start: $name"
+msgstr "Starte: $name"
 
-#: module/process:509
+#: module/process:391 module/process:534
 #, sh-format
-msgid "Started: step $name at $date"
-msgstr "Start: Schritt $name um $date"
+msgid "Finished: $name"
+msgstr "Fertig: $name"
 
-#: module/remote:457
+#: module/process:466
+#, sh-format
+msgid "Finished: $check"
+msgstr "Fertig: $check"
+
+#: module/process:517
+#, sh-format
+msgid "Queue: $name"
+msgstr "Warteschlange: $name"
+
+#: module/process:552
+#, sh-format
+msgid "Queued $started/$total jobs"
+msgstr "Warteschlange $started/$total Jobs"
+
+#: module/process:660
+msgid "No process with pid $2"
+msgstr "Kein Prozess mit PID $2"
+
+#: module/process:665
+msgid "No processes found for $2"
+msgstr "Keine Prozesse für $2 gefunden"
+
+#: module/process:708
+#, sh-format
+msgid "Waiting for $pid ($pcpu% CPU)"
+msgstr "Warten auf $pid ($pcpu% CPU)"
+
+#: module/process:712
+#, sh-format
+msgid "Timeout after ${timeout}s"
+msgstr "Abbruch nach ${timeout}s"
+
+#: module/remote:339
+msgid "Wait till reboot is done"
+msgstr "Warten bis der Reboot fertig ist"
+
+#: module/remote:342
 #, sh-format
 msgid "Wait until the reboot is complete ($seconds seconds)"
 msgstr "Warten bis der Reboot fertig ist ($seconds Sekunden)"
 
-#: module/software:270
+#: module/software:274
 msgid "are identical versions"
 msgstr "sind identische Versionen"
 
-#: module/software:274 module/software:300
+#: module/software:278 module/software:297
 #, sh-format
 msgid "is an upgrade of one major version"
 msgid_plural "is an upgrade of $step major versions"
 msgstr[0] "ist ein upgrade von einer Hauptversion"
 msgstr[1] "ist ein upgrade von $step Hauptversionen"
 
-#: module/software:278 module/software:296
+#: module/software:281 module/software:294
 #, sh-format
 msgid "is an upgrade of one minor version"
 msgid_plural "is an upgrade of $step minor versions"
 msgstr[0] "ist ein upgrade von einer Nebenversion"
 msgstr[1] "ist ein upgrade von $step Nebenversionen"
 
-#: module/software:282
+#: module/software:284
 #, sh-format
 msgid "is an upgrade of one patch version"
 msgid_plural "is an upgrade of $step patch versions"
 msgstr[0] "ist ein upgrade von einer Patchversion"
 msgstr[1] "ist ein upgrade von $step Patchversionen"
 
-#: module/software:285
+#: module/software:286
 msgid "is a developer upgrade"
 msgstr "ist ein Entwickler Upgrade"
 
@@ -398,12 +551,27 @@ msgstr "ist ein Entwickler Upgrade"
 msgid "is a developer downgrade"
 msgstr "ist ein Entwickler Downgrade"
 
-#: module/software:292
+#: module/software:291
 #, sh-format
 msgid "is a downgrade of one patch version"
 msgid_plural "is a downgrade of $step patch versions"
 msgstr[0] "ist ein Downgrade von einer Patchversion"
 msgstr[1] "ist ein Downgrade von $step Patchversionen"
+
+#~ msgid "Zuständig"
+#~ msgstr "Zuständig"
+
+#, sh-format
+#~ msgid "Job »$name« already done in this run, skipping"
+#~ msgstr "Der Job »$name« wurde bereits ausgeführt, überspringe diesen"
+
+#, sh-format
+#~ msgid "Started: step »$name« at $date"
+#~ msgstr "Start: Schritt »$name« um $date"
+
+#, fuzzy, sh-format
+#~ msgid "Queued: step »$name« at $date"
+#~ msgstr "Start: Schritt »$name« um $date"
 
 #, sh-format
 #~ msgid "No file to execute remotely under $file"

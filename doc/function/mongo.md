@@ -5,8 +5,14 @@
 ### Usage
 
 ```bash
-mongo "" <command>            # global command
-mongo <database> <command>    # work in database
+mongo [<options>] "" <command>            # global command
+mongo [<options>] <database> <command>    # work in database
+```
+
+### Options
+
+```bash
+h, host <host>          # destination host
 ```
 
 ### Globals
@@ -14,3 +20,7 @@ mongo <database> <command>    # work in database
 - `$server`
 - `$MONGO_ADMIN_USERPASS`
 - 
+
+### Description
+
+

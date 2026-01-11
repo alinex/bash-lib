@@ -9,6 +9,7 @@ source /dev/null
 ######################################################################################
 
 # Get current timestamp
+#
 # Usage:    now
 # Output:   <seconds> since 1970
 # shellcheck disable=SC2120
@@ -23,22 +24,28 @@ now() {
 ######################################################################################
 
 # Calculate difference in seconds
+#
 # The two dates to compare can be unix timestamps (seconds since 1970) or a parsable date format.
-# Usage:    date_diff <start> <end> # timestamp or date string
+# If no <end> is given, it will use the current time as end.
+#
+# Usage:    date_diff <start> [<end>] # timestamp or date string
 # Output:   <seconds> negative if <start> behind <end>
 date_diff() {
     is integer --name=arguments --max=2 --die -- $#
     local start end
+    end="${2:-$(now)}"
     is integer -- "$1" && start="$1" || start=$(date -d "$1" +%s) ||
         die "Date format '$1' not parsable!"
-    is integer -- "$2" && end="$2" || end=$(date -d "$2" +%s) ||
+    is integer -- "$end" || end=$(date -d "$end" +%s) ||
         die "Date format '$2' not parsable!"
     # processing
-    echo $((end - start))
+    printf '%s' $((end - start))
 }
 
 # Format date in different named versions or format string
+#
 # The `<value>` can be unix timestamp (seconds since 1970) or a parsable date format.
+#
 # Usage:    date_format <format> [<value>] # use now if missing
 #           <format>:   iso         2025-10-01T12:00:00+02:00
 #                       iso-date    2025-10-01
@@ -47,6 +54,7 @@ date_diff() {
 #                       unix        1759312800
 #                       eu-date     01.10.2025
 #                       us-date     10/01/2025
+#                       human       Mittwoch, Oktober 01, 2025 at 12:00:00
 #                       human-date  Mittwoch, Oktober 01, 2025
 #                       time        12:00:00
 #                       time-short  12:00
@@ -56,23 +64,40 @@ date_format() {
     is integer --name=arguments --max=2 --die -- $#
     is set --name=format --die -- "$1"
     # processing
-    local value format
+    local value format opt
     case $1 in
     iso) format="-Iseconds" ;;
     iso-date) format="-I" ;;
-    zulu) format="-u +%Y-%m-%dT%H:%M:%SZ" ;;
-    sql) format="+\"%Y-%m-%d %H:%M:%S\"" ;;
+    zulu) opt="-u" && format="+%Y-%m-%dT%H:%M:%SZ" ;;
+    sql) format="+%Y-%m-%d %H:%M:%S" ;;
     unix) format="+%s" ;;
     eu-date) format="+%Y-%m-%d" ;;
     us-date) format="+%m/%d/%Y" ;;
-    human-date) format="+%A, %B %d, %Y" ;;
+    human) format="$(gettext "+%A, %B %d, %Y at %H:%M:%S")" ;;
+    human-date) format="$(gettext "+%A, %B %d, %Y")" ;;
     time) format="+%H:%M:%S" ;;
     time-short) format="+%H:%M" ;;
     *) format="+$1" ;;
     esac
     value="${2-$(now)}"
-    is integer -- "$value" && eval "date -d @$value $format" || eval "date -d \"$value\" $format" ||
+    is integer -- "$value" && eval "date -d @$value '$format'" || eval "date -d \"$value\" $opt '$format'" ||
         die "Date format '$value' not parsable!"
+}
+
+# Sleep until given date
+#
+# Causes the running process to wait until the given date.
+# If the date is in the past, it immediately returns.
+#
+# Usage:    sleep_until <date>
+sleep_until() {
+    is integer --name=arguments --max=1 --die -- $#
+    is set --name=date --die -- "$1"
+    # processing
+    local secs
+    secs="$(date_diff "$(now)" "$1")"
+    ((secs > 0)) || die "Date has to be in the future for sleep_until"
+    sleep "$secs"
 }
 
 ######################################################################################
@@ -80,8 +105,10 @@ date_format() {
 ######################################################################################
 
 # Format duration in different numbers or human readable
+#
 # This function can convert into seconds and back into human format as you like. Months or years are not possible because they are not accurately, better use 30d or 365d for that.
-# Usage:    duration_format <format> <value|human format>
+#
+# Usage:    duration_format <format> <seconds>|<human>
 #           <format>:   seconds
 #                       minutes     # using floor 110s = 1
 #                       hours       # using floor
@@ -95,13 +122,17 @@ duration_format() {
     is integer -- "$2" && value="$2" || value="$(_parse_duration "$2")"
     # processing
     case $1 in
-    seconds) echo "$value" ;;
-    minutes) echo $((value / 60)) ;;
-    hours) echo $((value / 3600)) ;;
-    days) echo $((value / 86400)) ;;
+    seconds) printf '%s' "$value" ;;
+    minutes) printf '%s' $((value / 60)) ;;
+    hours) printf '%s' $((value / 3600)) ;;
+    days) printf '%s' $((value / 86400)) ;;
     human) _format_duration "$value" ;;
     esac
 }
+
+# Read seconds or parse human format
+#
+# Usage:    _parse_duration <seconds>|<human>
 _parse_duration() {
     local input="$1"
     local total=0
@@ -138,6 +169,10 @@ _parse_duration() {
     done < <(grep -Eo '[+-]?[0-9]+[[:alpha:]]*' <<<"$input" | sed -E 's/^([+-]?[0-9]+)([[:alpha:]]*)$/\1 \2/')
     printf '%d\n' "$total"
 }
+
+# Format duration in human format
+#
+# Usage:    _format_duration <seconds>
 _format_duration() {
     local total="$1"
     local sign=""
@@ -160,7 +195,7 @@ _format_duration() {
     ((s)) && out+="${s}s "
     # If total was exactly 0
     is empty -- "$out" && out="0s" && sign="" || true
-    echo "${sign}${out% }"
+    printf '%s' "${sign}${out% }"
 }
 
 ######################################################################################
@@ -170,7 +205,9 @@ _format_duration() {
 _timer_start=0
 
 # Start/stop the timer
+#
 # After `timer stop` it will return the elapsed time.
+#
 # Usage:    timer start
 #           timer stop
 # Output:   <seconds>.<milliseconds> # after stop
@@ -181,7 +218,7 @@ timer() {
         ;;
     stop)
         local seconds nano len
-        IFS='.' read -r seconds nano <<<"$(echo "$(date +%s.%N) - $_timer_start" | bc)"
+        IFS='.' read -r seconds nano < <(printf '%s' "$(date +%s.%N) - $_timer_start" | bc)
         len=$((4 - ${#seconds}))
         ((len >= 0)) || len=0
         LANG=C printf "%0.${len}f\n" "$seconds.$nano"
@@ -193,19 +230,12 @@ timer() {
 
 # Deprecated: Start the timer
 # Use @timer like `timer start`.
-# Later use @timer_stop to get the elapsed time.
-# Usage:    timer start
-#           timer stop
 timer_start() {
     _deprecated "Use: timer start"
-    timer start
 }
 
 # Deprecated: Stop the timer and calculate elapsed time
 # Use @timer like `timer stop`.
-# The timer has to be started before using @timer_start.
-# Output:   `<seconds>.<milliseconds>`
 timer_stop() {
     _deprecated "Use: timer stop"
-    timer stop
 }

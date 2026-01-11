@@ -8,7 +8,7 @@ command -v shfmt >/dev/null || sudo apt install -y shfmt
 
 echo "#!/usr/bin/env bash" >"$BASHLIB_HOME/full"
 echo "BASHLIB_LOADER=\${BASHLIB_LOADER:-full}" >>"$BASHLIB_HOME/full"
-echo -n "- full "
+echo -n '- full '
 for folder in core module; do
     echo -n "$folder "
     for f in "$BASHLIB_HOME/$folder"/*; do
@@ -273,7 +273,6 @@ for folder in config core module extra; do
                 (
                     echo "# $funcName"
                     echo -e "\n## $title"
-                    [ -z "${description//[[:space:]]/}" ] || echo -e "$description" | md_optimize
                     [ -z "$usage" ] || echo -e "\n### Usage\n\n\`\`\`bash${usage}\n\`\`\`"
                     [ -z "$options" ] || echo -e "\n### Options\n\n\`\`\`bash${options}\n\`\`\`"
                     [ -z "$variables" ] || echo -e "\n### Variables\n$variables" | md_optimize
@@ -284,6 +283,7 @@ for folder in config core module extra; do
                     [ -z "$error" ] || echo -e "\n### Error (stderr)\n$error" | md_optimize
                     [ -z "$return" ] || echo -e "\n### Return (exit code)\n$return" | md_optimize
                     [ -z "$example" ] || echo -e "\n### Examples\n$example" | md_optimize
+                    [ -z "${description//[[:space:]]/}" ] || echo -e "\n### Description\n$description" | md_optimize
                 ) |
                     sed -E 's#(^|[^[:alnum:]_.-])@([[:alnum:]_]+)#\1[`\2`](\2.md)#g' |
                     sed -E 's#(^|[^[:alnum:]_.-])&([[:alnum:]_]+)(\#[[:alnum:]_]+)?#\1[`\2`](../example/\2.md\3)#g' |

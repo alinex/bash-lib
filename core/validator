@@ -6,7 +6,9 @@
 ### General Validation
 ######################################################################################
 
-# Validate and sanitize values.
+# Deprecated:Validate and sanitize values.
+# Use is ... --output
+#
 # This validation is possible using the `check` and @is function.
 # - `check` should be used for sanitize because it will output the value
 # - @is should be used for checking only validity or stop processing on problem because no value is output
@@ -22,10 +24,13 @@
 # - `set` will fail if no value given
 # - `empty` will fail if not empty like ""
 # - `bool` will transform the value to `1` or `0` and allows: true/false, t/f, 1/0, yes/no, y/j/n, ja/nein, ""
+# - `true` should be a boolean true
+# - `false` should be a boolean false
 # - `integer` will check for a number maybe within a range
 # - `float` will check for a number maybe within a range
 # - `enum' will check against valid words using `--allow="word1 word2"`
 # - `length` check that the length is within range (like integer)
+# - `date` check that the input is parsable as date and return unix timestamp
 # - `duration` check and parse the @duration_format
 # - `path` check that value is an existing path (any type)
 # - `file` check that value is an existing file
@@ -52,14 +57,69 @@
 #
 #           - `if check integer age --min=18 -- "$1" >/dev/null; then`
 check() {
+    _deprecated "Use is ... --output" warn
+    is --output "$@"
+}
+
+# Validate and sanitize values.
+#
+# This validation is possible using the `check` and @is function.
+# - `check` should be used for sanitize because it will output the value
+# - @is should be used for checking only validity or stop processing on problem because no value is output
+#
+# Every parameter should be checked to prevent failure later in the code.
+# For such checks you run it with the `--die` option to stop processing if wrong.
+# But you can also use it in the program flow without that and use it's return status to check if it 0=ok or 1=failed.
+#
+# Because the values may start with an dash you should always put it at the end after '--' to prevent parsing it as option.
+#
+# The following checks are implemented:
+#
+# - `set` will fail if no value given
+# - `empty` will fail if not empty like ""
+# - `bool` will transform the value to `1` or `0` and allows: true/false, t/f, 1/0, yes/no, y/j/n, ja/nein, ""
+# - `true` should be a boolean true
+# - `false` should be a boolean false
+# - `integer` will check for a number maybe within a range
+# - `float` will check for a number maybe within a range
+# - `enum' will check against valid words using `--allow="word1 word2"`
+# - `length` check that the length is within range (like integer)
+# - `date` check that the input is parsable as date and return unix timestamp
+# - `duration` check and parse the @duration_format
+# - `path` check that value is an existing path (any type)
+# - `file` check that value is an existing file
+# - `directory` check that value is an existing directory
+# - `readable` check that value is a file readable by user
+# - `writable` check that value is a file writable by user
+#
+# Usage:    is <check> [options] -- <value>
+# Options:  d, die              # used in @is to stop with error instead of return state
+#           o, output=[<variable-name>]  # will write the sanitized value into variable or output it to stdout
+#           n, name=<string>    # used in @is to display variable name in `die` message
+#           m, message=<string> # additional message like usage
+#           s, sanitize         # for integer
+#           min=<num>           # for integer
+#           max=<num>           # for integer
+#           allow=<words>       # for enum (space separated)
+# Output:   <value>             # may be sanitized
+# Exit:     with message if incorrect value
+# Example:  - &is explains some regular use cases
+#           - `is integer --name=arguments --max=2 -- $# >/dev/null` # mostly only check max, if all args are checked separately
+#           - `name="$(is integer --name=age --sanitize --min=0 --output -- "$1")"`
+#           - `is integer --name=age --sanitize --min=0 --output=name -- "$1"`
+#           - `init="$(is bool --name=init --output -- "$1")"`
+#           - `if is integer age --min=18 -- "$1"; then`
+is() {
     # parameter parsing
-    eval set -- "$(option_parse $'n name +\nd die -\ns sanitize -\n- min +\n- max +\n- allow +' "$@")"
-    local name die sanitize min max allow
+    eval set -- "$(option_parse $'n name +\nd die -\ns sanitize -\n- min +\n- max +\n- allow +\no output ?\nm message +' "$@")"
+    local name die sanitize min max allow message output
     # shellcheck disable=SC2015
     # shellcheck disable=SC2059
     while true; do
         case "$1" in
         -n | --name) name="$2" && shift 2 ;;
+        -m | --message) message="; $2" && shift 2 ;;
+        -o | --output) output="${2:--}" && shift 2 ;;
         -d | --die) die=1 && shift ;;
         -s | --sanitize) sanitize=1 && shift ;;
         --min) [[ "$2" =~ ^[-+]?[0-9]+([.][0-9]+)?$ ]] && min="$2" && shift 2 || die "$(printf "$(gettext "Parameter %s needs number")" min)" ;;
@@ -80,12 +140,12 @@ check() {
     case $check in
     set)
         if [ -z "$val" ]; then
-            [ -z "$die" ] && return 1 || die "$(eval_gettext 'The "$name" has to be set with a value')"
+            [ -z "$die" ] && return 1 || die "$(eval_gettext 'The "$name" has to be set with a value')${message}"
         fi
         ;;
     empty)
         if [ -n "$val" ]; then
-            [ -z "$die" ] && return 1 || die "$(eval_gettext 'The "$name" has to be empty but has »${val}«')"
+            [ -z "$die" ] && return 1 || die "$(eval_gettext 'The "$name" has to be empty but has »${val}«')${message}"
         fi
         ;;
     bool)
@@ -94,7 +154,21 @@ check() {
         elif [[ -z "$val" || "${val,,}" =~ ^(false|f|0|no|n|nein)$ ]]; then
             res=0
         else
-            [ -z "$die" ] && return 1 || die "$(eval_gettext 'The value »${val}« for "$name" could not be read as true or false')"
+            [ -z "$die" ] && return 1 || die "$(eval_gettext 'The value »${val}« for "$name" could not be read as true or false')${message}"
+        fi
+        ;;
+    true)
+        if [[ "${val,,}" =~ ^(true|t|1|yes|y|ja|j)$ ]]; then
+            res=1
+        else
+            [ -z "$die" ] && return 1 || die "$(eval_gettext 'The value »${val}« for "$name" should be true but was »${val}«')${message}"
+        fi
+        ;;
+    false)
+        if [[ -z "$val" || "${val,,}" =~ ^(false|f|0|no|n|nein)$ ]]; then
+            res=0
+        else
+            [ -z "$die" ] && return 1 || die "$(eval_gettext 'The value »${val}« for "$name" should be false but was »${val}«')${message}"
         fi
         ;;
     integer)
@@ -102,23 +176,23 @@ check() {
             [[ "$val" =~ ^(-?[0-9]+) ]] && res="${BASH_REMATCH[1]}" || true
         fi
         if [[ ! "$res" =~ ^-?[0-9]+$ ]]; then
-            [ -z "$die" ] && return 1 || die "$(eval_gettext 'The "$name" has to be an integer but »${val}« was given')"
+            [ -z "$die" ] && return 1 || die "$(eval_gettext 'The "$name" has to be an integer but »${val}« was given')${message}"
         fi
         if [[ -n "$min" ]] && [[ "$min" == "$max" ]]; then
             if ((res != min)); then
-                [ -z "$die" ] && return 1 || die "$(eval_gettext 'The "$name" has to be exactly $min but »${val}« was given')"
+                [ -z "$die" ] && return 1 || die "$(eval_gettext 'The "$name" has to be exactly $min but »${val}« was given')${message}"
             fi
         elif [[ -n "$min" && -n "$max" ]]; then
             if ((res < min || res > max)); then
-                [ -z "$die" ] && return 1 || die "$(eval_gettext 'The "$name" has to be between $min and $max but »${val}« was given')"
+                [ -z "$die" ] && return 1 || die "$(eval_gettext 'The "$name" has to be between $min and $max but »${val}« was given')${message}"
             fi
         elif [[ -n "$min" ]]; then
             if ((res < min)); then
-                [ -z "$die" ] && return 1 || die "$(eval_gettext 'The "$name" has to at least $min but »${val}« was given')"
+                [ -z "$die" ] && return 1 || die "$(eval_gettext 'The "$name" has to at least $min but »${val}« was given')${message}"
             fi
         elif [[ -n "$max" ]]; then
             if ((res > max)); then
-                [ -z "$die" ] && return 1 || die "$(eval_gettext 'The "$name" has to not be more than $max but »${val}« was given')"
+                [ -z "$die" ] && return 1 || die "$(eval_gettext 'The "$name" has to not be more than $max but »${val}« was given')${message}"
             fi
         fi
         ;;
@@ -127,202 +201,117 @@ check() {
             [[ "$val" =~ ^(-?[0-9]+([.][0-9]+)?) ]] && res="${BASH_REMATCH[1]}" || true
         fi
         if [[ ! "$res" =~ ^-?[0-9]+([.][0-9]+)?$ ]]; then
-            [ -z "$die" ] && return 1 || die "$(eval_gettext 'The "$name" has to be a float but »${val}« was given')"
+            [ -z "$die" ] && return 1 || die "$(eval_gettext 'The "$name" has to be a float but »${val}« was given')${message}"
         fi
         if [[ -n "$min" ]] && [[ "$min" == "$max" ]]; then
             if ((res != min)); then
-                [ -z "$die" ] && return 1 || die "$(eval_gettext 'The "$name" has to be exactly $min but »${val}« was given')"
+                [ -z "$die" ] && return 1 || die "$(eval_gettext 'The "$name" has to be exactly $min but »${val}« was given')${message}"
             fi
         elif [[ -n "$min" && -n "$max" ]]; then
             if ((res < min || res > max)); then
-                [ -z "$die" ] && return 1 || die "$(eval_gettext 'The "$name" has to be between $min and $max but »${val}« was given')"
+                [ -z "$die" ] && return 1 || die "$(eval_gettext 'The "$name" has to be between $min and $max but »${val}« was given')${message}"
             fi
         elif [[ -n "$min" ]]; then
             if ((res < min)); then
-                [ -z "$die" ] && return 1 || die "$(eval_gettext 'The "$name" has to at least $min but »${val}« was given')"
+                [ -z "$die" ] && return 1 || die "$(eval_gettext 'The "$name" has to at least $min but »${val}« was given')${message}"
             fi
         elif [[ -n "$max" ]]; then
             if ((res > max)); then
-                [ -z "$die" ] && return 1 || die "$(eval_gettext 'The "$name" has to not be more than $max but »${val}« was given')"
+                [ -z "$die" ] && return 1 || die "$(eval_gettext 'The "$name" has to not be more than $max but »${val}« was given')${message}"
             fi
         fi
         ;;
     length)
         val=${#val}
         if [[ -n "$min" ]] && [[ "$min" == "$max" ]]; then
-            if ((res != min)); then
-                [ -z "$die" ] && return 1 || die "$(eval_gettext 'The length of "$name" has to be exactly $min but »${res}« is $val characters long')"
+            if ((val != min)); then
+                [ -z "$die" ] && return 1 || die "$(eval_gettext 'The length of "$name" has to be exactly $min but »${res}« is $val characters long')${message}"
             fi
         elif [[ -n "$min" && -n "$max" ]]; then
             if ((val < min || val > max)); then
-                [ -z "$die" ] && return 1 || die "$(eval_gettext 'The length of "$name" has to be between $min and $max but »${res}« is $val characters long')"
+                [ -z "$die" ] && return 1 || die "$(eval_gettext 'The length of "$name" has to be between $min and $max but »${res}« is $val characters long')${message}"
             fi
         elif [[ -n "$min" ]]; then
             if ((val < min)); then
-                [ -z "$die" ] && return 1 || die "$(eval_gettext 'The length of "$name" has to be at least $min but »${res}« is $val characters long')"
+                [ -z "$die" ] && return 1 || die "$(eval_gettext 'The length of "$name" has to be at least $min but »${res}« is $val characters long')${message}"
             fi
         elif [[ -n "$max" ]]; then
             if ((val > max)); then
-                [ -z "$die" ] && return 1 || die "$(eval_gettext 'The length of "$name" has to be not more than $max but »${res}« is $val characters long')"
+                [ -z "$die" ] && return 1 || die "$(eval_gettext 'The length of "$name" has to be not more than $max but »${res}« is $val characters long')${message}"
             fi
         fi
         ;;
     enum)
-        [ -n "$allow" ] || die "$(gettext "A list with --allow=<words> is needed for enum check")"
+        [ -n "$allow" ] || die "$(gettext "A list with --allow=<words> is needed for enum check")${message}"
         if [[ " $allow " != *" $val "* ]]; then
-            [ -z "$die" ] && return 1 || die "$(eval_gettext '"$name" is set to "${val}" but has to be one of: $allow')"
+            [ -z "$die" ] && return 1 || die "$(eval_gettext '"$name" is set to "${val}" but has to be one of: $allow')${message}"
+        fi
+        ;;
+    date)
+        if ! res=$(date_format unix "$val"); then
+            [ -z "$die" ] && return 1 || die "$(eval_gettext 'The "$name" has to be a parsable date format but »${val}« was given')${message}"
         fi
         ;;
     duration)
         [[ "$res" =~ ^-?[0-9] ]] && res="$(duration_format seconds "$val")" || true
         if [[ ! "$res" =~ ^-?[0-9]+$ ]]; then
-            [ -z "$die" ] && return 1 || die "$(eval_gettext 'The "$name" has to be an integer or human duration but »${val}« was given')"
+            [ -z "$die" ] && return 1 || die "$(eval_gettext 'The "$name" has to be an integer or human duration but »${val}« was given')${message}"
         fi
         ;;
     path)
         if [ ! -e "$val" ]; then
-            [ -z "$die" ] && return 1 || die "$(eval_gettext 'The "$name" ${val} has to be an existing path')"
+            [ -z "$die" ] && return 1 || die "$(eval_gettext 'The "$name" ${val} has to be an existing path')${message}"
         fi
         ;;
     file)
         if [ ! -f "$val" ]; then
-            [ -z "$die" ] && return 1 || die "$(eval_gettext 'The "$name" ${val} has to be an existing file')"
+            [ -z "$die" ] && return 1 || die "$(eval_gettext 'The "$name" ${val} has to be an existing file')${message}"
         fi
         ;;
     directory)
         if [ ! -d "$val" ]; then
-            [ -z "$die" ] && return 1 || die "$(eval_gettext 'The "$name" ${val} has to be an existing directory')"
+            [ -z "$die" ] && return 1 || die "$(eval_gettext 'The "$name" ${val} has to be an existing directory')${message}"
         fi
         ;;
     readable)
         if [ ! -r "$val" ]; then
-            [ -z "$die" ] && return 1 || die "$(eval_gettext 'The "$name" ${val} has to be a file readable for user')"
+            [ -z "$die" ] && return 1 || die "$(eval_gettext 'The "$name" ${val} has to be a file readable for user')${message}"
         fi
         ;;
     writable)
         if [ ! -w "$val" ]; then
-            [ -z "$die" ] && return 1 || die "$(eval_gettext 'The "$name" ${val} has to be a file writable for user')"
+            [ -z "$die" ] && return 1 || die "$(eval_gettext 'The "$name" ${val} has to be a file writable for user')${message}"
         fi
         ;;
     *) die "$(eval_gettext 'A check named ${check} is not defined')" ;;
     esac
-    echo "$res"
-}
-
-# Validate and sanitize values.
-# This validation is possible using the @check and `is` function.
-# - @check should be used for sanitize because it will output the value
-# - `is` should be used for checking only validity or stop processing on problem because no value is output
-#
-# Every parameter should be checked to prevent failure later in the code.
-# For such checks you run it with the `--die` option to stop processing if wrong.
-# But you can also use it in the program flow without that and use it's return status to check if it 0=ok or 1=failed.
-#
-# Because the values may start with an dash you should always put it at the end after '--' to prevent parsing it as option.
-#
-# The following checks are implemented:
-#
-# - `set` will fail if no value given
-# - `empty` will fail if not empty like ""
-# - `bool` will transform the value to `1` or `0` and allows: true/false, t/f, 1/0, yes/no, y/j/n, ja/nein, ""
-# - `integer` will check for a number maybe within a range
-# - `float` will check for a number maybe within a range
-# - `enum' will check against valid words using `--allow="word1 word2"`
-# - `length` check that the length is within range (like integer)
-# - `duration` check and parse the @duration_format
-# - `path` check that value is an existing path (any type)
-# - `file` check that value is an existing file
-# - `directory` check that value is an existing directory
-# - `readable` check that value is a file readable by user
-# - `writable` check that value is a file writable by user
-#
-# Usage:    is <check> [options] -- <value>
-# Options:  d, die              # stop with error instead of return state
-#           n, name=<string>    # name the variable for the `die` message
-#           min=<num>           # for integer
-#           max=<num>           # for integer
-#           allow=<words>       # for enum (space separated)
-# Exit:     with message if incorrect value
-# Example:  Check arguments:
-#
-#           - `is integer --name=arguments --max=2 $#` # mostly only check max, if all args are checked separately
-#
-#           Use in code:
-#
-#           - `if is integer age --min=18 -- "$1"; then ...`
-#           - `if ! is integer "$DEBUG"; then ...`
-is() {
-    check "$@" >/dev/null
+    if [ -n "$output" ]; then
+        [ "$output" = "-" ] && printf '%s' "$res" || printf -v "$output" '%s' "$res"
+    fi
 }
 
 # Deprecated: Check that a specific number of parameters are given
 # Use: is integer $# --min=1 --max=2
-# Usage:    num_parameters "$@" --min 1 --die "Zu viele Parameter: $USAGE"
-# Options:  min=<int>     # at least <int> elements are needed
-#           max=<int>     # not more than <int> elements are allowed
-#           die=<string>  # exit with this message if not
 num_parameters() {
-    _deprecated "Use: is integer $# --min=<val> --max=<val>" warn
-    # parameter parsing
-    eval set -- "$(option_parse $'- min +\n- max +\n- die +' "$@")"
-    local min max die
-    while true; do
-        case "$1" in
-        --min)
-            min=$2
-            shift 2
-            ;;
-        --max)
-            max=$2
-            shift 2
-            ;;
-        --die)
-            die=$2
-            shift 2
-            ;;
-        --)
-            shift
-            break
-            ;;
-        *) die "$(gettext "Unrecognized option"): $1" ;;
-        esac
-    done
-    # processing
-    _die() {
-        read -r line func file <<<"$(caller 1)"
-        echo "Check ${FUNCNAME[1]}: $1 (${func} in ${file}:${line})" >&2
-        [ -z "$die" ] || die "$die"
-        return 1
-    }
-    [ -z "$min" ] || (($# >= min)) || _die "[$*] $# < $min (min)" || return 1
-    [ -z "$max" ] || (($# <= max)) || _die "[$*] $# > $max (max)" || return 1
+    _deprecated "Use: is integer $# --min=<val> --max=<val>"
 }
 
 # Deprecated: Test if given value is an empty string or undefined
 # Use: is empty <value>
-# Usage:    is_empty <var>
-# Status:   0 => true
 is_empty() {
     _deprecated "Use: is empty -- <value>"
-    is empty -- "$1"
 }
 
 # Deprecated: Test if given value is an integer
 # Use: is integer <value>
-# Usage:    is_integer <value>
-# Status:   0 => is integer
 is_integer() {
-    _deprecated "Use: is integer <value>" warn
-    is integer -- "$1"
+    _deprecated "Use: is integer <value>"
 }
 
 # Deprecated: Test if given value is an float
 # Use: is integer <value>
-# Usage:    is_float <value>
-# Status:   0 => is float
 is_float() {
-    _deprecated "Use: is float -- <value>" warn
-    is float -- "$1"
+    _deprecated "Use: is float -- <value>"
 }
 
 ######################################################################################
@@ -330,6 +319,7 @@ is_float() {
 ######################################################################################
 
 # Trim leading whitespace or given character
+#
 # Usage:    trim_start <value> [<characters>]
 # Output:   <string>
 # See:      https://stackoverflow.com/a/3352015
@@ -339,10 +329,11 @@ trim_start() {
     local char="${2:-[:space:]}"
     # processing
     # shellcheck disable=SC2295
-    echo "${str#"${str%%[!$char]*}"}"
+    printf '%s' "${str#"${str%%[!$char]*}"}"
 }
 
 # Trim trailing whitespace or given character
+#
 # Usage:    trim_end <value> [<characters>]
 # Output:   <string>
 # See:      https://stackoverflow.com/a/3352015
@@ -352,10 +343,11 @@ trim_end() {
     local char="${2:-[:space:]}"
     # processing
     # shellcheck disable=SC2295
-    echo "${str%"${str##*[!$char]}"}"
+    printf '%s' "${str%"${str##*[!$char]}"}"
 }
 
 # Trim leading and trailing whitespace or given character
+#
 # Usage:    trim <value> [<characters>]
 # Output:   <string>
 # See:      https://stackoverflow.com/a/3352015
@@ -366,7 +358,9 @@ trim() {
 }
 
 # Convert string into only alphanumeric values
+#
 # This is needed to use it as a key in associative arrays. All other characters are converted into underscore.
+#
 # Usage:    to_alphanum <string>
 #           <string> | to_alphanum
 # Output:   <alnum>
@@ -375,10 +369,11 @@ to_alphanum() {
     local text
     text="$(input "$@")"
     # processing
-    echo "${text//[^a-zA-Z0-9_]/_}"
+    printf '%s' "${text//[^a-zA-Z0-9_]/_}"
 }
 
 # Return the value or if it is a variable name which is not empty return it's value
+#
 # Usage:    value_if_variable <name>
 # Output:   <string>
 value_if_variable() {
@@ -387,8 +382,8 @@ value_if_variable() {
     # processing
     if [[ "$_name" =~ ^[a-zA-Z_][a-zA-Z0-9_]*$ ]] &&
         [ -n "${!_name-}" ]; then
-        echo "${!_name}"
+        printf '%s' "${!_name}"
     else
-        echo "$_name"
+        printf '%s' "$_name"
     fi
 }

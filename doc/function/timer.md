@@ -2,8 +2,6 @@
 
 ## Start/stop the timer
 
-After `timer stop` it will return the elapsed time.
-
 ### Usage
 
 ```bash
@@ -14,4 +12,10 @@ timer stop
 ### Output (stdout)
 
 `<seconds>`.`<milliseconds>` # after stop
+
+
+### Description
+
+
+After `timer stop` it will return the elapsed time.
 

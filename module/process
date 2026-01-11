@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# shellcheck source=base
+source /dev/null
 
 # Module for process control
 
@@ -7,7 +9,9 @@
 ######################################################################################
 
 # Check if sudo is needed for command
-# This will @die if
+#
+# This will @die if the user is not allowed to use `sudo`.
+#
 # Usage:    sudo_allow <command-line>
 # Return:   0 if allowed
 #           @die if not allowed
@@ -20,6 +24,7 @@ sudo_allow() {
 }
 
 # Sudo overwrite to only use sudo if needed
+#
 # Usage:    sudo <command-line>
 sudo() {
     if ((EUID != 0)) && command -v sudo >/dev/null; then
@@ -34,6 +39,7 @@ sudo() {
 ######################################################################################
 
 # Execute command in N times
+#
 # Usage:    repeat <N> <command> [<params>]...
 repeat() {
     is integer --name=num --min=0 --die -- "$1"
@@ -49,10 +55,12 @@ repeat() {
 }
 
 # Retry a command multiple times until it succeeds
+#
 # Using escalating delay between attempts. Delay is 2 * n + random up to 30s, then 30s + random after that.
 # For large numbers of retries the max delay is effectively the retry count in minutes.
+#
 # Usage:    retry <N> <command> [<params>]...
-function retry {
+retry() {
     is integer --name=num --min=0 --die -- "$1"
     is set --name=command --die -- "$2"
     local retries=$1
@@ -74,8 +82,6 @@ function retry {
     return 0
 }
 
-countdown() { _deprecated "use pause <text> --timeout=<duration> --abort"; }
-
 ######################################################################################
 # Locking
 ######################################################################################
@@ -91,9 +97,11 @@ _lock_remove() {
 }
 
 # Set a lock or wait till it can be set
+#
 # In any part of your script you can surround a block with @lock and @unlock statements. The
 # process will wait on the lock statement till no other process with the same lock is running
 # before going on.
+#
 # Usage:    lock
 # Files:    /tmp/<prog>_lockfile        # hard link to active process
 #           /tmp/<prog>_lockfile.<pid>  # active or waiting process
@@ -103,7 +111,8 @@ lock() {
     local lockfile logged pid
     lockfile="$(mktemp 'lockfile')"
     # make a file with our PID
-    echo $$ >"$lockfile.$$" 2>/dev/null || die "$(gettext "Failed to create PID lockfile"): $lockfile.$$"
+    # shellcheck disable=SC2059
+    printf $$ >"$lockfile.$$" 2>/dev/null || die "$(gettext "Failed to create PID lockfile"): $lockfile.$$"
     # remove old lock if no longer running
     _lock_remove
     # try it, till it works
@@ -111,22 +120,25 @@ lock() {
     while ! ln "$lockfile.$$" "$lockfile" 2>/dev/null; do
         if ((logged == 0)); then # write message once
             pid="$(cat "$lockfile")"
-            echo "$(eval_gettext "Waiting for unlock in \$lockfile by PID \$pid")..." >&1
+            printf '%s\n' "$(eval_gettext "Waiting for unlock in \$lockfile by PID \$pid")..." >&1
             logged=1
         fi
         # if the symlink failed, wait for the current lock holder to exit
         sleep "$LOCK_SLEEP"
         # make a file with our PID, if no longer existent
-        echo $$ >"$lockfile.$$" 2>/dev/null
+        # shellcheck disable=SC2059
+        printf $$ >"$lockfile.$$" 2>/dev/null
         # check again for zombies
         _lock_remove
     done
     # if the locking process exits without unlocking, delete our lock
-    trap_add unlock EXIT
+    trap add unlock EXIT
 }
 
 # Set the lock or exit with optional error message
+#
 # While another program is running with this lock active it will @die.
+#
 # Usage:    lock_exit
 # Files:    /tmp/<prog>-lockfile        # hard link to active process
 #           /tmp/<prog>-lockfile.<pid>  # active or waiting process
@@ -135,7 +147,8 @@ lock_exit() {
     local lockfile logged pid
     lockfile="$(mktemp 'lockfile')"
     # make a file with our PID
-    echo $$ >"$lockfile.$$" 2>/dev/null || die "$(gettext "Failed to create PID lockfile"): $lockfile.$$"
+    # shellcheck disable=SC2059
+    printf $$ >"$lockfile.$$" 2>/dev/null || die "$(gettext "Failed to create PID lockfile"): $lockfile.$$"
     # move old lock if no longer running
     _lock_remove
     # try to symlink it
@@ -149,6 +162,7 @@ lock_exit() {
 }
 
 # Remove the lock
+#
 # Usage:    unlock
 # shellcheck disable=SC2120
 unlock() {
@@ -170,6 +184,7 @@ unlock() {
 ######################################################################################
 
 # Store variables into shared memory/file
+#
 # The <ident> specifies also who will use the same file.
 # To get the same file in all your invocations of this script only use a fixed string here.
 # To have a different file for each script invocation include `$$` or '${$}'.
@@ -181,6 +196,7 @@ unlock() {
 # - `restore` all or some variables
 # - `clean` remove the store
 # - `change` run a command which will change the variables in the store
+#
 # Usage:    variables store [<ident>] [<variable>]...   # store complete or only listed variables (ident can be empty string)
 #           variables restore [<ident>] [<variable>]... # restore all or defined variables
 #           variables clean [<ident>]                   # remove the store
@@ -212,7 +228,7 @@ variables() {
         *) shift ;; # ignore
         esac
     done
-    command="$(check enum --name=command --allow="store restore clean change" --die -- "$1")"
+    is enum --name=command --allow="store restore clean change" --die --output=command -- "$1"
     shift
     local ident=$1
     shift || true
@@ -253,172 +269,26 @@ variables() {
 
 # Deprecated: Store environment into shared memory/file
 # Use: variables store...
-# Use `$$` or '${$}' as the program PID which will be also the same in Subshell or `${BASHPID}` which will differ.
-# Usage:    store [<ident>]                 # store complete environment
-#           store [<ident>] [<variable>]... # store only listed variables (ident can be empty string)
-# Options:  d, disk                          # store on disk in temporary folder
-#           p, path <base-dir>               # store on disk in given folder
-# Files:    `/dev/shm/<prog>[-<ident>].env`     # stored environment
-# Example:  ```bash
-#           env_restore
-#           ...<code>
-#           store # save changes
-#           ....
-#           store # save changes
-#           ....
-#           env_clean # everything done remove progress
-#           ```
 env_store() {
-    _deprecated "Use: variables store..." warn
-    debug "env_store $*"
-    # parameter parsing
-    eval set -- "$(option_parse $'d disk -\np path +' "$@")"
-    local opt="-m"
-    while true; do
-        case "$1" in
-        -d | --disk)
-            opt=""
-            shift
-            ;;
-        -p | --path)
-            opt="$1 $2"
-            shift 2
-            ;;
-        --)
-            shift
-            break
-            ;;
-        *) shift ;; # ignore
-        esac
-    done
-    # processing
-    local ident=$1
-    shift || true
-    # shellcheck disable=SC2086
-    declare -p "$@" | sed 's/^declare\b/declare -g/' >"$(mktemp $opt --extension=env "$ident")"
+    _deprecated "Use: variables store..."
 }
 
 # Deprecated: Restore environment from shared memory/file
 # Use: variables restore...
-# If some variable names are given only those will be restored.
-# Usage:    env_restore [<ident>] [<variable>]...
-# Options:  d, disk                          # store on disk in temporary folder
-#           p, path <base-dir>               # store on disk in given folder
-# Files:    `/dev/shm/<prog>[-<ident>].env`     # stored environment
-#           `/dev/shm/<prog>[_<ident>]_<sub-pid>.env-sub` # very short temporary file to filter input
 env_restore() {
-    _deprecated "Use: variables restore..." warn
-    debug "env_restore $*"
-    # parameter parsing
-    eval set -- "$(option_parse $'d disk -\np path +' "$@")"
-    local opt="-m"
-    while true; do
-        case "$1" in
-        -d | --disk)
-            opt=""
-            shift
-            ;;
-        -p | --path)
-            opt="$1 $2"
-            shift 2
-            ;;
-        --)
-            shift
-            break
-            ;;
-        *) shift ;; # ignore
-        esac
-    done
-    # processing
-    local ident="${1-}" shm_env
-    shift || true
-    # shellcheck disable=SC2086
-    shm_env="$(mktemp $opt -e env "$ident")"
-    [ -s "$shm_env" ] || return 0
-    if [[ "$#" -gt 0 ]]; then
-        temp="$(mktemp -me env-sub "${ident}_${BASHPID}")"
-        grep -E "$(tr ' ' '|' <<<"$*")" "$shm_env" >"$temp" || true
-        # shellcheck disable=SC1090
-        source "$temp" || true
-        rm -r "$temp" || true
-    else
-        # shellcheck disable=SC1090
-        source "$shm_env" 2>/dev/null || true
-    fi
+    _deprecated "Use: variables restore..."
 }
 
 # Deprecated: Remove stored environment from shared memory/file
-# Usage:    env_clean [<ident>]
-# Options:  d, disk                          # store on disk in temporary folder
-#           p, path <base-dir>               # store on disk in given folder
 # Use: variables clean...
 env_clean() {
-    _deprecated "Use: variables clean..." warn
-    is integer --name=arguments --max=1 --die -- $#
-    debug "env_clean $*"
-    # parameter parsing
-    eval set -- "$(option_parse $'d disk -\np path +' "$@")"
-    local opt="-m"
-    while true; do
-        case "$1" in
-        -d | --disk)
-            opt=""
-            shift
-            ;;
-        -p | --path)
-            opt="$1 $2"
-            shift 2
-            ;;
-        --)
-            shift
-            break
-            ;;
-        *) shift ;; # ignore
-        esac
-    done
-    # processing
-    # shellcheck disable=SC2086
-    rm -f "$(mktemp $opt -e env "$1")"
+    _deprecated "Use: variables clean..."
 }
 
 # Deprecated: Change environment in shared memory/file
 # Use: variables change...
-# Usage:    env_change <ident> <command>                # store complete environment
-#           env_change <ident> <command> [<variable>]...# store only listed variables (ident can be empty string)
 env_change() {
-    _deprecated "Use: variables change..." warn
-    # parameter parsing
-    eval set -- "$(option_parse $'d disk -\np path +' "$@")"
-    local opt
-    while true; do
-        case "$1" in
-        -d | --disk)
-            opt="$opt $1"
-            shift
-            ;;
-        -p | --path)
-            opt="$opt $1 $2"
-            shift 2
-            ;;
-        --)
-            shift
-            break
-            ;;
-        *) shift ;; # ignore
-        esac
-    done
-    is set --name=ident --die -- "$1"
-    is set --name=command --die -- "$2"
-    # processing
-    local ident=$1
-    shift || true
-    local command=$1
-    shift || true
-    # shellcheck disable=SC2086
-    env_restore $opt "$ident"
-    eval "$command"
-    # shellcheck disable=SC2086
-    env_store $opt "$ident" "$@"
+    _deprecated "Use: variables change..."
 }
 
 ######################################################################################
@@ -429,133 +299,179 @@ declare -A _async_running
 
 # Set the variables which should be stored with step control
 STEPS_VARIABLES=
+_STEPS_NAME=
 
-# Initialize step control
-# Usage:    steps_init
-# Example:  steps_init
-#           # sync | async | queue calls
-#           steps_done
-steps_init() {
-    is integer --name=arguments --max=0 --die -- $#
-    declare -g -A _STEPS
-    variables restore steps
-    declare -p _STEPS
-    variables store steps _STEPS "$STEPS_VARIABLES" # initial store
-    echo "$(gettext "Work steps are logged so that you can resume work mid-process")..." >&2
+# Step control allows jobs to resume on another run.
+#
+# After starting step control this will be used in @sync, @async and @queue.
+#
+# Usage:    steps init [<name>]     # to start step control
+#           steps end               # to end step control
+steps() {
+    is enum --allow="init end" --die -- "$1"
+    case $1 in
+    init)
+        is integer --name=arguments --max=2 --die -- $#
+        _STEPS_NAME=${2:-all}
+        debug "start step control"
+        declare -g -A _STEPS
+        variables restore "steps_${_STEPS_NAME}"
+        # shellcheck disable=SC2086
+        variables store "steps_${_STEPS_NAME}" _STEPS $STEPS_VARIABLES # initial store
+        printf '%s\n' "$(gettext "Work steps are logged so that you can resume work mid-process")..." >&2
+        ;;
+    end)
+        is integer --name=arguments --max=1 --die -- $#
+        debug "end step control"
+        _steps_done
+        ;;
+    esac
 }
 
 # Check if step already finished successful
+#
 # Usage:    steps_check <name>
 # Exit:     0 if done else not done or with failure
-steps_check() {
-    is integer --name=arguments --max=1 --die -- $#
-    is set --name=name --die -- "$1"
+_steps_check() {
     local name="$1"
+    is set --name=name --die -- "$1"
+    is integer --name=arguments --max=2 --die -- $#
     # processing
-    declare -p _STEPS 2>/dev/null | grep -q 'declare -A' || return 1 # return not found if no step control
-    if [ -n "${_STEPS["$name"]}" ]; then
-        # shellcheck disable=SC2005
-        echo "$(eval_gettext "Job \$name already done in this run, skipping")" >&2
-        return 0
-    else
-        return 1
-    fi
+    is set -- "$_STEPS_NAME" || return 1 # return not found if no step control
+    [ -n "${_STEPS["$name"]}" ] && return 0 || return 1
 }
 
 # Set step as successfully done
+#
 # Usage:    steps_done <name>   # finished one step
 #           steps_done          # completely finished -> cleanup
-steps_done() {
-    is integer --name=arguments --max=1 --die -- $#
-    is set --name=name --die -- "$1"
-    local name="$1"
+_steps_done() {
+    is integer --name=arguments --max=2 --die -- $#
     # processing
-    declare -p _STEPS 2>/dev/null | grep -q 'declare -A' || return # do nothing if no step control
+    is set -- "$_STEPS_NAME" || return 0 # do nothing if no step control
     if [ -n "$1" ]; then
-        _STEPS["$name"]=1
-        # shellcheck disable=SC2155
-        local date="$(date_format sql)"
-        # shellcheck disable=SC2005
-        echo "$(eval_gettext "Finished: Step \$name at \$date")" >&2
-        variables store steps _STEPS "$STEPS_VARIABLES"
+        _STEPS["$1"]=1
+        # shellcheck disable=SC2086
+        variables store "steps_${_STEPS_NAME}" _STEPS $STEPS_VARIABLES
     else
-        variables clean steps
+        variables clean "steps_${_STEPS_NAME}"
+        _STEPS_NAME=""
     fi
 }
 
 # Run the given command with optional step control
-# This will use the command itself as name. If you run the same command multiple times use
-# async_name directly.
-# Usage:    sync <command> [<params>...]
+#
+# The command and arguments given will be called like directly run. But if @steps is started it will check if already done.
+# Further in `--verbose` mode a message for start and end will be printed on STDERR with the command or the given `--name`.
+#
+# Usage:    sync [<options>] <command> [<params>...]
+# Options:  v, verbose           # display notice/info message
+#           n, name=<string>     # define name or use command with args
+# Stderr:   - notice message for start (in verbose mode)
+#           - info message for finish (in verbose mode)
 sync() {
-    is set --name=command --die -- "$1"
+    # parameter parsing
+    eval set -- "$(option_parse $'+n name +\nv verbose -' "$@")"
+    local name verbose message
+    while true; do
+        case "$1" in
+        -n | --name) name="$2" && shift 2 ;;
+        --verbose) verbose=1 && shift ;;
+        --) shift && break ;;
+        *) die "$(gettext "Unrecognized option"): $1" ;;
+        esac
+    done
+    is integer --name=arguments --min=1 --die -- $#
+    [ -n "$name" ] || name="$*"
     # processing
-    sync_name "$1" "$@"
-}
-
-# Alternative to sync in which this call is given a name to refer
-# Usage:     sync <name> <cmd> [<params>...]
-sync_name() {
-    is set --name=name --die -- "$1"
-    is set --name=command --die -- "$2"
-    local name=$1
-    shift
-    # processing
-    steps_check "$name" && return || true
-    local date
-    # shellcheck disable=SC2034
-    date="$(date_format sql)"
-    # shellcheck disable=SC2005
-    declare -p _STEPS 2>/dev/null | grep -q 'declare -A' && echo "$(eval_gettext "Started: step \$name at \$date")" >&2 || true
+    if _steps_check "$name"; then
+        message="$(eval_gettext 'Skip: $name (already done)')"
+        is set -- "$verbose" && warn "$message" >&2 || debug "$message"
+        return
+    fi
+    message="$(eval_gettext 'Start: $name')"
+    is set -- "$verbose" && notice "$message" >&2 || debug "$message"
     "$@"
-    steps_done "$name"
+    message="$(eval_gettext 'Finished: $name')"
+    is set -- "$verbose" && info "$message" >&2 || debug "$message"
+    _steps_done "$name" "$verbose"
 }
 
-# Run the given command asynchronous ang go on in the calling routine (short form of async_name)
-# This will use the command itself as name. If you run the same command multiple times use
-# async_name directly.
-# Usage:    async <command> [<params>...]
+# Run the given command asynchronous ang go on in the calling routine
+#
+# While this command runs you may start more @async commands and use @async_wait to wait for a specific one to end or all to end.
+#
+# The command and arguments given will be called like directly run. But if @steps is started it will check if already done.
+# Further in `--verbose` mode a message for start and end will be printed on STDERR with the command or the given `--name`.
+#
+# Usage:    async [<options>] <command> [<params>...]
+#           async [<options>] wait [<command> [<params>...]]
+# Options:  v, verbose           # display notice/info message
+#           n, name=<string>     # define name or use command with args
+# Stderr:   - notice message for start (in verbose mode)
+#           - info message for finish (in verbose mode)
 # Example:  ```bash
 #           async task1
 #           async task2
-#           async_wait task1
+#           async wait task1
 #           async task3
 #           wait # for all to end
 #           ```
 async() {
-    is set --name=command --die -- "$1"
-    # processing
-    async_name "$1" "$@"
-}
-
-# Alternative to async in which this call is given a name to refer in async_wait
-# Usage:    async <name> <cmd> [<params>...]
-async_name() {
-    is set --name=name --die -- "$1"
-    is set --name=command --die -- "$2"
-    local name=$1
-    shift
-    # processing
-    ! steps_check "$name" || return
-    declare -p _STEPS 2>/dev/null | grep -q 'declare -A' && echo "Started: step $name at $(date_format sql)" >&2 || true
-    "$@" &
-    variables change queue "_async_running[\"$name\"]=$!" _queue _async_running
-}
-
-# Check if the command is done or wait here till it is so
-# Usage:    async_wait          # to wait for all to be done
-#           async_wait <name>   # to wait for specific command to finish
-async_wait() {
-    [ -z "${_async_running["$1"]}" ] && return 0 || true
-    wait "${_async_running["$1"]}"
-    local code=$?
-    if ((code == 0)); then
-        steps_done "$1"
-        variables change queue "unset async_running[\"$1\"]" _queue _async_running
-    else
-        declare -p _STEPS 2>/dev/null | grep -q 'declare -A' && echo echo "Failed: Step $1 at $(date_format sql)" >&2 || true
+    # parameter parsing
+    eval set -- "$(option_parse $'+n name +\nv verbose -' "$@")"
+    local name verbose message
+    while true; do
+        case "$1" in
+        -n | --name) name="$2" && shift 2 ;;
+        --verbose) verbose=1 && shift ;;
+        --) shift && break ;;
+        *) die "$(gettext "Unrecognized option"): $1" ;;
+        esac
+    done
+    is integer --name=arguments --min=1 --die -- $#
+    [ -n "$name" ] || name="$*"
+    # detect finished ones and wait for it
+    _async_done
+    if [ "$1" = "wait" ]; then
+        local pid
+        if [ "$name" = "wait" ]; then
+            for name in "${!_async_running[@]}"; do
+                hash _async_running has "$name" || continue
+                IFS=$'\t' read pid _ <<<"$(hash _async_running get "$name")"
+                wait "$pid" || true
+                _async_done
+            done
+        else
+            hash _async_running has "$name" || return 0
+            IFS=$'\t' read pid _ <<<"$(hash _async_running get "$name")"
+            wait "$pid" || true
+            _async_done
+        fi
+        return 0
     fi
-    return "$code"
+    # processing
+    if _steps_check "$name"; then
+        message="$(eval_gettext 'Skip: $name (already done)')"
+        is set -- "$verbose" && warn "$message" >&2 || debug "$message"
+        return
+    fi
+    message="$(eval_gettext 'Start: $name')"
+    is set -- "$verbose" && notice "$message" >&2 || debug "$message"
+    "$@" &
+    hash _async_running set "$name" $!$'\t'"$verbose"
+}
+
+_async_done() {
+    local check pid verbose
+    for check in "${!_async_running[@]}"; do
+        IFS=$'\t' read -r pid verbose <<<"${_async_running[$check]}"
+        if ! kill -0 "$pid" 2>/dev/null; then
+            message="$(eval_gettext 'Finished: $check')"
+            is set -- "$verbose" && info "$message" >&2 || debug "$message"
+            hash _async_running unset "$check"
+        fi
+    done
 }
 
 ######################################################################################
@@ -566,32 +482,61 @@ _queue_jobs=()
 declare -A _queue_running
 
 # Run bash commands parallel with limits from a queue.
+#
 # The queue first collects all jobs and then you execute them all in parallel. Therefore you can give a max number of parallel calls and a max percentage load limit for then to start the next job.
 # You may also set the limits using environment $QUEUE_MAX_NUM and $QUEUE_MAX_LOAD.
 # If the server is over the configured load limit one job will always run, but parallel execution will only start if possible.
-# Usage:    queue add <job> [<args>...]             # add job to queue
-#           queue run [<parallel>] [<load-percent>] # run the queue with specified limits
+#
+# Usage:    queue [<options>] add <job> [<args>...]             # add job to queue
+#           queue [--progress] run [<parallel>] [<load-percent>] # run the queue with specified limits
+# Options:  v, verbose           # display notice/info message
+#           n, name=<string>     # define name or use command with args
+#           p, progress          # show progress
+# Stderr:   - notice message for start (in verbose mode)
+#           - info message for finish (in verbose mode)
+#           - info with progress of queue
 queue() {
+    eval set -- "$(option_parse $'+n name +\nv verbose -' "$@")"
+    local name verbose=0 message progress
+    while true; do
+        case "$1" in
+        -n | --name) name="$2" && shift 2 ;;
+        --verbose) verbose=1 && shift ;;
+        --progress) progress=1 && shift ;;
+        --) shift && break ;;
+        *) die "$(gettext "Unrecognized option"): $1" ;;
+        esac
+    done
     is enum --name=command --allow="add run" --die -- "$1" && local command="$1" && shift
+    [ -n "$name" ] || name="$*"
     # processing
     case $command in
     add)
         is set --name=job --die -- "$1"
-        # add job
-        _queue_job+=("$*")
-        debug "add ${#_queue_job[@]}: $*"
+        if _steps_check "$name"; then
+            message="$(eval_gettext 'Skip: $name (already done)')"
+            is set -- "$verbose" && warn "$message" >&2 || debug "$message"
+            return
+        fi
+        message="$(eval_gettext 'Queue: $name')"
+        is true -- "$verbose" && info "$message" >&2 || debug "$message"
+        _queue_jobs+=("$(printf '%s\t%s\t%s' "$name" "$verbose" "$*")")
         ;;
     run)
-        is empty -- "$1" || is integer --name=parallel --min 1 --die
-        is empty -- "$2" || is integer --name=load-percent --min 1 --die
+        is empty -- "$1" || is integer --name=parallel --min 1 --die "$1"
+        is empty -- "$2" || is integer --name=load-percent --min 1 --die "$2"
         local max="${1:-$QUEUE_MAX_NUM}"
         local load="${2:-$QUEUE_MAX_LOAD}"
-        debug "${#_queue_job[@]} Jobs to be run..."
+        local job total=${#_queue_jobs[@]} started=0
+        debug "$total Jobs to be run..."
         while true; do
             # check for finished jobs
             for pid in "${!_queue_running[@]}"; do
                 if [[ ! -d /proc/$pid ]]; then
-                    debug "finished ${_queue_running[$pid]}"
+                    IFS=$'\t' read -r name verbose <<<"${_queue_running[$pid]}"
+                    _steps_done "$name"
+                    message="$(eval_gettext 'Finished: $name')"
+                    is true -- "$verbose" && info "$message" >&2 || debug "$message"
                     unset "_queue_running[$pid]"
                 fi
             done
@@ -600,13 +545,16 @@ queue() {
                 ( ((${#_queue_running[@]} < max)) &&
                     (($(cut -d' ' -f1 /proc/loadavg | sed 's/\.//;s/^0*//') / $(nproc) < load))); then
                 # get next job
-                if ((${#_queue_job[@]} > 0)); then
-                    local job="${_queue_job[0]}"
-                    _queue_job=("${_queue_job[@]:1}")
+                if ((${#_queue_jobs[@]} > 0)); then
+                    IFS=$'\t' read -r name verbose job <<<"${_queue_jobs[0]}"
+                    _queue_jobs=("${_queue_jobs[@]:1}") # remove first
                     # run job
-                    debug "start $job (${#_queue_job[@]} jobs remaining)"
+                    message="$(eval_gettext 'Start: $name')"
+                    is true -- "$verbose" && notice "$message" >&2 || debug "$message"
                     eval "$job" &
-                    _queue_running[$!]="$job"
+                    ((started++)) || true
+                    is empty -- "$progress" || info "$(eval_gettext 'Queued $started/$total jobs')"
+                    _queue_running[$!]="$name"$'\t'"$verbose"
                 # end if no new jobs and nothing running
                 elif ((${#_queue_running[@]} == 0)); then
                     break
@@ -627,6 +575,7 @@ queue() {
 ######################################################################################
 
 # Return a random string in specific length
+#
 # The default length is 16.
 #
 # The `<pattern>` is a list of allowed characters in range:
@@ -641,6 +590,7 @@ queue() {
 # - hex - `0-9a-f`
 # - HEX - `0-9A-F`
 # - directly give pattern
+#
 # Usage:    random <pattern> [<length>]
 random() {
     is integer --name=arguments --max=2 --die -- $#
@@ -669,5 +619,159 @@ random() {
     while ((${#result} < length)); do
         result+="$(head /dev/urandom | tr -dc "$pattern")"
     done
-    echo "${result:0:$length}"
+    printf '%s' "${result:0:$length}"
+}
+
+######################################################################################
+# OS Process
+######################################################################################
+
+# Process control
+#
+# This function will work on the main pid for the matching process groups:
+#
+# - if a <pid> is given the top parent of this is used
+# - if a name is given matching process groups in name or path are searched and their top parents are used
+#
+# Usage:    process info <pid>|<string>     # show summary for all matching processes
+#           process list <pid>|<string>     # show list of process groups (one summary per group) as tsv
+#           process tree <pid>|<string>     # show process trees
+#           process wait [<options>] <pid>|<string>
+#           process kill <pid>|<string> [<signal>]
+# Options:  w, watch        # (for wait) watch health status till done
+#           t, timeout      # (for wait) end with
+# Output:   - info: human readable line
+#           - list/tree: tsv with header
+process() {
+    local command watch timeout
+    # parameter parsing
+    eval set -- "$(option_parse $'t timeout +\nw watch -' "$@")"
+    while true; do
+        case "$1" in
+        -t | --timeout) timeout="$(duration_format seconds "$2")" && shift 2 ;;
+        -w | --watch) watch=1 && shift ;;
+        --) shift && break ;;
+        *) die "$(gettext "Unrecognized option"): $1" ;;
+        esac
+    done
+    # processing
+    is enum --allow="info list tree wait kill" --die --output=command -- "$1"
+    is set --name=process-id-or-name --die -- "$2"
+    is integer --name=arguments --max=3 --die -- $#
+    # get pid
+    local list
+    if is integer -- "$2"; then
+        kill -0 "$2" >/dev/null || die "$(eval_gettext 'No process with pid $2')"
+        list=("$2")
+    else
+        mapfile -t list < <(pgrep "$2" | _process_main_pid | sort -nu || true)
+        # shellcheck disable=SC2128
+        [ -n "$list" ] || mapfile -t list < <(pgrep -f "$2" | _process_main_pid | sort -nu || true)
+        # shellcheck disable=SC2128
+        [ -n "$list" ] || die "$(eval_gettext 'No processes found for $2')"
+    fi
+    debug "pids: ${list[*]}"
+    # processing
+    case $command in
+    info)
+        local pid comm tree_pid
+        for pid in "${list[@]}"; do
+            [ -n "$comm" ] || comm="$(_process_name "$pid")"
+            # shellcheck disable=SC2207
+            tree_pid+=($(_process_children "$pid"))
+            tree_pid+=("$pid") # Include root PID
+        done
+        printf '%s' "$comm"
+        #echo "> ${#tree_pid[@]}"
+        ps -o pcpu,rss --no-headers -p "$(IFS=, echo "${tree_pid[*]}")" |
+            awk '{ cpu+=$1; mem+=$2; count++ } END { printf " %.2f%% CPU %.2f MB in %d processes\n", cpu, mem/1024, count }' || true
+        ;;
+    list)
+        local pid tree_pid
+        printf '%s\t%s\t%s\t%s\t%s\n' Command PID 'CPU %' 'RSS MB' Processes
+        for pid in "${list[@]}"; do
+            printf '%s\t%s' "$(_process_name "$pid")" "$pid"
+            # shellcheck disable=SC2207
+            tree_pid=($(_process_children "$pid"))
+            tree_pid+=("$pid") # Include root PID
+            ps -o pcpu,rss --no-headers -p "$(IFS=, echo "${tree_pid[*]}")" |
+                awk '{ cpu+=$1; mem+=$2; count++ } END { printf "\t%.2f\t%.2f\t%d\n", cpu, mem/1024, count }' || true
+        done
+        ;;
+    tree)
+        local pid
+        printf '%s\t%s\t%s\t%s\n' Command PID 'CPU %' 'RSS kB'
+        for pid in "${list[@]}"; do
+            _process_tree "$pid"
+        done
+        ;;
+    wait)
+        local pid
+        start="$(date +%s)"
+        for pid in "${list[@]}"; do
+            while kill -0 "$pid" 2>/dev/null; do
+                if [ -n "$watch" ]; then
+                    local pcpu
+                    pcpu="$(trim "$(ps -o pcpu= -p "$pid")")" || true
+                    printf "$CURSOR_POS1$CLEAR_LINE%s" "$(eval_gettext 'Waiting for $pid ($pcpu% CPU)')"
+                fi
+                if [ -n "$timeout" ] && (($(date +%s) - start > timeout)); then
+                    printf "$CURSOR_POS1$CLEAR_LINE"
+                    warn "$(eval_gettext 'Timeout after ${timeout}s')"
+                    return 1
+                fi
+                sleep 0.1
+            done
+        done
+        printf "$CURSOR_POS1$CLEAR_LINE"
+        ;;
+    kill)
+        local pid signal="${3:-SIGTERM}"
+        for pid in "${list[@]}"; do
+            debug "kill -s $signal $pid"
+            kill -s "$signal" "$pid" 2>/dev/null || true
+        done
+        ;;
+    esac
+}
+
+# Usage:    _process_name <pid>
+_process_name() {
+    ps -o args= -p "$1" | cut -d' ' -f1 | xargs basename
+}
+# Usage:    <pids> | _process_main_pid
+_process_main_pid() {
+    local pid current
+    while read -r pid; do
+        current="$pid"
+        while true; do
+            parent="$(trim "$(ps -o ppid= -p "$current" 2>/dev/null)" || true)"
+            if [[ -z "$parent" || "$parent" == "1" ]] || grep -Fxq "$(_process_name "$parent")" <<<"plasmashell"; then
+                echo "$current"
+                break
+            else
+                current="$parent"
+            fi
+        done
+    done
+}
+# Usage:    _process_children <pid>
+_process_children() {
+    local children child
+    children=$(pgrep -P "$1" || true)
+    for child in $children; do
+        echo "$child"
+        _process_children "$child"
+    done
+}
+# Usage_    _process_tree <pid> <indent>
+_process_tree() {
+    local pcpu rss children child
+    read -r pcpu rss < <(ps -o pcpu,rss --no-headers -p "$1")
+    printf '%s%s\t%s\t%s\t%s\n' "$2" "$(_process_name "$1")" "$1" "$pcpu" "$rss"
+    children=$(pgrep -P "$1" || true)
+    for child in $children; do
+        _process_tree "$child" "$2  "
+    done
+
 }

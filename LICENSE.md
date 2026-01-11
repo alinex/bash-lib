@@ -2,9 +2,9 @@
 
 ## Alinex Bash Library
 
-> Copyright 2018-2025 Alexander Schilling (https://gitlab.com/alinex/bash-lib)
+> Copyright 2018-2026 Alexander Schilling (https://gitlab.com/alinex/bash-lib)
 
-!!! abstract "Apache License, Version 2.0"
+"**Apache License, Version 2.0**"
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.

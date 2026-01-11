@@ -2,8 +2,6 @@
 
 ## Add reaction to existing post
 
-This can only be called if a [`mattermost`](mattermost.md) call was used previously.
-
 ### Usage
 
 ```bash
@@ -24,3 +22,9 @@ l, links     # also post this to the links
 
 - 0 without action if no `$MATTERMOST_API` + `$MATTERMOST_TOKEN`
 - 
+
+### Description
+
+
+This can only be called if a [`mattermost`](mattermost.md) call was used previously.
+

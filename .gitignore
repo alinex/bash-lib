@@ -10,4 +10,8 @@
 /test-results
 /bats-core
 /oldlib
+# made by docker tests
+/yay
+# not public available / from divibib scripts
+/divibib
 /scripts

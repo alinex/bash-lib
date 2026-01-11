@@ -1,8 +1,6 @@
 # tsv
 
-## Transform tab separated table.
-
-
+## Transform tab separated table
 
 ### Usage
 
@@ -13,3 +11,8 @@
 <string> | tsv sort <num|name> [numeric]    # crop column
 <string> | tsv reverse                      # reverse order
 ```
+
+### Description
+
+
+

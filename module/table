@@ -16,6 +16,7 @@ use module/software
 ######################################################################################
 
 # Convert TSV data into visual table
+#
 # Usage:    tsv2table <tsv>
 #           <tsv> | tsv2table
 # Output:   <table>
@@ -27,6 +28,7 @@ tsv2table() {
 }
 
 # Convert TSV data into markdown table
+#
 # Usage:    tsv2md <tsv>
 #           <tsv> | tsv2md
 # Output:   <md>
@@ -42,7 +44,8 @@ tsv2md() {
 # csv
 ######################################################################################
 
-# Transform comma separated table.
+# Transform comma separated table
+#
 # Usage:    <string> | csv {to} <param>...
 #           <string> | csv to {tsv}              # convert
 csv() {
@@ -71,7 +74,8 @@ for row in reader:
 # tsv
 ######################################################################################
 
-# Transform tab separated table.
+# Transform tab separated table
+#
 # Usage:    <string> | tsv {to|crop} <param>...
 #           <string> | tsv to {csv|pprint}              # convert
 #           <string> | tsv crop <num|name> <width>      # crop column
@@ -100,7 +104,7 @@ tsv() {
                 }' <<<"$input"
             ;;
         pprint)
-            column -t -s $'\t' <<<"$input" | less -S
+            column -t -s $'\t' <<<"$input"
             ;;
         *) die "Allowed formats are only csv, not [$format]" ;;
         esac
@@ -118,7 +122,7 @@ tsv() {
             ((${#orig} <= width)) || line[idx]="${orig:0:width-1}…"
             (
                 IFS="$separator"
-                echo "${line[*]}"
+                printf '%s\n' "${line[*]}"
             )
         done <<<"$input"
         ;;
@@ -133,7 +137,7 @@ tsv() {
         # sort
         (
             IFS="$separator"
-            echo "${cols[*]}"
+            printf '%s\n' "${cols[*]}"
         )
         tail -n +2 <<<"$input" | sort -t $'\t' "-k${col},${col}${type}"
         ;;

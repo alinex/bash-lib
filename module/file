@@ -9,8 +9,10 @@ source /dev/null
 ######################################################################################
 
 # Strip directory from filepath
+#
 # This is a much faster implementation as the basename command because it is using shell parameter expansion.
 # It will remove the directory and output only the filename.
+#
 # Usage:    basename <path>
 #           <path> | basename
 # Output:   <file>
@@ -20,12 +22,14 @@ basename() {
     local path
     path="$(input "$@")"
     path="${path%/}"
-    echo "${path##*/}"
+    printf '%s' "${path##*/}"
 }
 
 # Strip last component from file path
+#
 # This is a much faster implementation as the dirname command because it is using shell parameter expansion.
 # It will remove the last element in path.
+#
 # Usage:    dirname <path>
 #           <path> | dirname
 # Output:   <base-path>
@@ -34,14 +38,16 @@ dirname() {
     # processing
     local path
     path="$(input "$@")"
-    [[ $path == '/' ]] && echo '/' && return 0
-    [[ $path =~ ^'../' ]] && echo '.' && return 0
-    [[ ! $path =~ / ]] && echo '.' && return 0
-    echo "${path%/*}"
+    [[ $path == '/' ]] && printf '/' && return 0
+    [[ $path =~ ^'../' ]] && printf '.' && return 0
+    [[ ! $path =~ / ]] && printf '.' && return 0
+    printf '%s' "${path%/*}"
 }
 
 # Returns the extension of the path
+#
 # From the last occurrence of the . (period) character to end of string in the last portion of the path. If there is no . in the last portion of the path, or if the first character of the basename of path (see path.basename()) is ., then an empty string is returned.
+#
 # Usage:    extname <path>
 #           <path> | extname
 # Output:   <extension>
@@ -50,12 +56,12 @@ extname() {
     # processing
     local path
     path="$(input "$@")"
-    [[ $path =~ ^\. ]] && echo '' && return
-    [[ ! $path =~ \. ]] && echo '' && return
-    echo ".${path##*.}"
+    [[ $path =~ ^\. || ! $path =~ \. ]] && return
+    printf '%s' ".${path##*.}"
 }
 
 # Get the path from the called command
+#
 # Usage:    script_path
 # Output:   full real directory path to script
 script_path() {

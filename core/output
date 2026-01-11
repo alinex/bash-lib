@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC2034
 # shellcheck source=base
 source /dev/null
 
@@ -9,9 +10,11 @@ source /dev/null
 ######################################################################################
 
 # Write message to STDERR if in DEBUG mode else do nothing
+#
 # Debug can support multiple levels starting from 1 upwards to be more verbose. This will only be shown if environment variable `DEBUG` is the same number or higher. Or if the `DEBUG` variable includes the function name. Multiple lines will be printed separately to have the function name prefix at the start of each.
 #
 # With DEBUG=9 the $BASHPID will also be shown.
+#
 # Usage:    debug [<num>] <message>
 #           <message> | debug [<num>]
 #               <num> := [1-9]      # (default 1) higher to only show in more verbose call
@@ -50,7 +53,8 @@ debug() {
 }
 
 # Output error message and exit
-# Usage:    die <message>
+#
+# Usage:    die <message> [<source>:<line>]
 #           <message> | die
 # Error:    # Example if called for deprecated call:
 #           ```
@@ -70,16 +74,20 @@ die() {
     text="$(input "$@")"
     [[ "$text" != *"Uncaught exception at"* ]] || trap=1
     # output
-    echo -e "${CC_CRITICAL}$text in ${FUNCNAME[1]}${CC_RESET}" >&2
+    printf "${CC_CRITICAL}%s${CC_RESET}\n" "$text in ${FUNCNAME[1]}" >&2
     _stacktrace "$trap"
     if command -v log >/dev/null; then
         log critical "$text"
         _stacktrace "$trap" 2>&1 | log critical
     fi
-    # sends SIGTERM to process group → process receives SIGTERM
-    sleep 1 # to let output pipes finish
-    kill -- -$$ 2>/dev/null
-    exit 143
+    if [[ $- == *i* ]]; then
+        return 143
+    else
+        sleep 1 # to let output pipes finish
+        # sends SIGTERM to process group → process receives SIGTERM
+        kill -- -$$ 2>/dev/null
+        exit 143
+    fi
 }
 
 ######################################################################################
@@ -87,6 +95,7 @@ die() {
 ######################################################################################
 
 # Show help page and exit
+#
 # Usage:    help <heading> <usage> <options-spec> <details>
 help() {
     is integer --name=arguments --min=2 --max=4 --die -- $#
@@ -95,14 +104,13 @@ help() {
     # processing
     heading "$(gettext Help): $1"
     info "Usage: $2"
-    echo ""
+    printf '\n'
     if is set -- "$3"; then
         option_help "$3"
-        echo ""
+        printf '\n'
     fi
     if is set -- "$4"; then
-        echo "$4"
-        echo
+        printf '%s\n\n' "$4"
     fi
     exit 0
 }
@@ -112,6 +120,7 @@ help() {
 ######################################################################################
 
 # Print block heading
+#
 # Usage:    heading <title>
 #           <title> | heading
 # Output:   colored <string>
@@ -124,6 +133,7 @@ heading() {
 }
 
 # Print critical/disaster message
+#
 # Usage:    critical <message>
 #           <message> | critical
 # Output:   colored <string>
@@ -131,11 +141,12 @@ critical() {
     local text
     text="$(input "$@")"
     is set -- "$text" || return 0
-    printf "%s\n" "${CC_CRITICAL}$text${CC_RESET}"
+    printf '%s\n' "${CC_CRITICAL}$text${CC_RESET}"
     ((${#_log_active[@]} == 0)) || log critical "$text"
 }
 
 # Print error message
+#
 # Usage:    error <message>
 #           <message> | error
 # Output:   colored <string>
@@ -143,11 +154,12 @@ error() {
     local text
     text="$(input "$@")"
     is set -- "$text" || return 0
-    printf "%s\n" "${CC_ERROR}$text${CC_RESET}"
+    printf '%s\n' "${CC_ERROR}$text${CC_RESET}"
     ((${#_log_active[@]} == 0)) || log error "$text"
 }
 
 # Print warning message
+#
 # Usage:    warn <message>
 #           <message> | warn
 # Output:   colored <string>
@@ -156,11 +168,12 @@ warn() {
     local text
     text="$(input "$@")"
     is set -- "$text" || return 0
-    printf "%s\n" "${CC_WARN}$text${CC_RESET}"
+    printf '%s\n' "${CC_WARN}$text${CC_RESET}"
     ((${#_log_active[@]} == 0)) || log warn "$text"
 }
 
 # Print special information message
+#
 # Usage:    info <message>
 #           <message> | info
 # Output:   colored <string>
@@ -169,11 +182,12 @@ notice() {
     local text
     text="$(input "$@")"
     is set -- "$text" || return 0
-    printf "%s\n" "${CC_NOTICE}$text${CC_RESET}"
+    printf '%s\n' "${CC_NOTICE}$text${CC_RESET}"
     ((${#_log_active[@]} == 0)) || log notice "$text"
 }
 
 # Print special information message
+#
 # Usage:    info <message>
 #           <message> | info
 # Output:   colored <string>
@@ -181,11 +195,12 @@ info() {
     local text
     text="$(input "$@")"
     is set -- "$text" || return 0
-    printf "%s\n" "$text"
+    printf '%s\n' "$text"
     ((${#_log_active[@]} == 0)) || log info "$text"
 }
 
 # Print success message
+#
 # Usage:    ok <message>
 #           <message> | ok
 # Output:   colored <string>
@@ -193,11 +208,12 @@ ok() {
     local text
     text="$(input "$@")"
     is set -- "$text" || return 0
-    echo -e "${CC_OK}$text${CC_RESET}"
+    printf "${CC_OK}%s${CC_RESET}\n" "$text"
     ((${#_log_active[@]} == 0)) || log notice "$text"
 }
 
 # Print special marked message like table header
+#
 # Usage:    invers <message>
 #           <message> | invers
 # Output:   colored <string>
@@ -205,11 +221,12 @@ invers() {
     local text
     text="$(input "$@")"
     is set -- "$text" || return 0
-    echo -e "${CC_INVERS}$text${CC_RESET}"
+    printf "${CC_INVERS}%s${CC_RESET}\n" "$text"
     ((${#_log_active[@]} == 0)) || log info "$text"
 }
 
 # Print message in defined color
+#
 # Usage:    color <color> <message>
 #           <message> | color <color>
 # Output:   colored <string>
@@ -217,7 +234,7 @@ color() {
     local text
     text="$(input_args 1 "$@")"
     is set -- "$text" || return 0
-    echo -e "${CC_ERROR}$text${CC_RESET}"
+    printf "${CC_ERROR}%s${CC_RESET}\n" "$text"
     ((${#_log_active[@]} == 0)) || log info "$text"
 }
 
@@ -226,6 +243,7 @@ color() {
 ######################################################################################
 
 # Remove color codes from text
+#
 # Usage:    uncolorize <text>
 #           <text> | uncolorize
 # Output:   <text>
@@ -235,6 +253,7 @@ uncolorize() {
 }
 
 # Convert HTML to markdown (simplified version)
+#
 # Usage:    html2md <html-part>
 #           <html-part> | html2md
 # Output:   <md>
@@ -245,6 +264,7 @@ html2md() {
 }
 
 # Remove carriage return from line endings
+#
 # Usage:    nocr <text>
 #           <text> | nocr
 # Output:   <text>
@@ -253,6 +273,7 @@ nocr() {
 }
 
 # Encode message to be used within the url
+#
 # Usage:    urlencode <string>
 #           <string> | urlencode
 # Output:   <string>
@@ -265,16 +286,8 @@ urlencode() {
 # Visual effects
 ######################################################################################
 
-# Remove current line
-# When printed to a terminal, it will erase everything from the current cursor position backward to the beginning of the line.
-# Usage:    erase_line
-erase_line() {
-    is integer --name=arguments --max=0 --die -- $#
-    # processing
-    printf '%b' $'\e[1K\r'
-}
-
 # Show a horizontal line
+#
 # It will go over the full width of terminal, but be at least 60 characters wide.
 #
 # Format can be:
@@ -284,6 +297,7 @@ erase_line() {
 # - double ══════════
 # - half ▄▄▄▄▄▄▄▄▄▄
 # - full ██████████
+#
 # Usage:    horizontal_line [<format>]
 # Output:   ────────── # over full width of terminal
 horizontal_line() {
@@ -302,12 +316,13 @@ horizontal_line() {
     local cols
     read -r _ cols < <(stty size)
     ((cols > 60)) || cols=60
-    printf "%.0s$char" $(seq 1 "$cols")
+    printf '%s\n' "$(character repeat "$cols" "$char")"
 }
 
 _spinner_pid=""
 
 # Function to start the spinner in the background
+#
 # To stop it later call @spinner_stop.
 #
 # Some formats have multiple character width:
@@ -322,6 +337,7 @@ _spinner_pid=""
 # - `moon`:     🌑 🌒 🌓 🌔 🌕 🌖 🌗 🌘
 # - `clock`:    🕐 🕑 🕒 🕓 🕔 🕕 🕖 🕗 🕘 🕙 🕚 🕛
 # - `weather`:  🌤 🌥 🌦 🌧 🌨 🌩 🌪
+#
 # Usage:    spinner_start <format> [<time>]
 #           # <format> see above
 #           # <time> 0.1 or more seconds (default 0.2)
@@ -355,7 +371,8 @@ spinner_start() {
     esac
     local back=$((size + 1))
     # Spinner function running in background loop
-    printf '\e[?25l' # make cursor invisible
+    # shellcheck disable=SC2059
+    printf "$CUR_HIDE" # make cursor invisible
     (
         while true; do
             for ((i = 0; i < ${#spinner}; i += chars)); do
@@ -369,7 +386,9 @@ spinner_start() {
 }
 
 # Function to stop the spinner
+#
 # Call this after @spinner_start to stop it. It has to be called within the same thread!
+#
 # Usage:    spinner_stop
 spinner_stop() {
     is integer --name=arguments --max=0 --die -- $#
@@ -379,5 +398,39 @@ spinner_stop() {
     wait "$_spinner_pid" 2>/dev/null
     _spinner_pid=""
     printf "    \b\b\b\b" # Clear spinner character
-    printf '\e[?25h'      # make cursor visible again
+    # shellcheck disable=SC2059
+    printf "$CUR_SHOW" # make cursor visible again
+}
+
+# Output Logo with title text
+#
+# You may overwrite this function with one displaying your own logo by loading it from your `extra/my-company-logo` or so.
+#
+# Usage:    logo <text>
+# Output:   ASCII art logo including title
+# shellcheck disable=SC2059
+logo() {
+    a=$'\e[36m'            # cyan
+    b=$'\e[33m\e[1m'       # yellow bold
+    c=$'\e[43m\e[30m\e[1m' # yellow bg + black bold
+    r=$'\e[0m'             # reset
+    u=$'\e[4m'             # underline
+    p="$(character repeat $((($(tput cols) - 80) / 2)) ' ')"
+    t="$(character repeat $((($(tput cols) - ${#1}) / 2)) ' ')"
+    printf '\n'
+    printf "$p$a                         $b  __   ____     ___\n"
+    printf "$p$a           ######  ##### $b ▕  ▏ ▕    ╲   ▕   ▏ $a  ########### #####       #####\n"
+    printf "$p$a          ######## ##### $b ▕  ▏ ▕     ╲  ▕   ▏ $a ############  #####     #####\n"
+    printf "$p$a         ######### ##### $b ▕  ▏ ▕  ▕╲  ╲ ▕   ▏ $a #####          #####   #####\n"
+    printf "$p$a        ########## ##### $b ▕  ▏ ▕  ▕ ╲  ╲▕   ▏ $a #####           ##### #####\n"
+    printf "$p$a       ##### ##### ##### $b ▕  ▏ ▕  ▕  ╲  ▔   ▏ $a ############     #########\n"
+    printf "$p$a      #####  ##### ##### $b ▕  ▏ ▕  ▕   ╲     ▏ $a ############     #########\n"
+    printf "$p$a     #####   ##### ##### $b ▕  ▏ ▕  ▕    ╲    ▏ $a #####           ##### #####\n"
+    printf "$p$a    #####    ##### ##### $b  ▔▔   ▔▔▔     ▔▔▔▔  $a #####          #####   #####\n"
+    printf "$p$a   ##### ######### ######""#####################"" ############  #####     #####\n"
+    printf "$p$a  ##### ##########  #####""#################### ""  ########### #####       ##### $r\n"
+    printf "$p$b▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄""▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄""▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄$r$c\n"
+    printf "$t%s$r\n" "$1"
+    printf "$p$b▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀""▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀""▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀$r\n"
+    printf '\n'
 }

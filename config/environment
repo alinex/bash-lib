@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # shellcheck disable=SC2034
 
-# The configuration module contains a lot of general configuration settings for the bash-lib modules itself. Most of them are specific to the individual environment so they need to be set in the local `overwrite` config.
+# The configuration module contains a lot of general configuration settings for the bash-lib modules itself. Most of them are specific to the individual environment so they need to be set in the `local` config.
 
 ######################################################################################
 ### process
@@ -16,10 +16,26 @@ QUEUE_MAX_LOAD=75
 ### Host Specific
 ######################################################################################
 
+# Default login if no `--login` or `$login` available
+REMOTE_LOGIN_DEFAULT=operator
+
 # Array: Color limits per mount (regex critical error warn ok) used in @df
 MOUNT_COLOR_LIMIT=(
     ".*" 100 90 80 50
 )
+
+# Array: Provider selection per ip (regex provider) used in @ip_pattern
+IP_PROVIDER_PATTERN=(
+    ".*" Unknown
+)
+# Array: Network segment selection per ip (regex segment) used in @ip_pattern
+IP_SEGMENT_PATTERN=(
+    ".*" other
+)
+# Array: Network segment selection per ip (regex segment) used in @ip_pattern
+#IP_VMWARE_PATTERN=(
+#    ".*" "https://myvmware.company.net/ui"
+#)
 
 ######################################################################################
 ### Mattermost
@@ -67,6 +83,25 @@ CONFLUENCE_API=
 # Atlassian jira API URL used together with $ATLASSIAN_USER and $ATLASSIAN_TOKEN and silently disables @jira functions if not set
 JIRA_API=
 
+# Security Board key in Jira (if trivy vulnerabilities are managed using Jira)
+TRIVY_JIRA_BOARD=
+# Type of issue to use for these (if trivy vulnerabilities are managed using Jira)
+TRIVY_JIRA_ISSUE_TYPE=
+# Field name for multiline text of sources (if trivy vulnerabilities are managed using Jira)
+TRIVY_JIRA_FIELD_SOURCES=
+# Field name for rating string (if trivy vulnerabilities are managed using Jira)
+TRIVY_JIRA_FIELD_RATING=
+# Field name for fixed version string (if trivy vulnerabilities are managed using Jira)
+TRIVY_JIRA_FIELD_VERSION=
+# Field name for multiline text with further links (if trivy vulnerabilities are managed using Jira)
+TRIVY_JIRA_FIELD_LINKS=
+# Field name for approval status (if trivy vulnerabilities are managed using Jira)
+TRIVY_JIRA_FIELD_APPROVAL=
+# Value in approval field for "allowed for 30 days" (if trivy vulnerabilities are managed using Jira)
+TRIVY_JIRA_APPROVAL_TEMP=
+# Value in approval field for irrelevant/always allowed (if trivy vulnerabilities are managed using Jira)
+TRIVY_JIRA_APPROVAL_IRRELEVANT=
+
 ######################################################################################
 ### Remote
 ######################################################################################
@@ -96,6 +131,8 @@ NETLAS_TOKEN=
 TRIVY_DEFAULT_TIMEOUT=60m
 # Optional, use specified trivy server for caching of the internet databases
 TRIVY_CACHE_SERVER=
+# Paths to prevent in root scans
+TRIVY_ROOT_EXCLUDE="/mnt /opt/docker"
 
 ######################################################################################
 ### divibib

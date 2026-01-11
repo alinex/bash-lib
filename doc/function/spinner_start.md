@@ -2,21 +2,6 @@
 
 ## Function to start the spinner in the background
 
-To stop it later call [`spinner_stop`](spinner_stop.md).
-
-Some formats have multiple character width:
-
-- `simple`:   - \ | /
-- `arrows`:   → ↑ ← ↓
-- `vertical`: ▏ ▎ ▍ ▌ ▋ ▊ ▉ █ ▉ ▊ ▋ ▌ ▍ ▎ ▏
-- `bar`:      (as `vertical` but two characters wide)
-- `fade`:     ░ ▒ ▓ █ ▓ ▒ ░
-- `braille`:   ⠋ ⠙ ⠹ ⠸ ⠼ ⠴ ⠦ ⠧ ⠇ ⠏ (default)
-- `roll`:     ⠋ ⠙ ⠚ ⠞ ⠖ ⠦ ⠴ ⠲ ⠳ ⠓
-- `moon`:     🌑 🌒 🌓 🌔 🌕 🌖 🌗 🌘
-- `clock`:    🕐 🕑 🕒 🕓 🕔 🕕 🕖 🕗 🕘 🕙 🕚 🕛
-- `weather`:  🌤 🌥 🌦 🌧 🌨 🌩 🌪
-
 ### Usage
 
 ```bash
@@ -35,3 +20,22 @@ spinner_start <format> [<time>]
 
 - 0 without doing anything if no `tput` and terminal available
 - 
+
+### Description
+
+
+To stop it later call [`spinner_stop`](spinner_stop.md).
+
+Some formats have multiple character width:
+
+- `simple`:   - \ | /
+- `arrows`:   → ↑ ← ↓
+- `vertical`: ▏ ▎ ▍ ▌ ▋ ▊ ▉ █ ▉ ▊ ▋ ▌ ▍ ▎ ▏
+- `bar`:      (as `vertical` but two characters wide)
+- `fade`:     ░ ▒ ▓ █ ▓ ▒ ░
+- `braille`:   ⠋ ⠙ ⠹ ⠸ ⠼ ⠴ ⠦ ⠧ ⠇ ⠏ (default)
+- `roll`:     ⠋ ⠙ ⠚ ⠞ ⠖ ⠦ ⠴ ⠲ ⠳ ⠓
+- `moon`:     🌑 🌒 🌓 🌔 🌕 🌖 🌗 🌘
+- `clock`:    🕐 🕑 🕒 🕓 🕔 🕕 🕖 🕗 🕘 🕙 🕚 🕛
+- `weather`:  🌤 🌥 🌦 🌧 🌨 🌩 🌪
+

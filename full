@@ -1,219 +1,69 @@
 #!/usr/bin/env bash
 BASHLIB_LOADER=${BASHLIB_LOADER:-full}
-option_parse(){
-local opt name type desc short="" long="" spec="$1" permute
-[ -n "$spec" ]||die "$(gettext 'A specification string is needed as first argument')"
-if [[ $spec =~ ^\+ ]];then
-permute=+
-spec="${spec:1}"
-fi
-while IFS=$' \t\n' read -r opt name type desc;do
-[[ $opt =~ ^# ]]&&continue
-[[ -z $opt ]]&&continue
-if [ ! "$type" = "-" ];then
-[ "$opt" = "-" ]||short+="$opt:"
-long+="$name:,"
-else
-[ "$opt" = "-" ]||short+="$opt"
-long+="$name,"
-fi
-done <<<"$spec"
-shift
-getopt -o "$permute$short" --long "$long" -n "$0" -- "$@"
-}
-option_help(){
-is set --name=spec --die -- "$1"
-declare opt name type desc
-declare -A opt_descriptions
-declare -A opt_type
-declare -A opt_short
-while read -r opt name type desc;do
-[[ $opt =~ ^# ]]&&continue
-is empty -- "$opt"&&continue
-opt_descriptions[$name]="$desc"
-opt_type[$name]=$type
-opt_short[$name]=$opt
-done <<<"$1"
-echo "$(gettext "Options"):"
-for name in "${!opt_descriptions[@]}";do
-local type_text=""
-local short_text=""
-if [ ! "${opt_type[$name]}" = "-" ];then
-type_text=" <${opt_type[$name]}>"
-fi
-if [[ ! ${opt_short[$name]} == "-" ]];then
-short_text="-${opt_short[$name]}$type_text, "
-fi
-printf "  %-40s %s\n" "$short_text--$name$type_text" "${opt_descriptions[$name]}"
-done
-}
-input(){
-test -p /dev/stdin&&(($#==0))&&cat -||echo "$*"
-}
-input_args(){
-local num=${1-}
-local start=$((num+2))
-is set --name="num" --die -- "$num"
-((num>0))||die "<num>=$num $(gettext 'argument is not a valid number!')"
-test -p /dev/stdin&&(($#<num+2))&&cat -||echo "${@:start}"
-}
-input_lines(){
-if [ -p /dev/stdin ]&&is empty -- "$1";then
-cat -
-else
-for arg in "$@";do echo "$arg";done
-fi
-}
-escape_args(){
-local escaped_args=()
-for arg in "$@";do
-escaped_args+=("$(printf '%q' "$arg")")
-done
-echo "${escaped_args[*]}"
-}
-contains(){
-_deprecated "use array <array-name> has <value>" warn
-array "$1" has "$2"
-}
-array(){
-is integer --name=arguments --max=3 --die -- $#
-is set --name=array-name --die -- "$1"
-is enum --name=command --allow="has indexof" --die -- "$2"
-is set --name=value --die -- "$3"
-declare -n arr="$1"
-local cmd="$2"
-local value="$3"
-case "$cmd" in
-has)for e in "${arr[@]}"
-do
-[ ! "$e" = "$value" ]||return 0
-done
-return 1
-;;
-indexof)for i in "${!arr[@]}"
-do
-if [ "${arr[i]}" = "$value" ];then
-echo "$i"
-return 0
-fi
-done
-return 1
-esac
-}
-join(){
-is integer --name=arguments --max=2 --die -- $#
-is set --name=array-name --die -- "$1"
-local -n array=$1
-local sep="${2:-,}"
-local joined="${array[0]}"
-for element in "${array[@]:1}";do
-joined+="$sep$element"
-done
-echo "$joined"
-}
-split(){
-is integer --name=arguments --max=3 --die -- $#
-is set --name=array-name --die -- "$2"
-local string="$1"
-local -n array=$2
-local sep="${3:-,}"
-IFS="$sep" read -ra array <<<"$string"
-}
-hash(){
-local keyFormat="simple"
-eval set -- "$(option_parse $'k key-format +' "$@")"
-while true;do
-case "$1" in
--k|--key-format)keyFormat="$(check enum --allow="simple base64" -- "$2")"&&shift 2;;
---)shift&&break;;
-*)die "$(gettext "Unrecognized option"): $1"
-esac
-done
-is integer --name=arguments --max=4 --die -- $#
-is set --name=array-name --die -- "$1"
-is enum --name=command --allow="set get unset has contains" --die -- "$2"
-declare -n arr="$1"
-local cmd="$2" key value="$4"
-case $keyFormat in
-base64)key="$(base64 -w0 <<<"$3")";;
-simple)key="${3//[^a-zA-Z0-9_]/_}"
-esac
-case "$cmd" in
-set)is set --name=key --die -- "$3"&&arr["$key"]="$value";;
-get)is set --name=key --die -- "$3"&&echo "${arr["$key"]}";;
-unset)is set --name=key --die -- "$3"&&unset 'arr[$key]';;
-has)is set --name=key --die -- "$3"&&[[ -v arr["$key"] ]];;
-contains)is set --name=value --die -- "$3"
-for key in "${!arr[@]}";do
-[[ ${arr["$key"]} != "$3" ]]||return 0
-done
-return 1
-esac
-}
 COLORS=$(tput colors 2>/dev/null||echo 0)
-CC_RESET=$'\033[0m'
-CC_RESET_FG=$'\033[39m'
-CC_RESET_BG=$'\033[49m'
-CC_INTENSITY_BOLD=$'\033[1m'
-CC_INTENSITY_LIGHT=$'\033[2m'
-CC_INTENSITY_OFF=$'\033[22m'
-CC_ITALIC=$'\033[3m'
-CC_ITALIC_OFF=$'\033[23m'
-CC_UNDERLINE=$'\033[4m'
-CC_UNDERLINE_OFF=$'\033[24m'
-CC_INVERSE=$'\033[7m'
-CC_INVERSE_OFF=$'\033[27m'
-CC_DASHED=$'\033[9m'
-CC_DASHED_OFF=$'\033[29m'
-CC_BLACK=$'\033[30m'
-CC_RED=$'\033[31m'
-CC_GREEN=$'\033[32m'
-CC_YELLOW=$'\033[33m'
-CC_BLUE=$'\033[34m'
-CC_MAGENTA=$'\033[35m'
-CC_CYAN=$'\033[36m'
-CC_WHITE=$'\033[37m'
-CC_BLACK_BOLD=$'\033[90m'
-CC_RED_BOLD=$'\033[91m'
-CC_GREEN_BOLD=$'\033[92m'
-CC_YELLOW_BOLD=$'\033[93m'
-CC_BLUE_BOLD=$'\033[94m'
-CC_MAGENTA_BOLD=$'\033[95m'
-CC_CYAN_BOLD=$'\033[96m'
-CC_WHITE_BOLD=$'\033[97m'
-CC_BLACK_BG=$'\033[40m'
-CC_RED_BG=$'\033[41m'
-CC_GREEN_BG=$'\033[42m'
-CC_YELLOW_BG=$'\033[43m'
-CC_BLUE_BG=$'\033[44m'
-CC_MAGENTA_BG=$'\033[45m'
-CC_CYAN_BG=$'\033[46m'
-CC_BLACK_BOLD_BG=$'\033[100m'
-CC_RED_BOLD_BG=$'\033[101m'
-CC_GREEN_BOLD_BG=$'\033[102m'
-CC_YELLOW_BOLD_BG=$'\033[103m'
-CC_BLUE_BOLD_BG=$'\033[104m'
-CC_MAGENTA_BOLD_BG=$'\033[105m'
-CC_CYAN_BOLD_BG=$'\033[106m'
+CC_RESET=$'\e[0m'
+CC_RESET_FG=$'\e[39m'
+CC_RESET_BG=$'\e[49m'
+CC_INTENSITY_BOLD=$'\e[1m'
+CC_INTENSITY_LIGHT=$'\e[2m'
+CC_INTENSITY_OFF=$'\e[22m'
+CC_ITALIC=$'\e[3m'
+CC_ITALIC_OFF=$'\e[23m'
+CC_UNDERLINE=$'\e[4m'
+CC_UNDERLINE_OFF=$'\e[24m'
+CC_INVERSE=$'\e[7m'
+CC_INVERSE_OFF=$'\e[27m'
+CC_DASHED=$'\e[9m'
+CC_DASHED_OFF=$'\e[29m'
+CC_BLACK=$'\e[30m'
+CC_RED=$'\e[31m'
+CC_GREEN=$'\e[32m'
+CC_YELLOW=$'\e[33m'
+CC_BLUE=$'\e[34m'
+CC_MAGENTA=$'\e[35m'
+CC_CYAN=$'\e[36m'
+CC_WHITE=$'\e[37m'
+CC_BLACK_BOLD=$'\e[90m'
+CC_RED_BOLD=$'\e[91m'
+CC_GREEN_BOLD=$'\e[92m'
+CC_YELLOW_BOLD=$'\e[93m'
+CC_BLUE_BOLD=$'\e[94m'
+CC_MAGENTA_BOLD=$'\e[95m'
+CC_CYAN_BOLD=$'\e[96m'
+CC_WHITE_BOLD=$'\e[97m'
+CC_BLACK_BG=$'\e[40m'
+CC_RED_BG=$'\e[41m'
+CC_GREEN_BG=$'\e[42m'
+CC_YELLOW_BG=$'\e[43m'
+CC_BLUE_BG=$'\e[44m'
+CC_MAGENTA_BG=$'\e[45m'
+CC_CYAN_BG=$'\e[46m'
+CC_BLACK_BOLD_BG=$'\e[100m'
+CC_RED_BOLD_BG=$'\e[101m'
+CC_GREEN_BOLD_BG=$'\e[102m'
+CC_YELLOW_BOLD_BG=$'\e[103m'
+CC_BLUE_BOLD_BG=$'\e[104m'
+CC_MAGENTA_BOLD_BG=$'\e[105m'
+CC_CYAN_BOLD_BG=$'\e[106m'
 color_256(){
 is integer --name=arguments --max=1 --die -- $#
 local num
-num="$(check integer --name=num "$1" --sanitize --min=0 --max=255 --die)"
-echo $'\033[38;5;'"$num"'m'
+num="$(is integer --name=num "$1" --sanitize --min=0 --max=255 --die --output)"
+echo $'\e[38;5;'"$num"'m'
 }
 color_256_bg(){
 is integer --name=arguments --max=1 --die -- $#
 local num
-num="$(check integer --name=num "$1" --sanitize --min=0 --max=255 --die)"
-echo $'\033[48;5;'"$num"'m'
+num="$(is integer --name=num "$1" --sanitize --min=0 --max=255 --die --output)"
+echo $'\e[48;5;'"$num"'m'
 }
-CC_CRITICAL=$'\033[1;45m'
-CC_ERROR=$'\033[1;31m'
-CC_WARN=$'\033[1;33m'
-CC_NOTICE=$'\033[1;34m'
-CC_OK=$'\033[1;32m'
-CC_HEADING=$'\033[44m'
-CC_INVERS=$'\033[7m'
+CC_CRITICAL=$'\e[1;45m'
+CC_ERROR=$'\e[1;31m'
+CC_WARN=$'\e[1;33m'
+CC_NOTICE=$'\e[1;34m'
+CC_OK=$'\e[1;32m'
+CC_HEADING=$'\e[44m'
+CC_INVERS=$'\e[7m'
 color_table(){
 is integer --name=arguments --max=0 --die -- $#
 echo "Basic Colors:"
@@ -236,14 +86,14 @@ local rows=15
 for c in $(seq 0 "$cols");do
 for r in $(seq 0 "$rows");do
 num=$((r*cols+c))
-echo -ne "\t$(color_256 "$num")FG $num"
+printf '%s' "\t$(color_256 "$num")FG $num"
 done
 echo ""
 done
 for c in $(seq 0 "$cols");do
 for r in $(seq 0 "$rows");do
 num=$((r*cols+c))
-echo -ne "\t$(color_256_bg "$num")BG $num$CC_RESET"
+printf '%s' "\t$(color_256_bg "$num")BG $num$CC_RESET"
 done
 echo ""
 done
@@ -255,6 +105,209 @@ echo -e "\t${CC_NOTICE}CC_NOTICE$CC_RESET"
 echo -e "\t${CC_OK}CC_OK$CC_RESET"
 echo -e "\t${CC_HEADING}CC_HEADING$CC_RESET"
 echo -e "\t${CC_INVERS}CC_INVERS$CC_RESET"
+}
+CURSOR_UP=$'\e[A'
+CURSOR_DOWN=$'\e[B'
+CURSOR_RIGHT=$'\e[C'
+CURSOR_LEFT=$'\e[D'
+CURSOR_NEXT=$'\e[E'
+CURSOR_PREVIOUS=$'\e[F'
+CURSOR_POS1=$'\e[G'
+CURSOR_TOP=$'\e[H'
+CURSOR_STORE=$'\e[s'
+CURSOR_RESTORE=$'\e[u'
+CURSOR_SHOW=$'\e[?25h'
+CURSOR_HIDE=$'\e[?25l'
+cursor(){
+local num="${2:-1}" col="${3:-1}"
+is enum --name=direction --allow="up down right left row pos next previous" --die -- "$1"
+is integer --name=num --min=1 --die -- "$num"
+is integer --name=arguments --max=3 --die -- $#
+case "$1" in
+up)printf '\e[%sA' "$num";;
+down)printf '\e[%sB' "$num";;
+right)printf '\e[%sC' "$num";;
+left)printf '\e[%sD' "$num";;
+row)printf '\e[%sH' "$num";;
+pos)is integer --name=col --min=1 --die -- "$col"
+printf '\e[%s;%sH' "$num" "$col"
+;;
+next)printf '\e[%sE' "$num";;
+previous)printf '\e[%sF' "$num"
+esac
+}
+character(){
+local num="$2"
+is enum --name=command --allow="repeat" --die -- "$1"
+is integer --name=num --min=1 --die -- "$num"
+case "$1" in
+repeat)is set --name=character --min=1 --die -- "$3"
+is length --name=character --min=1 --max=1 --die -- "$3"
+((num==1))&&printf '%s' "$3"||printf '%s\e[%sb' "$3" $((num-1))
+;;
+delete)printf '\e[%sP' "$num";;
+erase)printf '\e[%sX' "$num"
+esac
+}
+SCROLL_UP=$'\e[M'
+CLEAR_SCREEN=$'\e[2J'
+CLEAR_UP=$'\e[1J'
+CLEAR_DOWN=$'\e[0J'
+CLEAR_EOL=$'\e[0K'
+CLEAR_SOL=$'\e[1K'
+CLEAR_LINE=$'\e[2K'
+SCREEN_RESTORE=$'\e[?47l'
+SCREEN_SAVE=$'\e[?47h'
+erase_line(){
+_deprecated "Use $CLEAR_LINE" warn
+printf "$CLEAR_LINE"
+}
+option_parse(){
+local opt name type desc short="" long="" spec="$1" permute
+[ -n "$spec" ]||die "$(gettext 'A specification string is needed as first argument')"
+if [[ $spec =~ ^\+ ]];then
+permute=+
+spec="${spec:1}"
+fi
+while IFS=$' \t\n' read -r opt name type desc;do
+[[ $opt =~ ^# ]]&&continue
+[[ -z $opt ]]&&continue
+if [[ $type == *\? ]];then
+[ "$opt" = "-" ]||short+="$opt::"
+long+="$name::,"
+elif [ ! "$type" = "-" ];then
+[ "$opt" = "-" ]||short+="$opt:"
+long+="$name:,"
+else
+[ "$opt" = "-" ]||short+="$opt"
+long+="$name,"
+fi
+done <<<"$spec"
+shift
+getopt -q -o "$permute$short" --long "$long" -n "$0" -- "$@"
+}
+option_help(){
+is set --name=spec --die -- "$1"
+declare opt name type desc
+declare -A opt_descriptions
+declare -A opt_type
+declare -A opt_short
+while read -r opt name type desc;do
+[[ $opt =~ ^# ]]&&continue
+is empty -- "$opt"&&continue
+opt_descriptions[$name]="$desc"
+[[ $type == *\? ]]&&opt_type[$name]="[${type%?}]"||opt_type[$name]=$type
+opt_short[$name]=$opt
+done <<<"$1"
+printf '%s\n' "$(gettext "Options"):"
+for name in "${!opt_descriptions[@]}";do
+local type_text=""
+local short_text=""
+if [ ! "${opt_type[$name]}" = "-" ];then
+type_text=" <${opt_type[$name]}>"
+fi
+if [[ ! ${opt_short[$name]} == "-" ]];then
+short_text="-${opt_short[$name]}$type_text, "
+fi
+printf "  %-40s %s\n" "$short_text--$name$type_text" "${opt_descriptions[$name]}"
+done
+}
+input(){
+test -p /dev/stdin&&(($#==0))&&cat -||printf '%s' "$*"
+}
+input_args(){
+local num=${1-}
+local start=$((num+2))
+is set --name="num" --die -- "$num"
+((num>0))||die "<num>=$num $(gettext 'argument is not a valid number!')"
+test -p /dev/stdin&&(($#<num+2))&&cat -||echo -n "${@:start}"
+}
+input_lines(){
+if [ -p /dev/stdin ]&&is empty -- "$1";then
+cat -
+else
+printf '%s\n' "$@"
+fi
+}
+escape_args(){
+printf '%q ' "$@"
+}
+contains(){
+_deprecated "use array <array-name> has <value>"
+}
+array(){
+local cmd value
+is set --name=array-name --die -- "$1"
+is enum --name=command --allow="has indexof" --die --output=cmd -- "$2"
+is set --name=value --die --output=value -- "$3"
+is integer --name=arguments --max=3 --die -- $#
+declare -n arr="$1"
+case "$cmd" in
+has)for e in "${arr[@]}"
+do
+[ ! "$e" = "$value" ]||return 0
+done
+return 1
+;;
+indexof)for i in "${!arr[@]}"
+do
+if [ "${arr[i]}" = "$value" ];then
+printf '%s' "$i"
+return 0
+fi
+done
+return 1
+esac
+}
+join(){
+is integer --name=arguments --max=2 --die -- $#
+is set --name=array-name --die -- "$1"
+local -n array=$1
+local sep="${2:-,}"
+local joined="${array[0]}"
+for element in "${array[@]:1}";do
+joined+="$sep$element"
+done
+printf '%s' "$joined"
+}
+split(){
+is integer --name=arguments --max=3 --die -- $#
+is set --name=array-name --die -- "$2"
+local string="$1"
+local -n array=$2
+local sep="${3:-,}"
+IFS="$sep" read -ra array <<<"$string"
+}
+hash(){
+local keyFormat="simple"
+eval set -- "$(option_parse $'k key-format +' "$@")"
+while true;do
+case "$1" in
+-k|--key-format)is enum --allow="simple base64" --output -- "$2"&&keyFormat="$2"&&shift 2;;
+--)shift&&break;;
+*)die "$(gettext "Unrecognized option"): $1"
+esac
+done
+is integer --name=arguments --max=4 --die -- $#
+is set --name=array-name --die -- "$1"
+is enum --name=command --allow="set get unset has contains" --die -- "$2"
+declare -n arr="$1"
+local cmd="$2" key value="$4"
+case $keyFormat in
+base64)key="$(base64 -w0 <<<"$3")";;
+simple)key="${3//[^a-zA-Z0-9_]/_}"
+esac
+case "$cmd" in
+set)is set --name=key --die -- "$3"&&arr["$key"]="$value";;
+get)is set --name=key --die -- "$3"&&printf '%s' "${arr["$key"]}";;
+unset)is set --name=key --die -- "$3"&&unset 'arr[$key]';;
+has)is set --name=key --die -- "$3"&&[[ -v arr["$key"] ]];;
+contains)is set --name=value --die -- "$3"
+for key in "${!arr[@]}";do
+[[ ${arr["$key"]} != "$3" ]]||return 0
+done
+return 1
+esac
 }
 BASHLIB_HOME=${BASHLIB_HOME:-$HOME/bashlib}
 DEBUG=${DEBUG-}
@@ -268,29 +321,39 @@ date +%s
 date_diff(){
 is integer --name=arguments --max=2 --die -- $#
 local start end
+end="${2:-$(now)}"
 is integer -- "$1"&&start="$1"||start=$(date -d "$1" +%s)||die "Date format '$1' not parsable!"
-is integer -- "$2"&&end="$2"||end=$(date -d "$2" +%s)||die "Date format '$2' not parsable!"
-echo $((end-start))
+is integer -- "$end"||end=$(date -d "$end" +%s)||die "Date format '$2' not parsable!"
+printf '%s' $((end-start))
 }
 date_format(){
 is integer --name=arguments --max=2 --die -- $#
 is set --name=format --die -- "$1"
-local value format
+local value format opt
 case $1 in
 iso)format="-Iseconds";;
 iso-date)format="-I";;
-zulu)format="-u +%Y-%m-%dT%H:%M:%SZ";;
-sql)format='+"%Y-%m-%d %H:%M:%S"';;
+zulu)opt="-u"&&format="+%Y-%m-%dT%H:%M:%SZ";;
+sql)format="+%Y-%m-%d %H:%M:%S";;
 unix)format="+%s";;
 eu-date)format="+%Y-%m-%d";;
 us-date)format="+%m/%d/%Y";;
-human-date)format="+%A, %B %d, %Y";;
+human)format="$(gettext "+%A, %B %d, %Y at %H:%M:%S")";;
+human-date)format="$(gettext "+%A, %B %d, %Y")";;
 time)format="+%H:%M:%S";;
 time-short)format="+%H:%M";;
 *)format="+$1"
 esac
 value="${2-$(now)}"
-is integer -- "$value"&&eval "date -d @$value $format"||eval "date -d \"$value\" $format"||die "Date format '$value' not parsable!"
+is integer -- "$value"&&eval "date -d @$value '$format'"||eval "date -d \"$value\" $opt '$format'"||die "Date format '$value' not parsable!"
+}
+sleep_until(){
+is integer --name=arguments --max=1 --die -- $#
+is set --name=date --die -- "$1"
+local secs
+secs="$(date_diff "$(now)" "$1")"
+((secs>0))||die "Date has to be in the future for sleep_until"
+sleep "$secs"
 }
 duration_format(){
 is integer --name=arguments --max=2 --die -- $#
@@ -298,10 +361,10 @@ is enum --name=format --allow="seconds minutes hours days human" --die -- "$1"
 local value
 is integer -- "$2"&&value="$2"||value="$(_parse_duration "$2")"
 case $1 in
-seconds)echo "$value";;
-minutes)echo $((value/60));;
-hours)echo $((value/3600));;
-days)echo $((value/86400));;
+seconds)printf '%s' "$value";;
+minutes)printf '%s' $((value/60));;
+hours)printf '%s' $((value/3600));;
+days)printf '%s' $((value/86400));;
 human)_format_duration "$value"
 esac
 }
@@ -354,7 +417,7 @@ local out=""
 ((m))&&out+="${m}m "
 ((s))&&out+="${s}s "
 is empty -- "$out"&&out="0s"&&sign=""||true
-echo "$sign${out% }"
+printf '%s' "$sign${out% }"
 }
 _timer_start=0
 timer(){
@@ -362,7 +425,7 @@ case $1 in
 start)_timer_start=$(date +%s.%N)
 ;;
 stop)local seconds nano len
-IFS='.' read -r seconds nano <<<"$(echo "$(date +%s.%N) - $_timer_start"|bc)"
+IFS='.' read -r seconds nano < <(printf '%s' "$(date +%s.%N) - $_timer_start"|bc)
 len=$((4-${#seconds}))
 ((len>=0))||len=0
 LANG=C printf "%0.${len}f\n" "$seconds.$nano"
@@ -373,11 +436,9 @@ esac
 }
 timer_start(){
 _deprecated "Use: timer start"
-timer start
 }
 timer_stop(){
 _deprecated "Use: timer stop"
-timer stop
 }
 export TEXTDOMAIN=bashlib
 export TEXTDOMAINDIR=$BASHLIB_HOME/locale
@@ -385,7 +446,7 @@ source gettext.sh
 _deprecated(){
 IFS=$' \t\n' read -r line func file <<<"$(caller 1)"
 local message="DEPRECATED: ${FUNCNAME[1]} at $func in $file:$line $1"
-[ -n "$2" ]&&echo -e "$CC_WARN$message (update it)$CC_RESET" >&2||die "$message"
+[ -n "$2" ]&&printf "$CC_WARN%s$CC_RESET" "$message (update it)" >&2||die "$message"
 }
 _stacktrace(){
 local frame=1 line func src bestChoice
@@ -442,7 +503,7 @@ local sig="$2"
 local current new
 debug 3 "remove $remove from $sig"
 current="$(trap -p "$sig"|awk -F"'" '{print $2}')"
-new="$(echo "$current"|sed "s#;* *$remove##")"
+new="$(printf '%s' "$current"|sed "s#;* *$remove##")"
 trap "$new" "$sig"
 }
 mktemp(){
@@ -470,9 +531,7 @@ while [ -e "$result" ];do
 result="$path/$(basename "$0")$ident$RANDOM$ext"
 done
 fi
-if [ -e "$result" ];then
-debug "already exists $result"
-else
+if [ ! -e "$result" ];then
 if is set -- "$dir";then
 debug "create dir $result"
 mkdir -p "$result"
@@ -481,7 +540,7 @@ debug "create file $result"
 touch "$result"
 fi
 fi
-echo "$result"
+printf '%s' "$result"
 is empty -- "$ttl"||(_rm_temp "$ttl" "$result" >/dev/null 2>&1&
 disown)
 }
@@ -499,7 +558,8 @@ curl(){
 local args=() i=1 store
 while [[ $i -le $# ]];do
 if [[ ${!i} == "--store" ]];then
-store=1
+((i++))
+store=${!i}
 shift "$i"
 i=1
 continue
@@ -513,19 +573,34 @@ local file res
 array args has '-o'||file=$(mktemp -r)
 local opt
 [ -z "$file" ]||opt="-o $file"
-debug "command curl -s -w \"Error: %{url_effective} with RC:%{http_code}\" $opt -L $(escape_args "$@")"
+debug "curl -s $opt -L $(escape_args "$@")"
 res=$(command curl -s -w "%{url_effective} with RC:%{http_code}" $opt -L "$@"|tail -1)
 debug "Response: $res"
 CURL_HTTP_CODE=${res: -3}
-[ -z "$store" ]||variables store curl CURL_HTTP_CODE
+[ -z "$store" ]||variables store "$store" CURL_HTTP_CODE
+if [[ ! $CURL_HTTP_CODE =~ ^2[0-9]{2}$ ]];then
+error "Error: $res" >&2
+if [ -e "$file" ];then
+local val
+val="$(cat "$file")"
+[[ $val =~ ^\{ ]]&&jq . <<<"$val"|warn >&2||warn "$val" >&2
+fi
+fi
 if [ -n "$file" ];then
 cat "$file"
 rm "$file"
 fi
-if [[ ! $CURL_HTTP_CODE =~ ^2[0-9]{2}$ ]];then
-error "Error: $res" >&2
-return 1
+[[ $CURL_HTTP_CODE =~ ^2[0-9]{2}$ ]]
+}
+first(){
+local value
+for value in "$@";do
+if [[ $value ]];then
+printf '%s' "$value"
+return 0
 fi
+done
+return 1
 }
 debug(){
 local level=1 func text sign='>'
@@ -552,15 +627,19 @@ is integer --name=arguments --max=1 --die -- $#
 local text trap line func src
 text="$(input "$@")"
 [[ $text != *"Uncaught exception at"* ]]||trap=1
-echo -e "$CC_CRITICAL$text in ${FUNCNAME[1]}$CC_RESET" >&2
+printf "$CC_CRITICAL%s$CC_RESET\n" "$text in ${FUNCNAME[1]}" >&2
 _stacktrace "$trap"
 if command -v log >/dev/null;then
 log critical "$text"
 _stacktrace "$trap" 2>&1|log critical
 fi
+if [[ $- == *i* ]];then
+return 143
+else
 sleep 1
 kill -- -$$ 2>/dev/null
 exit 143
+fi
 }
 help(){
 is integer --name=arguments --min=2 --max=4 --die -- $#
@@ -568,14 +647,13 @@ is set --name=heading --die -- "$1"
 is set --name=usage --die -- "$2"
 heading "$(gettext Help): $1"
 info "Usage: $2"
-echo ""
+printf '\n'
 if is set -- "$3";then
 option_help "$3"
-echo ""
+printf '\n'
 fi
 if is set -- "$4";then
-echo "$4"
-echo
+printf '%s\n\n' "$4"
 fi
 exit 0
 }
@@ -588,56 +666,56 @@ critical(){
 local text
 text="$(input "$@")"
 is set -- "$text"||return 0
-printf "%s\n" "$CC_CRITICAL$text$CC_RESET"
+printf '%s\n' "$CC_CRITICAL$text$CC_RESET"
 ((${#_log_active[@]}==0))||log critical "$text"
 }
 error(){
 local text
 text="$(input "$@")"
 is set -- "$text"||return 0
-printf "%s\n" "$CC_ERROR$text$CC_RESET"
+printf '%s\n' "$CC_ERROR$text$CC_RESET"
 ((${#_log_active[@]}==0))||log error "$text"
 }
 warn(){
 local text
 text="$(input "$@")"
 is set -- "$text"||return 0
-printf "%s\n" "$CC_WARN$text$CC_RESET"
+printf '%s\n' "$CC_WARN$text$CC_RESET"
 ((${#_log_active[@]}==0))||log warn "$text"
 }
 notice(){
 local text
 text="$(input "$@")"
 is set -- "$text"||return 0
-printf "%s\n" "$CC_NOTICE$text$CC_RESET"
+printf '%s\n' "$CC_NOTICE$text$CC_RESET"
 ((${#_log_active[@]}==0))||log notice "$text"
 }
 info(){
 local text
 text="$(input "$@")"
 is set -- "$text"||return 0
-printf "%s\n" "$text"
+printf '%s\n' "$text"
 ((${#_log_active[@]}==0))||log info "$text"
 }
 ok(){
 local text
 text="$(input "$@")"
 is set -- "$text"||return 0
-echo -e "$CC_OK$text$CC_RESET"
+printf "$CC_OK%s$CC_RESET\n" "$text"
 ((${#_log_active[@]}==0))||log notice "$text"
 }
 invers(){
 local text
 text="$(input "$@")"
 is set -- "$text"||return 0
-echo -e "$CC_INVERS$text$CC_RESET"
+printf "$CC_INVERS%s$CC_RESET\n" "$text"
 ((${#_log_active[@]}==0))||log info "$text"
 }
 color(){
 local text
 text="$(input_args 1 "$@")"
 is set -- "$text"||return 0
-echo -e "$CC_ERROR$text$CC_RESET"
+printf "$CC_ERROR%s$CC_RESET\n" "$text"
 ((${#_log_active[@]}==0))||log info "$text"
 }
 uncolorize(){
@@ -653,10 +731,6 @@ urlencode(){
 install jq
 input "$@"|jq -sRr @uri|sed 's/%0A$//'
 }
-erase_line(){
-is integer --name=arguments --max=0 --die -- $#
-printf '%b' $'\e[1K\r'
-}
 horizontal_line(){
 is integer --name=arguments --max=1 --die -- $#
 is empty -- "$1"||is enum --name=format --allow="light bold double half full"--die -- "$1"
@@ -671,7 +745,7 @@ esac
 local cols
 read -r _ cols < <(stty size)
 ((cols>60))||cols=60
-printf "%.0s$char" $(seq 1 "$cols")
+printf '%s\n' "$(character repeat "$cols" "$char")"
 }
 _spinner_pid=""
 spinner_start(){
@@ -699,7 +773,7 @@ weather)spinner='🌤🌥🌦🌧🌨🌩🌪';;
 *)spinner='-\|/'
 esac
 local back=$((size+1))
-printf '\e[?25l'
+printf "$CUR_HIDE"
 (while
 true
 do
@@ -719,14 +793,45 @@ kill "$_spinner_pid" >/dev/null 2>&1
 wait "$_spinner_pid" 2>/dev/null
 _spinner_pid=""
 printf "    \b\b\b\b"
-printf '\e[?25h'
+printf "$CUR_SHOW"
+}
+logo(){
+a=$'\e[36m'
+b=$'\e[33m\e[1m'
+c=$'\e[43m\e[30m\e[1m'
+r=$'\e[0m'
+u=$'\e[4m'
+p="$(character repeat $((($(tput cols)-80)/2)) ' ')"
+t="$(character repeat $((($(tput cols)-${#1})/2)) ' ')"
+printf '\n'
+printf "$p$a                         $b  __   ____     ___\n"
+printf "$p$a           ######  ##### $b ▕  ▏ ▕    ╲   ▕   ▏ $a  ########### #####       #####\n"
+printf "$p$a          ######## ##### $b ▕  ▏ ▕     ╲  ▕   ▏ $a ############  #####     #####\n"
+printf "$p$a         ######### ##### $b ▕  ▏ ▕  ▕╲  ╲ ▕   ▏ $a #####          #####   #####\n"
+printf "$p$a        ########## ##### $b ▕  ▏ ▕  ▕ ╲  ╲▕   ▏ $a #####           ##### #####\n"
+printf "$p$a       ##### ##### ##### $b ▕  ▏ ▕  ▕  ╲  ▔   ▏ $a ############     #########\n"
+printf "$p$a      #####  ##### ##### $b ▕  ▏ ▕  ▕   ╲     ▏ $a ############     #########\n"
+printf "$p$a     #####   ##### ##### $b ▕  ▏ ▕  ▕    ╲    ▏ $a #####           ##### #####\n"
+printf "$p$a    #####    ##### ##### $b  ▔▔   ▔▔▔     ▔▔▔▔  $a #####          #####   #####\n"
+printf "$p$a   ##### ######### ######""#####################"" ############  #####     #####\n"
+printf "$p$a  ##### ##########  #####""#################### ""  ########### #####       ##### $r\n"
+printf "$p$b▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄""▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄""▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄$r$c\n"
+printf "$t%s$r\n" "$1"
+printf "$p$b▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀""▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀""▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀$r\n"
+printf '\n'
 }
 check(){
-eval set -- "$(option_parse $'n name +\nd die -\ns sanitize -\n- min +\n- max +\n- allow +' "$@")"
-local name die sanitize min max allow
+_deprecated "Use is ... --output" warn
+is --output "$@"
+}
+is(){
+eval set -- "$(option_parse $'n name +\nd die -\ns sanitize -\n- min +\n- max +\n- allow +\no output ?\nm message +' "$@")"
+local name die sanitize min max allow message output
 while true;do
 case "$1" in
 -n|--name)name="$2"&&shift 2;;
+-m|--message)message="; $2"&&shift 2;;
+-o|--output)output="${2:--}"&&shift 2;;
 -d|--die)die=1&&shift;;
 -s|--sanitize)sanitize=1&&shift;;
 --min)[[ $2 =~ ^[-+]?[0-9]+([.][0-9]+)?$ ]]&&min="$2"&&shift 2||die "$(printf "$(gettext "Parameter %s needs number")" min)";;
@@ -745,13 +850,13 @@ case $check in
 set)if
 [ -z "$val" ]
 then
-[ -z "$die" ]&&return 1||die "$(eval_gettext 'The "$name" has to be set with a value')"
+[ -z "$die" ]&&return 1||die "$(eval_gettext 'The "$name" has to be set with a value')$message"
 fi
 ;;
 empty)if
 [ -n "$val" ]
 then
-[ -z "$die" ]&&return 1||die "$(eval_gettext 'The "$name" has to be empty but has »${val}«')"
+[ -z "$die" ]&&return 1||die "$(eval_gettext 'The "$name" has to be empty but has »${val}«')$message"
 fi
 ;;
 bool)if
@@ -761,7 +866,23 @@ res=1
 elif [[ -z $val || ${val,,} =~ ^(false|f|0|no|n|nein)$ ]];then
 res=0
 else
-[ -z "$die" ]&&return 1||die "$(eval_gettext 'The value »${val}« for "$name" could not be read as true or false')"
+[ -z "$die" ]&&return 1||die "$(eval_gettext 'The value »${val}« for "$name" could not be read as true or false')$message"
+fi
+;;
+true)if
+[[ ${val,,} =~ ^(true|t|1|yes|y|ja|j)$ ]]
+then
+res=1
+else
+[ -z "$die" ]&&return 1||die "$(eval_gettext 'The value »${val}« for "$name" should be true but was »${val}«')$message"
+fi
+;;
+false)if
+[[ -z $val || ${val,,} =~ ^(false|f|0|no|n|nein)$ ]]
+then
+res=0
+else
+[ -z "$die" ]&&return 1||die "$(eval_gettext 'The value »${val}« for "$name" should be false but was »${val}«')$message"
 fi
 ;;
 integer)if
@@ -770,23 +891,23 @@ then
 [[ $val =~ ^(-?[0-9]+) ]]&&res="${BASH_REMATCH[1]}"||true
 fi
 if [[ ! $res =~ ^-?[0-9]+$ ]];then
-[ -z "$die" ]&&return 1||die "$(eval_gettext 'The "$name" has to be an integer but »${val}« was given')"
+[ -z "$die" ]&&return 1||die "$(eval_gettext 'The "$name" has to be an integer but »${val}« was given')$message"
 fi
 if [[ -n $min ]]&&[[ $min == "$max" ]];then
 if ((res!=min));then
-[ -z "$die" ]&&return 1||die "$(eval_gettext 'The "$name" has to be exactly $min but »${val}« was given')"
+[ -z "$die" ]&&return 1||die "$(eval_gettext 'The "$name" has to be exactly $min but »${val}« was given')$message"
 fi
 elif [[ -n $min && -n $max ]];then
 if ((res<min||res>max));then
-[ -z "$die" ]&&return 1||die "$(eval_gettext 'The "$name" has to be between $min and $max but »${val}« was given')"
+[ -z "$die" ]&&return 1||die "$(eval_gettext 'The "$name" has to be between $min and $max but »${val}« was given')$message"
 fi
 elif [[ -n $min ]];then
 if ((res<min));then
-[ -z "$die" ]&&return 1||die "$(eval_gettext 'The "$name" has to at least $min but »${val}« was given')"
+[ -z "$die" ]&&return 1||die "$(eval_gettext 'The "$name" has to at least $min but »${val}« was given')$message"
 fi
 elif [[ -n $max ]];then
 if ((res>max));then
-[ -z "$die" ]&&return 1||die "$(eval_gettext 'The "$name" has to not be more than $max but »${val}« was given')"
+[ -z "$die" ]&&return 1||die "$(eval_gettext 'The "$name" has to not be more than $max but »${val}« was given')$message"
 fi
 fi
 ;;
@@ -796,145 +917,120 @@ then
 [[ $val =~ ^(-?[0-9]+([.][0-9]+)?) ]]&&res="${BASH_REMATCH[1]}"||true
 fi
 if [[ ! $res =~ ^-?[0-9]+([.][0-9]+)?$ ]];then
-[ -z "$die" ]&&return 1||die "$(eval_gettext 'The "$name" has to be a float but »${val}« was given')"
+[ -z "$die" ]&&return 1||die "$(eval_gettext 'The "$name" has to be a float but »${val}« was given')$message"
 fi
 if [[ -n $min ]]&&[[ $min == "$max" ]];then
 if ((res!=min));then
-[ -z "$die" ]&&return 1||die "$(eval_gettext 'The "$name" has to be exactly $min but »${val}« was given')"
+[ -z "$die" ]&&return 1||die "$(eval_gettext 'The "$name" has to be exactly $min but »${val}« was given')$message"
 fi
 elif [[ -n $min && -n $max ]];then
 if ((res<min||res>max));then
-[ -z "$die" ]&&return 1||die "$(eval_gettext 'The "$name" has to be between $min and $max but »${val}« was given')"
+[ -z "$die" ]&&return 1||die "$(eval_gettext 'The "$name" has to be between $min and $max but »${val}« was given')$message"
 fi
 elif [[ -n $min ]];then
 if ((res<min));then
-[ -z "$die" ]&&return 1||die "$(eval_gettext 'The "$name" has to at least $min but »${val}« was given')"
+[ -z "$die" ]&&return 1||die "$(eval_gettext 'The "$name" has to at least $min but »${val}« was given')$message"
 fi
 elif [[ -n $max ]];then
 if ((res>max));then
-[ -z "$die" ]&&return 1||die "$(eval_gettext 'The "$name" has to not be more than $max but »${val}« was given')"
+[ -z "$die" ]&&return 1||die "$(eval_gettext 'The "$name" has to not be more than $max but »${val}« was given')$message"
 fi
 fi
 ;;
 length)val=${#val}
 if [[ -n $min ]]&&[[ $min == "$max" ]];then
-if ((res!=min));then
-[ -z "$die" ]&&return 1||die "$(eval_gettext 'The length of "$name" has to be exactly $min but »${res}« is $val characters long')"
+if ((val!=min));then
+[ -z "$die" ]&&return 1||die "$(eval_gettext 'The length of "$name" has to be exactly $min but »${res}« is $val characters long')$message"
 fi
 elif [[ -n $min && -n $max ]];then
 if ((val<min||val>max));then
-[ -z "$die" ]&&return 1||die "$(eval_gettext 'The length of "$name" has to be between $min and $max but »${res}« is $val characters long')"
+[ -z "$die" ]&&return 1||die "$(eval_gettext 'The length of "$name" has to be between $min and $max but »${res}« is $val characters long')$message"
 fi
 elif [[ -n $min ]];then
 if ((val<min));then
-[ -z "$die" ]&&return 1||die "$(eval_gettext 'The length of "$name" has to be at least $min but »${res}« is $val characters long')"
+[ -z "$die" ]&&return 1||die "$(eval_gettext 'The length of "$name" has to be at least $min but »${res}« is $val characters long')$message"
 fi
 elif [[ -n $max ]];then
 if ((val>max));then
-[ -z "$die" ]&&return 1||die "$(eval_gettext 'The length of "$name" has to be not more than $max but »${res}« is $val characters long')"
+[ -z "$die" ]&&return 1||die "$(eval_gettext 'The length of "$name" has to be not more than $max but »${res}« is $val characters long')$message"
 fi
 fi
 ;;
-enum)[ -n "$allow" ]||die "$(gettext "A list with --allow=<words> is needed for enum check")"
+enum)[ -n "$allow" ]||die "$(gettext "A list with --allow=<words> is needed for enum check")$message"
 if [[ " $allow " != *" $val "* ]];then
-[ -z "$die" ]&&return 1||die "$(eval_gettext '"$name" is set to "${val}" but has to be one of: $allow')"
+[ -z "$die" ]&&return 1||die "$(eval_gettext '"$name" is set to "${val}" but has to be one of: $allow')$message"
+fi
+;;
+date)if
+! res=$(date_format unix "$val")
+then
+[ -z "$die" ]&&return 1||die "$(eval_gettext 'The "$name" has to be a parsable date format but »${val}« was given')$message"
 fi
 ;;
 duration)[[ $res =~ ^-?[0-9] ]]&&res="$(duration_format seconds "$val")"||true
 if [[ ! $res =~ ^-?[0-9]+$ ]];then
-[ -z "$die" ]&&return 1||die "$(eval_gettext 'The "$name" has to be an integer or human duration but »${val}« was given')"
+[ -z "$die" ]&&return 1||die "$(eval_gettext 'The "$name" has to be an integer or human duration but »${val}« was given')$message"
 fi
 ;;
 path)if
 [ ! -e "$val" ]
 then
-[ -z "$die" ]&&return 1||die "$(eval_gettext 'The "$name" ${val} has to be an existing path')"
+[ -z "$die" ]&&return 1||die "$(eval_gettext 'The "$name" ${val} has to be an existing path')$message"
 fi
 ;;
 file)if
 [ ! -f "$val" ]
 then
-[ -z "$die" ]&&return 1||die "$(eval_gettext 'The "$name" ${val} has to be an existing file')"
+[ -z "$die" ]&&return 1||die "$(eval_gettext 'The "$name" ${val} has to be an existing file')$message"
 fi
 ;;
 directory)if
 [ ! -d "$val" ]
 then
-[ -z "$die" ]&&return 1||die "$(eval_gettext 'The "$name" ${val} has to be an existing directory')"
+[ -z "$die" ]&&return 1||die "$(eval_gettext 'The "$name" ${val} has to be an existing directory')$message"
 fi
 ;;
 readable)if
 [ ! -r "$val" ]
 then
-[ -z "$die" ]&&return 1||die "$(eval_gettext 'The "$name" ${val} has to be a file readable for user')"
+[ -z "$die" ]&&return 1||die "$(eval_gettext 'The "$name" ${val} has to be a file readable for user')$message"
 fi
 ;;
 writable)if
 [ ! -w "$val" ]
 then
-[ -z "$die" ]&&return 1||die "$(eval_gettext 'The "$name" ${val} has to be a file writable for user')"
+[ -z "$die" ]&&return 1||die "$(eval_gettext 'The "$name" ${val} has to be a file writable for user')$message"
 fi
 ;;
 *)die "$(eval_gettext 'A check named ${check} is not defined')"
 esac
-echo "$res"
-}
-is(){
-check "$@" >/dev/null
+if [ -n "$output" ];then
+[ "$output" = "-" ]&&printf '%s' "$res"||printf -v "$output" '%s' "$res"
+fi
 }
 num_parameters(){
-_deprecated "Use: is integer $# --min=<val> --max=<val>" warn
-eval set -- "$(option_parse $'- min +\n- max +\n- die +' "$@")"
-local min max die
-while true;do
-case "$1" in
---min)min=$2
-shift 2
-;;
---max)max=$2
-shift 2
-;;
---die)die=$2
-shift 2
-;;
---)shift
-break
-;;
-*)die "$(gettext "Unrecognized option"): $1"
-esac
-done
-_die(){
-read -r line func file <<<"$(caller 1)"
-echo "Check ${FUNCNAME[1]}: $1 ($func in $file:$line)" >&2
-[ -z "$die" ]||die "$die"
-return 1
-}
-[ -z "$min" ]||(($#>=min))||_die "[$*] $# < $min (min)"||return 1
-[ -z "$max" ]||(($#<=max))||_die "[$*] $# > $max (max)"||return 1
+_deprecated "Use: is integer $# --min=<val> --max=<val>"
 }
 is_empty(){
 _deprecated "Use: is empty -- <value>"
-is empty -- "$1"
 }
 is_integer(){
-_deprecated "Use: is integer <value>" warn
-is integer -- "$1"
+_deprecated "Use: is integer <value>"
 }
 is_float(){
-_deprecated "Use: is float -- <value>" warn
-is float -- "$1"
+_deprecated "Use: is float -- <value>"
 }
 trim_start(){
 is integer --name=arguments --max=2 --die -- $#
 local str="${1-}"
 local char="${2:-[:space:]}"
-echo "${str#"${str%%[!$char]*}"}"
+printf '%s' "${str#"${str%%[!$char]*}"}"
 }
 trim_end(){
 is integer --name=arguments --max=2 --die -- $#
 local str="${1:-}"
 local char="${2:-[:space:]}"
-echo "${str%"${str##*[!$char]}"}"
+printf '%s' "${str%"${str##*[!$char]}"}"
 }
 trim(){
 is integer --name=arguments --max=2 --die -- $#
@@ -944,15 +1040,15 @@ to_alphanum(){
 is integer --name=arguments --max=1 --die -- $#
 local text
 text="$(input "$@")"
-echo "${text//[^a-zA-Z0-9_]/_}"
+printf '%s' "${text//[^a-zA-Z0-9_]/_}"
 }
 value_if_variable(){
 is integer --name=arguments --max=2 --die -- $#
 local _name="$1"
 if [[ $_name =~ ^[a-zA-Z_][a-zA-Z0-9_]*$ ]]&&[ -n "${!_name-}" ];then
-echo "${!_name}"
+printf '%s' "${!_name}"
 else
-echo "$_name"
+printf '%s' "$_name"
 fi
 }
 [[ $- =~ i ]]||set -eE
@@ -971,80 +1067,271 @@ jira(){
 is set --name=JIRA_HOST --die -- "$JIRA_HOST"
 is set --name=ATLASSIAN_USER --die -- "$ATLASSIAN_USER"
 is set --name=ATLASSIAN_TOKEN --die -- "$ATLASSIAN_TOKEN"
-is enum --name=command --allow="get search create delete json" --die -- "$1"&&local command="$1"&&shift
+is enum --name=command --allow="get search create update delete project fields json adf_to_md md_to_adf" --die -- "$1"&&local command="$1"&&shift
 case "$command" in
 get)is set --name=arguments --max=1 --die -- $#
 is set --name=issueId-or-key --die -- "$1"
-debug "GET $1"
+debug "GET issue $1"
 _jira GET "issue/$1"
 ;;
 search)is set --name=arguments --max=1 --die -- $#
 is set --name=jql --die -- "$1"
-debug "SEARCH $1"
+debug "SEARCH issue $1"
 local res rc=0
 _jira GET "search/jql?jql=$(urlencode "$1")"|jq .issues[].id -r
 ;;
 create)is set --name=arguments --max=1 --die -- $#
 is set --name=json --die -- "$1"
-debug "CREATE Issue ${jq-r '.fields.summary' <<<"$1"}"
-_jira POST issue "$1"|jq .id
+debug "CREATE issue ${jq-r '.fields.summary' <<<"$1"}"
+_jira POST issue "$1"|jq .id -r
+;;
+update)is set --name=arguments --max=2 --die -- $#
+is set --name=issueId-or-key --die -- "$1"
+is set --name=json --die -- "$2"
+debug "UPDATE issue $1"
+_jira PUT "issue/$1" "$2" >/dev/null
 ;;
 delete)is set --name=arguments --max=1 --die -- $#
 is set --name=issueId-or-key --die -- "$1"
-debug "DELETE $1"
+debug "DELETE issue $1"
 _jira GET "issue/$1"
 ;;
-json)local empty='{"fields":{}}'
-local json="${1:-$empty}"&&shift
+project)is set --name=arguments --max=1 --die -- $#
+is set --name=projectId-or-key --die -- "$1"
+debug "GET project $1"
+_jira GET "project/$1"
+;;
+fields)is set --name=arguments --max=2 --die -- $#
+is set --name=projectId-or-key --die -- "$1"
+is set --name=issueTypeId --die -- "$2"
+debug "GET fields $1/$2"
+_jira GET "issue/createmeta/$1/issuetypes/$2"
+;;
+json)local empty='{"fields":{}}' var="$1"
+local json="${!1:-$empty}"&&shift
 is enum --name=sub-command --allow="set get remove" --die -- "$1"&&local subCommand="$1"&&shift
 is set --name=field --die -- "$1"&&local field="$1"
 case "$subCommand" in
-set)jq --arg v "$2" ".fields.$field = \$v" <<<"$json";;
-get)jq ".fields.$field" <<<"$json";;
-remove)jq "del(.fields.$field)" <<<"$json"
+set)if
+[ -z "$2" ]||[[ $2 =~ ^adf$|^json$ && -z $3 ]]
+then
+jira json "$var" remove "$field"
+elif [ "$2" = "json" ]&&[ -n "$3" ];then
+printf -v "$var" '%s' "$(jq -c --argjson v "$3" ".fields.$field = \$v" <<<"$json")"
+elif [ "$2" = "adf" ]&&[ -n "$3" ];then
+local val
+[[ $3 =~ ^\{ ]]&&val="$3"||val="$(jira md_to_adf "$3")"
+printf -v "$var" '%s' "$(jq -c --argjson v "$val" ".fields.$field = \$v" <<<"$json")"
+elif is integer -- "$2";then
+printf -v "$var" '%s' "$(jq -c ".fields.$field = $2" <<<"$json")"
+else
+printf -v "$var" '%s' "$(jq -c --arg v "$2" ".fields.$field = \$v" <<<"$json")"
+fi
+;;
+get)local val
+val="$(jq -c ".fields.$field" <<<"$json")"
+[ ! "$val" = null ]||val=""
+[[ $2 == "md" && $val =~ ^\{ ]]&&jira adf_to_md "$val"||printf '%s' "$val"
+;;
+remove)printf -v "$var" '%s' "$(jq -c "del(.fields.$field)" <<<"$json")"
 esac
+;;
+adf_to_md)is set --name=json --die -- "$1"&&local json="$1"
+jq -r '
+    def para(p):
+      p.content[]?.text // "";
+
+    .content[] |
+    if .type == "paragraph" then
+      para(.) + "\n"
+
+    elif .type == "bulletList" then
+      (
+        .content
+        | map("- " + para(.content[0]))
+        | join("\n")
+      ) + "\n\n"
+
+    elif .type == "orderedList" then
+      (
+        .content
+        | to_entries
+        | map("\(.key + 1). " + para(.value.content[0]))
+        | join("\n")
+      ) + "\n\n"
+
+    elif .type == "codeBlock" then
+      "```\n" + (.content[0].text) + "\n```\n\n"
+
+    else
+      ""
+    end
+  ' <<<"$1"|sed -E '
+    s/<strong>(.+?)<\/strong>/**\1**/g
+    s/<em>(.+?)<\/em>/*\1*/g
+    s/<code>(.+?)<\/code>/`\1`/g
+  '
+;;
+md_to_adf)is set --name=text --die -- "$1"
+jq -c -n --arg text "$1" '
+    def paragraph(t):
+      { type: "paragraph", content: [{ type: "text", text: t }] };
+
+    def bullet(items):
+      {
+        type: "bulletList",
+        content: items | map({
+          type: "listItem",
+          content: [ paragraph(.) ]
+        })
+      };
+
+    def ordered(items):
+      {
+        type: "orderedList",
+        attrs: { order: 1 },
+        content: items | map({
+          type: "listItem",
+          content: [ paragraph(.) ]
+        })
+      };
+
+    ($text | split("\n")) as $lines
+    | reduce $lines[] as $line (
+        { out: [], mode: null, buf: [], pBuf: [] };
+
+        # empty line → flush paragraph or list
+        if $line == "" then
+          if .mode == "ul" then
+            .out += [ bullet(.buf) ]
+            | .buf = [] | .mode = null
+          elif .mode == "ol" then
+            .out += [ ordered(.buf) ]
+            | .buf = [] | .mode = null
+          elif (.pBuf | length) > 0 then
+            .out += [ paragraph(.pBuf | join("\n")) ]
+            | .pBuf = []
+          else .
+          end
+
+        # bullet list
+        elif ($line | startswith("- ")) then
+          if (.pBuf | length) > 0 then
+            .out += [ paragraph(.pBuf | join("\n")) ]
+            | .pBuf = []
+          else .
+          end
+          | if .mode == "ul" then
+              .buf += [ $line[2:] ]
+            else
+              if .mode == "ol" then
+                .out += [ ordered(.buf) ]
+              end
+              | .mode = "ul"
+              | .buf = [ $line[2:] ]
+            end
+
+        # ordered list
+        elif ($line | test("^[0-9]+\\. ")) then
+          if (.pBuf | length) > 0 then
+            .out += [ paragraph(.pBuf | join("\n")) ]
+            | .pBuf = []
+          else .
+          end
+          | if .mode == "ol" then
+              .buf += [ ($line | sub("^[0-9]+\\. "; "")) ]
+            else
+              if .mode == "ul" then
+                .out += [ bullet(.buf) ]
+              end
+              | .mode = "ol"
+              | .buf = [ ($line | sub("^[0-9]+\\. "; "")) ]
+            end
+
+        # normal text → append to paragraph buffer
+        else
+          if .mode == "ul" then
+            .out += [ bullet(.buf) ]
+            | .buf = [] | .mode = null
+          elif .mode == "ol" then
+            .out += [ ordered(.buf) ]
+            | .buf = [] | .mode = null
+          else .
+          end
+          | .pBuf += [ $line ]
+        end
+      )
+    # flush leftovers
+    | (
+        .out
+        + (if .mode == "ul" then [ bullet(.buf) ]
+           elif .mode == "ol" then [ ordered(.buf) ]
+           else [] end)
+        + (if (.pBuf | length) > 0 then [ paragraph(.pBuf | join("\n")) ]
+           else [] end)
+      )
+    | {
+        type: "doc",
+        version: 1,
+        content: .
+      }
+  '|sed -E '
+    s/\*\*(.+?)\*\*/<strong>\1<\/strong>/g
+    s/\*(.+?)\*/<em>\1<\/em>/g
+    s/`([^`]+)`/<code>\1<\/code>/g
+  '
 esac
 }
 _jira(){
 local METHOD=$1
 local REST="$2"
 local DATA="$3"
-local api=/rest/api/3
+local api=rest/api/3
 local res rc=0 num=0 retry=3
 while ((num<=retry));do
 ((num==0))||debug "Retry $num"
-res="$(curl --store --request "$METHOD" --url "$JIRA_HOST/$api/$REST" --user "$ATLASSIAN_USER:$ATLASSIAN_TOKEN" --data "$DATA" -H "Content-Type: application/json")"||rc=$?
-variables restore --clean curl
+res="$(curl --store $$ --request "$METHOD" --url "$JIRA_HOST/$api/$REST" --user "$ATLASSIAN_USER:$ATLASSIAN_TOKEN" --data "$DATA" -H "Content-Type: application/json")"||rc=$?
+variables restore --clean $$
 if ((rc==0));then
-echo "$res"
+printf '%s' "$res"
 return
 else
 case $CURL_HTTP_CODE in
-400|404)(echo -n "HTTP Code $CURL_HTTP_CODE: "&&jq .errorMessages[] -r <<<"$res"||echo "$res")|die
+400|404)(printf "HTTP Code $CURL_HTTP_CODE: "&&jq .errorMessages[] -r <<<"$res"||printf '%s' "$res")|die
 esac
 fi
 ((num++))||true
 sleep $(((num+1)**2))
 done
-(echo -n "HTTP Code $CURL_HTTP_CODE: "&&jq .errorMessages[] -r <<<"$res"||echo "$res")|die
+(printf "HTTP Code $CURL_HTTP_CODE: "&&jq .errorMessages[] -r <<<"$res"||printf '%s' "$res")|die
 }
 use module/software
 mongo(){
+local host="$server"
+eval set -- "$(option_parse $'h host +' "$@")"
+while true;do
+case "$1" in
+-h|--host)host="$2"&&shift 2;;
+--)shift&&break;;
+*)die "$(gettext "Unrecognized option"): $1"
+esac
+done
+debug "$*"
 is integer --name=arguments --max=2 --die -- $#
 is set --name=command --die -- "$2"
 local cluster key
 install mongosh
-cluster="$(sed 's/^[^.]*\.//' <<<"$server")"
+cluster="$(sed 's/^[^.]*\.//' <<<"$host")"
 debug "Use settings for $cluster"
-command mongosh "mongodb://$(hash MONGO_ADMIN_USERPASS get "$cluster")@$server:27017/$1" \
+command mongosh "mongodb://$(hash MONGO_ADMIN_USERPASS get "$cluster")@$host:27017/$1" \
 --eval "print(EJSON.stringify($2))"
 }
 postgres(){
-echo "TODO"
+printf '%s' "TODO"
 }
 dns_list(){
 is integer --name=arguments --max=1 --die -- $#
-echo $'NAME\tTYPE\tCONTENT\tTTL'
+printf "$(gettext 'NAME\tTYPE\tCONTENT\tTTL')\n"
 powerdns "$1"|tail -n +2||true
 plusserver_dns "$1"|tail -n +2||true
 }
@@ -1054,7 +1341,7 @@ if [ -z "$POWERDNS_API" ]||[ -z "$POWERDNS_TOKEN" ];then
 debug "Disabled because POWERDNS_API and POWERDNS_TOKEN are not both set"
 return 0
 fi
-echo $'NAME\tTYPE\tCONTENT\tTTL'
+printf "$(gettext 'NAME\tTYPE\tCONTENT\tTTL')\n"
 curl -s -H "X-API-Key:$POWERDNS_TOKEN" "$POWERDNS_API/servers/localhost/search-data?q=*&max=10000"|jq -r '.[] | select(.object_type == "record" and .disabled == false) | [(.name | sub("\\.$"; "")), .type, (.content | sub("\\.$"; "")), .ttl] | @tsv'|grep -E "$1"
 }
 plusserver_dns(){
@@ -1067,9 +1354,8 @@ local list time
 list="$(ls -lt ~/Downloads/csv_list*.csv|head -1|cut -d' ' -f 9-)"
 time="$(ls -lt ~/Downloads/csv_list*.csv|head -1|cut -d' ' -f 6-8)"
 warn "$(eval_gettext 'To update $PLUSSERVER_PORTAL/services/nameservers -> download CSV (manually).')" >&2
-test -n "$list"||die "Keine lokale DNS Liste gefunden, bitte herunterladen."
-echo "Benutze $list vom $time." >&2
-echo "" >&2
+test -n "$list"||die "$(gettext 'No local DNS list found, please download it.')"
+printf '%s\n\n' "$(eval_gettext 'Use $list from $time.')" >&2
 mlr --icsv --ifs ';' --otsv \
 put '$name = $record_name . "." . $zone; $record_data = substr($record_data,0,80)' then \
 cut -o -f name,record_type,record_data,record_ttl then \
@@ -1082,24 +1368,23 @@ is integer --name=arguments --max=1 --die -- $#
 local path
 path="$(input "$@")"
 path="${path%/}"
-echo "${path##*/}"
+printf '%s' "${path##*/}"
 }
 dirname(){
 is integer --name=arguments --max=1 --die -- $#
 local path
 path="$(input "$@")"
-[[ $path == '/' ]]&&echo '/'&&return 0
-[[ $path =~ ^'../' ]]&&echo '.'&&return 0
-[[ ! $path =~ / ]]&&echo '.'&&return 0
-echo "${path%/*}"
+[[ $path == '/' ]]&&printf '/'&&return 0
+[[ $path =~ ^'../' ]]&&printf '.'&&return 0
+[[ ! $path =~ / ]]&&printf '.'&&return 0
+printf '%s' "${path%/*}"
 }
 extname(){
 is integer --name=arguments --max=1 --die -- $#
 local path
 path="$(input "$@")"
-[[ $path =~ ^\. ]]&&echo ''&&return
-[[ ! $path =~ \. ]]&&echo ''&&return
-echo ".${path##*.}"
+[[ $path =~ ^\. || ! $path =~ \. ]]&&return
+printf '%s' ".${path##*.}"
 }
 script_path(){
 is integer --name=arguments --max=0 --die -- $#
@@ -1123,26 +1408,26 @@ text="$(input "$@")"
 if is empty -- "$text";then
 is set -- "$timeout"&&is empty -- "$abort"&&text="$(gettext 'Please wait to go on')"||text="$(gettext 'Press any key to continue...')"
 fi
-echo -en "$CC_NOTICE$text$CC_RESET "
+printf "$CC_NOTICE%s$CC_RESET $CURSOR_STORE" "$text"
 if is empty -- "$timeout";then
 read -n 1 -s -r _ </dev/tty
 else
 stty -echo </dev/tty
 while ((timeout>0));do
-echo -ne "\r$CC_NOTICE$text$CC_RESET $(duration_format human "$timeout")     "
+printf "$CURSOR_RESTORE$CLEAR_EOL%s " "$(duration_format human "$timeout")"
 if read -r -s -t 1 -n 1 _ </dev/tty;then
 if [ -n "$abort" ];then
-echo -e "\b\b\b\b$(gettext 'aborted by user')    "
+printf "$CURSOR_RESTORE%s\n" "$(gettext 'go on by user')"
 stty echo </dev/tty
 return 1
 fi
 fi
 ((timeout--))
-((timeout>0))||echo -ne "\r$CC_NOTICE$text$CC_RESET 0s      "
+((timeout>0))||printf "$CURSOR_RESTORE$CLEAR_EOL%s" "0s"
 done
 stty echo </dev/tty
 fi
-echo ""
+printf '\n'
 }
 confirm(){
 local default timeout
@@ -1159,26 +1444,20 @@ done
 is integer --name=arguments --max=1 --die -- $#
 local prompt
 prompt="${1:-$(gettext "Should this be done")}"
-local char="" seq i_text invalid rc
+local char="" seq rc
 local countdown="$timeout"
 if is set -- "$default";then
 ((default==0))&&prompt="$prompt [$(gettext "No")]"||prompt="$prompt [$(gettext "Yes")]"
 fi
-echo -en "$CC_NOTICE$prompt?$CC_RESET " >/dev/tty
-stty -echo </dev/tty
+printf "$CC_NOTICE%s$CC_RESET $CURSOR_STORE" "$prompt?" >/dev/tty
 while IFS= read -r -s -t 1 -n 1 char </dev/tty||rc=$?;do
-if [ -n "$invalid" ];then
-invalid=0
-printf ' %.0s' {1..30} >/dev/tty
-printf '\b%.0s' {1..30} >/dev/tty
-fi
+printf "$CLEAR_EOF" >/dev/tty
 if ((rc==142));then
 rc=0
 if [ -n "$timeout" ];then
 ((countdown--))
 if ((countdown>0));then
-i_text="  $(duration_format human "$countdown")     "
-echo -ne "$i_text$(printf '\b%.0s' $(seq 1 ${#i_text}))" >/dev/tty
+printf "$CURSOR_RESTORE$CLEAR_EOL%s" "$(duration_format human "$countdown")" >/dev/tty
 continue
 fi
 else
@@ -1188,52 +1467,44 @@ fi
 if [[ $char == "" ]];then
 if [ -n "$default" ];then
 if ((default==1));then
-echo -e "$(gettext "Yes")     " >/dev/tty
+printf "$CURSOR_RESTORE$CLEAR_EOL%s\n" "$(gettext "Yes")" >/dev/tty
 stty echo </dev/tty
 return 0
 else
-echo -e "$(gettext "No")     " >/dev/tty
+printf "$CURSOR_RESTORE$CLEAR_EOL%s\n" "$(gettext "No")" >/dev/tty
 stty echo </dev/tty
 return 1
 fi
-elif [ -n "$i_text" ];then
-i_text="$(gettext 'value needed')"
-echo -en "   $CC_RED$i_text$CC_RESET$(printf '\b%.0s' $(seq 1 $((${#i_text}+3))))" >/dev/tty
-invalid=1
+else
+printf "$CURSOR_RESTORE$CLEAR_EOL$CC_RED%s$CC_RESET" "$(gettext 'value needed')" >/dev/tty
 fi
-elif [[ $char == $'\033' ]];then
+elif [[ $char == $'\e' ]];then
 read -r -s -n 1 -t 0.01 seq
 while [[ $seq == "[" || $seq =~ [0-9A-Za-z~] ]];do
 read -r -s -n 1 -t 0.01 seq||break
 done
 elif [[ $char =~ [JjYy] ]];then
-echo -e "$(gettext "Yes")" >/dev/tty
+printf "$CURSOR_RESTORE$CLEAR_EOL%s\n" "$(gettext "Yes")" >/dev/tty
 stty echo </dev/tty
 return 0
 elif [[ $char =~ [Nn] ]];then
-echo -e "$(gettext "No")" >/dev/tty
+printf "$CURSOR_RESTORE$CLEAR_EOL%s\n" "$(gettext "No")" >/dev/tty
 stty echo </dev/tty
 return 1
 else
-i_text="$(gettext 'invalid character')"
-echo -en "   $CC_RED$i_text$CC_RESET$(printf '\b%.0s' $(seq 1 $((${#i_text}+3))))" >/dev/tty
-invalid=1
+printf "$CURSOR_RESTORE$CLEAR_EOL$CC_RED%s$CC_RESET" "$(gettext 'invalid character')" >/dev/tty
 fi
-i_text=""
 done
 stty echo </dev/tty
 }
 ask_no(){
-_deprecated "use confirm --false <question>" warn
-confirm --false "$1"
+_deprecated "use confirm --false <question>"
 }
 ask_yes(){
 _deprecated "use confirm --true <question>"
-confirm --true "$1"
 }
 ask_input(){
 _deprecated "use ask string <question>"
-ask "$@"
 }
 ask(){
 local default empty negative timeout
@@ -1281,26 +1552,26 @@ text)prompt="${2:-$(gettext "Enter text (end with empty line)")}";;
 editor)prompt="${2:-$(gettext "Enter text here")}";;
 *)prompt="${2:-$(gettext "Enter short line")}"
 esac
-local input="" char="" seq invalid i_text u_text q
+local input="" char="" seq i_text q
 local countdown="$timeout"
 local nl=$'\n'
 [ -z "$default" ]&&[ -z "$empty" ]||prompt="$prompt [$default]"
 if [ "$format" = "editor" ];then
 notice "$(gettext "Input through system editor...")"
+EDITOR=$(first "$VISUAL" "$EDITOR" vi)
 while true;do
 sleep 2
 local answer
 answer="$(mktemp --random editor)"
-echo "$prompt" >"$answer"
+printf '%s\n' "$prompt" >"$answer"
 if [ -n "$timeout" ];then
-debug timeout "$timeout" "${EDITOR:-vi}" "$answer"
-${EDITOR:-vi} "$answer"&
+debug timeout "$timeout" "$EDITOR" "$answer"
+$EDITOR "$answer"&
 sleep "$timeout"
 pkill -TERM -P $!||true
 stty sane
-debug "------"
 else
-${EDITOR:-vi} "$answer"
+$EDITOR "$answer"
 fi
 input=$(grep -v -F "$prompt" "$answer")||true
 rm "$answer"
@@ -1310,24 +1581,19 @@ debug "maybe use default: $input"
 [ -z "$empty" ]||break
 [ -z "$input" ]||break
 done
-echo "$input"
+printf '%s\n' "$input"
 return 0
 fi
-echo -en "$CC_NOTICE$prompt:$CC_RESET " >/dev/tty
+printf "$CC_NOTICE%s: $CC_RESET" "$prompt" >/dev/tty
 stty -echo </dev/tty
 while IFS= read -r -s -t 1 -n 1 char </dev/tty||rc=$?;do
-if [ -n "$invalid" ];then
-invalid=0
-printf ' %.0s' {1..30} >/dev/tty
-printf '\b%.0s' {1..30} >/dev/tty
-fi
+printf "$CLEAR_EOL" >/dev/tty
 if ((rc==142));then
 rc=0
 if [ -n "$timeout" ];then
 ((countdown--))
 if ((countdown>0));then
-i_text="  $(duration_format human "$countdown")     "
-echo -ne "$i_text$(printf '\b%.0s' $(seq 1 ${#i_text}))" >/dev/tty
+printf "$CURSOR_STORE   %s$CURSOR_RESTORE" "$(duration_format human "$countdown")" >/dev/tty
 continue
 fi
 else
@@ -1337,56 +1603,50 @@ fi
 if [[ $char == "" ]];then
 if [ -n "$input" ]&&[ "$format" = "text" ]&&[[ $input != *"$nl" ]];then
 input+=$'\n'
-echo
+printf '\n'
 elif [ -n "$final" ];then
 if [[ $input =~ $final ]];then
-echo "          " >/dev/tty
+printf '\n' >/dev/tty
 break
 else
-i_text="$(gettext 'incomplete')"
-echo -en "   $CC_RED$i_text$CC_RESET$(printf '\b%.0s' $(seq 1 $((${#i_text}+3))))" >/dev/tty
-invalid=1
+printf "$CURSOR_STORE   $CC_RED%s$CC_RESET$CURSOR_RESTORE" "$(gettext 'incomplete')" >/dev/tty
 fi
 elif [ -n "$input" ];then
-echo "          " >/dev/tty
+printf "$CLEAR_EOL\n" >/dev/tty
 break
 elif [ -n "$default" ];then
 input="$default"
-echo "          " >/dev/tty
+printf "$CLEAR_EOL\n" >/dev/tty
 break
 elif [ -n "$empty" ];then
-echo >/dev/tty
+printf '\n' >/dev/tty
 break
-elif [ -n "$i_text" ];then
-i_text="$(gettext 'value needed')"
-echo -en "   $CC_RED$i_text$CC_RESET$(printf '\b%.0s' $(seq 1 $((${#i_text}+3))))" >/dev/tty
-invalid=1
+else
+printf "$CURSOR_STORE   $CC_RED%s$CC_RESET$CURSOR_RESTORE" "$(gettext 'value needed')" >/dev/tty
 fi
 elif [[ $char == $'\177' ]];then
 if [ ${#input} -gt 0 ];then
 input=${input:0:-1}
-echo -ne "\b \b" >/dev/tty
+printf '%s' "\b \b" >/dev/tty
 fi
-elif [[ $char == $'\033' ]];then
+elif [[ $char == $'\e' ]];then
 read -r -s -n 1 -t 0.01 seq
 while [[ $seq == "[" || $seq =~ [0-9A-Za-z~] ]];do
 read -r -s -n 1 -t 0.01 seq||break
 done
 else
 if [ -n "$pattern" ];then
-debug 7 "$(od -An -to1 -v <<<"$char") [[ \"$input$char\" =~ $pattern ]] $([[ "$input$char" =~ $pattern ]]&&echo true||echo false)"
+debug 7 "$(od -An -to1 -v <<<"$char") [[ \"$input$char\" =~ $pattern ]] $([[ "$input$char" =~ $pattern ]]&&printf 'true\n'||printf 'false\n')"
 if [ "$format" = "float" ]&&[ "$char" = "," ];then
 char=.
 fi
 if [[ ! "$input$char" =~ $pattern ]];then
-i_text="$(gettext 'invalid character')"
-echo -en "   $CC_RED$i_text$CC_RESET$(printf '\b%.0s' $(seq 1 $((${#i_text}+3))))" >/dev/tty
-invalid=1
+printf "$CURSOR_STORE   $CC_RED%s$CC_RESET$CURSOR_RESTORE" "$(gettext 'invalid character')" >/dev/tty
 continue
 fi
 fi
 input+="$char"
-[ -n "$mask" ]&&echo -n "*" >/dev/tty||echo -n "$char" >/dev/tty
+[ -n "$mask" ]&&printf '*' >/dev/tty||printf '%s' "$char" >/dev/tty
 if [ "$format" = "password" ];then
 q=$(_password_strength "$input")
 if ((q<25));then
@@ -1398,17 +1658,14 @@ i_text="$(gettext 'good')"
 else
 i_text="$CC_GREEN$(gettext 'strong')$CC_RESET"
 fi
-u_text="$(uncolorize "$i_text")"
-echo -en "   $i_text$(printf '\b%.0s' $(seq 1 $((${#u_text}+3))))" >/dev/tty
-invalid=1
+printf '${CURSOR_STORE}   %s${CURSOR_RESTORE}' "$i_text" >/dev/tty
 fi
 fi
-i_text=""
 done
 stty echo </dev/tty
 debug 4 "Octal result: $(od -An -to1 -v <<<"$input")"
 [ "$format" != "text" ]||input="$(grep -v '^[[:space:]]*$' <<<"$input")"
-echo "$input"
+printf '%s\n' "$input"
 }
 _password_strength(){
 local password="$1"
@@ -1423,7 +1680,7 @@ debug 7 "len $score"
 [[ $password =~ [^a-zA-Z0-9] ]]&&((score+=5))
 debug 7 "variety $score"
 local unique
-unique=$(echo "$password"|fold -w1|sort -u|wc -l)
+unique=$(printf '%s' "$password"|fold -w1|sort -u|wc -l)
 ((score+=unique*2))
 ((score=score>100?100:score))
 debug 7 "uniqueness $score"
@@ -1437,7 +1694,7 @@ done
 [[ $password =~ (.)\1{2,} ]]&&((score-=10))
 ((score=score<0?0:score))
 debug 7 "penalties $score"
-echo "$score"
+printf '%s' "$score"
 }
 choose(){
 local end default timeout
@@ -1486,25 +1743,20 @@ fi
 ((length==1))||pattern="(0|$pattern)"
 [ -z "$end" ]||pattern="(x|$pattern)"
 pattern="^$pattern$"
-local input="" char="" i_text invalid
+local input="" char=""
 local countdown="$timeout"
 local question="$(gettext "Select one of the above options")"
 [ -z "$default" ]&&timeout=""||question="$question [$default]"
-echo -n "$question: " >/dev/tty
+printf '%s: ' "$question" >/dev/tty
 stty -echo </dev/tty
 while read -r -s -t 1 -n 1 char </dev/tty||rc=$?;do
-if [ -n "$invalid" ];then
-invalid=0
-printf ' %.0s' {1..30} >/dev/tty
-printf '\b%.0s' {1..30} >/dev/tty
-fi
+printf "$CLEAR_EOL" >/dev/tty
 if ((rc==142));then
 rc=0
 if [ -n "$timeout" ];then
 ((countdown--))
 if ((countdown>0));then
-i_text="  $(duration_format human "$countdown")     "
-echo -ne "$i_text$(printf '\b%.0s' $(seq 1 ${#i_text}))" >/dev/tty
+printf "$CURSOR_STORE   %s$CURSOR_RESTORE" "$(duration_format human "$countdown")" >/dev/tty
 continue
 fi
 else
@@ -1513,46 +1765,42 @@ fi
 fi
 if [[ $char == "" ]];then
 if [ -n "$final" ];then
-echo "          " >/dev/tty
+printf "$CLEAR_EOL\n" >/dev/tty
 break
 elif [ -n "$input" ];then
-echo "          " >/dev/tty
+printf "$CLEAR_EOL\n" >/dev/tty
 break
 elif [ -n "$default" ];then
 input="$default"
-echo "          " >/dev/tty
+printf "$CLEAR_EOL\n" >/dev/tty
 break
 else
-i_text="$(gettext 'value needed')"
-echo -en "   $CC_RED$i_text$CC_RESET$(printf '\b%.0s' $(seq 1 $((${#i_text}+3))))" >/dev/tty
-invalid=1
+printf "$CURSOR_STORE   %s$CURSOR_RESTORE" "$(gettext 'value needed')" >/dev/tty
 fi
 elif [[ $char == $'\177' ]];then
 if [ ${#input} -gt 0 ];then
 input=${input:0:-1}
-echo -ne "\b \b" >/dev/tty
+printf '\b \b' >/dev/tty
 fi
-elif [[ $char == $'\033' ]];then
+elif [[ $char == $'\e' ]];then
 read -r -s -n 1 -t 0.01 seq
 while [[ $seq == "[" || $seq =~ [0-9A-Za-z~] ]];do
 read -r -s -n 1 -t 0.01 seq||break
 done
 elif [ -n "$end" ]&&[[ $char =~ [xX] ]];then
-echo "$char" >/dev/tty
-echo "exit"
+printf '%s\n' "$char" >/dev/tty
+printf 'exit'
 stty echo </dev/tty
 return 0
 else
 if [[ ! "$input$char" =~ $pattern ]];then
-i_text="$(gettext 'invalid character')"
-echo -en "   $CC_RED$i_text$CC_RESET$(printf '\b%.0s' $(seq 1 $((${#i_text}+3))))" >/dev/tty
-invalid=1
+printf "$CURSOR_STORE   $CC_RED%s$CC_RESET$CURSOR_RESTORE" "$(gettext 'invalid character')" >/dev/tty
 continue
 fi
 input+="$char"
-echo -n "$char" >/dev/tty
+printf '%s' "$char" >/dev/tty
 if ((${#input}==length));then
-echo >/dev/tty
+printf '\n' >/dev/tty
 break
 fi
 fi
@@ -1584,7 +1832,7 @@ while grep -qv '|' <<<"$list";do
 while IFS= read -r line;do
 IFS='|' read -r cmd name <<<"$line"
 if [ -n "$name" ];then
-echo "$line" >>"$new_list"
+printf '%s\n' "$line" >>"$new_list"
 else
 $cmd </dev/null >>"$new_list"||die "$(gettext "Could not get task list from command"): $cmd"
 fi
@@ -1598,14 +1846,13 @@ fi
 done
 _default="$(value_if_variable "$_default")"
 task=$(choose "$title" -x "$(gettext "Exit")" $opt -d "$_default" "$list" </dev/null)
-debug "chosen $task"
 [[ $task != "exit" ]]||break
 local error
 if ! eval "$task";then
 error=$?
 die "$(eval_gettext 'Got error $error running $task')"
 fi
-echo ""
+printf '\n'
 [ -n "$loop" ]||break
 done
 }
@@ -1663,7 +1910,7 @@ path="$file"
 if [ -n "$rotate" ]&&((rotate==0));then
 path+="_$(date_format "$rotate")"
 fi
-echo "$(date_format sql) ${1^^} $(uncolorize "$text")" >>"$path"
+printf '%s %s %s\n' "$(date_format sql)" "${1^^}" "$(uncolorize "$text")" >>"$path"
 done
 ;;
 *)die "Unrecognized command $1: start, stop or any log level allowed"
@@ -1707,7 +1954,7 @@ if [[ ! -v _mattermost_cache["__u"] ]];then
 debug "GET mattermost/users/me"
 _mattermost_cache["__u"]="$(curl -H "Authorization: Bearer $MATTERMOST_TOKEN" "$MATTERMOST_API"/users/me|jq '.id' -r)"||die "Could not find myself in mattermost!"
 fi
-echo "${_mattermost_cache["__u"]}"
+printf '%s' "${_mattermost_cache["__u"]}"
 }
 _mattermost_team(){
 if [[ ! -v _mattermost_cache["__t_$1"] ]];then
@@ -1715,7 +1962,7 @@ debug "GET mattermost/teams"
 _mattermost_cache["__t_$1"]="$(curl -H "Authorization: Bearer $MATTERMOST_TOKEN" "$MATTERMOST_API"/teams|jq '.[] | select(.display_name == "'"$1"'") | .id' -r)"||die "Could not get ID of team $1 in mattermost!"
 fi
 [ -n "${_mattermost_cache["__t_$1"]}" ]||die "Team $1 does not exist in mattermost."
-echo "${_mattermost_cache["__t_$1"]}"
+printf '%s' "${_mattermost_cache["__t_$1"]}"
 }
 _mattermost_channel(){
 local cache="channel_$1_$2"
@@ -1725,7 +1972,7 @@ debug "GET mattermost/users/me/teams/<team-id>/channels"
 _mattermost_cache[$cache]="$(curl -H "Authorization: Bearer $MATTERMOST_TOKEN" "$MATTERMOST_API"/users/me/teams/"$1"/channels|jq '.[] | select(.display_name == "'"$2"'") | .id' -r)"||die "Could not get ID of channel $1/$2 in mattermost!"
 fi
 [ -n "${_mattermost_cache[$cache]}" ]||die "Channel $2 does not exist in mattermost (team $1)"
-echo "${_mattermost_cache[$cache]}"
+printf '%s' "${_mattermost_cache[$cache]}"
 }
 _mattermost_channel_by_post(){
 debug "GET mattermost/posts/<post-id>"
@@ -1743,7 +1990,7 @@ debug "POST mattermost/posts"
 debug "JSON: $json" >&2
 pid=$(curl -H "Authorization: Bearer $MATTERMOST_TOKEN" -H 'Content-Type: application/json' -X POST "$MATTERMOST_API"/posts -d "$json"|jq '.id' -r)||die "Could not send new post to mattermost!"
 debug "-> $pid"
-echo "$1/$pid"
+printf '%s' "$1/$pid"
 }
 _mattermost_repost(){
 local att=""
@@ -1756,7 +2003,7 @@ json="$(jq -n --arg c "$1" --arg r "$2" --arg t "$3" '{ channel_id: $c, root_id:
 debug "POST mattermost/posts"
 debug "JSON: $json" >&2
 pid=$(curl -H "Authorization: Bearer $MATTERMOST_TOKEN" -H 'Content-Type: application/json' -X POST "$MATTERMOST_API"/posts -d "$json"|jq '.id' -r)||die "Could not send repost to mattermost!"
-echo "$1/$pid"
+printf '%s' "$1/$pid"
 }
 _mattermost_reaction(){
 local json
@@ -1773,7 +2020,7 @@ _mattermost_find_channels(){
 id(){
 local val
 val=$(_mattermost_channel "$1" "$2")||exit 1
-echo -n "$1/$val "
+printf '%s' "$1/$val "
 }
 local channel=${1:-$server}
 local divibib ekz result
@@ -1809,7 +2056,7 @@ break
 fi
 done
 fi
-echo ""
+printf '\n'
 done
 shopt -u nocasematch
 ((missing<2))||die "Could not detect mattermost channel for $1"
@@ -1862,29 +2109,29 @@ ok)color="#008000";;
 info)color="#0000FF";;
 default)color="#808080"
 esac
-json="$(echo "$json"|jq --arg i "$color" '. + {color: $i}')"
+json="$(jq --arg i "$color" '. + {color: $i}' <<<"$json")"
 shift 2
 ;;
---text)json="$(echo "$json"|jq --arg i "$2" '. + {text: $i}')"&&shift 2;;
---author)json="$(echo "$json"|jq --arg i "$2" '. + {author_name: $i}')"&&shift 2;;
---avatar)json="$(echo "$json"|jq --arg i "$2" '. + {author_icon: $i}')"&&shift 2;;
---home)json="$(echo "$json"|jq --arg i "$2" '. + {author_link: $i}')"&&shift 2;;
---title)json="$(echo "$json"|jq --arg i "$2" '. + {title: $i}')"&&shift 2;;
---link)json="$(echo "$json"|jq --arg i "$2" '. + {title_link: $i}')"&&shift 2;;
---image)json="$(echo "$json"|jq --arg i "$2" '. + {image_url: $i}')"&&shift 2;;
---thumb)json="$(echo "$json"|jq --arg i "$2" '. + {thumb_url: $i}')"&&shift 2;;
+--text)json="$(jq --arg i "$2" '. + {text: $i}' <<<"$json")"&&shift 2;;
+--author)json="$(jq --arg i "$2" '. + {author_name: $i}' <<<"$json")"&&shift 2;;
+--avatar)json="$(jq --arg i "$2" '. + {author_icon: $i}' <<<"$json")"&&shift 2;;
+--home)json="$(jq --arg i "$2" '. + {author_link: $i}' <<<"$json")"&&shift 2;;
+--title)json="$(jq --arg i "$2" '. + {title: $i}' <<<"$json")"&&shift 2;;
+--link)json="$(jq --arg i "$2" '. + {title_link: $i}' <<<"$json")"&&shift 2;;
+--image)json="$(jq --arg i "$2" '. + {image_url: $i}' <<<"$json")"&&shift 2;;
+--thumb)json="$(jq --arg i "$2" '. + {thumb_url: $i}' <<<"$json")"&&shift 2;;
 --fields)fields="$2"&&shift 2;;
---footer)json="$(echo "$json"|jq --arg i "$2" '. + {footer: $i}')"&&shift 2;;
---logo)json="$(echo "$json"|jq --arg i "$2" '. + {footer_image: $i}')"&&shift 2;;
+--footer)json="$(jq --arg i "$2" '. + {footer: $i}' <<<"$json")"&&shift 2;;
+--logo)json="$(jq --arg i "$2" '. + {footer_image: $i}' <<<"$json")"&&shift 2;;
 --)shift&&break;;
 *)die "$(gettext "Unrecognized option"): $1"
 esac
 done
 if [ -n "$fields" ];then
 [[ $fields == \[* ]]||fields="[$fields]"
-json="$(echo "$json"|jq ". + {fields: $fields}")"
+json="$(jq ". + {fields: $fields}" <<<"$json")"
 fi
-echo "$json"
+printf '%s' "$json"
 }
 mattermost_reaction(){
 if [ -z "$MATTERMOST_API" ]||[ -z "$MATTERMOST_TOKEN" ];then
@@ -1971,13 +2218,13 @@ done
 for api in $PROMETHEUS_API;do
 curl "$api"/targets|jq '.data.activeTargets[] | '"$filter"' [.scrapeUrl, .labels.job, (.labels | join(", ")), .discoveredLabels.__address__] | @tsv' -r|while read -r line;do
 local login user pass
-login="$(echo "$auth"|grep "$(echo "$line"|cut -f2)"|grep "$(echo "$line"|cut -f4)")"
+login="$(printf '%s' "$auth"|grep "$(cut -f2 <<<"$line")"|grep "$(cut -f4 <<<"$line")")"
 if [ -n "$login" ];then
-user="$(echo "$login"|cut -f2|tr -d '\n'|urlencode)"
-pass="$(echo "$login"|cut -f3|tr -d '\n'|urlencode)"
-echo "$line"|cut -f1-3|sed "s#://#://$user:$pass@#"
+user="$(cut -f2 <<<"$login"|tr -d '\n'|urlencode)"
+pass="$(cut -f3 <<<"$login"|tr -d '\n'|urlencode)"
+cut -f1-3 <<<"$line"|sed "s#://#://$user:$pass@#"
 else
-echo "$line"|cut -f1-3
+cut -f1-3 <<<"$line"
 fi
 done||(($?==141))||die "$(gettext "Could not get exporters from Prometheus!")"
 done
@@ -1991,8 +2238,8 @@ local metrics
 metrics="$(curl "$url"|grep -Ev '^($|#)'||die "$(eval_gettext 'Could not scrape the Prometheus exporter at $url!')")"
 debug ">>> $metrics"
 local found=2
-echo "$metrics"|grep -E "$2"|grep '{'|sed 's/,\?[{}] \?/\t/g'||((found--))
-echo "$metrics"|grep -E "$2"|grep -v '{'|sed 's/ /\t\t/g'||((found--))
+grep -E "$2" <<<"$metrics"|grep '{'|sed 's/,\?[{}] \?/\t/g'||((found--))
+grep -E "$2" <<<"$metrics"|grep -v '{'|sed 's/ /\t\t/g'||((found--))
 ((found>0))
 }
 alerts(){
@@ -2021,7 +2268,7 @@ shift 2
 *)die "$(gettext "Unrecognized option"): $1"
 esac
 done
-install jq mlr
+install jq
 local list
 list="$(curl -H "Authorization: Bearer $GRAFANA_TOKEN" "$GRAFANA_API/alertmanager/grafana/api/v2/alerts")"||die "$(gettext "Could not get alerts from Grafana!")"
 list="$(jq 'sort_by(.startsAt) | .[] '"$filter" <<<"$list")"||die "$(gettext "Parse error in Grafana alerts list with filter"): $filter"
@@ -2047,12 +2294,12 @@ mattermost)list="$(jq -s '.[] | {
                 )
             }' <<<"$list"|jq -s .)"
 ;;
-*)header="$(echo -e "$(gettext "Severity\tNetwork\tInstance\tSummary\tStart")")"
+*)header="$(printf "$(gettext "Severity\tNetwork\tInstance\tSummary\tStart")\n")"
 list="$header"$'\n'"$(jq -r '[.labels.severity, .labels.net, .labels.instance, .annotations.summary, (.startsAt| split(".")[0]| strptime("%Y-%m-%dT%H:%M:%S")| strftime("%Y-%m-%d %H:%M:%S"))] | @tsv' <<<"$list")"
 esac
 case $format in
 console)local first=1
-echo -e "$list"|tsv2table|while read -r line;do
+printf '%s\n' "$list"|tsv2table|while read -r line;do
 case $line in
 warning*)warn "$line";;
 critical*)error "$line";;
@@ -2063,12 +2310,12 @@ then
 invers "$line"
 first=""
 else
-echo "$line"
+printf '%s\n' "$line"
 fi
 esac
 done
 ;;
-*)echo "$list"
+*)printf '%s\n' "$list"
 esac
 return 1
 }
@@ -2081,7 +2328,7 @@ is integer --name=arguments --max=1 --die -- $#
 is set --name=prom-ql --die -- "$1"
 local api
 api="${PROMETHEUS_API%% *}"
-curl "$api/query?query=$(echo "$1"|urlencode)"
+curl "$api/query?query=$(urlencode "$1")"
 }
 prometheus_scrape_now(){
 if [ -z "$PROMETHEUS_HOST" ];then
@@ -2093,22 +2340,38 @@ local job=$1
 local -i seconds=${2:-60}
 for server in $PROMETHEUS_HOST;do
 remote true 2>/dev/null||continue
-echo "Let $server scrape $job again, now."
-echo "yq '(.scrape_configs[] | select(.job_name == \"$job\")).scrape_interval = \"${seconds}s\" | (.scrape_configs[] | select(.job_name == \"$job\")).scrape_timeout = \"${seconds}s\"' </etc/prometheus/prometheus.yml | sponge /etc/prometheus/prometheus.yml"|remote
+printf '%s\n' "Let $server scrape $job again, now."
+printf '%s\n' "yq '(.scrape_configs[] | select(.job_name == \"$job\")).scrape_interval = \"${seconds}s\" | (.scrape_configs[] | select(.job_name == \"$job\")).scrape_timeout = \"${seconds}s\"' </etc/prometheus/prometheus.yml | sponge /etc/prometheus/prometheus.yml"|remote
 remote curl -sX POST http://localhost:9090/-/reload
 done
 pause --timeout="$seconds" "Wait till scrape should be done..."
-echo "Reset config back to default."
+printf '%s\n' "Reset config back to default."
 for server in $PROMETHEUS_HOST;do
 remote true 2>/dev/null||continue
 remote /etc/prometheus/config-builder/update >/dev/null
 done
 }
+ip(){
+eval set -- "$(option_parse $'v version +' "$@")"
+local type=hosts
+while true;do
+case "$1" in
+-v|--version)(($2==4))&&type=ahostsv4||true
+(($2==6))&&type=ahostsv6||true
+shift 2
+;;
+--)shift&&break;;
+*)die "$(gettext "Unrecognized option"): $1"
+esac
+done
+is set --name=host --die -- "$1"
+getent "$type" "$1"|awk '{print $1}'|head -n1
+}
 ip_intern(){
 is integer --name=arguments --max=1 --die -- $#
 install ip
 case ${1-} in
-data)echo -e "$(gettext "IP\tInterface")"
+data)printf '%s\n' "$(gettext "IP\tInterface")"
 ip -o addr show|awk 'BEGIN { OFS="\t" } $2 != "lo" {print $4, $2}'
 ;;
 *)ip route get 1|awk '{print $7; exit}'
@@ -2126,7 +2389,7 @@ debug "checking $ip against $name"
 declare -n lookup="$name"
 for ((i=0; i<${#lookup[@]}; i+=2));do
 if [[ $ip =~ ${lookup[i]} ]];then
-echo "${lookup[i+1]}"
+printf '%s\n' "${lookup[i+1]}"
 return 0
 fi
 debug 7 "$ip =~ ${lookup[i]} => false"
@@ -2144,18 +2407,17 @@ ip)jq -r .query <<<"$_ip_extern_json";;
 *)jq -r ".$1" <<<"$_ip_extern_json"
 esac
 }
-detect_extern_ip(){ _deprecated "use ip_extern instead";}
 declare -A _os_detected
 os_detect(){
 is integer --name=arguments --max=1 --die -- $#
 is enum --name=format --allow="data info os base base_revision_name base_revision_number distribution revision_number revision_name kernel cpu_model cpu_num architecture machine_id virtual_machine" --die -- "$1"
 if [ ${#_os_detected[@]} -eq 0 ];then
 _os_detected["os"]="$(case "$(uname -s)" in
-"Darwin")echo MacOS;;
-"SunOS")echo Solaris;;
-"GNU"*)echo Linux;;
-*"BSD"|"DragonFly"|"Bitrig")echo BSD;;
-"CYGWIN"*|"MSYS"*|"MINGW"*)echo Windows;;
+"Darwin")printf MacOS;;
+"SunOS")printf Solaris;;
+"GNU"*)printf Linux;;
+*"BSD"|"DragonFly"|"Bitrig")printf BSD;;
+"CYGWIN"*|"MSYS"*|"MINGW"*)printf Windows;;
 *)uname -s
 esac)"
 case ${_os_detected["os"]} in
@@ -2211,30 +2473,29 @@ Solaris)uname -p;;
 *)uname -m
 esac)"
 _os_detected["machine_id"]="$(cat /etc/machine-id /var/lib/dbus/machine-id /var/db/dbus/machine-id /sys/class/dmi/id/board_serial 2>/dev/null|head -n 1||true)"
-_os_detected["virtual_machine"]="$(grep -q '^flags.* hypervisor' /proc/cpuinfo&&echo true||echo false)"
+_os_detected["virtual_machine"]="$(grep -q '^flags.* hypervisor' /proc/cpuinfo&&printf true||printf false)"
 for key in "${!_os_detected[@]}";do
-echo -e "$key=${_os_detected[$key]}"
+printf '%s=%s' "$key" "${_os_detected[$key]}"
 done|debug
 fi
 case ${1-} in
 data)for key in "${!_os_detected[@]}"
 do
-echo -e "$key\t${_os_detected[$key]}"
+printf '%s\n' "$key\t${_os_detected[$key]}"
 done
 ;;
-info)echo -n "${_os_detected[os]} system with kernel ${_os_detected[kernel]} on ${_os_detected[architecture]} (${_os_detected[cpu_num]}x ${_os_detected[cpu_model]})"
-[ "${_os_detected["virtual_machine"]}" = "true" ]&&echo "virtual machine"||echo
-echo "${_os_detected[distribution]} version ${_os_detected[revision_number]} (${_os_detected[revision_name]})"
+info)printf '%s' "${_os_detected[os]} system with kernel ${_os_detected[kernel]} on ${_os_detected[architecture]} (${_os_detected[cpu_num]}x ${_os_detected[cpu_model]})"
+[ "${_os_detected["virtual_machine"]}" = "true" ]&&printf 'virtual machine\n'||printf '\n'
+printf '%s\n' "${_os_detected[distribution]} version ${_os_detected[revision_number]} (${_os_detected[revision_name]})"
 if [ -n "${_os_detected[base_revision_number]}" ]&&[ ! "${_os_detected[revision_number]}" = "${_os_detected[base_revision_number]}" ];then
-echo "Based on ${_os_detected[base]} version ${_os_detected[base_revision_number]} (${_os_detected[base_revision_name]})"
+printf '%s\n' "Based on ${_os_detected[base]} version ${_os_detected[base_revision_number]} (${_os_detected[base_revision_name]})"
 fi
 ;;
-*)echo "${_os_detected["$1"]}"
+*)printf '%s\n' "${_os_detected["$1"]}"
 esac
 }
-detect_os(){ _deprecated "use os_detect data";}
-system_info(){ _deprecated "use os_detect info";}
 disk_free(){
+debug "$*"
 local opt="" free_operator free_percent free_bytes collect
 eval set -- "$(option_parse $'l locale -\nc collect +\nf free +' "$@")"
 while true;do
@@ -2261,13 +2522,14 @@ break
 *)die "$(gettext "Unrecognized option"): $1"
 esac
 done
-debug "collect into $collect ($free_operator $free_percent%/${free_bytes}B)"
+debug "$*"
+is empty -- "$collect"||debug "collect into $collect ($free_operator $free_percent%/${free_bytes}B)"
 local firstLine="" percent mount device limit_c limit_e limit_w limit_o
 IFS=$'\n'
 for line in $(df -h $opt -x tmpfs -x efivarfs -x devtmpfs -x squashfs "$@");do
 if [ -z "$firstLine" ];then
 firstLine=1
-echo -e "$CC_INVERSE$line$CC_RESET"
+printf "$CC_INVERSE%s$CC_RESET\n" "$line"
 else
 percent=$(echo "$line"|xargs echo|cut -d' ' -f5|sed 's/%//')
 bytes=$(echo "$line"|xargs echo|cut -d' ' -f4)
@@ -2292,13 +2554,15 @@ warn "$line"
 elif ((percent==limit_o));then
 ok "$line"
 else
-echo "$line"
+printf '%s\n' "$line"
 fi
+if is set -- "$collect";then
 if [ -n "$free_operator" ];then
 if [ -n "$free_percent" ]&&eval "(( 100 - percent $free_operator free_percent ))";then
 collect+="$mount "
 elif [ -n "$free_bytes" ]&&eval "(( bytes $free_operator free_bytes ))";then
 collect+="$mount "
+fi
 fi
 fi
 fi
@@ -2337,7 +2601,7 @@ debug 3 "call #$n: $*"
 "$@"
 done
 }
-function retry {
+retry(){
 is integer --name=num --min=0 --die -- "$1"
 is set --name=command --die -- "$2"
 local retries=$1
@@ -2357,7 +2621,6 @@ fi
 done
 return 0
 }
-countdown(){ _deprecated "use pause <text> --timeout=<duration> --abort";}
 LOCK_SLEEP=10
 _lock_remove(){
 pid=$(cat "$lockfile")||true
@@ -2367,26 +2630,26 @@ lock(){
 is integer --name=arguments --max=0 --die -- $#
 local lockfile logged pid
 lockfile="$(mktemp 'lockfile')"
-echo $$ >"$lockfile.$$" 2>/dev/null||die "$(gettext "Failed to create PID lockfile"): $lockfile.$$"
+printf $$ >"$lockfile.$$" 2>/dev/null||die "$(gettext "Failed to create PID lockfile"): $lockfile.$$"
 _lock_remove
 logged=0
 while ! ln "$lockfile.$$" "$lockfile" 2>/dev/null;do
 if ((logged==0));then
 pid="$(cat "$lockfile")"
-echo "$(eval_gettext 'Waiting for unlock in $lockfile by PID $pid')..." >&1
+printf '%s\n' "$(eval_gettext 'Waiting for unlock in $lockfile by PID $pid')..." >&1
 logged=1
 fi
 sleep "$LOCK_SLEEP"
-echo $$ >"$lockfile.$$" 2>/dev/null
+printf $$ >"$lockfile.$$" 2>/dev/null
 _lock_remove
 done
-trap_add unlock EXIT
+trap add unlock EXIT
 }
 lock_exit(){
 is integer --name=arguments --max=0 --die -- $#
 local lockfile logged pid
 lockfile="$(mktemp 'lockfile')"
-echo $$ >"$lockfile.$$" 2>/dev/null||die "$(gettext "Failed to create PID lockfile"): $lockfile.$$"
+printf $$ >"$lockfile.$$" 2>/dev/null||die "$(gettext "Failed to create PID lockfile"): $lockfile.$$"
 _lock_remove
 if ! ln "$lockfile.$$" "$lockfile" 2>/dev/null;then
 unlock
@@ -2417,7 +2680,7 @@ case "$1" in
 *)shift
 esac
 done
-command="$(check enum --name=command --allow="store restore clean change" --die -- "$1")"
+is enum --name=command --allow="store restore clean change" --die --output=command -- "$1"
 shift
 local ident=$1
 shift||true
@@ -2446,216 +2709,184 @@ variables store $self "$ident" "$@"
 esac
 }
 env_store(){
-_deprecated "Use: variables store..." warn
-debug "env_store $*"
-eval set -- "$(option_parse $'d disk -\np path +' "$@")"
-local opt="-m"
-while true;do
-case "$1" in
--d|--disk)opt=""
-shift
-;;
--p|--path)opt="$1 $2"
-shift 2
-;;
---)shift
-break
-;;
-*)shift
-esac
-done
-local ident=$1
-shift||true
-declare -p "$@"|sed 's/^declare\b/declare -g/' >"$(mktemp $opt --extension=env "$ident")"
+_deprecated "Use: variables store..."
 }
 env_restore(){
-_deprecated "Use: variables restore..." warn
-debug "env_restore $*"
-eval set -- "$(option_parse $'d disk -\np path +' "$@")"
-local opt="-m"
-while true;do
-case "$1" in
--d|--disk)opt=""
-shift
-;;
--p|--path)opt="$1 $2"
-shift 2
-;;
---)shift
-break
-;;
-*)shift
-esac
-done
-local ident="${1-}" shm_env
-shift||true
-shm_env="$(mktemp $opt -e env "$ident")"
-[ -s "$shm_env" ]||return 0
-if [[ $# -gt 0 ]];then
-temp="$(mktemp -me env-sub "${ident}_$BASHPID")"
-grep -E "$(tr ' ' '|' <<<"$*")" "$shm_env" >"$temp"||true
-source "$temp"||true
-rm -r "$temp"||true
-else
-source "$shm_env" 2>/dev/null||true
-fi
+_deprecated "Use: variables restore..."
 }
 env_clean(){
-_deprecated "Use: variables clean..." warn
-is integer --name=arguments --max=1 --die -- $#
-debug "env_clean $*"
-eval set -- "$(option_parse $'d disk -\np path +' "$@")"
-local opt="-m"
-while true;do
-case "$1" in
--d|--disk)opt=""
-shift
-;;
--p|--path)opt="$1 $2"
-shift 2
-;;
---)shift
-break
-;;
-*)shift
-esac
-done
-rm -f "$(mktemp $opt -e env "$1")"
+_deprecated "Use: variables clean..."
 }
 env_change(){
-_deprecated "Use: variables change..." warn
-eval set -- "$(option_parse $'d disk -\np path +' "$@")"
-local opt
-while true;do
-case "$1" in
--d|--disk)opt="$opt $1"
-shift
-;;
--p|--path)opt="$opt $1 $2"
-shift 2
-;;
---)shift
-break
-;;
-*)shift
-esac
-done
-is set --name=ident --die -- "$1"
-is set --name=command --die -- "$2"
-local ident=$1
-shift||true
-local command=$1
-shift||true
-env_restore $opt "$ident"
-eval "$command"
-env_store $opt "$ident" "$@"
+_deprecated "Use: variables change..."
 }
 declare -A _async_running
 STEPS_VARIABLES=
-steps_init(){
-is integer --name=arguments --max=0 --die -- $#
+_STEPS_NAME=
+steps(){
+is enum --allow="init end" --die -- "$1"
+case $1 in
+init)is integer --name=arguments --max=2 --die -- $#
+_STEPS_NAME=${2:-all}
+debug "start step control"
 declare -g -A _STEPS
-variables restore steps
-declare -p _STEPS
-variables store steps _STEPS "$STEPS_VARIABLES"
-echo "$(gettext "Work steps are logged so that you can resume work mid-process")..." >&2
+variables restore "steps_$_STEPS_NAME"
+variables store "steps_$_STEPS_NAME" _STEPS $STEPS_VARIABLES
+printf '%s\n' "$(gettext "Work steps are logged so that you can resume work mid-process")..." >&2
+;;
+end)is integer --name=arguments --max=1 --die -- $#
+debug "end step control"
+_steps_done
+esac
 }
-steps_check(){
-is integer --name=arguments --max=1 --die -- $#
-is set --name=name --die -- "$1"
+_steps_check(){
 local name="$1"
-declare -p _STEPS 2>/dev/null|grep -q 'declare -A'||return 1
-if [ -n "${_STEPS["$name"]}" ];then
-echo "$(eval_gettext 'Job $name already done in this run, skipping')" >&2
-return 0
-else
-return 1
-fi
+is set --name=name --die -- "$1"
+is integer --name=arguments --max=2 --die -- $#
+is set -- "$_STEPS_NAME"||return 1
+[ -n "${_STEPS["$name"]}" ]&&return 0||return 1
 }
-steps_done(){
-is integer --name=arguments --max=1 --die -- $#
-is set --name=name --die -- "$1"
-local name="$1"
-declare -p _STEPS 2>/dev/null|grep -q 'declare -A'||return
+_steps_done(){
+is integer --name=arguments --max=2 --die -- $#
+is set -- "$_STEPS_NAME"||return 0
 if [ -n "$1" ];then
-_STEPS["$name"]=1
-local date="$(date_format sql)"
-echo "$(eval_gettext 'Finished: Step $name at $date')" >&2
-variables store steps _STEPS "$STEPS_VARIABLES"
+_STEPS["$1"]=1
+variables store "steps_$_STEPS_NAME" _STEPS $STEPS_VARIABLES
 else
-variables clean steps
+variables clean "steps_$_STEPS_NAME"
+_STEPS_NAME=""
 fi
 }
 sync(){
-is set --name=command --die -- "$1"
-sync_name "$1" "$@"
-}
-sync_name(){
-is set --name=name --die -- "$1"
-is set --name=command --die -- "$2"
-local name=$1
-shift
-steps_check "$name"&&return||true
-local date
-date="$(date_format sql)"
-declare -p _STEPS 2>/dev/null|grep -q 'declare -A'&&echo "$(eval_gettext 'Started: step $name at $date')" >&2||true
+eval set -- "$(option_parse $'+n name +\nv verbose -' "$@")"
+local name verbose message
+while true;do
+case "$1" in
+-n|--name)name="$2"&&shift 2;;
+--verbose)verbose=1&&shift;;
+--)shift&&break;;
+*)die "$(gettext "Unrecognized option"): $1"
+esac
+done
+is integer --name=arguments --min=1 --die -- $#
+[ -n "$name" ]||name="$*"
+if _steps_check "$name";then
+message="$(eval_gettext 'Skip: $name (already done)')"
+is set -- "$verbose"&&warn "$message" >&2||debug "$message"
+return
+fi
+message="$(eval_gettext 'Start: $name')"
+is set -- "$verbose"&&notice "$message" >&2||debug "$message"
 "$@"
-steps_done "$name"
+message="$(eval_gettext 'Finished: $name')"
+is set -- "$verbose"&&info "$message" >&2||debug "$message"
+_steps_done "$name" "$verbose"
 }
 async(){
-is set --name=command --die -- "$1"
-async_name "$1" "$@"
-}
-async_name(){
-is set --name=name --die -- "$1"
-is set --name=command --die -- "$2"
-local name=$1
-shift
-! steps_check "$name"||return
-declare -p _STEPS 2>/dev/null|grep -q 'declare -A'&&echo "Started: step $name at $(date_format sql)" >&2||true
-"$@"&
-variables change queue "_async_running[\"$name\"]=$!" _queue _async_running
-}
-async_wait(){
-[ -z "${_async_running["$1"]}" ]&&return 0||true
-wait "${_async_running["$1"]}"
-local code=$?
-if ((code==0));then
-steps_done "$1"
-variables change queue "unset async_running[\"$1\"]" _queue _async_running
+eval set -- "$(option_parse $'+n name +\nv verbose -' "$@")"
+local name verbose message
+while true;do
+case "$1" in
+-n|--name)name="$2"&&shift 2;;
+--verbose)verbose=1&&shift;;
+--)shift&&break;;
+*)die "$(gettext "Unrecognized option"): $1"
+esac
+done
+is integer --name=arguments --min=1 --die -- $#
+[ -n "$name" ]||name="$*"
+_async_done
+if [ "$1" = "wait" ];then
+local pid
+if [ "$name" = "wait" ];then
+for name in "${!_async_running[@]}";do
+hash _async_running has "$name"||continue
+IFS=$'\t' read pid _ <<<"$(hash _async_running get "$name")"
+wait "$pid"||true
+_async_done
+done
 else
-declare -p _STEPS 2>/dev/null|grep -q 'declare -A'&&echo echo "Failed: Step $1 at $(date_format sql)" >&2||true
+hash _async_running has "$name"||return 0
+IFS=$'\t' read pid _ <<<"$(hash _async_running get "$name")"
+wait "$pid"||true
+_async_done
 fi
-return "$code"
+return 0
+fi
+if _steps_check "$name";then
+message="$(eval_gettext 'Skip: $name (already done)')"
+is set -- "$verbose"&&warn "$message" >&2||debug "$message"
+return
+fi
+message="$(eval_gettext 'Start: $name')"
+is set -- "$verbose"&&notice "$message" >&2||debug "$message"
+"$@"&
+hash _async_running set "$name" $!$'\t'"$verbose"
+}
+_async_done(){
+local check pid verbose
+for check in "${!_async_running[@]}";do
+IFS=$'\t' read -r pid verbose <<<"${_async_running[$check]}"
+if ! kill -0 "$pid" 2>/dev/null;then
+message="$(eval_gettext 'Finished: $check')"
+is set -- "$verbose"&&info "$message" >&2||debug "$message"
+hash _async_running unset "$check"
+fi
+done
 }
 _queue_jobs=()
 declare -A _queue_running
 queue(){
+eval set -- "$(option_parse $'+n name +\nv verbose -' "$@")"
+local name verbose=0 message progress
+while true;do
+case "$1" in
+-n|--name)name="$2"&&shift 2;;
+--verbose)verbose=1&&shift;;
+--progress)progress=1&&shift;;
+--)shift&&break;;
+*)die "$(gettext "Unrecognized option"): $1"
+esac
+done
 is enum --name=command --allow="add run" --die -- "$1"&&local command="$1"&&shift
+[ -n "$name" ]||name="$*"
 case $command in
 add)is set --name=job --die -- "$1"
-_queue_job+=("$*")
-debug "add ${#_queue_job[@]}: $*"
+if _steps_check "$name";then
+message="$(eval_gettext 'Skip: $name (already done)')"
+is set -- "$verbose"&&warn "$message" >&2||debug "$message"
+return
+fi
+message="$(eval_gettext 'Queue: $name')"
+is true -- "$verbose"&&info "$message" >&2||debug "$message"
+_queue_jobs+=("$(printf '%s\t%s\t%s' "$name" "$verbose" "$*")")
 ;;
-run)is empty -- "$1"||is integer --name=parallel --min 1 --die
-is empty -- "$2"||is integer --name=load-percent --min 1 --die
+run)is empty -- "$1"||is integer --name=parallel --min 1 --die "$1"
+is empty -- "$2"||is integer --name=load-percent --min 1 --die "$2"
 local max="${1:-$QUEUE_MAX_NUM}"
 local load="${2:-$QUEUE_MAX_LOAD}"
-debug "${#_queue_job[@]} Jobs to be run..."
+local job total=${#_queue_jobs[@]} started=0
+debug "$total Jobs to be run..."
 while true;do
 for pid in "${!_queue_running[@]}";do
 if [[ ! -d /proc/$pid ]];then
-debug "finished ${_queue_running[$pid]}"
+IFS=$'\t' read -r name verbose <<<"${_queue_running[$pid]}"
+_steps_done "$name"
+message="$(eval_gettext 'Finished: $name')"
+is true -- "$verbose"&&info "$message" >&2||debug "$message"
 unset "_queue_running[$pid]"
 fi
 done
 if ((${#_queue_running[@]}==0))||( ((${#_queue_running[@]}<max))&&(($(cut -d' ' -f1 /proc/loadavg|sed 's/\.//;s/^0*//')/$(nproc)<load)));then
-if ((${#_queue_job[@]}>0));then
-local job="${_queue_job[0]}"
-_queue_job=("${_queue_job[@]:1}")
-debug "start $job (${#_queue_job[@]} jobs remaining)"
+if ((${#_queue_jobs[@]}>0));then
+IFS=$'\t' read -r name verbose job <<<"${_queue_jobs[0]}"
+_queue_jobs=("${_queue_jobs[@]:1}")
+message="$(eval_gettext 'Start: $name')"
+is true -- "$verbose"&&notice "$message" >&2||debug "$message"
 eval "$job"&
-_queue_running[$!]="$job"
+((started++))||true
+is empty -- "$progress"||info "$(eval_gettext 'Queued $started/$total jobs')"
+_queue_running[$!]="$name"$'\t'"$verbose"
 elif ((${#_queue_running[@]}==0));then
 break
 else
@@ -2694,7 +2925,117 @@ esac
 while ((${#result}<length));do
 result+="$(head /dev/urandom|tr -dc "$pattern")"
 done
-echo "${result:0:length}"
+printf '%s' "${result:0:length}"
+}
+process(){
+local command watch timeout
+eval set -- "$(option_parse $'t timeout +\nw watch -' "$@")"
+while true;do
+case "$1" in
+-t|--timeout)timeout="$(duration_format seconds "$2")"&&shift 2;;
+-w|--watch)watch=1&&shift;;
+--)shift&&break;;
+*)die "$(gettext "Unrecognized option"): $1"
+esac
+done
+is enum --allow="info list tree wait kill" --die --output=command -- "$1"
+is set --name=process-id-or-name --die -- "$2"
+is integer --name=arguments --max=3 --die -- $#
+local list
+if is integer -- "$2";then
+kill -0 "$2" >/dev/null||die "$(eval_gettext 'No process with pid $2')"
+list=("$2")
+else
+mapfile -t list < <(pgrep "$2"|_process_main_pid|sort -nu||true)
+[ -n "$list" ]||mapfile -t list < <(pgrep -f "$2"|_process_main_pid|sort -nu||true)
+[ -n "$list" ]||die "$(eval_gettext 'No processes found for $2')"
+fi
+debug "pids: ${list[*]}"
+case $command in
+info)local pid comm tree_pid
+for pid in "${list[@]}";do
+[ -n "$comm" ]||comm="$(_process_name "$pid")"
+tree_pid+=($(_process_children "$pid"))
+tree_pid+=("$pid")
+done
+printf '%s' "$comm"
+ps -o pcpu,rss --no-headers -p "$(IFS=, echo "${tree_pid[*]}")"|awk '{ cpu+=$1; mem+=$2; count++ } END { printf " %.2f%% CPU %.2f MB in %d processes\n", cpu, mem/1024, count }'||true
+;;
+list)local pid tree_pid
+printf '%s\t%s\t%s\t%s\t%s\n' Command PID 'CPU %' 'RSS MB' Processes
+for pid in "${list[@]}";do
+printf '%s\t%s' "$(_process_name "$pid")" "$pid"
+tree_pid=($(_process_children "$pid"))
+tree_pid+=("$pid")
+ps -o pcpu,rss --no-headers -p "$(IFS=, echo "${tree_pid[*]}")"|awk '{ cpu+=$1; mem+=$2; count++ } END { printf "\t%.2f\t%.2f\t%d\n", cpu, mem/1024, count }'||true
+done
+;;
+tree)local pid
+printf '%s\t%s\t%s\t%s\n' Command PID 'CPU %' 'RSS kB'
+for pid in "${list[@]}";do
+_process_tree "$pid"
+done
+;;
+wait)local pid
+start="$(date +%s)"
+for pid in "${list[@]}";do
+while kill -0 "$pid" 2>/dev/null;do
+if [ -n "$watch" ];then
+local pcpu
+pcpu="$(trim "$(ps -o pcpu= -p "$pid")")"||true
+printf "$CURSOR_POS1$CLEAR_LINE%s" "$(eval_gettext 'Waiting for $pid ($pcpu% CPU)')"
+fi
+if [ -n "$timeout" ]&&(($(date +%s)-start>timeout));then
+printf "$CURSOR_POS1$CLEAR_LINE"
+warn "$(eval_gettext 'Timeout after ${timeout}s')"
+return 1
+fi
+sleep 0.1
+done
+done
+printf "$CURSOR_POS1$CLEAR_LINE"
+;;
+kill)local pid signal="${3:-SIGTERM}"
+for pid in "${list[@]}";do
+debug "kill -s $signal $pid"
+kill -s "$signal" "$pid" 2>/dev/null||true
+done
+esac
+}
+_process_name(){
+ps -o args= -p "$1"|cut -d' ' -f1|xargs basename
+}
+_process_main_pid(){
+local pid current
+while read -r pid;do
+current="$pid"
+while true;do
+parent="$(trim "$(ps -o ppid= -p "$current" 2>/dev/null)"||true)"
+if [[ -z $parent || $parent == "1" ]]||grep -Fxq "$(_process_name "$parent")" <<<"plasmashell";then
+echo "$current"
+break
+else
+current="$parent"
+fi
+done
+done
+}
+_process_children(){
+local children child
+children=$(pgrep -P "$1"||true)
+for child in $children;do
+echo "$child"
+_process_children "$child"
+done
+}
+_process_tree(){
+local pcpu rss children child
+read -r pcpu rss < <(ps -o pcpu,rss --no-headers -p "$1")
+printf '%s%s\t%s\t%s\t%s\n' "$2" "$(_process_name "$1")" "$1" "$pcpu" "$rss"
+children=$(pgrep -P "$1"||true)
+for child in $children;do
+_process_tree "$child" "$indent  "
+done
 }
 _module_resolve(){
 local modules=()
@@ -2702,10 +3043,10 @@ split "$1" modules ,
 local init=1 module line
 for module in "${modules[@]}";do
 [[ $module =~ ^(full|base|.*/.*)$ ]]||module="module/$module"
-[ -n "$init" ]&&init=||echo -n ,
-echo -n "$module"
+[ -n "$init" ]&&init=||printf ,
+printf '%s' "$module"
 while read -r line;do
-echo -n ",$(_module_resolve "$line")"
+printf '%s' ",$(_module_resolve "$line")"
 done < <(grep '^use ' "$BASHLIB_HOME/$module"|sed 's/^use //'||true)
 done
 }
@@ -2741,9 +3082,9 @@ IFS=',' read -ra modules <<<"$list"
 debug "Modules: ${modules[*]}"
 shift
 local pattern='^#!/usr/bin/env'" bash|source "'/dev/null'
-(echo "#!/usr/bin/env" bash
-echo "DEBUG=${DEBUG:-}"
-echo "BASHLIB_LOADER=remote"
+(printf '%s\n' "#!/usr/bin/env bash"
+printf '%s\n' "DEBUG=${DEBUG:-}"
+printf '%s\n' "BASHLIB_LOADER=remote"
 if [[ ${modules[0]} =~ ^(full|base)$ ]];then
 grep -Ev "$pattern" "$BASHLIB_HOME/${modules[0]}"
 modules=("${modules[@]:1}")
@@ -2792,20 +3133,16 @@ fi
 return "$rc"
 }
 remote_term(){
-_deprecated "Use: remote --terminal ... instead" warn
-remote --terminal "$@"
+_deprecated "Use: remote --terminal ... instead"
 }
 remote_term_line(){
-_deprecated "Use: @remote --terminal --line-based ..." warn
-remote --terminal --line-based "$@"
+_deprecated "Use: @remote --terminal --line-based ..."
 }
 remote_file(){
-_deprecated "se: remote --file <file>" warn
-remote --file "$@"
+_deprecated "se: remote --file <file>"
 }
 remote_console(){
-_deprecated "Use: remote console" warn
-remote "$@" console
+_deprecated "Use: remote console"
 }
 upload(){
 local _login host jump
@@ -2861,63 +3198,19 @@ local dir=${2:-.}
 rsync -av $ssh:"$1" "$dir"
 }
 remote_bashlib(){
-_deprecated "Use: remote bashlib <module> <command>" warn
-local opt
-eval set -- "$(option_parse $'+l login +\nh host +\nj jump +' "$@")"
-while true;do
-case "$1" in
--l|--login|-h|--host|-j|--jump)opt+=" $1 $2"&&shift 2;;
---)shift&&break;;
-*)die "$(gettext "Unrecognized option"): $1"
-esac
-done
-is set --name=module --die -- "$1"
-local list modules
-list="$(_module_resolve "${1-}")"
-IFS=',' read -ra modules <<<"$list"
-debug "Modules: ${modules[*]}"
-shift
-local pattern='^#!/usr/bin/env'" bash|source "'/dev/null'
-(echo "#!/usr/bin/env" bash
-echo "DEBUG=${DEBUG:-}"
-echo "BASHLIB_LOADER=remote"
-if [[ ${modules[0]} =~ ^(full|base)$ ]];then
-grep -Ev "$pattern" "$BASHLIB_HOME/${modules[0]}"
-modules=("${modules[@]:1}")
-else
-grep -Ev "$pattern" "$BASHLIB_HOME"/base
-fi
-for module in "${modules[@]}";do
-if [ "$module" = "configs" ];then
-for f in "$BASHLIB_HOME"/config/*;do
-if [[ -f $f && $f != *.* ]];then
-grep -Ev "$pattern" "$f"
-fi
-done
-else
-grep -Ev "$pattern" "$BASHLIB_HOME/$module"
-fi
-done
-(($#==0))||debug "Running: $*"
-(($#==0))||escape_args "$@"
-[ ! -p /dev/stdin ]||debug "Running piped command!"
-[ ! -p /dev/stdin ]||cat </dev/stdin)|shfmt -mn|remote $opt
+_deprecated "Use: remote bashlib <module> <command>"
 }
 remote_install(){
-_deprecated "use remote_bashlib software install" warn
-remote_bashlib software install "$@"
+_deprecated "use remote_bashlib software install"
 }
 remote_system_info(){
-_deprecated "use remote_bashlib os system_info" warn
-remote_bashlib os system_info "$@"
+_deprecated "use remote_bashlib os system_info"
 }
 remote_df(){
-_deprecated "use remote_bashlib os disk_free" warn
-remote_bashlib os disk_free "$@"
+_deprecated "use remote_bashlib os disk_free"
 }
 remote_lvm(){
-_deprecated "use remote_bashlib os uses_lvm" warn
-remote_bashlib os uses_lvm "$@"
+_deprecated "use remote_bashlib os uses_lvm"
 }
 boot_wait(){
 eval set -- "$(option_parse $'q quiet -' "$@")"
@@ -2931,10 +3224,10 @@ esac
 done
 is integer --name=arguments --max=0 --die -- $#
 local uptime seconds=15
-echo -ne "Warten bis der Reboot fertig ist" >&2
+printf '%s' "$(gettext 'Wait till reboot is done')" >&2
 sleep "$seconds"
 while true;do
-[ -n "$quiet" ]||echo -ne "\r$(eval_gettext 'Wait until the reboot is complete ($seconds seconds)')" >&2
+[ -n "$quiet" ]||printf '\r%s' "$(eval_gettext 'Wait until the reboot is complete ($seconds seconds)')" >&2
 uptime=$(remote cut -d"' '" -f1 /proc/uptime 2>/dev/null|sed 's/[ .].*//')
 if ((uptime>0&&uptime<300));then
 break
@@ -2944,19 +3237,19 @@ sleep 1
 fi
 done
 [ -n "$quiet" ]||remote uptime --since
-[ -n "$quiet" ]||echo ""
+[ -n "$quiet" ]||printf '\n'
 }
 declare -Ag _software_install
 _repo_debian_trivy(){
 sudo apt-get update
 sudo apt-get install -y wget gnupg lsb-release
 wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key|gpg --dearmor|sudo tee /usr/share/keyrings/trivy.gpg >/dev/null
-echo "deb [signed-by=/usr/share/keyrings/trivy.gpg] https://aquasecurity.github.io/trivy-repo/deb generic main"|sudo tee -a /etc/apt/sources.list.d/trivy.list
+printf '%s' "deb [signed-by=/usr/share/keyrings/trivy.gpg] https://aquasecurity.github.io/trivy-repo/deb generic main"|sudo tee -a /etc/apt/sources.list.d/trivy.list
 }
 _repo_redhat_epel(){
 is set -- "$major"||major="$(grep ^VERSION_ID /etc/os-release|sed 's/.*="//;s/\..*//')"
 if ! dnf repolist|grep -q epel;then
-dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-$major.noarch.rpm
+dnf install -y "https://dl.fedoraproject.org/pub/epel/epel-release-latest-$major.noarch.rpm"
 fi
 }
 _install_yq(){
@@ -3140,44 +3433,36 @@ num=-1
 fi
 local step
 if [ -n "$human" ];then
-echo -n "$1 -> $2 "
+printf '%s' "$1 -> $2 "
 if ((num==0));then
 gettext "are identical versions"
-echo
+printf '\n'
 elif ((num>=1000000000));then
 step=$((num/1000000000))
-eval_ngettext "is an upgrade of one major version" 'is an upgrade of $step major versions' "$step"
-echo
+printf '%s\n' "$(eval_ngettext "is an upgrade of one major version" 'is an upgrade of $step major versions' "$step")"
 elif ((num>=1000000));then
 step=$((num/1000000))
-eval_ngettext "is an upgrade of one minor version" 'is an upgrade of $step minor versions' "$step"
-echo
+printf '%s\n' "$(eval_ngettext "is an upgrade of one minor version" 'is an upgrade of $step minor versions' "$step")"
 elif ((num>=1000));then
 step=$((num/1000))
-eval_ngettext "is an upgrade of one patch version" 'is an upgrade of $step patch versions' "$step"
-echo
+printf '%s\n' "$(eval_ngettext "is an upgrade of one patch version" 'is an upgrade of $step patch versions' "$step")"
 elif ((num>=1));then
-gettext "is a developer upgrade"
-echo
+printf '%s\n' "$(gettext "is a developer upgrade")"
 elif ((num>=-1000));then
-gettext "is a developer downgrade"
-echo
+printf '%s\n' "$(gettext "is a developer downgrade")"
 elif ((num>=1000000));then
 step=$((num/-1000))
-eval_ngettext "is a downgrade of one patch version" 'is a downgrade of $step patch versions' "$step"
-echo
+printf '%s\n' "$(eval_ngettext "is a downgrade of one patch version" 'is a downgrade of $step patch versions' "$step")"
 elif ((num>=1000000000));then
 step=$((num/-1000000))
-eval_ngettext "is an upgrade of one minor version" 'is an upgrade of $step minor versions' "$step"
-echo
+printf '%s\n' "$(eval_ngettext "is an upgrade of one minor version" 'is an upgrade of $step minor versions' "$step")"
 else
 step=$((num/1000000000))
-eval_ngettext "is an upgrade of one major version" 'is an upgrade of $step major versions' "$step"
-echo
+printf '%s\n' "$(eval_ngettext "is an upgrade of one major version" 'is an upgrade of $step major versions' "$step")"
 fi
 return 0
 else
-echo "$num"
+printf '%s\n' "$num"
 fi
 ((num==0))&&return 0||return 1
 }
@@ -3228,7 +3513,7 @@ csv)awk 'BEGIN { FS="\t"; OFS="," }
                     print
                 }' <<<"$input"
 ;;
-pprint)column -t -s $'\t' <<<"$input"|less -S
+pprint)column -t -s $'\t' <<<"$input"
 ;;
 *)die "Allowed formats are only csv, not [$format]"
 esac
@@ -3243,7 +3528,7 @@ while IFS=$separator read -r -a line;do
 orig="${line[idx]}"
 ((${#orig}<=width))||line[idx]="${orig:0:width-1}…"
 (IFS="$separator"
-echo "${line[*]}")
+printf '%s\n' "${line[*]}")
 done <<<"$input"
 ;;
 sort)local cols idx
@@ -3254,7 +3539,7 @@ col=$((idx+1))
 [ ! "$3" = "numeric" ]||type=n
 [[ -n $idx ]]||die "Usage: table sort <column> [numeric]"
 (IFS="$separator"
-echo "${cols[*]}")
+printf '%s\n' "${cols[*]}")
 tail -n +2 <<<"$input"|sort -t $'\t' "-k$col,$col$type"
 ;;
 reverse)head -1 <<<"$input"
@@ -3263,16 +3548,18 @@ tail -n +2 <<<"$input"|tac
 *)die "Usage: tsv {to|crop} [<value>]"
 esac
 }
+TRIVY_EXPLOITS_URL=https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json
 trivy(){
 is enum --name=command --allow="root files docker" --die -- "$1"&&local command="$1"&&shift
-local timeout
+local timeout onlyOS exclude progress
 timeout=${TRIVY_DEFAULT_TIMEOUT:-60m}
-local _login host jump term lines file
-eval set -- "$(option_parse $'t timeout +\no only-os -' "$@")"
+eval set -- "$(option_parse $'t timeout +\no only-os -\ne exclude +\np progress -' "$@")"
 while true;do
 case "$1" in
 -t|--timeout)timeout="$2"&&shift 2;;
 -o|--only-os)onlyOS=1&&shift;;
+-e|--exclude)exclude="$2"&&shift 2;;
+-p|--progress)progress=1&&shift;;
 --)shift&&break;;
 *)die "$(gettext "Unrecognized option"): $1"
 esac
@@ -3285,10 +3572,16 @@ cmd="$(command -v trivy)"
 opt+=" -o $work/trivy.json"
 is empty -- "$DEBUG"||opt+=" --debug"
 is empty -- "$TRIVY_CACHE_SERVER"||opt+=" --server $TRIVY_CACHE_SERVER"
+echo "----"
 case $command in
-root)is empty -- "$onlyOS"||opt+=" --pkg-types os"
+root)exclude+=" $TRIVY_ROOT_EXCLUDE"
+local excludeOption
+for path in $exclude;do
+excludeOption+=" --skip-dirs $path"
+done
+is empty -- "$onlyOS"||opt+=" --pkg-types os"
 source="$(hostname -f)"
-sudo $cmd rootfs $opt $exclude / 2>&1|sed 's/[^A-Z]*T[^A-Z]*//'|debug
+sudo "$cmd" rootfs $opt $excludeOption / 2>&1|sed 's/[^A-Z]*T[^A-Z]*//'|debug
 ;;
 files)command $cmd fs $opt "$1" 2>&1|sed 's/[^A-Z]*T[^A-Z]*//'|debug;;
 docker)command $cmd image $opt --input "$1" 2>&1|sed 's/[^A-Z]*T[^A-Z]*//'|debug
@@ -3297,7 +3590,7 @@ debug "Optimize JSON structure for splitting..."
 jq '.Results[]?|. as $g|.Vulnerabilities[]?|{Class: $g.Class, Target: $g.Target, Type: $g.Type}*.' "$work"/trivy.json >"$work"/split.json
 debug "Splitting JSON..."
 mkdir "$work"/split
-csplit -f "$work"/split/ -b '%06d' -zs $work/split.json /^{/ "{*}"
+csplit -f "$work"/split/ -b '%06d' -zs "$work"/split.json /^{/ "{*}"
 rm "$work"/split.json
 local found
 found="$(ls -1 "$work"/split/|wc -l)"
@@ -3307,24 +3600,312 @@ rm -r "$work"
 return 0
 fi
 debug "Found $found reports."
-echo "$work"
-}
-trivy_test(){
-work="$1"
-source="test"
+mkdir -p "$_trivy_cache/jira"
+! is file -- "$_trivy_cache/exploits.json"||find "$_trivy_cache/exploits.json" -mmin +1440 -delete
+is file -- "$_trivy_cache/exploits.json"||curl -s "$TRIVY_EXPLOITS_URL" -o "$_trivy_cache/exploits.json"
+local project
+project="$(jira project "$TRIVY_JIRA_BOARD")"
+_trivy_jira[board]="$(jq .id -r <<<"$project")"
+is set -- "${_trivy_jira[board]}"||die "Could not find JIRA Board ID for $TRIVY_JIRA_BOARD!"
+_trivy_jira[issueType]="$(jq '.issueTypes[] | select(.name == "'"$TRIVY_JIRA_ISSUE_TYPE"'").id' -r <<<"$project")"
+is set -- "${_trivy_jira[issueType]}"||die "Could not find JIRA Issue Type ID for $TRIVY_JIRA_BOARD/$TRIVY_JIRA_ISSUE_TYPE!"
+fields="$(jira fields "${_trivy_jira[board]}" "${_trivy_jira[issueType]}")"
+_trivy_jira[field_sources]="$(jq '.fields[] | select(.name == "'"$TRIVY_JIRA_FIELD_SOURCES"'").key' -r <<<"$fields")"
+is set -- "${_trivy_jira[field_sources]}"||die "Could not find JIRA Field \"$TRIVY_JIRA_FIELD_SOURCES\" in $TRIVY_JIRA_BOARD/$TRIVY_JIRA_ISSUE_TYPE!"
+_trivy_jira[field_rating]="$(jq '.fields[] | select(.name == "'"$TRIVY_JIRA_FIELD_RATING"'").key' -r <<<"$fields")"
+is set -- "${_trivy_jira[field_rating]}"||die "Could not find JIRA Field \"$TRIVY_JIRA_FIELD_RATING\" in $TRIVY_JIRA_BOARD/$TRIVY_JIRA_ISSUE_TYPE!"
+_trivy_jira[field_version]="$(jq '.fields[] | select(.name == "'"$TRIVY_JIRA_FIELD_VERSION"'").key' -r <<<"$fields")"
+is set -- "${_trivy_jira[field_version]}"||die "Could not find JIRA Field \"$TRIVY_JIRA_FIELD_VERSION\" in $TRIVY_JIRA_BOARD/$TRIVY_JIRA_ISSUE_TYPE!"
+_trivy_jira[field_links]="$(jq '.fields[] | select(.name == "'"$TRIVY_JIRA_FIELD_LINKS"'").key' -r <<<"$fields")"
+is set -- "${_trivy_jira[field_links]}"||die "Could not find JIRA Field \"$TRIVY_JIRA_FIELD_LINKS\" in $TRIVY_JIRA_BOARD/$TRIVY_JIRA_ISSUE_TYPE!"
+_trivy_jira[field_approval]="$(jq '.fields[] | select(.name == "'"$TRIVY_JIRA_FIELD_APPROVAL"'").key' -r <<<"$fields")"
+is set -- "${_trivy_jira[field_approval]}"||die "Could not find JIRA Field \"$TRIVY_JIRA_FIELD_APPROVAL\" in $TRIVY_JIRA_BOARD/$TRIVY_JIRA_ISSUE_TYPE!"
 local num
 for file in "$work"/split/*;do
 num="$(basename "$file")"
 queue add _trivy_report "$work" "$file" "$source"
 done
 queue run
+rm -r "$work"/split
+while read -r folder;do
+cat "$folder/header.txt" "$folder/sources.txt" "$folder/footer.txt" >"$folder/report.txt"
+rm "$folder/header.txt" "$folder/sources.txt" "$folder/footer.txt"
+cat "$folder/report.tsv" >>"$work"/list.tsv
+rm "$folder/report.tsv"
+if is file -- "$folder/expired.tsv";then
+cat "$folder/expired.tsv" >>"$work"/expired.tsv
+rm "$folder/expired.tsv"
+fi
+if is file -- "$folder/blocked.tsv";then
+cat "$folder/blocked.tsv" >>"$work"/blocked.tsv
+rm "$folder/blocked.tsv"
+fi
+if is file -- "$folder/prom.txt";then
+cat "$folder/prom.txt" >>"$work"/prom.txt
+rm "$folder/prom.txt"
+fi
+done < <(find "$work" -mindepth 3 -type d)
+printf '%s' "$work"
 }
-_trivy_report(){
+trivy_test(){
 work="$1"
-file="$2"
-source="$3"
-debug "$2: checking"
-sleep 10
-debug "$2: done sleeping"
+source="test"
+rm -r "$work"/split/critical "$work"/split/high "$work"/split/medium "$work"/split/low 2>/dev/null||true
+local project
+project="$(jira project "$TRIVY_JIRA_BOARD")"
+_trivy_jira[board]="$(jq .id -r <<<"$project")"
+is set -- "${_trivy_jira[board]}"||die "Could not find JIRA Board ID for $TRIVY_JIRA_BOARD!"
+_trivy_jira[issueType]="$(jq '.issueTypes[] | select(.name == "'"$TRIVY_JIRA_ISSUE_TYPE"'").id' -r <<<"$project")"
+is set -- "${_trivy_jira[issueType]}"||die "Could not find JIRA Issue Type ID for $TRIVY_JIRA_BOARD/$TRIVY_JIRA_ISSUE_TYPE!"
+fields="$(jira fields "${_trivy_jira[board]}" "${_trivy_jira[issueType]}")"
+_trivy_jira[field_sources]="$(jq '.fields[] | select(.name == "'"$TRIVY_JIRA_FIELD_SOURCES"'").key' -r <<<"$fields")"
+is set -- "${_trivy_jira[field_sources]}"||die "Could not find JIRA Field \"$TRIVY_JIRA_FIELD_SOURCES\" in $TRIVY_JIRA_BOARD/$TRIVY_JIRA_ISSUE_TYPE!"
+_trivy_jira[field_rating]="$(jq '.fields[] | select(.name == "'"$TRIVY_JIRA_FIELD_RATING"'").key' -r <<<"$fields")"
+is set -- "${_trivy_jira[field_rating]}"||die "Could not find JIRA Field \"$TRIVY_JIRA_FIELD_RATING\" in $TRIVY_JIRA_BOARD/$TRIVY_JIRA_ISSUE_TYPE!"
+_trivy_jira[field_version]="$(jq '.fields[] | select(.name == "'"$TRIVY_JIRA_FIELD_VERSION"'").key' -r <<<"$fields")"
+is set -- "${_trivy_jira[field_version]}"||die "Could not find JIRA Field \"$TRIVY_JIRA_FIELD_VERSION\" in $TRIVY_JIRA_BOARD/$TRIVY_JIRA_ISSUE_TYPE!"
+_trivy_jira[field_links]="$(jq '.fields[] | select(.name == "'"$TRIVY_JIRA_FIELD_LINKS"'").key' -r <<<"$fields")"
+is set -- "${_trivy_jira[field_links]}"||die "Could not find JIRA Field \"$TRIVY_JIRA_FIELD_LINKS\" in $TRIVY_JIRA_BOARD/$TRIVY_JIRA_ISSUE_TYPE!"
+_trivy_jira[field_approval]="$(jq '.fields[] | select(.name == "'"$TRIVY_JIRA_FIELD_APPROVAL"'").key' -r <<<"$fields")"
+is set -- "${_trivy_jira[field_approval]}"||die "Could not find JIRA Field \"$TRIVY_JIRA_FIELD_APPROVAL\" in $TRIVY_JIRA_BOARD/$TRIVY_JIRA_ISSUE_TYPE!"
+local num
+for file in "$work"/split/*;do
+num="$(basename "$file")"
+queue add _trivy_report "$work" "$file" "$source"
+done
+queue run
+while read -r folder;do
+cat "$folder/header.txt" "$folder/sources.txt" "$folder/footer.txt" >"$folder/report.txt"
+rm "$folder/header.txt" "$folder/sources.txt" "$folder/footer.txt"
+cat "$folder/report.tsv" >>"$work"/list.tsv
+rm "$folder/report.tsv"
+if is file -- "$folder/expired.tsv";then
+cat "$folder/expired.tsv" >>"$work"/expired.tsv
+rm "$folder/expired.tsv"
+fi
+if is file -- "$folder/blocked.tsv";then
+cat "$folder/blocked.tsv" >>"$work"/blocked.tsv
+rm "$folder/blocked.tsv"
+fi
+if is file -- "$folder/prom.txt";then
+cat "$folder/prom.txt" >>"$work"/prom.txt
+rm "$folder/prom.txt"
+fi
+done < <(find "$work" -mindepth 3 -type d)
+}
+_trivy_cache=/tmp/trivy-cache
+declare -A _trivy_jira
+_trivy_report(){
+debug "trivy_report \"$1\" \"$2\" \"$3\""
+local work="$1"
+local file="$2"
+local source="$3"
+local type severity target id json title pkgName pkgPath description cvss installed sourceLine date fixed fixStatus links
+json="$(cat "$file")"
+type="$(jq .Type -r <<<"$json")"
+severity="$(jq .Severity -r <<<"$json")"
+target="$(jq .Target -r <<<"$json")"
+id="$(jq .VulnerabilityID -r <<<"$json")"
+title="$(jq .Title -r <<<"$json")"
+pkgPath="$(jq .PkgPath -r <<<"$json")"
+test ! "$pkgPath" = "null"||pkgPath=""
+pkgName="$(jq .PkgName -r <<<"$json")"
+test ! "$pkgName" = "null"||pkgName=""
+description="$(jq .Description -r <<<"$json")"
+cvss="$(jq '.CVSS[]?.V3Score' -r <<<"$json"|tr $'\n' '\;'|sed 's/;$//;s/;/; /g')"
+installed="$(jq .InstalledVersion -r <<<"$json")"
+sourceLine="$source $target ($type) $pkgPath - Version $installed"
+fixed="$(jq .FixedVersion -r <<<"$json")"
+[ "$fixed" != "null" ]||fixed="-"
+fixStatus="$(jq .Status -r <<<"$json")"
+[ "$fixStatus" != "null" ]||fixStatus="-"
+date="$(jq .PublishedDate -r <<<"$json")"
+test ! "$date" = "null"||date=""
+links="$(jq '.References[]?' -r <<<"$json"|sed 's/^/- /')"
+local changes=() rules=() action
+if (($(date_format unix "$date")>$(now)-$(duration_format seconds 3d)))&&[[ $severity == "HIGH" || $severity == "CRITICAL" ]];then
+action="$(eval_gettext 'Downgrade $severity -> MEDIUM because it was published less than 3 days ago')"
+info "$id at $target: $action" >&2
+changes+=("{\"Severity\": \"MEDIUM\",\"OriginalSeverity\": \"$severity\"}")
+rules+=("{\"Title\": \"Just Published\",\"Description\": \"$action.\"}")
+fi
+local exploited
+exploited="$(jq '.vulnerabilities[]|select(.cveID=="'"$id"'")' "$_trivy_cache/exploits.json")"
+if is set -- "$exploited";then
+action="$(gettext 'Add information of known exploits and cancel downgrades in case of just published')"
+info "$id at $target: $action" >&2
+changes+=("{\"Exploited\": $exploited, \"Severity\": \"$severity\"}")
+rules+=("{\"Title\": \"Exploited\",\"Description\": \"$action.\"}")
+fi
+if [ "$type" = "npm" ]&&[[ $severity == "HIGH" || $severity == "CRITICAL" ]]&&is file -- "$target"&&[ "$(jq '.packages|with_entries(select(.key|contains("'"$pkgName"'")))|.[]|select(has("dev"))|[.dev]|any' "$target"/package-lock.json)" = "true" ];then
+action="$(eval_gettext 'Downgrade $severity -> MEDIUM because it is a dev dependency')"
+info "$id at $target: $action" >&2
+changes+=("{\"Severity\": \"MEDIUM\",\"OriginalSeverity\": \"$severity\"}")
+rules+=("{\"Title\": \"NPM Dev Dependency\",\"Description\": \"$action.\"}")
+fi
+local issue key approval comments expired
+if is set -- "$TRIVY_JIRA_BOARD"&&[[ $severity == "HIGH" || $severity == "CRITICAL" ]];then
+local created
+issue="$(jira search "project = ${_trivy_jira[board]} AND summary ~ $id ORDER BY created ASC"|head -1)"
+if is empty -- "$issue";then
+local fields priority=Low
+case $severity in
+HIGH)priority=Major;;
+CRITICAL)priority=Critical
+esac
+jira json fields set project json "{\"id\":${_trivy_jira[board]}}"
+jira json fields set issuetype json "{\"id\":${_trivy_jira[issueType]}}"
+jira json fields set priority json "{\"name\":\"$priority\"}"
+jira json fields set summary "$id"
+jira json fields set description adf "$title"$'\n\n'"$description"
+jira json fields set "${_trivy_jira[field_rating]}" adf "$severity (CVSS rating ${cvss:--})"
+jira json fields set "${_trivy_jira[field_version]}" adf "Gefixt ab Version ${fixed:--} $fixStatus"
+jira json fields set "${_trivy_jira[field_links]}" adf "$links"
+jira json fields set "${_trivy_jira[field_sources]}" adf "$(date +%Y-%m) > $sourceLine"
+jira json fields set labels json "[\"cve\", \"$(sed 's#.*ekz.de/##;s#/-/.*##;s#[/.]#", "#g' <<<"$source")\"]"
+issue="$(jira create "$fields")"
+created=1
+fi
+local jira deploy commentDate jiraStatus assignee
+jira="$(jira get "$issue")"
+deploy="$(jq '.fields.'"${_trivy_jira[field_approval]}"'?.value' -r <<<"$jira")"
+commentDate="$(jq '.fields.comment.comments[].updated' -r <<<"$jira"|sort|tail -1)"
+key="$(jq .key -r <<<"$jira")"
+jiraStatus="$(jq .fields.status.name -r <<<"$jira")"
+assignee="$(jq .fields.assignee.displayName -r <<<"$jira")"
+local date author comments=()
+while IFS=$'\t' read -r date author comment;do
+comments+=("$date $author: $(jira adf_to_md "$comment"|grep -v ^$)")
+done < <(jq '.fields.comment.comments[-3:][] | [.updated, .updateAuthor.displayName, (.body | @json)] | @tsv' -r <<<"$jira"|tac)
+if [[ $severity == "HIGH" || $severity == "CRITICAL" ]];then
+if ([ "$deploy" = "$TRIVY_JIRA_APPROVAL_IRRELEVANT" ]||([ "$deploy" = "$TRIVY_JIRA_APPROVAL_TEMP" ]&&(($(date_diff "$commentDate")<=$(duration_format seconds '30d')))));then
+action="$(eval_gettext 'Downgrade $severity -> MEDIUM because of Jira status $deploy')"
+info "$(eval_gettext '$id at $target'): $action" >&2
+changes+=("{\"Severity\": \"MEDIUM\",\"OriginalSeverity\": \"$severity\"}")
+rules+=("{\"Title\": \"Jira Approval\",\"Description\": \"$action.\"}")
+fi
+if ([ "$deploy" = "$TRIVY_JIRA_APPROVAL_TEMP" ]&&(($(date_diff "$commentDate")>$(duration_format seconds '30d'))));then
+expired=1
+fi
+fi
+if ! is set -- "$created";then
+local old new fields update
+old="$(jira json jira get description adf)"
+new="$title"$'\n\n'"$description"
+if [[ $new != "$old" ]];then
+jira json fields set description adf "$new"
+update=1
+fi
+old="$(jira json jira get "${_trivy_jira[field_sources]}" md)"
+new="$(printf '%s\n%s' "$old" "$(date +%Y-%m) > $sourceLine"|sed -n '/>/p'|sort -t'>' -k1,1r -k2,2)"
+if [[ $new != "$old" ]];then
+jira json fields set "${_trivy_jira[field_sources]}" adf "$new"
+update=1
+fi
+old="$(jira json jira get "${_trivy_jira[field_rating]}" md)"
+new="$severity (CVSS Rating ${cvss:--})"
+if [[ $new != "$old" ]];then
+jira json fields set "${_trivy_jira[field_rating]}" adf "$new"
+update=1
+fi
+old="$(jira json jira get "${_trivy_jira[field_version]}" md)"
+new="Gefixt ab Version ${fixed:--} $fixStatus"
+if [[ $new != "$old" ]];then
+jira json fields set "${_trivy_jira[field_version]}" adf "$new"
+update=1
+fi
+old="$(jira json jira get "${_trivy_jira[field_links]}" md)"
+new="$links"
+if [[ $new != "$old" ]];then
+jira json fields set "${_trivy_jira[field_links]}" adf "$new"
+update=1
+fi
+local labels addLabel=()
+labels="$(jq '.fields.labels[]' -r <<<"$jira")"
+for label in $(sed 's#.*ekz.de/##;s#/-/.*##;s#[/.]# #g' <<<"$source");do
+[[ ! $labels =~ $label ]]||continue
+addLabel+=('{"add": "'"$label"'"}')
+done
+if is set -- "$update";then
+update=1
+if ((${#addLabel[@]}>0));then
+fields="$(jq --argjson l "[$(join addLabel ",")]" '.update = { "labels": $l }' <<<"$fields")"
+fi
+jira update "$issue" "$fields"
+fi
+fi
+action="$(gettext 'Add information from Jira')"
+info "$(eval_gettext '$id at $target'): $action" >&2
+changes+=("{\"Jira\": {\"id\": $issue, \"key\": \"$key\", \"approval\": \"$deploy\", \"lastComment\": \"$commentDate\"}}")
+rules+=("{\"Title\": \"Jira Info\",\"Description\": \"$action.\"}")
+fi
+is empty -- "$rules"||changes+=("{\"Rules\": [$(join rules)]}")
+for change in "${changes[@]}";do
+json="$(jq -n --argjson o "$json" --argjson c "$change" '$o * $c')"
+done
+severity="$(jq .Severity -r <<<"$json")"
+local folder="$work/${severity,,}/$type/$id"
+mkdir -p "$folder"
+printf '%s\n' "$json" >"$folder/data.json"
+local exploitDate exploitVendor exploitProduct issue key approval
+exploitDate="$(jq .Exploited.dateAdded -r <<<"$json")"
+test ! "$exploitDate" = "null"||exploitDate=""
+if is set -- "$exploitDate";then
+exploitVendor="$(jq .Exploited.vendorProject -r <<<"$json")"
+exploitProduct="$(jq .Exploited.product -r <<<"$json")"
+fi
+file="$folder/header.txt"
+if ! is file -- "$file";then
+{
+case $severity in
+CRITICAL)printf "$CC_CRITICAL";;
+HIGH)printf "$CC_ERROR";;
+MEDIUM)printf "$CC_WARN";;
+*)printf ""
+esac
+printf '%s\n' "================================================================================"
+printf '%s\n' "$severity $id $title"
+printf '%s\n' "--------------------------------------------------------------------------------"
+printf '%s\n' "$description"
+printf '%s\n' "    "
+local value="${cvss:--}" human
+printf '%s\n' "$(eval_gettext 'Rating: $severity (CVSS rating $value)')"
+value="${fixed:--}"
+printf '%s\n' "$(eval_gettext 'Status: Fixed from version $value $fixStatus')"
+human="$(date_format human-date "$date")"
+value="$(duration_format days "$(date_diff "$date")")"
+printf '%s\n' "$(eval_gettext 'Date:   Vulnerability known since $human ($value days ago)')"
+printf '%s\n' "    "
+is empty -- "$exploitDate"||printf '%s\n\n' "$(eval_gettext 'Exploit known since $exploitDate at $exploitVendor $exploitProduct')"
+if is set -- "$issue";then
+printf '%s\n' "Jira Issue: https://ekz-gruppe.atlassian.net/browse/$issue"
+printf '%s\n' "            $jiraStatus    $(gettext 'Responsible'): $assignee"
+printf '%s\n' "            $(gettext 'Deploy'): ${approval:-Undefiniert}"
+printf '%s\n' "$(gettext 'Last comments'):\n$(join comments $'\n'|sed 's/^/             /')"
+fi
+printf '%s:\n' "$(gettext 'Sources')"
+} >>"$file"
+fi
+file="$folder/sources.txt"
+printf '%s\n' "- $sourceLine" >>"$file"
+file="$folder/footer.txt"
+if ! is file -- "$file";then
+printf "%s$CC_RESET\n" "$(gettext 'Links'):\n$links" >>"$file"
+fi
+file="$folder/report.tsv"
+printf '%s\t%s\t%s\t%s\n' "$severity" "$type" "$id" "$title" >>"$file"
+is empty -- "$expired"||cat "$file" >"$folder/expired.tsv"
+[[ $severity == "LOW" || $severity == "MEDIUM" ]]||cat "$file" >"$folder/blocked.tsv"
+file="$folder/prom.txt"
+if [[ $severity == "HIGH" || $severity == "CRITICAL" ]];then
+case $severity in
+LOW)value=1;;
+MEDIUM)value=10;;
+HIGH)value=100;;
+CRITICAL)value=1000;;
+*)value=0
+esac
+printf '%s\n' "divibib_trivy_vulnerability{type=\"$type\",target=\"$target\",package=\"$pkgPath\",severity=\"$severity\",cve=\"$id\"} $value" >>"$file"
+fi
 }
 source $BASHLIB_HOME/configs

@@ -2,10 +2,6 @@
 
 ## Curl with added error handling
 
-This will load the content into a temporary shared memory file while running.
-
-The information of the CURL_* variables are stored in an environment file, if `--store` is added, and you get them set in your process parent using `variables restore curl` there.
-
 ### Usage
 
 ```bash
@@ -16,7 +12,7 @@ like curl
 
 ```bash
 default Options like in vanilla curl
-store   # if set `variable store` will be called
+store <name>  # if set `variables store <name>` will be called
 ```
 
 ### Globals
@@ -32,3 +28,10 @@ store   # if set `variable store` will be called
 - 0 if RC:2xx
 - 1 if not
 - 
+
+### Description
+
+This will load the content into a temporary shared memory file while running.
+
+The information of the CURL_* variables are stored in an environment file, if `--store <name>` is added, and you get them set in your process parent using `variables restore <name>` there. Best is to use the pid `$$` there, to be possible in parallel calls.
+

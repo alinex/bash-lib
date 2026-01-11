@@ -14,17 +14,17 @@ source /dev/null
 
 BASHLIB_DOWNLOAD="https://gitlab.com/alinex/bash-lib/-/archive/master/bash-lib-master.tar.gz"
 
-CC_ERROR=$'\033[31m' # red
-CC_STEP=$'\033[36m'  # cyan
-CC_RESET=$'\033[0m'
-CC_INTENSITY_BOLD=$'\033[1m'
+CC_ERROR=$'\e[31m' # red
+CC_STEP=$'\e[36m'  # cyan
+CC_RESET=$'\e[0m'
+CC_INTENSITY_BOLD=$'\e[1m'
 
 logo() {
-    a=$'\033[36m'                # cyan
-    b=$'\033[33m\033[1m'         # yellow bold
-    c=$'\033[43m\033[30m\033[1m' # yellow bg + black bold
-    r=$'\033[0m'                 # reset
-    u=$'\033[4m'                 # underline
+    a=$'\e[36m'            # cyan
+    b=$'\e[33m\e[1m'       # yellow bold
+    c=$'\e[43m\e[30m\e[1m' # yellow bg + black bold
+    r=$'\e[0m'             # reset
+    u=$'\e[4m'             # underline
     p="$(printf '%*s' $((($(tput cols) - 80) / 2)))"
     t="$(printf '%*s' $((($(tput cols) - ${#1}) / 2)))"
     echo
@@ -182,16 +182,16 @@ else
     echo "        Create example under ${config}secrets"
     cp "$install"/config/secrets.example "$config"secrets
 fi
-if [ -e "$config"overwrite ]; then
-    echo "        Use the existing ${config}overwrite"
+if [ -e "$config"local ]; then
+    echo "        Use the existing ${config}local"
 else
-    cp "$install"/config/overwrite.example "$config"overwrite
-    echo "        Created example under ${config}overwrite"
+    cp "$install"/config/local.example "$config"local
+    echo "        Created example under ${config}local"
 fi
 echo "        Link files into bashlib config dir"
-rm -rf "$install"/config/secrets "$install"/config/overwrite
+rm -rf "$install"/config/secrets "$install"/config/local
 ln -s "$config"secrets "$install"/config/secrets
-ln -s "$config"overwrite "$install"/config/overwrite
+ln -s "$config"local "$install"/config/local
 echo ""
 
 echo "To uninstall use:

@@ -18,15 +18,16 @@ _module_resolve() {
     local init=1 module line
     for module in "${modules[@]}"; do
         [[ "$module" =~ ^(full|base|.*/.*)$ ]] || module="module/$module"
-        [ -n "$init" ] && init= || echo -n ,
-        echo -n "$module"
+        [ -n "$init" ] && init= || printf ,
+        printf '%s' "$module"
         while read -r line; do
-            echo -n ",$(_module_resolve "$line")"
+            printf '%s' ",$(_module_resolve "$line")"
         done < <(grep '^use ' "$BASHLIB_HOME/$module" | sed 's/^use //' || true)
     done
 }
 
 # Run command on remote host.
+#
 # You can let it use the `$server` and `$login` variables or give it in the options.
 #
 # If you use a pseudo `--terminal`, `\r\n` may be contained in output, remove with @nocr.`
@@ -102,9 +103,9 @@ remote() {
         local pattern='^#!/usr/bin/env'" bash|source "'/dev/null'
         # shellcheck disable=SC2086
         (
-            echo "#!/usr/bin/env" bash
-            echo "DEBUG=${DEBUG:-}"
-            echo "BASHLIB_LOADER=remote"
+            printf '%s\n' "#!/usr/bin/env bash"
+            printf '%s\n' "DEBUG=${DEBUG:-}"
+            printf '%s\n' "BASHLIB_LOADER=remote"
             # load base
             if [[ "${modules[0]}" =~ ^(full|base)$ ]]; then
                 grep -Ev "$pattern" "$BASHLIB_HOME/${modules[0]}"
@@ -172,72 +173,30 @@ remote() {
 
 # Deprecated: Run remote command with pseudo terminal
 # Use: remote --terminal ...
-# `\r\n` my be contained in output, remove with n@ocr
-# "Connection ... closed" in stderr: remove using: 2> >(grep -v '^Connection to .* closed\.' >&2)
-# Usage:    remote_term [<options>] <command>... # special characters have to be masked: | & * > <
-#           <title> | remote_term [<options>]
-# Options:  # following options, only before `<command>`
-#           l, login <user>
-#           h, host <host>
-#           j, jump <user>@<host>
-# Globals:  $server
-#           $login - default is "operator"
-# Output:   passed through
 remote_term() {
-    _deprecated "Use: remote --terminal ... instead" warn
-    remote --terminal "$@"
+    _deprecated "Use: remote --terminal ... instead"
 }
 
 # Deprecated: Run remote command with pseudo terminal but line based output (problematic with questions)
 # Use: @remote --terminal --line-based ...
-# Usage:    remote_term_line [<options>] <command>... # special characters have to be masked: | & * > <
-#           <title> | remote_term_line [<options>]
-# Options:  # following options, only before `<command>`
-#           l, login <user>
-#           h, host <host>
-#           j, jump <user>@<host>
-# Globals:  $server
-#           $login - default is "operator"
-# Output:   passed through
 remote_term_line() {
-    _deprecated "Use: @remote --terminal --line-based ..." warn
-    remote --terminal --line-based "$@"
+    _deprecated "Use: @remote --terminal --line-based ..."
 }
 
 # Deprecated: Run local script on remote
 # Use: remote --file <file>
-# Usage:    remote_file [<options>] <file>
-#           <file> | remote_file [<options>]
-# Options:  # following options, only before `<file>`
-#           l, login <user>
-#           h, host <host>
-#           j, jump <user>@<host>
-# Globals:  $server
-#           $login - default is "operator"
-# Output:   passed through
 remote_file() {
-    _deprecated "se: remote --file <file>" warn
-    remote --file "$@"
+    _deprecated "se: remote --file <file>"
 }
 
 # Deprecated: Open an interactive console on remote host
 # Use: remote console
-# The motd and banner are prevented by touching .hushlogin on the server.
-# Usage:    remote_console [<options>]
-# Options:  l, login <user>
-#           h, host <host>
-#           j, jump <user>@<host>
-#           A, forward-agent     # use local ssh-agent also on remote host for authentication.
-# Globals:  $server
-#           $login - default is "operator"
-# Output:   passed through
-# Return:   passed through
 remote_console() {
-    _deprecated "Use: remote console" warn
-    remote "$@" console
+    _deprecated "Use: remote console"
 }
 
 # Upload file
+#
 # Usage:    upload [<options>] <source> <dest>
 # Options:  # following options, only before `<source>`
 #           l, login <user>
@@ -273,6 +232,7 @@ upload() {
 }
 
 # Download file
+#
 # Usage:    download [<options>] <source> <dest>
 # Options:  # following options, only before `<source>`
 #           l, login <user>
@@ -324,111 +284,36 @@ download() {
 
 # Deprecated: Run bashlib command on remote.
 # Use: remote bashlib <module> <command>
-# The `modules` are a comma separated list of module names like network os.
-# The modules can be:
-#
-# - `base` or `full` as first element
-# - `module/<name>` to load the named module (if not full is used)
-# - `extra/<name>` to load an extra module
-# - `configs` to also transfer all the configurations
-# - `config/<name>` to load only one config
-# - any other name will be interpreted as `module/<name>` (short form)
-# Usage:    remote_bashlib [<options>] <module>[,<module>...] <command> [<args>...]
-#           <command> [<args>...] | remote_bashlib [<options>] <module>[,<module>...]
-# Options:  # following options, only before `<module>`
-#           l, login <user>
-#           h, host <host>
-#           j, jump <user>@<host>
-# Globals:  $server
-#           $login - default is "operator"
-# Examples: IP="$(remote_bashlib ip ip_intern)"
 remote_bashlib() {
-    _deprecated "Use: remote bashlib <module> <command>" warn
-    # parameter parsing
-    local opt
-    eval set -- "$(option_parse $'+l login +\nh host +\nj jump +' "$@")"
-    while true; do
-        case "$1" in
-        -l | --login | -h | --host | -j | --jump) opt+=" $1 $2" && shift 2 ;;
-        --) shift && break ;;
-        *) die "$(gettext "Unrecognized option"): $1" ;;
-        esac
-    done
-    is set --name=module --die -- "$1"
-    local list modules
-    list="$(_module_resolve "${1-}")"
-    IFS=',' read -ra modules <<<"$list"
-    debug "Modules: ${modules[*]}"
-    shift
-    # processing
-    local pattern='^#!/usr/bin/env'" bash|source "'/dev/null'
-    # shellcheck disable=SC2086
-    (
-        echo "#!/usr/bin/env" bash
-        echo "DEBUG=${DEBUG:-}"
-        echo "BASHLIB_LOADER=remote"
-        # load base
-        if [[ "${modules[0]}" =~ ^(full|base)$ ]]; then
-            grep -Ev "$pattern" "$BASHLIB_HOME/${modules[0]}"
-            modules=("${modules[@]:1}")
-        else
-            grep -Ev "$pattern" "$BASHLIB_HOME"/base
-        fi
-        # load modules
-        for module in "${modules[@]}"; do
-            if [ "$module" = "configs" ]; then
-                for f in "$BASHLIB_HOME"/config/*; do
-                    if [[ -f "$f" && "$f" != *.* ]]; then
-                        grep -Ev "$pattern" "$f"
-                    fi
-                done
-            else
-                grep -Ev "$pattern" "$BASHLIB_HOME/$module"
-            fi
-        done
-        (($# == 0)) || debug "Running: $*"
-        (($# == 0)) || escape_args "$@"
-        [ ! -p /dev/stdin ] || debug "Running piped command!"
-        [ ! -p /dev/stdin ] || cat </dev/stdin
-    ) | shfmt -mn | remote $opt
+    _deprecated "Use: remote bashlib <module> <command>"
 }
 
 # Deprecated: Remote install package like @install
 # Use `remote_bashlib software install`, see @remote_bashlib.
 remote_install() {
-    _deprecated "use remote_bashlib software install" warn
-    remote_bashlib software install "$@"
+    _deprecated "use remote_bashlib software install"
 }
 
 # Deprecated: Display the system description (from remote)
 # Use `remote_bashlib os system_info`, see @remote_bashlib.
 remote_system_info() {
-    _deprecated "use remote_bashlib os system_info" warn
-    remote_bashlib os system_info "$@"
+    _deprecated "use remote_bashlib os system_info"
 }
 
 # Deprecated: Remote df with visual display
 # Use `remote_bashlib os disk_free` instead.
-# The lines will be colorized based on $MOUNT_COLOR_LIMIT setting, which contains sets of 5 entries (pattern critical error warn ok). The first matching pattern will decide the color limits.
-# Usage:    remote_df [<mount>...]                              # show table
-#           remote_df <var> <operator> <limit%> [<mount>...]    # additionally collect specific volumes
-# Options:  -l, --local     # only list local devices
 remote_df() {
-    _deprecated "use remote_bashlib os disk_free" warn
-    remote_bashlib os disk_free "$@"
+    _deprecated "use remote_bashlib os disk_free"
 }
 
 # Deprecated: Remote check if LVM is used
 # Use `remote_bashlib os uses_lvm` instead.
-# Usage:    remote_lvm
-# Return:   0 for uses LVM
-#           1 if not
 remote_lvm() {
-    _deprecated "use remote_bashlib os uses_lvm" warn
-    remote_bashlib os uses_lvm "$@"
+    _deprecated "use remote_bashlib os uses_lvm"
 }
 
 # Wait till reboot is finished
+#
 # Usage:    boot_wait [<options>]
 # Options:  l, login <user>
 #           h, host <host>
@@ -451,10 +336,10 @@ boot_wait() {
     is integer --name=arguments --max=0 --die -- $#
     # processing
     local uptime seconds=15
-    echo -ne "Warten bis der Reboot fertig ist" >&2
+    printf '%s' "$(gettext 'Wait till reboot is done')" >&2
     sleep "$seconds"
     while true; do
-        [ -n "$quiet" ] || echo -ne "\r$(eval_gettext "Wait until the reboot is complete (\$seconds seconds)")" >&2
+        [ -n "$quiet" ] || printf '\r%s' "$(eval_gettext "Wait until the reboot is complete (\$seconds seconds)")" >&2
         uptime=$(remote cut -d"' '" -f1 /proc/uptime 2>/dev/null | sed 's/[ .].*//')
         if ((uptime > 0 && uptime < 300)); then
             break
@@ -464,5 +349,5 @@ boot_wait() {
         fi
     done
     [ -n "$quiet" ] || remote uptime --since
-    [ -n "$quiet" ] || echo ""
+    [ -n "$quiet" ] || printf '\n'
 }

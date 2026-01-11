@@ -29,8 +29,36 @@ while true; do
 done
 ################################################################################################
 
-#trivy files /home/alex/dvb/divibib-search-api
-trivy_test /tmp/_test_2594541
+process tree mattermost
+process wait mattermost --watch
+process tree mattermost
+exit
+
+#queue add sleep 5
+#queue add sleep 4
+#queue add sleep 3
+#queue add sleep 8
+#queue add sleep 2
+#queue run
+#exit
+
+##steps init
+#echo start
+#async sleep 5
+#async --verbose sleep 4
+#async wait sleep 5
+#async sleep 3
+#async wait
+#echo end
+##steps end
+#exit
+
+#QUEUE_MAX_NUM=1
+#trivy_test /tmp/_test_1474058_trivy
+#_trivy_report /tmp/_test_1576440_trivy /tmp/_test_1576440_trivy/split/000014 /home/alex/dvb/divibib-search-api
+#exit
+
+trivy files /home/alex/dvb/divibib-search-api
 exit
 
 task1() { echo "task1"; }

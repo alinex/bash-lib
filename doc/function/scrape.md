@@ -2,8 +2,6 @@
 
 ## Scrape Prometheus exporter url now
 
-The metrics can be filtered by `<pattern>` argument.
-
 ### Usage
 
 ```bash
@@ -20,3 +18,9 @@ Tab separated list:
 - 0 if metrics found
 - 1 if no matching metric
 - 
+
+### Description
+
+
+The metrics can be filtered by `<pattern>` argument.
+

@@ -12,6 +12,7 @@ declare -F "color_256" >/dev/null || source "$BASHLIB_HOME"/module/color
 ######################################################################################
 
 # Wait for some time or user input
+#
 # Usage:    pause <message>
 #           <message> | pause
 # Options:  T, timeout <duration>    # time after which the default will be used
@@ -37,30 +38,32 @@ pause() {
     if is empty -- "$text"; then
         is set -- "$timeout" && is empty -- "$abort" && text="$(gettext 'Please wait to go on')" || text="$(gettext 'Press any key to continue...')"
     fi
-    echo -en "${CC_NOTICE}$text${CC_RESET} "
+    printf "${CC_NOTICE}%s${CC_RESET} ${CURSOR_STORE}" "$text"
     if is empty -- "$timeout"; then
         read -n 1 -s -r _ </dev/tty
     else
         stty -echo </dev/tty
         while ((timeout > 0)); do
-            echo -ne "\r${CC_NOTICE}$text${CC_RESET} $(duration_format human "$timeout")     "
+            printf "${CURSOR_RESTORE}${CLEAR_EOL}%s " "$(duration_format human "$timeout")"
             if read -r -s -t 1 -n 1 _ </dev/tty; then
                 if [ -n "$abort" ]; then
-                    echo -e "\b\b\b\b$(gettext 'aborted by user')    "
+                    printf "$CURSOR_RESTORE%s\n" "$(gettext 'go on by user')"
                     stty echo </dev/tty
                     return 1
                 fi
             fi
             ((timeout--))
-            ((timeout > 0)) || echo -ne "\r${CC_NOTICE}$text${CC_RESET} 0s      "
+            ((timeout > 0)) || printf "${CURSOR_RESTORE}${CLEAR_EOL}%s" "0s"
         done
         stty echo </dev/tty
     fi
-    echo ""
+    printf '\n'
 }
 
 # Ask a yes/no question.
+#
 # The default can be yes or no and if a default is set <return> will use it. Additional to a default a timeout can be set meaning to use default if timeout is reached. If an invalid character is typed, the timeout will restart.
+#
 # Usage:    confirm <question>
 # Options:  t, true                  # default: yes
 #           f, false                 # default: no
@@ -87,31 +90,26 @@ confirm() {
     local prompt
     prompt="${1:-$(gettext "Should this be done")}"
     # processing
-    local char="" seq i_text invalid rc
+    local char="" seq rc
     local countdown="$timeout"
     if is set -- "$default"; then
         ((default == 0)) && prompt="$prompt [$(gettext "No")]" || prompt="$prompt [$(gettext "Yes")]"
     fi
-    echo -en "${CC_NOTICE}$prompt?${CC_RESET} " >/dev/tty
+    printf "${CC_NOTICE}%s${CC_RESET} ${CURSOR_STORE}" "$prompt?" >/dev/tty
     # read input
-    stty -echo </dev/tty
+    #stty -echo </dev/tty
     # shellcheck disable=SC2086
     # shellcheck disable=SC2229
     while IFS= read -r -s -t 1 -n 1 char </dev/tty || rc=$?; do
-        # remove error
-        if [ -n "$invalid" ]; then
-            invalid=0
-            printf ' %.0s' {1..30} >/dev/tty
-            printf '\b%.0s' {1..30} >/dev/tty
-        fi
+        # shellcheck disable=SC2059
+        printf "${CLEAR_EOL}" >/dev/tty
         # check for countdown if timeout of read reached
         if ((rc == 142)); then
             rc=0
             if [ -n "$timeout" ]; then
                 ((countdown--))
                 if ((countdown > 0)); then
-                    i_text="  $(duration_format human "$countdown")     "
-                    echo -ne "$i_text$(printf '\b%.0s' $(seq 1 ${#i_text}))" >/dev/tty
+                    printf "${CURSOR_RESTORE}${CLEAR_EOL}%s" "$(duration_format human "$countdown")" >/dev/tty
                     continue
                 fi
             else
@@ -123,21 +121,19 @@ confirm() {
             # end if default is set
             if [ -n "$default" ]; then
                 if ((default == 1)); then
-                    echo -e "$(gettext "Yes")     " >/dev/tty
+                    printf "${CURSOR_RESTORE}${CLEAR_EOL}%s\n" "$(gettext "Yes")" >/dev/tty
                     stty echo </dev/tty
                     return 0
                 else
-                    echo -e "$(gettext "No")     " >/dev/tty
+                    printf "${CURSOR_RESTORE}${CLEAR_EOL}%s\n" "$(gettext "No")" >/dev/tty
                     stty echo </dev/tty
                     return 1
                 fi
-            elif [ -n "$i_text" ]; then
-                i_text="$(gettext 'value needed')"
-                echo -en "   ${CC_RED}$i_text${CC_RESET}$(printf '\b%.0s' $(seq 1 $((${#i_text} + 3))))" >/dev/tty
-                invalid=1
+            else
+                printf "${CURSOR_RESTORE}${CLEAR_EOL}${CC_RED}%s${CC_RESET}" "$(gettext 'value needed')" >/dev/tty
             fi
         # ignore escape sequences
-        elif [[ $char == $'\033' ]]; then
+        elif [[ $char == $'\e' ]]; then
             # Read next few characters non-blocking to drain escape sequence
             read -r -s -n 1 -t 0.01 seq
             while [[ $seq == "[" || $seq =~ [0-9A-Za-z~] ]]; do
@@ -145,20 +141,17 @@ confirm() {
             done
         # yes
         elif [[ $char =~ [JjYy] ]]; then
-            echo -e "$(gettext "Yes")" >/dev/tty
+            printf "${CURSOR_RESTORE}${CLEAR_EOL}%s\n" "$(gettext "Yes")" >/dev/tty
             stty echo </dev/tty
             return 0
         # no
         elif [[ $char =~ [Nn] ]]; then
-            echo -e "$(gettext "No")" >/dev/tty
+            printf "${CURSOR_RESTORE}${CLEAR_EOL}%s\n" "$(gettext "No")" >/dev/tty
             stty echo </dev/tty
             return 1
         else
-            i_text="$(gettext 'invalid character')"
-            echo -en "   ${CC_RED}$i_text${CC_RESET}$(printf '\b%.0s' $(seq 1 $((${#i_text} + 3))))" >/dev/tty
-            invalid=1
+            printf "${CURSOR_RESTORE}${CLEAR_EOL}${CC_RED}%s${CC_RESET}" "$(gettext 'invalid character')" >/dev/tty
         fi
-        i_text=""
     done
     stty echo </dev/tty
 }
@@ -166,25 +159,23 @@ confirm() {
 # Deprecated: Ask yes/no question with default to no.
 # Use `confirm --false <question>` instead, see @confirm.
 ask_no() {
-    _deprecated "use confirm --false <question>" warn
-    confirm --false "$1"
+    _deprecated "use confirm --false <question>"
 }
 
 # Deprecated: Ask yes/no question with default to yes.
 # Use `confirm --true <question>` instead, see @confirm.
 ask_yes() {
     _deprecated "use confirm --true <question>"
-    confirm --true "$1"
 }
 
 # Deprecated: Ask a free question.
 # Use `ask <question>` instead, see @ask.
 ask_input() {
     _deprecated "use ask string <question>"
-    ask "$@"
 }
 
 # Ask for an input element
+#
 # This will also validate while typing if you select the correct format. So you can only input characters matching the input format.
 # Possible formats are:
 #
@@ -197,6 +188,7 @@ ask_input() {
 # - `time` - a time with hour and minute can be given
 #
 # If another format is needed, you can fall back to string and validate on your own after you got the response.
+#
 # Usage:    ask <format> <question>
 # Options:  e, empty                 # allow empty value
 #           n, allow-negative        # on number, integer, float
@@ -259,27 +251,28 @@ ask() {
     editor) prompt="${2:-$(gettext "Enter text here")}" ;;
     *) prompt="${2:-$(gettext "Enter short line")}" ;;
     esac
-    local input="" char="" seq invalid i_text u_text q
+    local input="" char="" seq i_text q
     local countdown="$timeout"
     local nl=$'\n'
     [ -z "$default" ] && [ -z "$empty" ] || prompt="$prompt [$default]"
     # external editor
     if [ "$format" = "editor" ]; then
         notice "$(gettext "Input through system editor...")"
+        # shellcheck disable=SC2154
+        EDITOR=$(first "$VISUAL" "$EDITOR" vi)
         while true; do
             sleep 2
             local answer
             answer="$(mktemp --random editor)"
-            echo "$prompt" >"$answer"
+            printf '%s\n' "$prompt" >"$answer"
             if [ -n "$timeout" ]; then
-                debug timeout "$timeout" "${EDITOR:-vi}" "$answer"
-                ${EDITOR:-vi} "$answer" &
+                debug timeout "$timeout" "$EDITOR" "$answer"
+                $EDITOR "$answer" &
                 sleep "$timeout"
                 pkill -TERM -P $! || true
                 stty sane
-                debug "------"
             else
-                ${EDITOR:-vi} "$answer"
+                $EDITOR "$answer"
             fi
             input=$(grep -v -F "$prompt" "$answer") || true
             rm "$answer"
@@ -289,29 +282,24 @@ ask() {
             [ -z "$empty" ] || break
             [ -z "$input" ] || break
         done
-        echo "$input"
+        printf '%s\n' "$input"
         return 0
     fi
     # Read one character at a time silently (-s), without newline (-n 1)
-    echo -en "${CC_NOTICE}$prompt:${CC_RESET} " >/dev/tty
+    printf "${CC_NOTICE}%s: ${CC_RESET}" "$prompt" >/dev/tty
     stty -echo </dev/tty
     # shellcheck disable=SC2229
     # shellcheck disable=SC2086
     while IFS= read -r -s -t 1 -n 1 char </dev/tty || rc=$?; do
-        # remove error
-        if [ -n "$invalid" ]; then
-            invalid=0
-            printf ' %.0s' {1..30} >/dev/tty
-            printf '\b%.0s' {1..30} >/dev/tty
-        fi
+        # shellcheck disable=SC2059
+        printf "${CLEAR_EOL}" >/dev/tty
         # check for countdown if timeout of read reached
         if ((rc == 142)); then
             rc=0
             if [ -n "$timeout" ]; then
                 ((countdown--))
                 if ((countdown > 0)); then
-                    i_text="  $(duration_format human "$countdown")     "
-                    echo -ne "$i_text$(printf '\b%.0s' $(seq 1 ${#i_text}))" >/dev/tty
+                    printf "${CURSOR_STORE}   %s${CURSOR_RESTORE}" "$(duration_format human "$countdown")" >/dev/tty
                     continue
                 fi
             else
@@ -323,43 +311,43 @@ ask() {
             # end text
             if [ -n "$input" ] && [ "$format" = "text" ] && [[ ! "$input" == *"$nl" ]]; then
                 input+=$'\n'
-                echo
+                printf '\n'
             # end if final pattern reached
             elif [ -n "$final" ]; then
                 if [[ "$input" =~ $final ]]; then
-                    echo "          " >/dev/tty
+                    # shellcheck disable=SC2059
+                    printf '\n' >/dev/tty
                     break
                 else
-                    i_text="$(gettext 'incomplete')"
-                    echo -en "   ${CC_RED}$i_text${CC_RESET}$(printf '\b%.0s' $(seq 1 $((${#i_text} + 3))))" >/dev/tty
-                    invalid=1
+                    printf "${CURSOR_STORE}   ${CC_RED}%s${CC_RESET}${CURSOR_RESTORE}" "$(gettext 'incomplete')" >/dev/tty
                 fi
             # end if input done
             elif [ -n "$input" ]; then
-                echo "          " >/dev/tty
+                # shellcheck disable=SC2059
+                printf "${CLEAR_EOL}\n" >/dev/tty
                 break
             # end if default possible
             elif [ -n "$default" ]; then
+                # shellcheck disable=SC2059
                 input="$default"
-                echo "          " >/dev/tty
+                # shellcheck disable=SC2059
+                printf "${CLEAR_EOL}\n" >/dev/tty
                 break
             # end if empty allowed
             elif [ -n "$empty" ]; then
-                echo >/dev/tty
+                printf '\n' >/dev/tty
                 break
-            elif [ -n "$i_text" ]; then
-                i_text="$(gettext 'value needed')"
-                echo -en "   ${CC_RED}$i_text${CC_RESET}$(printf '\b%.0s' $(seq 1 $((${#i_text} + 3))))" >/dev/tty
-                invalid=1
+            else
+                printf "${CURSOR_STORE}   ${CC_RED}%s${CC_RESET}${CURSOR_RESTORE}" "$(gettext 'value needed')" >/dev/tty
             fi
         # Handle backspace
         elif [[ $char == $'\177' ]]; then
             if [ ${#input} -gt 0 ]; then
                 input=${input:0:-1}
-                echo -ne "\b \b" >/dev/tty
+                printf '%s' "\b \b" >/dev/tty
             fi
         # ignore escape sequences
-        elif [[ $char == $'\033' ]]; then
+        elif [[ $char == $'\e' ]]; then
             # Read next few characters non-blocking to drain escape sequence
             read -r -s -n 1 -t 0.01 seq
             while [[ $seq == "[" || $seq =~ [0-9A-Za-z~] ]]; do
@@ -368,20 +356,18 @@ ask() {
         # next character
         else
             if [ -n "$pattern" ]; then
-                debug 7 "$(od -An -to1 -v <<<"$char") [[ \"$input$char\" =~ $pattern ]] $([[ "$input$char" =~ $pattern ]] && echo true || echo false)"
+                debug 7 "$(od -An -to1 -v <<<"$char") [[ \"$input$char\" =~ $pattern ]] $([[ "$input$char" =~ $pattern ]] && printf 'true\n' || printf 'false\n')"
                 # alternative decimal point
                 if [ "$format" = "float" ] && [ "$char" = "," ]; then
                     char=.
                 fi
                 if [[ ! "$input$char" =~ $pattern ]]; then
-                    i_text="$(gettext 'invalid character')"
-                    echo -en "   ${CC_RED}$i_text${CC_RESET}$(printf '\b%.0s' $(seq 1 $((${#i_text} + 3))))" >/dev/tty
-                    invalid=1
+                    printf "${CURSOR_STORE}   ${CC_RED}%s${CC_RESET}${CURSOR_RESTORE}" "$(gettext 'invalid character')" >/dev/tty
                     continue
                 fi
             fi
             input+="$char"
-            [ -n "$mask" ] && echo -n "*" >/dev/tty || echo -n "$char" >/dev/tty
+            [ -n "$mask" ] && printf '*' >/dev/tty || printf '%s' "$char" >/dev/tty
             if [ "$format" = "password" ]; then
                 q=$(_password_strength "$input")
                 if ((q < 25)); then
@@ -393,21 +379,19 @@ ask() {
                 else
                     i_text="${CC_GREEN}$(gettext 'strong')${CC_RESET}"
                 fi
-                u_text="$(uncolorize "$i_text")"
-                echo -en "   $i_text$(printf '\b%.0s' $(seq 1 $((${#u_text} + 3))))" >/dev/tty
-                invalid=1
+                printf '${CURSOR_STORE}   %s${CURSOR_RESTORE}' "$i_text" >/dev/tty
             fi
         fi
-        i_text=""
     done
     stty echo </dev/tty
     debug 4 "Octal result: $(od -An -to1 -v <<<"$input")"
     # return input
     [ "$format" != "text" ] || input="$(grep -v '^[[:space:]]*$' <<<"$input")"
-    echo "$input"
+    printf '%s\n' "$input"
 }
 
 # Calculate password strength
+#
 # Usage:    _password_strength <password>
 # Output:   <int> 0 (weakest) up to 100 (strongest)
 _password_strength() {
@@ -426,7 +410,7 @@ _password_strength() {
     debug 7 "variety $score"
     # uniqueness bonus - number of different characters
     local unique
-    unique=$(echo "$password" | fold -w1 | sort -u | wc -l)
+    unique=$(printf '%s' "$password" | fold -w1 | sort -u | wc -l)
     ((score += unique * 2))
     ((score = score > 100 ? 100 : score))
     debug 7 "uniqueness $score"
@@ -441,15 +425,17 @@ _password_strength() {
     [[ "$password" =~ (.)\1{2,} ]] && ((score -= 10))
     ((score = score < 0 ? 0 : score))
     debug 7 "penalties $score"
-    echo "$score"
+    printf '%s' "$score"
 }
 
 # Select from list (extended version of native select)
+#
 # The given list will be printed as numerical options from which you select one by typing it's number. Number validation is on, so you can only input a valid number. No return-key needed if the full number is given.
 # Each list entry can be a single `<text>` or `<key>|<name>` while the `<name>` is shown the `<key>` will be returned if selected.
 #
 # With the options a default can be given, which will be selected using return-key or a timeout till this is used.
 # With the option `--exit` the additional entry will break by returning `exit`.
+#
 # Usage:    choose [-t] <entry>...
 #           <list> | choose [-t]
 # Options:  t, title <title>         # display text line above selection
@@ -464,7 +450,7 @@ _password_strength() {
 # Output:   selected `<line>`
 # Return:   `exit 0` # if run with `--exit` and this was chosen
 # Example:  &input#choose shows all possible use cases
-# TODO > 10 entries make two columns using mlr display
+# TODO > 10 entries make two columns using
 choose() {
     # parameter parsing
     local end default timeout
@@ -519,30 +505,25 @@ choose() {
     [ -z "$end" ] || pattern="(x|$pattern)"
     pattern="^$pattern$"
     # question
-    local input="" char="" i_text invalid
+    local input="" char=""
     local countdown="$timeout"
     # shellcheck disable=SC2155
     local question="$(gettext "Select one of the above options")"
     [ -z "$default" ] && timeout="" || question="$question [$default]"
-    echo -n "$question: " >/dev/tty
+    printf '%s: ' "$question" >/dev/tty
     stty -echo </dev/tty
     # shellcheck disable=SC2086
     # shellcheck disable=SC2229
     while read -r -s -t 1 -n 1 char </dev/tty || rc=$?; do
-        # remove error
-        if [ -n "$invalid" ]; then
-            invalid=0
-            printf ' %.0s' {1..30} >/dev/tty
-            printf '\b%.0s' {1..30} >/dev/tty
-        fi
+        # shellcheck disable=SC2059
+        printf "${CLEAR_EOL}" >/dev/tty
         # check for countdown if timeout of read reached
         if ((rc == 142)); then
             rc=0
             if [ -n "$timeout" ]; then
                 ((countdown--))
                 if ((countdown > 0)); then
-                    i_text="  $(duration_format human "$countdown")     "
-                    echo -ne "$i_text$(printf '\b%.0s' $(seq 1 ${#i_text}))" >/dev/tty
+                    printf "${CURSOR_STORE}   %s${CURSOR_RESTORE}" "$(duration_format human "$countdown")" >/dev/tty
                     continue
                 fi
             else
@@ -553,30 +534,31 @@ choose() {
         if [[ $char == "" ]]; then
             # end if number completed TODO
             if [ -n "$final" ]; then
-                echo "          " >/dev/tty
+                # shellcheck disable=SC2059
+                printf "${CLEAR_EOL}\n" >/dev/tty
                 break
             # end if input done
             elif [ -n "$input" ]; then
-                echo "          " >/dev/tty
+                # shellcheck disable=SC2059
+                printf "${CLEAR_EOL}\n" >/dev/tty
                 break
             # end if default possible
             elif [ -n "$default" ]; then
                 input="$default"
-                echo "          " >/dev/tty
+                # shellcheck disable=SC2059
+                printf "${CLEAR_EOL}\n" >/dev/tty
                 break
             else
-                i_text="$(gettext 'value needed')"
-                echo -en "   ${CC_RED}$i_text${CC_RESET}$(printf '\b%.0s' $(seq 1 $((${#i_text} + 3))))" >/dev/tty
-                invalid=1
+                printf "${CURSOR_STORE}   %s${CURSOR_RESTORE}" "$(gettext 'value needed')" >/dev/tty
             fi
         # Handle backspace
         elif [[ $char == $'\177' ]]; then
             if [ ${#input} -gt 0 ]; then
                 input=${input:0:-1}
-                echo -ne "\b \b" >/dev/tty
+                printf '\b \b' >/dev/tty
             fi
         # ignore escape sequences
-        elif [[ $char == $'\033' ]]; then
+        elif [[ $char == $'\e' ]]; then
             # Read next few characters non-blocking to drain escape sequence
             read -r -s -n 1 -t 0.01 seq
             while [[ $seq == "[" || $seq =~ [0-9A-Za-z~] ]]; do
@@ -584,23 +566,21 @@ choose() {
             done
         # exit
         elif [ -n "$end" ] && [[ "$char" =~ [xX] ]]; then
-            echo "$char" >/dev/tty
-            echo "exit"
+            printf '%s\n' "$char" >/dev/tty
+            printf 'exit'
             stty echo </dev/tty
             return 0
         # next character
         else
             if [[ ! "$input$char" =~ $pattern ]]; then
-                i_text="$(gettext 'invalid character')"
-                echo -en "   ${CC_RED}$i_text${CC_RESET}$(printf '\b%.0s' $(seq 1 $((${#i_text} + 3))))" >/dev/tty
-                invalid=1
+                printf "${CURSOR_STORE}   ${CC_RED}%s${CC_RESET}${CURSOR_RESTORE}" "$(gettext 'invalid character')" >/dev/tty
                 continue
             fi
             input+="$char"
-            echo -n "$char" >/dev/tty
+            printf '%s' "$char" >/dev/tty
             # completed number
             if ((${#input} == length)); then
-                echo >/dev/tty
+                printf '\n' >/dev/tty
                 break
             fi
         fi
@@ -610,10 +590,12 @@ choose() {
 }
 
 # Run tasks as selected by user
+#
 # Often the functions are also named `check-...` for the ones which will return tasks and `task-...` for the ones really doing the job. The first one may do a lot of analyzation and output user information on stdout.
 # The '|' character is not possible within the commands. If a pipe is necessary put it within a function. Also some commands can be disabled in the list by preceding the command with an `#` character.
 #
 # If there are no tasks defined or the dynamic list will return no tasks it will end with a success message.
+#
 # Usage:    tasks <entry>...
 #           # <entry>       := <check-fn> or "<task-line>"
 #           # <check-fn>    := function called to return up to multiple <task-lines>
@@ -661,7 +643,7 @@ tasks() {
             while IFS= read -r line; do
                 IFS='|' read -r cmd name <<<"$line"
                 if [ -n "$name" ]; then
-                    echo "$line" >>"$new_list"
+                    printf '%s\n' "$line" >>"$new_list"
                 else
                     $cmd </dev/null >>"$new_list" || die "$(gettext "Could not get task list from command"): $cmd"
                 fi
@@ -677,7 +659,7 @@ tasks() {
         _default="$(value_if_variable "$_default")"
         # shellcheck disable=SC2086
         task=$(choose "$title" -x "$(gettext "Exit")" $opt -d "$_default" "$list" </dev/null)
-        debug "chosen $task"
+        #task="$(uncolorize "$task")"
         [[ "$task" != "exit" ]] || break
         local error
         # shellcheck disable=SC2034
@@ -685,7 +667,7 @@ tasks() {
             error=$?
             die "$(eval_gettext "Got error \$error running \$task")"
         fi
-        echo ""
+        printf '\n'
         [ -n "$loop" ] || break
     done
 }

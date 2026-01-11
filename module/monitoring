@@ -13,7 +13,9 @@ source /dev/null
 ######################################################################################
 
 # Get exporter list
+#
 # The result can be filtered by additional argument specification.
+#
 # Usage:    exporter [<field>=<value>]...
 # Globals:  $PROMETHEUS_HOST + $PROMETHEUS_API
 # Output:   Tab separated list without header:
@@ -53,15 +55,15 @@ exporter() {
         curl "$api"/targets | jq '.data.activeTargets[] | '"$filter"' [.scrapeUrl, .labels.job, (.labels | join(", ")), .discoveredLabels.__address__] | @tsv' -r |
             while read -r line; do
                 local login user pass
-                login="$(echo "$auth" | grep "$(echo "$line" | cut -f2)" | grep "$(echo "$line" | cut -f4)")"
+                login="$(printf '%s' "$auth" | grep "$(cut -f2 <<<"$line")" | grep "$(cut -f4 <<<"$line")")"
                 if [ -n "$login" ]; then
                     # shellcheck disable=SC2119
-                    user="$(echo "$login" | cut -f2 | tr -d '\n' | urlencode)"
+                    user="$(cut -f2 <<<"$login" | tr -d '\n' | urlencode)"
                     # shellcheck disable=SC2119
-                    pass="$(echo "$login" | cut -f3 | tr -d '\n' | urlencode)"
-                    echo "$line" | cut -f1-3 | sed "s#://#://$user:$pass@#"
+                    pass="$(cut -f3 <<<"$login" | tr -d '\n' | urlencode)"
+                    cut -f1-3 <<<"$line" | sed "s#://#://$user:$pass@#"
                 else
-                    echo "$line" | cut -f1-3
+                    cut -f1-3 <<<"$line"
                 fi
             done ||
             (($? == 141)) ||
@@ -70,7 +72,9 @@ exporter() {
 }
 
 # Scrape Prometheus exporter url now
+#
 # The metrics can be filtered by <pattern> argument.
+#
 # Usage:    scrape <url> <pattern>
 # Output:   Tab separated list:
 #           `<metric>    [<value>=<text>],...    <value>`
@@ -85,13 +89,15 @@ scrape() {
     metrics="$(curl "$url" | grep -Ev '^($|#)' || die "$(eval_gettext "Could not scrape the Prometheus exporter at \$url!")")"
     debug ">>> $metrics"
     local found=2
-    echo "$metrics" | grep -E "$2" | grep '{' | sed 's/,\?[{}] \?/\t/g' || ((found--))
-    echo "$metrics" | grep -E "$2" | grep -v '{' | sed 's/ /\t\t/g' || ((found--))
+    grep -E "$2" <<<"$metrics" | grep '{' | sed 's/,\?[{}] \?/\t/g' || ((found--))
+    grep -E "$2" <<<"$metrics" | grep -v '{' | sed 's/ /\t\t/g' || ((found--))
     ((found > 0))
 }
 
 # Get Grafana alerts
+#
 # The list can be filtered by options and a specific output format can be selected.
+#
 # Usage:    alerts [<format>]                       # tsv, json, console, mattermost
 #           alerts -i "^$server" console || echo "" # will print the alerts with an empty line if there are some
 # Options:  a, alertname <regexp>               # select alert name
@@ -138,7 +144,7 @@ alerts() {
         esac
     done
     # processing
-    install jq mlr
+    install jq
     local list
     list="$(curl -H "Authorization: Bearer $GRAFANA_TOKEN" "$GRAFANA_API/alertmanager/grafana/api/v2/alerts")" ||
         die "$(gettext "Could not get alerts from Grafana!")"
@@ -170,7 +176,8 @@ alerts() {
             }' <<<"$list" | jq -s .)"
         ;;
     *)
-        header="$(echo -e "$(gettext "Severity\tNetwork\tInstance\tSummary\tStart")")"
+        # shellcheck disable=SC2059
+        header="$(printf "$(gettext "Severity\tNetwork\tInstance\tSummary\tStart")\n")"
         list="$header"$'\n'"$(jq -r '[.labels.severity, .labels.net, .labels.instance, .annotations.summary, (.startsAt| split(".")[0]| strptime("%Y-%m-%dT%H:%M:%S")| strftime("%Y-%m-%d %H:%M:%S"))] | @tsv' <<<"$list")"
         ;;
     esac
@@ -178,7 +185,7 @@ alerts() {
     case $format in
     console)
         local first=1
-        echo -e "$list" |
+        printf '%s\n' "$list" |
             tsv2table |
             while read -r line; do
                 case $line in
@@ -190,20 +197,21 @@ alerts() {
                         invers "$line"
                         first=""
                     else
-                        echo "$line"
+                        printf '%s\n' "$line"
                     fi
                     ;;
                 esac
             done
         ;;
     *)
-        echo "$list"
+        printf '%s\n' "$list"
         ;;
     esac
     return 1
 }
 
 # Prom ql ausführen
+#
 # Usage:    prometheus <prom-ql>
 # Globals:  $PROMETHEUS_API to query
 # Returns:  0 - without output if no $PROMETHEUS_API
@@ -218,13 +226,14 @@ prometheus() {
     local api
     api="${PROMETHEUS_API%% *}"
     # shellcheck disable=SC2119
-    curl "$api/query?query=$(echo "$1" | urlencode)"
+    curl "$api/query?query=$(urlencode "$1")"
     # start=
     # end=
     # step=
 }
 
 # Change scrape interval to scrape now and set back
+#
 # Usage:    prometheus_scrape_now <job> [<timeout>]
 # Globals:  $PROMETHEUS_HOST to change config temporarily
 # Returns:  0 - without output if no $PROMETHEUS_HOST
@@ -238,12 +247,12 @@ prometheus_scrape_now() {
     local -i seconds=${2:-60}
     for server in $PROMETHEUS_HOST; do
         remote true 2>/dev/null || continue # only work on reachable server
-        echo "Let $server scrape $job again, now."
-        echo "yq '(.scrape_configs[] | select(.job_name == \"$job\")).scrape_interval = \"${seconds}s\" | (.scrape_configs[] | select(.job_name == \"$job\")).scrape_timeout = \"${seconds}s\"' </etc/prometheus/prometheus.yml | sponge /etc/prometheus/prometheus.yml" | remote
+        printf '%s\n' "Let $server scrape $job again, now."
+        printf '%s\n' "yq '(.scrape_configs[] | select(.job_name == \"$job\")).scrape_interval = \"${seconds}s\" | (.scrape_configs[] | select(.job_name == \"$job\")).scrape_timeout = \"${seconds}s\"' </etc/prometheus/prometheus.yml | sponge /etc/prometheus/prometheus.yml" | remote
         remote curl -sX POST http://localhost:9090/-/reload
     done
     pause --timeout="$seconds" "Wait till scrape should be done..."
-    echo "Reset config back to default."
+    printf '%s\n' "Reset config back to default."
     for server in $PROMETHEUS_HOST; do
         remote true 2>/dev/null || continue # only work on reachable server
         remote /etc/prometheus/config-builder/update >/dev/null

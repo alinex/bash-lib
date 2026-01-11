@@ -17,9 +17,11 @@ _log_rotate_time[monthly]="%Y-%m"
 declare -Ag _log_active
 # _log_active[path]="<path> <level> <rotate> [<compress> [<cleanup>]]"
 
-# Additional logging (at the moment only into files).
+# Additional logging (at the moment only into files)
+#
 # After initializing a log using `start` the default output options will additionally write into log. But you can also specifically write t it using the log function.
 # Multiple log with different levels are possible.
+#
 # Usage:    log start <destination>                    # no spaces in file path allowed
 #           log <level> <message>
 #           <message> | log <level>
@@ -89,7 +91,7 @@ log() {
                 path+="_$(date_format "$rotate")"
             fi
             # log entry
-            echo "$(date_format sql) ${1^^} $(uncolorize "$text")" >>"$path"
+            printf '%s %s %s\n' "$(date_format sql)" "${1^^}" "$(uncolorize "$text")" >>"$path"
         done
         ;;
     *) die "Unrecognized command $1: start, stop or any log level allowed" ;;
