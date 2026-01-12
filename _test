@@ -29,10 +29,10 @@ while true; do
 done
 ################################################################################################
 
-process tree mattermost
-process wait mattermost --watch
-process tree mattermost
-exit
+#process tree mattermost
+#process wait mattermost --watch
+#process tree mattermost
+#exit
 
 #queue add sleep 5
 #queue add sleep 4
@@ -58,7 +58,7 @@ exit
 #_trivy_report /tmp/_test_1576440_trivy /tmp/_test_1576440_trivy/split/000014 /home/alex/dvb/divibib-search-api
 #exit
 
-trivy files /home/alex/dvb/divibib-search-api
+trivy files /home/alex/dvb/divibib-search-api --progress
 exit
 
 task1() { echo "task1"; }

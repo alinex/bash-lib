@@ -3548,7 +3548,9 @@ cmd="$(command -v trivy)"
 opt+=" -o $work/trivy.json"
 is empty -- "$DEBUG"||opt+=" --debug"
 is empty -- "$TRIVY_CACHE_SERVER"||opt+=" --server $TRIVY_CACHE_SERVER"
-echo "----"
+local version
+version="$(command "$cmd" -v|head -1|cut -d' ' -f2)"
+is empty -- "$progress"||eval_gettext 'Start $command scanning with trivy V${version}...'|info >&2
 case $command in
 root)exclude+=" $TRIVY_ROOT_EXCLUDE"
 local excludeOption
@@ -3557,14 +3559,30 @@ excludeOption+=" --skip-dirs $path"
 done
 is empty -- "$onlyOS"||opt+=" --pkg-types os"
 source="$(hostname -f)"
-sudo "$cmd" rootfs $opt $excludeOption / 2>&1|sed 's/[^A-Z]*T[^A-Z]*//'|debug
+local rc
+sudo command "$cmd" rootfs $opt $excludeOption / 2>&1|sed 's/[^A-Z]*T[^A-Z]*//' >"$work/log"||rc=$?
+cat "$work/log"|debug
+[ -z "$rc" ]||tail "$work/log"|warn
+[ -z "$rc" ]||die "Failed trivy scan!"
+rm "$work/log"
 ;;
-files)command $cmd fs $opt "$1" 2>&1|sed 's/[^A-Z]*T[^A-Z]*//'|debug;;
-docker)command $cmd image $opt --input "$1" 2>&1|sed 's/[^A-Z]*T[^A-Z]*//'|debug
+files)local rc
+command $cmd fs $opt "$1" 2>&1|sed 's/[^A-Z]*T[^A-Z]*//' >"$work/log"||rc=$?
+cat "$work/log"|debug
+[ -z "$rc" ]||tail "$work/log"|warn
+[ -z "$rc" ]||die "Failed trivy scan!"
+rm "$work/log"
+;;
+docker)local rc
+command $cmd image $opt --input "$1" 2>&1|sed 's/[^A-Z]*T[^A-Z]*//' >"$work/log"||rc=$?
+cat "$work/log"|debug
+[ -z "$rc" ]||tail "$work/log"|warn
+[ -z "$rc" ]||die "Failed trivy scan!"
+rm "$work/log"
 esac
-debug "Optimize JSON structure for splitting..."
+is empty -- "$progress"||gettext 'Optimize JSON structure for splitting...'|info >&2
 jq '.Results[]?|. as $g|.Vulnerabilities[]?|{Class: $g.Class, Target: $g.Target, Type: $g.Type}*.' "$work"/trivy.json >"$work"/split.json
-debug "Splitting JSON..."
+is empty -- "$progress"||gettext 'Splitting JSON into single reports...'|info >&2
 mkdir "$work"/split
 csplit -f "$work"/split/ -b '%06d' -zs "$work"/split.json /^\{/ "{*}"
 rm "$work"/split.json
@@ -3575,7 +3593,7 @@ debug "Nothing found."
 rm -r "$work"
 return 0
 fi
-debug "Found $found reports."
+is empty -- "$progress"||eval_gettext 'Found $found vulnerabilities.'|info >&2
 mkdir -p "$_trivy_cache/jira"
 ! is file -- "$_trivy_cache/exploits.json"||find "$_trivy_cache/exploits.json" -mmin +1440 -delete
 is file -- "$_trivy_cache/exploits.json"||curl -s "$TRIVY_EXPLOITS_URL" -o "$_trivy_cache/exploits.json"
@@ -3596,13 +3614,16 @@ _trivy_jira[field_links]="$(jq '.fields[] | select(.name == "'"$TRIVY_JIRA_FIELD
 is set -- "${_trivy_jira[field_links]}"||die "Could not find JIRA Field \"$TRIVY_JIRA_FIELD_LINKS\" in $TRIVY_JIRA_BOARD/$TRIVY_JIRA_ISSUE_TYPE!"
 _trivy_jira[field_approval]="$(jq '.fields[] | select(.name == "'"$TRIVY_JIRA_FIELD_APPROVAL"'").key' -r <<<"$fields")"
 is set -- "${_trivy_jira[field_approval]}"||die "Could not find JIRA Field \"$TRIVY_JIRA_FIELD_APPROVAL\" in $TRIVY_JIRA_BOARD/$TRIVY_JIRA_ISSUE_TYPE!"
+is empty -- "$progress"||gettext 'Build queue to optimize reports...'|info >&2
 local num
 for file in "$work"/split/*;do
 num="$(basename "$file")"
-queue add _trivy_report "$work" "$file" "$source"
+queue add _trivy_report "$work" "$file" "$source" "$progress"
 done
+is empty -- "$progress"||gettext 'Run queue to optimize reports...'|info >&2
 queue run
 rm -r "$work"/split
+is empty -- "$progress"||gettext 'Create summaries...'|info >&2
 while read -r folder;do
 cat "$folder/header.txt" "$folder/sources.txt" "$folder/footer.txt" >"$folder/report.txt"
 rm "$folder/header.txt" "$folder/sources.txt" "$folder/footer.txt"
@@ -3676,6 +3697,7 @@ debug "trivy_report \"$1\" \"$2\" \"$3\""
 local work="$1"
 local file="$2"
 local source="$3"
+local progress="$4"
 local type severity target id json title pkgName pkgPath description cvss installed sourceLine date fixed fixStatus links
 json="$(cat "$file")"
 type="$(jq .Type -r <<<"$json")"
@@ -3701,7 +3723,7 @@ links="$(jq '.References[]?' -r <<<"$json"|sed 's/^/- /')"
 local changes=() rules=() action
 if (($(date_format unix "$date")>$(now)-$(duration_format seconds 3d)))&&[[ $severity == "HIGH" || $severity == "CRITICAL" ]];then
 action="$(eval_gettext 'Downgrade $severity -> MEDIUM because it was published less than 3 days ago')"
-info "$id at $target: $action" >&2
+[ -z "$progress" ]||info "$id at $target: $action" >&2
 changes+=("{\"Severity\": \"MEDIUM\",\"OriginalSeverity\": \"$severity\"}")
 rules+=("{\"Title\": \"Just Published\",\"Description\": \"$action.\"}")
 fi
@@ -3709,13 +3731,13 @@ local exploited
 exploited="$(jq '.vulnerabilities[]|select(.cveID=="'"$id"'")' "$_trivy_cache/exploits.json")"
 if is set -- "$exploited";then
 action="$(gettext 'Add information of known exploits and cancel downgrades in case of just published')"
-info "$id at $target: $action" >&2
+[ -z "$progress" ]||info "$id at $target: $action" >&2
 changes+=("{\"Exploited\": $exploited, \"Severity\": \"$severity\"}")
 rules+=("{\"Title\": \"Exploited\",\"Description\": \"$action.\"}")
 fi
 if [ "$type" = "npm" ]&&[[ $severity == "HIGH" || $severity == "CRITICAL" ]]&&is file -- "$target"&&[ "$(jq '.packages|with_entries(select(.key|contains("'"$pkgName"'")))|.[]|select(has("dev"))|[.dev]|any' "$target"/package-lock.json)" = "true" ];then
 action="$(eval_gettext 'Downgrade $severity -> MEDIUM because it is a dev dependency')"
-info "$id at $target: $action" >&2
+[ -z "$progress" ]||info "$id at $target: $action" >&2
 changes+=("{\"Severity\": \"MEDIUM\",\"OriginalSeverity\": \"$severity\"}")
 rules+=("{\"Title\": \"NPM Dev Dependency\",\"Description\": \"$action.\"}")
 fi
@@ -3811,7 +3833,7 @@ jira update "$issue" "$fields"
 fi
 fi
 action="$(gettext 'Add information from Jira')"
-info "$(eval_gettext '$id at $target'): $action" >&2
+[ -z "$progress" ]||info "$(eval_gettext '$id at $target'): $action" >&2
 changes+=("{\"Jira\": {\"id\": $issue, \"key\": \"$key\", \"approval\": \"$deploy\", \"lastComment\": \"$commentDate\"}}")
 rules+=("{\"Title\": \"Jira Info\",\"Description\": \"$action.\"}")
 fi
