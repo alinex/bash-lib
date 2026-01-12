@@ -198,16 +198,21 @@ echo "        Link files into bashlib config dir"
 rm -rf "$install"/config/secrets "$install"/config/local
 ln -s "$config"secrets "$install"/config/secrets
 ln -s "$config"local "$install"/config/local
-echo ""
 
-echo "To uninstall use:
-    sudo rm -rf "$install" "$config"
-    sudo sed -i '/BASHLIB_HOME=/d' "$environment"
+echo "$CC_STEP"
+echo "Finished successfully!"
+echo "$CC_RESET"
 
+if [ "$install" = "/opt/bashlib" ]; then
+    echo "To uninstall use: sudo rm -rf \"$install\" \"$config\" && sudo sed -i '/BASHLIB_HOME=/d' \"$environment\""
+else
+    echo "To uninstall use: rm -rf \"$install\" \"$config\" && sed -i '/BASHLIB_HOME=/d' \"$environment\""
+fi
+
+echo "
 Please re-login or set the updated configuration using: ${CC_INTENSITY_BOLD}source \"$environment\"${CC_RESET}
 
-You could now use the bashlib by running: ${CC_INTENSITY_BOLD}source \"\$BASHLIB_HOME\"/full${CC_RESET}
-Test it with: ${CC_INTENSITY_BOLD}heading It works${CC_RESET}"
+You could now use the bashlib. Test it with: ${CC_INTENSITY_BOLD}source \"\$BASHLIB_HOME\"/full; heading It works${CC_RESET}"
 
 echo "$CC_STEP"
 echo "Have fun!"
