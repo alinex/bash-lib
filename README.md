@@ -169,6 +169,8 @@ Therefore the following steps will be done:
 3. Setup BASHLIB_HOME in your environment.
 4. Update local configuration files.
 
+![Install](./doc/installer.png)
+
 The update will be the same, you only need to download the new files and overwrite the old ones.
 If you want to remove it later the commands will be shown while installing/updating, too.
 
@@ -176,7 +178,13 @@ If you want to remove it later the commands will be shown while installing/updat
 
 By default the latest version from master branch will be used, also if you run the installer from another tag or branch.
 
-If you specifically want to switch you can always replace your bashlib home with the GitLab Download archive of any other version. But keep in mind that the installer will always overwrite with the newest master version if run to update.
+If you want to have another version use the specific branch name as argument or in as you are asked:
+
+- `master` - mostly stable and tested version but without the newest changes
+- `develop` - newest changes, but maybe not thoroughly tested
+- tags like `v2.3.0` - older version
+
+And you can also at any time download the baslib yourself and set `$BASHLIB_HOME` to this directory to work with it, like I do with my developer directory.
 
 ## Usage
 

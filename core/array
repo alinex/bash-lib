@@ -6,7 +6,7 @@
 ### Array analyzing
 ######################################################################################
 
-# Array analyzation.
+# Array analyzation
 #
 # This can be used for easy array access functions. The array itself is not given by value but by name, so no `$` before the name.
 #
@@ -17,9 +17,9 @@
 #
 # Usage:        array <array-name> <command> [<value>]
 # Variables:    <array-name> as basis to work on
-# Output:       - <value> for `has`
-#               - <index-num> for `indexof`
-# Return:       0 if ok, 1 if entry not found
+# Output:       - `indexof`: <index-num> for found value
+# Return:       0 if entry is found in array
+#               1 if entry not found
 array() {
     local cmd value
     is set --name=array-name --die -- "$1"
@@ -94,24 +94,24 @@ split() {
 #
 # After declaring a variable as associative array: `declare -A <array-name>` this commands may help working with it. The array itself is not given by value but by name, so no `$` before the name.
 #
-# As an assoziative array not allows all characters for the key, the key can be:
+# As an assoziative array allows not all characters for the key, the key can be:
 #
-# - simple (default) - unsupported characters will be replaced by _
-# - base64 - encode the whole key as base64
+# - `simple` (default) - unsupported characters will be replaced by _: "my %key" => "my__key"
+# - `base64` - encode the whole key as base64: "my %key" => "bXkgJWtleQo="
 #
-# The following commands ar<string-input>e possible:
+# The following commands are possible:
 #
-# - `set` add or update a `<value>` in the index
-# - `get` get the stored value for `<key>`
-# - `unset` remove `<key>` from hash
-# - `has` check if the `<key>` is set
-# - `contains` check if the given `<value>` is found in any key
+# - `set` add or update a <value> in the index
+# - `get` get the stored value for <key>
+# - `unset` remove <key> from hash
+# - `has` check if the <key> is set
+# - `contains` check if the given <value> is found in any key
 #
 # Usage:        hash <array-name> <command> [<key>] [<value>]
 # Options:      -k, --key-format={base64|simple} # how to convert key because of special characters
 # Variables:    <array-name> as basis to work on
-# Output:       <value> for `get`
-# Error:        1 if not found for `get` or `has`
+# Output:       `get`: <value> if found
+# Error:        `get` / `has`: 1 if not found
 # Example:      - `hash cache set "my_name" "any value"`
 #               - `hash cache get "my_name"`
 #               - `hash cache has "my_name"`

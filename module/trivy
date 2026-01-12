@@ -49,7 +49,7 @@ TRIVY_EXPLOITS_URL=https://www.cisa.gov/sites/default/files/feeds/known_exploite
 #           trivy [<options>] docker <image>
 # Options:  t, timeout <duration>   # set the timeout for the job in <int>m or <int>h
 #           o, only-os              # let `root` command only scan OS without filesystem traversal
-#           e, exclude <dirs>       # additional excludes
+#           e, exclude <dirs>       # additional excludes for `root` command
 #           p, progress             # show progress
 # GLobal:   $TRIVY_DEFAULT_TIMEOUT
 #           $TRIVY_CACHE_SERVER
@@ -64,6 +64,7 @@ TRIVY_EXPLOITS_URL=https://www.cisa.gov/sites/default/files/feeds/known_exploite
 #           $TRIVY_JIRA_APPROVAL_TEMP
 #           $TRIVY_JIRA_APPROVAL_IRRELEVANT
 # Output:   <report-path> or nothing if no vulnerabilities found
+# Error:    Progress output if `--progress` is set with optimizations on reports
 # Return:   1 if there are at least one CRITICAL or HIGH vulnerabilities
 trivy() {
     is enum --name=command --allow="root files docker" --die -- "$1" && local command="$1" && shift
@@ -132,7 +133,7 @@ trivy() {
     jq '.Results[]?|. as $g|.Vulnerabilities[]?|{Class: $g.Class, Target: $g.Target, Type: $g.Type}*.' "$work"/trivy.json >"$work"/split.json
     is empty -- "$progress" || gettext 'Splitting JSON into single reports...' | info >&2
     mkdir "$work"/split
-    csplit -f "$work"/split/ -b '%06d' -zs "$work"/split.json /^\{/ "{*}"
+    csplit -f "$work"/split/ -b '%06d' -zs "$work"/split.json '/^{/' "{*}"
     rm "$work"/split.json
     # skip if nothing found
     local found

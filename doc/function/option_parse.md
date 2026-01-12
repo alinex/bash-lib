@@ -18,7 +18,7 @@ and at last all other arguments
 
 ### Examples
 
-- eval set -- "$(option_parse `<spec>` "$@")"
+- `eval set -- "$(option_parse <spec> "$@")"`
 - [`base_script`](../example/base_script.md) includes a simple example
 
 

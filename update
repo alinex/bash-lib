@@ -18,8 +18,8 @@ for folder in core module; do
     done
 done
 #sed -E -f optimize-code.sed "$BASHLIB_HOME/full" >"$BASHLIB_HOME/full2"
-#echo -n "(optimize) "
-#sed -i -E -f optimize-code.sed "$BASHLIB_HOME/full"
+echo -n "(optimize) "
+sed -i -E -f optimize-code.sed "$BASHLIB_HOME/full"
 echo "fertig -> $(du -h full | cut -f1)B"
 echo "source \$BASHLIB_HOME/configs" >>"$BASHLIB_HOME/full" # load configs
 echo "#!/usr/bin/env bash" >"$BASHLIB_HOME/base"

@@ -43,9 +43,11 @@ The examples should be a good start to see what and how it is possible:
 
 - [Base Script](./example/base_script.md)
 - [Parameters and Options](./example/options.md)
-- [Shared Memory](./example/shared_memory.md)
+- [Validator](./example/is.md)
 - [User Interaction](example/input.md)
 - [Tasks](./example/tasks.md)
+- [Shared Memory](./example/shared_memory.md)
+- [Remote Execution](./example/remote.md)
 - [Mattermost](./example/mattermost.md)
 
 The BashLib contains some core functionality and optional modules which are listed below.
@@ -203,7 +205,7 @@ Helper functions to work with arrays and associative arrays (hashes).
 
 | Variable/Function | Description |
 | --- | --- |
-| [`array`](function/array.md) | Array analyzation. |
+| [`array`](function/array.md) | Array analyzation |
 | [`join`](function/join.md) | Join array elements by delimiter |
 | [`split`](function/split.md) | Splits string by delimiter into array |
 | [`hash`](function/hash.md) | Methods to work with assoziative arrays (hashes) |

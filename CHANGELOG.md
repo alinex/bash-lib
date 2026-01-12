@@ -5,6 +5,7 @@ But on release they will be merged with semantical versioning into the master br
 
 ## In development
 
+- fix installer to also allow installation of develop version
 - move down deprecated methods
 
 ## 11. January 2026 - v2.3.0
