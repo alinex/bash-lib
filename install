@@ -153,7 +153,6 @@ find "$install" -name \*.md -delete 2>/dev/null || true
 find "$install" -name \*.po -delete 2>/dev/null || true
 sed "s|\${DATE}|$(date +%Y-%m-%d)|g" "$install"/install-info >"$install"/README.md || true
 rm -f "$install"/install-info 2>/dev/null || true
-echo ""
 
 ###############################################################################
 # STEP 3
@@ -167,12 +166,12 @@ if [ "$install" = "/opt/bashlib" ]; then
     environment=/etc/environment
     echo "        Set/update global environment in $environment:"
     sudo sed -i '/^BASHLIB_HOME=/d' "$environment"
-    echo "BASHLIB_HOME=\"$install\"" >>"$environment" 2>&1 | sed 's/^/        /g'
+    echo "BASHLIB_HOME=\"$install\"" | sudo tee -a "$environment" >/dev/null | sed 's/^/        /g'
 else
     environment="$HOME"/.bashrc
     sudo sed -i '/^export BASHLIB_HOME=/d' "$environment"
     echo "        Added to $environment"
-    echo "export BASHLIB_HOME=\"$install\"" >>"$environment" 2>&1 | sed 's/^/        /g'
+    echo "export BASHLIB_HOME=\"$install\"" >>"$environment" | sed 's/^/        /g'
 fi
 
 ###############################################################################
