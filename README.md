@@ -151,7 +151,7 @@ Can be done locally after checking out the git repository manually by setting on
 # interactive install
 curl -sL https://gitlab.com/alinex/bash-lib/-/raw/master/install | bash     
 # automatic install, all values provided
-curl -sL https://gitlab.com/alinex/bash-lib/-/raw/master/install | bash -s -- "<path>" y|n "<config>"                                      
+curl -sL https://gitlab.com/alinex/bash-lib/-/raw/master/install | bash -s -- "<branch>" y|n
 
 # update if already installed
 curl -sL https://gitlab.com/alinex/bash-lib/-/raw/master/install | bash

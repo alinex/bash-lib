@@ -7,12 +7,10 @@ source /dev/null
 # interactive install
 #   curl -sL https://gitlab.com/alinex/bash-lib/-/raw/master/install | bash
 # automatic install, all values provided
-#   curl -sL https://gitlab.com/alinex/bash-lib/-/raw/master/install | bash -s -- "<path>" y|n "<config>"
+#   curl -sL https://gitlab.com/alinex/bash-lib/-/raw/master/install | bash -s -- <branch> y|n
 #
 # update if already installed
 #   curl -sL https://gitlab.com/alinex/bash-lib/-/raw/master/install | bash
-
-BASHLIB_DOWNLOAD="https://gitlab.com/alinex/bash-lib/-/archive/master/bash-lib-master.tar.gz"
 
 CC_ERROR=$'\e[31m' # red
 CC_STEP=$'\e[36m'  # cyan
@@ -82,6 +80,16 @@ else
     [ -n "$2" ] && yn="$2" || read -r -n 1 -s -p "Should the bashlib path be added globally (Y/n) " yn </dev/tty
     echo
 fi
+if [ -z "$1" ]; then
+    [ -n "$2" ] && yn="$2" || read -r -p "Which branch or tag should be used? [master] " branch </dev/tty
+    branch="${branch:-master}"
+    echo
+else
+    echo "User $branch version."
+fi
+BASHLIB_DOWNLOAD="https://gitlab.com/alinex/bash-lib/-/archive/$branch/bash-lib-$branch.tar.gz"
+echo $BASHLIB_DOWNLOAD
+exit
 case $yn in
 "" | [JjYy])
     install=/opt/bashlib
