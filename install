@@ -81,15 +81,14 @@ else
     echo
 fi
 if [ -z "$1" ]; then
-    [ -n "$2" ] && yn="$2" || read -r -p "Which branch or tag should be used? [master] " branch </dev/tty
+    read -r -p "Which branch or tag should be used? [master] " branch </dev/tty
     branch="${branch:-master}"
     echo
 else
+    branch="${1:-master}"
     echo "Use $branch version."
 fi
 BASHLIB_DOWNLOAD="https://gitlab.com/alinex/bash-lib/-/archive/$branch/bash-lib-$branch.tar.gz"
-echo $BASHLIB_DOWNLOAD
-exit
 case $yn in
 "" | [JjYy])
     install=/opt/bashlib
@@ -167,13 +166,13 @@ echo "$CC_RESET"
 if [ "$install" = "/opt/bashlib" ]; then
     environment=/etc/environment
     echo "        Set/update global environment in $environment:"
-    sudo sed -i '/^BASHLIB_HOME=/d' $environment
-    echo "BASHLIB_HOME=\"$install\"" | sudo tee -a $environment 2>&1 | sed 's/^/        /g'
+    sudo sed -i '/^BASHLIB_HOME=/d' "$environment"
+    echo "BASHLIB_HOME=\"$install\"" >>"$environment" 2>&1 | sed 's/^/        /g'
 else
     environment="$HOME"/.bashrc
-    sudo sed -i '/^export BASHLIB_HOME=/d' $environment
+    sudo sed -i '/^export BASHLIB_HOME=/d' "$environment"
     echo "        Added to $environment"
-    echo "export BASHLIB_HOME=\"$install\"" | tee -a "$environment" 2>&1 | sed 's/^/        /g'
+    echo "export BASHLIB_HOME=\"$install\"" >>"$environment" 2>&1 | sed 's/^/        /g'
 fi
 
 ###############################################################################
