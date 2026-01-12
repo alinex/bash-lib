@@ -85,7 +85,7 @@ if [ -z "$1" ]; then
     branch="${branch:-master}"
     echo
 else
-    echo "User $branch version."
+    echo "Use $branch version."
 fi
 BASHLIB_DOWNLOAD="https://gitlab.com/alinex/bash-lib/-/archive/$branch/bash-lib-$branch.tar.gz"
 echo $BASHLIB_DOWNLOAD
