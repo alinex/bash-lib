@@ -9,17 +9,19 @@
 
 # Get IP of given hostname
 #
+# This uses `getent` which may take some seconds to resolve. But if `dig` is installed this will be used, because it works faster.
+#
 # Usage:    ip [<option>] host.de
 # Options:  v, version=<int>    # ip version 4 or 6
 # Output:   one ip address
 ip() {
     eval set -- "$(option_parse $'v version +' "$@")"
-    local type=hosts
+    local type
     while true; do
         case "$1" in
         -v | --version)
-            (($2 == 4)) && type=ahostsv4 || true
-            (($2 == 6)) && type=ahostsv6 || true
+            (($2 == 4)) && type=4 || true
+            (($2 == 6)) && type=6 || true
             shift 2
             ;;
         --) shift && break ;;
@@ -28,7 +30,15 @@ ip() {
     done
     is set --name=host --die -- "$1"
     # processing
-    getent "$type" "$1" | awk '{print $1}' | head -n1
+    local query
+    if command -v dig >/dev/null; then
+        [ "$type" = 4 ] && query="A" || true
+        [ "$type" = 6 ] && query="AAAA" || true
+        dig +short $query "$1"
+    else
+        is set -- "$type" && query="ahostsv$type" || query=hosts
+        getent $query "$1" | awk '{print $1}' | head -n1
+    fi
 }
 
 # Show the IP addresses
