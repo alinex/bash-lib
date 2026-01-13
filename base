@@ -723,7 +723,7 @@ input "$@"|jq -sRr @uri|sed 's/%0A$//'
 }
 horizontal_line(){
 is integer -narguments --max=1 -d $#
-[ -z "$1" ]||is enum -nformat --allow="light bold double half full"--die -- "$1"
+[ -z "$1" ]||is enum -nformat --allow="light bold double half full" -d -- "$1"
 local char
 case $1 in
 bold)char="━";;

@@ -302,7 +302,7 @@ urlencode() {
 # Output:   ────────── # over full width of terminal
 horizontal_line() {
     is integer --name=arguments --max=1 --die -- $#
-    is empty -- "$1" || is enum --name=format --allow="light bold double half full"--die -- "$1"
+    is empty -- "$1" || is enum --name=format --allow="light bold double half full" --die -- "$1"
     # processing
     local char
     case $1 in
