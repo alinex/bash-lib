@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-12 22:06+0100\n"
+"POT-Creation-Date: 2026-01-13 18:48+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,11 +18,11 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 
 #: core/misc:121 core/validator:74 core/array:127 module/os:180
-#: module/network:26 module/trivy:82 module/monitoring:143 module/input:31
+#: module/network:28 module/trivy:82 module/monitoring:143 module/input:31
 #: module/input:86 module/input:212 module/input:465 module/input:628
 #: module/log:63 module/process:381 module/process:429 module/process:507
-#: module/process:654 module/remote:78 module/remote:217 module/remote:265
-#: module/remote:333 module/database:33 module/mattermost:299
+#: module/process:654 module/remote:80 module/remote:219 module/remote:267
+#: module/remote:335 module/database:33 module/mattermost:299
 #: module/mattermost:336 module/software:230
 msgid "Unrecognized option"
 msgstr "Unbekannte Option"
@@ -248,7 +248,7 @@ msgstr "Keine lokale DNS Liste gefunden, bitte herunterladen."
 msgid "Use $list from $time."
 msgstr "Benutze $list vom $time."
 
-#: module/network:49
+#: module/network:59
 msgid "IP\\tInterface"
 msgstr "IP\\tSchnittstelle"
 
@@ -553,11 +553,11 @@ msgstr "Warten auf $pid ($pcpu% CPU)"
 msgid "Timeout after ${timeout}s"
 msgstr "Abbruch nach ${timeout}s"
 
-#: module/remote:339
+#: module/remote:341
 msgid "Wait till reboot is done"
 msgstr "Warten bis der Reboot fertig ist"
 
-#: module/remote:342
+#: module/remote:344
 #, sh-format
 msgid "Wait until the reboot is complete ($seconds seconds)"
 msgstr "Warten bis der Reboot fertig ist ($seconds Sekunden)"

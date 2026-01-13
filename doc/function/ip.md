@@ -22,3 +22,5 @@ one ip address
 ### Description
 
 
+This uses `getent` which may take some seconds to resolve. But if `dig` is installed this will be used, because it works faster.
+

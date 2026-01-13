@@ -1,5 +1,5 @@
 #!/usr/bin/sed -E
-# sed replacement optimization
+# sed replacement optimization to compress the pre-build packages full and core
 
 # replace easy validator calls with direct syntax
 s/\bis set -- ("[^"]+")/[ -n \1 ]/g
@@ -13,7 +13,4 @@ s/(is .*?) --die/\1 -d/g
 s/(is .*?) --output=/\1 -o/g
 s/-- \$#/$#/g
 
-# remove validators not needed out of development
-#/^is integer --name=arguments .* --die -- \$#$/d
-
-#124KB
+#124KB 34KB

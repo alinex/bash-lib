@@ -31,7 +31,7 @@ for f in "$BASHLIB_HOME"/core/*; do
     fi
 done
 #echo -n "(optimize) "
-#sed -i -E -f optimize-code.sed "$BASHLIB_HOME/base"
+sed -i -E -f optimize-code.sed "$BASHLIB_HOME/base"
 echo "fertig -> $(du -h base | cut -f1)B"
 
 md_optimize() {

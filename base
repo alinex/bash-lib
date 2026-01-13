@@ -46,15 +46,15 @@ CC_BLUE_BOLD_BG=$'\e[104m'
 CC_MAGENTA_BOLD_BG=$'\e[105m'
 CC_CYAN_BOLD_BG=$'\e[106m'
 color_256(){
-is integer --name=arguments --max=1 --die -- $#
+is integer -narguments --max=1 -d $#
 local num
-num="$(is integer --name=num "$1" --sanitize --min=0 --max=255 --die --output)"
+num="$(is integer -nnum "$1" --sanitize --min=0 --max=255 -d --output)"
 echo $'\e[38;5;'"$num"'m'
 }
 color_256_bg(){
-is integer --name=arguments --max=1 --die -- $#
+is integer -narguments --max=1 -d $#
 local num
-num="$(is integer --name=num "$1" --sanitize --min=0 --max=255 --die --output)"
+num="$(is integer -nnum "$1" --sanitize --min=0 --max=255 -d --output)"
 echo $'\e[48;5;'"$num"'m'
 }
 CC_CRITICAL=$'\e[1;45m'
@@ -65,7 +65,7 @@ CC_OK=$'\e[1;32m'
 CC_HEADING=$'\e[44m'
 CC_INVERS=$'\e[7m'
 color_table(){
-is integer --name=arguments --max=0 --die -- $#
+is integer -narguments --max=0 -d $#
 echo "Basic Colors:"
 echo -e "\t${CC_BLACK}CC_BLACK\t${CC_BLACK_BOLD}CC_BLACK_BOLD\t${CC_BLACK_BG}CC_BLACK_BG\t${CC_BLACK_BOLD_BG}CC_BLACK_BOLD_BG$CC_RESET"
 echo -e "\t${CC_RED}CC_RED\t\t${CC_RED_BOLD}CC_RED_BOLD\t${CC_RED_BG}CC_RED_BG\t${CC_RED_BOLD_BG}CC_RED_BOLD_BG$CC_RESET"
@@ -120,16 +120,16 @@ CURSOR_SHOW=$'\e[?25h'
 CURSOR_HIDE=$'\e[?25l'
 cursor(){
 local num="${2:-1}" col="${3:-1}"
-is enum --name=direction --allow="up down right left row pos next previous" --die -- "$1"
-is integer --name=num --min=1 --die -- "$num"
-is integer --name=arguments --max=3 --die -- $#
+is enum -ndirection --allow="up down right left row pos next previous" -d -- "$1"
+is integer -nnum --min=1 -d -- "$num"
+is integer -narguments --max=3 -d $#
 case "$1" in
 up)printf '\e[%sA' "$num";;
 down)printf '\e[%sB' "$num";;
 right)printf '\e[%sC' "$num";;
 left)printf '\e[%sD' "$num";;
 row)printf '\e[%sH' "$num";;
-pos)is integer --name=col --min=1 --die -- "$col"
+pos)is integer -ncol --min=1 -d -- "$col"
 printf '\e[%s;%sH' "$num" "$col"
 ;;
 next)printf '\e[%sE' "$num";;
@@ -138,11 +138,11 @@ esac
 }
 character(){
 local num="$2"
-is enum --name=command --allow="repeat" --die -- "$1"
-is integer --name=num --min=1 --die -- "$num"
+is enum -ncommand --allow="repeat" -d -- "$1"
+is integer -nnum --min=1 -d -- "$num"
 case "$1" in
-repeat)is set --name=character --min=1 --die -- "$3"
-is length --name=character --min=1 --max=1 --die -- "$3"
+repeat)is set -ncharacter --min=1 -d -- "$3"
+is length -ncharacter --min=1 --max=1 -d -- "$3"
 ((num==1))&&printf '%s' "$3"||printf '%s\e[%sb' "$3" $((num-1))
 ;;
 delete)printf '\e[%sP' "$num";;
@@ -186,14 +186,14 @@ shift
 getopt -q -o "$permute$short" --long "$long" -n "$0" -- "$@"
 }
 option_help(){
-is set --name=spec --die -- "$1"
+is set -nspec -d -- "$1"
 declare opt name type desc
 declare -A opt_descriptions
 declare -A opt_type
 declare -A opt_short
 while read -r opt name type desc;do
 [[ $opt =~ ^# ]]&&continue
-is empty -- "$opt"&&continue
+[ -z "$opt" ]&&continue
 opt_descriptions[$name]="$desc"
 [[ $type == *\? ]]&&opt_type[$name]="[${type%?}]"||opt_type[$name]=$type
 opt_short[$name]=$opt
@@ -217,12 +217,12 @@ test -p /dev/stdin&&(($#==0))&&cat -||printf '%s' "$*"
 input_args(){
 local num=${1-}
 local start=$((num+2))
-is set --name="num" --die -- "$num"
+is set -n"num" -d -- "$num"
 ((num>0))||die "<num>=$num $(gettext 'argument is not a valid number!')"
 test -p /dev/stdin&&(($#<num+2))&&cat -||echo -n "${@:start}"
 }
 input_lines(){
-if [ -p /dev/stdin ]&&is empty -- "$1";then
+if [ -p /dev/stdin ]&&[ -z "$1" ];then
 cat -
 else
 printf '%s\n' "$@"
@@ -233,10 +233,10 @@ printf '%q ' "$@"
 }
 array(){
 local cmd value
-is set --name=array-name --die -- "$1"
-is enum --name=command --allow="has indexof" --die --output=cmd -- "$2"
-is set --name=value --die --output=value -- "$3"
-is integer --name=arguments --max=3 --die -- $#
+is set -narray-name -d -- "$1"
+is enum -ncommand --allow="has indexof" -d -ocmd -- "$2"
+is set -nvalue -d -ovalue -- "$3"
+is integer -narguments --max=3 -d $#
 declare -n arr="$1"
 case "$cmd" in
 has)for e in "${arr[@]}"
@@ -256,8 +256,8 @@ return 1
 esac
 }
 join(){
-is integer --name=arguments --max=2 --die -- $#
-is set --name=array-name --die -- "$1"
+is integer -narguments --max=2 -d $#
+is set -narray-name -d -- "$1"
 local -n array=$1
 local sep="${2:-,}"
 local joined="${array[0]}"
@@ -267,8 +267,8 @@ done
 printf '%s' "$joined"
 }
 split(){
-is integer --name=arguments --max=3 --die -- $#
-is set --name=array-name --die -- "$2"
+is integer -narguments --max=3 -d $#
+is set -narray-name -d -- "$2"
 local string="$1"
 local -n array=$2
 local sep="${3:-,}"
@@ -284,9 +284,9 @@ case "$1" in
 *)die "$(gettext "Unrecognized option"): $1"
 esac
 done
-is integer --name=arguments --max=4 --die -- $#
-is set --name=array-name --die -- "$1"
-is enum --name=command --allow="set get unset has contains" --die -- "$2"
+is integer -narguments --max=4 -d $#
+is set -narray-name -d -- "$1"
+is enum -ncommand --allow="set get unset has contains" -d -- "$2"
 declare -n arr="$1"
 local cmd="$2" key value="$4"
 case $keyFormat in
@@ -294,11 +294,11 @@ base64)key="$(base64 -w0 <<<"$3")";;
 simple)key="${3//[^a-zA-Z0-9_]/_}"
 esac
 case "$cmd" in
-set)is set --name=key --die -- "$3"&&arr["$key"]="$value";;
-get)is set --name=key --die -- "$3"&&printf '%s' "${arr["$key"]}";;
-unset)is set --name=key --die -- "$3"&&unset 'arr[$key]';;
-has)is set --name=key --die -- "$3"&&[[ -v arr["$key"] ]];;
-contains)is set --name=value --die -- "$3"
+set)is set -nkey -d -- "$3"&&arr["$key"]="$value";;
+get)is set -nkey -d -- "$3"&&printf '%s' "${arr["$key"]}";;
+unset)is set -nkey -d -- "$3"&&unset 'arr[$key]';;
+has)is set -nkey -d -- "$3"&&[[ -v arr["$key"] ]];;
+contains)is set -nvalue -d -- "$3"
 for key in "${!arr[@]}";do
 [[ ${arr["$key"]} != "$3" ]]||return 0
 done
@@ -311,20 +311,20 @@ CC_RESET=$'\033[0m'
 CC_CRITICAL=$'\033[1;45m'
 CC_BLACK=$'\033[30m'
 now(){
-is integer --name=arguments --max=0 --die -- $#
+is integer -narguments --max=0 -d $#
 date +%s
 }
 date_diff(){
-is integer --name=arguments --max=2 --die -- $#
+is integer -narguments --max=2 -d $#
 local start end
 end="${2:-$(now)}"
-is integer -- "$1"&&start="$1"||start=$(date -d "$1" +%s)||die "Date format '$1' not parsable!"
-is integer -- "$end"||end=$(date -d "$end" +%s)||die "Date format '$2' not parsable!"
+[[ "$1" =~ ^-?[0-9]+$ ]]&&start="$1"||start=$(date -d "$1" +%s)||die "Date format '$1' not parsable!"
+[[ "$end" =~ ^-?[0-9]+$ ]]||end=$(date -d "$end" +%s)||die "Date format '$2' not parsable!"
 printf '%s' $((end-start))
 }
 date_format(){
-is integer --name=arguments --max=2 --die -- $#
-is set --name=format --die -- "$1"
+is integer -narguments --max=2 -d $#
+is set -nformat -d -- "$1"
 local value format opt
 case $1 in
 iso)format="-Iseconds";;
@@ -341,21 +341,21 @@ time-short)format="+%H:%M";;
 *)format="+$1"
 esac
 value="${2-$(now)}"
-is integer -- "$value"&&eval "date -d @$value '$format'"||eval "date -d \"$value\" $opt '$format'"||die "Date format '$value' not parsable!"
+[[ "$value" =~ ^-?[0-9]+$ ]]&&eval "date -d @$value '$format'"||eval "date -d \"$value\" $opt '$format'"||die "Date format '$value' not parsable!"
 }
 sleep_until(){
-is integer --name=arguments --max=1 --die -- $#
-is set --name=date --die -- "$1"
+is integer -narguments --max=1 -d $#
+is set -ndate -d -- "$1"
 local secs
 secs="$(date_diff "$(now)" "$1")"
 ((secs>0))||die "Date has to be in the future for sleep_until"
 sleep "$secs"
 }
 duration_format(){
-is integer --name=arguments --max=2 --die -- $#
-is enum --name=format --allow="seconds minutes hours days human" --die -- "$1"
+is integer -narguments --max=2 -d $#
+is enum -nformat --allow="seconds minutes hours days human" -d -- "$1"
 local value
-is integer -- "$2"&&value="$2"||value="$(_parse_duration "$2")"
+[[ "$2" =~ ^-?[0-9]+$ ]]&&value="$2"||value="$(_parse_duration "$2")"
 case $1 in
 seconds)printf '%s' "$value";;
 minutes)printf '%s' $((value/60));;
@@ -412,7 +412,7 @@ local out=""
 ((h))&&out+="${h}h "
 ((m))&&out+="${m}m "
 ((s))&&out+="${s}s "
-is empty -- "$out"&&out="0s"&&sign=""||true
+[ -z "$out" ]&&out="0s"&&sign=""||true
 printf '%s' "$sign${out% }"
 }
 _timer_start=0
@@ -457,8 +457,8 @@ awk -v n="$line" '
 done
 }
 use(){
-is integer --name=arguments --max=1 --die -- $#
-is set --name=module-path --die -- "$1"
+is integer -narguments --max=1 -d $#
+is set -nmodule-path -d -- "$1"
 local module=$1
 [[ $module =~ / ]]||module="module/$module"
 local path
@@ -471,9 +471,9 @@ debug 5 "Loading module $module"
 source "$BASHLIB_HOME/$module"
 }
 trap_add(){
-is integer --name=arguments --min=2 --max=2 --die -- $#
-is set --name=code --die -- "$1"
-is enum --name=signal --allow="SIGINT SIGTERM SIGHUP SIGQUIT SIGUSR1 SIGALRM EXIT ERR DEBUG" --die -- "$2"
+is integer -narguments --min=2 --max=2 -d $#
+is set -ncode -d -- "$1"
+is enum -nsignal --allow="SIGINT SIGTERM SIGHUP SIGQUIT SIGUSR1 SIGALRM EXIT ERR DEBUG" -d -- "$2"
 local new="$1"
 local sig="$2"
 local old
@@ -485,9 +485,9 @@ trap "$new" "$sig"
 fi
 }
 trap_remove(){
-is integer --name=arguments --min=2 --max=2 --die -- $#
-is set --name=code --die -- "$1"
-is enum --name=signal --allow="SIGINT SIGTERM SIGHUP SIGQUIT SIGUSR1 SIGALRM EXIT ERR DEBUG" --die -- "$2"
+is integer -narguments --min=2 --max=2 -d $#
+is set -ncode -d -- "$1"
+is enum -nsignal --allow="SIGINT SIGTERM SIGHUP SIGQUIT SIGUSR1 SIGALRM EXIT ERR DEBUG" -d -- "$2"
 local remove="$1"
 local sig="$2"
 local current new
@@ -512,17 +512,17 @@ case "$1" in
 *)die "$(gettext "Unrecognized option"): $1"
 esac
 done
-is integer --name=arguments --max=1 --die -- $#
+is integer -narguments --max=1 -d $#
 local ident
-is set -- "$1"&&ident="_$1"
+[ -n "$1" ]&&ident="_$1"
 result="$path/$(basename "$0")$ident$rand$ext"
-if is set -- "$rand";then
+if [ -n "$rand" ];then
 while [ -e "$result" ];do
 result="$path/$(basename "$0")$ident$RANDOM$ext"
 done
 fi
 if [ ! -e "$result" ];then
-if is set -- "$dir";then
+if [ -n "$dir" ];then
 debug "create dir $result"
 mkdir -p "$result"
 else
@@ -531,7 +531,7 @@ touch "$result"
 fi
 fi
 printf '%s' "$result"
-is empty -- "$ttl"||(_rm_temp "$ttl" "$result" >/dev/null 2>&1&
+[ -z "$ttl" ]||(_rm_temp "$ttl" "$result" >/dev/null 2>&1&
 disown)
 }
 _rm_temp(){
@@ -594,15 +594,15 @@ return 1
 }
 debug(){
 local level=1 func text sign='>'
-is integer --name=arguments --max=2 --die -- $#
+is integer -narguments --max=2 -d $#
 is integer --min 1 -- "$1"&&level="$1"&&shift||true
 IFS=$' \t\n' read -r _ func _ <<<"$(caller 0||true)"
 func="${func:-(main)}"
-is set -- "$DEBUG"||return 0
+[ -n "$DEBUG" ]||return 0
 text="$(input "$@")"
 [[ $BASHLIB_LOADER != "remote" ]]||sign='>>'
-if is integer -- "$DEBUG";then
-is integer --min=0 --die -- "$DEBUG"
+if [[ "$DEBUG" =~ ^-?[0-9]+$ ]];then
+is integer --min=0 -d -- "$DEBUG"
 ((level<=DEBUG))||return 0
 else
 [[ $func =~ .*(${DEBUG//,? /|}) ]]||return 0
@@ -613,7 +613,7 @@ done <<<"$text"
 ! command -v log >/dev/null||log debug "$func: $text"
 }
 die(){
-is integer --name=arguments --max=1 --die -- $#
+is integer -narguments --max=1 -d $#
 local text trap line func src
 text="$(input "$@")"
 [[ $text != *"Uncaught exception at"* ]]||trap=1
@@ -632,79 +632,79 @@ exit 143
 fi
 }
 help(){
-is integer --name=arguments --min=2 --max=4 --die -- $#
-is set --name=heading --die -- "$1"
-is set --name=usage --die -- "$2"
+is integer -narguments --min=2 --max=4 -d $#
+is set -nheading -d -- "$1"
+is set -nusage -d -- "$2"
 heading "$(gettext Help): $1"
 info "Usage: $2"
 printf '\n'
-if is set -- "$3";then
+if [ -n "$3" ];then
 option_help "$3"
 printf '\n'
 fi
-if is set -- "$4";then
+if [ -n "$4" ];then
 printf '%s\n\n' "$4"
 fi
 exit 0
 }
 heading(){
 local prefix=""
-is empty -- "$server"||prefix="${server-} "
+[ -z "$server" ]||prefix="${server-} "
 printf "\n%s\n\n" "$CC_INVERS$prefix$CC_RESET$CC_HEADING$(input "$@")...$CC_RESET"
 }
 critical(){
 local text
 text="$(input "$@")"
-is set -- "$text"||return 0
+[ -n "$text" ]||return 0
 printf '%s\n' "$CC_CRITICAL$text$CC_RESET"
 ((${#_log_active[@]}==0))||log critical "$text"
 }
 error(){
 local text
 text="$(input "$@")"
-is set -- "$text"||return 0
+[ -n "$text" ]||return 0
 printf '%s\n' "$CC_ERROR$text$CC_RESET"
 ((${#_log_active[@]}==0))||log error "$text"
 }
 warn(){
 local text
 text="$(input "$@")"
-is set -- "$text"||return 0
+[ -n "$text" ]||return 0
 printf '%s\n' "$CC_WARN$text$CC_RESET"
 ((${#_log_active[@]}==0))||log warn "$text"
 }
 notice(){
 local text
 text="$(input "$@")"
-is set -- "$text"||return 0
+[ -n "$text" ]||return 0
 printf '%s\n' "$CC_NOTICE$text$CC_RESET"
 ((${#_log_active[@]}==0))||log notice "$text"
 }
 info(){
 local text
 text="$(input "$@")"
-is set -- "$text"||return 0
+[ -n "$text" ]||return 0
 printf '%s\n' "$text"
 ((${#_log_active[@]}==0))||log info "$text"
 }
 ok(){
 local text
 text="$(input "$@")"
-is set -- "$text"||return 0
+[ -n "$text" ]||return 0
 printf "$CC_OK%s$CC_RESET\n" "$text"
 ((${#_log_active[@]}==0))||log notice "$text"
 }
 invers(){
 local text
 text="$(input "$@")"
-is set -- "$text"||return 0
+[ -n "$text" ]||return 0
 printf "$CC_INVERS%s$CC_RESET\n" "$text"
 ((${#_log_active[@]}==0))||log info "$text"
 }
 color(){
 local text
 text="$(input_args 1 "$@")"
-is set -- "$text"||return 0
+[ -n "$text" ]||return 0
 printf "$CC_ERROR%s$CC_RESET\n" "$text"
 ((${#_log_active[@]}==0))||log info "$text"
 }
@@ -722,8 +722,8 @@ install jq
 input "$@"|jq -sRr @uri|sed 's/%0A$//'
 }
 horizontal_line(){
-is integer --name=arguments --max=1 --die -- $#
-is empty -- "$1"||is enum --name=format --allow="light bold double half full"--die -- "$1"
+is integer -narguments --max=1 -d $#
+[ -z "$1" ]||is enum -nformat --allow="light bold double half full"--die -- "$1"
 local char
 case $1 in
 bold)char="━";;
@@ -739,8 +739,8 @@ printf '%s\n' "$(character repeat "$cols" "$char")"
 }
 _spinner_pid=""
 spinner_start(){
-is integer --name=arguments --max=2 --die -- $#
-is empty -- "$1"||is enum --name=format --allow="simple arrows vertical bar fade braille roll moon clock weather" --die -- "$1"
+is integer -narguments --max=2 -d $#
+[ -z "$1" ]||is enum -nformat --allow="simple arrows vertical bar fade braille roll moon clock weather" -d -- "$1"
 if ! command -v tput >/dev/null 2>&1||[ ! -t 2 ];then
 debug "Disabled because tput and terminal is needed"
 return 0
@@ -777,7 +777,7 @@ _spinner_pid=$!
 disown
 }
 spinner_stop(){
-is integer --name=arguments --max=0 --die -- $#
+is integer -narguments --max=0 -d $#
 [ -n "$_spinner_pid" ]||return
 kill "$_spinner_pid" >/dev/null 2>&1
 wait "$_spinner_pid" 2>/dev/null
@@ -793,22 +793,22 @@ r=$'\e[0m'
 u=$'\e[4m'
 p="$(character repeat $((($(tput cols)-80)/2)) ' ')"
 t="$(character repeat $((($(tput cols)-${#1})/2)) ' ')"
-printf '\n'
-printf "$p$a                         $b  __   ____     ___\n"
-printf "$p$a           ######  ##### $b ▕  ▏ ▕    ╲   ▕   ▏ $a  ########### #####       #####\n"
-printf "$p$a          ######## ##### $b ▕  ▏ ▕     ╲  ▕   ▏ $a ############  #####     #####\n"
-printf "$p$a         ######### ##### $b ▕  ▏ ▕  ▕╲  ╲ ▕   ▏ $a #####          #####   #####\n"
-printf "$p$a        ########## ##### $b ▕  ▏ ▕  ▕ ╲  ╲▕   ▏ $a #####           ##### #####\n"
-printf "$p$a       ##### ##### ##### $b ▕  ▏ ▕  ▕  ╲  ▔   ▏ $a ############     #########\n"
-printf "$p$a      #####  ##### ##### $b ▕  ▏ ▕  ▕   ╲     ▏ $a ############     #########\n"
-printf "$p$a     #####   ##### ##### $b ▕  ▏ ▕  ▕    ╲    ▏ $a #####           ##### #####\n"
-printf "$p$a    #####    ##### ##### $b  ▔▔   ▔▔▔     ▔▔▔▔  $a #####          #####   #####\n"
-printf "$p$a   ##### ######### ######""#####################"" ############  #####     #####\n"
-printf "$p$a  ##### ##########  #####""#################### ""  ########### #####       ##### $r\n"
-printf "$p$b▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄""▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄""▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄$r$c\n"
-printf "$t%s$r\n" "$1"
-printf "$p$b▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀""▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀""▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀$r\n"
-printf '\n'
+printf "
+$p$a                         $b  __   ____     ___
+$p$a           ######  ##### $b ▕  ▏ ▕    ╲   ▕   ▏ $a  ########### #####       #####
+$p$a          ######## ##### $b ▕  ▏ ▕     ╲  ▕   ▏ $a ############  #####     #####
+$p$a         ######### ##### $b ▕  ▏ ▕  ▕╲  ╲ ▕   ▏ $a #####          #####   #####
+$p$a        ########## ##### $b ▕  ▏ ▕  ▕ ╲  ╲▕   ▏ $a #####           ##### #####
+$p$a       ##### ##### ##### $b ▕  ▏ ▕  ▕  ╲  ▔   ▏ $a ############     #########
+$p$a      #####  ##### ##### $b ▕  ▏ ▕  ▕   ╲     ▏ $a ############     #########
+$p$a     #####   ##### ##### $b ▕  ▏ ▕  ▕    ╲    ▏ $a #####           ##### #####
+$p$a    #####    ##### ##### $b  ▔▔   ▔▔▔     ▔▔▔▔  $a #####          #####   #####
+$p$a   ##### ######### ######""#####################"" ############  #####     #####
+$p$a  ##### ##########  #####""#################### ""  ########### #####       ##### $r
+$p$b▄\e[78b$r$c
+$t$1$r
+$p$b▀\e[78b$r
+"
 }
 is(){
 eval set -- "$(option_parse $'n name +\nd die -\ns sanitize -\n- min +\n- max +\n- allow +\no output ?\nm message +' "$@")"
@@ -995,29 +995,29 @@ if [ -n "$output" ];then
 fi
 }
 trim_start(){
-is integer --name=arguments --max=2 --die -- $#
+is integer -narguments --max=2 -d $#
 local str="${1-}"
 local char="${2:-[:space:]}"
 printf '%s' "${str#"${str%%[!$char]*}"}"
 }
 trim_end(){
-is integer --name=arguments --max=2 --die -- $#
+is integer -narguments --max=2 -d $#
 local str="${1:-}"
 local char="${2:-[:space:]}"
 printf '%s' "${str%"${str##*[!$char]}"}"
 }
 trim(){
-is integer --name=arguments --max=2 --die -- $#
+is integer -narguments --max=2 -d $#
 trim_end "$(trim_start "$1" "$2")" "$2"
 }
 to_alphanum(){
-is integer --name=arguments --max=1 --die -- $#
+is integer -narguments --max=1 -d $#
 local text
 text="$(input "$@")"
 printf '%s' "${text//[^a-zA-Z0-9_]/_}"
 }
 value_if_variable(){
-is integer --name=arguments --max=2 --die -- $#
+is integer -narguments --max=2 -d $#
 local _name="$1"
 if [[ $_name =~ ^[a-zA-Z_][a-zA-Z0-9_]*$ ]]&&[ -n "${!_name-}" ];then
 printf '%s' "${!_name}"
@@ -1027,7 +1027,7 @@ fi
 }
 [[ $- =~ i ]]||set -eE
 set -o pipefail
-is set -- "${BASH_VERSION:-}"||die "No bash CLI! This can only be run under bash"
+[ -n "${BASH_VERSION:-}" ]||die "No bash CLI! This can only be run under bash"
 ((BASH_VERSINFO[0]>4||(BASH_VERSINFO[0]==4&&BASH_VERSINFO[1]>=2)))||die "No bash CLI! This can only be run under bash >=4.2!"
 trap 'die "💥 Uncaught exception at »${BASH_COMMAND}« with exit code $?"' ERR
 debug "Running in DEBUG=${DEBUG-} mode!"

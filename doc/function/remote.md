@@ -63,3 +63,5 @@ The modules can be:
 - `config/<name>` to load only one config
 - any other name will be interpreted as `module/<name>` (short form)
 
+If you get something like `tput: No value for `$TERM` and no -T specified` then you should run the remote call with `remote --terminal`.
+
