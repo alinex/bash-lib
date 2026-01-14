@@ -375,7 +375,7 @@ sync() {
     local name verbose message
     while true; do
         case "$1" in
-        -n | --name) name="$2" && shift 2 ;;
+        -n | --name) is set --name=name --die --output=name -- "$2" && shift 2 ;;
         --verbose) verbose=1 && shift ;;
         --) shift && break ;;
         *) die "$(gettext "Unrecognized option"): $1" ;;
@@ -423,7 +423,7 @@ async() {
     local name verbose message
     while true; do
         case "$1" in
-        -n | --name) name="$2" && shift 2 ;;
+        -n | --name) is set --name=name --die --output=name -- "$2" && shift 2 ;;
         --verbose) verbose=1 && shift ;;
         --) shift && break ;;
         *) die "$(gettext "Unrecognized option"): $1" ;;
@@ -500,7 +500,7 @@ queue() {
     local name verbose=0 message progress
     while true; do
         case "$1" in
-        -n | --name) name="$2" && shift 2 ;;
+        -n | --name) is set --name=name --die --output=name -- "$2" && shift 2 ;;
         --verbose) verbose=1 && shift ;;
         --progress) progress=1 && shift ;;
         --) shift && break ;;
@@ -648,7 +648,7 @@ process() {
     eval set -- "$(option_parse $'t timeout +\nw watch -' "$@")"
     while true; do
         case "$1" in
-        -t | --timeout) timeout="$(duration_format seconds "$2")" && shift 2 ;;
+        -t | --timeout) is duration --name=timeout --die --output=timeout -- "$2" && shift 2 ;;
         -w | --watch) watch=1 && shift ;;
         --) shift && break ;;
         *) die "$(gettext "Unrecognized option"): $1" ;;

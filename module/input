@@ -25,7 +25,7 @@ pause() {
     eval set -- "$(option_parse $'a abort -\nT timeout +' "$@")"
     while true; do
         case "$1" in
-        -T | --timeout) timeout="$(duration_format seconds "$2")" && shift 2 ;;
+        -T | --timeout) is duration --name=timeout --die --output=timeout -- "$2" && shift 2 ;;
         -a | --abort) abort=1 && shift ;;
         --) shift && break ;;
         *) die "$(gettext "Unrecognized option"): $1" ;;
@@ -81,7 +81,7 @@ confirm() {
         case "$1" in
         -t | --true) default=1 && shift ;;
         -f | --false) default=0 && shift ;;
-        -T | --timeout) timeout="$(duration_format seconds "$2")" && shift 2 ;;
+        -T | --timeout) is duration --name=timeout --die --output=timeout -- "$2" && shift 2 ;;
         --) shift && break ;;
         *) die "$(gettext "Unrecognized option"): $1" ;;
         esac
@@ -206,7 +206,7 @@ ask() {
         case "$1" in
         -e | --empty) empty=1 && shift ;;
         -d | --default) default="$2" && shift 2 ;;
-        -T | --timeout) timeout="$(duration_format seconds "$2")" && shift 2 ;;
+        -T | --timeout) is duration --name=timeout --die --output=timeout -- "$2" && shift 2 ;;
         -n | --allow-negative) negative=1 && shift ;;
         --) shift && break ;;
         *) die "$(gettext "Unrecognized option"): $1" ;;
@@ -460,7 +460,7 @@ choose() {
         -t | --title) notice "$2" >/dev/tty && shift 2 ;;
         -d | --default) default="$2" && shift 2 ;;
         -x | --exit) end="$2" && shift 2 ;;
-        -T | --timeout) timeout="$(duration_format seconds "$2")" && shift 2 ;;
+        -T | --timeout) is duration --name=timeout --die --output=timeout -- "$2" && shift 2 ;;
         --) shift && break ;;
         *) die "$(gettext "Unrecognized option"): $1" ;;
         esac
@@ -622,7 +622,7 @@ tasks() {
         case "$1" in
         -t | --title) title="-t$2" >/dev/tty && shift 2 ;;
         -d | --default) _default="$2" >/dev/tty && shift 2 ;;
-        -T | --timeout) opt="-T $2 " >/dev/tty && shift 2 ;;
+        -T | --timeout) is duration --name=timeout --die -- "$2" && opt="-T $2 " && shift 2 ;;
         -l | --loop) loop=1 && shift ;;
         --) shift && break ;;
         *) die "$(gettext "Unrecognized option"): $1" ;;

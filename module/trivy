@@ -74,9 +74,9 @@ trivy() {
     eval set -- "$(option_parse $'t timeout +\no only-os -\ne exclude +\np progress -' "$@")"
     while true; do
         case "$1" in
-        -t | --timeout) timeout="$2" && shift 2 ;;
+        -t | --timeout) is duration --name=timeout --die --output=timeout -- "$2" && shift 2 ;;
         -o | --only-os) onlyOS=1 && shift ;;
-        -e | --exclude) exclude="$2" && shift 2 ;;
+        -e | --exclude) is set --name=exclude --die --output=exclude -- "$2" && shift 2 ;;
         -p | --progress) progress=1 && shift ;;
         --) shift && break ;;
         *) die "$(gettext "Unrecognized option"): $1" ;;

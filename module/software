@@ -219,14 +219,8 @@ semver_diff() {
     local human
     while true; do
         case "$1" in
-        -h | --human)
-            human=1
-            shift
-            ;;
-        --)
-            shift
-            break
-            ;;
+        -h | --human) human=1 && shift ;;
+        --) shift && break ;;
         *) die "$(gettext "Unrecognized option"): $1" ;;
         esac
     done

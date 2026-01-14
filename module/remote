@@ -70,9 +70,9 @@ remote() {
     eval set -- "$(option_parse $'+l login +\nh host +\nj jump +\nt terminal -\n- line-based -\nf file -' "$@")"
     while true; do
         case "$1" in
-        -l | --login) _login="$2" && shift 2 ;;
-        -h | --host) host="$2" && shift 2 ;;
-        -j | --jump) jump="$2" && shift 2 ;;
+        -l | --login) is set --name=login --die --output=_login -- "$2" && shift 2 ;;
+        -h | --host) is set --name=host --die --output=host -- "$2" && shift 2 ;;
+        -j | --jump) is set --name=jump --die --output=jump -- "$2" && shift 2 ;;
         -t | --terminal) term=1 && shift ;;
         --line-based) lines=1 && shift ;;
         -f | --file) file=1 && shift ;;
@@ -212,9 +212,9 @@ upload() {
     eval set -- "$(option_parse $'+l login +\nh host +\nj jump +' "$@")"
     while true; do
         case "$1" in
-        -l | --login) _login="$2" && shift 2 ;;
-        -h | --host) host="$2" && shift 2 ;;
-        -j | --jump) jump="$2" && shift 2 ;;
+        -l | --login) is set --name=login --die --output=_login -- "$2" && shift 2 ;;
+        -h | --host) is set --name=host --die --output=host -- "$2" && shift 2 ;;
+        -j | --jump) is set --name=jump --die --output=jump -- "$2" && shift 2 ;;
         --) shift && break ;;
         *) die "$(gettext "Unrecognized option"): $1" ;;
         esac
@@ -248,22 +248,10 @@ download() {
     eval set -- "$(option_parse $'+l login +\nh host +\nj jump +' "$@")"
     while true; do
         case "$1" in
-        -l | --login)
-            _login="$2"
-            shift 2
-            ;;
-        -h | --host)
-            host="$2"
-            shift 2
-            ;;
-        -j | --jump)
-            jump="$2"
-            shift 2
-            ;;
-        --)
-            shift
-            break
-            ;;
+        -l | --login) is set --name=login --die --output=_login -- "$2" && shift 2 ;;
+        -h | --host) is set --name=host --die --output=host -- "$2" && shift 2 ;;
+        -j | --jump) is set --name=jump --die --output=jump -- "$2" && shift 2 ;;
+        --) shift && break ;;
         *) die "$(gettext "Unrecognized option"): $1" ;;
         esac
     done
