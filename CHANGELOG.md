@@ -5,6 +5,7 @@ But on release they will be merged with semantical versioning into the master br
 
 ## In development
 
+- add [uppercase](doc/function/uppercase.md) and [lowercase](doc/function/lowercase.md) methods
 - allow to include BashLib directly from the net in special remote version
 - add [compress](doc/function/compress.md) and [decompress](doc/function/decompress.md)
 - fix installer to also allow installation of develop version

@@ -810,6 +810,40 @@ $t$1$r
 $p$b▀\e[78b$r
 "
 }
+trim_start(){
+is integer -narguments --max=2 -d $#
+local str="${1-}"
+local char="${2:-[:space:]}"
+printf '%s' "${str#"${str%%[!$char]*}"}"
+}
+trim_end(){
+is integer -narguments --max=2 -d $#
+local str="${1:-}"
+local char="${2:-[:space:]}"
+printf '%s' "${str%"${str##*[!$char]}"}"
+}
+trim(){
+is integer -narguments --max=2 -d $#
+trim_end "$(trim_start "$1" "$2")" "$2"
+}
+to_alphanum(){
+is integer -narguments --max=1 -d $#
+local text
+text="$(input "$@")"
+printf '%s' "${text//[^a-zA-Z0-9_]/_}"
+}
+uppercase(){
+${1^^}
+}
+lowercase(){
+${1,,}
+}
+uppercase_first(){
+${1^}
+}
+lowercase_first(){
+${1,}
+}
 is(){
 eval set -- "$(option_parse $'n name +\nd die -\ns sanitize -\n- min +\n- max +\n- allow +\no output ?\nm message +' "$@")"
 local name die sanitize min max allow message output
@@ -993,28 +1027,6 @@ esac
 if [ -n "$output" ];then
 [ "$output" = "-" ]&&printf '%s' "$res"||printf -v "$output" '%s' "$res"
 fi
-}
-trim_start(){
-is integer -narguments --max=2 -d $#
-local str="${1-}"
-local char="${2:-[:space:]}"
-printf '%s' "${str#"${str%%[!$char]*}"}"
-}
-trim_end(){
-is integer -narguments --max=2 -d $#
-local str="${1:-}"
-local char="${2:-[:space:]}"
-printf '%s' "${str%"${str##*[!$char]}"}"
-}
-trim(){
-is integer -narguments --max=2 -d $#
-trim_end "$(trim_start "$1" "$2")" "$2"
-}
-to_alphanum(){
-is integer -narguments --max=1 -d $#
-local text
-text="$(input "$@")"
-printf '%s' "${text//[^a-zA-Z0-9_]/_}"
 }
 value_if_variable(){
 is integer -narguments --max=2 -d $#

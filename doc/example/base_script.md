@@ -32,8 +32,8 @@ DESCRIPTION=\
 eval set -- "$(option_parse "$OPTIONS" "$@")"
 while true; do
     case "$1" in
-    -n | --name) name="$2" && shift 2 ;;
-    -a | --age) age="$2" && shift 2 ;;
+    -n | --name) is set --name=name --die --output=name -- "$2" && shift 2 ;;
+    -a | --age) is integer --name=age --min=12 --max=150 --die --output=age -- "$2" && shift 2 ;;
     -h | --help) help "$TITLE" "$USAGE" "$OPTIONS" "$DESCRIPTION" && exit ;;
     --) shift && break ;;
     *) die "Unrecognized option: $1" ;;

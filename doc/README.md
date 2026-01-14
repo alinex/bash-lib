@@ -277,6 +277,21 @@ Module with output and user interaction helpers.
 | [`spinner_stop`](function/spinner_stop.md) | Function to stop the spinner |
 | [`logo`](function/logo.md) | Output Logo with title text |
 
+### String Module
+
+String manipulation.
+
+| Variable/Function | Description |
+| --- | --- |
+| [`trim_start`](function/trim_start.md) | Trim leading whitespace or given character |
+| [`trim_end`](function/trim_end.md) | Trim trailing whitespace or given character |
+| [`trim`](function/trim.md) | Trim leading and trailing whitespace or given character |
+| [`to_alphanum`](function/to_alphanum.md) | Convert string into only alphanumeric values |
+| [`uppercase`](function/uppercase.md) | Change all characters to lower case. |
+| [`lowercase`](function/lowercase.md) | Change all characters to lower case. |
+| [`uppercase_first`](function/uppercase_first.md) | Change first characters to upper case. |
+| [`lowercase_first`](function/lowercase_first.md) | Change first characters to lower case. |
+
 ### Validator Module
 
 Validators to make this easier and more readable.
@@ -284,10 +299,6 @@ Validators to make this easier and more readable.
 | Variable/Function | Description |
 | --- | --- |
 | [`is`](function/is.md) | Validate and sanitize values. |
-| [`trim_start`](function/trim_start.md) | Trim leading whitespace or given character |
-| [`trim_end`](function/trim_end.md) | Trim trailing whitespace or given character |
-| [`trim`](function/trim.md) | Trim leading and trailing whitespace or given character |
-| [`to_alphanum`](function/to_alphanum.md) | Convert string into only alphanumeric values |
 | [`value_if_variable`](function/value_if_variable.md) | Return the value or if it is a variable name which is not empty return it's value |
 
 ## Module

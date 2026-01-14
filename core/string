@@ -1,0 +1,109 @@
+#!/usr/bin/env bash
+
+# String manipulation.
+
+######################################################################################
+### Trim
+######################################################################################
+
+# Trim leading whitespace or given character
+#
+# Usage:    trim_start <value> [<characters>]
+# Output:   <string>
+# See:      https://stackoverflow.com/a/3352015
+trim_start() {
+    is integer --name=arguments --max=2 --die -- $#
+    local str="${1-}"
+    local char="${2:-[:space:]}"
+    # processing
+    # shellcheck disable=SC2295
+    printf '%s' "${str#"${str%%[!$char]*}"}"
+}
+
+# Trim trailing whitespace or given character
+#
+# Usage:    trim_end <value> [<characters>]
+# Output:   <string>
+# See:      https://stackoverflow.com/a/3352015
+trim_end() {
+    is integer --name=arguments --max=2 --die -- $#
+    local str="${1:-}"
+    local char="${2:-[:space:]}"
+    # processing
+    # shellcheck disable=SC2295
+    printf '%s' "${str%"${str##*[!$char]}"}"
+}
+
+# Trim leading and trailing whitespace or given character
+#
+# Usage:    trim <value> [<characters>]
+# Output:   <string>
+# See:      https://stackoverflow.com/a/3352015
+trim() {
+    is integer --name=arguments --max=2 --die -- $#
+    # processing
+    trim_end "$(trim_start "$1" "$2")" "$2"
+}
+
+######################################################################################
+### Convert
+######################################################################################
+
+# Convert string into only alphanumeric values
+#
+# This is needed to use it as a key in associative arrays. All other characters are converted into underscore.
+#
+# Usage:    to_alphanum <string>
+#           <string> | to_alphanum
+# Output:   <alnum>
+to_alphanum() {
+    is integer --name=arguments --max=1 --die -- $#
+    local text
+    text="$(input "$@")"
+    # processing
+    printf '%s' "${text//[^a-zA-Z0-9_]/_}"
+}
+
+######################################################################################
+### Character Case
+######################################################################################
+
+# Change all characters to lower case.
+#
+# See also @uppercase_first @lowercase.
+#
+# Usage:    uppercase <string>
+# Output:   <string> in upper case
+uppercase() {
+    ${1^^}
+}
+
+# Change all characters to lower case.
+#
+# See also @lowercase_first @uppercase.
+#
+# Usage:    lowercase <string>
+# Output:   <string> in lower case
+lowercase() {
+    ${1,,}
+}
+
+# Change first characters to upper case.
+#
+# See also @uppercase @lowercase_first.
+#
+# Usage:    uppercase_first <string>
+# Output:   <string> starting with upper case
+uppercase_first() {
+    ${1^}
+}
+
+# Change first characters to lower case.
+#
+# See also @lowercase @uppercase_first.
+#
+# Usage:    lowercase_first <string>
+# Output:   <string> starting with lower case
+lowercase_first() {
+    ${1,}
+}
