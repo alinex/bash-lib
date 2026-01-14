@@ -11,6 +11,8 @@
 QUEUE_MAX_NUM=10
 # Percentage of 1 Minute Load per CPU (100% 8Cpu => 8.0)
 QUEUE_MAX_LOAD=75
+# The default compression tool used in @compress and @decompress
+COMPRESSION_DEFAULT=gzip
 
 ######################################################################################
 ### Host Specific

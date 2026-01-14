@@ -1279,6 +1279,43 @@ sleep $(((num+1)**2))
 done
 (printf "HTTP Code $CURL_HTTP_CODE: "&&jq .errorMessages[] -r <<<"$res"||printf '%s' "$res")|die
 }
+compress(){
+local in out tool="$COMPRESSION_DEFAULT" decompress
+eval set -- "$(option_parse $'i input +\no output +\na algorithm +\nd decompress -' "$@")"
+while true;do
+case "$1" in
+-i|--input)is readable -ninput -oin -d -- "$2"&&shift 2;;
+-o|--output)is writable -noutput -d -- "$2"&&out=">\"$2\""&&shift 2;;
+-t|--tool)is enum -nalgo --allow="gzip bzip2 xz zstd lz4 zip" -otool -d -- "$2"&&shift 2;;
+-d|--decompress)decompress=-d&&shift;;
+--)shift&&break;;
+*)die "$(gettext "Unrecognized option"): $1"
+esac
+done
+is integer -narguments --max=1 -d $#
+install "$tool"
+if [ -n "$in" ];then
+cat "$in"
+elif [ -n "$1" ];then
+printf '%s' "$1"
+else
+cat
+fi|case "$tool$decompress" in
+gzip)eval gzip -cf $out;;
+gzip-d)eval gzip -cdf $out;;
+bzip2)eval bzip2 -c $out;;
+bzip2-d)eval bzip2 -cd $out;;
+xz)eval xz -c $out;;
+xz-d)eval xz -cd $out;;
+zstd)eval zstd -cq $out;;
+zstd-d)eval zstd -cdq $out;;
+lz4)eval lz4 -c;;
+lz4-d)eval lz4 -cd
+esac
+}
+decompress(){
+compress -d "$@"
+}
 use module/software
 mongo(){
 local host="$server"
@@ -2340,7 +2377,7 @@ esac
 done
 is set -nhost -d -- "$1"
 local query
-if command -v dig >/dev/null;then
+if command -v dig 2>/dev/null;then
 [ "$type" = 4 ]&&query="A"||true
 [ "$type" = 6 ]&&query="AAAA"||true
 dig +short $query "$1"

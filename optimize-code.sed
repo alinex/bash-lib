@@ -12,5 +12,3 @@ s/(is [a-z]+) --name=/\1 -n/g
 s/(is .*?) --die/\1 -d/g
 s/(is .*?) --output=/\1 -o/g
 s/-- \$#/$#/g
-
-#124KB 34KB

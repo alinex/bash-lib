@@ -62,6 +62,7 @@ The configuration module contains a lot of general configuration settings for th
 | --- | --- |
 | ``$QUEUE_MAX_NUM`` | Maximum number of parallel tasks for queue |
 | ``$QUEUE_MAX_LOAD`` | Percentage of 1 Minute Load per CPU (100% 8Cpu => 8.0) |
+| ``$COMPRESSION_DEFAULT`` | The default compression tool used in [`compress`](functioncompress.md) and [`decompress`](functiondecompress.md) |
 | ``$REMOTE_LOGIN_DEFAULT`` | Default login if no `--login` or ``$login`` available |
 | ``$MOUNT_COLOR_LIMIT`` | Array: Color limits per mount (regex critical error warn ok) used in [`df`](functiondf.md) |
 | ``$IP_PROVIDER_PATTERN`` | Array: Provider selection per ip (regex provider) used in [`ip_pattern`](functionip_pattern.md) |
@@ -299,6 +300,15 @@ This covers Atlassian API for Jira and confluence.
 | --- | --- |
 | [`confluence`](function/confluence.md) | Get page content from Confluence using API |
 | [`jira`](function/jira.md) | Jira API calls |
+
+### Compress Module
+
+Compression and decompression.
+
+| Variable/Function | Description |
+| --- | --- |
+| [`compress`](function/compress.md) | Compress data stream using multiple algorithms. |
+| [`decompress`](function/decompress.md) | Uncompress data stream using multiple algorithms. |
 
 ### Database Module
 
