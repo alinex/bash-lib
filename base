@@ -503,11 +503,11 @@ local path=${TMPDIR:-/tmp}
 while true;do
 case "$1" in
 -d|--directory)dir=1&&shift;;
--e|--extension)ext=".$2"&&shift 2;;
+-e|--extension)is set -nextension -d -- "$2"&&ext=".$2"&&shift 2;;
 -m|--memory)path="/dev/shm"&&shift;;
--p|--path)path="$2"&&shift 2;;
+-p|--path)is set -npath -d -opath -- "$2"&&shift 2;;
 -r|--random)rand=$RANDOM&&shift;;
--T|--ttl)ttl="$(duration_format seconds "$2")"&&shift 2;;
+-T|--ttl)is duration -nttl -d -ottl -- "$2"&&shift 2;;
 --)shift&&break;;
 *)die "$(gettext "Unrecognized option"): $1"
 esac
