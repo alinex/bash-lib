@@ -26,6 +26,11 @@ If you already use it jump directly to the [module description](https://gitlab.c
   - [Installation](#installation)
     - [Switch Version](#switch-version)
   - [Usage](#usage)
+    - [Full BashLib](#full-bashlib)
+    - [BashLib Loader for Debug](#bashlib-loader-for-debug)
+    - [Base Bashlib](#base-bashlib)
+    - [Use in Terminal](#use-in-terminal)
+    - [Remote BashLib](#remote-bashlib)
   - [Configuration](#configuration)
     - [Environment](#environment)
   - [Latest Changes](#latest-changes)
@@ -96,6 +101,7 @@ bashlib/
     base            # only the base/core functionality (minified)
     full            # file with full functionality (minified)
     loader          # same as full but including all source files
+    remote          # library with base configs for remote use
     # module directories
     core/           # core modules which always is needed (loaded by all of the above)
     config/         # individual configuration (loaded by all of the above)
@@ -185,8 +191,18 @@ If you want to have another version use the specific branch name as argument or 
 - tags like `v2.3.0` - older version
 
 And you can also at any time download the baslib yourself and set `$BASHLIB_HOME` to this directory to work with it, like I do with my developer directory.
+Or use it without local installation, see below.
 
 ## Usage
+
+This will show you how to use it after installation or without installation. See the possibilities explained below.
+
+For further assistance see the [Examples](./doc/README.md#Examples) within the Modules API documentation.
+A [bash short reference](./bash-reference.md) is also available here.
+
+### Full BashLib
+
+This is a compressed library containing all core and modules. ANd will load the configurations from the config folder, too.
 
 Your scripts will start with:
 
@@ -195,12 +211,19 @@ Your scripts will start with:
 source $BASHLIB_HOME/full           # to have all tools ready
 ```
 
-The optimal solution may to use the `full` or `loader` (based on `DEBUG` mode locally:
+### BashLib Loader for Debug
+
+This will load all files individually, making error references to the source files, not the line in the compressed full script. This is preferable for debugging.
+Mostly it is used if DEBUG is set instead of the full lib:
 
 ```bash
 #!/usr/bin/env bash
 test -z "${DEBUG-}" && source "$BASHLIB_HOME"/full || source "$BASHLIB_HOME"/loader
 ```
+
+### Base Bashlib
+
+If you need only some specific parts of the BashLib, it is advisable to use the base which only contains the core functionality.
 
 And for the scripts better use the individual loading if not so much is needed:
 
@@ -213,12 +236,21 @@ source $BASHLIB_HOME/configs        # load configuration
 use module/output
 ```
 
-For further assistance see the [Examples](./doc/README.md#Examples) within the Modules API documentation.
-
-A [bash short reference](./bash-reference.md) is also available here.
+### Use in Terminal
 
 You can also use the BashLib directly in the terminal.
-Load it directly in bash with the above `source` commands.
+Load it directly in bash with one of the above `source` commands.
+
+### Remote BashLib
+
+And at last if you run a script seldom and want not to install the BashLib on your host, you may use it directly from the net, this is the full bashlib with default environment configuration bundled together.
+
+```bash
+#!/usr/bin/env bash
+source <(curl -s https://gitlab.com/alinex/bash-lib/-/raw/master/remote)
+```
+
+Now you have to include your specific configuration like API and secrets directly in the code to fully use it.
 
 ## Configuration
 

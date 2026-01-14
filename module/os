@@ -148,14 +148,11 @@ os_detect() {
 disk_free() {
     # parameter parsing
     debug "$*"
-    local opt="" free_operator free_percent free_bytes collect
+    local opt="" free_operator free_percent free_bytes
     eval set -- "$(option_parse $'l locale -\nc collect +\nf free +' "$@")"
     while true; do
         case "$1" in
-        -l | --locale)
-            opt="-l"
-            shift
-            ;;
+        -l | --locale) opt="-l" && shift ;;
         -f | --free)
             local text="$2"
             if [[ "$text" =~ ^([<>]=?|==|!=)?(([0-9]+)[%bB]?)$ ]]; then
@@ -169,19 +166,13 @@ disk_free() {
             fi
             shift 2
             ;;
-        -c | --collect)
-            declare -n collect="$2"
-            shift 2
-            ;;
-        --)
-            shift
-            break
-            ;;
+        -c | --collect) declare -n collect="$2" && shift 2 ;;
+        --) shift && break ;;
         *) die "$(gettext "Unrecognized option"): $1" ;;
         esac
     done
-    debug "$*"
-    is empty -- "$collect" || debug "collect into $collect ($free_operator ${free_percent}%/${free_bytes}B)"
+    debug "$opt"
+    ! declare -p collect >/dev/null || debug "collect into $collect ($free_operator ${free_percent}%/${free_bytes}B)"
     # processing
     local firstLine="" percent mount device limit_c limit_e limit_w limit_o
     IFS=$'\n'
@@ -220,7 +211,7 @@ disk_free() {
                 printf '%s\n' "$line"
             fi
             # collection limit
-            if is set -- "$collect"; then
+            if declare -p collect >/dev/null; then
                 # shellcheck disable=SC1105
                 if [ -n "$free_operator" ]; then
                     if [ -n "$free_percent" ] &&

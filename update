@@ -21,7 +21,11 @@ done
 echo -n "(optimize) "
 sed -i -E -f optimize-code.sed "$BASHLIB_HOME/full"
 echo "fertig -> $(du -h full | cut -f1)B"
+echo -n "- remote (clone) "
+sed 's/BASHLIB_LOADER:-full/BASHLIB_LOADER:-remote/' "$BASHLIB_HOME/full" >"$BASHLIB_HOME/remote"
 echo "source \$BASHLIB_HOME/configs" >>"$BASHLIB_HOME/full" # load configs
+shfmt -mn "$BASHLIB_HOME/config/environment" | grep -Ev '^#!/usr/bin/env bash|source /dev/null' >>"$BASHLIB_HOME/remote"
+echo "fertig -> $(du -h remote | cut -f1)B"
 echo "#!/usr/bin/env bash" >"$BASHLIB_HOME/base"
 echo "BASHLIB_LOADER=\${BASHLIB_LOADER:-base}" >>"$BASHLIB_HOME/base"
 echo -n "- base core "
@@ -30,7 +34,7 @@ for f in "$BASHLIB_HOME"/core/*; do
         shfmt -mn "$f" | grep -Ev '^#!/usr/bin/env bash|source /dev/null' >>"$BASHLIB_HOME/base"
     fi
 done
-#echo -n "(optimize) "
+echo -n "(optimize) "
 sed -i -E -f optimize-code.sed "$BASHLIB_HOME/base"
 echo "fertig -> $(du -h base | cut -f1)B"
 
