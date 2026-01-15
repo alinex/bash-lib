@@ -290,7 +290,7 @@ esac
 done
 is integer -narguments --max=4 -d $#
 is set -narray-name -d -- "$1"
-is enum -ncommand --allow="set get unset has contains" -d -- "$2"
+is enum -ncommand --allow="set get unset has contains to" -d -- "$2"
 declare -n arr="$1"
 local cmd="$2" key value="$4"
 case $keyFormat in
@@ -307,6 +307,14 @@ for key in "${!arr[@]}";do
 [[ ${arr["$key"]} != "$3" ]]||return 0
 done
 return 1
+;;
+to)is enum -nformat --allow=tsv -d -- "$3"
+case $3 in
+tsv)printf 'name\tvalue\n'
+for key in "${!arr[@]}";do
+printf '%s\t%s\n' "$key" "${arr[$key]}"
+done
+esac
 esac
 }
 BASHLIB_HOME=${BASHLIB_HOME:-$HOME/bashlib}
@@ -2425,37 +2433,47 @@ debug 7 "$ip =~ ${lookup[i]} => false"
 done
 return 1
 }
-_ip_extern_ip=()
+declare -A _ip_extern_data
 _ip_extern_json=
 ip_extern(){
-local type
-eval set -- "$(option_parse $'v version +' "$@")"
-while true;do
-case "$1" in
--v|--version)is enum -nversion --allow="4 6" -d -otype -- "$2"&&shift 2;;
---)shift&&break;;
-*)die "$(gettext "Unrecognized option"): $1"
-esac
-done
 is integer -narguments --max=1 -d $#
 is enum -nformat --allow="data country countryCode region regionName city zip lat lon timezone isp org as ip" -d -- "$1"
 if [ -z "$_ip_extern_ip" ];then
-_ip_extern_ip+=("$(curl -s4 icanhazip.com)")
-_ip_extern_ip+=("$(curl -s6 ifconfig.co)")
+hash _ip_extern_data set ipv4 "$(curl -s4 icanhazip.com)"
+hash _ip_extern_data set ipv6 "$(curl -s6 ifconfig.co)"
 fi
-if [ "$1" = "ip" ];then
-case $type in
-4)printf '%s' "${_ip_extern_ip[0]}";;
-6)printf '%s' "${_ip_extern_ip[1]}";;
-*)array _ip_extern_ip join $'\n'
-esac
-else
-[ -n "$_ip_extern_json" ]||_ip_extern_json="$(curl http://ip-api.com/json)"
 case ${1-} in
-data)jq -r 'with_entries(if .key == "query" then .key = "ip" else . end) | to_entries[] | "\(.key)\t\(.value)"' <<<"$_ip_extern_json";;
-*)jq -r ".$1" <<<"$_ip_extern_json"
+ipv4)hash _ip_extern_data get ipv4&&return;;
+ipv6)hash _ip_extern_data get ipv6&&return;;
+ip)printf '%s\n%s' "$(hash _ip_extern_data get ipv4)" "$(hash _ip_extern_data get ipv6)"&&return
 esac
-fi
+hash _ip_extern_data has isp||_ip_extern_ipapi_com||_ip_extern_ipinfo_co
+case ${1-} in
+data)hash _ip_extern_data to tsv;;
+*)hash _ip_extern_data get "$1"
+esac
+}
+_ip_extern_ipapi_com(){
+local json
+json="$(curl http://ip-api.com/json)"
+hash _ip_extern_data set country "$(jq .countryCode -r <<<"$json")"
+hash _ip_extern_data set region "$(jq .regionName -r <<<"$json")"
+hash _ip_extern_data set city "$(jq .city -r <<<"$json")"
+hash _ip_extern_data set zip "$(jq .zip -r <<<"$json")"
+hash _ip_extern_data set timezone "$(jq .timezone -r <<<"$json")"
+hash _ip_extern_data set org "$(jq .as -r <<<"$json")"
+hash _ip_extern_data set loc "$(jq '(.lat|tostring)+","+(.lon|tostring)' -r <<<"$json")"
+}
+_ip_extern_ipinfo_co(){
+local json
+json="$(curl ipinfo.io)"
+hash _ip_extern_data set country "$(jq .country -r <<<"$json")"
+hash _ip_extern_data set region "$(jq .region -r <<<"$json")"
+hash _ip_extern_data set city "$(jq .city -r <<<"$json")"
+hash _ip_extern_data set zip "$(jq .postal -r <<<"$json")"
+hash _ip_extern_data set timezone "$(jq .timezone -r <<<"$json")"
+hash _ip_extern_data set org "$(jq .org -r <<<"$json")"
+hash _ip_extern_data set loc "$(jq .loc -r <<<"$json")"
 }
 declare -A _os_detected
 os_detect(){

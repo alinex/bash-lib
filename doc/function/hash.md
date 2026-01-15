@@ -5,7 +5,12 @@
 ### Usage
 
 ```bash
-hash <array-name> <command> [<key>] [<value>]
+hash <array-name> set <key> [<value>]
+hash <array-name> get <key> [<value>]
+hash <array-name> unset <key>
+hash <array-name> has <key>
+hash <array-name> contains <key>
+hash <array-name> to tsv
 ```
 
 ### Options
@@ -51,4 +56,5 @@ The following commands are possible:
 - `unset` remove `<key>` from hash
 - `has` check if the `<key>` is set
 - `contains` check if the given `<value>` is found in any key
+- `to` converts hash into `tsv`
 

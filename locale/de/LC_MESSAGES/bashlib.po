@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-15 21:31+0100\n"
+"POT-Creation-Date: 2026-01-15 22:14+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,13 +17,13 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: core/misc:132 core/validator:74 core/array:130 module/os:171
-#: module/network:24 module/network:133 module/trivy:82 module/compress:41
-#: module/monitoring:143 module/input:31 module/input:86 module/input:212
-#: module/input:465 module/input:628 module/log:63 module/process:381
-#: module/process:429 module/process:507 module/process:654 module/remote:80
-#: module/remote:221 module/remote:261 module/remote:329 module/database:33
-#: module/mattermost:299 module/mattermost:330 module/software:224
+#: core/misc:132 core/validator:74 core/array:136 module/os:171
+#: module/network:24 module/trivy:82 module/compress:41 module/monitoring:143
+#: module/input:31 module/input:86 module/input:212 module/input:465
+#: module/input:628 module/log:63 module/process:381 module/process:429
+#: module/process:507 module/process:654 module/remote:80 module/remote:221
+#: module/remote:261 module/remote:329 module/database:33 module/mattermost:299
+#: module/mattermost:330 module/software:224
 msgid "Unrecognized option"
 msgstr "Unbekannte Option"
 
