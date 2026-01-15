@@ -240,37 +240,35 @@ printf '%q ' "$@"
 array(){
 local cmd value
 is set -narray-name -d -- "$1"
-is enum -ncommand --allow="has indexof" -d -ocmd -- "$2"
-is set -nvalue -d -ovalue -- "$3"
+is enum -ncommand --allow="has indexof join" -d -ocmd -- "$2"
 is integer -narguments --max=3 -d $#
 declare -n arr="$1"
 case "$cmd" in
-has)for e in "${arr[@]}"
-do
+has)is set -nvalue -d -ovalue -- "$3"
+for e in "${arr[@]}";do
 [ ! "$e" = "$value" ]||return 0
 done
 return 1
 ;;
-indexof)for i in "${!arr[@]}"
-do
+indexof)is set -nvalue -d -ovalue -- "$3"
+for i in "${!arr[@]}";do
 if [ "${arr[i]}" = "$value" ];then
 printf '%s' "$i"
 return 0
 fi
 done
 return 1
+;;
+join)local joined="${arr[0]}" separator="${3:-,}"
+for element in "${arr[@]:1}";do
+joined+="$separator$element"
+done
+printf '%s' "$joined"
 esac
 }
 join(){
-is integer -narguments --max=2 -d $#
-is set -narray-name -d -- "$1"
-local -n array=$1
-local sep="${2:-,}"
-local joined="${array[0]}"
-for element in "${array[@]:1}";do
-joined+="$sep$element"
-done
-printf '%s' "$joined"
+_deprecated "Use array <arr-name> join <separator>" warn
+array "$1" join "$2"
 }
 split(){
 is integer -narguments --max=3 -d $#
@@ -285,7 +283,7 @@ local keyFormat="simple"
 eval set -- "$(option_parse $'k key-format +' "$@")"
 while true;do
 case "$1" in
--k|--key-format)is enum --allow="simple base64" --output -- "$2"&&keyFormat="$2"&&shift 2;;
+-k|--key-format)is enum --allow="simple base64" -okeyFormat -- "$2"&&shift 2;;
 --)shift&&break;;
 *)die "$(gettext "Unrecognized option"): $1"
 esac
@@ -2377,15 +2375,12 @@ remote true 2>/dev/null||continue
 remote /etc/prometheus/config-builder/update >/dev/null
 done
 }
-ip(){
+ip_resolve(){
 eval set -- "$(option_parse $'v version +' "$@")"
 local type
 while true;do
 case "$1" in
--v|--version)(($2==4))&&type=4||true
-(($2==6))&&type=6||true
-shift 2
-;;
+-v|--version)is enum -nversion --allow="4 6" -d -otype -- "$2"&&shift 2;;
 --)shift&&break;;
 *)die "$(gettext "Unrecognized option"): $1"
 esac
@@ -2430,16 +2425,37 @@ debug 7 "$ip =~ ${lookup[i]} => false"
 done
 return 1
 }
+_ip_extern_ip=()
 _ip_extern_json=
 ip_extern(){
+local type
+eval set -- "$(option_parse $'v version +' "$@")"
+while true;do
+case "$1" in
+-v|--version)is enum -nversion --allow="4 6" -d -otype -- "$2"&&shift 2;;
+--)shift&&break;;
+*)die "$(gettext "Unrecognized option"): $1"
+esac
+done
 is integer -narguments --max=1 -d $#
 is enum -nformat --allow="data country countryCode region regionName city zip lat lon timezone isp org as ip" -d -- "$1"
+if [ -z "$_ip_extern_ip" ];then
+_ip_extern_ip+=("$(curl -s4 icanhazip.com)")
+_ip_extern_ip+=("$(curl -s6 ifconfig.co)")
+fi
+if [ "$1" = "ip" ];then
+case $type in
+4)printf '%s' "${_ip_extern_ip[0]}";;
+6)printf '%s' "${_ip_extern_ip[1]}";;
+*)array _ip_extern_ip join $'\n'
+esac
+else
 [ -n "$_ip_extern_json" ]||_ip_extern_json="$(curl http://ip-api.com/json)"
 case ${1-} in
 data)jq -r 'with_entries(if .key == "query" then .key = "ip" else . end) | to_entries[] | "\(.key)\t\(.value)"' <<<"$_ip_extern_json";;
-ip)jq -r .query <<<"$_ip_extern_json";;
 *)jq -r ".$1" <<<"$_ip_extern_json"
 esac
+fi
 }
 declare -A _os_detected
 os_detect(){

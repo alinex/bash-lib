@@ -206,7 +206,7 @@ Helper functions to work with arrays and associative arrays (hashes).
 | Variable/Function | Description |
 | --- | --- |
 | [`array`](function/array.md) | Array analyzation |
-| [`join`](function/join.md) | Join array elements by delimiter |
+| [`join`](function/join.md) | Deprecated: Join array elements by delimiter |
 | [`split`](function/split.md) | Splits string by delimiter into array |
 | [`hash`](function/hash.md) | Methods to work with assoziative arrays (hashes) |
 
@@ -402,7 +402,7 @@ Module with network functions.
 
 | Variable/Function | Description |
 | --- | --- |
-| [`ip`](function/ip.md) | Get IP of given hostname |
+| [`ip_resolve`](function/ip_resolve.md) | Get IP of given hostname |
 | [`ip_intern`](function/ip_intern.md) | Show the IP addresses |
 | [`ip_pattern`](function/ip_pattern.md) | Find info about IP by configured patterns. |
 | [`ip_extern`](function/ip_extern.md) | Run  os detection and set the constants |

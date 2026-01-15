@@ -5,7 +5,9 @@
 ### Usage
 
 ```bash
-array <array-name> <command> [<value>]
+array <array-name> has <value>
+array <array-name> indexof <value>
+array <array-name> join [<separator>]
 ```
 
 ### Globals

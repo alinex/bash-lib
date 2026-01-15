@@ -11,19 +11,15 @@
 #
 # This uses `getent` which may take some seconds to resolve. But if `dig` is installed this will be used, because it works faster.
 #
-# Usage:    ip [<option>] host.de
+# Usage:    ip_resolve [<option>] host.de
 # Options:  v, version=<int>    # ip version 4 or 6
 # Output:   one ip address
-ip() {
+ip_resolve() {
     eval set -- "$(option_parse $'v version +' "$@")"
     local type
     while true; do
         case "$1" in
-        -v | --version)
-            (($2 == 4)) && type=4 || true
-            (($2 == 6)) && type=6 || true
-            shift 2
-            ;;
+        -v | --version) is enum --name=version --allow="4 6" --die --output=type -- "$2" && shift 2 ;;
         --) shift && break ;;
         *) die "$(gettext "Unrecognized option"): $1" ;;
         esac
@@ -99,6 +95,7 @@ ip_pattern() {
     return 1
 }
 
+_ip_extern_ip=()
 _ip_extern_json=
 
 # Run  os detection and set the constants
@@ -118,19 +115,43 @@ _ip_extern_json=
 # - isp
 # - org
 # - as
-# - ip
+# - ipv4
+# - ipv6
 #
 # Usage:    ip_extern <format>
+# Options:  v, version=<int>    # ip version 4 or 6
 # Output:   <tsv-table> for data
 #           <value> else
 ip_extern() {
+    # parameter parsing
+    local type
+    eval set -- "$(option_parse $'v version +' "$@")"
+    while true; do
+        case "$1" in
+        -v | --version) is enum --name=version --allow="4 6" --die --output=type -- "$2" && shift 2 ;;
+        --) shift && break ;;
+        *) die "$(gettext "Unrecognized option"): $1" ;;
+        esac
+    done
     is integer --name=arguments --max=1 --die -- $#
     is enum --name=format --allow="data country countryCode region regionName city zip lat lon timezone isp org as ip" --die -- "$1"
     # processing
-    [ -n "$_ip_extern_json" ] || _ip_extern_json="$(curl http://ip-api.com/json)"
-    case ${1-} in
-    data) jq -r 'with_entries(if .key == "query" then .key = "ip" else . end) | to_entries[] | "\(.key)\t\(.value)"' <<<"$_ip_extern_json" ;;
-    ip) jq -r .query <<<"$_ip_extern_json" ;;
-    *) jq -r ".$1" <<<"$_ip_extern_json" ;;
-    esac
+    if [ -z "$_ip_extern_ip" ]; then
+        _ip_extern_ip+=("$(curl -s4 icanhazip.com)")
+        _ip_extern_ip+=("$(curl -s6 ifconfig.co)")
+    fi
+    if [ "$1" = "ip" ]; then
+        case $type in
+        4) printf '%s' "${_ip_extern_ip[0]}" ;;
+        6) printf '%s' "${_ip_extern_ip[1]}" ;;
+        *) array _ip_extern_ip join $'\n' ;;
+        esac
+    else
+        [ -n "$_ip_extern_json" ] || _ip_extern_json="$(curl http://ip-api.com/json)"
+        case ${1-} in
+        data) jq -r 'with_entries(if .key == "query" then .key = "ip" else . end) | to_entries[] | "\(.key)\t\(.value)"' <<<"$_ip_extern_json" ;;
+        *) jq -r ".$1" <<<"$_ip_extern_json" ;;
+        esac
+    fi
 }
+# alternative curl ipinfo.io

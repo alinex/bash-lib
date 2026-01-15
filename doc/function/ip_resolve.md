@@ -1,11 +1,11 @@
-# ip
+# ip_resolve
 
 ## Get IP of given hostname
 
 ### Usage
 
 ```bash
-ip [<option>] host.de
+ip_resolve [<option>] host.de
 ```
 
 ### Options

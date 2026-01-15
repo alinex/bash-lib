@@ -8,6 +8,12 @@
 ip_extern <format>
 ```
 
+### Options
+
+```bash
+v, version=<int>    # ip version 4 or 6
+```
+
 ### Output (stdout)
 
 `<tsv-table>` for data
@@ -32,5 +38,6 @@ The following formats are possible:
 - isp
 - org
 - as
-- ip
+- ipv4
+- ipv6
 

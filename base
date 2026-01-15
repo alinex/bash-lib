@@ -234,37 +234,35 @@ printf '%q ' "$@"
 array(){
 local cmd value
 is set -narray-name -d -- "$1"
-is enum -ncommand --allow="has indexof" -d -ocmd -- "$2"
-is set -nvalue -d -ovalue -- "$3"
+is enum -ncommand --allow="has indexof join" -d -ocmd -- "$2"
 is integer -narguments --max=3 -d $#
 declare -n arr="$1"
 case "$cmd" in
-has)for e in "${arr[@]}"
-do
+has)is set -nvalue -d -ovalue -- "$3"
+for e in "${arr[@]}";do
 [ ! "$e" = "$value" ]||return 0
 done
 return 1
 ;;
-indexof)for i in "${!arr[@]}"
-do
+indexof)is set -nvalue -d -ovalue -- "$3"
+for i in "${!arr[@]}";do
 if [ "${arr[i]}" = "$value" ];then
 printf '%s' "$i"
 return 0
 fi
 done
 return 1
+;;
+join)local joined="${arr[0]}" separator="${3:-,}"
+for element in "${arr[@]:1}";do
+joined+="$separator$element"
+done
+printf '%s' "$joined"
 esac
 }
 join(){
-is integer -narguments --max=2 -d $#
-is set -narray-name -d -- "$1"
-local -n array=$1
-local sep="${2:-,}"
-local joined="${array[0]}"
-for element in "${array[@]:1}";do
-joined+="$sep$element"
-done
-printf '%s' "$joined"
+_deprecated "Use array <arr-name> join <separator>" warn
+array "$1" join "$2"
 }
 split(){
 is integer -narguments --max=3 -d $#
@@ -279,7 +277,7 @@ local keyFormat="simple"
 eval set -- "$(option_parse $'k key-format +' "$@")"
 while true;do
 case "$1" in
--k|--key-format)is enum --allow="simple base64" --output -- "$2"&&keyFormat="$2"&&shift 2;;
+-k|--key-format)is enum --allow="simple base64" -okeyFormat -- "$2"&&shift 2;;
 --)shift&&break;;
 *)die "$(gettext "Unrecognized option"): $1"
 esac
