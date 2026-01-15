@@ -75,7 +75,7 @@ to_alphanum() {
 # Usage:    uppercase <string>
 # Output:   <string> in upper case
 uppercase() {
-    ${1^^}
+    printf '%s' "${1^^}"
 }
 
 # Change all characters to lower case.
@@ -85,7 +85,7 @@ uppercase() {
 # Usage:    lowercase <string>
 # Output:   <string> in lower case
 lowercase() {
-    ${1,,}
+    printf '%s' "${1,,}"
 }
 
 # Change first characters to upper case.
@@ -95,7 +95,7 @@ lowercase() {
 # Usage:    uppercase_first <string>
 # Output:   <string> starting with upper case
 uppercase_first() {
-    ${1^}
+    printf '%s' "${1^}"
 }
 
 # Change first characters to lower case.
@@ -105,5 +105,5 @@ uppercase_first() {
 # Usage:    lowercase_first <string>
 # Output:   <string> starting with lower case
 lowercase_first() {
-    ${1,}
+    printf '%s' "${1,}"
 }

@@ -833,16 +833,16 @@ text="$(input "$@")"
 printf '%s' "${text//[^a-zA-Z0-9_]/_}"
 }
 uppercase(){
-${1^^}
+printf '%s' "${1^^}"
 }
 lowercase(){
-${1,,}
+printf '%s' "${1,,}"
 }
 uppercase_first(){
-${1^}
+printf '%s' "${1^}"
 }
 lowercase_first(){
-${1,}
+printf '%s' "${1,}"
 }
 is(){
 eval set -- "$(option_parse $'n name +\nd die -\ns sanitize -\n- min +\n- max +\n- allow +\no output ?\nm message +' "$@")"
