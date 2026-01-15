@@ -11,39 +11,6 @@ use module/software
 # csv
 ######################################################################################
 
-######################################################################################
-# old
-######################################################################################
-
-# Convert TSV data into visual table
-#
-# Usage:    tsv2table <tsv>
-#           <tsv> | tsv2table
-# Output:   <table>
-tsv2table() {
-    is integer --name=arguments --max=1 --die -- $#
-    # processing
-    install mlr
-    input "$@" | mlr --csvlite --ifs '\t' -o pprint cat
-}
-
-# Convert TSV data into markdown table
-#
-# Usage:    tsv2md <tsv>
-#           <tsv> | tsv2md
-# Output:   <md>
-tsv2md() {
-    is integer --name=arguments --max=1 --die -- $#
-    # processing
-    install mlr
-    # shellcheck disable=SC2119
-    input "$@" | uncolorize | mlr --csvlite --ifs '\t' --omd cat
-}
-
-######################################################################################
-# csv
-######################################################################################
-
 # Transform comma separated table
 #
 # Usage:    <string> | csv {to} <param>...
