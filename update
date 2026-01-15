@@ -25,6 +25,14 @@ echo -n "- remote (clone) "
 sed 's/BASHLIB_LOADER:-full/BASHLIB_LOADER:-remote/' "$BASHLIB_HOME/full" >"$BASHLIB_HOME/remote"
 echo "source \$BASHLIB_HOME/configs" >>"$BASHLIB_HOME/full" # load configs
 shfmt -mn "$BASHLIB_HOME/config/environment" | grep -Ev '^#!/usr/bin/env bash|source /dev/null' >>"$BASHLIB_HOME/remote"
+sed -i '/BASHLIB_LOADER:-remote/ a\
+_tmpdir="${TMPDIR:-${TMP:-${TEMP:-/tmp}}}/bashlib"\
+mkdir -p $_tmpdir/locale/en/LC_MESSAGES\
+mkdir -p $_tmpdir/locale/de/LC_MESSAGES\
+curl -s https://gitlab.com/alinex/bash-lib/-/raw/develop/locale/en/LC_MESSAGES/bashlib.mo >$_tmpdir/locale/en/LC_MESSAGES\
+curl -s https://gitlab.com/alinex/bash-lib/-/raw/develop/locale/de/LC_MESSAGES/bashlib.mo >$_tmpdir/locale/de/LC_MESSAGES\
+BASHLIB_HOME=$_tmpdir
+' "$BASHLIB_HOME/remote"
 echo "fertig -> $(du -h remote | cut -f1)B"
 echo "#!/usr/bin/env bash" >"$BASHLIB_HOME/base"
 echo "BASHLIB_LOADER=\${BASHLIB_LOADER:-base}" >>"$BASHLIB_HOME/base"

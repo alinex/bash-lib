@@ -89,7 +89,6 @@ The configuration module contains a lot of general configuration settings for th
 | ``$TRIVY_JIRA_FIELD_APPROVAL`` | Field name for approval status (if trivy vulnerabilities are managed using Jira) |
 | ``$TRIVY_JIRA_APPROVAL_TEMP`` | Value in approval field for "allowed for 30 days" (if trivy vulnerabilities are managed using Jira) |
 | ``$TRIVY_JIRA_APPROVAL_IRRELEVANT`` | Value in approval field for irrelevant/always allowed (if trivy vulnerabilities are managed using Jira) |
-| ``$REMOTE_LOGIN_DEFAULT`` | Default login if no `--login` or ``$login`` available |
 | ``$MONGO_ADMIN_USERPASS`` | Hash: Mongo Admin User Logins `<host> = <username>:<password>` but use `_` instead of `.` in hostname |
 | ``$POWERDNS_API`` | PowerDNS API URL used together with `$POWERDNS_TOKEN` and silently disables powerdns function if not set |
 | ``$POWERDNS_TOKEN`` | PowerDNS API Token used together with `$POWERDNS_API` in dns function |

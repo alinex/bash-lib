@@ -4,7 +4,7 @@
 # The configuration module contains a lot of general configuration settings for the bash-lib modules itself. Most of them are specific to the individual environment so they need to be set in the `local` config.
 
 ######################################################################################
-### process
+### Process
 ######################################################################################
 
 # Maximum number of parallel tasks for queue
@@ -105,11 +105,8 @@ TRIVY_JIRA_APPROVAL_TEMP=
 TRIVY_JIRA_APPROVAL_IRRELEVANT=
 
 ######################################################################################
-### Remote
+### Remote API
 ######################################################################################
-
-# Default login if no `--login` or `$login` available
-REMOTE_LOGIN_DEFAULT=
 
 # Hash: Mongo Admin User Logins `<host> = <username>:<password>` but use `_` instead of `.` in hostname
 declare -A MONGO_ADMIN_USERPASS=()

@@ -244,6 +244,7 @@ Load it directly in bash with one of the above `source` commands.
 ### Remote BashLib
 
 And at last if you run a script seldom and want not to install the BashLib on your host, you may use it directly from the net, this is the full bashlib with default environment configuration bundled together.
+But to fully work it will store a footprint of about 25kB within your temp folder (`/tmp/bashlib`) like i18n files.
 
 ```bash
 #!/usr/bin/env bash

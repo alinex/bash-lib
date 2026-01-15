@@ -65,13 +65,11 @@ fi
 if [ -e /opt/bashlib ]; then
     yn=y
     echo "It will replace the installation under /opt/bashlib"
-    echo
     sleep 3
     sudo rm -rf /opt/bashlib
 elif [ -e "$HOME"/bashlib ]; then
     yn=n
     echo "It will replace the installation under $HOME/bashlib"
-    echo
     sleep 3
     rm -rf "$HOME"/bashlib
 else
@@ -83,7 +81,7 @@ if [ -z "$1" ]; then
     branch="${branch:-master}"
 else
     branch="${1:-master}"
-    echo "It will use $branch branch version."
+    echo "The version from $branch branch is used."
 fi
 BASHLIB_DOWNLOAD="https://gitlab.com/alinex/bash-lib/-/archive/$branch/bash-lib-$branch.tar.gz"
 case $yn in
