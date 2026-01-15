@@ -476,6 +476,10 @@ esac
 debug 5 "Loading module $module"
 source "$BASHLIB_HOME/$module"
 }
+script_path(){
+is integer -narguments --max=0 -d $#
+printf '%s' "${SCRIPT_PATH:-$(dirname "$(readlink -f "${BASH_SOURCE[-1]:-$(pwd)/x}")")}"
+}
 trap_add(){
 is integer -narguments --min=2 --max=2 -d $#
 is set -ncode -d -- "$1"
@@ -1049,6 +1053,7 @@ set -o pipefail
 ((BASH_VERSINFO[0]>4||(BASH_VERSINFO[0]==4&&BASH_VERSINFO[1]>=2)))||die "No bash CLI! This can only be run under bash >=4.2!"
 trap 'die "💥 Uncaught exception at »${BASH_COMMAND}« with exit code $?"' ERR
 debug "Running in DEBUG=${DEBUG-} mode!"
+SCRIPT_PATH="$(script_path)"
 confluence(){
 is integer -narguments --max=1 -d $#
 is set -npage-id -d -- "$1"
@@ -1414,10 +1419,6 @@ local path
 path="$(input "$@")"
 [[ $path =~ ^\. || ! $path =~ \. ]]&&return
 printf '%s' ".${path##*.}"
-}
-script_path(){
-is integer -narguments --max=0 -d $#
-dirname "$(readlink -f "${BASH_SOURCE[-1]:-$(pwd)/x}")"
 }
 declare -F "color_256" >/dev/null||source "$BASHLIB_HOME"/module/color
 pause(){

@@ -243,6 +243,7 @@ The core functions contains essential parts which may also be used while loading
 | --- | --- |
 | ``$CURL_HTTP_CODE`` | Last HTTP return code from curl |
 | [`use`](function/use.md) | Load bashlib module |
+| [`script_path`](function/script_path.md) | Get the path from the called command |
 | [`trap_add`](function/trap_add.md) | Set or add an additional trap without overwriting existing ones |
 | [`trap_remove`](function/trap_remove.md) | Remove a specific trap |
 | [`mktemp`](function/mktemp.md) | Make a temporary file, which can be recognizable/individual |
@@ -348,7 +349,6 @@ File and directory helpers.
 | [`basename`](function/basename.md) | Strip directory from filepath |
 | [`dirname`](function/dirname.md) | Strip last component from file path |
 | [`extname`](function/extname.md) | Returns the extension of the path |
-| [`script_path`](function/script_path.md) | Get the path from the called command |
 
 ### Input Module
 

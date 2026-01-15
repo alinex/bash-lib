@@ -35,6 +35,17 @@ use() {
     source "$BASHLIB_HOME/$module"
 }
 
+# Get the path from the called command
+#
+# Usage:    script_path
+# Global:   SCRIPT_PATH
+# Output:   full real directory path to script
+script_path() {
+    is integer --name=arguments --max=0 --die -- $#
+    # processing
+    printf '%s' "${SCRIPT_PATH:-$(dirname "$(readlink -f "${BASH_SOURCE[-1]:-$(pwd)/x}")")}"
+}
+
 ######################################################################################
 ### Trap
 ######################################################################################

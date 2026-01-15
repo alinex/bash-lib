@@ -2,6 +2,7 @@
 
 BASHLIB_HOME="$(dirname "$(readlink -f "${BASH_SOURCE[0]:-$(pwd)/x}")")"
 LOCALES="de en"
+set -eE
 
 echo "Update minimize bash-lib library... "
 command -v shfmt >/dev/null || sudo apt install -y shfmt

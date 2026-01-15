@@ -24,3 +24,6 @@ trap 'die "💥 Uncaught exception at »${BASH_COMMAND}« with exit code $?"' ER
 
 # Display debug mode
 debug "Running in DEBUG=${DEBUG-} mode!"
+
+# Path in which the running script is located (absolute)
+SCRIPT_PATH="$(script_path)"
