@@ -409,7 +409,7 @@ _trivy_report() {
             if is set -- "$update"; then
                 update=1
                 if ((${#addLabel[@]} > 0)); then
-                    fields="$(jq --argjson l "[$(join addLabel ",")]" '.update = { "labels": $l }' <<<"$fields")"
+                    fields="$(jq --argjson l "[$(array addLabel join ",")]" '.update = { "labels": $l }' <<<"$fields")"
                 fi
                 jira update "$issue" "$fields"
             fi
@@ -421,7 +421,7 @@ _trivy_report() {
     fi
     # store json changes
     # shellcheck disable=SC2128
-    is empty -- "$rules" || changes+=("{\"Rules\": [$(join rules)]}")
+    is empty -- "$rules" || changes+=("{\"Rules\": [$(array rules join)]}")
     for change in "${changes[@]}"; do
         json="$(jq -n --argjson o "$json" --argjson c "$change" '$o * $c')"
     done
@@ -469,7 +469,7 @@ _trivy_report() {
                 printf '%s\n' "Jira Issue: https://ekz-gruppe.atlassian.net/browse/$issue"
                 printf '%s\n' "            $jiraStatus    $(gettext 'Responsible'): $assignee"
                 printf '%s\n' "            $(gettext 'Deploy'): ${approval:-Undefiniert}"
-                printf '%s\n' "$(gettext 'Last comments'):\n$(join comments $'\n' | sed 's/^/             /')"
+                printf '%s\n' "$(gettext 'Last comments'):\n$(array comments join $'\n' | sed 's/^/             /')"
             fi
             printf '%s:\n' "$(gettext 'Sources')"
         } >>"$file"
