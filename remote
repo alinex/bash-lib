@@ -3,8 +3,9 @@ BASHLIB_LOADER=${BASHLIB_LOADER:-remote}
 _tmpdir="${TMPDIR:-${TMP:-${TEMP:-/tmp}}}/bashlib"
 mkdir -p $_tmpdir/locale/en/LC_MESSAGES
 mkdir -p $_tmpdir/locale/de/LC_MESSAGES
-curl -s https://gitlab.com/alinex/bash-lib/-/raw/develop/locale/en/LC_MESSAGES/bashlib.mo >$_tmpdir/locale/en/LC_MESSAGES
-curl -s https://gitlab.com/alinex/bash-lib/-/raw/develop/locale/de/LC_MESSAGES/bashlib.mo >$_tmpdir/locale/de/LC_MESSAGES
+curl -s https://gitlab.com/alinex/bash-lib/-/raw/develop/locale/en/LC_MESSAGES/bashlib.mo >$_tmpdir/locale/en/LC_MESSAGES/bashlib.mo
+curl -s https://gitlab.com/alinex/bash-lib/-/raw/develop/locale/de/LC_MESSAGES/bashlib.mo >$_tmpdir/locale/de/LC_MESSAGES/bashlib.mo
+BASHLIB_HOME=$_tmpdir
 COLORS=$(tput colors 2>/dev/null||echo 0)
 CC_RESET=$'\e[0m'
 CC_RESET_FG=$'\e[39m'
