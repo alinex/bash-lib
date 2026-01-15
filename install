@@ -7,7 +7,7 @@ source /dev/null
 # interactive install
 #   curl -sL https://gitlab.com/alinex/bash-lib/-/raw/master/install | bash
 # automatic install, all values provided
-#   curl -sL https://gitlab.com/alinex/bash-lib/-/raw/master/install | bash -s -- <branch> y|n
+#   curl -sL https://gitlab.com/alinex/bash-lib/-/raw/master/install | bash -s -- <branch> y|n [quiet]
 #
 # update if already installed
 #   curl -sL https://gitlab.com/alinex/bash-lib/-/raw/master/install | bash
@@ -49,10 +49,9 @@ $p$b▀\e[78b$r
 set -eE         # exit on uncatched failure
 set -o pipefail # fail if any command in a pipeline fails
 
-logo "Bash Lib 2 - INSTALLER"
+[ "$3" = "quiet" ] || logo "Bash Lib 2 - INSTALLER"
 
 echo "This will setup the bashlib on $(hostname -f) if not already done or update it..."
-echo ""
 # check bash version
 if [ -z "${BASH_VERSION:-}" ]; then
     echo "${CC_ERROR}No bash CLI! This can only be run under bash >=4.2!${CC_RESET}"
@@ -65,28 +64,26 @@ fi
 # ask for type of installation (if not update)
 if [ -e /opt/bashlib ]; then
     yn=y
-    echo "This will replace the installation under /opt/bashlib"
+    echo "It will replace the installation under /opt/bashlib"
     echo
     sleep 3
     sudo rm -rf /opt/bashlib
 elif [ -e "$HOME"/bashlib ]; then
     yn=n
-    echo "This will replace the installation under $HOME/bashlib"
+    echo "It will replace the installation under $HOME/bashlib"
     echo
     sleep 3
     rm -rf "$HOME"/bashlib
 else
     echo "No BashLib found, so it will be installed."
     [ -n "$2" ] && yn="$2" || read -r -n 1 -s -p "Should the bashlib path be added globally (Y/n) " yn </dev/tty
-    echo
 fi
 if [ -z "$1" ]; then
     read -r -p "Which branch or tag should be used? [master] " branch </dev/tty
     branch="${branch:-master}"
-    echo
 else
     branch="${1:-master}"
-    echo "Use $branch version."
+    echo "It will use $branch branch version."
 fi
 BASHLIB_DOWNLOAD="https://gitlab.com/alinex/bash-lib/-/archive/$branch/bash-lib-$branch.tar.gz"
 case $yn in
@@ -139,7 +136,7 @@ echo "Step 2: Download bashlib to your system"
 echo "$CC_RESET"
 
 echo "        Downloading..."
-curl -L "$BASHLIB_DOWNLOAD" -o /tmp/bashlib.tgz 2>&1 | sed 's/^/        /g;s/\r/\r        /g'
+curl -sL "$BASHLIB_DOWNLOAD" -o /tmp/bashlib.tgz 2>&1 | sed 's/^/        /g;s/\r/\r        /g'
 echo "        Store under $install"
 tar -xzf /tmp/bashlib.tgz -C "$install" --strip-components=1 \
     --exclude='bash-lib-master/tests' \
@@ -203,17 +200,17 @@ echo "$CC_STEP"
 echo "Finished successfully!"
 echo "$CC_RESET"
 
-if [ "$install" = "/opt/bashlib" ]; then
-    echo "To uninstall use: sudo rm -rf $install $config && sudo sed -i '/BASHLIB_HOME=/d' $environment"
-else
-    echo "To uninstall use: rm -rf $install $config && sed -i '/BASHLIB_HOME=/d' $environment"
-fi
-
-echo "
+if [ ! "$3" = "quiet" ]; then
+    if [ "$install" = "/opt/bashlib" ]; then
+        echo "To uninstall use: sudo rm -rf $install $config && sudo sed -i '/BASHLIB_HOME=/d' $environment"
+    else
+        echo "To uninstall use: rm -rf $install $config && sed -i '/BASHLIB_HOME=/d' $environment"
+    fi
+    echo "
 Please re-login or set the updated configuration using: ${CC_INTENSITY_BOLD}source $environment${CC_RESET}
-
 You could now use the bashlib. Test it with: ${CC_INTENSITY_BOLD}source \$BASHLIB_HOME/full; heading It works${CC_RESET}"
 
-echo "$CC_STEP"
-echo "Have fun!"
-echo "$CC_RESET"
+    echo "$CC_STEP"
+    echo "Have fun!"
+    echo "$CC_RESET"
+fi
