@@ -63,3 +63,9 @@ Case Change
 - `${variable^^}` — Converts all characters in the variable's value to uppercase.
 - `${variable,}` — Converts the first character of the variable's value to lowercase.
 - `${variable,,}` — Converts all characters in the variable's value to lowercase.
+
+Command Call
+
+- `$(command)` — return command output like `out="$(ls dir)"`
+- `<(command)` — use command output as filehandle like `diff <(ls dir1) <(ls dir2)`
+- `< <(command)` — use command output as stdin like `while ...; do; done < <(ls dir1)`

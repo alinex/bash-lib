@@ -31,7 +31,7 @@ ip() {
     is set --name=host --die -- "$1"
     # processing
     local query
-    if command -v dig 2>/dev/null; then
+    if command -v dig >/dev/null; then
         [ "$type" = 4 ] && query="A" || true
         [ "$type" = 6 ] && query="AAAA" || true
         dig +short $query "$1"

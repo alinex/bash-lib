@@ -125,15 +125,15 @@ The BashLib will be installed on the System with it's `BASHLIB_HOME` directory i
 
 The modules are as far as possible:
 
-- error handling
+- optimized error handling
 - unit tested (using bats)
 - integration tested in different OS using docker
-- CI tested on different OS, too
+- CI tested on some OS
 - and analyzed by the shellcheck static analysis and linting
 
 Documentation of externally usable variables and functions is completely done inline and exported as [markdown documentation](./doc/README.md).
 
-Management of bugs and issues will be done using [GitLab Issues](https://gitlab.com/alinex/bash-lib/-/issues) and also we use the milestones here. But also instant bug fixing of parts we find by ourself will be done directly in git without any message there.
+Management of bugs and issues will be done using [GitLab Issues](https://gitlab.com/alinex/bash-lib/-/issues) and we also use the milestones here. Self found bugs will be fixed mostly instant without any issue and commited to the repository.
 
 ### Error handling
 
@@ -151,7 +151,7 @@ See all the changes in the [changelog](./CHANGELOG.md).
 
 ## Installation
 
-Can be done locally after checking out the git repository manually by setting only the `BASHLIB_HOME` variable in your environment or directly from the repository by calling (your user should have sudo rights):
+This can be done manually after checking out the git repository by only setting the `BASHLIB_HOME` variable in your environment or directly. Or you use the installer which will setup everything for you (needs sudo rights):
 
 ```bash
 # interactive install
@@ -190,7 +190,7 @@ If you want to have another version use the specific branch name as argument or 
 - `develop` - newest changes, but maybe not thoroughly tested
 - tags like `v2.3.0` - older version
 
-And you can also at any time download the baslib yourself and set `$BASHLIB_HOME` to this directory to work with it, like I do with my developer directory.
+And you can also at any time download the BasLib yourself and set `$BASHLIB_HOME` to this directory to work with it, like I do with my developer directory.
 Or use it without local installation, see below.
 
 ## Usage
