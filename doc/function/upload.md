@@ -15,6 +15,7 @@ upload [<options>] <source> <dest>
 l, login <user>
 h, host <host>
 j, jump <user>@<host>
+f, files <list>     # each file in a line, must be relative from <source>
 ```
 
 ### Globals

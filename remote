@@ -3175,13 +3175,14 @@ remote_console(){
 _deprecated "Use: remote console"
 }
 upload(){
-local _login host jump
-eval set -- "$(option_parse $'+l login +\nh host +\nj jump +' "$@")"
+local _login host jump files
+eval set -- "$(option_parse $'+l login +\nh host +\nj jump +\nf files +' "$@")"
 while true;do
 case "$1" in
 -l|--login)is set -nlogin -d -o_login -- "$2"&&shift 2;;
 -h|--host)is set -nhost -d -ohost -- "$2"&&shift 2;;
 -j|--jump)is set -njump -d -ojump -- "$2"&&shift 2;;
+-f|--files)is set -nfiles -d -ofiles -- "$2"&&shift 2;;
 --)shift&&break;;
 *)die "$(gettext "Unrecognized option"): $1"
 esac
@@ -3195,7 +3196,11 @@ local ssh="$_login@$host"
 [ -z "$jump" ]||ssh="-J $jump $ssh"
 local dir=${2:-~}
 debug "rsync -av $1 $ssh:$dir"
-rsync -av "$1" $ssh:"$dir"
+if [ -n "$files" ];then
+rsync -avz --files-from=<(printf '%s\n' "$files") "$1" $ssh:"$dir"
+else
+rsync -avz "$1" $ssh:"$dir"
+fi
 }
 download(){
 local _login host jump
@@ -3217,7 +3222,7 @@ host=${host:-$server}
 local ssh="$_login@$host"
 [ -z "$jump" ]||ssh="-J $jump $ssh"
 local dir=${2:-.}
-rsync -av $ssh:"$1" "$dir"
+rsync -avz $ssh:"$1" "$dir"
 }
 remote_bashlib(){
 _deprecated "Use: remote bashlib <module> <command>"
