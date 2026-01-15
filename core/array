@@ -109,8 +109,14 @@ split() {
 # - `unset` remove <key> from hash
 # - `has` check if the <key> is set
 # - `contains` check if the given <value> is found in any key
+# - `to` converts hash into `tsv`
 #
-# Usage:        hash <array-name> <command> [<key>] [<value>]
+# Usage:        hash <array-name> set <key> [<value>]
+#               hash <array-name> get <key> [<value>]
+#               hash <array-name> unset <key>
+#               hash <array-name> has <key>
+#               hash <array-name> contains <key>
+#               hash <array-name> to tsv
 # Options:      -k, --key-format={base64|simple} # how to convert key because of special characters
 # Variables:    <array-name> as basis to work on
 # Output:       `get`: <value> if found
@@ -132,7 +138,7 @@ hash() {
     done
     is integer --name=arguments --max=4 --die -- $#
     is set --name=array-name --die -- "$1"
-    is enum --name=command --allow="set get unset has contains" --die -- "$2"
+    is enum --name=command --allow="set get unset has contains to" --die -- "$2"
     declare -n arr="$1"
     local cmd="$2" key value="$4"
     case $keyFormat in
@@ -151,6 +157,17 @@ hash() {
             [[ "${arr["$key"]}" != "$3" ]] || return 0
         done
         return 1
+        ;;
+    to)
+        is enum --name=format --allow=tsv --die -- "$3"
+        case $3 in
+        tsv)
+            printf 'name\tvalue\n'
+            for key in "${!arr[@]}"; do
+                printf '%s\t%s\n' "$key" "${arr[$key]}"
+            done
+            ;;
+        esac
         ;;
     esac
 }
