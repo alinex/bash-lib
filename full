@@ -860,7 +860,7 @@ local name die sanitize min max allow message output
 while true;do
 case "$1" in
 -n|--name)name="$2"&&shift 2;;
--m|--message)message=$'\n'"$2"&&shift 2;;
+-m|--message)message="$2"$'\n'&&shift 2;;
 -o|--output)output="${2:--}"&&shift 2;;
 -d|--die)die=1&&shift;;
 -s|--sanitize)sanitize=1&&shift;;
@@ -880,13 +880,13 @@ case $check in
 set)if
 [ -z "$val" ]
 then
-[ -z "$die" ]&&return 1||die "$(eval_gettext 'The "$name" has to be set with a value')$message"
+[ -z "$die" ]&&return 1||die "$message$(eval_gettext 'The "$name" has to be set with a value')"
 fi
 ;;
 empty)if
 [ -n "$val" ]
 then
-[ -z "$die" ]&&return 1||die "$(eval_gettext 'The "$name" has to be empty but has »${val}«')$message"
+[ -z "$die" ]&&return 1||die "$message$(eval_gettext 'The "$name" has to be empty but has »${val}«')"
 fi
 ;;
 bool)if
@@ -896,7 +896,7 @@ res=1
 elif [[ -z $val || ${val,,} =~ ^(false|f|0|no|n|nein)$ ]];then
 res=0
 else
-[ -z "$die" ]&&return 1||die "$(eval_gettext 'The value »${val}« for "$name" could not be read as true or false')$message"
+[ -z "$die" ]&&return 1||die "$message$(eval_gettext 'The value »${val}« for "$name" could not be read as true or false')"
 fi
 ;;
 true)if
@@ -904,7 +904,7 @@ true)if
 then
 res=1
 else
-[ -z "$die" ]&&return 1||die "$(eval_gettext 'The value »${val}« for "$name" should be true but was »${val}«')$message"
+[ -z "$die" ]&&return 1||die "$message$(eval_gettext 'The value »${val}« for "$name" should be true but was »${val}«')"
 fi
 ;;
 false)if
@@ -912,7 +912,7 @@ false)if
 then
 res=0
 else
-[ -z "$die" ]&&return 1||die "$(eval_gettext 'The value »${val}« for "$name" should be false but was »${val}«')$message"
+[ -z "$die" ]&&return 1||die "$message$(eval_gettext 'The value »${val}« for "$name" should be false but was »${val}«')"
 fi
 ;;
 integer)if
@@ -921,23 +921,23 @@ then
 [[ $val =~ ^(-?[0-9]+) ]]&&res="${BASH_REMATCH[1]}"||true
 fi
 if [[ ! $res =~ ^-?[0-9]+$ ]];then
-[ -z "$die" ]&&return 1||die "$(eval_gettext 'The "$name" has to be an integer but »${val}« was given')$message"
+[ -z "$die" ]&&return 1||die "$message$(eval_gettext 'The "$name" has to be an integer but »${val}« was given')"
 fi
 if [[ -n $min ]]&&[[ $min == "$max" ]];then
 if ((res!=min));then
-[ -z "$die" ]&&return 1||die "$(eval_gettext 'The "$name" has to be exactly $min but »${val}« was given')$message"
+[ -z "$die" ]&&return 1||die "$message$(eval_gettext 'The "$name" has to be exactly $min but »${val}« was given')"
 fi
 elif [[ -n $min && -n $max ]];then
 if ((res<min||res>max));then
-[ -z "$die" ]&&return 1||die "$(eval_gettext 'The "$name" has to be between $min and $max but »${val}« was given')$message"
+[ -z "$die" ]&&return 1||die "$message$(eval_gettext 'The "$name" has to be between $min and $max but »${val}« was given')"
 fi
 elif [[ -n $min ]];then
 if ((res<min));then
-[ -z "$die" ]&&return 1||die "$(eval_gettext 'The "$name" has to at least $min but »${val}« was given')$message"
+[ -z "$die" ]&&return 1||die "$message$(eval_gettext 'The "$name" has to at least $min but »${val}« was given')"
 fi
 elif [[ -n $max ]];then
 if ((res>max));then
-[ -z "$die" ]&&return 1||die "$(eval_gettext 'The "$name" has to not be more than $max but »${val}« was given')$message"
+[ -z "$die" ]&&return 1||die "$message$(eval_gettext 'The "$name" has to not be more than $max but »${val}« was given')"
 fi
 fi
 ;;
@@ -947,89 +947,89 @@ then
 [[ $val =~ ^(-?[0-9]+([.][0-9]+)?) ]]&&res="${BASH_REMATCH[1]}"||true
 fi
 if [[ ! $res =~ ^-?[0-9]+([.][0-9]+)?$ ]];then
-[ -z "$die" ]&&return 1||die "$(eval_gettext 'The "$name" has to be a float but »${val}« was given')$message"
+[ -z "$die" ]&&return 1||die "$message$(eval_gettext 'The "$name" has to be a float but »${val}« was given')"
 fi
 if [[ -n $min ]]&&[[ $min == "$max" ]];then
 if ((res!=min));then
-[ -z "$die" ]&&return 1||die "$(eval_gettext 'The "$name" has to be exactly $min but »${val}« was given')$message"
+[ -z "$die" ]&&return 1||die "$message$(eval_gettext 'The "$name" has to be exactly $min but »${val}« was given')"
 fi
 elif [[ -n $min && -n $max ]];then
 if ((res<min||res>max));then
-[ -z "$die" ]&&return 1||die "$(eval_gettext 'The "$name" has to be between $min and $max but »${val}« was given')$message"
+[ -z "$die" ]&&return 1||die "$message$(eval_gettext 'The "$name" has to be between $min and $max but »${val}« was given')"
 fi
 elif [[ -n $min ]];then
 if ((res<min));then
-[ -z "$die" ]&&return 1||die "$(eval_gettext 'The "$name" has to at least $min but »${val}« was given')$message"
+[ -z "$die" ]&&return 1||die "$message$(eval_gettext 'The "$name" has to at least $min but »${val}« was given')"
 fi
 elif [[ -n $max ]];then
 if ((res>max));then
-[ -z "$die" ]&&return 1||die "$(eval_gettext 'The "$name" has to not be more than $max but »${val}« was given')$message"
+[ -z "$die" ]&&return 1||die "$message$(eval_gettext 'The "$name" has to not be more than $max but »${val}« was given')"
 fi
 fi
 ;;
 length)val=${#val}
 if [[ -n $min ]]&&[[ $min == "$max" ]];then
 if ((val!=min));then
-[ -z "$die" ]&&return 1||die "$(eval_gettext 'The length of "$name" has to be exactly $min but »${res}« is $val characters long')$message"
+[ -z "$die" ]&&return 1||die "$message$(eval_gettext 'The length of "$name" has to be exactly $min but »${res}« is $val characters long')"
 fi
 elif [[ -n $min && -n $max ]];then
 if ((val<min||val>max));then
-[ -z "$die" ]&&return 1||die "$(eval_gettext 'The length of "$name" has to be between $min and $max but »${res}« is $val characters long')$message"
+[ -z "$die" ]&&return 1||die "$message$(eval_gettext 'The length of "$name" has to be between $min and $max but »${res}« is $val characters long')"
 fi
 elif [[ -n $min ]];then
 if ((val<min));then
-[ -z "$die" ]&&return 1||die "$(eval_gettext 'The length of "$name" has to be at least $min but »${res}« is $val characters long')$message"
+[ -z "$die" ]&&return 1||die "$message$(eval_gettext 'The length of "$name" has to be at least $min but »${res}« is $val characters long')"
 fi
 elif [[ -n $max ]];then
 if ((val>max));then
-[ -z "$die" ]&&return 1||die "$(eval_gettext 'The length of "$name" has to be not more than $max but »${res}« is $val characters long')$message"
+[ -z "$die" ]&&return 1||die "$message$(eval_gettext 'The length of "$name" has to be not more than $max but »${res}« is $val characters long')"
 fi
 fi
 ;;
-enum)[ -n "$allow" ]||die "$(gettext "A list with --allow=<words> is needed for enum check")$message"
+enum)[ -n "$allow" ]||die "$message$(gettext "A list with --allow=<words> is needed for enum check")"
 if [[ " $allow " != *" $val "* ]];then
-[ -z "$die" ]&&return 1||die "$(eval_gettext '"$name" is set to "${val}" but has to be one of: $allow')$message"
+[ -z "$die" ]&&return 1||die "$message$(eval_gettext '"$name" is set to "${val}" but has to be one of: $allow')"
 fi
 ;;
 date)if
 ! res=$(date_format unix "$val")
 then
-[ -z "$die" ]&&return 1||die "$(eval_gettext 'The "$name" has to be a parsable date format but »${val}« was given')$message"
+[ -z "$die" ]&&return 1||die "$message$(eval_gettext 'The "$name" has to be a parsable date format but »${val}« was given')"
 fi
 ;;
 duration)[[ $res =~ ^-?[0-9] ]]&&res="$(duration_format seconds "$val")"||true
 if [[ ! $res =~ ^-?[0-9]+$ ]];then
-[ -z "$die" ]&&return 1||die "$(eval_gettext 'The "$name" has to be an integer or human duration but »${val}« was given')$message"
+[ -z "$die" ]&&return 1||die "$message$(eval_gettext 'The "$name" has to be an integer or human duration but »${val}« was given')"
 fi
 ;;
 path)if
 [ ! -e "$val" ]
 then
-[ -z "$die" ]&&return 1||die "$(eval_gettext 'The "$name" ${val} has to be an existing path')$message"
+[ -z "$die" ]&&return 1||die "$message$(eval_gettext 'The "$name" ${val} has to be an existing path')"
 fi
 ;;
 file)if
 [ ! -f "$val" ]
 then
-[ -z "$die" ]&&return 1||die "$(eval_gettext 'The "$name" ${val} has to be an existing file')$message"
+[ -z "$die" ]&&return 1||die "$message$(eval_gettext 'The "$name" ${val} has to be an existing file')"
 fi
 ;;
 directory)if
 [ ! -d "$val" ]
 then
-[ -z "$die" ]&&return 1||die "$(eval_gettext 'The "$name" ${val} has to be an existing directory')$message"
+[ -z "$die" ]&&return 1||die "$message$(eval_gettext 'The "$name" ${val} has to be an existing directory')"
 fi
 ;;
 readable)if
 [ ! -r "$val" ]
 then
-[ -z "$die" ]&&return 1||die "$(eval_gettext 'The "$name" ${val} has to be a file readable for user')$message"
+[ -z "$die" ]&&return 1||die "$message$(eval_gettext 'The "$name" ${val} has to be a file readable for user')"
 fi
 ;;
 writable)if
 [ ! -w "$val" ]
 then
-[ -z "$die" ]&&return 1||die "$(eval_gettext 'The "$name" ${val} has to be a file writable for user')$message"
+[ -z "$die" ]&&return 1||die "$message$(eval_gettext 'The "$name" ${val} has to be a file writable for user')"
 fi
 ;;
 *)die "$(eval_gettext 'A check named ${check} is not defined')"
