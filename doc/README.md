@@ -358,6 +358,15 @@ File and directory helpers.
 | [`dirname`](function/dirname.md) | Strip last component from file path |
 | [`extname`](function/extname.md) | Returns the extension of the path |
 
+### Git Module
+
+Git command helpers
+
+| Variable/Function | Description |
+| --- | --- |
+| [`git_info`](function/git_info.md) | Get git information |
+| [`git_log`](function/git_log.md) | Get log information from git for specific path. |
+
 ### Input Module
 
 Module with user interaction helpers.

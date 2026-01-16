@@ -6,6 +6,7 @@ But on release they will be merged with semantical versioning into the master br
 ## (23. January 2026) - v2.4.0
 
 - allow to include BashLib directly from the net in special remote version
+- add [git_info](doc/function/git_info.md) and [git_log](doc/function/git_log.md) helper
 - add [pw_generator](doc/function/pw_generator.md)
 - add [uppercase](doc/function/uppercase.md) and [lowercase](doc/function/lowercase.md) methods
 - add [compress](doc/function/compress.md) and [decompress](doc/function/decompress.md)

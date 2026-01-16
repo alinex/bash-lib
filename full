@@ -1459,6 +1459,56 @@ path="$(input "$@")"
 [[ $path =~ ^\. || ! $path =~ \. ]]&&return
 printf '%s' ".${path##*.}"
 }
+git_info(){
+local opt=''
+eval set -- "$(option_parse $'w work +' "$@")"
+while true;do
+case "$1" in
+-w|--work)is set -npath -d -- "$2"&&opt+="-C $2 "&&shift 2;;
+--)shift&&break;;
+*)die "$(gettext "Unrecognized option"): $1"
+esac
+done
+is enum -ncommand --allow="root url name branch tag" -d -- "$1"
+is integer -narguments --max=1 -d $#
+install git
+case $1 in
+root)git $opt rev-parse --show-toplevel;;
+url)git $opt config --get remote.origin.url;;
+name)local name
+name="$(git $opt config --get remote.origin.url)"
+name=${name#*://}
+name=${name#*@}
+name=${name#*:}
+name=${name#*/}
+printf '%s' "${name%.git}"
+;;
+branch)git $opt branch --show-current;;
+tag)git $opt describe --abbrev=0 --tags 2>/dev/null||true
+esac
+}
+git_log(){
+local opt=''
+eval set -- "$(option_parse $'w work +\nl lines +' "$@")"
+while true;do
+case "$1" in
+-w|--work)is set -npath -d -- "$2"&&opt+="-C $2 "&&shift 2;;
+-l|--lines)is integer -nlines --min=1 -- "$2"&&opt+="-$2 "&&shift 2;;
+--)shift&&break;;
+*)die "$(gettext "Unrecognized option"): $1"
+esac
+done
+is integer -narguments --min=1 --max=2 -d $#
+install git
+local format=''
+case $1 in
+revision)format='%H';;
+message)format='%s';;
+short)format='%ad %an: %s';;
+*)format="$1"
+esac
+git log $opt --pretty=format:$format -- "${2:-.}"
+}
 declare -F "color_256" >/dev/null||source "$BASHLIB_HOME"/module/color
 pause(){
 local timeout abort
