@@ -124,7 +124,7 @@ alerts() {
     while true; do
         case "$1" in
         -g | --group)
-            [ -z "$2" ] || filter="$filter | select(.labels.group|test(\".*$2.*\"; \"i\"))"
+            [ -z "$2" ] || filter="$filter | select(.labels|has(\"group\")) | select(.labels.group|test(\".*$2.*\"; \"i\"))"
             shift 2
             ;;
         -i | --instance)
@@ -153,7 +153,9 @@ alerts() {
     local list
     list="$(curl -H "Authorization: Bearer $GRAFANA_TOKEN" "$GRAFANA_API/alertmanager/grafana/api/v2/alerts")" ||
         die "$(gettext "Could not get alerts from Grafana!")"
+    echo "$list" >/tmp/alerts.json
     list="$(jq 'sort_by(.startsAt) | .[] '"$filter" <<<"$list")" || die "$(gettext "Parse error in Grafana alerts list with filter"): $filter"
+    debug "-----------"
     local format=${1:-console}
     # empty list
     [ -n "$list" ] || return 0

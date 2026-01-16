@@ -2316,7 +2316,7 @@ local filter="" quiet
 eval set -- "$(option_parse $'a alertname +\ng group +\ni instance +\nn net +\ns summary +\nq quiet -' "$@")"
 while true;do
 case "$1" in
--g|--group)[ -z "$2" ]||filter="$filter | select(.labels.group|test(\".*$2.*\"; \"i\"))"
+-g|--group)[ -z "$2" ]||filter="$filter | select(.labels|has(\"group\")) | select(.labels.group|test(\".*$2.*\"; \"i\"))"
 shift 2
 ;;
 -i|--instance)[ -z "$2" ]||filter="$filter | select(.labels.instance|test(\"$2\"; \"i\"))"
@@ -2339,7 +2339,9 @@ done
 install jq
 local list
 list="$(curl -H "Authorization: Bearer $GRAFANA_TOKEN" "$GRAFANA_API/alertmanager/grafana/api/v2/alerts")"||die "$(gettext "Could not get alerts from Grafana!")"
+echo "$list" >/tmp/alerts.json
 list="$(jq 'sort_by(.startsAt) | .[] '"$filter" <<<"$list")"||die "$(gettext "Parse error in Grafana alerts list with filter"): $filter"
+debug "-----------"
 local format=${1:-console}
 [ -n "$list" ]||return 0
 [ -z "$quiet" ]||return 1

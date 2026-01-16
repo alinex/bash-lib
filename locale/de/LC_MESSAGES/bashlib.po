@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-16 13:39+0100\n"
+"POT-Creation-Date: 2026-01-16 15:24+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -372,11 +372,11 @@ msgstr "Der Prometheus Exporter unter $url konnte nicht abgefragt werden!"
 msgid "Could not get alerts from Grafana!"
 msgstr "Es konnten keine Grafana Alerts abgerufen werden!"
 
-#: module/monitoring:156
+#: module/monitoring:157
 msgid "Parse error in Grafana alerts list with filter"
 msgstr "Fehler beim Parsen der Grafana Alarmliste mit Filter"
 
-#: module/monitoring:185
+#: module/monitoring:187
 msgid "Severity\\tNetwork\\tInstance\\tSummary\\tStart"
 msgstr "Schweregrad\\tNetz\\tInstanz\\tZusammenfassung\\tStart"
 
