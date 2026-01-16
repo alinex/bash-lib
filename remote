@@ -866,7 +866,7 @@ local name die sanitize min max allow message output
 while true;do
 case "$1" in
 -n|--name)name="$2"&&shift 2;;
--m|--message)message="; $2"&&shift 2;;
+-m|--message)message=$'\n'"$2"&&shift 2;;
 -o|--output)output="${2:--}"&&shift 2;;
 -d|--die)die=1&&shift;;
 -s|--sanitize)sanitize=1&&shift;;
@@ -1344,6 +1344,61 @@ esac
 }
 decompress(){
 compress -d "$@"
+}
+pw_generator(){
+local length=16 use_lower=1 use_upper=1 use_digits=1 use_symbols=1 symbols='!@#$%^&*()-_=+[]{}<>?' custom=''
+while [[ $# -gt 0 ]];do
+case "$1" in
+-l|--length)length="$2"
+shift 2
+;;
+--no-lower)use_lower=0
+shift
+;;
+--no-upper)use_upper=0
+shift
+;;
+--no-digits)use_digits=0
+shift
+;;
+--no-symbols)use_symbols=0
+shift
+;;
+--symbols)symbols="$2"
+shift 2
+;;
+--custom)custom="$2"
+shift 2
+;;
+*)echo "Unknown option: $1"
+return 1
+esac
+done
+local lower="abcdefghijklmnopqrstuvwxyz"
+local upper="ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+local digits="0123456789"
+local pool=""
+((use_lower))&&pool+="$lower"
+((use_upper))&&pool+="$upper"
+((use_digits))&&pool+="$digits"
+((use_symbols))&&pool+="$symbols"
+pool+="$custom"
+[[ -z $pool ]]&&{
+echo "Error: character pool is empty"
+return 1
+}
+local required=()
+((use_lower))&&required+=("${lower:RANDOM%${#lower}:1}")
+((use_upper))&&required+=("${upper:RANDOM%${#upper}:1}")
+((use_digits))&&required+=("${digits:RANDOM%${#digits}:1}")
+((use_symbols))&&required+=("${symbols:RANDOM%${#symbols}:1}")
+local pw="${required[*]// /}"
+local remaining=$((length-${#pw}))
+for ((i=0; i<remaining; i++));do
+pw+="${pool:RANDOM%${#pool}:1}"
+done
+pw=$(printf "%s" "$pw"|fold -w1|shuf|tr -d '\n')
+printf '%s\n' "$pw"
 }
 use module/software
 mongo(){
@@ -3524,16 +3579,6 @@ fi
 ((num==0))&&return 0||return 1
 }
 use module/software
-tsv2table(){
-is integer -narguments --max=1 -d $#
-install mlr
-input "$@"|mlr --csvlite --ifs '\t' -o pprint cat
-}
-tsv2md(){
-is integer -narguments --max=1 -d $#
-install mlr
-input "$@"|uncolorize|mlr --csvlite --ifs '\t' --omd cat
-}
 csv(){
 is set -ncommand --allow="to" -d -- "$1"
 case $1 in
@@ -3908,7 +3953,7 @@ done
 if [ -n "$update" ];then
 update=1
 if ((${#addLabel[@]}>0));then
-fields="$(jq --argjson l "[$(join addLabel ",")]" '.update = { "labels": $l }' <<<"$fields")"
+fields="$(jq --argjson l "[$(array addLabel join ",")]" '.update = { "labels": $l }' <<<"$fields")"
 fi
 jira update "$issue" "$fields"
 fi
@@ -3918,7 +3963,7 @@ action="$(gettext 'Add information from Jira')"
 changes+=("{\"Jira\": {\"id\": $issue, \"key\": \"$key\", \"approval\": \"$deploy\", \"lastComment\": \"$commentDate\"}}")
 rules+=("{\"Title\": \"Jira Info\",\"Description\": \"$action.\"}")
 fi
-[ -z "$rules" ]||changes+=("{\"Rules\": [$(join rules)]}")
+[ -z "$rules" ]||changes+=("{\"Rules\": [$(array rules join)]}")
 for change in "${changes[@]}";do
 json="$(jq -n --argjson o "$json" --argjson c "$change" '$o * $c')"
 done
@@ -3960,7 +4005,7 @@ if [ -n "$issue" ];then
 printf '%s\n' "Jira Issue: https://ekz-gruppe.atlassian.net/browse/$issue"
 printf '%s\n' "            $jiraStatus    $(gettext 'Responsible'): $assignee"
 printf '%s\n' "            $(gettext 'Deploy'): ${approval:-Undefiniert}"
-printf '%s\n' "$(gettext 'Last comments'):\n$(join comments $'\n'|sed 's/^/             /')"
+printf '%s\n' "$(gettext 'Last comments'):\n$(array comments join $'\n'|sed 's/^/             /')"
 fi
 printf '%s:\n' "$(gettext 'Sources')"
 } >>"$file"

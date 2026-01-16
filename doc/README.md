@@ -321,6 +321,14 @@ Compression and decompression.
 | [`compress`](function/compress.md) | Compress data stream using multiple algorithms. |
 | [`decompress`](function/decompress.md) | Uncompress data stream using multiple algorithms. |
 
+### Crypto Module
+
+Cryptographic helper
+
+| Variable/Function | Description |
+| --- | --- |
+| [`pw_generator`](function/pw_generator.md) | Generate Password |
+
 ### Database Module
 
 Module with database access helpers.
@@ -481,8 +489,6 @@ Module with modifiers for csv/tsv tables.
 
 | Variable/Function | Description |
 | --- | --- |
-| [`tsv2table`](function/tsv2table.md) | Convert TSV data into visual table |
-| [`tsv2md`](function/tsv2md.md) | Convert TSV data into markdown table |
 | [`csv`](function/csv.md) | Transform comma separated table |
 | [`tsv`](function/tsv.md) | Transform tab separated table |
 
