@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-16 08:39+0100\n"
+"POT-Creation-Date: 2026-01-16 13:39+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,7 +18,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 
 #: core/misc:132 core/validator:74 core/array:136 module/os:171
-#: module/network:24 module/trivy:82 module/compress:41 module/monitoring:143
+#: module/network:24 module/trivy:82 module/compress:41 module/monitoring:148
 #: module/input:31 module/input:86 module/input:212 module/input:465
 #: module/input:628 module/log:63 module/process:381 module/process:429
 #: module/process:507 module/process:654 module/remote:80 module/remote:221
@@ -368,15 +368,15 @@ msgstr "Es konnten keine Exporter von Prometheus ermittelt werden!"
 msgid "Could not scrape the Prometheus exporter at $url!"
 msgstr "Der Prometheus Exporter unter $url konnte nicht abgefragt werden!"
 
-#: module/monitoring:150
+#: module/monitoring:155
 msgid "Could not get alerts from Grafana!"
 msgstr "Es konnten keine Grafana Alerts abgerufen werden!"
 
-#: module/monitoring:151
+#: module/monitoring:156
 msgid "Parse error in Grafana alerts list with filter"
 msgstr "Fehler beim Parsen der Grafana Alarmliste mit Filter"
 
-#: module/monitoring:180
+#: module/monitoring:185
 msgid "Severity\\tNetwork\\tInstance\\tSummary\\tStart"
 msgstr "Schweregrad\\tNetz\\tInstanz\\tZusammenfassung\\tStart"
 

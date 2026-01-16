@@ -3,9 +3,10 @@
 Newest changes will always take part in the development branch. You only may use them if you manually install this.
 But on release they will be merged with semantical versioning into the master branch and will get available to new installs or updates.
 
-## In development - v2.4.0
+## (23. January 2026) - v2.4.0
 
 - allow to include BashLib directly from the net in special remote version
+- add [pw_generator](doc/function/pw_generator.md)
 - add [uppercase](doc/function/uppercase.md) and [lowercase](doc/function/lowercase.md) methods
 - add [compress](doc/function/compress.md) and [decompress](doc/function/decompress.md)
 - move join -> [array](doc/function/array.md) command

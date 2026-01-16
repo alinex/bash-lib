@@ -1375,7 +1375,9 @@ local required=()
 ((use_upper))&&required+=("${upper:RANDOM%${#upper}:1}")
 ((use_digits))&&required+=("${digits:RANDOM%${#digits}:1}")
 ((use_symbols))&&required+=("${symbols:RANDOM%${#symbols}:1}")
-local pw="${required[*]// /}" remaining
+local pw
+pw="${required[@]}"
+pw="${pw// /}"
 remaining=$((length-${#pw}))
 for ((i=0; i<remaining; i++));do
 pw+="${pool:RANDOM%${#pool}:1}"
@@ -2317,9 +2319,12 @@ debug "Disabled because GRAFANA_API and GRAFANA_TOKEN are not both set"
 return 0
 fi
 local filter="" quiet
-eval set -- "$(option_parse $'a alertname +\ni instance +\nn net +\ns summary +\nq quiet -' "$@")"
+eval set -- "$(option_parse $'a alertname +\ng group +\ni instance +\nn net +\ns summary +\nq quiet -' "$@")"
 while true;do
 case "$1" in
+-g|--group)[ -z "$2" ]||filter="$filter | select(.labels.group|test(\".*$2.*\"; \"i\"))"
+shift 2
+;;
 -i|--instance)[ -z "$2" ]||filter="$filter | select(.labels.instance|test(\"$2\"; \"i\"))"
 shift 2
 ;;
@@ -2368,7 +2373,7 @@ list="$header"$'\n'"$(jq -r '[.labels.severity, .labels.net, .labels.instance, .
 esac
 case $format in
 console)local first=1
-printf '%s\n' "$list"|tsv2table|while read -r line;do
+printf '%s\n' "$list"|tsv to pprint|while read -r line;do
 case $line in
 warning*)warn "$line";;
 critical*)error "$line";;
