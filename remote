@@ -1346,59 +1346,41 @@ decompress(){
 compress -d "$@"
 }
 pw_generator(){
-local length=16 use_lower=1 use_upper=1 use_digits=1 use_symbols=1 symbols='!@#$%^&*()-_=+[]{}<>?' custom=''
-while [[ $# -gt 0 ]];do
+local length="$PW_GENERATOR_LENGTH" use_lower=1 use_upper=1 use_digits=1 use_symbols=1 symbols="$PW_GENERATOR_SYMBOLS" custom=''
+eval set -- "$(option_parse $'l length +\n- no-lower -\n- no-upper -\n- no-digits -\n- no-symbols -\nc custom +' "$@")"
+while true;do
 case "$1" in
--l|--length)length="$2"
-shift 2
-;;
---no-lower)use_lower=0
-shift
-;;
---no-upper)use_upper=0
-shift
-;;
---no-digits)use_digits=0
-shift
-;;
---no-symbols)use_symbols=0
-shift
-;;
---symbols)symbols="$2"
-shift 2
-;;
---custom)custom="$2"
-shift 2
-;;
-*)echo "Unknown option: $1"
-return 1
+-l|--length)is integer -nlength --min=1 -d -olength -- "$2"&&shift 2;;
+--no-lower)no_lower=0&&shift;;
+--no-upper)no_upper=0&&shift;;
+--no-digits)no_digits=0&&shift;;
+--no-symbols)no_symbols=0&&shift;;
+-c|--custom)is set -ncustom-chars -d -ocustom -- "$2"&&shift 2;;
+--)shift&&break;;
+*)die "$(gettext "Unrecognized option"): $1"
 esac
 done
-local lower="abcdefghijklmnopqrstuvwxyz"
-local upper="ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-local digits="0123456789"
-local pool=""
+local lower='abcdefghijklmnopqrstuvwxyz'
+local upper='ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+local digits='0123456789'
+local pool=''
 ((use_lower))&&pool+="$lower"
 ((use_upper))&&pool+="$upper"
 ((use_digits))&&pool+="$digits"
 ((use_symbols))&&pool+="$symbols"
 pool+="$custom"
-[[ -z $pool ]]&&{
-echo "Error: character pool is empty"
-return 1
-}
+is set -ncharacter-pool --message="Enable one of the pools or give a custom list of characters." -d -- "$pool"
 local required=()
 ((use_lower))&&required+=("${lower:RANDOM%${#lower}:1}")
 ((use_upper))&&required+=("${upper:RANDOM%${#upper}:1}")
 ((use_digits))&&required+=("${digits:RANDOM%${#digits}:1}")
 ((use_symbols))&&required+=("${symbols:RANDOM%${#symbols}:1}")
-local pw="${required[*]// /}"
-local remaining=$((length-${#pw}))
+local pw="${required[*]// /}" remaining
+remaining=$((length-${#pw}))
 for ((i=0; i<remaining; i++));do
 pw+="${pool:RANDOM%${#pool}:1}"
 done
-pw=$(printf "%s" "$pw"|fold -w1|shuf|tr -d '\n')
-printf '%s\n' "$pw"
+fold -w1 <<<"$pw"|shuf|tr -d '\n'
 }
 use module/software
 mongo(){
@@ -4032,9 +4014,11 @@ esac
 printf '%s\n' "divibib_trivy_vulnerability{type=\"$type\",target=\"$target\",package=\"$pkgPath\",severity=\"$severity\",cve=\"$id\"} $value" >>"$file"
 fi
 }
+PW_GENERATOR_LENGTH=16
+PW_GENERATOR_SYMBOLS='!@#$%^&*()-_=+[]{}<>?'
+COMPRESSION_DEFAULT=gzip
 QUEUE_MAX_NUM=10
 QUEUE_MAX_LOAD=75
-COMPRESSION_DEFAULT=gzip
 REMOTE_LOGIN_DEFAULT=operator
 MOUNT_COLOR_LIMIT=(
 ".*" 100 90 80 50)
@@ -4065,14 +4049,11 @@ TRIVY_JIRA_FIELD_LINKS=
 TRIVY_JIRA_FIELD_APPROVAL=
 TRIVY_JIRA_APPROVAL_TEMP=
 TRIVY_JIRA_APPROVAL_IRRELEVANT=
-declare -A MONGO_ADMIN_USERPASS=()
-POWERDNS_API=
-POWERDNS_TOKEN=
-PLUSSERVER_PORTAL=
 ABUSEIPDB_TOKEN=
+declare -A MONGO_ADMIN_USERPASS=()
 NETLAS_TOKEN=
+PLUSSERVER_PORTAL=
+POWERDNS_API=
 TRIVY_DEFAULT_TIMEOUT=60m
 TRIVY_CACHE_SERVER=
 TRIVY_ROOT_EXCLUDE="/mnt /opt/docker"
-CONFLUENCE_OUTAGE=
-export MIDDLEWARE_SWAGGER_PASSWORD=

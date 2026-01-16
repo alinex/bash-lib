@@ -16,9 +16,19 @@ no-lower
 no-upper
 no-digits
 no-symbols
+c, custom <list>
 ```
 
-### Description
+### Globals
 
+- `$PW_GENERATOR_LENGTH`
+- `$PW_GENERATOR_SYMBOLS`
+
+### Output (stdout)
+
+`<password>`
+
+
+### Description
 
 
