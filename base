@@ -234,17 +234,17 @@ printf '%q ' "$@"
 array(){
 local cmd value
 is set -narray-name -d -- "$1"
-is enum -ncommand --allow="has indexof join" -d -ocmd -- "$2"
+is enum -ncommand --allow="has indexof join" -docmd -- "$2"
 is integer -narguments --max=3 -d $#
 declare -n arr="$1"
 case "$cmd" in
-has)is set -nvalue -d -ovalue -- "$3"
+has)is set -nvalue -dovalue -- "$3"
 for e in "${arr[@]}";do
 [ ! "$e" = "$value" ]||return 0
 done
 return 1
 ;;
-indexof)is set -nvalue -d -ovalue -- "$3"
+indexof)is set -nvalue -dovalue -- "$3"
 for i in "${!arr[@]}";do
 if [ "${arr[i]}" = "$value" ];then
 printf '%s' "$i"
@@ -515,9 +515,9 @@ case "$1" in
 -d|--directory)dir=1&&shift;;
 -e|--extension)is set -nextension -d -- "$2"&&ext=".$2"&&shift 2;;
 -m|--memory)path="/dev/shm"&&shift;;
--p|--path)is set -npath -d -opath -- "$2"&&shift 2;;
+-p|--path)is set -npath -dopath -- "$2"&&shift 2;;
 -r|--random)rand=$RANDOM&&shift;;
--T|--ttl)is duration -nttl -d -ottl -- "$2"&&shift 2;;
+-T|--ttl)is duration -nttl -dottl -- "$2"&&shift 2;;
 --)shift&&break;;
 *)die "$(gettext "Unrecognized option"): $1"
 esac

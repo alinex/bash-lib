@@ -46,7 +46,7 @@ pw_generator() {
     ((use_digits)) && pool+="$digits"
     ((use_symbols)) && pool+="$symbols"
     pool+="$custom"
-    is set --name=character-pool --message="Enable one of the pools or give a custom list of characters." --die -- "$pool"
+    is set --name=character-pool --die --message="Enable one of the pools or give a custom list of characters." -- "$pool"
     # Ensure at least one of each enabled type
     local required=()
     ((use_lower)) && required+=("${lower:RANDOM%${#lower}:1}")

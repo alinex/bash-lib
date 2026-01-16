@@ -240,17 +240,17 @@ printf '%q ' "$@"
 array(){
 local cmd value
 is set -narray-name -d -- "$1"
-is enum -ncommand --allow="has indexof join" -d -ocmd -- "$2"
+is enum -ncommand --allow="has indexof join" -docmd -- "$2"
 is integer -narguments --max=3 -d $#
 declare -n arr="$1"
 case "$cmd" in
-has)is set -nvalue -d -ovalue -- "$3"
+has)is set -nvalue -dovalue -- "$3"
 for e in "${arr[@]}";do
 [ ! "$e" = "$value" ]||return 0
 done
 return 1
 ;;
-indexof)is set -nvalue -d -ovalue -- "$3"
+indexof)is set -nvalue -dovalue -- "$3"
 for i in "${!arr[@]}";do
 if [ "${arr[i]}" = "$value" ];then
 printf '%s' "$i"
@@ -521,9 +521,9 @@ case "$1" in
 -d|--directory)dir=1&&shift;;
 -e|--extension)is set -nextension -d -- "$2"&&ext=".$2"&&shift 2;;
 -m|--memory)path="/dev/shm"&&shift;;
--p|--path)is set -npath -d -opath -- "$2"&&shift 2;;
+-p|--path)is set -npath -dopath -- "$2"&&shift 2;;
 -r|--random)rand=$RANDOM&&shift;;
--T|--ttl)is duration -nttl -d -ottl -- "$2"&&shift 2;;
+-T|--ttl)is duration -nttl -dottl -- "$2"&&shift 2;;
 --)shift&&break;;
 *)die "$(gettext "Unrecognized option"): $1"
 esac
@@ -1350,12 +1350,12 @@ local length="$PW_GENERATOR_LENGTH" use_lower=1 use_upper=1 use_digits=1 use_sym
 eval set -- "$(option_parse $'l length +\n- no-lower -\n- no-upper -\n- no-digits -\n- no-symbols -\nc custom +' "$@")"
 while true;do
 case "$1" in
--l|--length)is integer -nlength --min=1 -d -olength -- "$2"&&shift 2;;
+-l|--length)is integer -nlength --min=1 -dolength -- "$2"&&shift 2;;
 --no-lower)no_lower=0&&shift;;
 --no-upper)no_upper=0&&shift;;
 --no-digits)no_digits=0&&shift;;
 --no-symbols)no_symbols=0&&shift;;
--c|--custom)is set -ncustom-chars -d -ocustom -- "$2"&&shift 2;;
+-c|--custom)is set -ncustom-chars -docustom -- "$2"&&shift 2;;
 --)shift&&break;;
 *)die "$(gettext "Unrecognized option"): $1"
 esac
@@ -1369,7 +1369,7 @@ local pool=''
 ((use_digits))&&pool+="$digits"
 ((use_symbols))&&pool+="$symbols"
 pool+="$custom"
-is set -ncharacter-pool --message="Enable one of the pools or give a custom list of characters." -d -- "$pool"
+is set -ncharacter-pool -dm"Enable one of the pools or give a custom list of characters." -- "$pool"
 local required=()
 ((use_lower))&&required+=("${lower:RANDOM%${#lower}:1}")
 ((use_upper))&&required+=("${upper:RANDOM%${#upper}:1}")
@@ -1390,7 +1390,7 @@ local host="$server"
 eval set -- "$(option_parse $'h host +' "$@")"
 while true;do
 case "$1" in
--h|--host)is set -nhost -d -ohost -- "$2"&&shift 2;;
+-h|--host)is set -nhost -dohost -- "$2"&&shift 2;;
 --)shift&&break;;
 *)die "$(gettext "Unrecognized option"): $1"
 esac
@@ -1471,7 +1471,7 @@ local timeout abort
 eval set -- "$(option_parse $'a abort -\nT timeout +' "$@")"
 while true;do
 case "$1" in
--T|--timeout)is duration -ntimeout -d -otimeout -- "$2"&&shift 2;;
+-T|--timeout)is duration -ntimeout -dotimeout -- "$2"&&shift 2;;
 -a|--abort)abort=1&&shift;;
 --)shift&&break;;
 *)die "$(gettext "Unrecognized option"): $1"
@@ -1511,7 +1511,7 @@ while true;do
 case "$1" in
 -t|--true)default=1&&shift;;
 -f|--false)default=0&&shift;;
--T|--timeout)is duration -ntimeout -d -otimeout -- "$2"&&shift 2;;
+-T|--timeout)is duration -ntimeout -dotimeout -- "$2"&&shift 2;;
 --)shift&&break;;
 *)die "$(gettext "Unrecognized option"): $1"
 esac
@@ -1588,7 +1588,7 @@ while true;do
 case "$1" in
 -e|--empty)empty=1&&shift;;
 -d|--default)default="$2"&&shift 2;;
--T|--timeout)is duration -ntimeout -d -otimeout -- "$2"&&shift 2;;
+-T|--timeout)is duration -ntimeout -dotimeout -- "$2"&&shift 2;;
 -n|--allow-negative)negative=1&&shift;;
 --)shift&&break;;
 *)die "$(gettext "Unrecognized option"): $1"
@@ -1779,7 +1779,7 @@ case "$1" in
 -t|--title)notice "$2" >/dev/tty&&shift 2;;
 -d|--default)default="$2"&&shift 2;;
 -x|--exit)end="$2"&&shift 2;;
--T|--timeout)is duration -ntimeout -d -otimeout -- "$2"&&shift 2;;
+-T|--timeout)is duration -ntimeout -dotimeout -- "$2"&&shift 2;;
 --)shift&&break;;
 *)die "$(gettext "Unrecognized option"): $1"
 esac
@@ -1958,7 +1958,7 @@ fi
 shift 2
 ;;
 -z|--compress)compress=1&&shift;;
--c|--cleanup)is duration name=cleanup -d -ocleanup -- "$2"&&shift 2;;
+-c|--cleanup)is duration name=cleanup -docleanup -- "$2"&&shift 2;;
 --)shift&&break;;
 *)die "$(gettext "Unrecognized option"): $1"
 esac
@@ -2432,7 +2432,7 @@ eval set -- "$(option_parse $'v version +' "$@")"
 local type
 while true;do
 case "$1" in
--v|--version)is enum -nversion --allow="4 6" -d -otype -- "$2"&&shift 2;;
+-v|--version)is enum -nversion --allow="4 6" -dotype -- "$2"&&shift 2;;
 --)shift&&break;;
 *)die "$(gettext "Unrecognized option"): $1"
 esac
@@ -2786,7 +2786,7 @@ case "$1" in
 *)shift
 esac
 done
-is enum -ncommand --allow="store restore clean change" -d -ocommand -- "$1"
+is enum -ncommand --allow="store restore clean change" -docommand -- "$1"
 shift
 local ident=$1
 shift||true
@@ -2868,7 +2868,7 @@ eval set -- "$(option_parse $'+n name +\nv verbose -' "$@")"
 local name verbose message
 while true;do
 case "$1" in
--n|--name)is set -nname -d -oname -- "$2"&&shift 2;;
+-n|--name)is set -nname -doname -- "$2"&&shift 2;;
 --verbose)verbose=1&&shift;;
 --)shift&&break;;
 *)die "$(gettext "Unrecognized option"): $1"
@@ -2893,7 +2893,7 @@ eval set -- "$(option_parse $'+n name +\nv verbose -' "$@")"
 local name verbose message
 while true;do
 case "$1" in
--n|--name)is set -nname -d -oname -- "$2"&&shift 2;;
+-n|--name)is set -nname -doname -- "$2"&&shift 2;;
 --verbose)verbose=1&&shift;;
 --)shift&&break;;
 *)die "$(gettext "Unrecognized option"): $1"
@@ -2947,7 +2947,7 @@ eval set -- "$(option_parse $'+n name +\nv verbose -' "$@")"
 local name verbose=0 message progress
 while true;do
 case "$1" in
--n|--name)is set -nname -d -oname -- "$2"&&shift 2;;
+-n|--name)is set -nname -doname -- "$2"&&shift 2;;
 --verbose)verbose=1&&shift;;
 --progress)progress=1&&shift;;
 --)shift&&break;;
@@ -3038,13 +3038,13 @@ local command watch timeout
 eval set -- "$(option_parse $'t timeout +\nw watch -' "$@")"
 while true;do
 case "$1" in
--t|--timeout)is duration -ntimeout -d -otimeout -- "$2"&&shift 2;;
+-t|--timeout)is duration -ntimeout -dotimeout -- "$2"&&shift 2;;
 -w|--watch)watch=1&&shift;;
 --)shift&&break;;
 *)die "$(gettext "Unrecognized option"): $1"
 esac
 done
-is enum --allow="info list tree wait kill" -d -ocommand -- "$1"
+is enum --allow="info list tree wait kill" -docommand -- "$1"
 is set -nprocess-id-or-name -d -- "$2"
 is integer -narguments --max=3 -d $#
 local list
@@ -3163,9 +3163,9 @@ local _login host jump term lines file
 eval set -- "$(option_parse $'+l login +\nh host +\nj jump +\nt terminal -\n- line-based -\nf file -' "$@")"
 while true;do
 case "$1" in
--l|--login)is set -nlogin -d -o_login -- "$2"&&shift 2;;
--h|--host)is set -nhost -d -ohost -- "$2"&&shift 2;;
--j|--jump)is set -njump -d -ojump -- "$2"&&shift 2;;
+-l|--login)is set -nlogin -do_login -- "$2"&&shift 2;;
+-h|--host)is set -nhost -dohost -- "$2"&&shift 2;;
+-j|--jump)is set -njump -dojump -- "$2"&&shift 2;;
 -t|--terminal)term=1&&shift;;
 --line-based)lines=1&&shift;;
 -f|--file)file=1&&shift;;
@@ -3257,10 +3257,10 @@ local _login host jump files
 eval set -- "$(option_parse $'+l login +\nh host +\nj jump +\nf files +' "$@")"
 while true;do
 case "$1" in
--l|--login)is set -nlogin -d -o_login -- "$2"&&shift 2;;
--h|--host)is set -nhost -d -ohost -- "$2"&&shift 2;;
--j|--jump)is set -njump -d -ojump -- "$2"&&shift 2;;
--f|--files)is set -nfiles -d -ofiles -- "$2"&&shift 2;;
+-l|--login)is set -nlogin -do_login -- "$2"&&shift 2;;
+-h|--host)is set -nhost -dohost -- "$2"&&shift 2;;
+-j|--jump)is set -njump -dojump -- "$2"&&shift 2;;
+-f|--files)is set -nfiles -dofiles -- "$2"&&shift 2;;
 --)shift&&break;;
 *)die "$(gettext "Unrecognized option"): $1"
 esac
@@ -3285,9 +3285,9 @@ local _login host jump
 eval set -- "$(option_parse $'+l login +\nh host +\nj jump +' "$@")"
 while true;do
 case "$1" in
--l|--login)is set -nlogin -d -o_login -- "$2"&&shift 2;;
--h|--host)is set -nhost -d -ohost -- "$2"&&shift 2;;
--j|--jump)is set -njump -d -ojump -- "$2"&&shift 2;;
+-l|--login)is set -nlogin -do_login -- "$2"&&shift 2;;
+-h|--host)is set -nhost -dohost -- "$2"&&shift 2;;
+-j|--jump)is set -njump -dojump -- "$2"&&shift 2;;
 --)shift&&break;;
 *)die "$(gettext "Unrecognized option"): $1"
 esac
@@ -3647,9 +3647,9 @@ timeout=${TRIVY_DEFAULT_TIMEOUT:-60m}
 eval set -- "$(option_parse $'t timeout +\no only-os -\ne exclude +\np progress -' "$@")"
 while true;do
 case "$1" in
--t|--timeout)is duration -ntimeout -d -otimeout -- "$2"&&shift 2;;
+-t|--timeout)is duration -ntimeout -dotimeout -- "$2"&&shift 2;;
 -o|--only-os)onlyOS=1&&shift;;
--e|--exclude)is set -nexclude -d -oexclude -- "$2"&&shift 2;;
+-e|--exclude)is set -nexclude -doexclude -- "$2"&&shift 2;;
 -p|--progress)progress=1&&shift;;
 --)shift&&break;;
 *)die "$(gettext "Unrecognized option"): $1"
