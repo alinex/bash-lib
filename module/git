@@ -71,5 +71,5 @@ git_log() {
     short) format='%ad %an: %s' ;;
     *) format="$1" ;;
     esac
-    git log $opt --pretty=format:$format -- "${2:-.}"
+    git $opt log --pretty=format:$format -- "${2:-.}"
 }

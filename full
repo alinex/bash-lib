@@ -1507,7 +1507,7 @@ message)format='%s';;
 short)format='%ad %an: %s';;
 *)format="$1"
 esac
-git log $opt --pretty=format:$format -- "${2:-.}"
+git $opt log --pretty=format:$format -- "${2:-.}"
 }
 declare -F "color_256" >/dev/null||source "$BASHLIB_HOME"/module/color
 pause(){
@@ -1902,7 +1902,7 @@ input=${input:0:-1}
 printf '\b \b' >/dev/tty
 fi
 elif [[ $char == $'\e' ]];then
-read -r -s -n 1 -t 0.01 seq
+read -r -s -n 1 -t 0.01 seq||true
 while [[ $seq == "[" || $seq =~ [0-9A-Za-z~] ]];do
 read -r -s -n 1 -t 0.01 seq||break
 done

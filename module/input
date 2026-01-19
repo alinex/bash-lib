@@ -560,7 +560,7 @@ choose() {
         # ignore escape sequences
         elif [[ $char == $'\e' ]]; then
             # Read next few characters non-blocking to drain escape sequence
-            read -r -s -n 1 -t 0.01 seq
+            read -r -s -n 1 -t 0.01 seq || true
             while [[ $seq == "[" || $seq =~ [0-9A-Za-z~] ]]; do
                 read -r -s -n 1 -t 0.01 seq || break
             done
