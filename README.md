@@ -253,6 +253,12 @@ source <(curl -s https://gitlab.com/alinex/bash-lib/-/raw/master/remote)
 
 Now you have to include your specific configuration like API and secrets directly in the code to fully use it.
 
+If an error occurs while using the remote BashLib you may encounter an additional error which you should ignore:
+
+```text
+awk: fatal: cannot open file `/dev/fd/63' for reading: No such file or directory
+```
+
 ## Configuration
 
 The configuration is under `config/` folder and will be loaded in alphabetically order. For your configuration change only the `local` and `secrets` which are linked to your local configuration folder.

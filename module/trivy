@@ -47,6 +47,7 @@ TRIVY_EXPLOITS_URL=https://www.cisa.gov/sites/default/files/feeds/known_exploite
 #           trivy [<options>] files <path>
 #           trivy [<options>] docker <file>
 #           trivy [<options>] docker <image>
+#           trivy clean
 # Options:  t, timeout <duration>   # set the timeout for the job in <int>m or <int>h
 #           o, only-os              # let `root` command only scan OS without filesystem traversal
 #           e, exclude <dirs>       # additional excludes for `root` command
@@ -67,7 +68,6 @@ TRIVY_EXPLOITS_URL=https://www.cisa.gov/sites/default/files/feeds/known_exploite
 # Error:    Progress output if `--progress` is set with optimizations on reports
 # Return:   1 if there are at least one CRITICAL or HIGH vulnerabilities
 trivy() {
-    is enum --name=command --allow="root files docker" --die -- "$1" && local command="$1" && shift
     local timeout onlyOS exclude progress
     timeout=${TRIVY_DEFAULT_TIMEOUT:-60m}
     # parameter parsing
@@ -82,6 +82,7 @@ trivy() {
         *) die "$(gettext "Unrecognized option"): $1" ;;
         esac
     done
+    is enum --name=command --allow="root files docker clean" --die -- "$1" && local command="$1" && shift
     # processing
     install trivy
     local work cmd opt="--exit-code 0 --no-progress --skip-version-check --timeout $timeout -f json"
@@ -126,6 +127,10 @@ trivy() {
         [ -z "$rc" ] || tail "$work/log" | warn
         [ -z "$rc" ] || die "Failed trivy scan!"
         rm "$work/log"
+        ;;
+    clean)
+        sudo rm -rf /root/.cache/trivy
+        return
         ;;
     esac
     # Splitting
