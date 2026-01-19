@@ -1488,12 +1488,12 @@ tag)git $opt describe --abbrev=0 --tags 2>/dev/null||true
 esac
 }
 git_log(){
-local opt=''
+local opt='' arg=''
 eval set -- "$(option_parse $'w work +\nl lines +' "$@")"
 while true;do
 case "$1" in
 -w|--work)is set -npath -d -- "$2"&&opt+="-C $2 "&&shift 2;;
--l|--lines)is integer -nlines --min=1 -d -- "$2"&&opt+="-$2 "&&shift 2;;
+-l|--lines)is integer -nlines --min=1 -d -- "$2"&&arg+="-$2 "&&shift 2;;
 --)shift&&break;;
 *)die "$(gettext "Unrecognized option"): $1"
 esac
@@ -1507,7 +1507,7 @@ message)format='%s';;
 short)format='%ad %an: %s';;
 *)format="$1"
 esac
-git $opt log --pretty=format:$format -- "${2:-.}"
+git $opt log $arg --pretty="format:$format" -- "${2:-.}"
 }
 declare -F "color_256" >/dev/null||source "$BASHLIB_HOME"/module/color
 pause(){

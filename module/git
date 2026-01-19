@@ -51,12 +51,12 @@ git_info() {
 #           l, lines <num>
 git_log() {
     # parameter parsing
-    local opt=''
+    local opt='' arg=''
     eval set -- "$(option_parse $'w work +\nl lines +' "$@")"
     while true; do
         case "$1" in
         -w | --work) is set --name=path --die -- "$2" && opt+="-C $2 " && shift 2 ;;
-        -l | --lines) is integer --name=lines --min=1 --die -- "$2" && opt+="-$2 " && shift 2 ;;
+        -l | --lines) is integer --name=lines --min=1 --die -- "$2" && arg+="-$2 " && shift 2 ;;
         --) shift && break ;;
         *) die "$(gettext "Unrecognized option"): $1" ;;
         esac
@@ -71,5 +71,5 @@ git_log() {
     short) format='%ad %an: %s' ;;
     *) format="$1" ;;
     esac
-    git $opt log --pretty=format:$format -- "${2:-.}"
+    git $opt log $arg --pretty="format:$format" -- "${2:-.}"
 }
