@@ -183,7 +183,7 @@ long+="$name,"
 fi
 done <<<"$spec"
 shift
-getopt -q -o "$permute$short" --long "$long" -n "$0" -- "$@"
+getopt -q -o "$permute$short" --long "$long" -n "$0" -- "$@"||true
 }
 option_help(){
 is set -nspec -d -- "$1"

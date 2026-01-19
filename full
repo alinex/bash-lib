@@ -183,7 +183,7 @@ long+="$name,"
 fi
 done <<<"$spec"
 shift
-getopt -q -o "$permute$short" --long "$long" -n "$0" -- "$@"
+getopt -q -o "$permute$short" --long "$long" -n "$0" -- "$@"||true
 }
 option_help(){
 is set -nspec -d -- "$1"
@@ -1493,7 +1493,7 @@ eval set -- "$(option_parse $'w work +\nl lines +' "$@")"
 while true;do
 case "$1" in
 -w|--work)is set -npath -d -- "$2"&&opt+="-C $2 "&&shift 2;;
--l|--lines)is integer -nlines --min=1 -- "$2"&&opt+="-$2 "&&shift 2;;
+-l|--lines)is integer -nlines --min=1 -d -- "$2"&&opt+="-$2 "&&shift 2;;
 --)shift&&break;;
 *)die "$(gettext "Unrecognized option"): $1"
 esac
