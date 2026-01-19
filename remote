@@ -1834,22 +1834,31 @@ case "$1" in
 *)die "$(gettext "Unrecognized option"): $1"
 esac
 done
-local list max length
-list="$(input_lines "$@")"
-list="$(trim "$list"|grep -v ^#)"
-max="$(wc -l <<<"$list")"
-length="${#max}"
-local line key display num=0 pattern
-while read -r line;do
-num=$((num+1))
-IFS="|" read -r key display <<<"$line"
-if [ -n "$default" ];then
-[ "$default" = "$(trim "$key")" ]&&default="$num"||true
-[ "$default" = "$(trim "$display")" ]&&default="$num"||true
-fi
-printf "  %0${length}d) $(trim "${display:-$key}")\n" "$num" >/dev/tty
-done <<<"$list"
 [ -z "$default" ]||[[ "$default" =~ ^-?[0-9]+$ ]]||die "Default option $default not recognized."
+local width list max length cols rows i
+width=$(tput cols 2>/dev/null||echo 80)
+mapfile -t list < <(input_lines "$@")
+max=${#list[@]}
+length=0
+for i in "${list[@]}";do
+((${#i}>length))&&length=${#i}
+done
+cols=1
+((max>3))&&cols=2
+((max>6))&&cols=3
+((max>9))&&cols=4
+while ((cols>1&&cols*(length+${#max}+4)>width));do
+((cols--))
+done
+rows=$(((max+cols-1)/cols))
+local r c idx
+for ((r=0; r<rows; r++));do
+for ((c=0; c<cols; c++));do
+idx=$((r+c*rows))
+((idx>max))||printf "  %*s) %-*s" ${#max} $((idx+1)) "$length" "${list[idx]}" >/dev/tty
+done
+printf "\n" >/dev/tty
+done
 [ -z "$end" ]||printf "  %${length}s) $end\n" x >/dev/tty
 if ((length==1));then
 pattern="[1-$max]"

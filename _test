@@ -18,10 +18,15 @@ while true; do
 done
 ################################################################################################
 
-ask
 echo "one
 two
-three" | choose
+three
+four
+five
+six
+seven
+eight
+nine" | choose
 exit
 
 #process tree mattermost
