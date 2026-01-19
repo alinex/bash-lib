@@ -18,6 +18,12 @@ while true; do
 done
 ################################################################################################
 
+ask
+echo "one
+two
+three" | choose
+exit
+
 #process tree mattermost
 #process wait mattermost --watch
 #process tree mattermost

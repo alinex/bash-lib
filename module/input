@@ -344,7 +344,7 @@ ask() {
         elif [[ $char == $'\177' ]]; then
             if [ ${#input} -gt 0 ]; then
                 input=${input:0:-1}
-                printf '%s' "\b \b" >/dev/tty
+                printf "\b \b" >/dev/tty
             fi
         # ignore escape sequences
         elif [[ $char == $'\e' ]]; then
