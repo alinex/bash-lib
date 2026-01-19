@@ -3685,7 +3685,6 @@ esac
 }
 TRIVY_EXPLOITS_URL=https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json
 trivy(){
-is enum -ncommand --allow="root files docker" -d -- "$1"&&local command="$1"&&shift
 local timeout onlyOS exclude progress
 timeout=${TRIVY_DEFAULT_TIMEOUT:-60m}
 eval set -- "$(option_parse $'t timeout +\no only-os -\ne exclude +\np progress -' "$@")"
@@ -3699,11 +3698,12 @@ case "$1" in
 *)die "$(gettext "Unrecognized option"): $1"
 esac
 done
+is enum -ncommand --allow="root files docker clean" -d -- "$1"&&local command="$1"&&shift
 install trivy
 local work cmd opt="--exit-code 0 --no-progress --skip-version-check --timeout $timeout -f json"
 local source="$1"
 work="$(mktemp --directory "$$_trivy")"
-cmd="$(command -v trivy)"
+cmd="$(which trivy)"
 opt+=" -o $work/trivy.json"
 [ -z "$DEBUG" ]||opt+=" --debug"
 [ -z "$TRIVY_CACHE_SERVER" ]||opt+=" --server $TRIVY_CACHE_SERVER"
@@ -3719,25 +3719,28 @@ done
 [ -z "$onlyOS" ]||opt+=" --pkg-types os"
 source="$(hostname -f)"
 local rc
-sudo command "$cmd" rootfs $opt $excludeOption / 2>&1|sed 's/[^A-Z]*T[^A-Z]*//' >"$work/log"||rc=$?
+sudo "$cmd" rootfs $opt $excludeOption / 2>&1|sed 's/[^A-Z]*T[^A-Z]*//' >"$work/log"||rc=$?
 cat "$work/log"|debug
 [ -z "$rc" ]||tail "$work/log"|warn
 [ -z "$rc" ]||die "Failed trivy scan!"
 rm "$work/log"
 ;;
 files)local rc
-command $cmd fs $opt "$1" 2>&1|sed 's/[^A-Z]*T[^A-Z]*//' >"$work/log"||rc=$?
+$cmd fs $opt "$1" 2>&1|sed 's/[^A-Z]*T[^A-Z]*//' >"$work/log"||rc=$?
 cat "$work/log"|debug
 [ -z "$rc" ]||tail "$work/log"|warn
 [ -z "$rc" ]||die "Failed trivy scan!"
 rm "$work/log"
 ;;
 docker)local rc
-command $cmd image $opt --input "$1" 2>&1|sed 's/[^A-Z]*T[^A-Z]*//' >"$work/log"||rc=$?
+$cmd image $opt --input "$1" 2>&1|sed 's/[^A-Z]*T[^A-Z]*//' >"$work/log"||rc=$?
 cat "$work/log"|debug
 [ -z "$rc" ]||tail "$work/log"|warn
 [ -z "$rc" ]||die "Failed trivy scan!"
 rm "$work/log"
+;;
+clean)sudo rm -rf /root/.cache/trivy
+return
 esac
 [ -z "$progress" ]||gettext 'Optimize JSON structure for splitting...'|info >&2
 jq '.Results[]?|. as $g|.Vulnerabilities[]?|{Class: $g.Class, Target: $g.Target, Type: $g.Type}*.' "$work"/trivy.json >"$work"/split.json

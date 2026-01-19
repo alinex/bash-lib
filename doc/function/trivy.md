@@ -9,6 +9,7 @@ trivy [<options>] root
 trivy [<options>] files <path>
 trivy [<options>] docker <file>
 trivy [<options>] docker <image>
+trivy clean
 ```
 
 ### Options

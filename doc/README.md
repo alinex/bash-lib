@@ -96,7 +96,7 @@ The configuration module contains a lot of general configuration settings for th
 | ``$POWERDNS_API`` | PowerDNS API URL used together with `$POWERDNS_TOKEN` and silently disables powerdns function if not set |
 | ``$TRIVY_DEFAULT_TIMEOUT`` | Maximum time to generate trivy security report |
 | ``$TRIVY_CACHE_SERVER`` | Optional, use specified trivy server for caching of the internet databases |
-| ``$TRIVY_ROOT_EXCLUDE`` | Paths to prevent in root scans |
+| ``$TRIVY_ROOT_EXCLUDE`` | Specify there trivy should store its cache (about 1.3GB) |
 
 ## Core
 
