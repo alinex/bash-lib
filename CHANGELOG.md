@@ -12,8 +12,10 @@ But on release they will be merged with semantical versioning into the master br
 - add [compress](doc/function/compress.md) and [decompress](doc/function/decompress.md)
 - move join -> [array](doc/function/array.md) command
 - enhance [hash](doc/function/hash.md) to tsv
+- [choose](doc/function/choose.md) now with multi column display
 - rename ip -> [ip_resolve](doc/function/ip_resolve.md)
 - fix installer to also allow installation of develop version
+- fix in option_parse to always return true
 - move down deprecated methods
 
 ## 11. January 2026 - v2.3.0
