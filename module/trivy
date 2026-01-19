@@ -88,7 +88,7 @@ trivy() {
     local work cmd opt="--exit-code 0 --no-progress --skip-version-check --timeout $timeout -f json"
     local source="$1"
     work="$(mktemp --directory "${$}_trivy")"
-    cmd="$(command -v trivy)"
+    cmd="$(which trivy)"
     opt+=" -o $work/trivy.json"
     is empty -- "$DEBUG" || opt+=" --debug"
     is empty -- "$TRIVY_CACHE_SERVER" || opt+=" --server $TRIVY_CACHE_SERVER"
@@ -106,7 +106,7 @@ trivy() {
         is empty -- "$onlyOS" || opt+=" --pkg-types os"
         source="$(hostname -f)"
         local rc
-        sudo command "$cmd" rootfs $opt $excludeOption / 2>&1 | sed 's/[^A-Z]*T[^A-Z]*//' >"$work/log" || rc=$?
+        sudo "$cmd" rootfs $opt $excludeOption / 2>&1 | sed 's/[^A-Z]*T[^A-Z]*//' >"$work/log" || rc=$?
         cat "$work/log" | debug
         [ -z "$rc" ] || tail "$work/log" | warn
         [ -z "$rc" ] || die "Failed trivy scan!"
@@ -114,7 +114,7 @@ trivy() {
         ;;
     files)
         local rc
-        command $cmd fs $opt "$1" 2>&1 | sed 's/[^A-Z]*T[^A-Z]*//' >"$work/log" || rc=$?
+        $cmd fs $opt "$1" 2>&1 | sed 's/[^A-Z]*T[^A-Z]*//' >"$work/log" || rc=$?
         cat "$work/log" | debug
         [ -z "$rc" ] || tail "$work/log" | warn
         [ -z "$rc" ] || die "Failed trivy scan!"
@@ -122,7 +122,7 @@ trivy() {
         ;;
     docker)
         local rc
-        command $cmd image $opt --input "$1" 2>&1 | sed 's/[^A-Z]*T[^A-Z]*//' >"$work/log" || rc=$?
+        $cmd image $opt --input "$1" 2>&1 | sed 's/[^A-Z]*T[^A-Z]*//' >"$work/log" || rc=$?
         cat "$work/log" | debug
         [ -z "$rc" ] || tail "$work/log" | warn
         [ -z "$rc" ] || die "Failed trivy scan!"
