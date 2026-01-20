@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-19 22:19+0100\n"
+"POT-Creation-Date: 2026-01-20 21:16+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -20,7 +20,7 @@ msgstr ""
 #: core/misc:132 core/validator:74 core/array:136 module/os:171
 #: module/network:24 module/trivy:82 module/compress:41 module/monitoring:148
 #: module/input:31 module/input:86 module/input:212 module/input:465
-#: module/input:640 module/log:63 module/process:381 module/process:429
+#: module/input:671 module/log:63 module/process:381 module/process:429
 #: module/process:507 module/process:654 module/remote:80 module/remote:221
 #: module/remote:261 module/remote:329 module/database:33 module/mattermost:299
 #: module/mattermost:330 module/crypto:36 module/git:23 module/git:61
@@ -40,7 +40,7 @@ msgstr "Optionen"
 msgid "argument is not a valid number!"
 msgstr "Argument ist nicht ganzzahlig"
 
-#: core/output:105
+#: core/output:125
 msgid "Help"
 msgstr "Hilfe"
 
@@ -405,11 +405,11 @@ msgstr "Nein"
 msgid "Yes"
 msgstr "Ja"
 
-#: module/input:133 module/input:341 module/input:564
+#: module/input:133 module/input:341 module/input:595
 msgid "value needed"
 msgstr "Wert notwendig"
 
-#: module/input:153 module/input:365 module/input:588
+#: module/input:153 module/input:365 module/input:619
 msgid "invalid character"
 msgstr "ungültiges Zeichen"
 
@@ -465,23 +465,23 @@ msgstr "gut"
 msgid "strong"
 msgstr "stark"
 
-#: module/input:523
+#: module/input:554
 msgid "Select one of the above options"
 msgstr "Wähle eine der obigen Optionen"
 
-#: module/input:660
+#: module/input:691
 msgid "Could not get task list from command"
 msgstr "Befehlsliste konnte nicht von der Funktion gelesen werden"
 
-#: module/input:667
+#: module/input:698
 msgid "No tasks found to be executed."
 msgstr "Keine Aufgaben zum Ausführen gefunden."
 
-#: module/input:673
+#: module/input:704
 msgid "Exit"
 msgstr "Beenden"
 
-#: module/input:680
+#: module/input:711
 #, sh-format
 msgid "Got error $error running $task"
 msgstr "Beim Aufruf von $task kam es zum Fehler $error"

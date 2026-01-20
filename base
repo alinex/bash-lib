@@ -641,6 +641,19 @@ kill -- -$$ 2>/dev/null
 exit 143
 fi
 }
+uprintf(){
+local cmd=awk
+for ((i=1; i<=$#; i++));do
+cmd+=" -v $(printf "\\$(printf '%03o' $((96+i)))=\"\$$i\"")"
+done
+cmd+=" 'BEGIN{printf("
+for ((i=1; i<=$#; i++));do
+cmd+="$(printf "\\$(printf '%03o' $((96+i)))"),"
+done
+cmd+="\"\")}'"
+echo "$cmd"
+eval "$cmd"
+}
 help(){
 is integer -narguments --min=2 --max=4 -d $#
 is set -nheading -d -- "$1"
@@ -751,10 +764,6 @@ _spinner_pid=""
 spinner_start(){
 is integer -narguments --max=2 -d $#
 [ -z "$1" ]||is enum -nformat --allow="simple arrows vertical bar fade braille roll moon clock weather" -d -- "$1"
-if ! command -v tput >/dev/null 2>&1||[ ! -t 2 ];then
-debug "Disabled because tput and terminal is needed"
-return 0
-fi
 local format="${1:-braille}"
 local spinner
 local size=1

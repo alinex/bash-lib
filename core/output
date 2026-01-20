@@ -90,6 +90,25 @@ die() {
     fi
 }
 
+# Unicode-aware printf variant for multibyte characters.
+#
+# This works exactly like printf, but should be used if width calculation is needed like in `%15s`. Instead of counting bytes (which the original printf does) this variant uses `awk` under the hood to count characters.
+# Therefor it will also make the alignment correct for german Umlaut or other multibyte Unicode characters. But it will not work for all the Unicode symbols and emojis.
+#
+# Usage:    printf <pattern> [<value>]...
+uprintf() {
+    local cmd=awk
+    for ((i = 1; i <= $#; i++)); do
+        cmd+=" -v $(printf "\\$(printf '%03o' $((96 + i)))=\"\$$i\"")"
+    done
+    cmd+=" 'BEGIN{printf("
+    for ((i = 1; i <= $#; i++)); do
+        cmd+="$(printf "\\$(printf '%03o' $((96 + i)))"),"
+    done
+    cmd+="\"\")}'"
+    eval "$cmd"
+}
+
 ######################################################################################
 # Context
 ######################################################################################
@@ -342,15 +361,10 @@ _spinner_pid=""
 #           # <format> see above
 #           # <time> 0.1 or more seconds (default 0.2)
 # TTY:      <symbol> with back-space so that cursor is always before it
-# Returns:   0 without doing anything if no `tput` and terminal available
 spinner_start() {
     is integer --name=arguments --max=2 --die -- $#
     is empty -- "$1" || is enum --name=format --allow="simple arrows vertical bar fade braille roll moon clock weather" --die -- "$1"
     # processing
-    if ! command -v tput >/dev/null 2>&1 || [ ! -t 2 ]; then
-        debug "Disabled because tput and terminal is needed"
-        return 0
-    fi
     local format="${1:-braille}"
     local spinner
     local size=1

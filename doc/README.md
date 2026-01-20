@@ -258,6 +258,7 @@ Module with output and user interaction helpers.
 | --- | --- |
 | [`debug`](function/debug.md) | Write message to STDERR if in DEBUG mode else do nothing |
 | [`die`](function/die.md) | Output error message and exit |
+| [`uprintf`](function/uprintf.md) | Unicode-aware printf variant for multibyte characters. |
 | [`help`](function/help.md) | Show help page and exit |
 | [`heading`](function/heading.md) | Print block heading |
 | [`critical`](function/critical.md) | Print critical/disaster message |

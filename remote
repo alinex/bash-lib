@@ -647,6 +647,19 @@ kill -- -$$ 2>/dev/null
 exit 143
 fi
 }
+uprintf(){
+local cmd=awk
+for ((i=1; i<=$#; i++));do
+cmd+=" -v $(printf "\\$(printf '%03o' $((96+i)))=\"\$$i\"")"
+done
+cmd+=" 'BEGIN{printf("
+for ((i=1; i<=$#; i++));do
+cmd+="$(printf "\\$(printf '%03o' $((96+i)))"),"
+done
+cmd+="\"\")}'"
+echo "$cmd"
+eval "$cmd"
+}
 help(){
 is integer -narguments --min=2 --max=4 -d $#
 is set -nheading -d -- "$1"
@@ -757,10 +770,6 @@ _spinner_pid=""
 spinner_start(){
 is integer -narguments --max=2 -d $#
 [ -z "$1" ]||is enum -nformat --allow="simple arrows vertical bar fade braille roll moon clock weather" -d -- "$1"
-if ! command -v tput >/dev/null 2>&1||[ ! -t 2 ];then
-debug "Disabled because tput and terminal is needed"
-return 0
-fi
 local format="${1:-braille}"
 local spinner
 local size=1
@@ -1834,20 +1843,33 @@ case "$1" in
 *)die "$(gettext "Unrecognized option"): $1"
 esac
 done
-[ -z "$default" ]||[[ "$default" =~ ^-?[0-9]+$ ]]||die "Default option $default not recognized."
-local width list max length cols rows i
-width=$(tput cols 2>/dev/null||echo 80)
-mapfile -t list < <(input_lines "$@")
-max=${#list[@]}
+local width list num entries keys key display
+width=$(tput cols </dev/tty 2>/dev/null||echo 80)
+list="$(input_lines "$@")"
+list="$(trim "$list"|grep -v ^#)"
+while read -r line;do
+num=$((num+1))
+IFS="|" read -r key display <<<"$line"
+if [ -n "$default" ];then
+[ "$default" = "$(trim "$key")" ]&&default="$num"||true
+[ "$default" = "$(trim "$display")" ]&&default="$num"||true
+fi
+entries+=("$(trim "${display:-$key}")")
+keys+=("$(trim "$key")")
+done <<<"$list"
+local max max_length length cols rows i
+max=${#entries[@]}
+max_length=${#max}
 length=0
-for i in "${list[@]}";do
-((${#i}>length))&&length=${#i}
+for i in "${entries[@]}";do
+i=$(wc -m <<<"$i")
+((i>length))&&length=$i
 done
 cols=1
 ((max>3))&&cols=2
 ((max>6))&&cols=3
 ((max>9))&&cols=4
-while ((cols>1&&cols*(length+${#max}+4)>width));do
+while ((cols>1&&cols*(length+max_length+4)>width));do
 ((cols--))
 done
 rows=$(((max+cols-1)/cols))
@@ -1855,18 +1877,19 @@ local r c idx
 for ((r=0; r<rows; r++));do
 for ((c=0; c<cols; c++));do
 idx=$((r+c*rows))
-((idx>max))||printf "  %*s) %-*s" ${#max} $((idx+1)) "$length" "${list[idx]}" >/dev/tty
+((idx>max))||uprintf "  %*s) %-*s" $max_length $((idx+1)) "$length" "${entries[idx]}" >/dev/tty
 done
 printf "\n" >/dev/tty
 done
-[ -z "$end" ]||printf "  %${length}s) $end\n" x >/dev/tty
-if ((length==1));then
+[ -z "$end" ]||printf '  %*s) %s\n' $max_length x "$end" >/dev/tty
+[ -z "$default" ]||[[ "$default" =~ ^-?[0-9]+$ ]]||die "Default option $default not recognized."
+if ((max_length==1));then
 pattern="[1-$max]"
-elif ((length==2));then
+elif ((max_length==2));then
 pattern="0[1-9]?|"
 ((${max:0:1}==1))||pattern+="[1-$((${max:0:1}-1))][0-9]?|"
 pattern+="${max:0:1}[0-${max:1:1}]?"
-elif ((length==3));then
+elif ((max_length==3));then
 pattern="0(0[1-9]?)?|0([1-9][0-9]?)?|"
 ((${max:0:1}==1))||pattern+="[1-$((${max:0:1}-1))]([0-9][0-9]?)?|"
 pattern+="${max:0:1}([0-$((${max:1:1}-1))][0-9]?)?|"
@@ -1874,7 +1897,7 @@ pattern+="${max:0:1}(${max:1:1}[0-${max:3:1}]?)?"
 else
 pattern="[0-9]*"
 fi
-((length==1))||pattern="(0|$pattern)"
+((max_length==1))||pattern="(0|$pattern)"
 [ -z "$end" ]||pattern="(x|$pattern)"
 pattern="^$pattern$"
 local input="" char=""
@@ -1933,7 +1956,7 @@ continue
 fi
 input+="$char"
 printf '%s' "$char" >/dev/tty
-if ((${#input}==length));then
+if ((${#input}==max_length));then
 printf '\n' >/dev/tty
 break
 fi
