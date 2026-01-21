@@ -3724,13 +3724,14 @@ esac
 }
 TRIVY_EXPLOITS_URL=https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json
 trivy(){
-local timeout onlyOS exclude progress
+local timeout exclude progress opt='--exit-code 0 --no-progress --skip-version-check --skip-dirs "log/,*/log/" -f json'
 timeout=${TRIVY_DEFAULT_TIMEOUT:-60m}
 eval set -- "$(option_parse $'t timeout +\no only-os -\ne exclude +\np progress -' "$@")"
 while true;do
 case "$1" in
--t|--timeout)is duration -ntimeout -dotimeout -- "$2"&&shift 2;;
--o|--only-os)onlyOS=1&&shift;;
+-t|--timeout)is duration -ntimeout -dotimeout -- "$2"&&opt+=" --timeout $timeout"&&shift 2;;
+-o|--only-os)opt+=" --pkg-types os"&&shift;;
+--no-secrets)opt+=" --scanners-exclude secret"&&shift;;
 -e|--exclude)is set -nexclude -doexclude -- "$2"&&shift 2;;
 -p|--progress)progress=1&&shift;;
 --)shift&&break;;
@@ -3739,7 +3740,7 @@ esac
 done
 is enum -ncommand --allow="root files docker clean" -d -- "$1"&&local command="$1"&&shift
 install trivy
-local work cmd opt="--exit-code 0 --no-progress --skip-version-check --timeout $timeout -f json"
+local work cmd
 local source="$1"
 work="$(mktemp --directory "$$_trivy")"
 cmd="$(which trivy)"
