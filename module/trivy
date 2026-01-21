@@ -68,7 +68,7 @@ TRIVY_EXPLOITS_URL=https://www.cisa.gov/sites/default/files/feeds/known_exploite
 # Error:    Progress output if `--progress` is set with optimizations on reports
 # Return:   1 if there are at least one CRITICAL or HIGH vulnerabilities
 trivy() {
-    local timeout exclude progress opt="--exit-code 0 --no-progress --skip-version-check --skip-dirs \"log/,*/log/\" -f json"
+    local timeout exclude progress opt="--exit-code 0 --no-progress --skip-version-check --skip-dirs \"log/,*/log/,var/log/\" -f json"
     timeout=${TRIVY_DEFAULT_TIMEOUT:-60m}
     # parameter parsing
     eval set -- "$(option_parse $'t timeout +\no only-os -\ne exclude +\np progress -' "$@")"
@@ -175,9 +175,7 @@ trivy() {
     is set -- "${_trivy_jira[field_approval]}" || die "Could not find JIRA Field \"$TRIVY_JIRA_FIELD_APPROVAL\" in $TRIVY_JIRA_BOARD/$TRIVY_JIRA_ISSUE_TYPE!"
     # Loop over entries and create report
     is empty -- "$progress" || gettext 'Build queue to optimize reports...' | info >&2
-    local num
     for file in "$work"/split/*; do
-        num="$(basename "$file")"
         queue add _trivy_report "$work" "$file" "$source" "$progress"
     done
     is empty -- "$progress" || gettext 'Run queue to optimize reports...' | info >&2
@@ -229,9 +227,7 @@ trivy_test() {
     _trivy_jira[field_approval]="$(jq '.fields[] | select(.name == "'"$TRIVY_JIRA_FIELD_APPROVAL"'").key' -r <<<"$fields")"
     is set -- "${_trivy_jira[field_approval]}" || die "Could not find JIRA Field \"$TRIVY_JIRA_FIELD_APPROVAL\" in $TRIVY_JIRA_BOARD/$TRIVY_JIRA_ISSUE_TYPE!"
     # Loop over entries
-    local num
     for file in "$work"/split/*; do
-        num="$(basename "$file")"
         queue add _trivy_report "$work" "$file" "$source"
     done
     queue run
