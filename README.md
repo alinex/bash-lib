@@ -1,7 +1,7 @@
 # BASH-LIB Generation 2
 
 This is my personal library used to easily write powerful bash scripts which may work locally, partly remote or completely remote interactive or automatic.
-It brings powerful functions, makes your code easier readable and helps finding problems...
+It brings easy functions, makes your code more readable includes a wide range of tools and systems and helps finding problems in the scripts itself...
 
 I use it privately and at work for:
 
@@ -17,7 +17,10 @@ If you already use it jump directly to the [module description](https://gitlab.c
 
 - [BASH-LIB Generation 2](#bash-lib-generation-2)
   - [Table of Contents](#table-of-contents)
-  - [Changes to Generation 1](#changes-to-generation-1)
+  - [Why use Bash](#why-use-bash)
+    - [Personal history of bash](#personal-history-of-bash)
+    - [Changes to Generation 1](#changes-to-generation-1)
+    - [Look into the Future](#look-into-the-future)
   - [Distributions](#distributions)
   - [Architecture](#architecture)
     - [Quality](#quality)
@@ -36,9 +39,35 @@ If you already use it jump directly to the [module description](https://gitlab.c
   - [Latest Changes](#latest-changes)
   - [Contributing](#contributing)
 
-## Changes to Generation 1
+## Why use Bash
 
-Version 2 is a complete rework of the library meaning it is another toolset and you could not upgrade to it.
+Bash is often dismissed as “just glue” or “only for quick scripts.” That reputation comes largely from old Bash habits, legacy `/bin/sh` assumptions, and poorly written shell code.
+When used consciously, modern Bash (v4.2+) is a serious scripting language—but not a general-purpose one.
+
+Bash is:
+
+- A command language
+- A process orchestration language
+- A text-stream manipulation environment
+- Bash can directly be interpreted, needs no virtual machine or translation
+
+Bash is not:
+
+- A high-level application language
+- A numeric or data-science language
+- A Unicode-first language
+
+But as Bash speaks directly with processes, native pipes and redirection it can direct work to other tools in such parts it is not designed for. As an example you may use ffmpeg for video conversion and so on.
+
+### Personal history of bash
+
+First I learned it as only the glue to run a command. But for programming on the console I used perl. That was the golden time of Perl which later got more and more lost. I switched to NodeJS later with TypeScript but then came back to doing more in Bash. I found that I could also do everything in Bash and the command line utilities that I did with NodeJS.
+After the first years I did often the same thing and had lots of copy and change in it, so I decided to make this BashLib. The library grew and grew but I got stuck with it. It was not modular and open enough and some parts were over engineered and got to complex over the time. I lost interest in the BashLib and made more and more again without it or only copying parts of it.
+In 2025 I took some time and made a plan for a better base construct for the BashLib which I developed and changed multiple times completely till I got to the current BashLib 2 structure. The whole time I was not only developing it, but also used it actively myself. And now I am at the point there I can say I love to port all my scripts to the new BashLib and will do so over time. All new scripts are already based on it.
+
+### Changes to Generation 1
+
+Since the BashLib is publicly available since years some guys may also use it. And for those I can say Version 2 is a complete rework of the library meaning it is another toolset and you could not upgrade to it.
 Some functionalities from the older version will no longer be available like logging while a lot of new possibilities are included.
 
 What BashLib 2 brings:
@@ -57,6 +86,11 @@ The downside against Version 1 may be:
 - no backward compatibility - everything is new
 - no automatic conversion from the older versions
 - needs bash v4.2 (February 2011)
+
+### Look into the Future
+
+The BashLib itself will grow further through my own usage and needs and maybe some other developers will later take part, too.
+We are not at the end, we are more at the start. There is so much potential that can be added.
 
 ## Distributions
 
