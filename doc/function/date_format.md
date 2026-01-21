@@ -17,6 +17,8 @@ date_format <format> [<value>] # use now if missing
             human-date  Mittwoch, Oktober 01, 2025
             time        12:00:00
             time-short  12:00
+            compact         20251001_120000
+            compact-date    20251001
             %Y          2025 (custom format)
 ```
 

@@ -58,6 +58,8 @@ date_diff() {
 #                       human-date  Mittwoch, Oktober 01, 2025
 #                       time        12:00:00
 #                       time-short  12:00
+#                       compact         20251001_120000
+#                       compact-date    20251001
 #                       %Y          2025 (custom format)
 # Output:   <string> in selected format
 date_format() {
@@ -77,6 +79,8 @@ date_format() {
     human-date) format="$(gettext "+%A, %B %d, %Y")" ;;
     time) format="+%H:%M:%S" ;;
     time-short) format="+%H:%M" ;;
+    compact) format="Y%m%d_%H%M%S" ;;
+    compact-date) format="Y%m%d" ;;
     *) format="+$1" ;;
     esac
     value="${2-$(now)}"
