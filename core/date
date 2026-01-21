@@ -79,8 +79,8 @@ date_format() {
     human-date) format="$(gettext "+%A, %B %d, %Y")" ;;
     time) format="+%H:%M:%S" ;;
     time-short) format="+%H:%M" ;;
-    compact) format="Y%m%d_%H%M%S" ;;
-    compact-date) format="Y%m%d" ;;
+    compact) format="+%Y%m%d_%H%M%S" ;;
+    compact-date) format="+%Y%m%d" ;;
     *) format="+$1" ;;
     esac
     value="${2-$(now)}"
