@@ -1,6 +1,6 @@
 # os
 
-## Detect OS settings
+## Detect OS settings and Hardware
 
 ### Usage
 
@@ -29,9 +29,10 @@ The following formats are possible:
 - revision_number - distribution number
 - revision_name - version code name
 - kernel - version number of kernel like 6.8.0-87-generic
+- architecture - x86_64, i686, i386, armv7l, aarch64...
 - cpu_model - cpu name
 - cpu_num - number of cpus
-- architecture - x86_64, i686, i386, armv7l, aarch64...
+- memory - hardware memory in GB
 - machine_id
 - virtual_machine - `false` or `true`
 

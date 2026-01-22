@@ -2749,7 +2749,7 @@ hash _ip_extern_data set loc "$(jq .loc -r <<<"$json")"
 declare -A _os_detected
 os(){
 is integer -narguments --max=1 -d $#
-is enum -nformat --allow="data info os base base_revision_name base_revision_number distribution revision_number revision_name kernel cpu_model cpu_num architecture machine_id virtual_machine" -d -- "$1"
+is enum -nformat --allow="data info os base base_revision_name base_revision_number distribution revision_number revision_name kernel cpu_model cpu_num memory architecture machine_id virtual_machine" -d -- "$1"
 if [ ${#_os_detected[@]} -eq 0 ];then
 _os_detected["os"]="$(case "$(uname -s)" in
 "Darwin")printf MacOS;;
@@ -2807,6 +2807,7 @@ esac
 _os_detected["kernel"]="$(uname -r)"
 _os_detected["cpu_model"]="$(grep 'model name' /proc/cpuinfo|head -n 1|sed 's/^.*: //')"
 _os_detected["cpu_num"]="$(grep -c ^processor /proc/cpuinfo)"
+_os_detected["memory"]="$(LANG=C free --giga|awk '/^Mem:/ {printf "%.0f\n", $2 * (1000/1024)}')"
 _os_detected["architecture"]="$(case ${_os_detected["os"]} in
 Solaris)uname -p;;
 *)uname -m
