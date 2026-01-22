@@ -1180,6 +1180,7 @@ jq -r '
   '
 ;;
 md_to_adf)is set -ntext -d -- "$1"
+echo "$1" >/tmp/atlassian-md2adf.txt
 jq -c -n --arg text "$1" '
     def paragraph(t):
       { type: "paragraph", content: [{ type: "text", text: t }] };

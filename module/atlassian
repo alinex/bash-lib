@@ -193,6 +193,8 @@ jira() {
     ;;
   md_to_adf)
     is set --name=text --die -- "$1"
+    # TODO: remove after debugging
+    echo "$1" >/tmp/atlassian-md2adf.txt
     jq -c -n --arg text "$1" '
     def paragraph(t):
       { type: "paragraph", content: [{ type: "text", text: t }] };
