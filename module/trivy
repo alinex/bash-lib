@@ -91,7 +91,7 @@ trivy() {
     work="$(mktemp --directory "${$}_trivy")"
     cmd="$(which trivy)"
     opt+=" -o $work/trivy.json"
-    is empty -- "$DEBUG" || opt+=" --debug"
+    ! is integer --min=9 -- "$DEBUG" || opt+=" --debug"
     is empty -- "$TRIVY_CACHE_SERVER" || opt+=" --server $TRIVY_CACHE_SERVER"
     local version
     version="$(command "$cmd" -v | head -1 | cut -d' ' -f2)"
