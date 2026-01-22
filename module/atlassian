@@ -193,115 +193,108 @@ jira() {
     ;;
   md_to_adf)
     is set --name=text --die -- "$1"
-    # TODO: remove after debugging
-    echo "$1" >/tmp/atlassian-md2adf.txt
     jq -c -n --arg text "$1" '
-    def paragraph(t):
-      { type: "paragraph", content: [{ type: "text", text: t }] };
+      def paragraph(t):
+        { type: "paragraph", content: [{ type: "text", text: t }] };
 
-    def bullet(items):
-      {
-        type: "bulletList",
-        content: items | map({
-          type: "listItem",
-          content: [ paragraph(.) ]
-        })
-      };
+      def bullet(items):
+        {
+          type: "bulletList",
+          content: items | map({
+            type: "listItem",
+            content: [ paragraph(.) ]
+          })
+        };
 
-    def ordered(items):
-      {
-        type: "orderedList",
-        attrs: { order: 1 },
-        content: items | map({
-          type: "listItem",
-          content: [ paragraph(.) ]
-        })
-      };
+      def ordered(items):
+        {
+          type: "orderedList",
+          attrs: { order: 1 },
+          content: items | map({
+            type: "listItem",
+            content: [ paragraph(.) ]
+          })
+        };
 
-    ($text | split("\n")) as $lines
-    | reduce $lines[] as $line (
-        { out: [], mode: null, buf: [], pBuf: [] };
+      ($text | split("\n")) as $lines
+      | reduce $lines[] as $line (
+          { out: [], mode: null, buf: [], pBuf: [] };
 
-        # empty line → flush paragraph or list
-        if $line == "" then
-          if .mode == "ul" then
-            .out += [ bullet(.buf) ]
-            | .buf = [] | .mode = null
-          elif .mode == "ol" then
-            .out += [ ordered(.buf) ]
-            | .buf = [] | .mode = null
-          elif (.pBuf | length) > 0 then
-            .out += [ paragraph(.pBuf | join("\n")) ]
-            | .pBuf = []
-          else .
-          end
-
-        # bullet list
-        elif ($line | startswith("- ")) then
-          if (.pBuf | length) > 0 then
-            .out += [ paragraph(.pBuf | join("\n")) ]
-            | .pBuf = []
-          else .
-          end
-          | if .mode == "ul" then
-              .buf += [ $line[2:] ]
-            else
-              if .mode == "ol" then
-                .out += [ ordered(.buf) ]
-              end
-              | .mode = "ul"
-              | .buf = [ $line[2:] ]
+          if $line == "" then
+            if .mode == "ul" then
+              .out += [ bullet(.buf) ]
+              | .buf = [] | .mode = null
+            elif .mode == "ol" then
+              .out += [ ordered(.buf) ]
+              | .buf = [] | .mode = null
+            elif (.pBuf | length) > 0 then
+              .out += [ paragraph(.pBuf | join("\n")) ]
+              | .pBuf = []
+            else .
             end
 
-        # ordered list
-        elif ($line | test("^[0-9]+\\. ")) then
-          if (.pBuf | length) > 0 then
-            .out += [ paragraph(.pBuf | join("\n")) ]
-            | .pBuf = []
-          else .
-          end
-          | if .mode == "ol" then
-              .buf += [ ($line | sub("^[0-9]+\\. "; "")) ]
-            else
-              if .mode == "ul" then
-                .out += [ bullet(.buf) ]
-              end
-              | .mode = "ol"
-              | .buf = [ ($line | sub("^[0-9]+\\. "; "")) ]
+          elif ($line | startswith("- ")) then
+            if (.pBuf | length) > 0 then
+              .out += [ paragraph(.pBuf | join("\n")) ]
+              | .pBuf = []
+            else .
             end
+            | if .mode == "ul" then
+                .buf += [ $line[2:] ]
+              else
+                if .mode == "ol" then
+                  .out += [ ordered(.buf) ]
+                end
+                | .mode = "ul"
+                | .buf = [ $line[2:] ]
+              end
 
-        # normal text → append to paragraph buffer
-        else
-          if .mode == "ul" then
-            .out += [ bullet(.buf) ]
-            | .buf = [] | .mode = null
-          elif .mode == "ol" then
-            .out += [ ordered(.buf) ]
-            | .buf = [] | .mode = null
-          else .
+          elif ($line | test("^[0-9]+\\. ")) then
+            if (.pBuf | length) > 0 then
+              .out += [ paragraph(.pBuf | join("\n")) ]
+              | .pBuf = []
+            else .
+            end
+            | if .mode == "ol" then
+                .buf += [ ($line | sub("^[0-9]+\\. "; "")) ]
+              else
+                if .mode == "ul" then
+                  .out += [ bullet(.buf) ]
+                end
+                | .mode = "ol"
+                | .buf = [ ($line | sub("^[0-9]+\\. "; "")) ]
+              end
+
+          else
+            if .mode == "ul" then
+              .out += [ bullet(.buf) ]
+              | .buf = [] | .mode = null
+            elif .mode == "ol" then
+              .out += [ ordered(.buf) ]
+              | .buf = [] | .mode = null
+            else .
+            end
+            | .pBuf += [ $line ]
           end
-          | .pBuf += [ $line ]
-        end
-      )
-    # flush leftovers
-    | (
-        .out
-        + (if .mode == "ul" then [ bullet(.buf) ]
-           elif .mode == "ol" then [ ordered(.buf) ]
-           else [] end)
-        + (if (.pBuf | length) > 0 then [ paragraph(.pBuf | join("\n")) ]
-           else [] end)
-      )
-    | {
-        type: "doc",
-        version: 1,
-        content: .
-      }
-  ' | sed -E '
-    s/\*\*(.+?)\*\*/<strong>\1<\/strong>/g
-    s/\*(.+?)\*/<em>\1<\/em>/g
-    s/`([^`]+)`/<code>\1<\/code>/g
-  '
+        )
+      | (
+          .out
+          + (if .mode == "ul" then [ bullet(.buf) ]
+             elif .mode == "ol" then [ ordered(.buf) ]
+             else [] end)
+          + (if (.pBuf | length) > 0 then [ paragraph(.pBuf | join("\n")) ]
+             else [] end)
+        )
+      | {
+          type: "doc",
+          version: 1,
+          content: .
+        }
+    ' | sed -E '
+      s/\*\*(.+?)\*\*/<strong>\1<\/strong>/g
+      s/\*(.+?)\*/<em>\1<\/em>/g
+      s/`([^`]+)`/<code>\1<\/code>/g
+    '
     ;;
   esac
 }
