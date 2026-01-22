@@ -1189,79 +1189,95 @@ jq -r '
 ;;
 md_to_adf)is set -ntext -d -- "$1"
 jq -c -n --arg text "$1" '
-      def paragraph(t):
-        { type: "paragraph", content: [{ type: "text", text: t }] };
+    def paragraph(t):
+      { type: "paragraph", content: [{ type: "text", text: t }] };
 
-      def bullet(items):
+    def bullet(items):
+      {
+        type: "bulletList",
+        content: items | map({
+          type: "listItem",
+          content: [ paragraph(.) ]
+        })
+      };
+
+    def ordered(items):
+      {
+        type: "orderedList",
+        attrs: { order: 1 },
+        content: items | map({
+          type: "listItem",
+          content: [ paragraph(.) ]
+        })
+      };
+
+    def heading(level; t):
+      {
+        type: "heading",
+        attrs: { level: level },
+        content: [{ type: "text", text: t }]
+      };
+
+    def codeblock(lang; body):
+      {
+        type: "codeBlock",
+        attrs: { language: lang },
+        content: [{ type: "text", text: body }]
+      };
+
+    def rule:
+      { type: "rule" };
+
+    def blockquote(paras):
+      {
+        type: "blockquote",
+        content: paras
+      };
+
+    ($text | split("\n")) as $lines
+    | reduce $lines[] as $line (
         {
-          type: "bulletList",
-          content: items | map({
-            type: "listItem",
-            content: [ paragraph(.) ]
-          })
+          out: [],
+          mode: null,      # "ul" / "ol" / null
+          buf: [],         # list items buffer
+          pBuf: [],        # paragraph buffer
+          code: false,
+          codeLang: "",
+          codeBuf: [],
+          quoteBuf: []     # paragraphs inside current blockquote
         };
 
-      def ordered(items):
-        {
-          type: "orderedList",
-          attrs: { order: 1 },
-          content: items | map({
-            type: "listItem",
-            content: [ paragraph(.) ]
-          })
-        };
-
-      ($text | split("\n")) as $lines
-      | reduce $lines[] as $line (
-          { out: [], mode: null, buf: [], pBuf: [] };
-
-          if $line == "" then
-            if .mode == "ul" then
-              .out += [ bullet(.buf) ]
-              | .buf = [] | .mode = null
-            elif .mode == "ol" then
-              .out += [ ordered(.buf) ]
-              | .buf = [] | .mode = null
-            elif (.pBuf | length) > 0 then
-              .out += [ paragraph(.pBuf | join("\n")) ]
-              | .pBuf = []
-            else .
-            end
-
-          elif ($line | startswith("- ")) then
-            if (.pBuf | length) > 0 then
-              .out += [ paragraph(.pBuf | join("\n")) ]
-              | .pBuf = []
-            else .
-            end
-            | if .mode == "ul" then
-                .buf += [ $line[2:] ]
-              else
-                if .mode == "ol" then
-                  .out += [ ordered(.buf) ]
-                end
-                | .mode = "ul"
-                | .buf = [ $line[2:] ]
-              end
-
-          elif ($line | test("^[0-9]+\\. ")) then
-            if (.pBuf | length) > 0 then
-              .out += [ paragraph(.pBuf | join("\n")) ]
-              | .pBuf = []
-            else .
-            end
-            | if .mode == "ol" then
-                .buf += [ ($line | sub("^[0-9]+\\. "; "")) ]
-              else
-                if .mode == "ul" then
-                  .out += [ bullet(.buf) ]
-                end
-                | .mode = "ol"
-                | .buf = [ ($line | sub("^[0-9]+\\. "; "")) ]
-              end
-
+        # fenced code blocks
+        if ($line | test("^```")) then
+          if .code then
+            .out += [ codeblock(.codeLang; (.codeBuf | join("\n"))) ]
+            | .code = false
+            | .codeBuf = []
+            | .codeLang = ""
           else
-            if .mode == "ul" then
+            .code = true
+            | .codeLang = ($line | sub("^```"; ""))
+          end
+
+        elif .code then
+          .codeBuf += [ $line ]
+
+        # horizontal rules
+        elif ($line | test("^(-{3,}|\\*{3,}|_{3,})$")) then
+          # flush paragraph
+          if (.pBuf | length) > 0 then
+            .out += [ paragraph(.pBuf | join("\n")) ]
+            | .pBuf = []
+          else .
+          end
+          # flush quote
+          | if (.quoteBuf | length) > 0 then
+              .out += [ blockquote(.quoteBuf) ]
+              | .quoteBuf = []
+            else .
+            end
+          # flush list
+          | if .mode == "ul" then
               .out += [ bullet(.buf) ]
               | .buf = [] | .mode = null
             elif .mode == "ol" then
@@ -1269,27 +1285,158 @@ jq -c -n --arg text "$1" '
               | .buf = [] | .mode = null
             else .
             end
-            | .pBuf += [ $line ]
+          | .out += [ rule ]
+
+        # blockquotes
+        elif ($line | test("^> ")) then
+          # flush list before starting/continuing quote
+          if .mode == "ul" then
+            .out += [ bullet(.buf) ]
+            | .buf = [] | .mode = null
+          elif .mode == "ol" then
+            .out += [ ordered(.buf) ]
+            | .buf = [] | .mode = null
+          else .
           end
-        )
-      | (
-          .out
-          + (if .mode == "ul" then [ bullet(.buf) ]
-             elif .mode == "ol" then [ ordered(.buf) ]
-             else [] end)
-          + (if (.pBuf | length) > 0 then [ paragraph(.pBuf | join("\n")) ]
-             else [] end)
-        )
-      | {
-          type: "doc",
-          version: 1,
-          content: .
-        }
-    '|sed -E '
-      s/\*\*(.+?)\*\*/<strong>\1<\/strong>/g
-      s/\*(.+?)\*/<em>\1<\/em>/g
-      s/`([^`]+)`/<code>\1<\/code>/g
-    '
+          # flush paragraph into quote if we were in text
+          | if (.pBuf | length) > 0 then
+              .quoteBuf += [ paragraph(.pBuf | join("\n")) ]
+              | .pBuf = []
+            else .
+            end
+          | ($line | sub("^> "; "")) as $t
+          | .quoteBuf += [ paragraph($t) ]
+
+        # headings
+        elif ($line | test("^#{1,6} ")) then
+          # flush paragraph
+          if (.pBuf | length) > 0 then
+            .out += [ paragraph(.pBuf | join("\n")) ]
+            | .pBuf = []
+          else .
+          end
+          # flush quote
+          | if (.quoteBuf | length) > 0 then
+              .out += [ blockquote(.quoteBuf) ]
+              | .quoteBuf = []
+            else .
+            end
+          # flush list
+          | if .mode == "ul" then
+              .out += [ bullet(.buf) ]
+              | .buf = [] | .mode = null
+            elif .mode == "ol" then
+              .out += [ ordered(.buf) ]
+              | .buf = [] | .mode = null
+            else .
+            end
+          | ($line | capture("^(?<h>#+) (?<t>.*)")) as $h
+          | .out += [ heading(($h.h | length); $h.t) ]
+
+        # bullet list
+        elif ($line | startswith("- ")) then
+          # flush paragraph
+          if (.pBuf | length) > 0 then
+            .out += [ paragraph(.pBuf | join("\n")) ]
+            | .pBuf = []
+          else .
+          end
+          # flush quote
+          | if (.quoteBuf | length) > 0 then
+              .out += [ blockquote(.quoteBuf) ]
+              | .quoteBuf = []
+            else .
+            end
+          | if .mode == "ul" then
+              .buf += [ $line[2:] ]
+            else
+              if .mode == "ol" then
+                .out += [ ordered(.buf) ]
+              else .
+              end
+              | .mode = "ul"
+              | .buf = [ $line[2:] ]
+            end
+
+        # ordered list
+        elif ($line | test("^[0-9]+\\. ")) then
+          # flush paragraph
+          if (.pBuf | length) > 0 then
+            .out += [ paragraph(.pBuf | join("\n")) ]
+            | .pBuf = []
+          else .
+          end
+          # flush quote
+          | if (.quoteBuf | length) > 0 then
+              .out += [ blockquote(.quoteBuf) ]
+              | .quoteBuf = []
+            else .
+            end
+          | if .mode == "ol" then
+              .buf += [ ($line | sub("^[0-9]+\\. "; "")) ]
+            else
+              if .mode == "ul" then
+                .out += [ bullet(.buf) ]
+              else .
+              end
+              | .mode = "ol"
+              | .buf = [ ($line | sub("^[0-9]+\\. "; "")) ]
+            end
+
+        # empty line → flush paragraph / quote / list
+        elif $line == "" then
+          if .mode == "ul" then
+            .out += [ bullet(.buf) ]
+            | .buf = [] | .mode = null
+          elif .mode == "ol" then
+            .out += [ ordered(.buf) ]
+            | .buf = [] | .mode = null
+          else .
+          end
+          | if (.quoteBuf | length) > 0 then
+              .out += [ blockquote(.quoteBuf) ]
+              | .quoteBuf = []
+            else .
+            end
+          | if (.pBuf | length) > 0 then
+              .out += [ paragraph(.pBuf | join("\n")) ]
+              | .pBuf = []
+            else .
+            end
+
+        # normal text → paragraph buffer
+        else
+          # if we were in a list, close it before plain text
+          if .mode == "ul" then
+            .out += [ bullet(.buf) ]
+            | .buf = [] | .mode = null
+          elif .mode == "ol" then
+            .out += [ ordered(.buf) ]
+            | .buf = [] | .mode = null
+          else .
+          end
+          | .pBuf += [ $line ]
+        end
+      )
+    # final flush
+    | (
+        .out
+        + (if .mode == "ul" then [ bullet(.buf) ]
+           elif .mode == "ol" then [ ordered(.buf) ]
+           else [] end)
+        + (if (.quoteBuf | length) > 0 then [ blockquote(.quoteBuf) ] else [] end)
+        + (if (.pBuf | length) > 0 then [ paragraph(.pBuf | join("\n")) ] else [] end)
+      )
+    | {
+        type: "doc",
+        version: 1,
+        content: .
+      }
+  '|sed -E '
+    s/\*\*(.+?)\*\*/<strong>\1<\/strong>/g
+    s/\*(.+?)\*/<em>\1<\/em>/g
+    s/`([^`]+)`/<code>\1<\/code>/g
+  '
 esac
 }
 _jira(){
@@ -3889,8 +4036,8 @@ done < <(find "$work" -mindepth 3 -type d)
 _trivy_cache=/tmp/trivy-cache
 declare -A _trivy_jira
 _trivy_report(){
-echo "trivy_report \"$1\" \"$2\" \"$3\"" >&2
-debug "trivy_report \"$1\" \"$2\" \"$3\""
+echo "_trivy_report \"$1\" \"$2\" \"$3\"" >&2
+debug "_trivy_report \"$1\" \"$2\" \"$3\""
 local work="$1"
 local file="$2"
 local source="$3"

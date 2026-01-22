@@ -258,8 +258,8 @@ _trivy_cache=/tmp/trivy-cache
 declare -A _trivy_jira
 _trivy_report() {
     # TODO: remove debug code
-    echo "trivy_report \"$1\" \"$2\" \"$3\"" >&2
-    debug "trivy_report \"$1\" \"$2\" \"$3\""
+    echo "_trivy_report \"$1\" \"$2\" \"$3\"" >&2
+    debug "_trivy_report \"$1\" \"$2\" \"$3\""
     local work="$1"
     local file="$2"
     local source="$3"
