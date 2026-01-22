@@ -123,5 +123,7 @@ IP_SEGMENT_PATTERN=(
 #TRIVY_CACHE_SERVER=
 # Specify there trivy should store its cache (about 1.3GB)
 #TRIVY_CACHE_DIR=$HOME/.cache/trivy
+# Default timeout if nothing defined for the root scan only
+#TRIVY_ROOT_TIMEOUT=60m
 # Paths to prevent in root scans
 #TRIVY_ROOT_EXCLUDE="/mnt /opt/docker"

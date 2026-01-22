@@ -68,7 +68,7 @@ TRIVY_EXPLOITS_URL=https://www.cisa.gov/sites/default/files/feeds/known_exploite
 # Error:    Progress output if `--progress` is set with optimizations on reports
 # Return:   1 if there are at least one CRITICAL or HIGH vulnerabilities
 trivy() {
-    local timeout exclude progress opt="--exit-code 0 --no-progress --skip-version-check --skip-dirs \"log/,*/log/,var/log/\" -f json"
+    local timeout exclude progress opt="--exit-code 0 --no-progress --skip-version-check -f json"
     timeout=${TRIVY_DEFAULT_TIMEOUT:-60m}
     # parameter parsing
     eval set -- "$(option_parse $'t timeout +\no only-os -\ne exclude +\np progress -' "$@")"
@@ -99,6 +99,7 @@ trivy() {
     # shellcheck disable=SC2086
     case $command in
     root)
+        [[ "$opt" == *"--timeout"* ]] || opt+=" --timeout $TRIVY_ROOT_TIMEOUT"
         exclude+=" $TRIVY_ROOT_EXCLUDE"
         local excludeOption
         for path in $exclude; do

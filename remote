@@ -3725,7 +3725,7 @@ esac
 }
 TRIVY_EXPLOITS_URL=https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json
 trivy(){
-local timeout exclude progress opt='--exit-code 0 --no-progress --skip-version-check --skip-dirs "log/,*/log/,var/log/" -f json'
+local timeout exclude progress opt="--exit-code 0 --no-progress --skip-version-check -f json"
 timeout=${TRIVY_DEFAULT_TIMEOUT:-60m}
 eval set -- "$(option_parse $'t timeout +\no only-os -\ne exclude +\np progress -' "$@")"
 while true;do
@@ -3752,7 +3752,8 @@ local version
 version="$(command "$cmd" -v|head -1|cut -d' ' -f2)"
 [ -z "$progress" ]||eval_gettext 'Start $command scanning with trivy V${version}...'|info >&2
 case $command in
-root)exclude+=" $TRIVY_ROOT_EXCLUDE"
+root)[[ $opt == *"--timeout"* ]]||opt+=" --timeout $TRIVY_ROOT_TIMEOUT"
+exclude+=" $TRIVY_ROOT_EXCLUDE"
 local excludeOption
 for path in $exclude;do
 excludeOption+=" --skip-dirs $path"
@@ -4147,4 +4148,5 @@ PLUSSERVER_PORTAL=
 POWERDNS_API=
 TRIVY_DEFAULT_TIMEOUT=60m
 TRIVY_CACHE_SERVER=
-TRIVY_ROOT_EXCLUDE="/mnt /opt/docker"
+TRIVY_ROOT_TIMEOUT=60m
+TRIVY_ROOT_EXCLUDE="/mnt /opt/docker **/log/ **/logs/"
