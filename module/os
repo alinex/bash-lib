@@ -6,7 +6,7 @@ source /dev/null
 # Module with operating system specific helper functions.
 
 ######################################################################################
-### Detect OS
+### Detect OS / Hardware
 ######################################################################################
 
 declare -A _os_detected
@@ -137,6 +137,52 @@ os() {
 os_detect() {
     _deprecated "Use os now" warn
     os "$@"
+}
+
+# Hardware description
+#
+# This will show information like:
+#
+# ```text
+# System HP ZBook Firefly 16 inch G10 Mobile Workstation PC 5CG3371SB8
+# BIOS HP V70 Ver. 01.09.00 04/11/2025 firmware 81.67
+# Processor Intel(R) Corporation 13th Gen Intel(R) Core(TM) i7-1360P 12 cores 16 threads
+# Memory 16 GB Samsung DDR5 SODIMM
+# Memory 16 GB Samsung DDR5 SODIMM
+# Port Type-C Port 1
+# Port Type-C Port 2
+# Port Left  USB Port
+# Port Right USB Port
+# Port HDMI Port
+# Port Speaker Port
+# Port SIM card
+# ```
+#
+# Usage:    bios
+# Output:   List with type as first word and details (type specific) behind
+bios() {
+    sudo dmidecode -t 1 | awk '
+    /Product Name:/ { prod=$0; sub(".*Product Name: *","",prod) }
+    /Serial Number:/ { ser=$0; sub(".*Serial Number: *","",ser); print "System " prod " " ser }'
+    sudo dmidecode -t 0 | awk '
+    /Vendor:/        { vendor=$0; sub(".*Vendor: *","",vendor) }
+    /Version:/       { version=$0; sub(".*Version: *","",version) }
+    /Release Date:/  { date=$0; sub(".*Release Date: *","",date) }
+    /Firmware Revision:/  { firmware=$0; sub(".*Firmware Revision: *","",firmware); print "BIOS " vendor " " version " " date " firmware " firmware}'
+    sudo dmidecode -t 4 | awk '
+    /Manufacturer:/ { pm=$0; sub(".*Manufacturer: *","",pm) }
+    /Version:/      { pv=$0; sub(".*Version: *","",pv) }
+    /Core Count:/   { pc=$0; sub(".*Core Count: *","",pc) }
+    /Thread Count:/ { pt=$0; sub(".*Thread Count: *","",pt); print "Processor " pm " " pv " " pc " cores " pt " threads" }'
+    sudo dmidecode -t 17 | awk '
+    /Size:/ { size=$0; sub(".*Size: *","",size) }
+    /Type:/ { type=$0; sub(".*Type: *","",type) }
+    /Form Factor:/ { ff=$0; sub(".*Form Factor: *","",ff) }
+    /Manufacturer:/ { mm=$0; sub(".*Manufacturer: *","",mm); print "Memory " size " " mm " " type " " ff }'
+    sudo dmidecode -t 8 | awk '
+    /External Reference Designator:/ { des=$0; sub(".*External Reference Designator: *","",des); print "Port " des }'
+    sudo dmidecode -t 9 | awk '
+    section=="slot" && /Designation:/ { des=$0; sub(".*Designation: *","",des); print "system-slot " des }'
 }
 
 ######################################################################################

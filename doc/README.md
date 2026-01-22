@@ -434,6 +434,7 @@ Module with operating system specific helper functions.
 | --- | --- |
 | [`os`](function/os.md) | Detect OS settings and Hardware |
 | [`os_detect`](function/os_detect.md) | Deprecates: OS detection |
+| [`bios`](function/bios.md) | Hardware description |
 | [`disk_free`](function/disk_free.md) | Disk free with visual display |
 | [`uses_lvm`](function/uses_lvm.md) | Check if LVM is used |
 | [`has_tty`](function/has_tty.md) | Has tty present |
