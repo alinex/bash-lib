@@ -2747,7 +2747,7 @@ hash _ip_extern_data set org "$(jq .org -r <<<"$json")"
 hash _ip_extern_data set loc "$(jq .loc -r <<<"$json")"
 }
 declare -A _os_detected
-os_detect(){
+os(){
 is integer -narguments --max=1 -d $#
 is enum -nformat --allow="data info os base base_revision_name base_revision_number distribution revision_number revision_name kernel cpu_model cpu_num architecture machine_id virtual_machine" -d -- "$1"
 if [ ${#_os_detected[@]} -eq 0 ];then
@@ -2832,6 +2832,10 @@ fi
 ;;
 *)printf '%s\n' "${_os_detected["$1"]}"
 esac
+}
+os_detect(){
+_deprecated "Use os now" warn
+os "$@"
 }
 disk_free(){
 debug "$*"

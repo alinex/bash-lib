@@ -34,7 +34,7 @@ declare -A _os_detected
 # Usage:    os_detect <format>
 # Output:   - <tsv-table> for data
 #           - <value> else
-os_detect() {
+os() {
     is integer --name=arguments --max=1 --die -- $#
     is enum --name=format --allow="data info os base base_revision_name base_revision_number distribution revision_number revision_name kernel cpu_model cpu_num architecture machine_id virtual_machine" --die -- "$1"
     # processing
@@ -128,6 +128,13 @@ os_detect() {
         ;;
     *) printf '%s\n' "${_os_detected["$1"]}" ;;
     esac
+}
+
+# Deprecates: Os detection
+# Renamed to @os
+os_detect() {
+    _deprecated "Use os now" warn
+    os "$@"
 }
 
 ######################################################################################
