@@ -3868,16 +3868,16 @@ esac
 }
 TRIVY_EXPLOITS_URL=https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json
 trivy(){
-local timeout exclude progress opt="--exit-code 0 --no-progress --skip-version-check -f json"
-timeout=${TRIVY_DEFAULT_TIMEOUT:-60m}
-eval set -- "$(option_parse $'t timeout +\no only-os -\ne exclude +\np progress -' "$@")"
+local exclude clean progress opt="--exit-code 0 --no-progress --skip-version-check -f json"
+eval set -- "$(option_parse $'t timeout +\no only-os -\ne exclude +\np progress -\nc clean -' "$@")"
 while true;do
 case "$1" in
--t|--timeout)is duration -ntimeout -dotimeout -- "$2"&&opt+=" --timeout $timeout"&&shift 2;;
+-t|--timeout)is duration -ntimeout -d -- "$2"&&opt+=" --timeout $timeout"&&shift 2;;
 -o|--only-os)opt+=" --pkg-types os"&&shift;;
 --no-secrets)opt+=" --scanners-exclude secret"&&shift;;
 -e|--exclude)is set -nexclude -doexclude -- "$2"&&shift 2;;
 -p|--progress)progress=1&&shift;;
+-c|--clean)clean=1&&shift;;
 --)shift&&break;;
 *)die "$(gettext "Unrecognized option"): $1"
 esac
@@ -3894,8 +3894,9 @@ opt+=" -o $work/trivy.json"
 local version
 version="$(command "$cmd" -v|head -1|cut -d' ' -f2)"
 [ -z "$progress" ]||eval_gettext 'Start $command scanning with trivy V${version}...'|info >&2
+local rc
 case $command in
-root)[[ $opt == *"--timeout"* ]]||opt+=" --timeout $TRIVY_ROOT_TIMEOUT"
+root)[[ $opt == *"--timeout"* ]]||opt+=" --timeout ${TRIVY_ROOT_TIMEOUT:-${TRIVY_DEFAULT_TIMEOUT:-30m}}"
 exclude+=" $TRIVY_ROOT_EXCLUDE"
 local excludeOption
 for path in $exclude;do
@@ -3903,30 +3904,23 @@ excludeOption+=" --skip-dirs $path"
 done
 [ -z "$onlyOS" ]||opt+=" --pkg-types os"
 source="$(hostname -f)"
-local rc
 sudo "$cmd" rootfs $opt $excludeOption / 2>&1|sed 's/[^A-Z]*T[^A-Z]*//' >"$work/log"||rc=$?
-cat "$work/log"|debug
-[ -z "$rc" ]||tail "$work/log"|warn
-[ -z "$rc" ]||die "Failed trivy scan!"
-rm "$work/log"
 ;;
-files)local rc
+files)[[ $opt == *"--timeout"* ]]||opt+=" --timeout ${TRIVY_DEFAULT_TIMEOUT:-30m}"
 $cmd fs $opt "$1" 2>&1|sed 's/[^A-Z]*T[^A-Z]*//' >"$work/log"||rc=$?
-cat "$work/log"|debug
-[ -z "$rc" ]||tail "$work/log"|warn
-[ -z "$rc" ]||die "Failed trivy scan!"
-rm "$work/log"
 ;;
-docker)local rc
+docker)[[ $opt == *"--timeout"* ]]||opt+=" --timeout ${TRIVY_DEFAULT_TIMEOUT:-30m}"
 $cmd image $opt --input "$1" 2>&1|sed 's/[^A-Z]*T[^A-Z]*//' >"$work/log"||rc=$?
-cat "$work/log"|debug
-[ -z "$rc" ]||tail "$work/log"|warn
-[ -z "$rc" ]||die "Failed trivy scan!"
-rm "$work/log"
 ;;
-clean)sudo rm -rf /root/.cache/trivy
+clean)_deprecated "Use option --clean instead" warn
+sudo rm -rf /root/.cache/trivy
 return
 esac
+cat "$work/log"|debug
+[ -z "$rc" ]||tail "$work/log"|warn
+[ -z "$rc" ]||die "Failed trivy scan!"
+rm "$work/log"
+is false -- "$clean"||sudo rm -rf /root/.cache/trivy
 [ -z "$progress" ]||gettext 'Optimize JSON structure for splitting...'|info >&2
 jq '.Results[]?|. as $g|.Vulnerabilities[]?|{Class: $g.Class, Target: $g.Target, Type: $g.Type}*.' "$work"/trivy.json >"$work"/split.json
 [ -z "$progress" ]||gettext 'Splitting JSON into single reports...'|info >&2

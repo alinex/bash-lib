@@ -19,6 +19,7 @@ t, timeout <duration>   # set the timeout for the job in <int>m or <int>h
 o, only-os              # let `root` command only scan OS without filesystem traversal
 e, exclude <dirs>       # additional excludes for `root` command
 p, progress             # show progress
+c, clean                # immediately clean trivy database after scan
 ```
 
 ### Globals
