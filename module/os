@@ -246,7 +246,7 @@ uses_lvm() {
 
 # Has tty present
 #
-# Usage:    has_ttyp
+# Usage:    has_tty
 # Status:   0 || 1
 has_tty() {
     is integer --name=arguments --max=0 --die -- $#

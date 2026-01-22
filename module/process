@@ -484,7 +484,7 @@ declare -A _queue_running
 # Run bash commands parallel with limits from a queue.
 #
 # The queue first collects all jobs and then you execute them all in parallel. Therefore you can give a max number of parallel calls and a max percentage load limit for then to start the next job.
-# You may also set the limits using environment $QUEUE_MAX_NUM and $QUEUE_MAX_LOAD.
+# You may also set the limits using environment $QUEUE_MAX_PARALLEL and $QUEUE_MAX_LOAD.
 # If the server is over the configured load limit one job will always run, but parallel execution will only start if possible.
 #
 # Usage:    queue [<options>] add <job> [<args>...]             # add job to queue
@@ -525,7 +525,7 @@ queue() {
     run)
         is empty -- "$1" || is integer --name=parallel --min 1 --die "$1"
         is empty -- "$2" || is integer --name=load-percent --min 1 --die "$2"
-        local max="${1:-$QUEUE_MAX_NUM}"
+        local max="${1:-$QUEUE_MAX_PARALLEL}"
         local load="${2:-$QUEUE_MAX_LOAD}"
         local job total=${#_queue_jobs[@]} started=0
         debug "$total Jobs to be run..."

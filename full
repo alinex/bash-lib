@@ -3046,7 +3046,7 @@ _queue_jobs+=("$(printf '%s\t%s\t%s' "$name" "$verbose" "$*")")
 ;;
 run)[ -z "$1" ]||is integer -nparallel --min 1 -d "$1"
 [ -z "$2" ]||is integer -nload-percent --min 1 -d "$2"
-local max="${1:-$QUEUE_MAX_NUM}"
+local max="${1:-$QUEUE_MAX_PARALLEL}"
 local load="${2:-$QUEUE_MAX_LOAD}"
 local job total=${#_queue_jobs[@]} started=0
 debug "$total Jobs to be run..."
@@ -3718,7 +3718,7 @@ esac
 }
 TRIVY_EXPLOITS_URL=https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json
 trivy(){
-local timeout exclude progress opt='--exit-code 0 --no-progress --skip-version-check --skip-dirs "log/,*/log/" -f json'
+local timeout exclude progress opt='--exit-code 0 --no-progress --skip-version-check --skip-dirs "log/,*/log/,var/log/" -f json'
 timeout=${TRIVY_DEFAULT_TIMEOUT:-60m}
 eval set -- "$(option_parse $'t timeout +\no only-os -\ne exclude +\np progress -' "$@")"
 while true;do
@@ -3811,9 +3811,7 @@ _trivy_jira[field_links]="$(jq '.fields[] | select(.name == "'"$TRIVY_JIRA_FIELD
 _trivy_jira[field_approval]="$(jq '.fields[] | select(.name == "'"$TRIVY_JIRA_FIELD_APPROVAL"'").key' -r <<<"$fields")"
 [ -n "${_trivy_jira[field_approval]}" ]||die "Could not find JIRA Field \"$TRIVY_JIRA_FIELD_APPROVAL\" in $TRIVY_JIRA_BOARD/$TRIVY_JIRA_ISSUE_TYPE!"
 [ -z "$progress" ]||gettext 'Build queue to optimize reports...'|info >&2
-local num
 for file in "$work"/split/*;do
-num="$(basename "$file")"
 queue add _trivy_report "$work" "$file" "$source" "$progress"
 done
 [ -z "$progress" ]||gettext 'Run queue to optimize reports...'|info >&2
@@ -3861,9 +3859,7 @@ _trivy_jira[field_links]="$(jq '.fields[] | select(.name == "'"$TRIVY_JIRA_FIELD
 [ -n "${_trivy_jira[field_links]}" ]||die "Could not find JIRA Field \"$TRIVY_JIRA_FIELD_LINKS\" in $TRIVY_JIRA_BOARD/$TRIVY_JIRA_ISSUE_TYPE!"
 _trivy_jira[field_approval]="$(jq '.fields[] | select(.name == "'"$TRIVY_JIRA_FIELD_APPROVAL"'").key' -r <<<"$fields")"
 [ -n "${_trivy_jira[field_approval]}" ]||die "Could not find JIRA Field \"$TRIVY_JIRA_FIELD_APPROVAL\" in $TRIVY_JIRA_BOARD/$TRIVY_JIRA_ISSUE_TYPE!"
-local num
 for file in "$work"/split/*;do
-num="$(basename "$file")"
 queue add _trivy_report "$work" "$file" "$source"
 done
 queue run
