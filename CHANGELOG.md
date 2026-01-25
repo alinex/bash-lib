@@ -11,6 +11,7 @@ But on release they will be merged with semantical versioning into the master br
 - add [uppercase](doc/function/uppercase.md) and [lowercase](doc/function/lowercase.md) methods
 - add [compress](doc/function/compress.md) and [decompress](doc/function/decompress.md)
 - add [uprintf](doc/function/uprintf.md) which is a multi-byte safe version of `printf`
+- enhance the [os](doc/function/os.md) and add [bios](doc/function/bios.md) information
 - move join -> [array](doc/function/array.md) command
 - enhance [hash](doc/function/hash.md) to tsv
 - [choose](doc/function/choose.md) now with multi column display

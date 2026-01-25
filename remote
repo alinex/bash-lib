@@ -2862,7 +2862,87 @@ sudo dmidecode -t 8|awk '
 sudo dmidecode -t 9|awk '
     section=="slot" && /Designation:/ { des=$0; sub(".*Designation: *","",des); print "system-slot " des }'
 }
+disk(){
+local opt="" format free_operator free_percent free_bytes
+eval set -- "$(option_parse $'l locale -\nr remote -\nf free +' "$@")"
+while true;do
+case "$1" in
+-l|--locale)opt="-l"&&shift;;
+-r|--remote)opt="-t nfs -t cifs -t sshfs -t smbfs -t fuse"&&shift;;
+-f|--free)local text="$2"
+if [[ $text =~ ^([<>]=?|==|!=)?(([0-9]+)[%bB]?)$ ]];then
+read -r _ free_operator val num <<<"${BASH_REMATCH[@]}"
+free_operator="${free_operator:-<}"
+[[ $val =~ ^[0-9]+%$ ]]&&free_percent="$num"||free_bytes="$(numfmt --from=iec <<<"${num^^}")"
+else
+die "Option value --free=$2 not supported!"
+fi
+shift 2
+;;
+--)shift&&break;;
+*)die "$(gettext "Unrecognized option"): $1"
+esac
+done
+is enum -nformat --allow="list data console" -doformat -- "$1"&&shift
+local type source size used avail pcent itotal iused iavail ipcent target list pval ival i pattern level
+while read -r type source size used avail pcent itotal iused iavail ipcent target;do
+pval=${pcent%%%}
+[ "$ipcent" = "-" ]||ival=${ipcent%%%}
+for ((i=0; i<${#MOUNT_COLOR_LIMIT[@]}; i+=5));do
+pattern="${MOUNT_COLOR_LIMIT[i]}"
+if [[ $source =~ $pattern ]];then
+limit_c="${MOUNT_COLOR_LIMIT[i+1]}"
+limit_e="${MOUNT_COLOR_LIMIT[i+2]}"
+limit_w="${MOUNT_COLOR_LIMIT[i+3]}"
+limit_o="${MOUNT_COLOR_LIMIT[i+4]}"
+break
+fi
+done
+percent=$pval
+((percent>=ival))||percent=$ival
+if ((percent>=limit_c));then
+level=critical
+elif ((percent>=limit_e));then
+level=error
+elif ((percent>=limit_w));then
+level=warn
+elif ((percent>=limit_o));then
+level=ok
+else
+level=info
+fi
+if [ -n "$free_operator" ];then
+if [ -n "$free_percent" ]&&eval "(( 100 - ${pcent%%%} $free_operator free_percent ))";then
+list+="$type $source $size $used $avail $pcent $itotal $iused $iavail $ipcent $target $pval $ival $level"$'\n'
+elif [ -n "$free_bytes" ]&&eval "(( avail $free_operator free_bytes ))";then
+list+="$type $source $size $used $avail $pcent $itotal $iused $iavail $ipcent $target $pval $ival $level"$'\n'
+fi
+else
+list+="$type $source $size $used $avail $pcent $itotal $iused $iavail $ipcent $target $pval $ival $level"$'\n'
+fi
+done < <(df $opt -x tmpfs -x efivarfs -x devtmpfs -x squashfs --output=fstype,source,size,used,avail,pcent,itotal,iused,iavail,ipcent,target "$@" 2>/dev/null|tail -n +2|grep -v ^fuse.cryfs)
+case $format in
+list)while
+read -r type source size used avail pcent itotal iused iavail ipcent target pval ival level
+do
+[ -z "$type" ]||printf '%s\n' $target
+done <<<"$list"
+;;
+data)printf "Type\tSource\tSize\tUsed\tAvail\tPercent\tI-Total\tI-Used\tI-Avail\tI-Percent\tTarget\n"
+while read -r type source size used avail pcent itotal iused iavail ipcent target pval ival level;do
+[ -n "$type" ]||continue
+print '%s\t' $type $source $size $used $avail $pcent $itotal $iused $iavail $ipcent $target
+print '\n'
+done <<<"$list"
+;;
+console)printf "$CC_INVERSE%-30s %8s %8s %8s %8s %8s$CC_RESET\n" $(gettext Mount) $(gettext Total) $(gettext Used) $(gettext Avail) $(gettext Percent) $(gettext Inodes)
+while read -r type source size used avail pcent itotal iused iavail ipcent target pval ival level;do
+[ -z "$type" ]||printf '%-30s %8s %8s %8s %8s %8s\n' $target $(numfmt --to=iec --suffix=B $((size*1024))) $(numfmt --to=iec --suffix=B $((used*1024))) $(numfmt --to=iec --suffix=B $((avail*1024))) $pcent $ipcent|$level
+done <<<"$list"
+esac
+}
 disk_free(){
+_deprecated "Use disk instead" warn
 debug "$*"
 local opt="" free_operator free_percent free_bytes
 eval set -- "$(option_parse $'l locale -\nc collect +\nf free +' "$@")"

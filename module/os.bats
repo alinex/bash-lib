@@ -81,28 +81,28 @@ setup() {
 }
 
 ######################################################################################
-# disk_free
+# disk
 ######################################################################################
 
-# bats test_tags=disk_free
-@test "disk_free: should display" {
-    run disk_free
+# bats test_tags=disk
+@test "disk: should display" {
+    run disk list
     assert_success
 }
-# bats test_tags=disk_free
-@test "disk_free: should display root only" {
-    run bats_pipe disk_free / \| wc -l
+# bats test_tags=disk
+@test "disk: should display root only" {
+    run bats_pipe disk data / \| wc -l
     assert_output "2"
     assert_success
 }
-# bats test_tags=disk_free
-@test "disk_free: should display root local" {
-    run disk_free -l
+# bats test_tags=disk
+@test "disk: should display local" {
+    run disk list -l
     assert_success
 }
-# bats test_tags=disk_free
-@test "disk_free: collect free percent" {
-    run disk_free --collect=array --free="<99%"
+# bats test_tags=disk
+@test "disk: with free percent" {
+    run disk --free="<99%"
     assert_success
 }
 
