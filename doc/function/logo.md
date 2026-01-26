@@ -1,6 +1,6 @@
 # logo
 
-## divibib Logo with title text
+## Output Logo with title text
 
 ### Usage
 
@@ -15,4 +15,6 @@ ASCII art logo including title
 
 ### Description
 
+
+You may overwrite this function with one displaying your own logo by loading it from your `extra/my-company-logo` or so.
 

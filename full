@@ -2914,7 +2914,7 @@ fi
 else
 list+="$type $source $size $used $avail $pcent $itotal $iused $iavail $ipcent $target $pval $ival $level"$'\n'
 fi
-done < <(df $opt -x tmpfs -x efivarfs -x devtmpfs -x squashfs --output=fstype,source,size,used,avail,pcent,itotal,iused,iavail,ipcent,target "$@" 2>/dev/null|tail -n +2|grep -v ^fuse.cryfs)
+done < <(df -B1 $opt -x tmpfs -x efivarfs -x devtmpfs -x squashfs --output=fstype,source,size,used,avail,pcent,itotal,iused,iavail,ipcent,target "$@" 2>/dev/null|tail -n +2|grep -v ^fuse.cryfs)
 case $format in
 list)while
 read -r type source size used avail pcent itotal iused iavail ipcent target pval ival level
@@ -2931,7 +2931,7 @@ done <<<"$list"
 ;;
 console)printf "$CC_INVERSE%-30s %8s %8s %8s %8s %8s$CC_RESET\n" $(gettext Mount) $(gettext Total) $(gettext Used) $(gettext Avail) $(gettext Percent) $(gettext Inodes)
 while read -r type source size used avail pcent itotal iused iavail ipcent target pval ival level;do
-[ -z "$type" ]||printf '%-30s %8s %8s %8s %8s %8s\n' $target $(numfmt --to=iec --suffix=B $((size*1024))) $(numfmt --to=iec --suffix=B $((used*1024))) $(numfmt --to=iec --suffix=B $((avail*1024))) $pcent $ipcent|$level
+[ -z "$type" ]||printf '%-30s %8s %8s %8s %8s %8s\n' $target $(numfmt --to=iec --suffix=B $size) $(numfmt --to=iec --suffix=B $used) $(numfmt --to=iec --suffix=B $avail) $pcent $ipcent|$level
 done <<<"$list"
 esac
 }
@@ -3004,6 +3004,24 @@ fi
 fi
 done
 unset IFS
+}
+big_files(){
+local percent=10
+eval set -- "$(option_parse $'p percent +' "$@")"
+while true;do
+case "$1" in
+-p|--percent)is integer -npercent --min=0 --max=100 -dopercent-- "$2"&&shift 2;;
+--)shift&&break;;
+*)die "$(gettext "Unrecognized option"): $1"
+esac
+done
+is path -npath -dopath -- "$1"
+local max min size
+max=$(df -B1 "$path"|awk 'NR==2 {print $3}')
+min=$((max*percent/100))
+while read -r size path;do
+printf '%s\t%s\n' $(numfmt --to=iec --suffix=B <<<"$size") "$path"
+done < <(sudo du -abx "$path" 2>/dev/null|grep -v 'du: cannot access'|awk '$1 > '"$min"|sort -k2)
 }
 uses_lvm(){
 is integer -narguments --max=0 -d $#
