@@ -6,7 +6,7 @@ As shown in the [base script](./base_script.md) you should always check your add
 
 ```bash
 local server
-is set --name=host --message="Usage: $USAGE" --die --output=server -- "$1"
+is set --name=host --die --message="Usage: $USAGE" --output=server -- "$1"
 is integer --name=arguments --max=1 --die --message="Usage: $USAGE" -- $#
 echo "Working on $server..."
 ```

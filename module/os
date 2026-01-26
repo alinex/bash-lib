@@ -2,16 +2,18 @@
 # shellcheck disable=SC2034
 # shellcheck source=base
 source /dev/null
+# shellcheck source=config/environment
+source /dev/null
 
 # Module with operating system specific helper functions.
 
 ######################################################################################
-### Detect OS
+### Detect OS / Hardware
 ######################################################################################
 
 declare -A _os_detected
 
-# Detect OS settings
+# Detect OS settings and Hardware
 #
 # The following formats are possible:
 #
@@ -25,18 +27,19 @@ declare -A _os_detected
 # - revision_number - distribution number
 # - revision_name - version code name
 # - kernel - version number of kernel like 6.8.0-87-generic
+# - architecture - x86_64, i686, i386, armv7l, aarch64...
 # - cpu_model - cpu name
 # - cpu_num - number of cpus
-# - architecture - x86_64, i686, i386, armv7l, aarch64...
+# - memory - hardware memory in GB
 # - machine_id
 # - virtual_machine - `false` or `true`
 #
 # Usage:    os_detect <format>
 # Output:   - <tsv-table> for data
 #           - <value> else
-os_detect() {
+os() {
     is integer --name=arguments --max=1 --die -- $#
-    is enum --name=format --allow="data info os base base_revision_name base_revision_number distribution revision_number revision_name kernel cpu_model cpu_num architecture machine_id virtual_machine" --die -- "$1"
+    is enum --name=format --allow="data info os base base_revision_name base_revision_number distribution revision_number revision_name kernel cpu_model cpu_num memory architecture machine_id virtual_machine" --die -- "$1"
     # processing
     if [ ${#_os_detected[@]} -eq 0 ]; then
         # get values
@@ -99,6 +102,7 @@ os_detect() {
         _os_detected["kernel"]="$(uname -r)"
         _os_detected["cpu_model"]="$(grep 'model name' /proc/cpuinfo | head -n 1 | sed 's/^.*: //')"
         _os_detected["cpu_num"]="$(grep -c ^processor /proc/cpuinfo)"
+        _os_detected["memory"]="$(LANG=C free --giga | awk '/^Mem:/ {printf "%.0f\n", $2 * (1000/1024)}')"
         _os_detected["architecture"]="$(
             case ${_os_detected["os"]} in
             Solaris) uname -p ;;
@@ -130,32 +134,82 @@ os_detect() {
     esac
 }
 
+# Deprecates: OS detection
+# Renamed to @os
+os_detect() {
+    _deprecated "Use os now" warn
+    os "$@"
+}
+
+# Hardware description
+#
+# This will show information like:
+#
+# ```text
+# System HP ZBook Firefly 16 inch G10 Mobile Workstation PC 5CG3371SB8
+# BIOS HP V70 Ver. 01.09.00 04/11/2025 firmware 81.67
+# Processor Intel(R) Corporation 13th Gen Intel(R) Core(TM) i7-1360P 12 cores 16 threads
+# Memory 16 GB Samsung DDR5 SODIMM
+# Memory 16 GB Samsung DDR5 SODIMM
+# Port Type-C Port 1
+# Port Type-C Port 2
+# Port Left  USB Port
+# Port Right USB Port
+# Port HDMI Port
+# Port Speaker Port
+# Port SIM card
+# ```
+#
+# Usage:    bios
+# Output:   List with type as first word and details (type specific) behind
+bios() {
+    sudo dmidecode -t 1 | awk '
+    /Product Name:/ { prod=$0; sub(".*Product Name: *","",prod) }
+    /Serial Number:/ { ser=$0; sub(".*Serial Number: *","",ser); print "System " prod " " ser }'
+    sudo dmidecode -t 0 | awk '
+    /Vendor:/        { vendor=$0; sub(".*Vendor: *","",vendor) }
+    /Version:/       { version=$0; sub(".*Version: *","",version) }
+    /Release Date:/  { date=$0; sub(".*Release Date: *","",date) }
+    /Firmware Revision:/  { firmware=$0; sub(".*Firmware Revision: *","",firmware); print "BIOS " vendor " " version " " date " firmware " firmware}'
+    sudo dmidecode -t 4 | awk '
+    /Manufacturer:/ { pm=$0; sub(".*Manufacturer: *","",pm) }
+    /Version:/      { pv=$0; sub(".*Version: *","",pv) }
+    /Core Count:/   { pc=$0; sub(".*Core Count: *","",pc) }
+    /Thread Count:/ { pt=$0; sub(".*Thread Count: *","",pt); print "Processor " pm " " pv " " pc " cores " pt " threads" }'
+    sudo dmidecode -t 17 | awk '
+    /Size:/ { size=$0; sub(".*Size: *","",size) }
+    /Type:/ { type=$0; sub(".*Type: *","",type) }
+    /Form Factor:/ { ff=$0; sub(".*Form Factor: *","",ff) }
+    /Manufacturer:/ { mm=$0; sub(".*Manufacturer: *","",mm); print "Memory " size " " mm " " type " " ff }'
+    sudo dmidecode -t 8 | awk '
+    /External Reference Designator:/ { des=$0; sub(".*External Reference Designator: *","",des); print "Port " des }'
+    sudo dmidecode -t 9 | awk '
+    section=="slot" && /Designation:/ { des=$0; sub(".*Designation: *","",des); print "system-slot " des }'
+}
+
 ######################################################################################
 ### Disk
 ######################################################################################
 
-# Disk free with visual display
+# File system analyzation
 #
-# The lines will be colorized based on `$MOUNT_COLOR_LIMIT`` setting, which contains sets of 5 entries (pattern critical error warn ok). The first matching pattern will decide the color limits.
+# The following formats are defined:
 #
-# If a `--free` condition and `--collect` is given all disks violating this will be collected as string within the collection variable for further use.
+# - list    only list mounts
+# - data    all data as tsv table
+# - console colored visual output
 #
-# Usage:    disk_free [options] [<mount>...]            # show table
-# Options:  l, local     # only list local devices
-#           c, collect <variable-name>
+# Usage:    disk [options] <format> [<path>]...
+# Options:  l, local    # show only local file systems
 #           f, free [<operator>]<percent%|bytes>
-# Output:   # same as `df` command but colorized
-disk_free() {
+disk() {
     # parameter parsing
-    debug "$*"
-    local opt="" free_operator free_percent free_bytes collect
-    eval set -- "$(option_parse $'l locale -\nc collect +\nf free +' "$@")"
+    local opt="" format free_operator free_percent free_bytes
+    eval set -- "$(option_parse $'l locale -\nr remote -\nf free +' "$@")"
     while true; do
         case "$1" in
-        -l | --locale)
-            opt="-l"
-            shift
-            ;;
+        -l | --locale) opt="-l" && shift ;;
+        -r | --remote) opt="-t nfs -t cifs -t sshfs -t smbfs -t fuse" && shift ;;
         -f | --free)
             local text="$2"
             if [[ "$text" =~ ^([<>]=?|==|!=)?(([0-9]+)[%bB]?)$ ]]; then
@@ -169,19 +223,124 @@ disk_free() {
             fi
             shift 2
             ;;
-        -c | --collect)
-            declare -n collect="$2"
-            shift 2
-            ;;
-        --)
-            shift
-            break
-            ;;
+        --) shift && break ;;
         *) die "$(gettext "Unrecognized option"): $1" ;;
         esac
     done
+    is enum --name=format --allow="list data console" --die --output=format -- "$1" && shift
+    # processing
+    local type source size used avail pcent itotal iused iavail ipcent target list pval ival i pattern level
+    # shellcheck disable=SC2086
+    while read -r type source size used avail pcent itotal iused iavail ipcent target; do
+        pval=${pcent%%%}
+        [ "$ipcent" = "-" ] || ival=${ipcent%%%}
+        for ((i = 0; i < ${#MOUNT_COLOR_LIMIT[@]}; i += 5)); do
+            pattern="${MOUNT_COLOR_LIMIT[i]}"
+            if [[ "$source" =~ $pattern ]]; then
+                limit_c="${MOUNT_COLOR_LIMIT[i + 1]}"
+                limit_e="${MOUNT_COLOR_LIMIT[i + 2]}"
+                limit_w="${MOUNT_COLOR_LIMIT[i + 3]}"
+                limit_o="${MOUNT_COLOR_LIMIT[i + 4]}"
+                break
+            fi
+        done
+        # display
+        percent=$pval
+        ((percent >= ival)) || percent=$ival
+        if ((percent >= limit_c)); then
+            level=critical
+        elif ((percent >= limit_e)); then
+            level=error
+        elif ((percent >= limit_w)); then
+            level=warn
+        elif ((percent >= limit_o)); then
+            level=ok
+        else
+            level=info
+        fi
+        if [ -n "$free_operator" ]; then
+            if [ -n "$free_percent" ] &&
+                eval "(( 100 - ${pcent%%%} $free_operator free_percent ))"; then
+                list+="$type $source $size $used $avail $pcent $itotal $iused $iavail $ipcent $target $pval $ival $level"$'\n'
+            elif [ -n "$free_bytes" ] &&
+                eval "(( avail $free_operator free_bytes ))"; then
+                list+="$type $source $size $used $avail $pcent $itotal $iused $iavail $ipcent $target $pval $ival $level"$'\n'
+            fi
+        else
+            list+="$type $source $size $used $avail $pcent $itotal $iused $iavail $ipcent $target $pval $ival $level"$'\n'
+        fi
+    done < <(df -B1 $opt -x tmpfs -x efivarfs -x devtmpfs -x squashfs --output=fstype,source,size,used,avail,pcent,itotal,iused,iavail,ipcent,target "$@" 2>/dev/null |
+        tail -n +2 | grep -v ^fuse.cryfs)
+    # output
+    case $format in
+    list)
+        while read -r type source size used avail pcent itotal iused iavail ipcent target pval ival level; do
+            # shellcheck disable=SC2086
+            is empty -- "$type" || printf '%s\n' $target
+        done <<<"$list"
+        ;;
+    data)
+        printf '%s\t' "$(gettext Type)" "$(gettext Source)" "$(gettext Total)" "$(gettext Used)" "$(gettext Avail)" "$(gettext Percent)" "$(gettext I-Total)" "$(gettext I-Used)" "$(gettext I-Avail)" "$(gettext I-Percent)" "$(gettext Mount)"
+        printf '\n'
+        while read -r type source size used avail pcent itotal iused iavail ipcent target pval ival level; do
+            is set -- "$type" || continue
+            # shellcheck disable=SC2086
+            print '%s\t' $type $source $size $used $avail $pcent $itotal $iused $iavail $ipcent $target
+            print '\n'
+        done <<<"$list"
+        ;;
+    console)
+        printf "${CC_INVERSE}%-30s %8s %8s %8s %8s %8s${CC_RESET}\n" "$(gettext Mount)" "$(gettext Total)" "$(gettext Used)" "$(gettext Avail)" "$(gettext Percent)" "$(gettext Inodes)"
+        while read -r type source size used avail pcent itotal iused iavail ipcent target pval ival level; do
+            # shellcheck disable=SC2046
+            # shellcheck disable=SC2086
+            is empty -- "$type" || printf '%-30s %8s %8s %8s %8s %8s\n' $target $(numfmt --to=iec --suffix=B $size) $(numfmt --to=iec --suffix=B $used) $(numfmt --to=iec --suffix=B $avail) $pcent $ipcent | $level
+        done <<<"$list"
+        ;;
+    esac
+}
+
+# Deprecated: Disk free with visual display
+# Use @disk instead.
+#
+# The lines will be colorized based on `$MOUNT_COLOR_LIMIT`` setting, which contains sets of 5 entries (pattern critical error warn ok). The first matching pattern will decide the color limits.
+#
+# If a `--free` condition and `--collect` is given all disks violating this will be collected as string within the collection variable for further use.
+#
+# Usage:    disk_free [options] [<mount>...]            # show table
+# Options:  l, local     # only list local devices
+#           c, collect <variable-name>
+#           f, free [<operator>]<percent%|bytes>
+# Output:   # same as `df` command but colorized
+disk_free() {
+    _deprecated "Use disk instead" warn
+    # parameter parsing
     debug "$*"
-    is empty -- "$collect" || debug "collect into $collect ($free_operator ${free_percent}%/${free_bytes}B)"
+    local opt="" free_operator free_percent free_bytes
+    eval set -- "$(option_parse $'l locale -\nc collect +\nf free +' "$@")"
+    while true; do
+        case "$1" in
+        -l | --locale) opt="-l" && shift ;;
+        -f | --free)
+            local text="$2"
+            if [[ "$text" =~ ^([<>]=?|==|!=)?(([0-9]+)[%bB]?)$ ]]; then
+                read -r _ free_operator val num <<<"${BASH_REMATCH[@]}"
+                free_operator="${free_operator:-<}"
+                [[ "$val" =~ ^[0-9]+%$ ]] &&
+                    free_percent="$num" ||
+                    free_bytes="$(numfmt --from=iec <<<"${num^^}")"
+            else
+                die "Option value --free=$2 not supported!"
+            fi
+            shift 2
+            ;;
+        -c | --collect) declare -n collect="$2" && shift 2 ;;
+        --) shift && break ;;
+        *) die "$(gettext "Unrecognized option"): $1" ;;
+        esac
+    done
+    debug "$opt"
+    ! declare -p collect >/dev/null || debug "collect into $collect ($free_operator ${free_percent}%/${free_bytes}B)"
     # processing
     local firstLine="" percent mount device limit_c limit_e limit_w limit_o
     IFS=$'\n'
@@ -220,7 +379,7 @@ disk_free() {
                 printf '%s\n' "$line"
             fi
             # collection limit
-            if is set -- "$collect"; then
+            if declare -p collect >/dev/null; then
                 # shellcheck disable=SC1105
                 if [ -n "$free_operator" ]; then
                     if [ -n "$free_percent" ] &&
@@ -235,6 +394,33 @@ disk_free() {
         fi
     done
     unset IFS
+}
+
+# Show big directory and files
+#
+# Usage:    big_files <path>
+# Options:  p, percent <min>
+# Output:   <size human>\t<path>
+big_files() {
+    # parameter parsing
+    local percent=10
+    eval set -- "$(option_parse $'p percent +' "$@")"
+    while true; do
+        case "$1" in
+        -p | --percent) is integer --name=percent --min=0 --max=100 --die --output=percent-- "$2" && shift 2 ;;
+        --) shift && break ;;
+        *) die "$(gettext "Unrecognized option"): $1" ;;
+        esac
+    done
+    is path --name=path --die --output=path -- "$1"
+    # processing
+    local max min size
+    max=$(df -B1 "$path" | awk 'NR==2 {print $3}')
+    min=$((max * percent / 100))
+    while read -r size path; do
+        # shellcheck disable=SC2046
+        printf '%s\t%s\n' $(numfmt --to=iec --suffix=B <<<"$size") "$path"
+    done < <(sudo du -abx "$path" 2>/dev/null | grep -v 'du: cannot access' | awk '$1 > '"$min" | sort -k2)
 }
 
 # Check if LVM is used
@@ -255,7 +441,7 @@ uses_lvm() {
 
 # Has tty present
 #
-# Usage:    has_ttyp
+# Usage:    has_tty
 # Status:   0 || 1
 has_tty() {
     is integer --name=arguments --max=0 --die -- $#

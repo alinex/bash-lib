@@ -13,21 +13,21 @@ setup() {
 # ip
 ######################################################################################
 
-# bats test_tags=ip
-@test "ip: resolve host" {
-    run ip heise.de
+# bats test_tags=ip_resolve
+@test "ip_resolve: resolve host" {
+    run ip_resolve heise.de
     assert_output "2a02:2e0:3fe:1001:302::"
     assert_success
 }
-# bats test_tags=ip
-@test "ip: resolve ip v4" {
-    run ip -v4 heise.de
+# bats test_tags=ip_resolve
+@test "ip_resolve: resolve ip v4" {
+    run ip_resolve -v4 heise.de
     assert_output "193.99.144.80"
     assert_success
 }
-# bats test_tags=ip
-@test "ip: resolve ip v6" {
-    run ip -v6 heise.de
+# bats test_tags=ip_resolve
+@test "ip_resolve: resolve ip v6" {
+    run ip_resolve -v6 heise.de
     assert_output "2a02:2e0:3fe:1001:302::"
     assert_success
 }

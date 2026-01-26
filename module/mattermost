@@ -325,14 +325,8 @@ mattermost_reaction() {
     eval set -- "$(option_parse $'l links -' "$@")"
     while true; do
         case "$1" in
-        -l | --links)
-            post_links=1
-            shift
-            ;;
-        --)
-            shift
-            break
-            ;;
+        -l | --links) post_links=1 && shift ;;
+        --) shift && break ;;
         *) die "$(gettext "Unrecognized option"): $1" ;;
         esac
     done

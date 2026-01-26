@@ -375,7 +375,7 @@ sync() {
     local name verbose message
     while true; do
         case "$1" in
-        -n | --name) name="$2" && shift 2 ;;
+        -n | --name) is set --name=name --die --output=name -- "$2" && shift 2 ;;
         --verbose) verbose=1 && shift ;;
         --) shift && break ;;
         *) die "$(gettext "Unrecognized option"): $1" ;;
@@ -423,7 +423,7 @@ async() {
     local name verbose message
     while true; do
         case "$1" in
-        -n | --name) name="$2" && shift 2 ;;
+        -n | --name) is set --name=name --die --output=name -- "$2" && shift 2 ;;
         --verbose) verbose=1 && shift ;;
         --) shift && break ;;
         *) die "$(gettext "Unrecognized option"): $1" ;;
@@ -484,7 +484,7 @@ declare -A _queue_running
 # Run bash commands parallel with limits from a queue.
 #
 # The queue first collects all jobs and then you execute them all in parallel. Therefore you can give a max number of parallel calls and a max percentage load limit for then to start the next job.
-# You may also set the limits using environment $QUEUE_MAX_NUM and $QUEUE_MAX_LOAD.
+# You may also set the limits using environment $QUEUE_MAX_PARALLEL and $QUEUE_MAX_LOAD.
 # If the server is over the configured load limit one job will always run, but parallel execution will only start if possible.
 #
 # Usage:    queue [<options>] add <job> [<args>...]             # add job to queue
@@ -500,7 +500,7 @@ queue() {
     local name verbose=0 message progress
     while true; do
         case "$1" in
-        -n | --name) name="$2" && shift 2 ;;
+        -n | --name) is set --name=name --die --output=name -- "$2" && shift 2 ;;
         --verbose) verbose=1 && shift ;;
         --progress) progress=1 && shift ;;
         --) shift && break ;;
@@ -525,7 +525,7 @@ queue() {
     run)
         is empty -- "$1" || is integer --name=parallel --min 1 --die "$1"
         is empty -- "$2" || is integer --name=load-percent --min 1 --die "$2"
-        local max="${1:-$QUEUE_MAX_NUM}"
+        local max="${1:-$QUEUE_MAX_PARALLEL}"
         local load="${2:-$QUEUE_MAX_LOAD}"
         local job total=${#_queue_jobs[@]} started=0
         debug "$total Jobs to be run..."
@@ -648,7 +648,7 @@ process() {
     eval set -- "$(option_parse $'t timeout +\nw watch -' "$@")"
     while true; do
         case "$1" in
-        -t | --timeout) timeout="$(duration_format seconds "$2")" && shift 2 ;;
+        -t | --timeout) is duration --name=timeout --die --output=timeout -- "$2" && shift 2 ;;
         -w | --watch) watch=1 && shift ;;
         --) shift && break ;;
         *) die "$(gettext "Unrecognized option"): $1" ;;
@@ -661,14 +661,16 @@ process() {
     # get pid
     local list
     if is integer -- "$2"; then
-        kill -0 "$2" >/dev/null || die "$(eval_gettext 'No process with pid $2')"
+        local pid="$2"
+        kill -0 "$2" >/dev/null || die "$(eval_gettext 'No process with pid $pid')"
         list=("$2")
     else
         mapfile -t list < <(pgrep "$2" | _process_main_pid | sort -nu || true)
         # shellcheck disable=SC2128
         [ -n "$list" ] || mapfile -t list < <(pgrep -f "$2" | _process_main_pid | sort -nu || true)
         # shellcheck disable=SC2128
-        [ -n "$list" ] || die "$(eval_gettext 'No processes found for $2')"
+        local search="$2"
+        [ -n "$list" ] || die "$(eval_gettext 'No processes found for $search')"
     fi
     debug "pids: ${list[*]}"
     # processing

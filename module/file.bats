@@ -62,15 +62,3 @@ setup() {
     assert_output ".config"
     assert_success
 }
-
-######################################################################################
-# script_path
-######################################################################################
-
-# bats test_tags=script_path
-@test "script_path: should get directory" {
-    run script_path
-    # cspell:disable-next-line
-    assert_output -p "libexec/bats-core"
-    assert_success
-}

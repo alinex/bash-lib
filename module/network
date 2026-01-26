@@ -9,26 +9,32 @@
 
 # Get IP of given hostname
 #
-# Usage:    ip [<option>] host.de
+# This uses `getent` which may take some seconds to resolve. But if `dig` is installed this will be used, because it works faster.
+#
+# Usage:    ip_resolve [<option>] host.de
 # Options:  v, version=<int>    # ip version 4 or 6
 # Output:   one ip address
-ip() {
+ip_resolve() {
     eval set -- "$(option_parse $'v version +' "$@")"
-    local type=hosts
+    local type
     while true; do
         case "$1" in
-        -v | --version)
-            (($2 == 4)) && type=ahostsv4 || true
-            (($2 == 6)) && type=ahostsv6 || true
-            shift 2
-            ;;
+        -v | --version) is enum --name=version --allow="4 6" --die --output=type -- "$2" && shift 2 ;;
         --) shift && break ;;
         *) die "$(gettext "Unrecognized option"): $1" ;;
         esac
     done
     is set --name=host --die -- "$1"
     # processing
-    getent "$type" "$1" | awk '{print $1}' | head -n1
+    local query
+    if command -v dig >/dev/null; then
+        [ "$type" = 4 ] && query="A" || true
+        [ "$type" = 6 ] && query="AAAA" || true
+        dig +short $query "$1"
+    else
+        is set -- "$type" && query="ahostsv$type" || query=hosts
+        getent $query "$1" | awk '{print $1}' | head -n1
+    fi
 }
 
 # Show the IP addresses
@@ -89,6 +95,7 @@ ip_pattern() {
     return 1
 }
 
+declare -A _ip_extern_data
 _ip_extern_json=
 
 # Run  os detection and set the constants
@@ -96,19 +103,16 @@ _ip_extern_json=
 # The following formats are possible:
 #
 # - data - all values with `<name>\t<value>`
-# - country
-# - countryCode
-# - region
-# - regionName
-# - city
-# - zip
-# - lat
-# - lon
-# - timezone
-# - isp
-# - org
-# - as
-# - ip
+# - ip - <ipv4>\n<ipv6>
+# - ipv4
+# - ipv6
+# - country - like DE
+# - region - like Baden-Württemberg
+# - city - like Reutlingen
+# - zip - like 72766
+# - loc - <lat>,<lon>
+# - timezone - like Europe/Berlin
+# - org - like AS3320 Deutsche Telekom AG
 #
 # Usage:    ip_extern <format>
 # Output:   <tsv-table> for data
@@ -116,11 +120,44 @@ _ip_extern_json=
 ip_extern() {
     is integer --name=arguments --max=1 --die -- $#
     is enum --name=format --allow="data country countryCode region regionName city zip lat lon timezone isp org as ip" --die -- "$1"
-    # processing
-    [ -n "$_ip_extern_json" ] || _ip_extern_json="$(curl http://ip-api.com/json)"
+    # get ips
+    if [ -z "$_ip_extern_ip" ]; then
+        hash _ip_extern_data set ipv4 "$(curl -s4 icanhazip.com)"
+        hash _ip_extern_data set ipv6 "$(curl -s6 ifconfig.co)"
+    fi
+    # return ips
     case ${1-} in
-    data) jq -r 'with_entries(if .key == "query" then .key = "ip" else . end) | to_entries[] | "\(.key)\t\(.value)"' <<<"$_ip_extern_json" ;;
-    ip) jq -r .query <<<"$_ip_extern_json" ;;
-    *) jq -r ".$1" <<<"$_ip_extern_json" ;;
+    ipv4) hash _ip_extern_data get ipv4 && return ;;
+    ipv6) hash _ip_extern_data get ipv6 && return ;;
+    ip) printf '%s\n%s' "$(hash _ip_extern_data get ipv4)" "$(hash _ip_extern_data get ipv6)" && return ;;
     esac
+    # get other data
+    hash _ip_extern_data has isp || _ip_extern_ipapi_com || _ip_extern_ipinfo_co
+    # return other data
+    case ${1-} in
+    data) hash _ip_extern_data to tsv ;;
+    *) hash _ip_extern_data get "$1" ;;
+    esac
+}
+_ip_extern_ipapi_com() {
+    local json
+    json="$(curl http://ip-api.com/json)"
+    hash _ip_extern_data set country "$(jq .countryCode -r <<<"$json")"
+    hash _ip_extern_data set region "$(jq .regionName -r <<<"$json")"
+    hash _ip_extern_data set city "$(jq .city -r <<<"$json")"
+    hash _ip_extern_data set zip "$(jq .zip -r <<<"$json")"
+    hash _ip_extern_data set timezone "$(jq .timezone -r <<<"$json")"
+    hash _ip_extern_data set org "$(jq .as -r <<<"$json")"
+    hash _ip_extern_data set loc "$(jq '(.lat|tostring)+","+(.lon|tostring)' -r <<<"$json")"
+}
+_ip_extern_ipinfo_co() {
+    local json
+    json="$(curl ipinfo.io)"
+    hash _ip_extern_data set country "$(jq .country -r <<<"$json")"
+    hash _ip_extern_data set region "$(jq .region -r <<<"$json")"
+    hash _ip_extern_data set city "$(jq .city -r <<<"$json")"
+    hash _ip_extern_data set zip "$(jq .postal -r <<<"$json")"
+    hash _ip_extern_data set timezone "$(jq .timezone -r <<<"$json")"
+    hash _ip_extern_data set org "$(jq .org -r <<<"$json")"
+    hash _ip_extern_data set loc "$(jq .loc -r <<<"$json")"
 }

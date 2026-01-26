@@ -216,36 +216,148 @@ jira() {
         })
       };
 
+    def heading(level; t):
+      {
+        type: "heading",
+        attrs: { level: level },
+        content: [{ type: "text", text: t }]
+      };
+
+    def codeblock(lang; body):
+      {
+        type: "codeBlock",
+        attrs: { language: lang },
+        content: [{ type: "text", text: body }]
+      };
+
+    def rule:
+      { type: "rule" };
+
+    def blockquote(paras):
+      {
+        type: "blockquote",
+        content: paras
+      };
+
     ($text | split("\n")) as $lines
     | reduce $lines[] as $line (
-        { out: [], mode: null, buf: [], pBuf: [] };
+        {
+          out: [],
+          mode: null,      # "ul" / "ol" / null
+          buf: [],         # list items buffer
+          pBuf: [],        # paragraph buffer
+          code: false,
+          codeLang: "",
+          codeBuf: [],
+          quoteBuf: []     # paragraphs inside current blockquote
+        };
 
-        # empty line → flush paragraph or list
-        if $line == "" then
+        # fenced code blocks
+        if ($line | test("^```")) then
+          if .code then
+            .out += [ codeblock(.codeLang; (.codeBuf | join("\n"))) ]
+            | .code = false
+            | .codeBuf = []
+            | .codeLang = ""
+          else
+            .code = true
+            | .codeLang = ($line | sub("^```"; ""))
+          end
+
+        elif .code then
+          .codeBuf += [ $line ]
+
+        # horizontal rules
+        elif ($line | test("^(-{3,}|\\*{3,}|_{3,})$")) then
+          # flush paragraph
+          if (.pBuf | length) > 0 then
+            .out += [ paragraph(.pBuf | join("\n")) ]
+            | .pBuf = []
+          else .
+          end
+          # flush quote
+          | if (.quoteBuf | length) > 0 then
+              .out += [ blockquote(.quoteBuf) ]
+              | .quoteBuf = []
+            else .
+            end
+          # flush list
+          | if .mode == "ul" then
+              .out += [ bullet(.buf) ]
+              | .buf = [] | .mode = null
+            elif .mode == "ol" then
+              .out += [ ordered(.buf) ]
+              | .buf = [] | .mode = null
+            else .
+            end
+          | .out += [ rule ]
+
+        # blockquotes
+        elif ($line | test("^> ")) then
+          # flush list before starting/continuing quote
           if .mode == "ul" then
             .out += [ bullet(.buf) ]
             | .buf = [] | .mode = null
           elif .mode == "ol" then
             .out += [ ordered(.buf) ]
             | .buf = [] | .mode = null
-          elif (.pBuf | length) > 0 then
-            .out += [ paragraph(.pBuf | join("\n")) ]
-            | .pBuf = []
           else .
           end
+          # flush paragraph into quote if we were in text
+          | if (.pBuf | length) > 0 then
+              .quoteBuf += [ paragraph(.pBuf | join("\n")) ]
+              | .pBuf = []
+            else .
+            end
+          | ($line | sub("^> "; "")) as $t
+          | .quoteBuf += [ paragraph($t) ]
 
-        # bullet list
-        elif ($line | startswith("- ")) then
+        # headings
+        elif ($line | test("^#{1,6} ")) then
+          # flush paragraph
           if (.pBuf | length) > 0 then
             .out += [ paragraph(.pBuf | join("\n")) ]
             | .pBuf = []
           else .
           end
+          # flush quote
+          | if (.quoteBuf | length) > 0 then
+              .out += [ blockquote(.quoteBuf) ]
+              | .quoteBuf = []
+            else .
+            end
+          # flush list
+          | if .mode == "ul" then
+              .out += [ bullet(.buf) ]
+              | .buf = [] | .mode = null
+            elif .mode == "ol" then
+              .out += [ ordered(.buf) ]
+              | .buf = [] | .mode = null
+            else .
+            end
+          | ($line | capture("^(?<h>#+) (?<t>.*)")) as $h
+          | .out += [ heading(($h.h | length); $h.t) ]
+
+        # bullet list
+        elif ($line | startswith("- ")) then
+          # flush paragraph
+          if (.pBuf | length) > 0 then
+            .out += [ paragraph(.pBuf | join("\n")) ]
+            | .pBuf = []
+          else .
+          end
+          # flush quote
+          | if (.quoteBuf | length) > 0 then
+              .out += [ blockquote(.quoteBuf) ]
+              | .quoteBuf = []
+            else .
+            end
           | if .mode == "ul" then
               .buf += [ $line[2:] ]
             else
               if .mode == "ol" then
                 .out += [ ordered(.buf) ]
+              else .
               end
               | .mode = "ul"
               | .buf = [ $line[2:] ]
@@ -253,23 +365,53 @@ jira() {
 
         # ordered list
         elif ($line | test("^[0-9]+\\. ")) then
+          # flush paragraph
           if (.pBuf | length) > 0 then
             .out += [ paragraph(.pBuf | join("\n")) ]
             | .pBuf = []
           else .
           end
+          # flush quote
+          | if (.quoteBuf | length) > 0 then
+              .out += [ blockquote(.quoteBuf) ]
+              | .quoteBuf = []
+            else .
+            end
           | if .mode == "ol" then
               .buf += [ ($line | sub("^[0-9]+\\. "; "")) ]
             else
               if .mode == "ul" then
                 .out += [ bullet(.buf) ]
+              else .
               end
               | .mode = "ol"
               | .buf = [ ($line | sub("^[0-9]+\\. "; "")) ]
             end
 
-        # normal text → append to paragraph buffer
+        # empty line → flush paragraph / quote / list
+        elif $line == "" then
+          if .mode == "ul" then
+            .out += [ bullet(.buf) ]
+            | .buf = [] | .mode = null
+          elif .mode == "ol" then
+            .out += [ ordered(.buf) ]
+            | .buf = [] | .mode = null
+          else .
+          end
+          | if (.quoteBuf | length) > 0 then
+              .out += [ blockquote(.quoteBuf) ]
+              | .quoteBuf = []
+            else .
+            end
+          | if (.pBuf | length) > 0 then
+              .out += [ paragraph(.pBuf | join("\n")) ]
+              | .pBuf = []
+            else .
+            end
+
+        # normal text → paragraph buffer
         else
+          # if we were in a list, close it before plain text
           if .mode == "ul" then
             .out += [ bullet(.buf) ]
             | .buf = [] | .mode = null
@@ -281,14 +423,14 @@ jira() {
           | .pBuf += [ $line ]
         end
       )
-    # flush leftovers
+    # final flush
     | (
         .out
         + (if .mode == "ul" then [ bullet(.buf) ]
            elif .mode == "ol" then [ ordered(.buf) ]
            else [] end)
-        + (if (.pBuf | length) > 0 then [ paragraph(.pBuf | join("\n")) ]
-           else [] end)
+        + (if (.quoteBuf | length) > 0 then [ blockquote(.quoteBuf) ] else [] end)
+        + (if (.pBuf | length) > 0 then [ paragraph(.pBuf | join("\n")) ] else [] end)
       )
     | {
         type: "doc",

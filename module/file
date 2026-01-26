@@ -59,13 +59,3 @@ extname() {
     [[ $path =~ ^\. || ! $path =~ \. ]] && return
     printf '%s' ".${path##*.}"
 }
-
-# Get the path from the called command
-#
-# Usage:    script_path
-# Output:   full real directory path to script
-script_path() {
-    is integer --name=arguments --max=0 --die -- $#
-    # processing
-    dirname "$(readlink -f "${BASH_SOURCE[-1]:-$(pwd)/x}")"
-}

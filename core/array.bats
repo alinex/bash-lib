@@ -26,6 +26,7 @@ setup() {
     run array test_array has nine
     assert_failure
 }
+
 # bats test_tags=array2
 @test "array: indexof value" {
     declare -g test_array
@@ -36,21 +37,17 @@ setup() {
     assert_success
 }
 
-######################################################################################
-# join
-######################################################################################
-
-# bats test_tags=join
-@test "join: use default separator" {
+# bats test_tags=array
+@test "array: join with default separator" {
     x=( one two three )
-    run join x
+    run array x join
     assert_output "one,two,three"
     assert_success
 }
-# bats test_tags=join
-@test "join: use custom separator" {
+# bats test_tags=array
+@test "array: join with custom separator" {
     x=( one two three )
-    run join x ", "
+    run array x join ", "
     assert_output "one, two, three"
     assert_success
 }

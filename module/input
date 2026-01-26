@@ -25,7 +25,7 @@ pause() {
     eval set -- "$(option_parse $'a abort -\nT timeout +' "$@")"
     while true; do
         case "$1" in
-        -T | --timeout) timeout="$(duration_format seconds "$2")" && shift 2 ;;
+        -T | --timeout) is duration --name=timeout --die --output=timeout -- "$2" && shift 2 ;;
         -a | --abort) abort=1 && shift ;;
         --) shift && break ;;
         *) die "$(gettext "Unrecognized option"): $1" ;;
@@ -81,7 +81,7 @@ confirm() {
         case "$1" in
         -t | --true) default=1 && shift ;;
         -f | --false) default=0 && shift ;;
-        -T | --timeout) timeout="$(duration_format seconds "$2")" && shift 2 ;;
+        -T | --timeout) is duration --name=timeout --die --output=timeout -- "$2" && shift 2 ;;
         --) shift && break ;;
         *) die "$(gettext "Unrecognized option"): $1" ;;
         esac
@@ -206,7 +206,7 @@ ask() {
         case "$1" in
         -e | --empty) empty=1 && shift ;;
         -d | --default) default="$2" && shift 2 ;;
-        -T | --timeout) timeout="$(duration_format seconds "$2")" && shift 2 ;;
+        -T | --timeout) is duration --name=timeout --die --output=timeout -- "$2" && shift 2 ;;
         -n | --allow-negative) negative=1 && shift ;;
         --) shift && break ;;
         *) die "$(gettext "Unrecognized option"): $1" ;;
@@ -344,7 +344,7 @@ ask() {
         elif [[ $char == $'\177' ]]; then
             if [ ${#input} -gt 0 ]; then
                 input=${input:0:-1}
-                printf '%s' "\b \b" >/dev/tty
+                printf "\b \b" >/dev/tty
             fi
         # ignore escape sequences
         elif [[ $char == $'\e' ]]; then
@@ -460,18 +460,32 @@ choose() {
         -t | --title) notice "$2" >/dev/tty && shift 2 ;;
         -d | --default) default="$2" && shift 2 ;;
         -x | --exit) end="$2" && shift 2 ;;
-        -T | --timeout) timeout="$(duration_format seconds "$2")" && shift 2 ;;
+        -T | --timeout) is duration --name=timeout --die --output=timeout -- "$2" && shift 2 ;;
         --) shift && break ;;
         *) die "$(gettext "Unrecognized option"): $1" ;;
         esac
     done
-    local list max length
+    #local list max length
+    #list="$()"
+    #list="$(trim "$list" | grep -v ^#)"
+    #max="$(wc -l <<<"$list")"
+    #length="${#max}"
+    ## output list
+    #local line key display num=0 pattern
+    #while read -r line; do
+    #    num=$((num + 1))
+    #    IFS="|" read -r key display <<<"$line"
+    #    if [ -n "$default" ]; then
+    #        [ "$default" = "$(trim "$key")" ] && default="$num" || true
+    #        [ "$default" = "$(trim "$display")" ] && default="$num" || true
+    #    fi
+    #    printf "  %0${length}d) $(trim "${display:-$key}")\n" "$num" >/dev/tty
+    #done <<<"$list"
+    # get list
+    local width list num entries keys key display
+    width=$(tput cols </dev/tty 2>/dev/null || echo 80)
     list="$(input_lines "$@")"
     list="$(trim "$list" | grep -v ^#)"
-    max="$(wc -l <<<"$list")"
-    length="${#max}"
-    # output list
-    local line key display num=0 pattern
     while read -r line; do
         num=$((num + 1))
         IFS="|" read -r key display <<<"$line"
@@ -479,21 +493,49 @@ choose() {
             [ "$default" = "$(trim "$key")" ] && default="$num" || true
             [ "$default" = "$(trim "$display")" ] && default="$num" || true
         fi
-        printf "  %0${length}d) $(trim "${display:-$key}")\n" "$num" >/dev/tty
+        entries+=("$(trim "${display:-$key}")")
+        keys+=("$(trim "$key")")
     done <<<"$list"
+    # calculate max (number) and width
+    local max max_length length cols rows i
+    max=${#entries[@]}
+    max_length=${#max}
+    length=0
+    for i in "${entries[@]}"; do
+        i=$(wc -m <<<"$i")
+        ((i > length)) && length=$i
+    done
+    cols=1
+    ((max > 3)) && cols=2
+    ((max > 6)) && cols=3
+    ((max > 9)) && cols=4
+    while ((cols > 1 && cols * (length + $max_length + 4) > width)); do
+        ((cols--))
+    done
+    rows=$(((max + cols - 1) / cols))
+    # Print row-wise
+    local r c idx
+    for ((r = 0; r < rows; r++)); do
+        for ((c = 0; c < cols; c++)); do
+            idx=$((r + c * rows))
+            ((idx > max)) || uprintf "  %*s) %-*s" $max_length $((idx + 1)) "$length" "${entries[idx]}" >/dev/tty
+        done
+        printf "\n" >/dev/tty
+    done
+    # add exit entry
+    [ -z "$end" ] || printf '  %*s) %s\n' $max_length x "${end}" >/dev/tty
     is empty -- "$default" || is integer -- "$default" || die "Default option $default not recognized."
-    [ -z "$end" ] || printf "  %${length}s) ${end}\n" x >/dev/tty
     # Pattern example parts:
     # 8      [1-8]
     # 78    0[1-9]                      [1-6][0-9]                7[0-8]
     # 345  00[1-9]   0[1-9][0-9]   [1-2][0-9][0-9]  3[0-3][0-9]  34[0-5]
-    if ((length == 1)); then
+    if ((max_length == 1)); then
         pattern="[1-$max]"
-    elif ((length == 2)); then
+    elif ((max_length == 2)); then
         pattern="0[1-9]?|"
         ((${max:0:1} == 1)) || pattern+="[1-$((${max:0:1} - 1))][0-9]?|"
         pattern+="${max:0:1}[0-${max:1:1}]?"
-    elif ((length == 3)); then
+    elif ((max_length == 3)); then
         pattern="0(0[1-9]?)?|0([1-9][0-9]?)?|"
         ((${max:0:1} == 1)) || pattern+="[1-$((${max:0:1} - 1))]([0-9][0-9]?)?|"
         pattern+="${max:0:1}([0-$((${max:1:1} - 1))][0-9]?)?|"
@@ -501,7 +543,7 @@ choose() {
     else
         pattern="[0-9]*"
     fi
-    ((length == 1)) || pattern="(0|$pattern)"
+    ((max_length == 1)) || pattern="(0|$pattern)"
     [ -z "$end" ] || pattern="(x|$pattern)"
     pattern="^$pattern$"
     # question
@@ -560,7 +602,7 @@ choose() {
         # ignore escape sequences
         elif [[ $char == $'\e' ]]; then
             # Read next few characters non-blocking to drain escape sequence
-            read -r -s -n 1 -t 0.01 seq
+            read -r -s -n 1 -t 0.01 seq || true
             while [[ $seq == "[" || $seq =~ [0-9A-Za-z~] ]]; do
                 read -r -s -n 1 -t 0.01 seq || break
             done
@@ -579,7 +621,7 @@ choose() {
             input+="$char"
             printf '%s' "$char" >/dev/tty
             # completed number
-            if ((${#input} == length)); then
+            if ((${#input} == max_length)); then
                 printf '\n' >/dev/tty
                 break
             fi
@@ -622,7 +664,7 @@ tasks() {
         case "$1" in
         -t | --title) title="-t$2" >/dev/tty && shift 2 ;;
         -d | --default) _default="$2" >/dev/tty && shift 2 ;;
-        -T | --timeout) opt="-T $2 " >/dev/tty && shift 2 ;;
+        -T | --timeout) is duration --name=timeout --die -- "$2" && opt="-T $2 " && shift 2 ;;
         -l | --loop) loop=1 && shift ;;
         --) shift && break ;;
         *) die "$(gettext "Unrecognized option"): $1" ;;

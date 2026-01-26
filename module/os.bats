@@ -10,99 +10,99 @@ setup() {
 }
 
 ######################################################################################
-# os_detect
+# os
 ######################################################################################
 
-# bats test_tags=os_detect
-@test "os_detect: detect data" {
-    run os_detect data
+# bats test_tags=os
+@test "os: detect data" {
+    run os data
     assert_output -p "os"
     assert_success
 }
-# bats test_tags=os_detect
-@test "os_detect: detect info" {
-    run os_detect info
+# bats test_tags=os
+@test "os: detect info" {
+    run os info
     assert_output -e ".+"
     assert_success
 }
-# bats test_tags=os_detect
-@test "os_detect: detect base" {
-    run os_detect base
+# bats test_tags=os
+@test "os: detect base" {
+    run os base
     assert_output -e ".+"
     assert_success
 }
-# bats test_tags=os_detect
-@test "os_detect: detect distribution" {
-    run os_detect distribution
+# bats test_tags=os
+@test "os: detect distribution" {
+    run os distribution
     assert_output -e ".+"
     assert_success
 }
-# bats test_tags=os_detect
-@test "os_detect: detect revision_number" {
-    run os_detect revision_number
+# bats test_tags=os
+@test "os: detect revision_number" {
+    run os revision_number
     assert_output -e ".+"
     assert_success
 }
-# bats test_tags=os_detect
-@test "os_detect: detect kernel" {
-    run os_detect kernel
+# bats test_tags=os
+@test "os: detect kernel" {
+    run os kernel
     assert_output -e ".+"
     assert_success
 }
-# bats test_tags=os_detect
-@test "os_detect: detect cpu_model" {
-    run os_detect cpu_model
+# bats test_tags=os
+@test "os: detect cpu_model" {
+    run os cpu_model
     assert_output -e ".+"
     assert_success
 }
-# bats test_tags=os_detect
-@test "os_detect: detect cpu_num" {
-    run os_detect cpu_num
+# bats test_tags=os
+@test "os: detect cpu_num" {
+    run os cpu_num
     assert_output -e ".+"
     assert_success
 }
-# bats test_tags=os_detect
-@test "os_detect: detect architecture" {
-    run os_detect architecture
+# bats test_tags=os
+@test "os: detect architecture" {
+    run os architecture
     assert_output -e ".+"
     assert_success
 }
-# bats test_tags=os_detect
-@test "os_detect: detect machine_id" {
-    run os_detect machine_id
+# bats test_tags=os
+@test "os: detect machine_id" {
+    run os machine_id
     assert_output -e ".+"
     assert_success
 }
-# bats test_tags=os_detect
-@test "os_detect: detect virtual_machine" {
-    run os_detect virtual_machine
+# bats test_tags=os
+@test "os: detect virtual_machine" {
+    run os virtual_machine
     assert_output -e ".+"
     assert_success
 }
 
 ######################################################################################
-# disk_free
+# disk
 ######################################################################################
 
-# bats test_tags=disk_free
-@test "disk_free: should display" {
-    run disk_free
+# bats test_tags=disk
+@test "disk: should display" {
+    run disk list
     assert_success
 }
-# bats test_tags=disk_free
-@test "disk_free: should display root only" {
-    run bats_pipe disk_free / \| wc -l
+# bats test_tags=disk
+@test "disk: should display root only" {
+    run bats_pipe disk data / \| wc -l
     assert_output "2"
     assert_success
 }
-# bats test_tags=disk_free
-@test "disk_free: should display root local" {
-    run disk_free -l
+# bats test_tags=disk
+@test "disk: should display local" {
+    run disk list -l
     assert_success
 }
-# bats test_tags=disk_free
-@test "disk_free: collect free percent" {
-    run disk_free --collect=array --free="<99%"
+# bats test_tags=disk
+@test "disk: with free percent" {
+    run disk --free="<99%"
     assert_success
 }
 

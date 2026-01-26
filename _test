@@ -5,34 +5,34 @@ test -z "${DEBUG-}" && source "$BASHLIB_HOME"/full || source "$BASHLIB_HOME"/loa
 
 TITLE="Test suite"
 USAGE="$(basename "$0") [<options>] <instance>"
-OPTIONS="
-n name  string  Name of Birthday Person
-a age   int     Age in years
-h help  -       Show Help Page"
+OPTIONS="h help  -       Show Help Page"
 DESCRIPTION=""
 # parse and validate arguments
 eval set -- "$(option_parse "$OPTIONS" "$@")"
 while true; do
     case "$1" in
-    -n | --name) shift 2 ;;
-    -a | --age) shift 2 ;;
-    -h | --help)
-        help "$TITLE" "$USAGE" "$OPTIONS" "$DESCRIPTION"
-        exit
-        ;;
-    --)
-        shift
-        break
-        ;;
+    -h | --help) help "$TITLE" "$USAGE" "$OPTIONS" "$DESCRIPTION" && exit ;;
+    --) shift && break ;;
     *) die "Unerwartete option: $1" ;;
     esac
 done
 ################################################################################################
 
-process tree mattermost
-process wait mattermost --watch
-process tree mattermost
+echo "one
+two
+three
+four
+five
+six
+seven
+eight
+nine" | choose
 exit
+
+#process tree mattermost
+#process wait mattermost --watch
+#process tree mattermost
+#exit
 
 #queue add sleep 5
 #queue add sleep 4
@@ -58,7 +58,7 @@ exit
 #_trivy_report /tmp/_test_1576440_trivy /tmp/_test_1576440_trivy/split/000014 /home/alex/dvb/divibib-search-api
 #exit
 
-trivy files /home/alex/dvb/divibib-search-api
+trivy files /home/alex/dvb/divibib-search-api --progress
 exit
 
 task1() { echo "task1"; }

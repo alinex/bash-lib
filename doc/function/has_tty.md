@@ -5,7 +5,7 @@
 ### Usage
 
 ```bash
-has_ttyp
+has_tty
 ```
 
 ### Description

@@ -1,0 +1,78 @@
+#!/usr/bin/env bash
+# shellcheck disable=SC2034
+# shellcheck source=base
+source /dev/null
+
+# Compression and decompression.
+
+######################################################################################
+### Compress/Decompress Streams
+######################################################################################
+
+# Compress data stream using multiple algorithms.
+#
+# | Tool  | Algorithmus             | Geschwindigkeit | Kompressionsrate  | Datenintegrität | Dateiendung |
+# | ----- | ----------------------- | --------------- | ----------------- | --------------- | ----------- |
+# | gzip  | DEFLATE (Lempel-Ziv)    | Sehr schnell    | Mittel            | CRC32           | .gz         |
+# | bzip2 | Burrows-Wheeler         | Langsam         | Hoch              | CRC32           | .bz2        |
+# | xz    | LZMA2                   | Sehr langsam    | Sehr hoch         | CRC64 / SHA-256 | .xz         |
+# | zstd  | Zstandard (FSE/Huffman) | Extrem schnell  | Hoch (skalierbar) | XXH64           | .zst        |
+# | lz4   | LZ4                     | Ultrafast       | Niedrig           | XXH32           | .lz4        |
+#
+# Zip is not supported at the moment, because it can not work with streams but files only.
+#
+# Usage:    compress [<string>]
+#           <string> | compress
+# Options:  i, input <path>         # file to read from
+#           o, output <path>        # file to write to
+#           t, tool <compression>   # compression: gzip, zip,...
+#           d, decompress
+compress() {
+    # parameter parsing
+    local in out tool="$COMPRESSION_DEFAULT" decompress
+    eval set -- "$(option_parse $'i input +\no output +\na algorithm +\nd decompress -' "$@")"
+    while true; do
+        case "$1" in
+        -i | --input) is readable --name=input --output=in --die -- "$2" && shift 2 ;;
+        -o | --output) is writable --name=output --die -- "$2" && out=">\"$2\"" && shift 2 ;;
+        -t | --tool) is enum --name=algo --allow="gzip bzip2 xz zstd lz4 zip" --output=tool --die -- "$2" && shift 2 ;;
+        -d | --decompress) decompress=-d && shift ;;
+        --) shift && break ;;
+        *) die "$(gettext "Unrecognized option"): $1" ;;
+        esac
+    done
+    is integer --name=arguments --max=1 --die -- $#
+    # processing
+    install "$tool"
+    if is set -- "$in"; then
+        cat "$in"
+    elif is set -- "$1"; then
+        printf '%s' "$1"
+    else
+        cat
+    fi | case "$tool$decompress" in
+    gzip) eval gzip -cf $out ;;
+    gzip-d) eval gzip -cdf $out ;;
+    bzip2) eval bzip2 -c $out ;;
+    bzip2-d) eval bzip2 -cd $out ;;
+    xz) eval xz -c $out ;;
+    xz-d) eval xz -cd $out ;;
+    zstd) eval zstd -cq $out ;;
+    zstd-d) eval zstd -cdq $out ;;
+    lz4) eval lz4 -c ;;
+    lz4-d) eval lz4 -cd ;;
+    esac
+}
+
+# Uncompress data stream using multiple algorithms.
+#
+# See also @compress
+#
+# Usage:    decompress [<string>]
+#           <string> | decompress
+# Options:  f, file <path>          # file to read from
+#           o, output <path>        # file to write to
+#           t, tool <compression>   # compression: gzip, zip,...
+decompress() {
+    compress -d "$@"
+}

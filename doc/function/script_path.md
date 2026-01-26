@@ -8,6 +8,10 @@
 script_path
 ```
 
+### Globals
+
+- SCRIPT_PATH
+
 ### Output (stdout)
 
 full real directory path to script

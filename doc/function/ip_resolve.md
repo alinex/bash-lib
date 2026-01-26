@@ -1,11 +1,11 @@
-# ip
+# ip_resolve
 
 ## Get IP of given hostname
 
 ### Usage
 
 ```bash
-ip [<option>] host.de
+ip_resolve [<option>] host.de
 ```
 
 ### Options
@@ -21,4 +21,6 @@ one ip address
 
 ### Description
 
+
+This uses `getent` which may take some seconds to resolve. But if `dig` is installed this will be used, because it works faster.
 

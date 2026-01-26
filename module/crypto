@@ -1,0 +1,66 @@
+#!/usr/bin/env bash
+# shellcheck source=base
+source /dev/null
+
+# Cryptographic helper
+
+######################################################################################
+# Password Generator
+######################################################################################
+
+# Generate Password
+#
+# Usage:    pw_generator
+# Options:  l, length <num>
+#           no-lower
+#           no-upper
+#           no-digits
+#           no-symbols
+#           c, custom <list>
+# Globals:  $PW_GENERATOR_LENGTH
+#           $PW_GENERATOR_SYMBOLS
+# Output:   <password>
+pw_generator() {
+    local length="$PW_GENERATOR_LENGTH" use_lower=1 use_upper=1 use_digits=1 use_symbols=1 symbols="$PW_GENERATOR_SYMBOLS" custom=''
+    # parameter parsing
+    eval set -- "$(option_parse $'l length +\n- no-lower -\n- no-upper -\n- no-digits -\n- no-symbols -\nc custom +' "$@")"
+    while true; do
+        case "$1" in
+        -l | --length) is integer --name=length --min=1 --die --output=length -- "$2" && shift 2 ;;
+        --no-lower) no_lower=0 && shift ;;
+        --no-upper) no_upper=0 && shift ;;
+        --no-digits) no_digits=0 && shift ;;
+        --no-symbols) no_symbols=0 && shift ;;
+        -c | --custom) is set --name=custom-chars --die --output=custom -- "$2" && shift 2 ;;
+        --) shift && break ;;
+        *) die "$(gettext "Unrecognized option"): $1" ;;
+        esac
+    done
+    # Build pools
+    local lower='abcdefghijklmnopqrstuvwxyz'
+    local upper='ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+    local digits='0123456789'
+    local pool=''
+    ((use_lower)) && pool+="$lower"
+    ((use_upper)) && pool+="$upper"
+    ((use_digits)) && pool+="$digits"
+    ((use_symbols)) && pool+="$symbols"
+    pool+="$custom"
+    is set --name=character-pool --die --message="Enable one of the pools or give a custom list of characters." -- "$pool"
+    # Ensure at least one of each enabled type
+    local required=()
+    ((use_lower)) && required+=("${lower:RANDOM%${#lower}:1}")
+    ((use_upper)) && required+=("${upper:RANDOM%${#upper}:1}")
+    ((use_digits)) && required+=("${digits:RANDOM%${#digits}:1}")
+    ((use_symbols)) && required+=("${symbols:RANDOM%${#symbols}:1}")
+    # Fill the rest randomly
+    local pw
+    pw="${required[@]}"
+    pw="${pw// /}"
+    remaining=$((length - ${#pw}))
+    for ((i = 0; i < remaining; i++)); do
+        pw+="${pool:RANDOM%${#pool}:1}"
+    done
+    # Shuffle the password so required chars aren't grouped
+    fold -w1 <<<"$pw" | shuf | tr -d '\n'
+}

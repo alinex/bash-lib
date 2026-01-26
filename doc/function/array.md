@@ -1,11 +1,13 @@
 # array
 
-## Array analyzation.
+## Array analyzation
 
 ### Usage
 
 ```bash
-array <array-name> <command> [<value>]
+array <array-name> has <value>
+array <array-name> indexof <value>
+array <array-name> join [<separator>]
 ```
 
 ### Globals
@@ -14,12 +16,12 @@ array <array-name> <command> [<value>]
 
 ### Output (stdout)
 
-- `<value>` for `has`
-- `<index-num>` for `indexof`
+- `indexof`: `<index-num>` for found value
 
 ### Return (exit code)
 
-- 0 if ok, 1 if entry not found
+- 0 if entry is found in array
+- 1 if entry not found
 - 
 
 ### Description

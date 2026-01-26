@@ -1,0 +1,75 @@
+#!/usr/bin/env bash
+# shellcheck source=base
+source /dev/null
+
+# Git command helpers
+
+######################################################################################
+### Path
+######################################################################################
+
+# Get git information
+#
+# Usage:    git_info root|url|branch|tag
+# Option:   w, work <dir>
+git_info() {
+    # parameter parsing
+    local opt=''
+    eval set -- "$(option_parse $'w work +' "$@")"
+    while true; do
+        case "$1" in
+        -w | --work) is set --name=path --die -- "$2" && opt+="-C $2 " && shift 2 ;;
+        --) shift && break ;;
+        *) die "$(gettext "Unrecognized option"): $1" ;;
+        esac
+    done
+    is enum --name=command --allow="root url name branch tag" --die -- "$1"
+    is integer --name=arguments --max=1 --die -- $#
+    # processing
+    install git
+    case $1 in
+    root) git $opt rev-parse --show-toplevel ;;
+    url) git $opt config --get remote.origin.url ;;
+    name)
+        local name
+        name="$(git $opt config --get remote.origin.url)"
+        name=${name#*://}
+        name=${name#*@}
+        name=${name#*:}
+        name=${name#*/}
+        printf '%s' "${name%.git}"
+        ;;
+    branch) git $opt branch --show-current ;;
+    tag) git $opt describe --abbrev=0 --tags 2>/dev/null || true ;;
+    esac
+}
+
+# Get log information from git for specific path.
+#
+# Usage:    git_log <format> [<path>]
+# Option:   w, work <dir>
+#           l, lines <num>
+git_log() {
+    # parameter parsing
+    local opt='' arg=''
+    eval set -- "$(option_parse $'w work +\nl lines +' "$@")"
+    while true; do
+        case "$1" in
+        -w | --work) is set --name=path --die -- "$2" && opt+="-C $2 " && shift 2 ;;
+        -l | --lines) is integer --name=lines --min=1 --die -- "$2" && arg+="-$2 " && shift 2 ;;
+        --) shift && break ;;
+        *) die "$(gettext "Unrecognized option"): $1" ;;
+        esac
+    done
+    is integer --name=arguments --min=1 --max=2 --die -- $#
+    # processing
+    install git
+    local format=''
+    case $1 in
+    revision) format='%H' ;;
+    message) format='%s' ;;
+    short) format='%ad %an: %s' ;;
+    *) format="$1" ;;
+    esac
+    git $opt log $arg --pretty="format:$format" -- "${2:-.}"
+}

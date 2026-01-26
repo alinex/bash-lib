@@ -1,7 +1,7 @@
 # BASH-LIB Generation 2
 
 This is my personal library used to easily write powerful bash scripts which may work locally, partly remote or completely remote interactive or automatic.
-It brings powerful functions, makes your code easier readable and helps finding problems...
+It brings easy functions, makes your code more readable includes a wide range of tools and systems and helps finding problems in the scripts itself...
 
 I use it privately and at work for:
 
@@ -17,7 +17,10 @@ If you already use it jump directly to the [module description](https://gitlab.c
 
 - [BASH-LIB Generation 2](#bash-lib-generation-2)
   - [Table of Contents](#table-of-contents)
-  - [Changes to Generation 1](#changes-to-generation-1)
+  - [Why use Bash](#why-use-bash)
+    - [Personal history of bash](#personal-history-of-bash)
+    - [Changes to Generation 1](#changes-to-generation-1)
+    - [Look into the Future](#look-into-the-future)
   - [Distributions](#distributions)
   - [Architecture](#architecture)
     - [Quality](#quality)
@@ -26,14 +29,45 @@ If you already use it jump directly to the [module description](https://gitlab.c
   - [Installation](#installation)
     - [Switch Version](#switch-version)
   - [Usage](#usage)
+    - [Full BashLib](#full-bashlib)
+    - [BashLib Loader for Debug](#bashlib-loader-for-debug)
+    - [Base Bashlib](#base-bashlib)
+    - [Use in Terminal](#use-in-terminal)
+    - [Remote BashLib](#remote-bashlib)
   - [Configuration](#configuration)
     - [Environment](#environment)
   - [Latest Changes](#latest-changes)
   - [Contributing](#contributing)
 
-## Changes to Generation 1
+## Why use Bash
 
-Version 2 is a complete rework of the library meaning it is another toolset and you could not upgrade to it.
+Bash is often dismissed as “just glue” or “only for quick scripts.” That reputation comes largely from old Bash habits, legacy `/bin/sh` assumptions, and poorly written shell code.
+When used consciously, modern Bash (v4.2+) is a serious scripting language—but not a general-purpose one.
+
+Bash is:
+
+- A command language
+- A process orchestration language
+- A text-stream manipulation environment
+- Bash can directly be interpreted, needs no virtual machine or translation
+
+Bash is not:
+
+- A high-level application language
+- A numeric or data-science language
+- A Unicode-first language
+
+But as Bash speaks directly with processes, native pipes and redirection it can direct work to other tools in such parts it is not designed for. As an example you may use ffmpeg for video conversion and so on.
+
+### Personal history of bash
+
+First I learned it as only the glue to run a command. But for programming on the console I used perl. That was the golden time of Perl which later got more and more lost. I switched to NodeJS later with TypeScript but then came back to doing more in Bash. I found that I could also do everything in Bash and the command line utilities that I did with NodeJS.
+After the first years I did often the same thing and had lots of copy and change in it, so I decided to make this BashLib. The library grew and grew but I got stuck with it. It was not modular and open enough and some parts were over engineered and got to complex over the time. I lost interest in the BashLib and made more and more again without it or only copying parts of it.
+In 2025 I took some time and made a plan for a better base construct for the BashLib which I developed and changed multiple times completely till I got to the current BashLib 2 structure. The whole time I was not only developing it, but also used it actively myself. And now I am at the point there I can say I love to port all my scripts to the new BashLib and will do so over time. All new scripts are already based on it.
+
+### Changes to Generation 1
+
+Since the BashLib is publicly available since years some guys may also use it. And for those I can say Version 2 is a complete rework of the library meaning it is another toolset and you could not upgrade to it.
 Some functionalities from the older version will no longer be available like logging while a lot of new possibilities are included.
 
 What BashLib 2 brings:
@@ -52,6 +86,11 @@ The downside against Version 1 may be:
 - no backward compatibility - everything is new
 - no automatic conversion from the older versions
 - needs bash v4.2 (February 2011)
+
+### Look into the Future
+
+The BashLib itself will grow further through my own usage and needs and maybe some other developers will later take part, too.
+We are not at the end, we are more at the start. There is so much potential that can be added.
 
 ## Distributions
 
@@ -96,6 +135,7 @@ bashlib/
     base            # only the base/core functionality (minified)
     full            # file with full functionality (minified)
     loader          # same as full but including all source files
+    remote          # library with base configs for remote use
     # module directories
     core/           # core modules which always is needed (loaded by all of the above)
     config/         # individual configuration (loaded by all of the above)
@@ -119,15 +159,15 @@ The BashLib will be installed on the System with it's `BASHLIB_HOME` directory i
 
 The modules are as far as possible:
 
-- error handling
+- optimized error handling
 - unit tested (using bats)
 - integration tested in different OS using docker
-- CI tested on different OS, too
+- CI tested on some OS
 - and analyzed by the shellcheck static analysis and linting
 
 Documentation of externally usable variables and functions is completely done inline and exported as [markdown documentation](./doc/README.md).
 
-Management of bugs and issues will be done using [GitLab Issues](https://gitlab.com/alinex/bash-lib/-/issues) and also we use the milestones here. But also instant bug fixing of parts we find by ourself will be done directly in git without any message there.
+Management of bugs and issues will be done using [GitLab Issues](https://gitlab.com/alinex/bash-lib/-/issues) and we also use the milestones here. Self found bugs will be fixed mostly instant without any issue and commited to the repository.
 
 ### Error handling
 
@@ -145,13 +185,13 @@ See all the changes in the [changelog](./CHANGELOG.md).
 
 ## Installation
 
-Can be done locally after checking out the git repository manually by setting only the `BASHLIB_HOME` variable in your environment or directly from the repository by calling (your user should have sudo rights):
+This can be done manually after checking out the git repository by only setting the `BASHLIB_HOME` variable in your environment or directly. Or you use the installer which will setup everything for you (needs sudo rights):
 
 ```bash
 # interactive install
 curl -sL https://gitlab.com/alinex/bash-lib/-/raw/master/install | bash     
 # automatic install, all values provided
-curl -sL https://gitlab.com/alinex/bash-lib/-/raw/master/install | bash -s -- "<path>" y|n "<config>"                                      
+curl -sL https://gitlab.com/alinex/bash-lib/-/raw/master/install | bash -s -- "<branch>" y|n
 
 # update if already installed
 curl -sL https://gitlab.com/alinex/bash-lib/-/raw/master/install | bash
@@ -169,6 +209,8 @@ Therefore the following steps will be done:
 3. Setup BASHLIB_HOME in your environment.
 4. Update local configuration files.
 
+![Install](./doc/installer.png)
+
 The update will be the same, you only need to download the new files and overwrite the old ones.
 If you want to remove it later the commands will be shown while installing/updating, too.
 
@@ -176,9 +218,25 @@ If you want to remove it later the commands will be shown while installing/updat
 
 By default the latest version from master branch will be used, also if you run the installer from another tag or branch.
 
-If you specifically want to switch you can always replace your bashlib home with the GitLab Download archive of any other version. But keep in mind that the installer will always overwrite with the newest master version if run to update.
+If you want to have another version use the specific branch name as argument or in as you are asked:
+
+- `master` - mostly stable and tested version but without the newest changes
+- `develop` - newest changes, but maybe not thoroughly tested
+- tags like `v2.3.0` - older version
+
+And you can also at any time download the BasLib yourself and set `$BASHLIB_HOME` to this directory to work with it, like I do with my developer directory.
+Or use it without local installation, see below.
 
 ## Usage
+
+This will show you how to use it after installation or without installation. See the possibilities explained below.
+
+For further assistance see the [Examples](./doc/README.md#Examples) within the Modules API documentation.
+A [bash short reference](./bash-reference.md) is also available here.
+
+### Full BashLib
+
+This is a compressed library containing all core and modules. ANd will load the configurations from the config folder, too.
 
 Your scripts will start with:
 
@@ -187,12 +245,19 @@ Your scripts will start with:
 source $BASHLIB_HOME/full           # to have all tools ready
 ```
 
-The optimal solution may to use the `full` or `loader` (based on `DEBUG` mode locally:
+### BashLib Loader for Debug
+
+This will load all files individually, making error references to the source files, not the line in the compressed full script. This is preferable for debugging.
+Mostly it is used if DEBUG is set instead of the full lib:
 
 ```bash
 #!/usr/bin/env bash
 test -z "${DEBUG-}" && source "$BASHLIB_HOME"/full || source "$BASHLIB_HOME"/loader
 ```
+
+### Base Bashlib
+
+If you need only some specific parts of the BashLib, it is advisable to use the base which only contains the core functionality.
 
 And for the scripts better use the individual loading if not so much is needed:
 
@@ -205,12 +270,28 @@ source $BASHLIB_HOME/configs        # load configuration
 use module/output
 ```
 
-For further assistance see the [Examples](./doc/README.md#Examples) within the Modules API documentation.
-
-A [bash short reference](./bash-reference.md) is also available here.
+### Use in Terminal
 
 You can also use the BashLib directly in the terminal.
-Load it directly in bash with the above `source` commands.
+Load it directly in bash with one of the above `source` commands.
+
+### Remote BashLib
+
+And at last if you run a script seldom and want not to install the BashLib on your host, you may use it directly from the net, this is the full bashlib with default environment configuration bundled together.
+But to fully work it will store a footprint of about 25kB within your temp folder (`/tmp/bashlib`) like i18n files.
+
+```bash
+#!/usr/bin/env bash
+source <(curl -s https://gitlab.com/alinex/bash-lib/-/raw/master/remote)
+```
+
+Now you have to include your specific configuration like API and secrets directly in the code to fully use it.
+
+If an error occurs while using the remote BashLib you may encounter an additional error which you should ignore:
+
+```text
+awk: fatal: cannot open file `/dev/fd/63' for reading: No such file or directory
+```
 
 ## Configuration
 

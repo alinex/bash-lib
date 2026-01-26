@@ -43,6 +43,8 @@ _module_resolve() {
 # - `config/<name>` to load only one config
 # - any other name will be interpreted as `module/<name>` (short form)
 #
+# If you get something like `tput: No value for $TERM and no -T specified` then you should run the remote call with `remote --terminal`.
+#
 # Usage:    remote [<options>] <command>...     # special characters in command masked with backslash ( | & * > < $ )
 #           <commands> | remote [<options>]     # pipe the command which prevents masking
 #           remote [<options>] --file <file>    # run file content on remote host
@@ -68,9 +70,9 @@ remote() {
     eval set -- "$(option_parse $'+l login +\nh host +\nj jump +\nt terminal -\n- line-based -\nf file -' "$@")"
     while true; do
         case "$1" in
-        -l | --login) _login="$2" && shift 2 ;;
-        -h | --host) host="$2" && shift 2 ;;
-        -j | --jump) jump="$2" && shift 2 ;;
+        -l | --login) is set --name=login --die --output=_login -- "$2" && shift 2 ;;
+        -h | --host) is set --name=host --die --output=host -- "$2" && shift 2 ;;
+        -j | --jump) is set --name=jump --die --output=jump -- "$2" && shift 2 ;;
         -t | --terminal) term=1 && shift ;;
         --line-based) lines=1 && shift ;;
         -f | --file) file=1 && shift ;;
@@ -202,17 +204,19 @@ remote_console() {
 #           l, login <user>
 #           h, host <host>
 #           j, jump <user>@<host>
+#           f, files <list>     # each file in a line, must be relative from <source>
 # Globals:  $server
 #           $login - default is "operator"
 upload() {
     # parameter parsing
-    local _login host jump
-    eval set -- "$(option_parse $'+l login +\nh host +\nj jump +' "$@")"
+    local _login host jump files
+    eval set -- "$(option_parse $'+l login +\nh host +\nj jump +\nf files +' "$@")"
     while true; do
         case "$1" in
-        -l | --login) _login="$2" && shift 2 ;;
-        -h | --host) host="$2" && shift 2 ;;
-        -j | --jump) jump="$2" && shift 2 ;;
+        -l | --login) is set --name=login --die --output=_login -- "$2" && shift 2 ;;
+        -h | --host) is set --name=host --die --output=host -- "$2" && shift 2 ;;
+        -j | --jump) is set --name=jump --die --output=jump -- "$2" && shift 2 ;;
+        -f | --files) is set --name=files --die --output=files -- "$2" && shift 2 ;;
         --) shift && break ;;
         *) die "$(gettext "Unrecognized option"): $1" ;;
         esac
@@ -228,7 +232,11 @@ upload() {
     local dir=${2:-~}
     debug "rsync -av $1 $ssh:$dir"
     # shellcheck disable=SC2086
-    rsync -av "$1" $ssh:"$dir"
+    if is set -- "$files"; then
+        rsync -avz --files-from=<(printf '%s\n' "$files") "$1" $ssh:"$dir"
+    else
+        rsync -avz "$1" $ssh:"$dir"
+    fi
 }
 
 # Download file
@@ -246,22 +254,10 @@ download() {
     eval set -- "$(option_parse $'+l login +\nh host +\nj jump +' "$@")"
     while true; do
         case "$1" in
-        -l | --login)
-            _login="$2"
-            shift 2
-            ;;
-        -h | --host)
-            host="$2"
-            shift 2
-            ;;
-        -j | --jump)
-            jump="$2"
-            shift 2
-            ;;
-        --)
-            shift
-            break
-            ;;
+        -l | --login) is set --name=login --die --output=_login -- "$2" && shift 2 ;;
+        -h | --host) is set --name=host --die --output=host -- "$2" && shift 2 ;;
+        -j | --jump) is set --name=jump --die --output=jump -- "$2" && shift 2 ;;
+        --) shift && break ;;
         *) die "$(gettext "Unrecognized option"): $1" ;;
         esac
     done
@@ -275,7 +271,7 @@ download() {
     [ -z "$jump" ] || ssh="-J $jump $ssh"
     local dir=${2:-.}
     # shellcheck disable=SC2086
-    rsync -av $ssh:"$1" "$dir"
+    rsync -avz $ssh:"$1" "$dir"
 }
 
 ######################################################################################

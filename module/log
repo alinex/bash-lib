@@ -58,7 +58,7 @@ log() {
             shift 2
             ;;
         -z | --compress) compress=1 && shift ;;
-        -c | --cleanup) cleanup="$(check duration --name=cleanup --die -- "$2")" && shift 2 ;;
+        -c | --cleanup) is duration name=cleanup --die --output=cleanup -- "$2" && shift 2 ;;
         --) shift && break ;;
         *) die "$(gettext "Unrecognized option"): $1" ;;
         esac

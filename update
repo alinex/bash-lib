@@ -2,6 +2,7 @@
 
 BASHLIB_HOME="$(dirname "$(readlink -f "${BASH_SOURCE[0]:-$(pwd)/x}")")"
 LOCALES="de en"
+set -eE
 
 echo "Update minimize bash-lib library... "
 command -v shfmt >/dev/null || sudo apt install -y shfmt
@@ -18,10 +19,22 @@ for folder in core module; do
     done
 done
 #sed -E -f optimize-code.sed "$BASHLIB_HOME/full" >"$BASHLIB_HOME/full2"
-#echo -n "(optimize) "
-#sed -i -E -f optimize-code.sed "$BASHLIB_HOME/full"
+echo -n "(optimize) "
+sed -i -E -f optimize-code.sed "$BASHLIB_HOME/full"
 echo "fertig -> $(du -h full | cut -f1)B"
+echo -n "- remote (clone) "
+sed 's/BASHLIB_LOADER:-full/BASHLIB_LOADER:-remote/' "$BASHLIB_HOME/full" >"$BASHLIB_HOME/remote"
 echo "source \$BASHLIB_HOME/configs" >>"$BASHLIB_HOME/full" # load configs
+shfmt -mn "$BASHLIB_HOME/config/environment" | grep -Ev '^#!/usr/bin/env bash|source /dev/null' >>"$BASHLIB_HOME/remote"
+sed -i '/BASHLIB_LOADER:-remote/ a\
+_tmpdir="${TMPDIR:-${TMP:-${TEMP:-/tmp}}}/bashlib"\
+mkdir -p $_tmpdir/locale/en/LC_MESSAGES\
+mkdir -p $_tmpdir/locale/de/LC_MESSAGES\
+curl -s https://gitlab.com/alinex/bash-lib/-/raw/develop/locale/en/LC_MESSAGES/bashlib.mo >$_tmpdir/locale/en/LC_MESSAGES/bashlib.mo\
+curl -s https://gitlab.com/alinex/bash-lib/-/raw/develop/locale/de/LC_MESSAGES/bashlib.mo >$_tmpdir/locale/de/LC_MESSAGES/bashlib.mo\
+BASHLIB_HOME=$_tmpdir
+' "$BASHLIB_HOME/remote"
+echo "fertig -> $(du -h remote | cut -f1)B"
 echo "#!/usr/bin/env bash" >"$BASHLIB_HOME/base"
 echo "BASHLIB_LOADER=\${BASHLIB_LOADER:-base}" >>"$BASHLIB_HOME/base"
 echo -n "- base core "
@@ -30,8 +43,8 @@ for f in "$BASHLIB_HOME"/core/*; do
         shfmt -mn "$f" | grep -Ev '^#!/usr/bin/env bash|source /dev/null' >>"$BASHLIB_HOME/base"
     fi
 done
-#echo -n "(optimize) "
-#sed -i -E -f optimize-code.sed "$BASHLIB_HOME/base"
+echo -n "(optimize) "
+sed -i -E -f optimize-code.sed "$BASHLIB_HOME/base"
 echo "fertig -> $(du -h base | cut -f1)B"
 
 md_optimize() {

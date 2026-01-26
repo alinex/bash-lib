@@ -32,7 +32,7 @@ source /dev/null
 #               the options are at the start
 #               then the double dash `--` also if not given
 #               and at last all other arguments
-# Example:      - eval set -- "$(option_parse <spec> "$@")"
+# Example:      - `eval set -- "$(option_parse <spec> "$@")"`
 #               - &base_script includes a simple example
 option_parse() {
     local opt name type desc short="" long="" spec="$1" permute
@@ -59,7 +59,7 @@ option_parse() {
     done <<<"$spec"
     shift
     # parse
-    getopt -q -o "$permute$short" --long "$long" -n "$0" -- "$@"
+    getopt -q -o "$permute$short" --long "$long" -n "$0" -- "$@" || true
 }
 
 # Print help for options defined in options specification

@@ -3,6 +3,24 @@
 Newest changes will always take part in the development branch. You only may use them if you manually install this.
 But on release they will be merged with semantical versioning into the master branch and will get available to new installs or updates.
 
+## 26. January 2026 - v2.4.0
+
+- allow to include BashLib directly from the net in special remote version
+- add [big_files](doc/function/big_files.md) analyzation
+- add [git_info](doc/function/git_info.md) and [git_log](doc/function/git_log.md) helper
+- add [pw_generator](doc/function/pw_generator.md)
+- add [uppercase](doc/function/uppercase.md) and [lowercase](doc/function/lowercase.md) methods
+- add [compress](doc/function/compress.md) and [decompress](doc/function/decompress.md)
+- add [uprintf](doc/function/uprintf.md) which is a multi-byte safe version of `printf`
+- enhance the [os](doc/function/os.md) and add [bios](doc/function/bios.md) information
+- move join -> [array](doc/function/array.md) command
+- enhance [hash](doc/function/hash.md) to tsv
+- [choose](doc/function/choose.md) now with multi column display
+- rename ip -> [ip_resolve](doc/function/ip_resolve.md)
+- fix installer to also allow installation of develop version
+- fix in option_parse to always return true
+- move down deprecated methods
+
 ## 11. January 2026 - v2.3.0
 
 - add [trivy](doc/function/trivy.md) security scanning

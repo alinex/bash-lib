@@ -1,6 +1,6 @@
 # join
 
-## Join array elements by delimiter
+## Deprecated: Join array elements by delimiter
 
 ### Usage
 
@@ -19,6 +19,7 @@ join <array-name> [<delimiter>]
 
 ### Description
 
+Use [`array`](array.md) `<arr>` join `<separator>`
 
 Convert all elements in array into a string separated by delimiter (default is `,`).
 

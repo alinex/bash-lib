@@ -47,10 +47,12 @@ TRIVY_EXPLOITS_URL=https://www.cisa.gov/sites/default/files/feeds/known_exploite
 #           trivy [<options>] files <path>
 #           trivy [<options>] docker <file>
 #           trivy [<options>] docker <image>
+#           trivy clean
 # Options:  t, timeout <duration>   # set the timeout for the job in <int>m or <int>h
 #           o, only-os              # let `root` command only scan OS without filesystem traversal
-#           e, exclude <dirs>       # additional excludes
+#           e, exclude <dirs>       # additional excludes for `root` command
 #           p, progress             # show progress
+#           c, clean                # immediately clean trivy database after scan
 # GLobal:   $TRIVY_DEFAULT_TIMEOUT
 #           $TRIVY_CACHE_SERVER
 #           $TRIVY_ROOT_EXCLUDE
@@ -64,37 +66,42 @@ TRIVY_EXPLOITS_URL=https://www.cisa.gov/sites/default/files/feeds/known_exploite
 #           $TRIVY_JIRA_APPROVAL_TEMP
 #           $TRIVY_JIRA_APPROVAL_IRRELEVANT
 # Output:   <report-path> or nothing if no vulnerabilities found
+# Error:    Progress output if `--progress` is set with optimizations on reports
 # Return:   1 if there are at least one CRITICAL or HIGH vulnerabilities
 trivy() {
-    is enum --name=command --allow="root files docker" --die -- "$1" && local command="$1" && shift
-    local timeout onlyOS exclude progress
-    timeout=${TRIVY_DEFAULT_TIMEOUT:-60m}
+    local exclude clean progress opt="--exit-code 0 --no-progress --skip-version-check -f json"
     # parameter parsing
-    eval set -- "$(option_parse $'t timeout +\no only-os -\ne exclude +\np progress -' "$@")"
+    eval set -- "$(option_parse $'t timeout +\no only-os -\ne exclude +\np progress -\nc clean -' "$@")"
     while true; do
         case "$1" in
-        -t | --timeout) timeout="$2" && shift 2 ;;
-        -o | --only-os) onlyOS=1 && shift ;;
-        -e | --exclude) exclude="$2" && shift 2 ;;
+        -t | --timeout) is duration --name=timeout --die -- "$2" && opt+=" --timeout $timeout" && shift 2 ;;
+        -o | --only-os) opt+=" --pkg-types os" && shift ;;
+        --no-secrets) opt+=" --scanners-exclude secret" && shift ;;
+        -e | --exclude) is set --name=exclude --die --output=exclude -- "$2" && shift 2 ;;
         -p | --progress) progress=1 && shift ;;
+        -c | --clean) clean=1 && shift ;;
         --) shift && break ;;
         *) die "$(gettext "Unrecognized option"): $1" ;;
         esac
     done
+    is enum --name=command --allow="root files docker clean" --die -- "$1" && local command="$1" && shift
     # processing
     install trivy
-    local work cmd opt="--exit-code 0 --no-progress --skip-version-check --timeout $timeout -f json"
+    local work cmd
     local source="$1"
     work="$(mktemp --directory "${$}_trivy")"
-    cmd="$(command -v trivy)"
+    cmd="$(which trivy)"
     opt+=" -o $work/trivy.json"
-    is empty -- "$DEBUG" || opt+=" --debug"
+    ! is integer --min=9 -- "$DEBUG" || opt+=" --debug"
     is empty -- "$TRIVY_CACHE_SERVER" || opt+=" --server $TRIVY_CACHE_SERVER"
+    local version
+    version="$(command "$cmd" -v | head -1 | cut -d' ' -f2)"
+    is empty -- "$progress" || eval_gettext 'Start $command scanning with trivy V${version}...' | info >&2
     # shellcheck disable=SC2086
-    echo "----"
-    # shellcheck disable=SC2086
+    local rc
     case $command in
     root)
+        [[ "$opt" == *"--timeout"* ]] || opt+=" --timeout ${TRIVY_ROOT_TIMEOUT:-${TRIVY_DEFAULT_TIMEOUT:-30m}}"
         exclude+=" $TRIVY_ROOT_EXCLUDE"
         local excludeOption
         for path in $exclude; do
@@ -102,17 +109,33 @@ trivy() {
         done
         is empty -- "$onlyOS" || opt+=" --pkg-types os"
         source="$(hostname -f)"
-        sudo "$cmd" rootfs $opt $excludeOption / 2>&1 | sed 's/[^A-Z]*T[^A-Z]*//' | debug
+        sudo "$cmd" rootfs $opt $excludeOption / 2>&1 | sed 's/[^A-Z]*T[^A-Z]*//' >"$work/log" || rc=$?
         ;;
-    files) command $cmd fs $opt "$1" 2>&1 | sed 's/[^A-Z]*T[^A-Z]*//' | debug ;;
-    docker) command $cmd image $opt --input "$1" 2>&1 | sed 's/[^A-Z]*T[^A-Z]*//' | debug ;;
+    files)
+        [[ "$opt" == *"--timeout"* ]] || opt+=" --timeout ${TRIVY_DEFAULT_TIMEOUT:-30m}"
+        $cmd fs $opt "$1" 2>&1 | sed 's/[^A-Z]*T[^A-Z]*//' >"$work/log" || rc=$?
+        ;;
+    docker)
+        [[ "$opt" == *"--timeout"* ]] || opt+=" --timeout ${TRIVY_DEFAULT_TIMEOUT:-30m}"
+        $cmd image $opt --input "$1" 2>&1 | sed 's/[^A-Z]*T[^A-Z]*//' >"$work/log" || rc=$?
+        ;;
+    clean)
+        _deprecated "Use option --clean instead" warn
+        sudo rm -rf /root/.cache/trivy
+        return
+        ;;
     esac
+    cat "$work/log" | debug
+    [ -z "$rc" ] || tail "$work/log" | warn
+    [ -z "$rc" ] || die "Failed trivy scan!"
+    rm "$work/log"
+    is false -- "$clean" || sudo rm -rf /root/.cache/trivy
     # Splitting
-    debug "Optimize JSON structure for splitting..."
+    is empty -- "$progress" || gettext 'Optimize JSON structure for splitting...' | info >&2
     jq '.Results[]?|. as $g|.Vulnerabilities[]?|{Class: $g.Class, Target: $g.Target, Type: $g.Type}*.' "$work"/trivy.json >"$work"/split.json
-    debug "Splitting JSON..."
+    is empty -- "$progress" || gettext 'Splitting JSON into single reports...' | info >&2
     mkdir "$work"/split
-    csplit -f "$work"/split/ -b '%06d' -zs "$work"/split.json /^\{/ "{*}"
+    csplit -f "$work"/split/ -b '%06d' -zs "$work"/split.json '/^{/' "{*}"
     rm "$work"/split.json
     # skip if nothing found
     local found
@@ -123,7 +146,7 @@ trivy() {
         rm -r "$work"
         return 0
     fi
-    debug "Found $found reports."
+    is empty -- "$progress" || eval_gettext 'Found $found vulnerabilities.' | info >&2
     # trivy report cache
     mkdir -p "$_trivy_cache/jira"
     ! is file -- "$_trivy_cache/exploits.json" || find "$_trivy_cache/exploits.json" -mmin +1440 -delete
@@ -147,14 +170,15 @@ trivy() {
     _trivy_jira[field_approval]="$(jq '.fields[] | select(.name == "'"$TRIVY_JIRA_FIELD_APPROVAL"'").key' -r <<<"$fields")"
     is set -- "${_trivy_jira[field_approval]}" || die "Could not find JIRA Field \"$TRIVY_JIRA_FIELD_APPROVAL\" in $TRIVY_JIRA_BOARD/$TRIVY_JIRA_ISSUE_TYPE!"
     # Loop over entries and create report
-    local num
+    is empty -- "$progress" || gettext 'Build queue to optimize reports...' | info >&2
     for file in "$work"/split/*; do
-        num="$(basename "$file")"
-        queue add _trivy_report "$work" "$file" "$source"
+        queue add _trivy_report "$work" "$file" "$source" "$progress"
     done
+    is empty -- "$progress" || gettext 'Run queue to optimize reports...' | info >&2
     queue run
     rm -r "$work"/split
     # Finalize reports
+    is empty -- "$progress" || gettext 'Create summaries...' | info >&2
     while read -r folder; do
         cat "$folder/header.txt" "$folder/sources.txt" "$folder/footer.txt" >"$folder/report.txt"
         rm "$folder/header.txt" "$folder/sources.txt" "$folder/footer.txt"
@@ -199,9 +223,7 @@ trivy_test() {
     _trivy_jira[field_approval]="$(jq '.fields[] | select(.name == "'"$TRIVY_JIRA_FIELD_APPROVAL"'").key' -r <<<"$fields")"
     is set -- "${_trivy_jira[field_approval]}" || die "Could not find JIRA Field \"$TRIVY_JIRA_FIELD_APPROVAL\" in $TRIVY_JIRA_BOARD/$TRIVY_JIRA_ISSUE_TYPE!"
     # Loop over entries
-    local num
     for file in "$work"/split/*; do
-        num="$(basename "$file")"
         queue add _trivy_report "$work" "$file" "$source"
     done
     queue run
@@ -230,10 +252,13 @@ trivy_test() {
 _trivy_cache=/tmp/trivy-cache
 declare -A _trivy_jira
 _trivy_report() {
-    debug "trivy_report \"$1\" \"$2\" \"$3\""
+    # TODO: remove debug code
+    echo "_trivy_report \"$1\" \"$2\" \"$3\"" >&2
+    debug "_trivy_report \"$1\" \"$2\" \"$3\""
     local work="$1"
     local file="$2"
     local source="$3"
+    local progress="$4"
     # initialize data and structure
     local type severity target id json title pkgName pkgPath description cvss installed sourceLine date fixed fixStatus links
     json="$(cat "$file")"
@@ -264,7 +289,7 @@ _trivy_report() {
     if (($(date_format unix "$date") > $(now) - $(duration_format seconds 3d))) &&
         [[ "$severity" = "HIGH" || "$severity" = "CRITICAL" ]]; then
         action="$(eval_gettext 'Downgrade $severity -> MEDIUM because it was published less than 3 days ago')"
-        info "$id at $target: $action" >&2
+        [ -z "$progress" ] || info "$id at $target: $action" >&2
         changes+=("{\"Severity\": \"MEDIUM\",\"OriginalSeverity\": \"$severity\"}")
         rules+=("{\"Title\": \"Just Published\",\"Description\": \"$action.\"}")
     fi
@@ -273,7 +298,7 @@ _trivy_report() {
     exploited="$(jq '.vulnerabilities[]|select(.cveID=="'"$id"'")' "$_trivy_cache/exploits.json")"
     if is set -- "$exploited"; then
         action="$(gettext 'Add information of known exploits and cancel downgrades in case of just published')"
-        info "$id at $target: $action" >&2
+        [ -z "$progress" ] || info "$id at $target: $action" >&2
         changes+=("{\"Exploited\": $exploited, \"Severity\": \"$severity\"}")
         rules+=("{\"Title\": \"Exploited\",\"Description\": \"$action.\"}")
     fi
@@ -282,7 +307,7 @@ _trivy_report() {
         [[ "$severity" = "HIGH" || "$severity" = "CRITICAL" ]] && is file -- "$target" &&
         [ "$(jq '.packages|with_entries(select(.key|contains("'"$pkgName"'")))|.[]|select(has("dev"))|[.dev]|any' "$target"/package-lock.json)" = "true" ]; then
         action="$(eval_gettext 'Downgrade $severity -> MEDIUM because it is a dev dependency')"
-        info "$id at $target: $action" >&2
+        [ -z "$progress" ] || info "$id at $target: $action" >&2
         changes+=("{\"Severity\": \"MEDIUM\",\"OriginalSeverity\": \"$severity\"}")
         rules+=("{\"Title\": \"NPM Dev Dependency\",\"Description\": \"$action.\"}")
     fi
@@ -384,19 +409,19 @@ _trivy_report() {
             if is set -- "$update"; then
                 update=1
                 if ((${#addLabel[@]} > 0)); then
-                    fields="$(jq --argjson l "[$(join addLabel ",")]" '.update = { "labels": $l }' <<<"$fields")"
+                    fields="$(jq --argjson l "[$(array addLabel join ",")]" '.update = { "labels": $l }' <<<"$fields")"
                 fi
                 jira update "$issue" "$fields"
             fi
         fi
         action="$(gettext 'Add information from Jira')"
-        info "$(eval_gettext '$id at $target'): $action" >&2
+        [ -z "$progress" ] || info "$(eval_gettext '$id at $target'): $action" >&2
         changes+=("{\"Jira\": {\"id\": $issue, \"key\": \"$key\", \"approval\": \"$deploy\", \"lastComment\": \"$commentDate\"}}")
         rules+=("{\"Title\": \"Jira Info\",\"Description\": \"$action.\"}")
     fi
     # store json changes
     # shellcheck disable=SC2128
-    is empty -- "$rules" || changes+=("{\"Rules\": [$(join rules)]}")
+    is empty -- "$rules" || changes+=("{\"Rules\": [$(array rules join)]}")
     for change in "${changes[@]}"; do
         json="$(jq -n --argjson o "$json" --argjson c "$change" '$o * $c')"
     done
@@ -444,7 +469,7 @@ _trivy_report() {
                 printf '%s\n' "Jira Issue: https://ekz-gruppe.atlassian.net/browse/$issue"
                 printf '%s\n' "            $jiraStatus    $(gettext 'Responsible'): $assignee"
                 printf '%s\n' "            $(gettext 'Deploy'): ${approval:-Undefiniert}"
-                printf '%s\n' "$(gettext 'Last comments'):\n$(join comments $'\n' | sed 's/^/             /')"
+                printf '%s\n' "$(gettext 'Last comments'):\n$(array comments join $'\n' | sed 's/^/             /')"
             fi
             printf '%s:\n' "$(gettext 'Sources')"
         } >>"$file"

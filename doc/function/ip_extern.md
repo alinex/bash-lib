@@ -20,17 +20,15 @@ ip_extern <format>
 The following formats are possible:
 
 - data - all values with `<name>	<value>`
-- country
-- countryCode
-- region
-- regionName
-- city
-- zip
-- lat
-- lon
-- timezone
-- isp
-- org
-- as
-- ip
+- ip - `<ipv4>`
+`<ipv6>`
+- ipv4
+- ipv6
+- country - like DE
+- region - like Baden-Württemberg
+- city - like Reutlingen
+- zip - like 72766
+- loc - `<lat>`,`<lon>`
+- timezone - like Europe/Berlin
+- org - like AS3320 Deutsche Telekom AG
 

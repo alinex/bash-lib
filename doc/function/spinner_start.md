@@ -14,12 +14,8 @@ spinner_start <format> [<time>]
 
 ```bash
 <symbol> with back-space so that cursor is always before it
+
 ```
-
-### Return (exit code)
-
-- 0 without doing anything if no `tput` and terminal available
-- 
 
 ### Description
 
