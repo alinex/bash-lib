@@ -2,6 +2,8 @@
 # shellcheck disable=SC2034
 # shellcheck source=base
 source /dev/null
+# shellcheck source=config/environment
+source /dev/null
 
 # Module with operating system specific helper functions.
 
@@ -228,6 +230,7 @@ disk() {
     is enum --name=format --allow="list data console" --die --output=format -- "$1" && shift
     # processing
     local type source size used avail pcent itotal iused iavail ipcent target list pval ival i pattern level
+    # shellcheck disable=SC2086
     while read -r type source size used avail pcent itotal iused iavail ipcent target; do
         pval=${pcent%%%}
         [ "$ipcent" = "-" ] || ival=${ipcent%%%}
@@ -272,6 +275,7 @@ disk() {
     case $format in
     list)
         while read -r type source size used avail pcent itotal iused iavail ipcent target pval ival level; do
+            # shellcheck disable=SC2086
             is empty -- "$type" || printf '%s\n' $target
         done <<<"$list"
         ;;
@@ -280,6 +284,7 @@ disk() {
         printf '\n'
         while read -r type source size used avail pcent itotal iused iavail ipcent target pval ival level; do
             is set -- "$type" || continue
+            # shellcheck disable=SC2086
             print '%s\t' $type $source $size $used $avail $pcent $itotal $iused $iavail $ipcent $target
             print '\n'
         done <<<"$list"
@@ -287,6 +292,8 @@ disk() {
     console)
         printf "${CC_INVERSE}%-30s %8s %8s %8s %8s %8s${CC_RESET}\n" "$(gettext Mount)" "$(gettext Total)" "$(gettext Used)" "$(gettext Avail)" "$(gettext Percent)" "$(gettext Inodes)"
         while read -r type source size used avail pcent itotal iused iavail ipcent target pval ival level; do
+            # shellcheck disable=SC2046
+            # shellcheck disable=SC2086
             is empty -- "$type" || printf '%-30s %8s %8s %8s %8s %8s\n' $target $(numfmt --to=iec --suffix=B $size) $(numfmt --to=iec --suffix=B $used) $(numfmt --to=iec --suffix=B $avail) $pcent $ipcent | $level
         done <<<"$list"
         ;;
@@ -411,6 +418,7 @@ big_files() {
     max=$(df -B1 "$path" | awk 'NR==2 {print $3}')
     min=$((max * percent / 100))
     while read -r size path; do
+        # shellcheck disable=SC2046
         printf '%s\t%s\n' $(numfmt --to=iec --suffix=B <<<"$size") "$path"
     done < <(sudo du -abx "$path" 2>/dev/null | grep -v 'du: cannot access' | awk '$1 > '"$min" | sort -k2)
 }
