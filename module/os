@@ -276,7 +276,8 @@ disk() {
         done <<<"$list"
         ;;
     data)
-        printf "Type\tSource\tSize\tUsed\tAvail\tPercent\tI-Total\tI-Used\tI-Avail\tI-Percent\tTarget\n"
+        printf '%s\t' "$(gettext Type)" "$(gettext Source)" "$(gettext Total)" "$(gettext Used)" "$(gettext Avail)" "$(gettext Percent)" "$(gettext I-Total)" "$(gettext I-Used)" "$(gettext I-Avail)" "$(gettext I-Percent)" "$(gettext Mount)"
+        printf '\n'
         while read -r type source size used avail pcent itotal iused iavail ipcent target pval ival level; do
             is set -- "$type" || continue
             print '%s\t' $type $source $size $used $avail $pcent $itotal $iused $iavail $ipcent $target
@@ -284,7 +285,7 @@ disk() {
         done <<<"$list"
         ;;
     console)
-        printf "${CC_INVERSE}%-30s %8s %8s %8s %8s %8s${CC_RESET}\n" $(gettext Mount) $(gettext Total) $(gettext Used) $(gettext Avail) $(gettext Percent) $(gettext Inodes)
+        printf "${CC_INVERSE}%-30s %8s %8s %8s %8s %8s${CC_RESET}\n" "$(gettext Mount)" "$(gettext Total)" "$(gettext Used)" "$(gettext Avail)" "$(gettext Percent)" "$(gettext Inodes)"
         while read -r type source size used avail pcent itotal iused iavail ipcent target pval ival level; do
             is empty -- "$type" || printf '%-30s %8s %8s %8s %8s %8s\n' $target $(numfmt --to=iec --suffix=B $size) $(numfmt --to=iec --suffix=B $used) $(numfmt --to=iec --suffix=B $avail) $pcent $ipcent | $level
         done <<<"$list"

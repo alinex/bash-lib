@@ -3,9 +3,10 @@
 Newest changes will always take part in the development branch. You only may use them if you manually install this.
 But on release they will be merged with semantical versioning into the master branch and will get available to new installs or updates.
 
-## (23. January 2026) - v2.4.0
+## 26. January 2026 - v2.4.0
 
 - allow to include BashLib directly from the net in special remote version
+- add [big_files](doc/function/big_files.md) analyzation
 - add [git_info](doc/function/git_info.md) and [git_log](doc/function/git_log.md) helper
 - add [pw_generator](doc/function/pw_generator.md)
 - add [uppercase](doc/function/uppercase.md) and [lowercase](doc/function/lowercase.md) methods

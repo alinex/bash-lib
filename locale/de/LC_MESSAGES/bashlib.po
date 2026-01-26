@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-26 20:04+0100\n"
+"POT-Creation-Date: 2026-01-26 20:17+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,8 +17,8 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: core/misc:132 core/validator:74 core/array:136 module/os:225 module/os:331
-#: module/os:404 module/network:24 module/trivy:84 module/compress:41
+#: core/misc:132 core/validator:74 core/array:136 module/os:225 module/os:332
+#: module/os:405 module/network:24 module/trivy:84 module/compress:41
 #: module/monitoring:148 module/input:31 module/input:86 module/input:212
 #: module/input:465 module/input:670 module/log:63 module/process:381
 #: module/process:429 module/process:507 module/process:654 module/remote:80
@@ -249,29 +249,53 @@ msgstr "Keine lokale DNS Liste gefunden, bitte herunterladen."
 msgid "Use $list from $time."
 msgstr "Benutze $list vom $time."
 
-#: module/os:287
-msgid "Mount"
-msgstr ""
+#: module/os:279
+msgid "Type"
+msgstr "Typ"
 
-#: module/os:287
+#: module/os:279
+msgid "Source"
+msgstr "Quelle"
+
+#: module/os:279 module/os:288
 msgid "Total"
-msgstr ""
+msgstr "Gesamt"
 
-#: module/os:287
+#: module/os:279 module/os:288
 msgid "Used"
-msgstr ""
+msgstr "Benutzt"
 
-#: module/os:287
+#: module/os:279 module/os:288
 msgid "Avail"
-msgstr ""
+msgstr "Frei"
 
-#: module/os:287
+#: module/os:279 module/os:288
 msgid "Percent"
-msgstr ""
+msgstr "Prozent"
 
-#: module/os:287
+#: module/os:279
+msgid "I-Total"
+msgstr "I-Gesamt"
+
+#: module/os:279
+msgid "I-Used"
+msgstr "I-Benutzt"
+
+#: module/os:279
+msgid "I-Avail"
+msgstr "I-Frei"
+
+#: module/os:279
+msgid "I-Percent"
+msgstr "I-Proz."
+
+#: module/os:279 module/os:288
+msgid "Mount"
+msgstr "Mount"
+
+#: module/os:288
 msgid "Inodes"
-msgstr ""
+msgstr "Inodes"
 
 #: module/network:55
 msgid "IP\\tInterface"
@@ -626,6 +650,12 @@ msgid "is a downgrade of one patch version"
 msgid_plural "is a downgrade of $step patch versions"
 msgstr[0] "ist ein Downgrade von einer Patchversion"
 msgstr[1] "ist ein Downgrade von $step Patchversionen"
+
+#~ msgid "Size"
+#~ msgstr "Größe"
+
+#~ msgid "Target"
+#~ msgstr "Ziel"
 
 #~ msgid "NAME\\tTYPE\\tCONTENT\\tTTL"
 #~ msgstr "NAME\\tTYP\\tINHALT\\tTTL"
