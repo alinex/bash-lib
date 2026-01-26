@@ -267,30 +267,6 @@ variables() {
     esac
 }
 
-# Deprecated: Store environment into shared memory/file
-# Use: variables store...
-env_store() {
-    _deprecated "Use: variables store..."
-}
-
-# Deprecated: Restore environment from shared memory/file
-# Use: variables restore...
-env_restore() {
-    _deprecated "Use: variables restore..."
-}
-
-# Deprecated: Remove stored environment from shared memory/file
-# Use: variables clean...
-env_clean() {
-    _deprecated "Use: variables clean..."
-}
-
-# Deprecated: Change environment in shared memory/file
-# Use: variables change...
-env_change() {
-    _deprecated "Use: variables change..."
-}
-
 ######################################################################################
 # Sync/Async calls with optional step control
 ######################################################################################

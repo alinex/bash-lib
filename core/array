@@ -59,15 +59,8 @@ array() {
 
 # Deprecated: Join array elements by delimiter
 # Use @array <arr> join <separator>
-#
-# Convert all elements in array into a string separated by delimiter (default is `,`).
-#
-# Usage:        join <array-name> [<delimiter>]
-# Variables:    <array-name> to read values to join
-# Output:       <string>
 join() {
-    _deprecated "Use array <arr-name> join <separator>" warn
-    array "$1" join "$2"
+    _deprecated "Use array <arr-name> join <separator>"
 }
 
 ######################################################################################

@@ -137,8 +137,7 @@ os() {
 # Deprecates: OS detection
 # Renamed to @os
 os_detect() {
-    _deprecated "Use os now" warn
-    os "$@"
+    _deprecated "Use os now"
 }
 
 # Hardware description

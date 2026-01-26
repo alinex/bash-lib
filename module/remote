@@ -173,30 +173,6 @@ remote() {
     return "$rc"
 }
 
-# Deprecated: Run remote command with pseudo terminal
-# Use: remote --terminal ...
-remote_term() {
-    _deprecated "Use: remote --terminal ... instead"
-}
-
-# Deprecated: Run remote command with pseudo terminal but line based output (problematic with questions)
-# Use: @remote --terminal --line-based ...
-remote_term_line() {
-    _deprecated "Use: @remote --terminal --line-based ..."
-}
-
-# Deprecated: Run local script on remote
-# Use: remote --file <file>
-remote_file() {
-    _deprecated "se: remote --file <file>"
-}
-
-# Deprecated: Open an interactive console on remote host
-# Use: remote console
-remote_console() {
-    _deprecated "Use: remote console"
-}
-
 # Upload file
 #
 # Usage:    upload [<options>] <source> <dest>
@@ -277,36 +253,6 @@ download() {
 ######################################################################################
 ### Extended remote commands
 ######################################################################################
-
-# Deprecated: Run bashlib command on remote.
-# Use: remote bashlib <module> <command>
-remote_bashlib() {
-    _deprecated "Use: remote bashlib <module> <command>"
-}
-
-# Deprecated: Remote install package like @install
-# Use `remote_bashlib software install`, see @remote_bashlib.
-remote_install() {
-    _deprecated "use remote_bashlib software install"
-}
-
-# Deprecated: Display the system description (from remote)
-# Use `remote_bashlib os system_info`, see @remote_bashlib.
-remote_system_info() {
-    _deprecated "use remote_bashlib os system_info"
-}
-
-# Deprecated: Remote df with visual display
-# Use `remote_bashlib os disk_free` instead.
-remote_df() {
-    _deprecated "use remote_bashlib os disk_free"
-}
-
-# Deprecated: Remote check if LVM is used
-# Use `remote_bashlib os uses_lvm` instead.
-remote_lvm() {
-    _deprecated "use remote_bashlib os uses_lvm"
-}
 
 # Wait till reboot is finished
 #

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-26 20:17+0100\n"
+"POT-Creation-Date: 2026-01-26 21:22+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,12 +17,12 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: core/misc:132 core/validator:74 core/array:136 module/os:225 module/os:332
-#: module/os:405 module/network:24 module/trivy:84 module/compress:41
-#: module/monitoring:148 module/input:31 module/input:86 module/input:212
-#: module/input:465 module/input:670 module/log:63 module/process:381
-#: module/process:429 module/process:507 module/process:654 module/remote:80
-#: module/remote:221 module/remote:261 module/remote:329 module/database:33
+#: core/misc:132 core/validator:74 core/array:129 module/os:226 module/os:338
+#: module/os:411 module/network:24 module/trivy:84 module/compress:41
+#: module/monitoring:148 module/input:31 module/input:86 module/input:194
+#: module/input:447 module/input:652 module/log:63 module/process:357
+#: module/process:405 module/process:483 module/process:630 module/remote:80
+#: module/remote:197 module/remote:237 module/remote:275 module/database:33
 #: module/mattermost:299 module/mattermost:330 module/crypto:36 module/git:23
 #: module/git:61 module/software:224
 msgid "Unrecognized option"
@@ -249,51 +249,51 @@ msgstr "Keine lokale DNS Liste gefunden, bitte herunterladen."
 msgid "Use $list from $time."
 msgstr "Benutze $list vom $time."
 
-#: module/os:279
+#: module/os:282
 msgid "Type"
 msgstr "Typ"
 
-#: module/os:279
+#: module/os:282
 msgid "Source"
 msgstr "Quelle"
 
-#: module/os:279 module/os:288
+#: module/os:282 module/os:292
 msgid "Total"
 msgstr "Gesamt"
 
-#: module/os:279 module/os:288
+#: module/os:282 module/os:292
 msgid "Used"
 msgstr "Benutzt"
 
-#: module/os:279 module/os:288
+#: module/os:282 module/os:292
 msgid "Avail"
 msgstr "Frei"
 
-#: module/os:279 module/os:288
+#: module/os:282 module/os:292
 msgid "Percent"
 msgstr "Prozent"
 
-#: module/os:279
+#: module/os:282
 msgid "I-Total"
 msgstr "I-Gesamt"
 
-#: module/os:279
+#: module/os:282
 msgid "I-Used"
 msgstr "I-Benutzt"
 
-#: module/os:279
+#: module/os:282
 msgid "I-Avail"
 msgstr "I-Frei"
 
-#: module/os:279
+#: module/os:282
 msgid "I-Percent"
 msgstr "I-Proz."
 
-#: module/os:279 module/os:288
+#: module/os:282 module/os:292
 msgid "Mount"
 msgstr "Mount"
 
-#: module/os:288
+#: module/os:292
 msgid "Inodes"
 msgstr "Inodes"
 
@@ -306,32 +306,32 @@ msgstr "IP\\tSchnittstelle"
 msgid "Start $command scanning with trivy V${version}..."
 msgstr "Starte $command Scanner mit trivy V${version}..."
 
-#: module/trivy:134
+#: module/trivy:133
 msgid "Optimize JSON structure for splitting..."
 msgstr "Optimiere JSON Struktur für das Splitten..."
 
-#: module/trivy:136
+#: module/trivy:135
 msgid "Splitting JSON into single reports..."
 msgstr "Splitte JSON in einzelne Reports..."
 
-#: module/trivy:149
+#: module/trivy:148
 #, sh-format
 msgid "Found $found vulnerabilities."
 msgstr "$found Sicherheitsprobleme gefunden"
 
-#: module/trivy:173
+#: module/trivy:172
 msgid "Build queue to optimize reports..."
 msgstr "Aufbau der Warteschlange für die Report Generierung..."
 
-#: module/trivy:177
+#: module/trivy:176
 msgid "Run queue to optimize reports..."
 msgstr "Start der Warteschlange zur Report Generierung..."
 
-#: module/trivy:181
+#: module/trivy:180
 msgid "Create summaries..."
 msgstr "Erstelle Zusammenfassungen..."
 
-#: module/trivy:291
+#: module/trivy:290
 #, sh-format
 msgid ""
 "Downgrade $severity -> MEDIUM because it was published less than 3 days ago"
@@ -339,7 +339,7 @@ msgstr ""
 "Herunterstufen $severity -> MEDIUM, weil diese Lücke erst in den letzten 3 "
 "Tagen veröffentlicht wurde"
 
-#: module/trivy:300
+#: module/trivy:299
 msgid ""
 "Add information of known exploits and cancel downgrades in case of just "
 "published"
@@ -347,64 +347,64 @@ msgstr ""
 "Füge Informationen zu bekannten Exploits hinzu und streiche mögliche "
 "Herunterstufungen durch kürzliches publizieren"
 
-#: module/trivy:309
+#: module/trivy:308
 #, sh-format
 msgid "Downgrade $severity -> MEDIUM because it is a dev dependency"
 msgstr ""
 "Herunterstufen $severity -> MEDIUM, weil es sich um eine reine "
 "Entwicklungsabhängigkeit handelt"
 
-#: module/trivy:354
+#: module/trivy:353
 #, sh-format
 msgid "Downgrade $severity -> MEDIUM because of Jira status $deploy"
 msgstr "Herunterstufen $severity -> MEDIUM, durch Jira Status $deploy"
 
-#: module/trivy:355 module/trivy:418
+#: module/trivy:354 module/trivy:417
 #, sh-format
 msgid "$id at $target"
 msgstr "$id in $target"
 
-#: module/trivy:417
+#: module/trivy:416
 msgid "Add information from Jira"
 msgstr "Hinzufügen der Jira Informationen"
 
-#: module/trivy:459
+#: module/trivy:458
 #, sh-format
 msgid "Rating: $severity (CVSS rating $value)"
 msgstr "Einstufung: $severity (CVSS Wert $value)"
 
-#: module/trivy:461
+#: module/trivy:460
 #, sh-format
 msgid "Status: Fixed from version $value $fixStatus"
 msgstr "Status: Gelöst in Version $value $fixStatus"
 
-#: module/trivy:465
+#: module/trivy:464
 #, sh-format
 msgid "Date:   Vulnerability known since $human ($value days ago)"
 msgstr "Datum:  Sicherheitslücke bekannt seit $human (vor $value Tagen)"
 
-#: module/trivy:467
+#: module/trivy:466
 #, sh-format
 msgid "Exploit known since $exploitDate at $exploitVendor $exploitProduct"
 msgstr "Exploit bekannt seit $exploitDate bei $exploitVendor $exploitProduct"
 
-#: module/trivy:470
+#: module/trivy:469
 msgid "Responsible"
 msgstr "Zuständig"
 
-#: module/trivy:471
+#: module/trivy:470
 msgid "Deploy"
 msgstr "Deploy"
 
-#: module/trivy:472
+#: module/trivy:471
 msgid "Last comments"
 msgstr "Letzte Kommentare"
 
-#: module/trivy:474
+#: module/trivy:473
 msgid "Sources"
 msgstr "Quellen"
 
-#: module/trivy:481
+#: module/trivy:480
 msgid "Links"
 msgstr "Links"
 
@@ -453,83 +453,83 @@ msgstr "Nein"
 msgid "Yes"
 msgstr "Ja"
 
-#: module/input:133 module/input:341 module/input:594
+#: module/input:133 module/input:323 module/input:576
 msgid "value needed"
 msgstr "Wert notwendig"
 
-#: module/input:153 module/input:365 module/input:618
+#: module/input:153 module/input:347 module/input:600
 msgid "invalid character"
 msgstr "ungültiges Zeichen"
 
-#: module/input:223
+#: module/input:205
 msgid "Enter integer number"
 msgstr "Gib eine Nummer ein"
 
-#: module/input:232
+#: module/input:214
 msgid "Enter float number"
 msgstr "Gib eine Fließkommazahl ein"
 
-#: module/input:242
+#: module/input:224
 msgid "Enter password"
 msgstr "Gib das Passwort ein"
 
-#: module/input:246
+#: module/input:228
 msgid "Enter time"
 msgstr "Gib die Zeit an"
 
-#: module/input:250
+#: module/input:232
 msgid "Enter text (end with empty line)"
 msgstr "Gib einen Text ein (Beenden mit Leerzeile)"
 
-#: module/input:251
+#: module/input:233
 msgid "Enter text here"
 msgstr "Gib einen Text ein"
 
-#: module/input:252
+#: module/input:234
 msgid "Enter short line"
 msgstr "Gib eine kurze Zeile ein"
 
-#: module/input:260
+#: module/input:242
 msgid "Input through system editor..."
 msgstr "Eingabe mit dem Systemeditor..."
 
-#: module/input:322
+#: module/input:304
 msgid "incomplete"
 msgstr "unvollständig"
 
-#: module/input:374
+#: module/input:356
 msgid "bad"
 msgstr "schlecht"
 
-#: module/input:376
+#: module/input:358
 msgid "weak"
 msgstr "schwach"
 
-#: module/input:378
+#: module/input:360
 msgid "good"
 msgstr "gut"
 
-#: module/input:380
+#: module/input:362
 msgid "strong"
 msgstr "stark"
 
-#: module/input:553
+#: module/input:535
 msgid "Select one of the above options"
 msgstr "Wähle eine der obigen Optionen"
 
-#: module/input:690
+#: module/input:672
 msgid "Could not get task list from command"
 msgstr "Befehlsliste konnte nicht von der Funktion gelesen werden"
 
-#: module/input:697
+#: module/input:679
 msgid "No tasks found to be executed."
 msgstr "Keine Aufgaben zum Ausführen gefunden."
 
-#: module/input:703
+#: module/input:685
 msgid "Exit"
 msgstr "Beenden"
 
-#: module/input:710
+#: module/input:692
 #, sh-format
 msgid "Got error $error running $task"
 msgstr "Beim Aufruf von $task kam es zum Fehler $error"
@@ -547,66 +547,66 @@ msgstr "PID Lockfile konnte nicht erstellt werden"
 msgid "Waiting for unlock in $lockfile by PID $pid"
 msgstr "Warten, bis zur Freigabe in $lockfile durch PID $pid"
 
-#: module/process:321
+#: module/process:297
 msgid "Work steps are logged so that you can resume work mid-process"
 msgstr ""
 "Arbeitsschritte werden protokolliert um auch mittendrin wieder aufzusetzen"
 
-#: module/process:388 module/process:455 module/process:517
+#: module/process:364 module/process:431 module/process:493
 #, sh-format
 msgid "Skip: $name (already done)"
 msgstr "Abbrechen: $name (bereits durchgeführt)"
 
-#: module/process:392 module/process:459 module/process:552
+#: module/process:368 module/process:435 module/process:528
 #, sh-format
 msgid "Start: $name"
 msgstr "Starte: $name"
 
-#: module/process:395 module/process:538
+#: module/process:371 module/process:514
 #, sh-format
 msgid "Finished: $name"
 msgstr "Fertig: $name"
 
-#: module/process:470
+#: module/process:446
 #, sh-format
 msgid "Finished: $check"
 msgstr "Fertig: $check"
 
-#: module/process:521
+#: module/process:497
 #, sh-format
 msgid "Queue: $name"
 msgstr "Warteschlange: $name"
 
-#: module/process:556
+#: module/process:532
 #, sh-format
 msgid "Queued $started/$total jobs"
 msgstr "Warteschlange $started/$total Jobs"
 
-#: module/process:665
+#: module/process:641
 #, sh-format
 msgid "No process with pid $pid"
 msgstr "Kein Prozess mit PID $pid"
 
-#: module/process:673
+#: module/process:649
 #, sh-format
 msgid "No processes found for $search"
 msgstr "Keine Prozesse für $search gefunden"
 
-#: module/process:718
+#: module/process:694
 #, sh-format
 msgid "Waiting for $pid ($pcpu% CPU)"
 msgstr "Warten auf $pid ($pcpu% CPU)"
 
-#: module/process:722
+#: module/process:698
 #, sh-format
 msgid "Timeout after ${timeout}s"
 msgstr "Abbruch nach ${timeout}s"
 
-#: module/remote:335
+#: module/remote:281
 msgid "Wait till reboot is done"
 msgstr "Warten bis der Reboot fertig ist"
 
-#: module/remote:338
+#: module/remote:284
 #, sh-format
 msgid "Wait until the reboot is complete ($seconds seconds)"
 msgstr "Warten bis der Reboot fertig ist ($seconds Sekunden)"

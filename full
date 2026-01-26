@@ -158,9 +158,6 @@ CLEAR_SOL=$'\e[1K'
 CLEAR_LINE=$'\e[2K'
 SCREEN_RESTORE=$'\e[?47l'
 SCREEN_SAVE=$'\e[?47h'
-erase_line(){
-_deprecated "Use $CLEAR_LINE"
-}
 option_parse(){
 local opt name type desc short="" long="" spec="$1" permute
 [ -n "$spec" ]||die "$(gettext 'A specification string is needed as first argument')"
@@ -261,8 +258,7 @@ printf '%s' "$joined"
 esac
 }
 join(){
-_deprecated "Use array <arr-name> join <separator>" warn
-array "$1" join "$2"
+_deprecated "Use array <arr-name> join <separator>"
 }
 split(){
 is integer -narguments --max=3 -d $#
@@ -1770,15 +1766,6 @@ fi
 done
 stty echo </dev/tty
 }
-ask_no(){
-_deprecated "use confirm --false <question>"
-}
-ask_yes(){
-_deprecated "use confirm --true <question>"
-}
-ask_input(){
-_deprecated "use ask string <question>"
-}
 ask(){
 local default empty negative timeout
 eval set -- "$(option_parse $'e empty -\nd default +\nT timeout +\nn allow-negative -' "$@")"
@@ -2829,8 +2816,7 @@ fi
 esac
 }
 os_detect(){
-_deprecated "Use os now" warn
-os "$@"
+_deprecated "Use os now"
 }
 bios(){
 sudo dmidecode -t 1|awk '
@@ -3162,18 +3148,6 @@ variables restore $self "$ident"
 eval "$command"
 variables store $self "$ident" "$@"
 esac
-}
-env_store(){
-_deprecated "Use: variables store..."
-}
-env_restore(){
-_deprecated "Use: variables restore..."
-}
-env_clean(){
-_deprecated "Use: variables clean..."
-}
-env_change(){
-_deprecated "Use: variables change..."
 }
 declare -A _async_running
 STEPS_VARIABLES=
@@ -3589,18 +3563,6 @@ exit 143
 fi
 return "$rc"
 }
-remote_term(){
-_deprecated "Use: remote --terminal ... instead"
-}
-remote_term_line(){
-_deprecated "Use: @remote --terminal --line-based ..."
-}
-remote_file(){
-_deprecated "se: remote --file <file>"
-}
-remote_console(){
-_deprecated "Use: remote console"
-}
 upload(){
 local _login host jump files
 eval set -- "$(option_parse $'+l login +\nh host +\nj jump +\nf files +' "$@")"
@@ -3650,21 +3612,6 @@ local ssh="$_login@$host"
 [ -z "$jump" ]||ssh="-J $jump $ssh"
 local dir=${2:-.}
 rsync -avz $ssh:"$1" "$dir"
-}
-remote_bashlib(){
-_deprecated "Use: remote bashlib <module> <command>"
-}
-remote_install(){
-_deprecated "use remote_bashlib software install"
-}
-remote_system_info(){
-_deprecated "use remote_bashlib os system_info"
-}
-remote_df(){
-_deprecated "use remote_bashlib os disk_free"
-}
-remote_lvm(){
-_deprecated "use remote_bashlib os uses_lvm"
 }
 boot_wait(){
 eval set -- "$(option_parse $'q quiet -' "$@")"
@@ -4034,8 +3981,7 @@ $cmd fs $opt "$1" 2>&1|sed 's/[^A-Z]*T[^A-Z]*//' >"$work/log"||rc=$?
 docker)[[ $opt == *"--timeout"* ]]||opt+=" --timeout ${TRIVY_DEFAULT_TIMEOUT:-30m}"
 $cmd image $opt --input "$1" 2>&1|sed 's/[^A-Z]*T[^A-Z]*//' >"$work/log"||rc=$?
 ;;
-clean)_deprecated "Use option --clean instead" warn
-sudo rm -rf /root/.cache/trivy
+clean)_deprecated "Use option --clean instead"
 return
 esac
 cat "$work/log"|debug

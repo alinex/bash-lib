@@ -185,7 +185,6 @@ This module contains ANSI escape constants and helpers for color, cursor move, c
 | [`color_table`](function/color_table.md) | Show complete color table |
 | [`cursor`](function/cursor.md) | Move cursor on console |
 | [`character`](function/character.md) | Change characters |
-| [`erase_line`](function/erase_line.md) | Deprecated: Remove current line |
 
 ### Arguments Module
 
@@ -377,9 +376,6 @@ Module with user interaction helpers.
 | --- | --- |
 | [`pause`](function/pause.md) | Wait for some time or user input |
 | [`confirm`](function/confirm.md) | Ask a yes/no question. |
-| [`ask_no`](function/ask_no.md) | Deprecated: Ask yes/no question with default to no. |
-| [`ask_yes`](function/ask_yes.md) | Deprecated: Ask yes/no question with default to yes. |
-| [`ask_input`](function/ask_input.md) | Deprecated: Ask a free question. |
 | [`ask`](function/ask.md) | Ask for an input element |
 | [`choose`](function/choose.md) | Select from list (extended version of native select) |
 | [`tasks`](function/tasks.md) | Run tasks as selected by user |
@@ -456,10 +452,6 @@ Module for process control
 | [`lock_exit`](function/lock_exit.md) | Set the lock or exit with optional error message |
 | [`unlock`](function/unlock.md) | Remove the lock |
 | [`variables`](function/variables.md) | Store variables into shared memory/file |
-| [`env_store`](function/env_store.md) | Deprecated: Store environment into shared memory/file |
-| [`env_restore`](function/env_restore.md) | Deprecated: Restore environment from shared memory/file |
-| [`env_clean`](function/env_clean.md) | Deprecated: Remove stored environment from shared memory/file |
-| [`env_change`](function/env_change.md) | Deprecated: Change environment in shared memory/file |
 | [`steps`](function/steps.md) | Step control allows jobs to resume on another run. |
 | [`sync`](function/sync.md) | Run the given command with optional step control |
 | [`async`](function/async.md) | Run the given command asynchronous ang go on in the calling routine |
@@ -474,17 +466,8 @@ Module with remote calling/execution helpers.
 | Variable/Function | Description |
 | --- | --- |
 | [`remote`](function/remote.md) | Run command on remote host. |
-| [`remote_term`](function/remote_term.md) | Deprecated: Run remote command with pseudo terminal |
-| [`remote_term_line`](function/remote_term_line.md) | Deprecated: Run remote command with pseudo terminal but line based output (problematic with questions) |
-| [`remote_file`](function/remote_file.md) | Deprecated: Run local script on remote |
-| [`remote_console`](function/remote_console.md) | Deprecated: Open an interactive console on remote host |
 | [`upload`](function/upload.md) | Upload file |
 | [`download`](function/download.md) | Download file |
-| [`remote_bashlib`](function/remote_bashlib.md) | Deprecated: Run bashlib command on remote. |
-| [`remote_install`](function/remote_install.md) | Deprecated: Remote install package like @install |
-| [`remote_system_info`](function/remote_system_info.md) | Deprecated: Display the system description (from remote) |
-| [`remote_df`](function/remote_df.md) | Deprecated: Remote df with visual display |
-| [`remote_lvm`](function/remote_lvm.md) | Deprecated: Remote check if LVM is used |
 | [`boot_wait`](function/boot_wait.md) | Wait till reboot is finished |
 
 ### Software Module

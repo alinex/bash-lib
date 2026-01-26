@@ -297,9 +297,3 @@ CLEAR_LINE=$'\e[2K'
 SCREEN_RESTORE=$'\e[?47l'
 # save screen
 SCREEN_SAVE=$'\e[?47h'
-
-# Deprecated: Remove current line
-# Use $CLEAR_LINE
-erase_line() {
-  _deprecated "Use $CLEAR_LINE"
-}

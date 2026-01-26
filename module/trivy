@@ -120,8 +120,7 @@ trivy() {
         $cmd image $opt --input "$1" 2>&1 | sed 's/[^A-Z]*T[^A-Z]*//' >"$work/log" || rc=$?
         ;;
     clean)
-        _deprecated "Use option --clean instead" warn
-        sudo rm -rf /root/.cache/trivy
+        _deprecated "Use option --clean instead"
         return
         ;;
     esac
