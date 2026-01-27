@@ -1,22 +1,23 @@
-# big_files
+# files
 
 ## Show big directory and files
 
 ### Usage
 
 ```bash
-big_files <path>
+files big <path>
+files interactive <path>
 ```
 
 ### Options
 
 ```bash
-p, percent <min>
+p, percent <limit>
 ```
 
 ### Output (stdout)
 
-`<size human>`	`<path>`
+`<size human>`	`<path>` for `big`
 
 
 ### Description

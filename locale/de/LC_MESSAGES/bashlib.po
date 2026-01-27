@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-27 19:50+0100\n"
+"POT-Creation-Date: 2026-01-27 20:09+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,7 +18,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 
 #: core/misc:134 core/validator:74 core/array:129 module/os:231 module/os:344
-#: module/os:417 module/network:24 module/trivy:114 module/compress:44
+#: module/os:418 module/network:24 module/trivy:114 module/compress:44
 #: module/monitoring:166 module/input:31 module/input:86 module/input:194
 #: module/input:447 module/input:659 module/log:63 module/process:359
 #: module/process:407 module/process:490 module/process:637 module/remote:84

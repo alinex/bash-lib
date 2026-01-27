@@ -3016,7 +3016,7 @@ fi
 done
 unset IFS
 }
-big_files(){
+files(){
 local percent=10
 eval set -- "$(option_parse $'p percent +' "$@")"
 while true;do
@@ -3026,21 +3026,22 @@ case "$1" in
 *)die "$(gettext "Unrecognized option"): $1"
 esac
 done
-is path -npath -dopath -- "$1"
-local max min size
+is enum -ncommand --allow="big interactive" -docommand -- "$1"
+is path -npath -dopath -- "$2"
+case $command in
+big)local max min size
 max=$(df -B1 "$path"|awk 'NR==2 {print $3}')
 min=$((max*percent/100))
 while read -r size path;do
 printf '%s\t%s\n' $(numfmt --to=iec --suffix=B <<<"$size") "$path"
 done < <(sudo du -abx "$path" 2>/dev/null|grep -v 'du: cannot access'|awk '$1 > '"$min"|sort -k2)
+;;
+interactive)ncdu -xe "$path"
+esac
 }
 uses_lvm(){
 is integer -narguments --max=0 -d $#
 sudo bash -lc 'command -v vgs' >/dev/null&&sudo vgs --noheadings >/dev/null&&[ -n "$(sudo vgs --noheadings)" ] &>/dev/null
-}
-has_tty(){
-is integer -narguments --max=0 -d $#
-{ : >/dev/tty;} &>/dev/null
 }
 sudo_allow(){
 is integer -narguments --max=1 -d $#

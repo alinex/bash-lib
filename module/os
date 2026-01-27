@@ -403,10 +403,11 @@ disk_free() {
 
 # Show big directory and files
 #
-# Usage:    big_files <path>
-# Options:  p, percent <min>
-# Output:   <size human>\t<path>
-big_files() {
+# Usage:    files big <path>
+#           files interactive <path>
+# Options:  p, percent <limit>
+# Output:   <size human>\t<path> for `big`
+files() {
     # parameter parsing
     local percent=10
     eval set -- "$(option_parse $'p percent +' "$@")"
@@ -417,16 +418,29 @@ big_files() {
         *) die "$(gettext "Unrecognized option"): $1" ;;
         esac
     done
-    is path --name=path --die --output=path -- "$1"
+    is enum --name=command --allow="big interactive" --die --output=command -- "$1"
+    is path --name=path --die --output=path -- "$2"
     # processing
-    local max min size
-    max=$(df -B1 "$path" | awk 'NR==2 {print $3}')
-    min=$((max * percent / 100))
-    while read -r size path; do
-        # shellcheck disable=SC2046
-        printf '%s\t%s\n' $(numfmt --to=iec --suffix=B <<<"$size") "$path"
-    done < <(sudo du -abx "$path" 2>/dev/null | grep -v 'du: cannot access' | awk '$1 > '"$min" | sort -k2)
+    case $command in
+    big)
+        local max min size
+        max=$(df -B1 "$path" | awk 'NR==2 {print $3}')
+        min=$((max * percent / 100))
+        while read -r size path; do
+            # shellcheck disable=SC2046
+            printf '%s\t%s\n' $(numfmt --to=iec --suffix=B <<<"$size") "$path"
+        done < <(sudo du -abx "$path" 2>/dev/null | grep -v 'du: cannot access' | awk '$1 > '"$min" | sort -k2)
+        ;;
+    interactive)
+        install ncdu
+        ncdu -xe "$path"
+        ;;
+    esac
 }
+
+######################################################################################
+### LVM
+######################################################################################
 
 # Check if LVM is used
 #
@@ -438,17 +452,4 @@ uses_lvm() {
     sudo bash -lc 'command -v vgs' >/dev/null &&      # installed
         sudo vgs --noheadings >/dev/null &&           # vgs returns ok
         [ -n "$(sudo vgs --noheadings)" ] &>/dev/null # vgs returns at least one group
-}
-
-######################################################################################
-### Further Specialties
-######################################################################################
-
-# Has tty present
-#
-# Usage:    has_tty
-# Status:   0 || 1
-has_tty() {
-    is integer --name=arguments --max=0 --die -- $#
-    { : >/dev/tty; } &>/dev/null
 }

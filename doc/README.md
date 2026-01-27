@@ -410,9 +410,8 @@ Module with operating system specific helper functions.
 | [`bios`](function/bios.md) | Hardware description |
 | [`disk`](function/disk.md) | File system analyzation |
 | [`disk_free`](function/disk_free.md) | Deprecated: Disk free with visual display |
-| [`big_files`](function/big_files.md) | Show big directory and files |
+| [`files`](function/files.md) | Show big directory and files |
 | [`uses_lvm`](function/uses_lvm.md) | Check if LVM is used |
-| [`has_tty`](function/has_tty.md) | Has tty present |
 
 ### Process Module
 
