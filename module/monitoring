@@ -155,7 +155,6 @@ alerts() {
         die "$(gettext "Could not get alerts from Grafana!")"
     echo "$list" >/tmp/alerts.json
     list="$(jq 'sort_by(.startsAt) | .[] '"$filter" <<<"$list")" || die "$(gettext "Parse error in Grafana alerts list with filter"): $filter"
-    debug "-----------"
     local format=${1:-console}
     # empty list
     [ -n "$list" ] || return 0
