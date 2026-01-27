@@ -451,6 +451,7 @@ printf "Triggered at %s:%d (%s)\n" "$src" "$line" "$func"|warn >&2
 bestChoice=""
 fi
 printf "\033[1m%s:%d (%s)\n" "$src" "$line" "$func"|([ -n "$1" ]&&( ((frame==1))&&warn||notice)||debug 5) >&2
+[ ! "$src" = 'main' ]||src="$0"
 awk -v n="$line" '
             NR>=n-2 && NR<=n+2 {
                 gsub(/^[ \t]+/, "", $0)  # Remove leading spaces/tabs

@@ -457,6 +457,7 @@ printf "Triggered at %s:%d (%s)\n" "$src" "$line" "$func"|warn >&2
 bestChoice=""
 fi
 printf "\033[1m%s:%d (%s)\n" "$src" "$line" "$func"|([ -n "$1" ]&&( ((frame==1))&&warn||notice)||debug 5) >&2
+[ ! "$src" = 'main' ]||src="$0"
 awk -v n="$line" '
             NR>=n-2 && NR<=n+2 {
                 gsub(/^[ \t]+/, "", $0)  # Remove leading spaces/tabs
@@ -2561,7 +2562,6 @@ local list
 list="$(curl -H "Authorization: Bearer $GRAFANA_TOKEN" "$GRAFANA_API/alertmanager/grafana/api/v2/alerts")"||die "$(gettext "Could not get alerts from Grafana!")"
 echo "$list" >/tmp/alerts.json
 list="$(jq 'sort_by(.startsAt) | .[] '"$filter" <<<"$list")"||die "$(gettext "Parse error in Grafana alerts list with filter"): $filter"
-debug "-----------"
 local format=${1:-console}
 [ -n "$list" ]||return 0
 [ -z "$quiet" ]||return 1
@@ -2886,17 +2886,18 @@ fi
 done
 percent=$pval
 ((percent>=ival))||percent=$ival
-if ((percent>=limit_c));then
+if ((limit_c>0&&percent>=limit_c));then
 level=critical
-elif ((percent>=limit_e));then
+elif ((limit_e>0&&percent>=limit_e));then
 level=error
-elif ((percent>=limit_w));then
+elif ((limit_w>0&&percent>=limit_w));then
 level=warn
-elif ((percent>=limit_o));then
+elif ((limit_o>0&&percent>=limit_o));then
 level=ok
 else
 level=info
 fi
+debug "$target Limit: $limit_c $limit_e $limit_e $limit_o -> $level"
 if [ -n "$free_operator" ];then
 if [ -n "$free_percent" ]&&eval "(( 100 - ${pcent%%%} $free_operator free_percent ))";then
 list+="$type $source $size $used $avail $pcent $itotal $iused $iavail $ipcent $target $pval $ival $level"$'\n'

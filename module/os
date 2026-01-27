@@ -246,17 +246,18 @@ disk() {
         # display
         percent=$pval
         ((percent >= ival)) || percent=$ival
-        if ((percent >= limit_c)); then
+        if ((limit_c > 0 && percent >= limit_c)); then
             level=critical
-        elif ((percent >= limit_e)); then
+        elif ((limit_e > 0 && percent >= limit_e)); then
             level=error
-        elif ((percent >= limit_w)); then
+        elif ((limit_w > 0 && percent >= limit_w)); then
             level=warn
-        elif ((percent >= limit_o)); then
+        elif ((limit_o > 0 && percent >= limit_o)); then
             level=ok
         else
             level=info
         fi
+        debug "$target Limit: $limit_c $limit_e $limit_e $limit_o -> $level"
         if [ -n "$free_operator" ]; then
             if [ -n "$free_percent" ] &&
                 eval "(( 100 - ${pcent%%%} $free_operator free_percent ))"; then
