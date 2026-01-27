@@ -1064,12 +1064,16 @@ set -o pipefail
 trap 'die "💥 Uncaught exception at »${BASH_COMMAND}« with exit code $?"' ERR
 debug "Running in DEBUG=${DEBUG-} mode!"
 SCRIPT_PATH="$(script_path)"
+ATLASSIAN_USER=
+ATLASSIAN_TOKEN=
+CONFLUENCE_API=
 confluence(){
 is integer -narguments --max=1 -d $#
 is set -npage-id -d -- "$1"
 install jq
 curl -H "Content-Type: application/json" -u "$ATLASSIAN_USER:$ATLASSIAN_TOKEN" "$CONFLUENCE_API/content/$1?expand=body.storage"|jq .body.storage.value -r||die "Could not read confluence page!"
 }
+JIRA_HOST=
 jira(){
 is set -nJIRA_HOST -d -- "$JIRA_HOST"
 is set -nATLASSIAN_USER -d -- "$ATLASSIAN_USER"
@@ -1454,6 +1458,7 @@ sleep $(((num+1)**2))
 done
 (printf "HTTP Code $CURL_HTTP_CODE: "&&jq .errorMessages[] -r <<<"$res"||printf '%s' "$res")|die
 }
+COMPRESSION_DEFAULT=gzip
 compress(){
 local in out tool="$COMPRESSION_DEFAULT" decompress
 eval set -- "$(option_parse $'i input +\no output +\na algorithm +\nd decompress -' "$@")"
@@ -1491,6 +1496,8 @@ esac
 decompress(){
 compress -d "$@"
 }
+PW_GENERATOR_LENGTH=16
+PW_GENERATOR_SYMBOLS='!@#$%^&*()-_=+[]{}<>?'
 pw_generator(){
 local length="$PW_GENERATOR_LENGTH" use_lower=1 use_upper=1 use_digits=1 use_symbols=1 symbols="$PW_GENERATOR_SYMBOLS" custom=''
 eval set -- "$(option_parse $'l length +\n- no-lower -\n- no-upper -\n- no-digits -\n- no-symbols -\nc custom +' "$@")"
@@ -1531,6 +1538,7 @@ done
 fold -w1 <<<"$pw"|shuf|tr -d '\n'
 }
 use module/software
+declare -A MONGO_ADMIN_USERPASS=()
 mongo(){
 local host="$server"
 eval set -- "$(option_parse $'h host +' "$@")"
@@ -1554,6 +1562,8 @@ command mongosh "mongodb://$(hash MONGO_ADMIN_USERPASS get "$cluster")@$host:270
 postgres(){
 printf '%s' "TODO"
 }
+PLUSSERVER_PORTAL=
+POWERDNS_API=
 dns_list(){
 is integer -narguments --max=1 -d $#
 printf '%s\t%s\t%s\t%s\n' "$(gettext 'NAME')" "$(gettext 'TYPE')" "$(gettext 'CONTENT')" "$(gettext 'TTL')"
@@ -2239,6 +2249,11 @@ done
 }
 _log_manager&
 disown
+MATTERMOST_API=
+MATTERMOST_TOKEN=
+MATTERMOST_CHANNEL_PATTERN=(
+MyTeam ".*" "Town Square")
+MATTERMOST_LINK_PATTERN=()
 declare -A _mattermost_cache
 _mattermost_user(){
 if [[ ! -v _mattermost_cache["__u"] ]];then
@@ -2516,6 +2531,8 @@ fi
 done||(($?==141))||die "$(gettext "Could not get exporters from Prometheus!")"
 done
 }
+PROMETHEUS_API=
+PROMETHEUS=
 scrape(){
 is integer -narguments --max=2 -d $#
 is set -nurl -d -- "$1"
@@ -2529,6 +2546,8 @@ grep -E "$2" <<<"$metrics"|grep '{'|sed 's/,\?[{}] \?/\t/g'||((found--))
 grep -E "$2" <<<"$metrics"|grep -v '{'|sed 's/ /\t\t/g'||((found--))
 ((found>0))
 }
+GRAFANA_API=
+GRAFANA_TOKEN=
 alerts(){
 if [ -z "$GRAFANA_API" ]||[ -z "$GRAFANA_TOKEN" ];then
 debug "Disabled because GRAFANA_API and GRAFANA_TOKEN are not both set"
@@ -2673,6 +2692,10 @@ ip -o addr show|awk 'BEGIN { OFS="\t" } $2 != "lo" {print $4, $2}'
 *)ip route get 1|awk '{print $7; exit}'
 esac
 }
+IP_PROVIDER_PATTERN=(
+".*" Unknown)
+IP_SEGMENT_PATTERN=(
+".*" other)
 ip_pattern(){
 is integer -narguments --max=2 -d $#
 is enum -ntype --allow="provider segment vmware" -d -- "$1"
@@ -2734,7 +2757,6 @@ hash _ip_extern_data set timezone "$(jq .timezone -r <<<"$json")"
 hash _ip_extern_data set org "$(jq .org -r <<<"$json")"
 hash _ip_extern_data set loc "$(jq .loc -r <<<"$json")"
 }
-use config/environment
 use config/local
 declare -A _os_detected
 os(){
@@ -2851,6 +2873,8 @@ sudo dmidecode -t 8|awk '
 sudo dmidecode -t 9|awk '
     section=="slot" && /Designation:/ { des=$0; sub(".*Designation: *","",des); print "system-slot " des }'
 }
+MOUNT_COLOR_LIMIT=(
+".*" 100 90 80 50)
 disk(){
 local opt="" format free_operator free_percent free_bytes
 eval set -- "$(option_parse $'l locale -\nr remote -\nf free +' "$@")"
@@ -3273,6 +3297,8 @@ hash _async_running unset "$check"
 fi
 done
 }
+QUEUE_MAX_PARALLEL=10
+QUEUE_MAX_LOAD=75
 _queue_jobs=()
 declare -A _queue_running
 queue(){
@@ -3478,6 +3504,7 @@ for child in $children;do
 _process_tree "$child" "$2  "
 done
 }
+REMOTE_LOGIN_DEFAULT=operator
 _module_resolve(){
 local modules=()
 split "$1" modules ,
@@ -3947,6 +3974,19 @@ tail -n +2 <<<"$input"|tac
 *)die "Usage: tsv {to|crop} [<value>]"
 esac
 }
+TRIVY_DEFAULT_TIMEOUT=60m
+TRIVY_CACHE_SERVER=
+TRIVY_ROOT_TIMEOUT=60m
+TRIVY_ROOT_EXCLUDE="/mnt /opt/docker **/log/ **/logs/"
+TRIVY_JIRA_BOARD=
+TRIVY_JIRA_ISSUE_TYPE=
+TRIVY_JIRA_FIELD_SOURCES=
+TRIVY_JIRA_FIELD_RATING=
+TRIVY_JIRA_FIELD_VERSION=
+TRIVY_JIRA_FIELD_LINKS=
+TRIVY_JIRA_FIELD_APPROVAL=
+TRIVY_JIRA_APPROVAL_TEMP=
+TRIVY_JIRA_APPROVAL_IRRELEVANT=
 TRIVY_EXPLOITS_URL=https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json
 trivy(){
 local exclude clean progress opt="--exit-code 0 --no-progress --skip-version-check -f json"

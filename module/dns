@@ -12,6 +12,11 @@ source /dev/null
 # DNS
 ######################################################################################
 
+# Base URL for Portal to Provider Plusserver
+PLUSSERVER_PORTAL=
+# PowerDNS API URL used together with $POWERDNS_TOKEN and silently disables powerdns function if not set
+POWERDNS_API=
+
 # Query all managed DNS servers to get a complete list of domain names
 #
 # It will output only the header line if no DNS system is available. Possible DNS systems are:

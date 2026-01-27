@@ -59,6 +59,19 @@ ip_intern() {
     esac
 }
 
+# Array: Provider selection per ip (regex provider) used in @ip_pattern
+IP_PROVIDER_PATTERN=(
+    ".*" Unknown
+)
+# Array: Network segment selection per ip (regex segment) used in @ip_pattern
+IP_SEGMENT_PATTERN=(
+    ".*" other
+)
+# Array: Network segment selection per ip (regex segment) used in @ip_pattern
+#IP_VMWARE_PATTERN=(
+#    ".*" "https://myvmware.company.net/ui"
+#)
+
 # Find info about IP by configured patterns.
 #
 # Possible types are like in the configuration:

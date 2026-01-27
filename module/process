@@ -454,6 +454,11 @@ _async_done() {
 # Job Queue
 ######################################################################################
 
+# Maximum number of parallel tasks for queue
+QUEUE_MAX_PARALLEL=10
+# Percentage of 1 Minute Load per CPU (100% 8Cpu => 8.0)
+QUEUE_MAX_LOAD=75
+
 _queue_jobs=()
 declare -A _queue_running
 

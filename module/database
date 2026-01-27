@@ -15,6 +15,9 @@ use module/software
 # Mongo
 ######################################################################################
 
+# Hash: Mongo Admin User Logins `<host> = <username>:<password>` but use `_` instead of `.` in hostname
+declare -A MONGO_ADMIN_USERPASS=()
+
 # Run command on Mongo DB
 #
 # Usage:    mongo [<options>] "" <command>            # global command

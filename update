@@ -25,7 +25,6 @@ echo "fertig -> $(du -h full | cut -f1)B"
 echo -n "- remote (clone) "
 sed 's/BASHLIB_LOADER:-full/BASHLIB_LOADER:-remote/' "$BASHLIB_HOME/full" >"$BASHLIB_HOME/remote"
 echo "source \$BASHLIB_HOME/configs" >>"$BASHLIB_HOME/full" # load configs
-shfmt -mn "$BASHLIB_HOME/config/environment" | grep -Ev '^#!/usr/bin/env bash|source /dev/null' >>"$BASHLIB_HOME/remote"
 sed -i '/BASHLIB_LOADER:-remote/ a\
 _tmpdir="${TMPDIR:-${TMP:-${TEMP:-/tmp}}}/bashlib"\
 mkdir -p $_tmpdir/locale/en/LC_MESSAGES\

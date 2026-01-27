@@ -9,6 +9,9 @@ source /dev/null
 ### Compress/Decompress Streams
 ######################################################################################
 
+# The default compression tool used in @compress and @decompress
+COMPRESSION_DEFAULT=gzip
+
 # Compress data stream using multiple algorithms.
 #
 # | Tool  | Algorithmus             | Geschwindigkeit | Kompressionsrate  | Datenintegrität | Dateiendung |

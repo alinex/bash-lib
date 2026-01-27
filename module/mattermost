@@ -6,6 +6,18 @@ source /dev/null
 
 # Using the mattermost API to write messages.
 
+# Mattermost API URL used together with $MATTERMOST_TOKEN and silently disables mattermost functions if not set
+MATTERMOST_API=
+# Mattermost API Token used in @mattermost @mattermost_repost @mattermost_reaction
+MATTERMOST_TOKEN=
+
+# Array: Channel per pattern (team regex channel) used in @mattermost ("-"" = no selection for team)
+MATTERMOST_CHANNEL_PATTERN=(
+    MyTeam ".*" "Town Square"
+)
+# Array: Link channel per pattern (team regex channel) used in @mattermost ("-"" = no selection for team)
+MATTERMOST_LINK_PATTERN=()
+
 ######################################################################################
 # Mattermost Internal
 ######################################################################################

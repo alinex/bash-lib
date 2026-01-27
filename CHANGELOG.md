@@ -5,6 +5,8 @@ But on release they will be merged with semantical versioning into the master br
 
 ## Development - v2.5.0
 
+- move environment settings into module with defaults and description
+- Bug Fixes: choice/task, remote bashlib, disk
 - move down deprecated methods
 
 ## 26. January 2026 - v2.4.0

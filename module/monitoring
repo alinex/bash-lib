@@ -9,7 +9,7 @@ source /dev/null
 # Using the Grafana/Prometheus APIs to get Monitoring information.
 
 ######################################################################################
-# Monitoring
+# Prometheus Exporter
 ######################################################################################
 
 # Get exporter list
@@ -71,6 +71,15 @@ exporter() {
     done
 }
 
+######################################################################################
+# Prometheus
+######################################################################################
+
+# Prometheus API URLs as space separated list
+PROMETHEUS_API=
+# Prometheus host names as space separated list
+PROMETHEUS=
+
 # Scrape Prometheus exporter url now
 #
 # The metrics can be filtered by <pattern> argument.
@@ -93,6 +102,15 @@ scrape() {
     grep -E "$2" <<<"$metrics" | grep -v '{' | sed 's/ /\t\t/g' || ((found--))
     ((found > 0))
 }
+
+######################################################################################
+# Grafana
+######################################################################################
+
+# Grafana API URL used together with $GRAFANA_TOKEN and silently disables Grafana functions if not set
+GRAFANA_API=
+# Grafana API Token used in @alerts
+GRAFANA_TOKEN=
 
 # Get Grafana alerts
 #

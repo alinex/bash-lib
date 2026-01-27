@@ -7,7 +7,6 @@ source /dev/null
 
 # Module with operating system specific helper functions.
 
-use config/environment
 use config/local
 
 ######################################################################################
@@ -192,6 +191,11 @@ bios() {
 ######################################################################################
 ### Disk
 ######################################################################################
+
+# Array: Color limits per mount (regex critical error warn ok) used in @df
+MOUNT_COLOR_LIMIT=(
+    ".*" 100 90 80 50
+)
 
 # File system analyzation
 #

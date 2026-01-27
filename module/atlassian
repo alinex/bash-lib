@@ -8,9 +8,17 @@ source /dev/null
 
 # This covers Atlassian API for Jira and confluence.
 
+# Atlassian user for API access in confluence and jira
+ATLASSIAN_USER=
+# Atlassian password for API access in confluence and jira
+ATLASSIAN_TOKEN=
+
 ######################################################################################
 # Confluence
 ######################################################################################
+
+# Atlassian confluence API URL used together with $ATLASSIAN_USER and $ATLASSIAN_TOKEN and silently disables @confluence functions if not set
+CONFLUENCE_API=
 
 # Get page content from Confluence using API
 #
@@ -34,6 +42,9 @@ confluence() {
 # - https://atlas-doc-parser.readthedocs.io/en/latest/index.html
 
 # https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issues/#api-group-issues
+
+# Atlassian Jira URL this can be https://my-company.atlassian.net used together with $ATLASSIAN_USER and $ATLASSIAN_TOKEN and silently disables @jira functions if not set
+JIRA_HOST=
 
 # Jira API calls
 #

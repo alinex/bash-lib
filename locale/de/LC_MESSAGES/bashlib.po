@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-27 16:08+0100\n"
+"POT-Creation-Date: 2026-01-27 19:13+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,13 +17,13 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: core/misc:134 core/validator:74 core/array:129 module/os:229 module/os:342
-#: module/os:415 module/network:24 module/trivy:84 module/compress:41
-#: module/monitoring:148 module/input:31 module/input:86 module/input:194
+#: core/misc:134 core/validator:74 core/array:129 module/os:233 module/os:346
+#: module/os:419 module/network:24 module/trivy:114 module/compress:44
+#: module/monitoring:166 module/input:31 module/input:86 module/input:194
 #: module/input:447 module/input:659 module/log:63 module/process:357
-#: module/process:405 module/process:483 module/process:630 module/remote:81
-#: module/remote:199 module/remote:239 module/remote:277 module/database:33
-#: module/mattermost:299 module/mattermost:330 module/crypto:36 module/git:23
+#: module/process:405 module/process:488 module/process:635 module/remote:84
+#: module/remote:202 module/remote:242 module/remote:280 module/database:36
+#: module/mattermost:311 module/mattermost:342 module/crypto:41 module/git:23
 #: module/git:61 module/software:224
 msgid "Unrecognized option"
 msgstr "Unbekannte Option"
@@ -216,23 +216,23 @@ msgstr "\"$name\" ${val} muss eine für den Benutzer schreibbare Datei sein"
 msgid "A check named ${check} is not defined"
 msgstr "Eine Prüfung namens ${check} ist nicht definiert"
 
-#: module/dns:35 module/dns:59
+#: module/dns:40 module/dns:64
 msgid "NAME"
 msgstr "NAME"
 
-#: module/dns:35 module/dns:59
+#: module/dns:40 module/dns:64
 msgid "TYPE"
 msgstr "TYP"
 
-#: module/dns:35 module/dns:59
+#: module/dns:40 module/dns:64
 msgid "CONTENT"
 msgstr "INHALT"
 
-#: module/dns:35 module/dns:59
+#: module/dns:40 module/dns:64
 msgid "TTL"
 msgstr "TTL"
 
-#: module/dns:93
+#: module/dns:98
 #, sh-format
 msgid ""
 "To update $PLUSSERVER_PORTAL/services/nameservers -> download CSV (manually)."
@@ -240,60 +240,60 @@ msgstr ""
 "Für Update $PLUSSERVER_PORTAL/services/nameservers -> CSV herunterladen "
 "(manuell)."
 
-#: module/dns:94
+#: module/dns:99
 msgid "No local DNS list found, please download it."
 msgstr "Keine lokale DNS Liste gefunden, bitte herunterladen."
 
-#: module/dns:95
+#: module/dns:100
 #, sh-format
 msgid "Use $list from $time."
 msgstr "Benutze $list vom $time."
 
-#: module/os:286
+#: module/os:290
 msgid "Type"
 msgstr "Typ"
 
-#: module/os:286
+#: module/os:290
 msgid "Source"
 msgstr "Quelle"
 
-#: module/os:286 module/os:296
+#: module/os:290 module/os:300
 msgid "Total"
 msgstr "Gesamt"
 
-#: module/os:286 module/os:296
+#: module/os:290 module/os:300
 msgid "Used"
 msgstr "Benutzt"
 
-#: module/os:286 module/os:296
+#: module/os:290 module/os:300
 msgid "Avail"
 msgstr "Frei"
 
-#: module/os:286 module/os:296
+#: module/os:290 module/os:300
 msgid "Percent"
 msgstr "Prozent"
 
-#: module/os:286
+#: module/os:290
 msgid "I-Total"
 msgstr "I-Gesamt"
 
-#: module/os:286
+#: module/os:290
 msgid "I-Used"
 msgstr "I-Benutzt"
 
-#: module/os:286
+#: module/os:290
 msgid "I-Avail"
 msgstr "I-Frei"
 
-#: module/os:286
+#: module/os:290
 msgid "I-Percent"
 msgstr "I-Proz."
 
-#: module/os:286 module/os:296
+#: module/os:290 module/os:300
 msgid "Mount"
 msgstr "Mount"
 
-#: module/os:296
+#: module/os:300
 msgid "Inodes"
 msgstr "Inodes"
 
@@ -301,37 +301,37 @@ msgstr "Inodes"
 msgid "IP\\tInterface"
 msgstr "IP\\tSchnittstelle"
 
-#: module/trivy:99
+#: module/trivy:129
 #, sh-format
 msgid "Start $command scanning with trivy V${version}..."
 msgstr "Starte $command Scanner mit trivy V${version}..."
 
-#: module/trivy:133
+#: module/trivy:163
 msgid "Optimize JSON structure for splitting..."
 msgstr "Optimiere JSON Struktur für das Splitten..."
 
-#: module/trivy:135
+#: module/trivy:165
 msgid "Splitting JSON into single reports..."
 msgstr "Splitte JSON in einzelne Reports..."
 
-#: module/trivy:148
+#: module/trivy:178
 #, sh-format
 msgid "Found $found vulnerabilities."
 msgstr "$found Sicherheitsprobleme gefunden"
 
-#: module/trivy:172
+#: module/trivy:202
 msgid "Build queue to optimize reports..."
 msgstr "Aufbau der Warteschlange für die Report Generierung..."
 
-#: module/trivy:176
+#: module/trivy:206
 msgid "Run queue to optimize reports..."
 msgstr "Start der Warteschlange zur Report Generierung..."
 
-#: module/trivy:180
+#: module/trivy:210
 msgid "Create summaries..."
 msgstr "Erstelle Zusammenfassungen..."
 
-#: module/trivy:290
+#: module/trivy:320
 #, sh-format
 msgid ""
 "Downgrade $severity -> MEDIUM because it was published less than 3 days ago"
@@ -339,7 +339,7 @@ msgstr ""
 "Herunterstufen $severity -> MEDIUM, weil diese Lücke erst in den letzten 3 "
 "Tagen veröffentlicht wurde"
 
-#: module/trivy:299
+#: module/trivy:329
 msgid ""
 "Add information of known exploits and cancel downgrades in case of just "
 "published"
@@ -347,64 +347,64 @@ msgstr ""
 "Füge Informationen zu bekannten Exploits hinzu und streiche mögliche "
 "Herunterstufungen durch kürzliches publizieren"
 
-#: module/trivy:308
+#: module/trivy:338
 #, sh-format
 msgid "Downgrade $severity -> MEDIUM because it is a dev dependency"
 msgstr ""
 "Herunterstufen $severity -> MEDIUM, weil es sich um eine reine "
 "Entwicklungsabhängigkeit handelt"
 
-#: module/trivy:353
+#: module/trivy:383
 #, sh-format
 msgid "Downgrade $severity -> MEDIUM because of Jira status $deploy"
 msgstr "Herunterstufen $severity -> MEDIUM, durch Jira Status $deploy"
 
-#: module/trivy:354 module/trivy:417
+#: module/trivy:384 module/trivy:447
 #, sh-format
 msgid "$id at $target"
 msgstr "$id in $target"
 
-#: module/trivy:416
+#: module/trivy:446
 msgid "Add information from Jira"
 msgstr "Hinzufügen der Jira Informationen"
 
-#: module/trivy:458
+#: module/trivy:488
 #, sh-format
 msgid "Rating: $severity (CVSS rating $value)"
 msgstr "Einstufung: $severity (CVSS Wert $value)"
 
-#: module/trivy:460
+#: module/trivy:490
 #, sh-format
 msgid "Status: Fixed from version $value $fixStatus"
 msgstr "Status: Gelöst in Version $value $fixStatus"
 
-#: module/trivy:464
+#: module/trivy:494
 #, sh-format
 msgid "Date:   Vulnerability known since $human ($value days ago)"
 msgstr "Datum:  Sicherheitslücke bekannt seit $human (vor $value Tagen)"
 
-#: module/trivy:466
+#: module/trivy:496
 #, sh-format
 msgid "Exploit known since $exploitDate at $exploitVendor $exploitProduct"
 msgstr "Exploit bekannt seit $exploitDate bei $exploitVendor $exploitProduct"
 
-#: module/trivy:469
+#: module/trivy:499
 msgid "Responsible"
 msgstr "Zuständig"
 
-#: module/trivy:470
+#: module/trivy:500
 msgid "Deploy"
 msgstr "Deploy"
 
-#: module/trivy:471
+#: module/trivy:501
 msgid "Last comments"
 msgstr "Letzte Kommentare"
 
-#: module/trivy:473
+#: module/trivy:503
 msgid "Sources"
 msgstr "Quellen"
 
-#: module/trivy:480
+#: module/trivy:510
 msgid "Links"
 msgstr "Links"
 
@@ -412,20 +412,20 @@ msgstr "Links"
 msgid "Could not get exporters from Prometheus!"
 msgstr "Es konnten keine Exporter von Prometheus ermittelt werden!"
 
-#: module/monitoring:89
+#: module/monitoring:98
 #, sh-format
 msgid "Could not scrape the Prometheus exporter at $url!"
 msgstr "Der Prometheus Exporter unter $url konnte nicht abgefragt werden!"
 
-#: module/monitoring:155
+#: module/monitoring:173
 msgid "Could not get alerts from Grafana!"
 msgstr "Es konnten keine Grafana Alerts abgerufen werden!"
 
-#: module/monitoring:157
+#: module/monitoring:175
 msgid "Parse error in Grafana alerts list with filter"
 msgstr "Fehler beim Parsen der Grafana Alarmliste mit Filter"
 
-#: module/monitoring:186
+#: module/monitoring:204
 msgid "Severity\\tNetwork\\tInstance\\tSummary\\tStart"
 msgstr "Schweregrad\\tNetz\\tInstanz\\tZusammenfassung\\tStart"
 
@@ -552,17 +552,17 @@ msgid "Work steps are logged so that you can resume work mid-process"
 msgstr ""
 "Arbeitsschritte werden protokolliert um auch mittendrin wieder aufzusetzen"
 
-#: module/process:364 module/process:431 module/process:493
+#: module/process:364 module/process:431 module/process:498
 #, sh-format
 msgid "Skip: $name (already done)"
 msgstr "Abbrechen: $name (bereits durchgeführt)"
 
-#: module/process:368 module/process:435 module/process:528
+#: module/process:368 module/process:435 module/process:533
 #, sh-format
 msgid "Start: $name"
 msgstr "Starte: $name"
 
-#: module/process:371 module/process:514
+#: module/process:371 module/process:519
 #, sh-format
 msgid "Finished: $name"
 msgstr "Fertig: $name"
@@ -572,41 +572,41 @@ msgstr "Fertig: $name"
 msgid "Finished: $check"
 msgstr "Fertig: $check"
 
-#: module/process:497
+#: module/process:502
 #, sh-format
 msgid "Queue: $name"
 msgstr "Warteschlange: $name"
 
-#: module/process:532
+#: module/process:537
 #, sh-format
 msgid "Queued $started/$total jobs"
 msgstr "Warteschlange $started/$total Jobs"
 
-#: module/process:641
+#: module/process:646
 #, sh-format
 msgid "No process with pid $pid"
 msgstr "Kein Prozess mit PID $pid"
 
-#: module/process:649
+#: module/process:654
 #, sh-format
 msgid "No processes found for $search"
 msgstr "Keine Prozesse für $search gefunden"
 
-#: module/process:694
+#: module/process:699
 #, sh-format
 msgid "Waiting for $pid ($pcpu% CPU)"
 msgstr "Warten auf $pid ($pcpu% CPU)"
 
-#: module/process:698
+#: module/process:703
 #, sh-format
 msgid "Timeout after ${timeout}s"
 msgstr "Abbruch nach ${timeout}s"
 
-#: module/remote:283
+#: module/remote:286
 msgid "Wait till reboot is done"
 msgstr "Warten bis der Reboot fertig ist"
 
-#: module/remote:286
+#: module/remote:289
 #, sh-format
 msgid "Wait until the reboot is complete ($seconds seconds)"
 msgstr "Warten bis der Reboot fertig ist ($seconds Sekunden)"

@@ -12,6 +12,9 @@ source /dev/null
 # Remote SSH
 ######################################################################################
 
+# Default login if no `--login` or `$login` available
+REMOTE_LOGIN_DEFAULT=operator
+
 _module_resolve() {
     local modules=()
     split "$1" modules ,
