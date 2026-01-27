@@ -494,16 +494,23 @@ choose() {
     while ((cols > 1 && cols * (length + $max_length + 4) > width)); do
         ((cols--))
     done
-    rows=$(((max + cols - 1) / cols))
-    # Print row-wise
-    local r c idx
-    for ((r = 0; r < rows; r++)); do
-        for ((c = 0; c < cols; c++)); do
-            idx=$((r + c * rows))
-            ((idx > max)) || uprintf "  %*s) %-*s" $max_length $((idx + 1)) "$length" "${entries[idx]}" >/dev/tty
+    if ((cols == 1)); then
+        # Print one column (specially needed for multiline entries)
+        for idx in "${!entries[@]}"; do
+            printf '  %*s) %s\n' $max_length $((idx + 1)) "${entries[idx]}" >/dev/tty
         done
-        printf "\n" >/dev/tty
-    done
+    else
+        # Print row-wise
+        rows=$(((max + cols - 1) / cols))
+        local r c idx
+        for ((r = 0; r < rows; r++)); do
+            for ((c = 0; c < cols; c++)); do
+                idx=$((r + c * rows))
+                ((idx > max)) || uprintf "  %*s) %-*s" $max_length $((idx + 1)) "$length" "${entries[idx]}" >/dev/tty
+            done
+            printf "\n" >/dev/tty
+        done
+    fi
     # add exit entry
     [ -z "$end" ] || printf '  %*s) %s\n' $max_length x "${end}" >/dev/tty
     is empty -- "$default" || is integer -- "$default" || die "Default option $default not recognized."

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-27 15:05+0100\n"
+"POT-Creation-Date: 2026-01-27 16:08+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,10 +17,10 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: core/misc:134 core/validator:74 core/array:129 module/os:228 module/os:341
-#: module/os:414 module/network:24 module/trivy:84 module/compress:41
+#: core/misc:134 core/validator:74 core/array:129 module/os:229 module/os:342
+#: module/os:415 module/network:24 module/trivy:84 module/compress:41
 #: module/monitoring:148 module/input:31 module/input:86 module/input:194
-#: module/input:447 module/input:652 module/log:63 module/process:357
+#: module/input:447 module/input:659 module/log:63 module/process:357
 #: module/process:405 module/process:483 module/process:630 module/remote:81
 #: module/remote:199 module/remote:239 module/remote:277 module/database:33
 #: module/mattermost:299 module/mattermost:330 module/crypto:36 module/git:23
@@ -249,51 +249,51 @@ msgstr "Keine lokale DNS Liste gefunden, bitte herunterladen."
 msgid "Use $list from $time."
 msgstr "Benutze $list vom $time."
 
-#: module/os:285
+#: module/os:286
 msgid "Type"
 msgstr "Typ"
 
-#: module/os:285
+#: module/os:286
 msgid "Source"
 msgstr "Quelle"
 
-#: module/os:285 module/os:295
+#: module/os:286 module/os:296
 msgid "Total"
 msgstr "Gesamt"
 
-#: module/os:285 module/os:295
+#: module/os:286 module/os:296
 msgid "Used"
 msgstr "Benutzt"
 
-#: module/os:285 module/os:295
+#: module/os:286 module/os:296
 msgid "Avail"
 msgstr "Frei"
 
-#: module/os:285 module/os:295
+#: module/os:286 module/os:296
 msgid "Percent"
 msgstr "Prozent"
 
-#: module/os:285
+#: module/os:286
 msgid "I-Total"
 msgstr "I-Gesamt"
 
-#: module/os:285
+#: module/os:286
 msgid "I-Used"
 msgstr "I-Benutzt"
 
-#: module/os:285
+#: module/os:286
 msgid "I-Avail"
 msgstr "I-Frei"
 
-#: module/os:285
+#: module/os:286
 msgid "I-Percent"
 msgstr "I-Proz."
 
-#: module/os:285 module/os:295
+#: module/os:286 module/os:296
 msgid "Mount"
 msgstr "Mount"
 
-#: module/os:295
+#: module/os:296
 msgid "Inodes"
 msgstr "Inodes"
 
@@ -453,11 +453,11 @@ msgstr "Nein"
 msgid "Yes"
 msgstr "Ja"
 
-#: module/input:133 module/input:323 module/input:576
+#: module/input:133 module/input:323 module/input:583
 msgid "value needed"
 msgstr "Wert notwendig"
 
-#: module/input:153 module/input:347 module/input:600
+#: module/input:153 module/input:347 module/input:607
 msgid "invalid character"
 msgstr "ungültiges Zeichen"
 
@@ -513,23 +513,23 @@ msgstr "gut"
 msgid "strong"
 msgstr "stark"
 
-#: module/input:535
+#: module/input:542
 msgid "Select one of the above options"
 msgstr "Wähle eine der obigen Optionen"
 
-#: module/input:672
+#: module/input:679
 msgid "Could not get task list from command"
 msgstr "Befehlsliste konnte nicht von der Funktion gelesen werden"
 
-#: module/input:679
+#: module/input:686
 msgid "No tasks found to be executed."
 msgstr "Keine Aufgaben zum Ausführen gefunden."
 
-#: module/input:685
+#: module/input:692
 msgid "Exit"
 msgstr "Beenden"
 
-#: module/input:692
+#: module/input:699
 #, sh-format
 msgid "Got error $error running $task"
 msgstr "Beim Aufruf von $task kam es zum Fehler $error"

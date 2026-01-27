@@ -2000,6 +2000,11 @@ cols=1
 while ((cols>1&&cols*(length+max_length+4)>width));do
 ((cols--))
 done
+if ((cols==1));then
+for idx in "${!entries[@]}";do
+printf '  %*s) %s\n' $max_length $((idx+1)) "${entries[idx]}" >/dev/tty
+done
+else
 rows=$(((max+cols-1)/cols))
 local r c idx
 for ((r=0; r<rows; r++));do
@@ -2009,6 +2014,7 @@ idx=$((r+c*rows))
 done
 printf "\n" >/dev/tty
 done
+fi
 [ -z "$end" ]||printf '  %*s) %s\n' $max_length x "$end" >/dev/tty
 [ -z "$default" ]||[[ "$default" =~ ^-?[0-9]+$ ]]||die "Default option $default not recognized."
 if ((max_length==1));then
@@ -2728,6 +2734,7 @@ hash _ip_extern_data set timezone "$(jq .timezone -r <<<"$json")"
 hash _ip_extern_data set org "$(jq .org -r <<<"$json")"
 hash _ip_extern_data set loc "$(jq .loc -r <<<"$json")"
 }
+use config/environment
 use config/local
 declare -A _os_detected
 os(){
