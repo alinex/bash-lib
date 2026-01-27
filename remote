@@ -476,7 +476,8 @@ local path
 path="$(dirname "$module")"
 case $path in
 core)return 0;;
-module)[[ ! $BASHLIB_LOADER =~ loader|full|remote ]]||return 0
+module)[[ ! $BASHLIB_LOADER =~ loader|full|remote ]]||return 0;;
+config)return 0
 esac
 debug 5 "Loading module $module"
 source "$BASHLIB_HOME/$module"
@@ -2733,6 +2734,7 @@ hash _ip_extern_data set timezone "$(jq .timezone -r <<<"$json")"
 hash _ip_extern_data set org "$(jq .org -r <<<"$json")"
 hash _ip_extern_data set loc "$(jq .loc -r <<<"$json")"
 }
+use config/local
 declare -A _os_detected
 os(){
 is integer -narguments --max=1 -d $#
@@ -3480,6 +3482,7 @@ local modules=()
 split "$1" modules ,
 local init=1 module line
 for module in "${modules[@]}";do
+debug "$module"
 [[ $module =~ ^(full|base|.*/.*)$ ]]||module="module/$module"
 [ -n "$init" ]&&init=||printf ,
 printf '%s' "$module"
@@ -3530,6 +3533,7 @@ else
 grep -Ev "$pattern" "$BASHLIB_HOME"/base
 fi
 for module in "${modules[@]}";do
+debug "xxxx $module"
 if [ "$module" = "configs" ];then
 for f in "$BASHLIB_HOME"/config/*;do
 if [[ -f $f && $f != *.* ]];then

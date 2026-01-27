@@ -470,7 +470,8 @@ local path
 path="$(dirname "$module")"
 case $path in
 core)return 0;;
-module)[[ ! $BASHLIB_LOADER =~ loader|full|remote ]]||return 0
+module)[[ ! $BASHLIB_LOADER =~ loader|full|remote ]]||return 0;;
+config)return 0
 esac
 debug 5 "Loading module $module"
 source "$BASHLIB_HOME/$module"

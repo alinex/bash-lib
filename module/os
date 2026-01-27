@@ -7,6 +7,9 @@ source /dev/null
 
 # Module with operating system specific helper functions.
 
+use config/environment
+use config/local
+
 ######################################################################################
 ### Detect OS / Hardware
 ######################################################################################

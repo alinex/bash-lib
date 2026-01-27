@@ -17,6 +17,7 @@ _module_resolve() {
     split "$1" modules ,
     local init=1 module line
     for module in "${modules[@]}"; do
+        debug "$module"
         [[ "$module" =~ ^(full|base|.*/.*)$ ]] || module="module/$module"
         [ -n "$init" ] && init= || printf ,
         printf '%s' "$module"
@@ -117,6 +118,7 @@ remote() {
             fi
             # load modules
             for module in "${modules[@]}"; do
+                debug "xxxx $module"
                 if [ "$module" = "configs" ]; then
                     for f in "$BASHLIB_HOME"/config/*; do
                         if [[ -f "$f" && "$f" != *.* ]]; then
