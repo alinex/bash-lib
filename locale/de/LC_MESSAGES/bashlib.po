@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-27 19:13+0100\n"
+"POT-Creation-Date: 2026-01-27 19:50+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,13 +17,13 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: core/misc:134 core/validator:74 core/array:129 module/os:233 module/os:346
-#: module/os:419 module/network:24 module/trivy:114 module/compress:44
+#: core/misc:134 core/validator:74 core/array:129 module/os:231 module/os:344
+#: module/os:417 module/network:24 module/trivy:114 module/compress:44
 #: module/monitoring:166 module/input:31 module/input:86 module/input:194
-#: module/input:447 module/input:659 module/log:63 module/process:357
-#: module/process:405 module/process:488 module/process:635 module/remote:84
+#: module/input:447 module/input:659 module/log:63 module/process:359
+#: module/process:407 module/process:490 module/process:637 module/remote:84
 #: module/remote:202 module/remote:242 module/remote:280 module/database:36
-#: module/mattermost:311 module/mattermost:342 module/crypto:41 module/git:23
+#: module/mattermost:309 module/mattermost:340 module/crypto:41 module/git:23
 #: module/git:61 module/software:224
 msgid "Unrecognized option"
 msgstr "Unbekannte Option"
@@ -249,51 +249,51 @@ msgstr "Keine lokale DNS Liste gefunden, bitte herunterladen."
 msgid "Use $list from $time."
 msgstr "Benutze $list vom $time."
 
-#: module/os:290
+#: module/os:288
 msgid "Type"
 msgstr "Typ"
 
-#: module/os:290
+#: module/os:288
 msgid "Source"
 msgstr "Quelle"
 
-#: module/os:290 module/os:300
+#: module/os:288 module/os:298
 msgid "Total"
 msgstr "Gesamt"
 
-#: module/os:290 module/os:300
+#: module/os:288 module/os:298
 msgid "Used"
 msgstr "Benutzt"
 
-#: module/os:290 module/os:300
+#: module/os:288 module/os:298
 msgid "Avail"
 msgstr "Frei"
 
-#: module/os:290 module/os:300
+#: module/os:288 module/os:298
 msgid "Percent"
 msgstr "Prozent"
 
-#: module/os:290
+#: module/os:288
 msgid "I-Total"
 msgstr "I-Gesamt"
 
-#: module/os:290
+#: module/os:288
 msgid "I-Used"
 msgstr "I-Benutzt"
 
-#: module/os:290
+#: module/os:288
 msgid "I-Avail"
 msgstr "I-Frei"
 
-#: module/os:290
+#: module/os:288
 msgid "I-Percent"
 msgstr "I-Proz."
 
-#: module/os:290 module/os:300
+#: module/os:288 module/os:298
 msgid "Mount"
 msgstr "Mount"
 
-#: module/os:300
+#: module/os:298
 msgid "Inodes"
 msgstr "Inodes"
 
@@ -534,70 +534,70 @@ msgstr "Beenden"
 msgid "Got error $error running $task"
 msgstr "Beim Aufruf von $task kam es zum Fehler $error"
 
-#: module/process:96
+#: module/process:97
 msgid "Failed to remove lockfile"
 msgstr "Lockfile konnte nicht entfernt werden"
 
-#: module/process:115 module/process:151
+#: module/process:116 module/process:152
 msgid "Failed to create PID lockfile"
 msgstr "PID Lockfile konnte nicht erstellt werden"
 
-#: module/process:123
+#: module/process:124
 #, sh-format
 msgid "Waiting for unlock in $lockfile by PID $pid"
 msgstr "Warten, bis zur Freigabe in $lockfile durch PID $pid"
 
-#: module/process:297
+#: module/process:299
 msgid "Work steps are logged so that you can resume work mid-process"
 msgstr ""
 "Arbeitsschritte werden protokolliert um auch mittendrin wieder aufzusetzen"
 
-#: module/process:364 module/process:431 module/process:498
+#: module/process:366 module/process:433 module/process:500
 #, sh-format
 msgid "Skip: $name (already done)"
 msgstr "Abbrechen: $name (bereits durchgeführt)"
 
-#: module/process:368 module/process:435 module/process:533
+#: module/process:370 module/process:437 module/process:535
 #, sh-format
 msgid "Start: $name"
 msgstr "Starte: $name"
 
-#: module/process:371 module/process:519
+#: module/process:373 module/process:521
 #, sh-format
 msgid "Finished: $name"
 msgstr "Fertig: $name"
 
-#: module/process:446
+#: module/process:448
 #, sh-format
 msgid "Finished: $check"
 msgstr "Fertig: $check"
 
-#: module/process:502
+#: module/process:504
 #, sh-format
 msgid "Queue: $name"
 msgstr "Warteschlange: $name"
 
-#: module/process:537
+#: module/process:539
 #, sh-format
 msgid "Queued $started/$total jobs"
 msgstr "Warteschlange $started/$total Jobs"
 
-#: module/process:646
+#: module/process:648
 #, sh-format
 msgid "No process with pid $pid"
 msgstr "Kein Prozess mit PID $pid"
 
-#: module/process:654
+#: module/process:656
 #, sh-format
 msgid "No processes found for $search"
 msgstr "Keine Prozesse für $search gefunden"
 
-#: module/process:699
+#: module/process:701
 #, sh-format
 msgid "Waiting for $pid ($pcpu% CPU)"
 msgstr "Warten auf $pid ($pcpu% CPU)"
 
-#: module/process:703
+#: module/process:705
 #, sh-format
 msgid "Timeout after ${timeout}s"
 msgstr "Abbruch nach ${timeout}s"

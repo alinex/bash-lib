@@ -16,7 +16,7 @@ use module/software
 ######################################################################################
 
 # Hash: Mongo Admin User Logins `<host> = <username>:<password>` but use `_` instead of `.` in hostname
-declare -A MONGO_ADMIN_USERPASS=()
+declare -A MONGO_ADMIN_USERPASS="${MONGO_ADMIN_USERPASS:-()}"
 
 # Run command on Mongo DB
 #

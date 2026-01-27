@@ -13,7 +13,7 @@ source /dev/null
 ######################################################################################
 
 # Default login if no `--login` or `$login` available
-REMOTE_LOGIN_DEFAULT=operator
+REMOTE_LOGIN_DEFAULT=${REMOTE_LOGIN_DEFAULT:-operator}
 
 _module_resolve() {
     local modules=()

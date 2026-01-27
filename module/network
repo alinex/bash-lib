@@ -60,17 +60,11 @@ ip_intern() {
 }
 
 # Array: Provider selection per ip (regex provider) used in @ip_pattern
-IP_PROVIDER_PATTERN=(
-    ".*" Unknown
-)
+IP_PROVIDER_PATTERN="${IP_PROVIDER_PATTERN:-(".*" Unknown)}"
 # Array: Network segment selection per ip (regex segment) used in @ip_pattern
-IP_SEGMENT_PATTERN=(
-    ".*" other
-)
+IP_SEGMENT_PATTERN="${IP_SEGMENT_PATTERN:-(".*" other)}"
 # Array: Network segment selection per ip (regex segment) used in @ip_pattern
-#IP_VMWARE_PATTERN=(
-#    ".*" "https://myvmware.company.net/ui"
-#)
+IP_VMWARE_PATTERN="${IP_VMWARE_PATTERN}"
 
 # Find info about IP by configured patterns.
 #

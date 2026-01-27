@@ -7,34 +7,34 @@ source /dev/null
 # Run trivy security scan and analyze results.
 
 # Maximum time to generate trivy security report
-TRIVY_DEFAULT_TIMEOUT=60m
+TRIVY_DEFAULT_TIMEOUT=${TRIVY_DEFAULT_TIMEOUT:-60m}
 # Optional, use specified trivy server for caching of the internet databases
-TRIVY_CACHE_SERVER=
-# Specify there trivy should store its cache (about 1.3GB)
-#TRIVY_CACHE_DIR=$HOME/.cache/trivy
+TRIVY_CACHE_SERVER=$TRIVY_CACHE_SERVER
+# Specify there trivy should store its cache (about 1.3GB something like $HOME/.cache/trivy)
+TRIVY_CACHE_DIR="$TRIVY_CACHE_DIR"
 # Default timeout if nothing defined for the root scan only
-TRIVY_ROOT_TIMEOUT=60m
+TRIVY_ROOT_TIMEOUT=${TRIVY_ROOT_TIMEOUT:-60m}
 # Paths to prevent in root scans
-TRIVY_ROOT_EXCLUDE="/mnt /opt/docker **/log/ **/logs/"
+TRIVY_ROOT_EXCLUDE="${TRIVY_ROOT_EXCLUDE:-/mnt /opt/docker **/log/ **/logs/}"
 
 # Security Board key in Jira (if trivy vulnerabilities are managed using Jira)
-TRIVY_JIRA_BOARD=
+TRIVY_JIRA_BOARD="$TRIVY_JIRA_BOARD"
 # Type of issue to use for these (if trivy vulnerabilities are managed using Jira)
-TRIVY_JIRA_ISSUE_TYPE=
+TRIVY_JIRA_ISSUE_TYPE="$TRIVY_JIRA_ISSUE_TYPE"
 # Field name for multiline text of sources (if trivy vulnerabilities are managed using Jira)
-TRIVY_JIRA_FIELD_SOURCES=
+TRIVY_JIRA_FIELD_SOURCES="$TRIVY_JIRA_FIELD_SOURCES"
 # Field name for rating string (if trivy vulnerabilities are managed using Jira)
-TRIVY_JIRA_FIELD_RATING=
+TRIVY_JIRA_FIELD_RATING="$TRIVY_JIRA_FIELD_RATING"
 # Field name for fixed version string (if trivy vulnerabilities are managed using Jira)
-TRIVY_JIRA_FIELD_VERSION=
+TRIVY_JIRA_FIELD_VERSION="$TRIVY_JIRA_FIELD_VERSION"
 # Field name for multiline text with further links (if trivy vulnerabilities are managed using Jira)
-TRIVY_JIRA_FIELD_LINKS=
+TRIVY_JIRA_FIELD_LINKS="$TRIVY_JIRA_FIELD_LINKS"
 # Field name for approval status (if trivy vulnerabilities are managed using Jira)
-TRIVY_JIRA_FIELD_APPROVAL=
+TRIVY_JIRA_FIELD_APPROVAL="$TRIVY_JIRA_FIELD_APPROVAL"
 # Value in approval field for "allowed for 30 days" (if trivy vulnerabilities are managed using Jira)
-TRIVY_JIRA_APPROVAL_TEMP=
+TRIVY_JIRA_APPROVAL_TEMP="$TRIVY_JIRA_APPROVAL_TEMP"
 # Value in approval field for irrelevant/always allowed (if trivy vulnerabilities are managed using Jira)
-TRIVY_JIRA_APPROVAL_IRRELEVANT=
+TRIVY_JIRA_APPROVAL_IRRELEVANT="$TRIVY_JIRA_APPROVAL_IRRELEVANT"
 
 TRIVY_EXPLOITS_URL=https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json
 

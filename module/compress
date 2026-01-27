@@ -10,7 +10,7 @@ source /dev/null
 ######################################################################################
 
 # The default compression tool used in @compress and @decompress
-COMPRESSION_DEFAULT=gzip
+COMPRESSION_DEFAULT=${COMPRESSION_DEFAULT:-gzip}
 
 # Compress data stream using multiple algorithms.
 #

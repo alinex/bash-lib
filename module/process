@@ -86,7 +86,8 @@ retry() {
 # Locking
 ######################################################################################
 
-LOCK_SLEEP=10
+# Default time in seconds to wait till checking again if process is still locked
+LOCK_SLEEP=${LOCK_SLEEP:-10}
 
 _lock_remove() {
     # Remove old locks for non existing processes or the defined pid lock
@@ -274,7 +275,8 @@ variables() {
 declare -A _async_running
 
 # Set the variables which should be stored with step control
-STEPS_VARIABLES=
+STEPS_VARIABLES="$STEPS_VARIABLES"
+
 _STEPS_NAME=
 
 # Step control allows jobs to resume on another run.
@@ -455,9 +457,9 @@ _async_done() {
 ######################################################################################
 
 # Maximum number of parallel tasks for queue
-QUEUE_MAX_PARALLEL=10
-# Percentage of 1 Minute Load per CPU (100% 8Cpu => 8.0)
-QUEUE_MAX_LOAD=75
+QUEUE_MAX_PARALLEL=${QUEUE_MAX_PARALLEL:-10}
+# Percentage of 1 Minute Load per CPU (100 with 8Cpu -> 8.0)
+QUEUE_MAX_LOAD=${QUEUE_MAX_LOAD:-75}
 
 _queue_jobs=()
 declare -A _queue_running

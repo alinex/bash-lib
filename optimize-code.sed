@@ -17,3 +17,6 @@ s/(is .*?) --message=/\1 -m/g
 s/(is .*?) -d -([^-])/\1 -d\2/g
 # remove unnecessary end option
 s/-- \$#/$#/g
+
+# remove variable documentation only $VAR=$VAR
+/^([A-Z_]+)=(\")?\$\1\2?$/d

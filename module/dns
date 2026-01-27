@@ -13,9 +13,9 @@ source /dev/null
 ######################################################################################
 
 # Base URL for Portal to Provider Plusserver
-PLUSSERVER_PORTAL=
+PLUSSERVER_PORTAL="$PLUSSERVER_PORTAL"
 # PowerDNS API URL used together with $POWERDNS_TOKEN and silently disables powerdns function if not set
-POWERDNS_API=
+POWERDNS_API="$POWERDNS_API"
 
 # Query all managed DNS servers to get a complete list of domain names
 #

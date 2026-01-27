@@ -76,9 +76,9 @@ exporter() {
 ######################################################################################
 
 # Prometheus API URLs as space separated list
-PROMETHEUS_API=
+PROMETHEUS_API="$PROMETHEUS_API"
 # Prometheus host names as space separated list
-PROMETHEUS=
+PROMETHEUS="$PROMETHEUS"
 
 # Scrape Prometheus exporter url now
 #
@@ -108,9 +108,9 @@ scrape() {
 ######################################################################################
 
 # Grafana API URL used together with $GRAFANA_TOKEN and silently disables Grafana functions if not set
-GRAFANA_API=
+GRAFANA_API="$GRAFANA_API"
 # Grafana API Token used in @alerts
-GRAFANA_TOKEN=
+GRAFANA_TOKEN="$GRAFANA_TOKEN"
 
 # Get Grafana alerts
 #

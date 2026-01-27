@@ -392,6 +392,7 @@ Module with network functions.
 | --- | --- |
 | ``$IP_PROVIDER_PATTERN`` | Array: Provider selection per ip (regex provider) used in [`ip_pattern`](functionip_pattern.md) |
 | ``$IP_SEGMENT_PATTERN`` | Array: Network segment selection per ip (regex segment) used in [`ip_pattern`](functionip_pattern.md) |
+| ``$IP_VMWARE_PATTERN`` | Array: Network segment selection per ip (regex segment) used in [`ip_pattern`](functionip_pattern.md) |
 | [`ip_resolve`](function/ip_resolve.md) | Get IP of given hostname |
 | [`ip_intern`](function/ip_intern.md) | Show the IP addresses |
 | [`ip_pattern`](function/ip_pattern.md) | Find info about IP by configured patterns. |
@@ -419,9 +420,10 @@ Module for process control
 
 | Variable/Function | Description |
 | --- | --- |
+| ``$LOCK_SLEEP`` | Default time in seconds to wait till checking again if process is still locked |
 | ``$STEPS_VARIABLES`` | Set the variables which should be stored with step control |
 | ``$QUEUE_MAX_PARALLEL`` | Maximum number of parallel tasks for queue |
-| ``$QUEUE_MAX_LOAD`` | Percentage of 1 Minute Load per CPU (100% 8Cpu => 8.0) |
+| ``$QUEUE_MAX_LOAD`` | Percentage of 1 Minute Load per CPU (100 with 8Cpu -> 8.0) |
 | [`sudo_allow`](function/sudo_allow.md) | Check if sudo is needed for command |
 | [`sudo`](function/sudo.md) | Sudo overwrite to only use sudo if needed |
 | [`repeat`](function/repeat.md) | Execute command in N times |
@@ -477,7 +479,8 @@ Run trivy security scan and analyze results.
 | --- | --- |
 | ``$TRIVY_DEFAULT_TIMEOUT`` | Maximum time to generate trivy security report |
 | ``$TRIVY_CACHE_SERVER`` | Optional, use specified trivy server for caching of the internet databases |
-| ``$TRIVY_ROOT_TIMEOUT`` | Specify there trivy should store its cache (about 1.3GB) |
+| ``$TRIVY_CACHE_DIR`` | Specify there trivy should store its cache (about 1.3GB something like `$HOME`/.cache/trivy) |
+| ``$TRIVY_ROOT_TIMEOUT`` | Default timeout if nothing defined for the root scan only |
 | ``$TRIVY_ROOT_EXCLUDE`` | Paths to prevent in root scans |
 | ``$TRIVY_JIRA_BOARD`` | Security Board key in Jira (if trivy vulnerabilities are managed using Jira) |
 | ``$TRIVY_JIRA_ISSUE_TYPE`` | Type of issue to use for these (if trivy vulnerabilities are managed using Jira) |
