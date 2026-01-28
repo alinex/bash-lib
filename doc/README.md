@@ -412,6 +412,7 @@ Module with operating system specific helper functions.
 | [`disk`](function/disk.md) | File system analyzation |
 | [`disk_free`](function/disk_free.md) | Deprecated: Disk free with visual display |
 | [`files`](function/files.md) | Show big directory and files |
+| [`user_info`](function/user_info.md) | Get information about user |
 | [`uses_lvm`](function/uses_lvm.md) | Check if LVM is used |
 
 ### Process Module

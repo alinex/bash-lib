@@ -3037,6 +3037,26 @@ interactive)install ncdu
 ncdu -xe "$path"
 esac
 }
+user_info(){
+local user home from login logout time uid gid shell sudo info
+getent passwd $1|awk -F: '$3 >= 1000 && $3 < 60000 && $1 !~ /^snap_/ && $1 !~ /^(nobody|daemon|www-data|postgres|mysql|redis|git)/ {print $1}'|while IFS= read -r user;do
+IFS=: read -r _ _ uid gid _ home shell < <(getent passwd "$user")
+read -r _ _ from login logout < <(last -dw --time-format=iso -n 1 "$user")
+time="$(sed 's/.*(\|).*//g;s/+0\?/d /;s/:/h /;s/00/0/;s/\([0-9]\)$/\1m/' <<<"$logout")"
+info=$(LANG=C sudo -l -U "$user" 2>/dev/null)
+if grep -q "not allowed\|Sorry" <<<"$info"||[ -z "$info" ];then
+sudo=no
+elif grep -q "(ALL.*ALL)" <<<"$info";then
+sudo=all
+else
+sudo=specified
+fi
+printf '%-20s\t' "$(gettext User)" "$(gettext UID)" "$(gettext GID)" "$(gettext Home)" "$(gettext SuDo)" "$(gettext Login)" "$(gettext From)" "$(gettext Duration)"
+printf '\n'
+printf '%-20s\t' "$user" "$uid" "$gid" "$home" "$sudo" "$login" "$from" "$time"
+printf '\n'
+done
+}
 uses_lvm(){
 is integer -narguments --max=0 -d $#
 sudo bash -lc 'command -v vgs' >/dev/null&&sudo vgs --noheadings >/dev/null&&[ -n "$(sudo vgs --noheadings)" ] &>/dev/null
