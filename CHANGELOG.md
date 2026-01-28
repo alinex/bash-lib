@@ -5,6 +5,7 @@ But on release they will be merged with semantical versioning into the master br
 
 ## Development - v2.5.0
 
+- add [open_url](doc/function/open_url.md)
 - move environment settings into module with defaults and description
 - Bug Fixes: choice/task, remote bashlib, disk
 - move down deprecated methods

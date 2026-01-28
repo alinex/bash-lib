@@ -344,6 +344,7 @@ Module with user interaction helpers.
 | [`ask`](function/ask.md) | Ask for an input element |
 | [`choose`](function/choose.md) | Select from list (extended version of native select) |
 | [`tasks`](function/tasks.md) | Run tasks as selected by user |
+| [`open_url`](function/open_url.md) | Open Url in browser |
 
 ### Log Module
 

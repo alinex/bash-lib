@@ -702,3 +702,16 @@ tasks() {
         [ -n "$loop" ] || break
     done
 }
+
+######################################################################################
+# Visual Tools
+######################################################################################
+
+# Open Url in browser
+#
+# This will open the url in the last used or local installed Browser as a new tab.
+#
+# Usage:    open_url <url>
+open_url() {
+    xdg-open "$1" 2>/dev/null || sensible-browser "$1"
+}

@@ -2151,6 +2151,9 @@ printf '\n'
 [ -n "$loop" ]||break
 done
 }
+open_url(){
+xdg-open "$1" 2>/dev/null||sensible-browser "$1"
+}
 declare -ag _log_level=(debug info notice warn error critical)
 declare -Ag _log_rotate_time
 _log_rotate_time[hourly]="%Y-%m-%dT%H"
@@ -2671,7 +2674,6 @@ fi
 }
 ip_intern(){
 is integer -narguments --max=1 -d $#
-install ip
 case ${1-} in
 data)printf '%s\n' "$(gettext "IP\tInterface")"
 ip -o addr show|awk 'BEGIN { OFS="\t" } $2 != "lo" {print $4, $2}'
@@ -3030,7 +3032,8 @@ while read -r size path;do
 printf '%s\t%s\n' $(numfmt --to=iec --suffix=B <<<"$size") "$path"
 done < <(sudo du -abx "$path" 2>/dev/null|grep -v 'du: cannot access'|awk '$1 > '"$min"|sort -k2)
 ;;
-interactive)ncdu -xe "$path"
+interactive)install ncdu
+ncdu -xe "$path"
 esac
 }
 uses_lvm(){
@@ -3545,7 +3548,6 @@ else
 grep -Ev "$pattern" "$BASHLIB_HOME"/base
 fi
 for module in "${modules[@]}";do
-debug "xxxx $module"
 if [ "$module" = "configs" ];then
 for f in "$BASHLIB_HOME"/config/*;do
 if [[ -f $f && $f != *.* ]];then

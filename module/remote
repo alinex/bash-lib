@@ -121,7 +121,6 @@ remote() {
             fi
             # load modules
             for module in "${modules[@]}"; do
-                debug "xxxx $module"
                 if [ "$module" = "configs" ]; then
                     for f in "$BASHLIB_HOME"/config/*; do
                         if [[ -f "$f" && "$f" != *.* ]]; then

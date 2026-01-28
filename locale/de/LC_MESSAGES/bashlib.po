@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-27 20:09+0100\n"
+"POT-Creation-Date: 2026-01-28 07:30+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -22,7 +22,7 @@ msgstr ""
 #: module/monitoring:166 module/input:31 module/input:86 module/input:194
 #: module/input:447 module/input:659 module/log:63 module/process:359
 #: module/process:407 module/process:490 module/process:637 module/remote:84
-#: module/remote:202 module/remote:242 module/remote:280 module/database:36
+#: module/remote:201 module/remote:241 module/remote:279 module/database:36
 #: module/mattermost:309 module/mattermost:340 module/crypto:41 module/git:23
 #: module/git:61 module/software:224
 msgid "Unrecognized option"
@@ -297,7 +297,7 @@ msgstr "Mount"
 msgid "Inodes"
 msgstr "Inodes"
 
-#: module/network:55
+#: module/network:56
 msgid "IP\\tInterface"
 msgstr "IP\\tSchnittstelle"
 
@@ -602,11 +602,11 @@ msgstr "Warten auf $pid ($pcpu% CPU)"
 msgid "Timeout after ${timeout}s"
 msgstr "Abbruch nach ${timeout}s"
 
-#: module/remote:286
+#: module/remote:285
 msgid "Wait till reboot is done"
 msgstr "Warten bis der Reboot fertig ist"
 
-#: module/remote:289
+#: module/remote:288
 #, sh-format
 msgid "Wait until the reboot is complete ($seconds seconds)"
 msgstr "Warten bis der Reboot fertig ist ($seconds Sekunden)"

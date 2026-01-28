@@ -49,7 +49,8 @@ ip_resolve() {
 # shellcheck disable=SC2120
 ip_intern() {
     is integer --name=arguments --max=1 --die -- $#
-    install ip
+    # this needs the software package to be bundled
+    #install ip
     case ${1-} in
     data)
         printf '%s\n' "$(gettext "IP\tInterface")"
