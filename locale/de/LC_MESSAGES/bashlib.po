@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-28 07:30+0100\n"
+"POT-Creation-Date: 2026-01-28 07:55+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -20,7 +20,7 @@ msgstr ""
 #: core/misc:134 core/validator:74 core/array:129 module/os:231 module/os:344
 #: module/os:418 module/network:24 module/trivy:114 module/compress:44
 #: module/monitoring:166 module/input:31 module/input:86 module/input:194
-#: module/input:447 module/input:659 module/log:63 module/process:359
+#: module/input:447 module/input:660 module/log:63 module/process:359
 #: module/process:407 module/process:490 module/process:637 module/remote:84
 #: module/remote:201 module/remote:241 module/remote:279 module/database:36
 #: module/mattermost:309 module/mattermost:340 module/crypto:41 module/git:23
@@ -517,19 +517,19 @@ msgstr "stark"
 msgid "Select one of the above options"
 msgstr "Wähle eine der obigen Optionen"
 
-#: module/input:679
+#: module/input:680
 msgid "Could not get task list from command"
 msgstr "Befehlsliste konnte nicht von der Funktion gelesen werden"
 
-#: module/input:686
+#: module/input:687
 msgid "No tasks found to be executed."
 msgstr "Keine Aufgaben zum Ausführen gefunden."
 
-#: module/input:692
+#: module/input:693
 msgid "Exit"
 msgstr "Beenden"
 
-#: module/input:699
+#: module/input:700
 #, sh-format
 msgid "Got error $error running $task"
 msgstr "Beim Aufruf von $task kam es zum Fehler $error"

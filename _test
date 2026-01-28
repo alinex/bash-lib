@@ -18,6 +18,13 @@ while true; do
 done
 ################################################################################################
 
+server=grafana.host.cloud.dvb
+remote sudo lvs --noheadings -o lv_name "$vg"
+volume=$(remote sudo lvs --noheadings -o lv_name "$vg" | choose -d 1 -t "Welchem Volume soll der freie Speicher zugeordnet werden?")
+info "Volume $volume vergrößern"
+
+exit
+
 echo "one
 two
 three

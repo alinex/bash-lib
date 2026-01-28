@@ -1984,7 +1984,7 @@ done
 local width list num entries keys key display
 width=$(tput cols </dev/tty 2>/dev/null||echo 80)
 list="$(input_lines "$@")"
-list="$(trim "$list"|grep -v ^#)"
+list="$(trim "$list"|grep -v ^#|sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
 while read -r line;do
 num=$((num+1))
 IFS="|" read -r key display <<<"$line"
@@ -2107,6 +2107,7 @@ fi
 fi
 done
 stty echo </dev/tty
+debug "$list"
 sed -n "${input}p" <<<"$list"|sed 's/\s*|.*//'
 }
 tasks(){
