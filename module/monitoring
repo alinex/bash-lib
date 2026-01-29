@@ -142,23 +142,23 @@ alerts() {
     while true; do
         case "$1" in
         -g | --group)
-            [ -z "$2" ] || filter="$filter | select(.labels|has(\"group\")) | select(.labels.group|test(\".*$2.*\"; \"i\"))"
+            [ -z "$2" ] || filter+=" | select(.labels|has(\"group\")) | select(.labels.group|test(\".*$2.*\"; \"i\"))"
             shift 2
             ;;
         -i | --instance)
-            [ -z "$2" ] || filter="$filter | select(.labels.instance|test(\"$2\"; \"i\"))"
+            [ -z "$2" ] || filter+=" | select(.labels.instance|test(\"$2\"; \"i\"))"
             shift 2
             ;;
         -a | --alertname)
-            [ -z "$2" ] || filter="$filter | select(.labels.alertname|test(\"$2\"; \"i\"))"
+            [ -z "$2" ] || filter+=" | select(.labels.alertname|test(\"$2\"; \"i\"))"
             shift 2
             ;;
         -s | --summary)
-            [ -z "$2" ] || filter="$filter | select(.annotations.summary? // \"\"|test(\"$2\"; \"i\"))"
+            [ -z "$2" ] || filter+=" | select(.annotations.summary? // \"\"|test(\"$2\"; \"i\"))"
             shift 2
             ;;
         -n | --net)
-            [ -z "$2" ] || filter="$filter | select(.labels.net? // \"\"|test(\"$2\"; \"i\"))"
+            [ -z "$2" ] || filter+=" | select(.labels.net? // \"\"|test(\"$2\"; \"i\"))"
             shift 2
             ;;
         -q | --quiet) quiet=1 && shift ;;
@@ -166,6 +166,7 @@ alerts() {
         *) die "$(gettext "Unrecognized option"): $1" ;;
         esac
     done
+    debug "$filter"
     # processing
     install jq
     local list

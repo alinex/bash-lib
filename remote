@@ -3044,7 +3044,7 @@ interactive)install ncdu
 ncdu -xe "$path"
 esac
 }
-user_info(){
+user_data(){
 local user home from login logout time uid gid shell sudo info
 getent passwd $1|awk -F: '$3 >= 1000 && $3 < 60000 && $1 !~ /^snap_/ && $1 !~ /^(nobody|daemon|www-data|postgres|mysql|redis|git)/ {print $1}'|while IFS= read -r user;do
 IFS=: read -r _ _ uid gid _ home shell < <(getent passwd "$user")
@@ -3064,55 +3064,13 @@ printf '%-20s\t' "$user" "$uid" "$gid" "$home" "$sudo" "$login" "$from" "$time"
 printf '\n'
 done
 }
-sudo_info(){
+sudo_data(){
 echo -e "username\tas UID\tas GID\tcommand"
 getent passwd $1|awk -F: '$3 >= 1000 && $3 < 60000 {print $1}'|while IFS= read -r user;do
-echo $user
-LANG=C sudo -lU "$user" 2>/dev/null|awk -v u="$user" '
-        /User .* may run the following commands/ { inlist=1; next }
-
-        inlist {
-            # Pattern: (UID : GID) FLAGS: COMMAND
-            if (match($0, /\(([^:()]+) *: *([^)]+)\)[[:space:]]*([^:]*):?[[:space:]]*(.*)/, a)) {
-                uid=a[1]
-                gid=a[2]
-                flags=a[3]
-                cmd=a[4]
-
-                # Strip NOPASSWD/PASSWD
-                gsub(/NOPASSWD|PASSWD/,"",flags)
-                gsub(/^[[:space:]]+|[[:space:]]+$/,"",flags)
-
-                # Skip if no command
-                if (cmd == "" || cmd ~ /^[[:space:]]*$/) next
-
-                # Skip redundant ALL ALL ALL
-                if (cmd == "ALL" && uid == "ALL" && gid == "ALL" && flags == "") next
-
-                print u "\t" uid "\t" gid "\t" cmd
-                next
-            }
-
-            # Pattern: (UID) FLAGS: COMMAND
-            if (match($0, /\(([^()]+)\)[[:space:]]*([^:]*):?[[:space:]]*(.*)/, a)) {
-                uid=a[1]
-                gid=uid
-                flags=a[2]
-                cmd=a[3]
-
-                # Strip NOPASSWD/PASSWD
-                gsub(/NOPASSWD|PASSWD/,"",flags)
-                gsub(/^[[:space:]]+|[[:space:]]+$/,"",flags)
-
-                # Skip if no command
-                if (cmd == "" || cmd ~ /^[[:space:]]*$/) next
-
-                print u "\t" uid "\t" gid "\t" cmd
-                next
-            }
-        }
-    '
-done|awk 'NF>=4'
+LANG=C sudo -lU "$user" 2>/dev/null|sed '1,/User .* may run the following commands/d'|while read -r line;do
+sed 's/(\([A-Z0-9]*\) *:\? *\([A-Z0-9]*\)\?) * \(NOPASSWD:\)\? */'"$user"'\t\1\t\2\t/' <<<"$line"
+done
+done
 }
 uses_lvm(){
 is integer -narguments --max=0 -d $#
