@@ -1811,8 +1811,8 @@ password)prompt="${2:-$(gettext "Enter password")}"
 mask=1
 ;;
 time)prompt="${2:-$(gettext "Enter time")}"
-pattern="^([0-1]?[0-9]|2[0-3])(:([0-5]?[0-9])?)?$"
-final="^([0-1][0-9]|2[0-3]):[0-5][0-9]$"
+pattern="^([0-9]|1?[0-9]|2[0-3])(:([0-5]?[0-9])?)?$"
+final="^([0-9]|1[0-9]|2[0-3]):[0-5][0-9]$"
 ;;
 text)prompt="${2:-$(gettext "Enter text (end with empty line)")}";;
 editor)prompt="${2:-$(gettext "Enter text here")}";;
@@ -2548,19 +2548,19 @@ local filter="" quiet
 eval set -- "$(option_parse $'a alertname +\ng group +\ni instance +\nn net +\ns summary +\nq quiet -' "$@")"
 while true;do
 case "$1" in
--g|--group)[ -z "$2" ]||filter="$filter | select(.labels|has(\"group\")) | select(.labels.group|test(\".*$2.*\"; \"i\"))"
+-g|--group)[ -z "$2" ]||filter+=" | select(.labels|has(\"group\")) | select(.labels.group|test(\".*$2.*\"; \"i\"))"
 shift 2
 ;;
--i|--instance)[ -z "$2" ]||filter="$filter | select(.labels.instance|test(\"$2\"; \"i\"))"
+-i|--instance)[ -z "$2" ]||filter+=" | select(.labels.instance|test(\"$2\"; \"i\"))"
 shift 2
 ;;
--a|--alertname)[ -z "$2" ]||filter="$filter | select(.labels.alertname|test(\"$2\"; \"i\"))"
+-a|--alertname)[ -z "$2" ]||filter+=" | select(.labels.alertname|test(\"$2\"; \"i\"))"
 shift 2
 ;;
--s|--summary)[ -z "$2" ]||filter="$filter | select(.annotations.summary? // \"\"|test(\"$2\"; \"i\"))"
+-s|--summary)[ -z "$2" ]||filter+=" | select(.annotations.summary? // \"\"|test(\"$2\"; \"i\"))"
 shift 2
 ;;
--n|--net)[ -z "$2" ]||filter="$filter | select(.labels.net? // \"\"|test(\"$2\"; \"i\"))"
+-n|--net)[ -z "$2" ]||filter+=" | select(.labels.net? // \"\"|test(\"$2\"; \"i\"))"
 shift 2
 ;;
 -q|--quiet)quiet=1&&shift;;
@@ -2568,6 +2568,7 @@ shift 2
 *)die "$(gettext "Unrecognized option"): $1"
 esac
 done
+debug "$filter"
 install jq
 local list
 list="$(curl -H "Authorization: Bearer $GRAFANA_TOKEN" "$GRAFANA_API/alertmanager/grafana/api/v2/alerts")"||die "$(gettext "Could not get alerts from Grafana!")"
@@ -3056,6 +3057,56 @@ printf '\n'
 printf '%-20s\t' "$user" "$uid" "$gid" "$home" "$sudo" "$login" "$from" "$time"
 printf '\n'
 done
+}
+sudo_info(){
+echo -e "username\tas UID\tas GID\tcommand"
+getent passwd $1|awk -F: '$3 >= 1000 && $3 < 60000 {print $1}'|while IFS= read -r user;do
+echo $user
+LANG=C sudo -lU "$user" 2>/dev/null|awk -v u="$user" '
+        /User .* may run the following commands/ { inlist=1; next }
+
+        inlist {
+            # Pattern: (UID : GID) FLAGS: COMMAND
+            if (match($0, /\(([^:()]+) *: *([^)]+)\)[[:space:]]*([^:]*):?[[:space:]]*(.*)/, a)) {
+                uid=a[1]
+                gid=a[2]
+                flags=a[3]
+                cmd=a[4]
+
+                # Strip NOPASSWD/PASSWD
+                gsub(/NOPASSWD|PASSWD/,"",flags)
+                gsub(/^[[:space:]]+|[[:space:]]+$/,"",flags)
+
+                # Skip if no command
+                if (cmd == "" || cmd ~ /^[[:space:]]*$/) next
+
+                # Skip redundant ALL ALL ALL
+                if (cmd == "ALL" && uid == "ALL" && gid == "ALL" && flags == "") next
+
+                print u "\t" uid "\t" gid "\t" cmd
+                next
+            }
+
+            # Pattern: (UID) FLAGS: COMMAND
+            if (match($0, /\(([^()]+)\)[[:space:]]*([^:]*):?[[:space:]]*(.*)/, a)) {
+                uid=a[1]
+                gid=uid
+                flags=a[2]
+                cmd=a[3]
+
+                # Strip NOPASSWD/PASSWD
+                gsub(/NOPASSWD|PASSWD/,"",flags)
+                gsub(/^[[:space:]]+|[[:space:]]+$/,"",flags)
+
+                # Skip if no command
+                if (cmd == "" || cmd ~ /^[[:space:]]*$/) next
+
+                print u "\t" uid "\t" gid "\t" cmd
+                next
+            }
+        }
+    '
+done|awk 'NF>=4'
 }
 uses_lvm(){
 is integer -narguments --max=0 -d $#
