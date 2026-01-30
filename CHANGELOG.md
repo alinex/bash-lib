@@ -5,7 +5,7 @@ But on release they will be merged with semantical versioning into the master br
 
 ## Development - v2.5.0
 
-- add [user_info](doc/function/user_info.md) and [sudo_info](doc/function/sudo_info.md)
+- add [user_info](doc/function/user_info.md), [sudo_info](doc/function/sudo_info.md) and [ssh_allowed](doc/function/ssh_allowed.md)
 - add [open_url](doc/function/open_url.md) to open url in browser
 - move environment settings into module with defaults and description
 - Bug Fixes: choice/task, remote bashlib, disk

@@ -447,13 +447,13 @@ files() {
 # The sudo column will show: no, all, specified.
 # Find more about the sudo rights using @sudo_info.
 #
-# Usage:    user_info [<user>]
+# Usage:    user_info [<user>]...
 # Output:   <tsv with header>
 #           User UID  GID  Home       SuDo Login                     From    Duration
 #           alex 1000 1000 /home/alex all  2026-01-13T07:01:09+01:00 0.0.0.0 still logged in
 user_info() {
     local user home from login logout time uid gid shell sudo info
-    getent passwd $1 | awk -F: '$3 >= 1000 && $3 < 60000 && $1 !~ /^snap_/ && $1 !~ /^(nobody|daemon|www-data|postgres|mysql|redis|git)/ {print $1}' | while IFS= read -r user; do
+    getent passwd "$@" | awk -F: '$3 >= 1000 && $3 < 60000 && $1 !~ /^snap_/ && $1 !~ /^(nobody|daemon|www-data|postgres|mysql|redis|git)/ {print $1}' | while IFS= read -r user; do
         IFS=: read -r _ _ uid gid _ home shell < <(getent passwd "$user")
         read -r _ _ from login logout < <(last -dw --time-format=iso -n 1 "$user")
         time="$(sed 's/.*(\|).*//g;s/+0\?/d /;s/:/h /;s/00/0/;s/\([0-9]\)$/\1m/' <<<"$logout")"
@@ -478,20 +478,46 @@ user_info() {
 #
 # This lists all allowed sudo commands for the user.
 #
-# Usage:    sudo_info [<user>]
+# Usage:    sudo_info [<user>]...
 # Output:   <tsv with header>
-#           username as UID as GID  command
+#           User     UID    GID     command
 #           alex     ALL            /usr/bin/openfortivpn
 #           alex     ALL    ALL     ALL
 sudo_info() {
-    echo -e "username\tas UID\tas GID\tcommand"
-
-    getent passwd $1 | awk -F: '$3 >= 1000 && $3 < 60000 {print $1}' |
+    local user line
+    printf '%-20s\t' "$(gettext User)" "$(gettext UID)" "$(gettext GID)" "$(gettext Command)"
+    printf '\n'
+    getent passwd "$@" | awk -F: '$3 >= 1000 && $3 < 60000 {print $1}' |
         while IFS= read -r user; do
             LANG=C sudo -lU "$user" 2>/dev/null | sed '1,/User .* may run the following commands/d' |
                 while read -r line; do
                     sed 's/(\([A-Z0-9]*\) *:\? *\([A-Z0-9]*\)\?) * \(NOPASSWD:\)\? */'"$user"'\t\1\t\2\t/' <<<"$line"
                 done
+        done
+}
+
+# Get allowed ssh keys
+#
+# This lists all allowed ssh keys for the users.
+#
+# Usage:    sudo_info [<user>]...
+# Output:   <tsv with header>
+#           User                	Comment             	            Type      Key
+#           operator            	alexander.schilling@my-company.com	ssh-rsa   AAAAB3NzaC1yc????
+ssh_allowed() {
+    local user file home
+    printf '%-20s\t' "$(gettext User)" "$(gettext Comment)" "$(gettext Type)" "$(gettext Key)"
+    printf '\n'
+    getent passwd "$@" | awk -F: '$3 >= 1000 && $3 < 60000 {print $1 "\t" $6}' |
+        while IFS=$'\t' read -r user home; do
+            for file in authorized_keys authorized_keys2; do
+                file="$home/.ssh/$file"
+                list="$(sudo sed 's/[[:space:]][[:space:]]*#.*//' $file 2>/dev/null | grep -v '^$')" || continue
+                while read -r type key comment; do
+                    printf '%-20s\t' "$user" "$comment" "$type" "$key"
+                    printf '\n'
+                done <<<"$list"
+            done
         done
 }
 

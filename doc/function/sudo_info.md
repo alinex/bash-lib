@@ -1,17 +1,17 @@
-# sudo_data
+# sudo_info
 
 ## Get sudo information
 
 ### Usage
 
 ```bash
-sudo_data [<user>]
+sudo_info [<user>]...
 ```
 
 ### Output (stdout)
 
 `<tsv with header>`
-username as UID as GID  command
+User     UID    GID     command
 alex     ALL            /usr/bin/openfortivpn
 alex     ALL    ALL     ALL
 

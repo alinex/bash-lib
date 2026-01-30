@@ -412,8 +412,9 @@ Module with operating system specific helper functions.
 | [`disk`](function/disk.md) | File system analyzation |
 | [`disk_free`](function/disk_free.md) | Deprecated: Disk free with visual display |
 | [`files`](function/files.md) | Show big directory and files |
-| [`user_data`](function/user_data.md) | Get information about user |
-| [`sudo_data`](function/sudo_data.md) | Get sudo information |
+| [`user_info`](function/user_info.md) | Get information about user |
+| [`sudo_info`](function/sudo_info.md) | Get sudo information |
+| [`ssh_allowed`](function/ssh_allowed.md) | Get allowed ssh keys |
 | [`uses_lvm`](function/uses_lvm.md) | Check if LVM is used |
 
 ### Process Module

@@ -1,11 +1,11 @@
-# user_data
+# user_info
 
 ## Get information about user
 
 ### Usage
 
 ```bash
-user_data [<user>]
+user_info [<user>]...
 ```
 
 ### Output (stdout)
@@ -19,5 +19,5 @@ alex 1000 1000 /home/alex all  2026-01-13T07:01:09+01:00 0.0.0.0 still logged in
 
 
 The sudo column will show: no, all, specified.
-Find more about the sudo rights using [`sudo_data`](sudo_data.md).
+Find more about the sudo rights using [`sudo_info`](sudo_info.md).
 

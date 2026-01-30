@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-29 13:24+0100\n"
+"POT-Creation-Date: 2026-01-30 14:32+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -249,7 +249,7 @@ msgstr "Keine lokale DNS Liste gefunden, bitte herunterladen."
 msgid "Use $list from $time."
 msgstr "Benutze $list vom $time."
 
-#: module/os:288
+#: module/os:288 module/os:509
 msgid "Type"
 msgstr "Typ"
 
@@ -297,15 +297,15 @@ msgstr "Mount"
 msgid "Inodes"
 msgstr "Inodes"
 
-#: module/os:470
+#: module/os:470 module/os:488 module/os:509
 msgid "User"
 msgstr "Nutzer"
 
-#: module/os:470
+#: module/os:470 module/os:488
 msgid "UID"
 msgstr "UID"
 
-#: module/os:470
+#: module/os:470 module/os:488
 msgid "GID"
 msgstr "GID"
 
@@ -328,6 +328,18 @@ msgstr "Von"
 #: module/os:470
 msgid "Duration"
 msgstr "Dauer"
+
+#: module/os:488
+msgid "Command"
+msgstr "Befehl"
+
+#: module/os:509
+msgid "Comment"
+msgstr "Kommentar"
+
+#: module/os:509
+msgid "Key"
+msgstr "Schlüssel"
 
 #: module/network:56
 msgid "IP\\tInterface"
