@@ -290,7 +290,7 @@ for folder in config core module extra; do
                     [ -z "$variables" ] || echo -e "\n### Variables\n$variables" | md_optimize
                     [ -z "$globals" ] || echo -e "\n### Globals\n$globals" | md_optimize
                     [ -z "$files" ] || echo -e "\n### Files\n$files" | md_optimize
-                    [ -z "$tty" ] || echo -e "\n### TTY (direct)\n\n\`\`\`bash${tty}\n\`\`\`"
+                    [ -z "$tty" ] || echo -e "\n### TTY (direct)\n${tty}" | md_optimize
                     [ -z "$output" ] || echo -e "\n### Output (stdout)\n$output" | md_optimize
                     [ -z "$error" ] || echo -e "\n### Error (stderr)\n$error" | md_optimize
                     [ -z "$return" ] || echo -e "\n### Return (exit code)\n$return" | md_optimize

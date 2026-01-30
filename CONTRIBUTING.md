@@ -600,7 +600,7 @@ Lines starting with a keyword will be used specific description parts and the in
 - `Variable(s)` - used external variables -> **markdown** (mostly as list)
 - `Global(s)` - global variables like configuration settings -> **markdown** (mostly as list)
 - `File(s)` - files which were read or written -> **markdown** (mostly as list)
-- `TTY` - input and output -> displayed as **pre formatted** text box
+- `TTY` - input and output -> **markdown**
 - `Output` - through STDOUT -> **markdown**
 - `Error(s)` - through STDERR -> **markdown**
 - `Return(s)` - return value on specific conditions -> **markdown** (mostly as list)
