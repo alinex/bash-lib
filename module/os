@@ -449,8 +449,10 @@ files() {
 #
 # Usage:    user_info [<user>]...
 # Output:   <tsv with header>
+#           ```text
 #           User UID  GID  Home       SuDo Login                     From    Duration
 #           alex 1000 1000 /home/alex all  2026-01-13T07:01:09+01:00 0.0.0.0 still logged in
+#           ````
 user_info() {
     local user home from login logout time uid gid shell sudo info
     getent passwd "$@" | awk -F: '$3 >= 1000 && $3 < 60000 && $1 !~ /^snap_/ && $1 !~ /^(nobody|daemon|www-data|postgres|mysql|redis|git)/ {print $1}' | while IFS= read -r user; do

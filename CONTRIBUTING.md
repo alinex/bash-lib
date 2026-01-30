@@ -428,7 +428,7 @@ bats core module
 
 #### CI Run in GitLab
 
-And the last test will be within the build pipeline after submitting something to gitlab.com. Therefor you have to do nothing gitlab-ci.yml will run `./test ci` for that and will write test results which will be shown in the GitLab pipeline under the "Test" tab.
+Sorry, we had to remove this because it takes to much time in the free GitLab plan to run all the tests.
 
 ### 📝 Linting with Shellcheck
 
