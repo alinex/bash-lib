@@ -12,6 +12,7 @@ user_info [<user>]...
 
 `<tsv with header>`
 
+
 ```text
 User UID  GID  Home       SuDo Login                     From    Duration
 alex 1000 1000 /home/alex all  2026-01-13T07:01:09+01:00 0.0.0.0 still logged in

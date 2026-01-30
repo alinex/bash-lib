@@ -20,12 +20,10 @@ T, timeout <duration>    # timeout till default selection as seconds or duration
 
 ### TTY (direct)
 
-```bash
-[<title>]
-<list>
+[`<title>`]
+`<list>`
 ...
-<question> <key>
-```
+`<question>` `<key>`
 
 ### Output (stdout)
 

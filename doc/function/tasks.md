@@ -22,14 +22,12 @@ T, timeout <sec>             # timeout till default selection
 
 ### TTY (direct)
 
-```bash
 Nächste Schritte
    1) Analyse einzelner Partitionen
    2) Docker aufräumen mit etwa 206MB unter /data
    3) Remote Host Console (interaktiv)
    x) Beenden
 Wähle eine der obigen Optionen: [1]
-```
 
 ### Examples
 

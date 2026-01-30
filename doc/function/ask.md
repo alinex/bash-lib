@@ -19,10 +19,8 @@ T, timeout <duration>    # time till default is used
 
 ### TTY (direct)
 
-```bash
-<question> <valid characters>...
-# input <keys> printed if valid
-```
+`<question>` `<valid characters>`...
+# input `<keys>` printed if valid
 
 ### Output (stdout)
 

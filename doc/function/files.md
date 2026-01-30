@@ -12,12 +12,12 @@ files interactive <path>
 ### Options
 
 ```bash
-p, percent <limit>
+-p, --percent <limit>
 ```
 
 ### Output (stdout)
 
-`<size human>`	`<path>` for `big`
+For `files big`: `<size human>	<path>`
 
 
 ### Description

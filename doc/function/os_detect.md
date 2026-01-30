@@ -1,6 +1,6 @@
 # os_detect
 
-## Deprecates: OS detection
+## Deprecated: OS detection
 
 ### Description
 

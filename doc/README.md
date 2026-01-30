@@ -405,9 +405,9 @@ Module with operating system specific helper functions.
 
 | Variable/Function | Description |
 | --- | --- |
-| ``$MOUNT_COLOR_LIMIT`` | Array: Color limits per mount (regex critical error warn ok) used in [`df`](functiondf.md) |
+| ``$MOUNT_COLOR_LIMIT`` | Array: Color limits per mount (regex critical error warn ok) used in [`disk`](functiondisk.md) |
 | [`os`](function/os.md) | Detect OS settings and Hardware |
-| [`os_detect`](function/os_detect.md) | Deprecates: OS detection |
+| [`os_detect`](function/os_detect.md) | Deprecated: OS detection |
 | [`bios`](function/bios.md) | Hardware description |
 | [`disk`](function/disk.md) | File system analyzation |
 | [`disk_free`](function/disk_free.md) | Deprecated: Disk free with visual display |

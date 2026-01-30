@@ -18,9 +18,7 @@ a, abort                 # let the timeout abort by key press
 
 ### TTY (direct)
 
-```bash
-<question> <key>
-```
+`<question>` `<key>`
 
 ### Examples
 

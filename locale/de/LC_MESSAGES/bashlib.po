@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-30 20:31+0100\n"
+"POT-Creation-Date: 2026-01-30 21:45+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,8 +17,8 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: core/misc:134 core/validator:74 core/array:129 module/os:231 module/os:344
-#: module/os:418 module/network:24 module/trivy:116 module/compress:44
+#: core/misc:134 core/validator:74 core/array:129 module/os:235 module/os:348
+#: module/os:422 module/network:24 module/trivy:116 module/compress:44
 #: module/monitoring:166 module/input:31 module/input:86 module/input:194
 #: module/input:447 module/input:660 module/log:63 module/process:359
 #: module/process:407 module/process:490 module/process:637 module/remote:84
@@ -249,95 +249,95 @@ msgstr "Keine lokale DNS Liste gefunden, bitte herunterladen."
 msgid "Use $list from $time."
 msgstr "Benutze $list vom $time."
 
-#: module/os:288 module/os:511
+#: module/os:292 module/os:522
 msgid "Type"
 msgstr "Typ"
 
-#: module/os:288
+#: module/os:292
 msgid "Source"
 msgstr "Quelle"
 
-#: module/os:288 module/os:298
+#: module/os:292 module/os:302
 msgid "Total"
 msgstr "Gesamt"
 
-#: module/os:288 module/os:298
+#: module/os:292 module/os:302
 msgid "Used"
 msgstr "Benutzt"
 
-#: module/os:288 module/os:298
+#: module/os:292 module/os:302
 msgid "Avail"
 msgstr "Frei"
 
-#: module/os:288 module/os:298
+#: module/os:292 module/os:302
 msgid "Percent"
 msgstr "Prozent"
 
-#: module/os:288
+#: module/os:292
 msgid "I-Total"
 msgstr "I-Gesamt"
 
-#: module/os:288
+#: module/os:292
 msgid "I-Used"
 msgstr "I-Benutzt"
 
-#: module/os:288
+#: module/os:292
 msgid "I-Avail"
 msgstr "I-Frei"
 
-#: module/os:288
+#: module/os:292
 msgid "I-Percent"
 msgstr "I-Proz."
 
-#: module/os:288 module/os:298
+#: module/os:292 module/os:302
 msgid "Mount"
 msgstr "Mount"
 
-#: module/os:298
+#: module/os:302
 msgid "Inodes"
 msgstr "Inodes"
 
-#: module/os:472 module/os:490 module/os:511
+#: module/os:477 module/os:498 module/os:522
 msgid "User"
 msgstr "Nutzer"
 
-#: module/os:472 module/os:490
+#: module/os:477 module/os:498
 msgid "UID"
 msgstr "UID"
 
-#: module/os:472 module/os:490
+#: module/os:477 module/os:498
 msgid "GID"
 msgstr "GID"
 
-#: module/os:472
+#: module/os:477
 msgid "Home"
 msgstr "Home"
 
-#: module/os:472
+#: module/os:477
 msgid "SuDo"
 msgstr "SuDo"
 
-#: module/os:472
+#: module/os:477
 msgid "Login"
 msgstr "Login"
 
-#: module/os:472
+#: module/os:477
 msgid "From"
 msgstr "Von"
 
-#: module/os:472
+#: module/os:477
 msgid "Duration"
 msgstr "Dauer"
 
-#: module/os:490
+#: module/os:498
 msgid "Command"
 msgstr "Befehl"
 
-#: module/os:511
+#: module/os:522
 msgid "Comment"
 msgstr "Kommentar"
 
-#: module/os:511
+#: module/os:522
 msgid "Key"
 msgstr "Schlüssel"
 

@@ -18,10 +18,8 @@ T, timeout <duration>    # time after which the default will be used
 
 ### TTY (direct)
 
-```bash
-<question> [<default>]? <answer>
+`<question>` [`<default>`]? `<answer>`
 # read single characters
-```
 
 ### Return (exit code)
 

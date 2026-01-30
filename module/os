@@ -17,22 +17,24 @@ declare -A _os_detected
 #
 # The following formats are possible:
 #
-# - data - all values with `<name>\t<value>`
-# - info - show human readable paragraph
-# - os - operating system type like Linux, Solaris, Windows
-# - base - base distribution type like Debian, ArchLinux
-# - base_revision_name - (optional)
-# - base_revision_number - (optional)
-# - distribution - real distribution name
-# - revision_number - distribution number
-# - revision_name - version code name
-# - kernel - version number of kernel like 6.8.0-87-generic
-# - architecture - x86_64, i686, i386, armv7l, aarch64...
-# - cpu_model - cpu name
-# - cpu_num - number of cpus
-# - memory - hardware memory in GB
-# - machine_id
-# - virtual_machine - `false` or `true`
+# - `data` - all values with `<name>\t<value>`
+# - `info` - show human readable paragraph
+# - `os` - operating system type like Linux, Solaris, Windows
+# - `base` - base distribution type like Debian, ArchLinux
+# - `base_revision_name` - (optional)
+# - `base_revision_number` - (optional)
+# - `distribution` - real distribution name
+# - `revision_number` - distribution number
+# - `revision_name` - version code name
+# - `kernel` - version number of kernel like 6.8.0-87-generic
+# - `architecture` - x86_64, i686, i386, armv7l, aarch64...
+# - `cpu_model` - cpu name
+# - `cpu_num` - number of cpus
+# - `memory` - hardware memory in GB
+# - `machine_id`
+# - `virtual_machine` - `false` or `true`
+#
+# It uses an internal cache so the analyzation runs only once, also if multiple values are queried one after the other.
 #
 # Usage:    os_detect <format>
 # Output:   - <tsv-table> for data
@@ -134,7 +136,7 @@ os() {
     esac
 }
 
-# Deprecates: OS detection
+# Deprecated: OS detection
 # Renamed to @os
 os_detect() {
     _deprecated "Use os now"
@@ -159,8 +161,10 @@ os_detect() {
 # Port SIM card
 # ```
 #
+# It needs `sudo dmidecode *` rights to analyze this information.
+#
 # Usage:    bios
-# Output:   List with type as first word and details (type specific) behind
+# Output:   List with <type> as first word and details (type specific) behind
 bios() {
     sudo dmidecode -t 1 | awk '
     /Product Name:/ { prod=$0; sub(".*Product Name: *","",prod) }
@@ -192,20 +196,20 @@ bios() {
 
 use config/local
 
-# Array: Color limits per mount (regex critical error warn ok) used in @df
+# Array: Color limits per mount (regex critical error warn ok) used in @disk
 MOUNT_COLOR_LIMIT="${MOUNT_COLOR_LIMIT:=('.*' 100 90 80 50)}"
 
 # File system analyzation
 #
 # The following formats are defined:
 #
-# - list    only list mounts
-# - data    all data as tsv table
-# - console colored visual output
+# - `list`    only list mounts
+# - `data`    all data as tsv table
+# - `console` colored visual output
 #
 # Usage:    disk [options] <format> [<path>]...
-# Options:  l, local    # show only local file systems
-#           f, free [<operator>]<percent%|bytes>
+# Options:  -l, --local                                 # show only local file systems
+#           -f, --free [<operator>]<percent%|bytes>     # filter only matching file systems
 disk() {
     # parameter parsing
     local opt="" format free_operator free_percent free_bytes
@@ -405,8 +409,8 @@ disk_free() {
 #
 # Usage:    files big <path>
 #           files interactive <path>
-# Options:  p, percent <limit>
-# Output:   <size human>\t<path> for `big`
+# Options:  -p, --percent <limit>
+# Output:   For `files big`: `<size human>\t<path>`
 files() {
     # parameter parsing
     local percent=10
@@ -449,6 +453,7 @@ files() {
 #
 # Usage:    user_info [<user>]...
 # Output:   <tsv with header>
+#
 #           ```text
 #           User UID  GID  Home       SuDo Login                     From    Duration
 #           alex 1000 1000 /home/alex all  2026-01-13T07:01:09+01:00 0.0.0.0 still logged in
@@ -507,8 +512,11 @@ sudo_info() {
 #
 # Usage:    sudo_info [<user>]...
 # Output:   <tsv with header>
+#
+#           ```text
 #           User                	Comment             	            Type      Key
-#           operator            	alexander.schilling@my-company.com	ssh-rsa   AAAAB3NzaC1yc????
+#           operator            	alexander.schilling@my-company.com	ssh-rsa   AAAAB3NzaC1yc...
+#           ```
 ssh_allowed() {
     local user file home
     printf '%-20s\t' "$(gettext User)" "$(gettext Comment)" "$(gettext Type)" "$(gettext Key)"
@@ -533,8 +541,8 @@ ssh_allowed() {
 # Check if LVM is used
 #
 # Usage:    uses_lvm
-# Return:   0 for uses LVM
-#           1 if not
+# Return:   - 0 if LVM is used
+#           - 1 if not
 uses_lvm() {
     is integer --name=arguments --max=0 --die -- $#
     sudo bash -lc 'command -v vgs' >/dev/null &&      # installed

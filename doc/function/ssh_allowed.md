@@ -11,8 +11,12 @@ sudo_info [<user>]...
 ### Output (stdout)
 
 `<tsv with header>`
+
+
+```text
 User                	Comment             	            Type      Key
-operator            	alexander.schilling@my-company.com	ssh-rsa   AAAAB3NzaC1yc????
+operator            	alexander.schilling@my-company.com	ssh-rsa   AAAAB3NzaC1yc...
+```
 
 
 ### Description

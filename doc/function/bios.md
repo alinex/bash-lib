@@ -10,7 +10,7 @@ bios
 
 ### Output (stdout)
 
-List with type as first word and details (type specific) behind
+List with `<type>` as first word and details (type specific) behind
 
 
 ### Description
@@ -33,4 +33,6 @@ Port HDMI Port
 Port Speaker Port
 Port SIM card
 ```
+
+It needs `sudo dmidecode *` rights to analyze this information.
 

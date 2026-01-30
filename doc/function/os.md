@@ -19,20 +19,22 @@ os_detect <format>
 
 The following formats are possible:
 
-- data - all values with `<name>	<value>`
-- info - show human readable paragraph
-- os - operating system type like Linux, Solaris, Windows
-- base - base distribution type like Debian, ArchLinux
-- base_revision_name - (optional)
-- base_revision_number - (optional)
-- distribution - real distribution name
-- revision_number - distribution number
-- revision_name - version code name
-- kernel - version number of kernel like 6.8.0-87-generic
-- architecture - x86_64, i686, i386, armv7l, aarch64...
-- cpu_model - cpu name
-- cpu_num - number of cpus
-- memory - hardware memory in GB
-- machine_id
-- virtual_machine - `false` or `true`
+- `data` - all values with `<name>	<value>`
+- `info` - show human readable paragraph
+- `os` - operating system type like Linux, Solaris, Windows
+- `base` - base distribution type like Debian, ArchLinux
+- `base_revision_name` - (optional)
+- `base_revision_number` - (optional)
+- `distribution` - real distribution name
+- `revision_number` - distribution number
+- `revision_name` - version code name
+- `kernel` - version number of kernel like 6.8.0-87-generic
+- `architecture` - x86_64, i686, i386, armv7l, aarch64...
+- `cpu_model` - cpu name
+- `cpu_num` - number of cpus
+- `memory` - hardware memory in GB
+- `machine_id`
+- `virtual_machine` - `false` or `true`
+
+It uses an internal cache so the analyzation runs only once, also if multiple values are queried one after the other.
 
