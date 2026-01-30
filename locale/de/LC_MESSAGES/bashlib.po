@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-30 14:32+0100\n"
+"POT-Creation-Date: 2026-01-30 15:29+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,7 +18,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 
 #: core/misc:134 core/validator:74 core/array:129 module/os:231 module/os:344
-#: module/os:418 module/network:24 module/trivy:114 module/compress:44
+#: module/os:418 module/network:24 module/trivy:116 module/compress:44
 #: module/monitoring:166 module/input:31 module/input:86 module/input:194
 #: module/input:447 module/input:660 module/log:63 module/process:359
 #: module/process:407 module/process:490 module/process:637 module/remote:84
@@ -345,37 +345,37 @@ msgstr "Schlüssel"
 msgid "IP\\tInterface"
 msgstr "IP\\tSchnittstelle"
 
-#: module/trivy:129
+#: module/trivy:131
 #, sh-format
 msgid "Start $command scanning with trivy V${version}..."
 msgstr "Starte $command Scanner mit trivy V${version}..."
 
-#: module/trivy:163
+#: module/trivy:165
 msgid "Optimize JSON structure for splitting..."
 msgstr "Optimiere JSON Struktur für das Splitten..."
 
-#: module/trivy:165
+#: module/trivy:167
 msgid "Splitting JSON into single reports..."
 msgstr "Splitte JSON in einzelne Reports..."
 
-#: module/trivy:178
+#: module/trivy:180
 #, sh-format
 msgid "Found $found vulnerabilities."
 msgstr "$found Sicherheitsprobleme gefunden"
 
-#: module/trivy:202
+#: module/trivy:204
 msgid "Build queue to optimize reports..."
 msgstr "Aufbau der Warteschlange für die Report Generierung..."
 
-#: module/trivy:206
+#: module/trivy:208
 msgid "Run queue to optimize reports..."
 msgstr "Start der Warteschlange zur Report Generierung..."
 
-#: module/trivy:210
+#: module/trivy:212
 msgid "Create summaries..."
 msgstr "Erstelle Zusammenfassungen..."
 
-#: module/trivy:320
+#: module/trivy:322
 #, sh-format
 msgid ""
 "Downgrade $severity -> MEDIUM because it was published less than 3 days ago"
@@ -383,7 +383,7 @@ msgstr ""
 "Herunterstufen $severity -> MEDIUM, weil diese Lücke erst in den letzten 3 "
 "Tagen veröffentlicht wurde"
 
-#: module/trivy:329
+#: module/trivy:331
 msgid ""
 "Add information of known exploits and cancel downgrades in case of just "
 "published"
@@ -391,64 +391,64 @@ msgstr ""
 "Füge Informationen zu bekannten Exploits hinzu und streiche mögliche "
 "Herunterstufungen durch kürzliches publizieren"
 
-#: module/trivy:338
+#: module/trivy:340
 #, sh-format
 msgid "Downgrade $severity -> MEDIUM because it is a dev dependency"
 msgstr ""
 "Herunterstufen $severity -> MEDIUM, weil es sich um eine reine "
 "Entwicklungsabhängigkeit handelt"
 
-#: module/trivy:383
+#: module/trivy:385
 #, sh-format
 msgid "Downgrade $severity -> MEDIUM because of Jira status $deploy"
 msgstr "Herunterstufen $severity -> MEDIUM, durch Jira Status $deploy"
 
-#: module/trivy:384 module/trivy:447
+#: module/trivy:386 module/trivy:450
 #, sh-format
 msgid "$id at $target"
 msgstr "$id in $target"
 
-#: module/trivy:446
+#: module/trivy:449
 msgid "Add information from Jira"
 msgstr "Hinzufügen der Jira Informationen"
 
-#: module/trivy:488
+#: module/trivy:491
 #, sh-format
 msgid "Rating: $severity (CVSS rating $value)"
 msgstr "Einstufung: $severity (CVSS Wert $value)"
 
-#: module/trivy:490
+#: module/trivy:493
 #, sh-format
 msgid "Status: Fixed from version $value $fixStatus"
 msgstr "Status: Gelöst in Version $value $fixStatus"
 
-#: module/trivy:494
+#: module/trivy:497
 #, sh-format
 msgid "Date:   Vulnerability known since $human ($value days ago)"
 msgstr "Datum:  Sicherheitslücke bekannt seit $human (vor $value Tagen)"
 
-#: module/trivy:496
+#: module/trivy:499
 #, sh-format
 msgid "Exploit known since $exploitDate at $exploitVendor $exploitProduct"
 msgstr "Exploit bekannt seit $exploitDate bei $exploitVendor $exploitProduct"
 
-#: module/trivy:499
+#: module/trivy:502
 msgid "Responsible"
 msgstr "Zuständig"
 
-#: module/trivy:500
+#: module/trivy:503
 msgid "Deploy"
 msgstr "Deploy"
 
-#: module/trivy:501
+#: module/trivy:504
 msgid "Last comments"
 msgstr "Letzte Kommentare"
 
-#: module/trivy:503
+#: module/trivy:506
 msgid "Sources"
 msgstr "Quellen"
 
-#: module/trivy:510
+#: module/trivy:513
 msgid "Links"
 msgstr "Links"
 

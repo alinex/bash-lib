@@ -494,6 +494,7 @@ Run trivy security scan and analyze results.
 | ``$TRIVY_JIRA_FIELD_APPROVAL`` | Field name for approval status (if trivy vulnerabilities are managed using Jira) |
 | ``$TRIVY_JIRA_APPROVAL_TEMP`` | Value in approval field for "allowed for 30 days" (if trivy vulnerabilities are managed using Jira) |
 | ``$TRIVY_JIRA_APPROVAL_IRRELEVANT`` | Value in approval field for irrelevant/always allowed (if trivy vulnerabilities are managed using Jira) |
+| ``$TRIVY_JIRA_REMOVE_SOURCE_OLDER_MONTHS`` | On updates remove entries older than (default: 6 months) |
 | [`trivy`](function/trivy.md) | Run a trivy security analysis. |
 
 ## Extra

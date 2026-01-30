@@ -100,6 +100,8 @@ IP_SEGMENT_PATTERN=(
 #TRIVY_JIRA_APPROVAL_TEMP="Ok für 30 Tage"
 # Value in approval field for irrelevant/always allowed (if trivy vulnerabilities are managed using Jira)
 #TRIVY_JIRA_APPROVAL_IRRELEVANT="Irrelevant"
+# On updates remove entries older than (default: 6 months)
+#TRIVY_JIRA_REMOVE_SOURCE_OLDER_MONTHS=6
 
 ######################################################################################
 ### Other API A-Z

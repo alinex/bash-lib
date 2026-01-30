@@ -4016,6 +4016,7 @@ esac
 TRIVY_DEFAULT_TIMEOUT=${TRIVY_DEFAULT_TIMEOUT:-60m}
 TRIVY_ROOT_TIMEOUT=${TRIVY_ROOT_TIMEOUT:-60m}
 TRIVY_ROOT_EXCLUDE="${TRIVY_ROOT_EXCLUDE:-/mnt /opt/docker **/log/ **/logs/}"
+TRIVY_JIRA_REMOVE_SOURCE_OLDER_MONTHS=${TRIVY_JIRA_REMOVE_SOURCE_OLDER_MONTHS:-6}
 TRIVY_EXPLOITS_URL=https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json
 trivy(){
 local exclude clean progress opt="--exit-code 0 --no-progress --skip-version-check -f json"
@@ -4274,7 +4275,7 @@ expired=1
 fi
 fi
 if ! [ -n "$created" ];then
-local old new fields update
+local old new fields update cutoff
 old="$(jira json jira get description adf)"
 new="$title"$'\n\n'"$description"
 if [[ $new != "$old" ]];then
@@ -4282,7 +4283,8 @@ jira json fields set description adf "$new"
 update=1
 fi
 old="$(jira json jira get "${_trivy_jira[field_sources]}" md)"
-new="$(printf '%s\n%s' "$old" "$(date +%Y-%m) > $sourceLine"|sed -n '/>/p'|sort -u -t'>' -k1,1r -k2,2)"
+cutoff=$(date -d "$TRIVY_JIRA_REMOVE_SOURCE_OLDER_MONTHS months ago" +%Y-%m)
+new="$(printf '%s\n%s' "$old" "$(date +%Y-%m) > $sourceLine"|sed -n '/>/p'|sort -u -t'>' -k1,1r -k2,2|awk -v cutoff="$cutoff" '$1 >= cutoff {print}')"
 if [[ $new != "$old" ]];then
 jira json fields set "${_trivy_jira[field_sources]}" adf "$new"
 update=1
