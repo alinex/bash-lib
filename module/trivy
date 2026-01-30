@@ -401,7 +401,7 @@ _trivy_report() {
             fi
             # update sources
             old="$(jira json jira get "${_trivy_jira[field_sources]}" md)"
-            new="$(printf '%s\n%s' "$old" "$(date +%Y-%m) > $sourceLine" | sed -n '/>/p' | sort -t'>' -k1,1r -k2,2)"
+            new="$(printf '%s\n%s' "$old" "$(date +%Y-%m) > $sourceLine" | sed -n '/>/p' | sort -u -t'>' -k1,1r -k2,2)"
             if [[ "$new" != "$old" ]]; then
                 jira json fields set "${_trivy_jira[field_sources]}" adf "$new"
                 update=1
