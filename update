@@ -156,9 +156,9 @@ for folder in config core module extra; do
                         }
                     }
                 }' "$file" |
-                sed -E 's#(^|[^[:alnum:]_.-])@([[:alnum:]_]+)#\1[`\2`](function\2.md)#g' |
-                sed -E 's#(^|[^[:alnum:]_.-])&([[:alnum:]_]+)(\#[[:alnum:]_]+)?#\1[`\2`](example/\2.md\3)#g' |
-                sed -E 's#(^|[^[:alnum:]_.-])&([[:alnum:]_]+)#\1[`\2`](example/\2.md)#g' |
+                sed -E 's#(^|[^[:alnum:]_.-])@([[:alnum:]_]+)(\[(.*)\])?#\1[`\2\4`](function\2.md)#g' |
+                sed -E 's#(^|[^[:alnum:]_.-])&([[:alnum:]_]+)(\#[[:alnum:]_]+)?(\[(.*)\])?#\1[`\2\4`](example/\2.md\3)#g' |
+                sed -E 's#(^|[^[:alnum:]_.-])&([[:alnum:]_]+)(\[(.*)\])?#\1[`\2\4`](example/\2.md)#g' |
                 sed -E 's#(^|[^[:alnum:]_.-])(\$[[:alnum:]_]+)#\1`\2`#g' \
                     >>"$BASHLIB_HOME"/doc/README.md
             # Get function names and start lines using grep and awk
@@ -289,16 +289,16 @@ for folder in config core module extra; do
                     [ -z "$options" ] || echo -e "\n### Options\n\n\`\`\`bash${options}\n\`\`\`"
                     [ -z "$variables" ] || echo -e "\n### Variables\n$variables" | md_optimize
                     [ -z "$globals" ] || echo -e "\n### Globals\n$globals" | md_optimize
-                    [ -z "$tty" ] || echo -e "\n### TTY (direct)\n\n\`\`\`bash${tty}\n\`\`\`"
                     [ -z "$files" ] || echo -e "\n### Files\n$files" | md_optimize
+                    [ -z "$tty" ] || echo -e "\n### TTY (direct)\n\n\`\`\`bash${tty}\n\`\`\`"
                     [ -z "$output" ] || echo -e "\n### Output (stdout)\n$output" | md_optimize
                     [ -z "$error" ] || echo -e "\n### Error (stderr)\n$error" | md_optimize
                     [ -z "$return" ] || echo -e "\n### Return (exit code)\n$return" | md_optimize
                     [ -z "$example" ] || echo -e "\n### Examples\n$example" | md_optimize
                     [ -z "${description//[[:space:]]/}" ] || echo -e "\n### Description\n$description" | md_optimize
                 ) |
-                    sed -E 's#(^|[^[:alnum:]_.-])@([[:alnum:]_]+)#\1[`\2`](\2.md)#g' |
-                    sed -E 's#(^|[^[:alnum:]_.-])&([[:alnum:]_]+)(\#[[:alnum:]_]+)?#\1[`\2`](../example/\2.md\3)#g' |
+                    sed -E 's#(^|[^[:alnum:]_.-])@([[:alnum:]_]+)(\[(.*)\])?#\1[`\2\4`](\2.md)#g' |
+                    sed -E 's#(^|[^[:alnum:]_.-])&([[:alnum:]_]+)(\#[[:alnum:]_]+)?(\[(.*)\])?#\1[`\2\4`](../example/\2.md\3)#g' |
                     sed -E 's#(^|[^[:alnum:]_.-])(\$[[:alnum:]_]+)#\1`\2`#g' \
                         >"$BASHLIB_HOME"/doc/function/"$funcName".md
             done <<<"$function_lines"

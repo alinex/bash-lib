@@ -16,6 +16,10 @@ d, default <string|int|variable>  # default command to start
 T, timeout <sec>             # timeout till default selection
 ```
 
+### Files
+
+- `/dev/shm/<program>_tasks_<pid>` will be used while dynamically generating the tasks list and removed afterwards
+
 ### TTY (direct)
 
 ```bash
@@ -26,10 +30,6 @@ Nächste Schritte
    x) Beenden
 Wähle eine der obigen Optionen: [1]
 ```
-
-### Files
-
-- `/dev/shm/<program>_tasks_<pid>` will be used while dynamically generating the tasks list and removed afterwards
 
 ### Examples
 

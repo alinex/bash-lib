@@ -482,9 +482,12 @@ user_info() {
 #
 # Usage:    sudo_info [<user>]...
 # Output:   <tsv with header>
+#
+#           ```text
 #           User     UID    GID     command
 #           alex     ALL            /usr/bin/openfortivpn
 #           alex     ALL    ALL     ALL
+#           ```
 sudo_info() {
     local user line
     printf '%-20s\t' "$(gettext User)" "$(gettext UID)" "$(gettext GID)" "$(gettext Command)"
