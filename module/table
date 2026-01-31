@@ -128,11 +128,15 @@ tsv() {
         [ ! "$3" = "numeric" ] || type=n
         [[ -n "$idx" ]] || die "Usage: table sort <column> [numeric]"
         # sort
-        (
-            IFS="$separator"
-            printf '%s\n' "${cols[*]}"
-        )
-        tail -n +2 <<<"$input" | sort -t $'\t' "-k${col},${col}${type}"
+        if is true -- "$withHeader"; then
+            (
+                IFS="$separator"
+                printf '%s\n' "${cols[*]}"
+            )
+            tail -n +2 <<<"$input" | sort -t $'\t' "-k${col},${col}${type}"
+        else
+            sort -t $'\t' "-k${col},${col}${type}" <<<"$input"
+        fi
         ;;
     reverse)
         if is true -- "$withHeader"; then

@@ -105,7 +105,7 @@ EOT
     assert_success
 }
 # bats test_tags=tsv
-@test "tsv: sort col1" {
+@test "tsv: sort col1 (with header)" {
     in="$(cat <<'EOT'
 col1	col2
 4	four
@@ -118,6 +118,26 @@ col1	col2
 10	ten
 4	four
 5	five
+EOT
+)"
+    run bats_pipe echo "$in" \| tsv --with-header sort col1
+    assert_output "$out"
+    assert_success
+}
+# bats test_tags=tsv
+@test "tsv: sort col1" {
+    in="$(cat <<'EOT'
+col1	col2
+4	four
+5	five
+10	ten
+EOT
+)"
+    out="$(cat <<'EOT'
+10	ten
+4	four
+5	five
+col1	col2
 EOT
 )"
     run bats_pipe echo "$in" \| tsv sort col1
