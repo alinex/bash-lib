@@ -324,7 +324,6 @@ disk() {
 disk_free() {
     _deprecated "Use disk instead" warn
     # parameter parsing
-    debug "$*"
     local opt="" free_operator free_percent free_bytes
     eval set -- "$(option_parse $'l locale -\nc collect +\nf free +' "$@")"
     while true; do

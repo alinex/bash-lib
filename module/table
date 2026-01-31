@@ -43,19 +43,43 @@ for row in reader:
 
 # Transform tab separated table
 #
-# Usage:    <string> | tsv <command> <param>...
-#           <string> | tsv to {csv|pprint}              # convert
-#           <string> | tsv crop <num|name> <width>      # crop column
-#           <string> | tsv sort <num|name> [numeric]    # sort by column
-#           <string> | tsv reverse                      # reverse order
-# Options:  -h, --header        # keep first line as header
-#           --remove-header     # remove first (header) line
+# The main element for tabular data within the BashLib is tab separated values which can easily used in bash.
+# This command collection help with some common use cases to make them easier to write.
+#
+# To run multiple actions call it multiple times in a pipe.
+#
+# Usage:    <string> | tsv crop <num|name> <width>                 # crop column
+#           <string> | tsv sort <num|name> [numeric] [<options>]   # sort by column
+#           <string> | tsv reverse [<options>]                     # reverse order
+#           <string> | tsv to {csv|pprint} [<options>]             # convert
+#           <string> | tsv filter [<num|name> <pattern>]           # filter some rows
+# Options:  --with-header              # keep first line as header in `sort`, `reverse`
+#           --remove-header            # remove first (header) line
+#           --color-red <pattern>      # to colorize in `pprint`
+#           --color-yellow <pattern>   # to colorize in `pprint`
+#           --color-blue <pattern>     # to colorize in `pprint`
+# Example:  - `<string> | tsv filter --remove-header`
 tsv() {
-    local separator=$'\t'
-    local input
+    # parameter parsing
+    local withHeader removeHeader cmd
+    eval set -- "$(option_parse $'- with-header -\n- remove-header -' "$@")"
+    while true; do
+        case "$1" in
+        --with-header) withHeader=1 && shift ;;
+        --remove-header) removeHeader=1 && shift ;;
+        --) shift && break ;;
+        *) die "$(gettext "Unrecognized option"): $1" ;;
+        esac
+    done
+    is enum --name=command --allow="crop sort reverse to filter" --die --output=cmd -- "$1"
+    # processing
+    local separator=$'\t' input
     input=$(cat) # read stdin
-    local cmd="$1"
+    is false -- "$removeHeader" || removeHeader="${removeHeader#*$'\n'}"
     case $cmd in
+    filter)
+        echo "$input"
+        ;;
     to)
         local format=$2
         case $format in
@@ -111,8 +135,12 @@ tsv() {
         tail -n +2 <<<"$input" | sort -t $'\t' "-k${col},${col}${type}"
         ;;
     reverse)
-        head -1 <<<"$input"
-        tail -n +2 <<<"$input" | tac
+        if is true -- "$withHeader"; then
+            head -1 <<<"$input"
+            tail -n +2 <<<"$input" | tac
+        else
+            tac <<<"$input"
+        fi
         ;;
     *) die "Usage: tsv {to|crop} [<value>]" ;;
     esac

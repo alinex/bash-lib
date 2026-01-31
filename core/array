@@ -19,9 +19,9 @@
 #               array <array-name> indexof <value>
 #               array <array-name> join [<separator>]
 # Variables:    <array-name> as basis to work on
-# Output:       - `indexof`: <index-num> for found value
-# Return:       0 if entry is found in array
-#               1 if entry not found
+# Output:       `indexof`: <index-num> for found value
+# Return:       - 0 if entry is found in array
+#               - 1 if entry not found
 array() {
     local cmd value
     is set --name=array-name --die -- "$1"
@@ -110,7 +110,7 @@ split() {
 #               hash <array-name> has <key>
 #               hash <array-name> contains <key>
 #               hash <array-name> to tsv
-# Options:      -k, --key-format={base64|simple} # how to convert key because of special characters
+# Options:      -k, --key-format={base64|simple}    # how to convert key because of special characters
 # Variables:    <array-name> as basis to work on
 # Output:       `get`: <value> if found
 # Error:        `get` / `has`: 1 if not found

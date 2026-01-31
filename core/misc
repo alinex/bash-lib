@@ -115,8 +115,8 @@ trap_remove() {
 #           -r, --random                # add a random (numeric) part to the identifier
 #           -T, --ttl=<duration>        # duration to remove file again as seconds or duration @duration_format
 # Output:   <path>
-#           Debug: path and if it is created
-#           Debug: remove after TTL
+# Error:    - Debug: path and if it is created
+#           - Debug: remove after TTL
 mktemp() {
     # parameter parsing
     eval set -- "$(option_parse $'d directory -\ne extension +\nm memory -\np path +\nr random -\nT ttl +' "$@")"
@@ -192,10 +192,10 @@ CURL_HTTP_CODE=""
 # Usage:    like curl
 # Options:  default Options like in vanilla curl
 #           store <name>  # if set `variables store <name>` will be called
-# Globals:  `CURL_HTTP_CODE` set with last code
+# Globals:  $CURL_HTTP_CODE set with last code
 # Error:    `<text>` if not RC:2xx
-# Return:   0 if RC:2xx
-#           1 if not
+# Return:   - 0 if RC:2xx
+#           - 1 if not
 curl() {
     # check for additional flags
     local args=() i=1 store
