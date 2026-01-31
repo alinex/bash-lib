@@ -75,14 +75,14 @@ JIRA_HOST="$JIRA_HOST"
 #           # convert atlassian document format:
 #           jira md_to_adf <json>
 #           jira adf_to_md <md>
-# Global:   $JIRA_HOST
-#           $ATLASSIAN_USER
-#           $ATLASSIAN_TOKEN
+# Global:   - $JIRA_HOST
+#           - $ATLASSIAN_USER
+#           - $ATLASSIAN_TOKEN
 # Output:   - get: <json>
 #           - search: <issueId> list, each in a separate line
 #           - create: <issueId> which was just created
-# Return:   die on 400, 404 Error
-#           retry on other not 2xx Code
+# Return:   - die on 400, 404 Error
+#           - retry on other not 2xx Code
 jira() {
   is set --name=JIRA_HOST --die -- "$JIRA_HOST"
   is set --name=ATLASSIAN_USER --die -- "$ATLASSIAN_USER"

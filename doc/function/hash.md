@@ -16,7 +16,7 @@ hash <array-name> to tsv
 ### Options
 
 ```bash
--k, --key-format={base64|simple} # how to convert key because of special characters
+-k, --key-format={base64|simple}    # how to convert key because of special characters
 ```
 
 ### Globals

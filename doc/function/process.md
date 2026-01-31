@@ -15,8 +15,8 @@ process kill <pid>|<string> [<signal>]
 ### Options
 
 ```bash
-w, watch        # (for wait) watch health status till done
-t, timeout      # (for wait) end with
+-w, --watch        # (for wait) watch health status till done
+-t, --timeout      # (for wait) end with
 ```
 
 ### Output (stdout)

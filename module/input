@@ -15,8 +15,8 @@ declare -F "color_256" >/dev/null || source "$BASHLIB_HOME"/module/color
 #
 # Usage:    pause <message>
 #           <message> | pause
-# Options:  T, timeout <duration>    # time after which the default will be used
-#           a, abort                 # let the timeout abort by key press
+# Options:  -T, --timeout <duration>    # time after which the default will be used
+#           -a, --abort                 # let the timeout abort by key press
 # TTY:      <question> <key>
 # Example:  &input#pause shows all possible use cases
 pause() {
@@ -65,13 +65,15 @@ pause() {
 # The default can be yes or no and if a default is set <return> will use it. Additional to a default a timeout can be set meaning to use default if timeout is reached. If an invalid character is typed, the timeout will restart.
 #
 # Usage:    confirm <question>
-# Options:  t, true                  # default: yes
-#           f, false                 # default: no
-#           T, timeout <duration>    # time after which the default will be used
-# TTY:      <question> [<default>]? <answer>
-#           # read single characters
-# Return:   0 for true/yes
-#           1 for false/no
+# Options:  -t, --true                  # default: yes
+#           -f, --false                 # default: no
+#           -T, --timeout <duration>    # time after which the default will be used
+# TTY:      ```
+#           <question> [<default>]? <answer>
+#           ```
+#           read single characters
+# Return:   -0 for true/yes
+#           -1 for false/no
 # Example:  &input#confirm shows all possible use cases
 confirm() {
     # parameter parsing
@@ -172,12 +174,14 @@ confirm() {
 # If another format is needed, you can fall back to string and validate on your own after you got the response.
 #
 # Usage:    ask <format> <question>
-# Options:  e, empty                 # allow empty value
-#           n, allow-negative        # on number, integer, float
-#           d, default <value>       # set default if none given
-#           T, timeout <duration>    # time till default is used
-# TTY:      <question> <valid characters>...
-#           # input <keys> printed if valid
+# Options:  -e, --empty                 # allow empty value
+#           -n, --allow-negative        # on number, integer, float
+#           -d, --default <value>       # set default if none given
+#           -T, --timeout <duration>    # time till default is used
+# TTY:      ```
+#           <question> <valid characters>...
+#           ```
+#           input <keys> printed if valid
 # Output:   <answer>
 # Example:  &input#ask shows all possible use cases
 ask() {
@@ -420,19 +424,20 @@ _password_strength() {
 #
 # Usage:    choose [-t] <entry>...
 #           <list> | choose [-t]
-# Options:  t, title <title>         # display text line above selection
-#           x, exit <string>         # will add an exit option at the end -> return "exit"
-#           d, default <string|int>  # the command or number which will be returned on <enter>
-#           T, timeout <duration>    # timeout till default selection as seconds or duration @duration_format
+# Options:  -t, --title <title>         # display text line above selection
+#           -x, --exit <string>         # will add an exit option at the end -> return "exit"
+#           -d, --default <string|int>  # the command or number which will be returned on <enter>
+#           -T, --timeout <duration>    # timeout till default selection as seconds or duration @duration_format
 # Entry:    <entry> := <string> | <key> "|" <display> # whitespace around values are removed
-# TTY:      [<title>]
+# TTY:      ```
+#           [<title>]
 #           <list>
 #           ...
 #           <question> <key>
+#           ```
 # Output:   selected `<line>`
 # Return:   `exit 0` # if run with `--exit` and this was chosen
 # Example:  &input#choose shows all possible use cases
-# TODO > 10 entries make two columns using
 choose() {
     # parameter parsing
     local end default timeout
@@ -447,22 +452,6 @@ choose() {
         *) die "$(gettext "Unrecognized option"): $1" ;;
         esac
     done
-    #local list max length
-    #list="$()"
-    #list="$(trim "$list" | grep -v ^#)"
-    #max="$(wc -l <<<"$list")"
-    #length="${#max}"
-    ## output list
-    #local line key display num=0 pattern
-    #while read -r line; do
-    #    num=$((num + 1))
-    #    IFS="|" read -r key display <<<"$line"
-    #    if [ -n "$default" ]; then
-    #        [ "$default" = "$(trim "$key")" ] && default="$num" || true
-    #        [ "$default" = "$(trim "$display")" ] && default="$num" || true
-    #    fi
-    #    printf "  %0${length}d) $(trim "${display:-$key}")\n" "$num" >/dev/tty
-    #done <<<"$list"
     # get list
     local width list num entries keys key display
     width=$(tput cols </dev/tty 2>/dev/null || echo 80)
@@ -635,16 +624,18 @@ choose() {
 #           # <task-line>   := "<task-fn> | <name>"
 #           <task-lines> | tasks            # entries from pipe
 #           tasks <check-fn>                # add entries from function (dynamic)
-# Option    t, title <title>             # display text line above selection
-#           d, default <string|int|variable>  # default command to start
-#           T, timeout <sec>             # timeout till default selection
+# Option    -t, --title <title>             # display text line above selection
+#           -d, --default <string|int|variable>  # default command to start
+#           -T, --timeout <sec>             # timeout till default selection
 # Files:    `/dev/shm/<program>_tasks_<pid>` will be used while dynamically generating the tasks list and removed afterwards
-# TTY:      Nächste Schritte
+# TTY:      ```
+#           Nächste Schritte
 #              1) Analyse einzelner Partitionen
 #              2) Docker aufräumen mit etwa 206MB unter /data
 #              3) Remote Host Console (interaktiv)
 #              x) Beenden
 #           Wähle eine der obigen Optionen: [1]
+#           ```
 # Example:  &tasks different possibilities
 tasks() {
     # parameter parsing

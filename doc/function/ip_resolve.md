@@ -11,7 +11,7 @@ ip_resolve [<option>] host.de
 ### Options
 
 ```bash
-v, version=<int>    # ip version 4 or 6
+-v, --version=<int>    # ip version 4 or 6
 ```
 
 ### Output (stdout)

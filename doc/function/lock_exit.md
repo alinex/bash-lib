@@ -10,8 +10,8 @@ lock_exit
 
 ### Files
 
-- /tmp/`<prog>`-lockfile        # hard link to active process
-- /tmp/`<prog>`-lockfile.`<pid>`  # active or waiting process
+- - /tmp/`<prog>`-lockfile        # hard link to active process
+- - /tmp/`<prog>`-lockfile.`<pid>`  # active or waiting process
 - 
 
 ### Description

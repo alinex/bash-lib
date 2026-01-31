@@ -55,18 +55,18 @@ _module_resolve() {
 #           remote [<options>] console          # open a remote console to the user
 #           remote [<options>] bashlib <modules> <command>...         # run bashlib command on remote (no need to be installed)
 # Options:  # following options, only before `<command>`
-#           l, login <user>         # username for login
-#           h, host <host>          # destination host
-#           j, jump <user>@<host>   # to use a jump host before
-#           t, terminal             # to use a pseudo terminal
-#           line-based              # line based return for terminal
-#           f, file                 # the command is a file reference which has to be used
-# Globals:  $server
-#           $login - default is "operator"
+#           -l, --login <user>         # username for login
+#           -h, --host <host>          # destination host
+#           -j, --jump <user>@<host>   # to use a jump host before
+#           -t, --terminal             # to use a pseudo terminal
+#           --line-based              # line based return for terminal
+#           -f, --file                 # the command is a file reference which has to be used
+# Globals:  - $server
+#           - $login - default is "operator"
 # Output:   passed through
-# Return:   Error code from remote command
-#           (255) will die because it is a connection problem
-#           (143) will exit because it was from a SIGTERM on the remote
+# Return:   - Error code from remote command
+#           - (255) will die because it is a connection problem
+#           - (143) will exit because it was from a SIGTERM on the remote
 # Example:  &remote shows how to use it
 remote() {
     # parameter parsing
@@ -181,10 +181,10 @@ remote() {
 #
 # Usage:    upload [<options>] <source> <dest>
 # Options:  # following options, only before `<source>`
-#           l, login <user>
-#           h, host <host>
-#           j, jump <user>@<host>
-#           f, files <list>     # each file in a line, must be relative from <source>
+#           -l, --login <user>
+#           -h, --host <host>
+#           -j, --jump <user>@<host>
+#           -f, --files <list>     # each file in a line, must be relative from <source>
 # Globals:  $server
 #           $login - default is "operator"
 upload() {
@@ -223,11 +223,11 @@ upload() {
 #
 # Usage:    download [<options>] <source> <dest>
 # Options:  # following options, only before `<source>`
-#           l, login <user>
-#           h, host <host>
-#           j, jump <user>@<host>
-# Globals:  $server
-#           $login - default is "operator"
+#           -l, --login <user>
+#           -h, --host <host>
+#           -j, --jump <user>@<host>
+# Globals:  - $server
+#           - $login - default is "operator"
 download() {
     # parameter parsing
     local _login host jump
@@ -261,12 +261,12 @@ download() {
 # Wait till reboot is finished
 #
 # Usage:    boot_wait [<options>]
-# Options:  l, login <user>
-#           h, host <host>
-#           j, jump <user>@<host>
-#           q, quiet
-# Globals:  $server
-#           $login - default is "operator"
+# Options:  -l, -login <user>
+#           -h, -host <host>
+#           -j, -jump <user>@<host>
+#           -q, -quiet
+# Globals:  - $server
+#           - $login - default is "operator"
 # Error:    <sql-time>
 boot_wait() {
     # parameter parsing

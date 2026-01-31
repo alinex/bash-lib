@@ -12,10 +12,10 @@ compress [<string>]
 ### Options
 
 ```bash
-i, input <path>         # file to read from
-o, output <path>        # file to write to
-t, tool <compression>   # compression: gzip, zip,...
-d, decompress
+-i, --input <path>         # file to read from
+-o, --output <path>        # file to write to
+-t, --tool <compression>   # compression: gzip, zip,...
+-d, --decompress
 ```
 
 ### Description

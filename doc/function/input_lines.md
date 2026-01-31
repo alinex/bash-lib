@@ -11,8 +11,8 @@ text="$(input_lines "$@")"
 
 ### Output (stdout)
 
-`<string-input>` or
-`<string-params>` separated by newlines
+- `<string-input>` or
+- `<string-params>` separated by newlines
 
 
 ### Description

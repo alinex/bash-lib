@@ -23,9 +23,9 @@ jira adf_to_md <md>
 
 ### Globals
 
-- `$JIRA_HOST`
-- `$ATLASSIAN_USER`
-- `$ATLASSIAN_TOKEN`
+- - `$JIRA_HOST`
+- - `$ATLASSIAN_USER`
+- - `$ATLASSIAN_TOKEN`
 
 ### Output (stdout)
 
@@ -35,8 +35,8 @@ jira adf_to_md <md>
 
 ### Return (exit code)
 
-- die on 400, 404 Error
-- retry on other not 2xx Code
+- - die on 400, 404 Error
+- - retry on other not 2xx Code
 - 
 
 ### Description

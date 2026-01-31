@@ -10,8 +10,8 @@ dns_list <pattern>
 
 ### Globals
 
-- `$POWERDNS_API` + `$POWERDNS_TOKEN` if powerdns is possible
-- `$PLUSSERVER_PORTAL`              if plusserver as provider is used
+- - `$POWERDNS_API` + `$POWERDNS_TOKEN` if powerdns is possible
+- - `$PLUSSERVER_PORTAL`              if plusserver as provider is used
 
 ### Output (stdout)
 

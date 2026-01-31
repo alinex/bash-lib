@@ -13,10 +13,10 @@ debug [<num>] <message>
 
 ### Globals
 
-- ``$DEBUG`` - if unset nothing will be printed
-- ``$DEBUG`=<num>` - only print messages with same or lower numeric level
-- ``$DEBUG`=<func>,...` - only print if the function is matched
-- ``$DEBUG`=9` - to output all
+- - `$DEBUG` - if unset nothing will be printed
+- - `DEBUG=<num>` - only print messages with same or lower numeric level
+- - `DEBUG=<func>,...` - only print if the function is matched
+- - `DEBUG=9` - to output all
 
 ### Error (stderr)
 

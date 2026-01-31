@@ -13,8 +13,8 @@ source /dev/null
 # This will @die if the user is not allowed to use `sudo`.
 #
 # Usage:    sudo_allow <command-line>
-# Return:   0 if allowed
-#           @die if not allowed
+# Return:   - 0 if allowed
+#           - @die if not allowed
 sudo_allow() {
     is integer --name=arguments --max=1 --die -- $#
     # processing
@@ -104,8 +104,8 @@ _lock_remove() {
 # before going on.
 #
 # Usage:    lock
-# Files:    /tmp/<prog>_lockfile        # hard link to active process
-#           /tmp/<prog>_lockfile.<pid>  # active or waiting process
+# Files:    - /tmp/<prog>_lockfile        # hard link to active process
+#           - /tmp/<prog>_lockfile.<pid>  # active or waiting process
 # Output:   <wait message>
 lock() {
     is integer --name=arguments --max=0 --die -- $#
@@ -141,8 +141,8 @@ lock() {
 # While another program is running with this lock active it will @die.
 #
 # Usage:    lock_exit
-# Files:    /tmp/<prog>-lockfile        # hard link to active process
-#           /tmp/<prog>-lockfile.<pid>  # active or waiting process
+# Files:    - /tmp/<prog>-lockfile        # hard link to active process
+#           - /tmp/<prog>-lockfile.<pid>  # active or waiting process
 lock_exit() {
     is integer --name=arguments --max=0 --die -- $#
     local lockfile logged pid
@@ -202,9 +202,9 @@ unlock() {
 #           variables restore [<ident>] [<variable>]... # restore all or defined variables
 #           variables clean [<ident>]                   # remove the store
 #           variables update <ident> <cmd-line> [<variable>]..   # update some variables by the cmd-line
-# Options:  d, disk                             # store on disk in temporary folder
-#           p, path <base-dir>                  # store on disk in given folder
-#           c, clean                            # remove after restore is done
+# Options:  -d, --disk                             # store on disk in temporary folder
+#           -p, --path <base-dir>                  # store on disk in given folder
+#           -c, --clean                            # remove after restore is done
 # Files:    `/dev/shm/<prog>[-<ident>].env`     # stored environment
 # Files:    `/tmp/<prog>[-<ident>].env`         # if `--disk` was used
 # Example:  ```bash
@@ -343,8 +343,8 @@ _steps_done() {
 # Further in `--verbose` mode a message for start and end will be printed on STDERR with the command or the given `--name`.
 #
 # Usage:    sync [<options>] <command> [<params>...]
-# Options:  v, verbose           # display notice/info message
-#           n, name=<string>     # define name or use command with args
+# Options:  -v, --verbose           # display notice/info message
+#           -n, --name=<string>     # define name or use command with args
 # Stderr:   - notice message for start (in verbose mode)
 #           - info message for finish (in verbose mode)
 sync() {
@@ -384,8 +384,8 @@ sync() {
 #
 # Usage:    async [<options>] <command> [<params>...]
 #           async [<options>] wait [<command> [<params>...]]
-# Options:  v, verbose           # display notice/info message
-#           n, name=<string>     # define name or use command with args
+# Options:  -v, --verbose           # display notice/info message
+#           -n, --name=<string>     # define name or use command with args
 # Stderr:   - notice message for start (in verbose mode)
 #           - info message for finish (in verbose mode)
 # Example:  ```bash
@@ -472,9 +472,9 @@ declare -A _queue_running
 #
 # Usage:    queue [<options>] add <job> [<args>...]             # add job to queue
 #           queue [--progress] run [<parallel>] [<load-percent>] # run the queue with specified limits
-# Options:  v, verbose           # display notice/info message
-#           n, name=<string>     # define name or use command with args
-#           p, progress          # show progress
+# Options:  -v, --verbose           # display notice/info message
+#           -n, --name=<string>     # define name or use command with args
+#           -p, --progress          # show progress
 # Stderr:   - notice message for start (in verbose mode)
 #           - info message for finish (in verbose mode)
 #           - info with progress of queue
@@ -621,8 +621,8 @@ random() {
 #           process tree <pid>|<string>     # show process trees
 #           process wait [<options>] <pid>|<string>
 #           process kill <pid>|<string> [<signal>]
-# Options:  w, watch        # (for wait) watch health status till done
-#           t, timeout      # (for wait) end with
+# Options:  -w, --watch        # (for wait) watch health status till done
+#           -t, --timeout      # (for wait) end with
 # Output:   - info: human readable line
 #           - list/tree: tsv with header
 process() {

@@ -11,14 +11,15 @@ option_parse <spec> <arguments>
 
 ### Output (stdout)
 
-**parsed and ordered options `<string>`**
-the options are at the start
-then the double dash `--` also if not given
-and at last all other arguments
+**parsed and ordered options `<string>`**:
+
+- the options are at the start
+- then the double dash `--` also if not given
+- and at last all other arguments
 
 ### Examples
 
-- `eval set -- "$(option_parse <spec> "$@")"`
+- `eval set -- "$(option_parse <spec> "$@")"` the common use case
 - [`base_script`](../example/base_script.md) includes a simple example
 
 
@@ -40,4 +41,6 @@ Permutation, reordering and giving options after arguments, is possible by defau
 Options can be given in different forms: `-a 45`, `-a45`, `--age 45`, `--age=45` are all equal. The last one is preferred because of readability.
 
 Also multiple short options can be put together with only the last may need a value.
+
+**Unknown options** will be pushed through without an error, you have to check for them later by yourself to give better error messages then we could here. The corelation between name and value can be broken here. So neither use this intentionally, you always have to check it and break with an unknown option error.
 

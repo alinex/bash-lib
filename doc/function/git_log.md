@@ -11,8 +11,8 @@ git_log <format> [<path>]
 ### Options
 
 ```bash
-w, work <dir>
-l, lines <num>
+-w, --work <dir>
+-l, --lines <num>
 ```
 
 ### Description

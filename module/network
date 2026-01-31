@@ -12,7 +12,7 @@
 # This uses `getent` which may take some seconds to resolve. But if `dig` is installed this will be used, because it works faster.
 #
 # Usage:    ip_resolve [<option>] host.de
-# Options:  v, version=<int>    # ip version 4 or 6
+# Options:  -v, --version=<int>    # ip version 4 or 6
 # Output:   one ip address
 ip_resolve() {
     eval set -- "$(option_parse $'v version +' "$@")"
@@ -123,8 +123,8 @@ _ip_extern_json=
 # - org - like AS3320 Deutsche Telekom AG
 #
 # Usage:    ip_extern <format>
-# Output:   <tsv-table> for data
-#           <value> else
+# Output:   - <tsv-table> for data
+#           - <value> else
 ip_extern() {
     is integer --name=arguments --max=1 --die -- $#
     is enum --name=format --allow="data country countryCode region regionName city zip lat lon timezone isp org as ip" --die -- "$1"

@@ -11,7 +11,7 @@ git_info root|url|branch|tag
 ### Options
 
 ```bash
-w, work <dir>
+-w, --work <dir>
 ```
 
 ### Description

@@ -12,8 +12,8 @@ pause <message>
 ### Options
 
 ```bash
-T, timeout <duration>    # time after which the default will be used
-a, abort                 # let the timeout abort by key press
+-T, --timeout <duration>    # time after which the default will be used
+-a, --abort                 # let the timeout abort by key press
 ```
 
 ### TTY (direct)

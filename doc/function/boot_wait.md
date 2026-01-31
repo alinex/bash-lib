@@ -11,16 +11,16 @@ boot_wait [<options>]
 ### Options
 
 ```bash
-l, login <user>
-h, host <host>
-j, jump <user>@<host>
-q, quiet
+-l, -login <user>
+-h, -host <host>
+-j, -jump <user>@<host>
+-q, -quiet
 ```
 
 ### Globals
 
-- `$server`
-- `$login` - default is "operator"
+- - `$server`
+- - `$login` - default is "operator"
 
 ### Error (stderr)
 

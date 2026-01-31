@@ -16,18 +16,18 @@ remote [<options>] bashlib <modules> <command>...         # run bashlib command 
 
 ```bash
 # following options, only before `<command>`
-l, login <user>         # username for login
-h, host <host>          # destination host
-j, jump <user>@<host>   # to use a jump host before
-t, terminal             # to use a pseudo terminal
-line-based              # line based return for terminal
-f, file                 # the command is a file reference which has to be used
+-l, --login <user>         # username for login
+-h, --host <host>          # destination host
+-j, --jump <user>@<host>   # to use a jump host before
+-t, --terminal             # to use a pseudo terminal
+--line-based              # line based return for terminal
+-f, --file                 # the command is a file reference which has to be used
 ```
 
 ### Globals
 
-- `$server`
-- `$login` - default is "operator"
+- - `$server`
+- - `$login` - default is "operator"
 
 ### Output (stdout)
 
@@ -35,9 +35,9 @@ passed through
 
 ### Return (exit code)
 
-- Error code from remote command
-- (255) will die because it is a connection problem
-- (143) will exit because it was from a SIGTERM on the remote
+- - Error code from remote command
+- - (255) will die because it is a connection problem
+- - (143) will exit because it was from a SIGTERM on the remote
 
 ### Examples
 

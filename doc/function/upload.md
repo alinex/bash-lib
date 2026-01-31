@@ -12,10 +12,10 @@ upload [<options>] <source> <dest>
 
 ```bash
 # following options, only before `<source>`
-l, login <user>
-h, host <host>
-j, jump <user>@<host>
-f, files <list>     # each file in a line, must be relative from <source>
+-l, --login <user>
+-h, --host <host>
+-j, --jump <user>@<host>
+-f, --files <list>     # each file in a line, must be relative from <source>
 ```
 
 ### Globals

@@ -11,20 +11,23 @@ confirm <question>
 ### Options
 
 ```bash
-t, true                  # default: yes
-f, false                 # default: no
-T, timeout <duration>    # time after which the default will be used
+-t, --true                  # default: yes
+-f, --false                 # default: no
+-T, --timeout <duration>    # time after which the default will be used
 ```
 
 ### TTY (direct)
 
-`<question>` [`<default>`]? `<answer>`
-# read single characters
+
+```
+<question> [<default>]? <answer>
+```
+read single characters
 
 ### Return (exit code)
 
-- 0 for true/yes
-- 1 for false/no
+- -0 for true/yes
+- -1 for false/no
 
 ### Examples
 

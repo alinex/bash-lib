@@ -22,8 +22,11 @@ mktemp [<identifier>]       # use default temp if no identifier given
 ### Output (stdout)
 
 `<path>`
-Debug: path and if it is created
-Debug: remove after TTL
+
+### Error (stderr)
+
+- Debug: path and if it is created
+- Debug: remove after TTL
 
 
 ### Description

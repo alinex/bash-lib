@@ -25,8 +25,8 @@ POWERDNS_API="$POWERDNS_API"
 # - @plusserver_dns - the DNS in the Plusserver Cloud https://www.plusserver.com/
 #
 # Usage:    dns_list <pattern>
-# Globals:  $POWERDNS_API + $POWERDNS_TOKEN if powerdns is possible
-#           $PLUSSERVER_PORTAL              if plusserver as provider is used
+# Globals:  - $POWERDNS_API + $POWERDNS_TOKEN if powerdns is possible
+#           - $PLUSSERVER_PORTAL              if plusserver as provider is used
 # Output:   Tab separated <table>:
 #           ```
 #           NAME        TYPE    CONTENT         TTL

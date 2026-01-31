@@ -14,9 +14,9 @@ variables update <ident> <cmd-line> [<variable>]..   # update some variables by 
 ### Options
 
 ```bash
-d, disk                             # store on disk in temporary folder
-p, path <base-dir>                  # store on disk in given folder
-c, clean                            # remove after restore is done
+-d, --disk                             # store on disk in temporary folder
+-p, --path <base-dir>                  # store on disk in given folder
+-c, --clean                            # remove after restore is done
 ```
 
 ### Files

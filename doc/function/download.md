@@ -12,15 +12,15 @@ download [<options>] <source> <dest>
 
 ```bash
 # following options, only before `<source>`
-l, login <user>
-h, host <host>
-j, jump <user>@<host>
+-l, --login <user>
+-h, --host <host>
+-j, --jump <user>@<host>
 ```
 
 ### Globals
 
-- `$server`
-- `$login` - default is "operator"
+- - `$server`
+- - `$login` - default is "operator"
 - 
 
 ### Description

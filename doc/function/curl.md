@@ -17,7 +17,7 @@ store <name>  # if set `variables store <name>` will be called
 
 ### Globals
 
-- `CURL_HTTP_CODE` set with last code
+- `$CURL_HTTP_CODE` set with last code
 
 ### Error (stderr)
 
@@ -25,8 +25,8 @@ store <name>  # if set `variables store <name>` will be called
 
 ### Return (exit code)
 
-- 0 if RC:2xx
-- 1 if not
+- - 0 if RC:2xx
+- - 1 if not
 - 
 
 ### Description

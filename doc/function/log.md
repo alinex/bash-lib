@@ -14,10 +14,10 @@ log end <destination>
 ### Options
 
 ```bash
-l, level=<level>  with values: debug info notice warn error critical
-r, rotate=hourly|daily|weekly|monthly|<bytes> - only for file logging
-c, cleanup=<num>|<duration> - only for file logging
-z, compress - only for file logging
+-l, --level=<level>  with values: debug info notice warn error critical
+-r, --rotate=hourly|daily|weekly|monthly|<bytes> - only for file logging
+-c, --cleanup=<num>|<duration> - only for file logging
+-z, --compress - only for file logging
 ```
 
 ### Files

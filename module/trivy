@@ -80,23 +80,23 @@ TRIVY_EXPLOITS_URL=https://www.cisa.gov/sites/default/files/feeds/known_exploite
 #           trivy [<options>] docker <file>
 #           trivy [<options>] docker <image>
 #           trivy clean
-# Options:  t, timeout <duration>   # set the timeout for the job in <int>m or <int>h
-#           o, only-os              # let `root` command only scan OS without filesystem traversal
-#           e, exclude <dirs>       # additional excludes for `root` command
-#           p, progress             # show progress
-#           c, clean                # immediately clean trivy database after scan
-# GLobal:   $TRIVY_DEFAULT_TIMEOUT
-#           $TRIVY_CACHE_SERVER
-#           $TRIVY_ROOT_EXCLUDE
-#           $TRIVY_JIRA_BOARD
-#           $TRIVY_JIRA_ISSUE_TYPE
-#           $TRIVY_JIRA_FIELD_SOURCES
-#           $TRIVY_JIRA_FIELD_RATING
-#           $TRIVY_JIRA_FIELD_VERSION
-#           $TRIVY_JIRA_FIELD_LINKS
-#           $TRIVY_JIRA_FIELD_APPROVAL
-#           $TRIVY_JIRA_APPROVAL_TEMP
-#           $TRIVY_JIRA_APPROVAL_IRRELEVANT
+# Options:  -t, --timeout <duration>   # set the timeout for the job in <int>m or <int>h
+#           -o, --only-os              # let `root` command only scan OS without filesystem traversal
+#           -e, --exclude <dirs>       # additional excludes for `root` command
+#           -p, --progress             # show progress
+#           -c, --clean                # immediately clean trivy database after scan
+# GLobal:   - $TRIVY_DEFAULT_TIMEOUT
+#           - $TRIVY_CACHE_SERVER
+#           - $TRIVY_ROOT_EXCLUDE
+#           - $TRIVY_JIRA_BOARD
+#           - $TRIVY_JIRA_ISSUE_TYPE
+#           - $TRIVY_JIRA_FIELD_SOURCES
+#           - $TRIVY_JIRA_FIELD_RATING
+#           - $TRIVY_JIRA_FIELD_VERSION
+#           - $TRIVY_JIRA_FIELD_LINKS
+#           - $TRIVY_JIRA_FIELD_APPROVAL
+#           - $TRIVY_JIRA_APPROVAL_TEMP
+#           - $TRIVY_JIRA_APPROVAL_IRRELEVANT
 # Output:   <report-path> or nothing if no vulnerabilities found
 # Error:    Progress output if `--progress` is set with optimizations on reports
 # Return:   1 if there are at least one CRITICAL or HIGH vulnerabilities

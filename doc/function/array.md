@@ -16,12 +16,12 @@ array <array-name> join [<separator>]
 
 ### Output (stdout)
 
-- `indexof`: `<index-num>` for found value
+`indexof`: `<index-num>` for found value
 
 ### Return (exit code)
 
-- 0 if entry is found in array
-- 1 if entry not found
+- - 0 if entry is found in array
+- - 1 if entry not found
 - 
 
 ### Description

@@ -26,10 +26,10 @@ COMPRESSION_DEFAULT=${COMPRESSION_DEFAULT:-gzip}
 #
 # Usage:    compress [<string>]
 #           <string> | compress
-# Options:  i, input <path>         # file to read from
-#           o, output <path>        # file to write to
-#           t, tool <compression>   # compression: gzip, zip,...
-#           d, decompress
+# Options:  -i, --input <path>         # file to read from
+#           -o, --output <path>        # file to write to
+#           -t, --tool <compression>   # compression: gzip, zip,...
+#           -d, --decompress
 compress() {
     # parameter parsing
     local in out tool="$COMPRESSION_DEFAULT" decompress
@@ -73,9 +73,9 @@ compress() {
 #
 # Usage:    decompress [<string>]
 #           <string> | decompress
-# Options:  f, file <path>          # file to read from
-#           o, output <path>        # file to write to
-#           t, tool <compression>   # compression: gzip, zip,...
+# Options:  -f, --file <path>          # file to read from
+#           -o, --output <path>        # file to write to
+#           -t, --tool <compression>   # compression: gzip, zip,...
 decompress() {
     compress -d "$@"
 }

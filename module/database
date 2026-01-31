@@ -22,9 +22,9 @@ declare -A MONGO_ADMIN_USERPASS="${MONGO_ADMIN_USERPASS:-()}"
 #
 # Usage:    mongo [<options>] "" <command>            # global command
 #           mongo [<options>] <database> <command>    # work in database
-# Options:  h, host <host>          # destination host
-# Global:   $server
-#           $MONGO_ADMIN_USERPASS
+# Options:  -h, --host <host>          # destination host
+# Global:   - $server
+#           - $MONGO_ADMIN_USERPASS
 mongo() {
     # parameter parsing
     local host="$server"
