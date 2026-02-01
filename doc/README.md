@@ -255,6 +255,7 @@ Validators to make this easier and more readable.
 | Variable/Function | Description |
 | --- | --- |
 | [`is`](function/is.md) | Validate and sanitize values. |
+| [`check`](function/check.md) | Validate value against rule |
 | [`value_if_variable`](function/value_if_variable.md) | Return the value or if it is a variable name which is not empty return it's value |
 
 ## Module

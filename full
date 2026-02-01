@@ -1065,6 +1065,63 @@ if [ -n "$output" ];then
 [ "$output" = "-" ]&&printf '%s' "$res"||printf -v "$output" '%s' "$res"
 fi
 }
+check(){
+local type
+is enum -ntype --allow="string integer float" -dotype -- "$1"
+is integer -narguments --min=3 --max=4 -d $#
+case $type in
+string)is enum -noperator --allow="= == != =* !* =~ !~ < > empty set" -d -- "$3"
+case $3 in
+empty)[ -z "$2" ];;
+set)[ -n "$2" ];;
+=|==)[[ $2 == "$4" ]];;
+!=)[[ $2 != "$4" ]];;
+=\*)[[ $2 == $4 ]];;
+!\*)[[ $2 != $4 ]];;
+=~)[[ $2 =~ $4 ]];;
+\!~)[[ ! $2 =~ $4 ]];;
+\<)[[ $2 < $4 ]];;
+\>)[[ $2 > $4 ]]
+esac
+;;
+integer)is enum -noperator --allow="= < > <= >= positiv negativ zero odd even multiple-of divisible-by factor-of prime no-prime" -d -- "$3"
+is integer -nvalue -- "$2"||return 1
+case $3 in
+positiv)(($2>=0));;
+negativ)(($2<0));;
+zero)(($2==0));;
+odd)(($2%2==1));;
+even)(($2%2==0));;
+prime)(($(factor $2|wc -w)==2));;
+no-prime)(($(factor $2|wc -w)>2));;
+*)is integer -ncompare -d -- "$4"
+case $3 in
+=)(($2==$4));;
+\<)(($2<$4));;
+\>)(($2>$4));;
+\<=)(($2<=$4));;
+\>=)(($2>=$4));;
+multiple-of|divisible-by)(($2%$4==0));;
+factor-of)(($4%$2==0))
+esac
+esac
+;;
+float)is enum -noperator --allow="= < > <= >= positiv negativ" -d -- "$3"
+is float -nvalue -- "$2"||return 1
+case $3 in
+positiv)(($(bc -l <<<"$2 >= 0")));;
+negativ)(($(bc -l <<<"$2 < 0")));;
+*)is float -ncompare -d -- "$4"
+case $3 in
+=)(($(bc -l <<<"$2 == $4")));;
+\<)(($(bc -l <<<"$2 < $4")));;
+\>)(($(bc -l <<<"$2 > $4")));;
+\<=)(($(bc -l <<<"$2 <= $4")));;
+\>=)(($(bc -l <<<"$2 >= $4")))
+esac
+esac
+esac
+}
 value_if_variable(){
 is integer -narguments --max=2 -d $#
 local _name="$1"
@@ -4000,7 +4057,12 @@ csv)awk 'BEGIN { FS="\t"; OFS="," }
                     print
                 }' <<<"$input"
 ;;
-pprint)column -t -s $'\t' <<<"$input"
+pprint)input="$(column -t -s $'\t' <<<"$input")"
+if is true -- "$withHeader";then
+echo "$CC_INVERS${input%%$'\n'*}$CC_RESET"
+input="${input#*$'\n'}"
+fi
+echo "$input"
 ;;
 *)die "Allowed formats are only csv, not [$format]"
 esac
@@ -4025,9 +4087,13 @@ local col type
 col=$((idx+1))
 [ ! "$3" = "numeric" ]||type=n
 [[ -n $idx ]]||die "Usage: table sort <column> [numeric]"
+if is true -- "$withHeader";then
 (IFS="$separator"
 printf '%s\n' "${cols[*]}")
 tail -n +2 <<<"$input"|sort -t $'\t' "-k$col,$col$type"
+else
+sort -t $'\t' "-k$col,$col$type" <<<"$input"
+fi
 ;;
 reverse)if
 is true -- "$withHeader"

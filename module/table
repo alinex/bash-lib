@@ -48,16 +48,15 @@ for row in reader:
 #
 # To run multiple actions call it multiple times in a pipe.
 #
-# Usage:    <string> | tsv crop <num|name> <width>                 # crop column
-#           <string> | tsv sort <num|name> [numeric] [<options>]   # sort by column
-#           <string> | tsv reverse [<options>]                     # reverse order
-#           <string> | tsv to {csv|pprint} [<options>]             # convert
-#           <string> | tsv filter [<num|name> <pattern>]           # filter some rows
+# Usage:    <string> | tsv crop <num|name> <width>                  # crop column
+#           <string> | tsv sort <num|name> [numeric] [<options>]    # sort by column
+#           <string> | tsv reverse [<options>]                      # reverse order
+#           <string> | tsv to {csv|pprint} [<options>]              # convert
+#           <string> | tsv filter [<num|name> <operator> <value>]   # filter some rows
 # Options:  --with-header              # keep first line as header in `sort`, `reverse`
 #           --remove-header            # remove first (header) line
-#           --color-red <pattern>      # to colorize in `pprint`
-#           --color-yellow <pattern>   # to colorize in `pprint`
-#           --color-blue <pattern>     # to colorize in `pprint`
+#           --colorize-line "<num|name>\t<operator>\t<value>\t<color>"  # multiple allowed
+#           --colorize-field "<num|name>\t<operator>\t<value>\t<color>" # multiple allowed
 # Example:  - `<string> | tsv filter --remove-header`
 tsv() {
     # parameter parsing
@@ -97,7 +96,12 @@ tsv() {
                 }' <<<"$input"
             ;;
         pprint)
-            column -t -s $'\t' <<<"$input"
+            input="$(column -t -s $'\t' <<<"$input")"
+            if is true -- "$withHeader"; then
+                echo "${CC_INVERS}${input%%$'\n'*}${CC_RESET}"
+                input="${input#*$'\n'}"
+            fi
+            echo "$input"
             ;;
         *) die "Allowed formats are only csv, not [$format]" ;;
         esac

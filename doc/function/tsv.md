@@ -5,11 +5,11 @@
 ### Usage
 
 ```bash
-<string> | tsv crop <num|name> <width>                 # crop column
-<string> | tsv sort <num|name> [numeric] [<options>]   # sort by column
-<string> | tsv reverse [<options>]                     # reverse order
-<string> | tsv to {csv|pprint} [<options>]             # convert
-<string> | tsv filter [<num|name> <pattern>]           # filter some rows
+<string> | tsv crop <num|name> <width>                  # crop column
+<string> | tsv sort <num|name> [numeric] [<options>]    # sort by column
+<string> | tsv reverse [<options>]                      # reverse order
+<string> | tsv to {csv|pprint} [<options>]              # convert
+<string> | tsv filter [<num|name> <operator> <value>]   # filter some rows
 ```
 
 ### Options
@@ -17,9 +17,8 @@
 ```bash
 --with-header              # keep first line as header in `sort`, `reverse`
 --remove-header            # remove first (header) line
---color-red <pattern>      # to colorize in `pprint`
---color-yellow <pattern>   # to colorize in `pprint`
---color-blue <pattern>     # to colorize in `pprint`
+--colorize-line "<num|name>	<operator>	<value>	<color>"  # multiple allowed
+--colorize-field "<num|name>	<operator>	<value>	<color>" # multiple allowed
 ```
 
 ### Examples

@@ -235,6 +235,123 @@ is() {
     fi
 }
 
+# Validate value against rule
+#
+# If you have more than one condition, call it multiple times.
+#
+# Text Operators:
+#
+# - `=`, `==`   - equal string presentation
+# - `!=`        - not equal string presentation
+# - `=*`        - match against pattern
+# - `!*`        - no match against pattern
+# - `=~`        - match against regular expression
+# - `!~`        - no match against regular expression
+# - `<`         - alphabetical before
+# - '>'         - alphabetical behind
+# - `empty`     - unset or empty string
+# - `set`       - has a value
+#
+# Integer Operators:
+#
+# - `=`
+# - `<`
+# - `>`
+# - `<=`
+# - `>=`
+# - `positiv`
+# - `negativ`
+# - `zero`
+# - `odd`
+# - `even`
+# - `multiple-of` or `divisible-by`
+# - `factor-of`
+# - `prime`
+# - `no-prime`
+#
+# Float Operators:
+#
+# - `=`
+# - `<`
+# - `>`
+# - `<=`
+# - `>=`
+# - `positiv`
+# - `negativ`
+#
+# Because some of the operators use special characters like `< > ! *` you have to put this in quotes or prefix them with backslashes.
+#
+# Usage:    check string <value> <operator> [<compare>]
+#           check integer <value> <operator> [<compare>]
+#           check float <value> <operator> [<compare>]
+# Return:   0 if ok
+# Example:  `check "$a" == "$b"`
+check() {
+    local type
+    is enum --name=type --allow="string integer float" --die --output=type -- "$1"
+    is integer --name=arguments --min=3 --max=4 --die -- $#
+    case $type in
+    string)
+        is enum --name=operator --allow="= == != =* !* =~ !~ < > empty set" --die -- "$3"
+        case $3 in
+        empty) [ -z "$2" ] ;;
+        set) [ -n "$2" ] ;;
+        = | ==) [[ "$2" == "$4" ]] ;;
+        !=) [[ "$2" != "$4" ]] ;;
+        =\*) [[ "$2" == $4 ]] ;;
+        !\*) [[ "$2" != $4 ]] ;;
+        =~) [[ "$2" =~ $4 ]] ;;
+        \!~) [[ ! "$2" =~ $4 ]] ;;
+        \<) [[ "$2" < "$4" ]] ;;
+        \>) [[ "$2" > "$4" ]] ;;
+        esac
+        ;;
+    integer)
+        is enum --name=operator --allow="= < > <= >= positiv negativ zero odd even multiple-of divisible-by factor-of prime no-prime" --die -- "$3"
+        is integer --name=value -- "$2" || return 1
+        case $3 in
+        positiv) (($2 >= 0)) ;;
+        negativ) (($2 < 0)) ;;
+        zero) (($2 == 0)) ;;
+        odd) (($2 % 2 == 1)) ;;
+        even) (($2 % 2 == 0)) ;;
+        prime) (($(factor $2 | wc -w) == 2)) ;;
+        no-prime) (($(factor $2 | wc -w) > 2)) ;;
+        *)
+            is integer --name=compare --die -- "$4"
+            case $3 in
+            =) (($2 == $4)) ;;
+            \<) (($2 < $4)) ;;
+            \>) (($2 > $4)) ;;
+            \<=) (($2 <= $4)) ;;
+            \>=) (($2 >= $4)) ;;
+            multiple-of | divisible-by) (($2 % $4 == 0)) ;;
+            factor-of) (($4 % $2 == 0)) ;;
+            esac
+            ;;
+        esac
+        ;;
+    float)
+        is enum --name=operator --allow="= < > <= >= positiv negativ" --die -- "$3"
+        is float --name=value -- "$2" || return 1
+        case $3 in
+        positiv) (($(bc -l <<<"$2 >= 0"))) ;;
+        negativ) (($(bc -l <<<"$2 < 0"))) ;;
+        *)
+            is float --name=compare --die -- "$4"
+            case $3 in
+            =) (($(bc -l <<<"$2 == $4"))) ;;
+            \<) (($(bc -l <<<"$2 < $4"))) ;;
+            \>) (($(bc -l <<<"$2 > $4"))) ;;
+            \<=) (($(bc -l <<<"$2 <= $4"))) ;;
+            \>=) (($(bc -l <<<"$2 >= $4"))) ;;
+            esac
+            ;;
+        esac
+        ;;
+    esac
+}
+
 ######################################################################################
 ### Helper
 ######################################################################################
