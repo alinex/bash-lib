@@ -639,6 +639,7 @@ is integer --min=0 -d -- "$DEBUG"
 else
 [[ $func =~ .*(${DEBUG//,? /|}) ]]||return 0
 fi
+local line
 while IFS= read -r line;do
 is integer --min=9 -- "$DEBUG"&&printf "$CC_BLACK%-2s %7d %-20s %s$CC_RESET\n" "$sign" "$BASHPID" "$func" "$line" >&2||printf "$CC_BLACK%-2s %-20s %s$CC_RESET\n" "$sign" "$func" "$line" >&2
 done <<<"$text"
@@ -4032,12 +4033,13 @@ esac
 esac
 }
 tsv(){
-local withHeader removeHeader cmd
+local withHeader removeHeader cmd unique
 eval set -- "$(option_parse $'- with-header -\n- remove-header -' "$@")"
 while true;do
 case "$1" in
 --with-header)withHeader=1&&shift;;
 --remove-header)removeHeader=1&&shift;;
+--unique)unique=1&&shift;;
 --)shift&&break;;
 *)die "$(gettext "Unrecognized option"): $1"
 esac
@@ -4047,7 +4049,31 @@ local separator=$'\t' input
 input=$(cat)
 is false -- "$removeHeader"||removeHeader="${removeHeader#*$'\n'}"
 case $cmd in
-filter)echo "$input"
+filter)local header cols idx line
+if is true -- "$withHeader";then
+header="$(head -1 <<<"$input")"
+echo "$header"
+input="$(tail -n +2 <<<"$input")"
+fi
+if (($#>=2));then
+is integer -narguments --min=4 --max=5 -d $#
+IFS=$'\t' read -r -a cols <<<"$header"
+if [[ "$3" =~ ^-?[0-9]+$ ]];then
+idx=$(($2-1))
+else
+[ -n "$header" ]||die "Named columns only possible using --with-header option"
+idx="$(array cols indexof "$3")"||die "Column [$3] not found in table"
+fi
+debug "filter $2 cols[$idx] $4 $5"
+while IFS= read -r line;do
+IFS=$'\t' read -r -a cols <<<"$line"
+debug "check $2 \"${cols[idx]}\" \"$4\" \"$5\""
+check $2 "${cols[idx]}" "$4" "$5"||continue
+echo "$line"
+done <<<"$input"
+else
+printf '%s' "$input"
+fi
 ;;
 to)local format=$2
 case $format in
@@ -4091,8 +4117,12 @@ IFS=$separator read -r -a cols < <(head -n 1 <<<"$input")
 [[ "$2" =~ ^-?[0-9]+$ ]]&&idx=$(($2-1))||idx="$(array cols indexof "$2")"||die "Column [$2] not found in table"
 local col type
 col=$((idx+1))
-[ ! "$3" = "numeric" ]||type=n
-[[ -n $idx ]]||die "Usage: table sort <column> [numeric]"
+case "$3" in
+numeric)type=n;;
+human)type=h
+esac
+[ -z "$unique" ]||type+=u
+[[ -n $idx ]]||die "Usage: table sort <column> [numeric/human]"
 if is true -- "$withHeader";then
 (IFS="$separator"
 printf '%s\n' "${cols[*]}")

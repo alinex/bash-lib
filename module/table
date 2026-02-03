@@ -59,9 +59,7 @@ for row in reader:
 #           <string> | tsv filter [<type> <num|name> <operator> <comparison>]   # filter some rows
 # Options:  --with-header              # keep first line as header in `sort`, `reverse`
 #           --remove-header            # remove first (header) line
-#           --unique                   # with sort removes duplicate lines
-#           --colorize-line "<type>\n<num|name>\t<operator>\t<value>\t<color>"  # multiple allowed
-#           --colorize-field "<type>\n<num|name>\t<operator>\t<value>\t<color>" # multiple allowed
+#           --unique                   # removes duplicate lines (only in tsv sort)
 # Example:  - `<string> | tsv filter --remove-header`
 tsv() {
     # parameter parsing
