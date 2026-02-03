@@ -44,6 +44,7 @@ debug() {
         [[ "$func" =~ .*(${DEBUG//,? /|}) ]] || return 0
     fi
     # print each line separately
+    local line
     while IFS= read -r line; do
         is integer --min=9 -- "$DEBUG" &&
             printf "$CC_BLACK%-2s %7d %-20s %s$CC_RESET\n" "$sign" "$BASHPID" "$func" "$line" >&2 ||
