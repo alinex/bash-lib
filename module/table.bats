@@ -27,6 +27,44 @@ setup() {
     assert_output -p $'1,2\t3'
     assert_success
 }
+# bats test_tags=tsv
+@test "tsv: filter string" {
+    in="$(cat <<'EOT'
+col1	col2
+4	four
+5	five
+10	ten
+EOT
+)"
+    out="$(cat <<'EOT'
+col1	col2
+4	four
+5	five
+EOT
+)"
+    run bats_pipe echo "$in" \| tsv --with-header filter string 2 '=*' 'f*'
+    assert_output "$out"
+    assert_success
+}
+# bats test_tags=tsv
+@test "tsv: filter string (named column)" {
+    in="$(cat <<'EOT'
+col1	col2
+4	four
+5	five
+10	ten
+EOT
+)"
+    out="$(cat <<'EOT'
+col1	col2
+4	four
+5	five
+EOT
+)"
+    run bats_pipe echo "$in" \| tsv --with-header filter string col2 '=*' 'f*'
+    assert_output "$out"
+    assert_success
+}
 
 # bats test_tags=tsv
 @test "tsv: to csv" {

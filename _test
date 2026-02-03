@@ -18,6 +18,18 @@ while true; do
 done
 ################################################################################################
 
+in="$(
+    cat <<'EOT'
+col1	col2
+4	four
+5	five
+10	ten
+EOT
+)"
+echo "$in" | tsv --with-header filter string col2 '=*' 'f*'
+
+exit
+
 ask time
 exit
 
