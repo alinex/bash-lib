@@ -49,25 +49,29 @@ for row in reader:
 # To run multiple actions call it multiple times in a pipe.
 #
 # The **filter** command uses @check to do it's work so <type> <operator> <comparison> are all passed through.
+# To combine multiple filters pipe it through the command multiple times to have AND condition.
+# Run the original string a second time through `tsv filter --remove-header...` to habe an OR condition (this may lead to duplicate lines, which you may remove with a sort).
 #
 # Usage:    <string> | tsv crop <num|name> <width>                  # crop column
-#           <string> | tsv sort <num|name> [numeric] [<options>]    # sort by column
+#           <string> | tsv sort <num|name> [numeric/human] [<options>]    # sort by column
 #           <string> | tsv reverse [<options>]                      # reverse order
 #           <string> | tsv to {csv|pprint} [<options>]              # convert
 #           <string> | tsv filter [<type> <num|name> <operator> <comparison>]   # filter some rows
 # Options:  --with-header              # keep first line as header in `sort`, `reverse`
 #           --remove-header            # remove first (header) line
-#           --colorize-line "<num|name>\t<operator>\t<value>\t<color>"  # multiple allowed
-#           --colorize-field "<num|name>\t<operator>\t<value>\t<color>" # multiple allowed
+#           --unique                   # with sort removes duplicate lines
+#           --colorize-line "<type>\n<num|name>\t<operator>\t<value>\t<color>"  # multiple allowed
+#           --colorize-field "<type>\n<num|name>\t<operator>\t<value>\t<color>" # multiple allowed
 # Example:  - `<string> | tsv filter --remove-header`
 tsv() {
     # parameter parsing
-    local withHeader removeHeader cmd
+    local withHeader removeHeader cmd unique
     eval set -- "$(option_parse $'- with-header -\n- remove-header -' "$@")"
     while true; do
         case "$1" in
         --with-header) withHeader=1 && shift ;;
         --remove-header) removeHeader=1 && shift ;;
+        --unique) unique=1 && shift ;;
         --) shift && break ;;
         *) die "$(gettext "Unrecognized option"): $1" ;;
         esac
@@ -155,8 +159,12 @@ tsv() {
         is integer -- "$2" && idx=$(($2 - 1)) || idx="$(array cols indexof "$2")" || die "Column [$2] not found in table"
         local col type
         col=$((idx + 1))
-        [ ! "$3" = "numeric" ] || type=n
-        [[ -n "$idx" ]] || die "Usage: table sort <column> [numeric]"
+        case "$3" in
+        numeric) type=n ;;
+        human) type=h ;;
+        esac
+        is empty -- "$unique" || type+=u
+        [[ -n "$idx" ]] || die "Usage: table sort <column> [numeric/human]"
         # sort
         if is true -- "$withHeader"; then
             (
