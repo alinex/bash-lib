@@ -95,7 +95,7 @@ tsv() {
             is integer --name=arguments --min=4 --max=5 --die -- $#
             IFS=$'\t' read -r -a cols <<<"$header"
             if is integer -- "$3"; then
-                idx=$(($2 - 1))
+                idx=$(($3 - 1))
             else
                 is set -- "$header" || die "Named columns only possible using --with-header option"
                 idx="$(array cols indexof "$3")" || die "Column [$3] not found in table"
@@ -103,7 +103,7 @@ tsv() {
             debug "filter $2 cols[$idx] $4 $5"
             while IFS= read -r line; do
                 IFS=$'\t' read -r -a cols <<<"$line"
-                debug "check $2 \"${cols[idx]}\" \"$4\" \"$5\""
+                debug "check $2 $idx:\"${cols[idx]}\" \"$4\" \"$5\""
                 check $2 "${cols[idx]}" "$4" "$5" || continue
                 echo "$line"
             done <<<"$input"
