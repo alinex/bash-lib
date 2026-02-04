@@ -56,7 +56,7 @@ for row in reader:
 #           <string> | tsv sort <num|name> [numeric/human] [<options>]    # sort by column
 #           <string> | tsv reverse [<options>]                      # reverse order
 #           <string> | tsv to {csv|pprint} [<options>]              # convert
-#           <string> | tsv filter [<type> <num|name> <operator> <comparison>]   # filter some rows
+#           <string> | tsv filter [<type> <num|name> <operator> <compare>]   # filter some rows
 # Options:  --with-header              # keep first line as header in `sort`, `reverse`
 #           --remove-header            # remove first (header) line
 #           --unique                   # removes duplicate lines (only in tsv sort)
@@ -88,6 +88,10 @@ tsv() {
             input="$(tail -n +2 <<<"$input")"
         fi
         if (($# >= 2)); then
+            is set --name=type --die -- "$2"
+            is set --name=num-name --die -- "$3"
+            is set --name=operator --die -- "$4"
+            is set --name=compare --die -- "$5"
             is integer --name=arguments --min=4 --max=5 --die -- $#
             IFS=$'\t' read -r -a cols <<<"$header"
             if is integer -- "$3"; then
@@ -108,6 +112,9 @@ tsv() {
         fi
         ;;
     to)
+        is set --name=num-name --die -- "$2"
+        is enum --name=format --allow="csv pprint" --die -- "$3"
+        is integer --name=arguments --max=3 --die -- $#
         local format=$2
         case $format in
         csv)
@@ -135,6 +142,9 @@ tsv() {
         esac
         ;;
     crop)
+        is set --name=num-name -- "$2"
+        is integer --name=width --min=3 --die -- "$3"
+        is integer --name=arguments --max=4 --die -- $#
         local cols idx
         IFS=$separator read -r -a cols < <(head -n 1 <<<"$input")
         is integer -- "$2" && idx=$(($2 - 1)) || idx="$(array cols indexof "$2")" || die "Column [$2] not found in table"
@@ -152,6 +162,9 @@ tsv() {
         done <<<"$input"
         ;;
     sort)
+        is set --name=num-name -- "$2"
+        is empty -- "$3" || is enum --name=format --allow="numeric human" --die -- "$3"
+        is integer --name=arguments --max=4 --die -- $#
         local cols idx
         IFS=$separator read -r -a cols < <(head -n 1 <<<"$input")
         is integer -- "$2" && idx=$(($2 - 1)) || idx="$(array cols indexof "$2")" || die "Column [$2] not found in table"
@@ -175,6 +188,7 @@ tsv() {
         fi
         ;;
     reverse)
+        is integer --name=arguments --max=1 --die -- $#
         if is true -- "$withHeader"; then
             head -1 <<<"$input"
             tail -n +2 <<<"$input" | tac

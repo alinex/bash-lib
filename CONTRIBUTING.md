@@ -49,10 +49,10 @@ Example:
 
 ```text
 **Describe the bug**
-`blib_join` fails when input contains spaces.
+`lib_join` fails when input contains spaces.
 
 **To Reproduce**
-blib_join "," "a b" "c"
+lib_join "," "a b" "c"
 
 **Expected**
 "a b,c"
@@ -132,7 +132,7 @@ To contribute to BashLib is the dame as to any other GitLab repository.
 2. **Clone** your fork locally:
 
    In your terminal:
-   
+
    ```bash
    git clone https://gitlab.com/<your-username>/bash-lib.git
    cd bash-lib
@@ -194,7 +194,7 @@ To contribute to BashLib is the dame as to any other GitLab repository.
    Make sure:
 
    - Source branch: your fork’s feature/my-new-feature
-   - Target branch: the original repo’s develop branch https://gitlab.com/alinex/bash-lib/-/tree/develop
+   - Target branch: the original repo’s develop branch [gitlab.com/alinex/bash-lib/-/tree/develop](https://gitlab.com/alinex/bash-lib/-/tree/develop)
    - Add a title, description, and any reviewers.
    - Submit the MR 🎉
 
@@ -220,11 +220,11 @@ Before making changes, please make sure your environment includes:
 
 You should also install:
 
-- **bats-core** for testing → [https://github.com/bats-core/bats-core](https://github.com/bats-core/bats-core)  
-- **bats-support** for testing → https://github.com/ztombol/bats-support
-- **bats-assert** for testing → https://github.com/ztombol/bats-assert
-- **shellcheck** for linting → [https://www.shellcheck.net/](https://www.shellcheck.net/)
-- **gettext** for localization -> https://www.gnu.org/software/gettext/
+- **bats-core** for testing → [github.com/bats-core/bats-core](https://github.com/bats-core/bats-core)  
+- **bats-support** for testing → [github.com/ztombol/bats-support](https://github.com/ztombol/bats-support)
+- **bats-assert** for testing → [github.com/ztombol/bats-assert](https://github.com/ztombol/bats-assert)
+- **shellcheck** for linting → [www.shellcheck.net/](https://www.shellcheck.net/)
+- **gettext** for localization -> [www.gnu.org/software/gettext/](https://www.gnu.org/software/gettext/)
 
 As IDE we use VS Code with the Extensions:
 
