@@ -60,7 +60,7 @@ install() {
     declare -a yay
     declare -a dnf
     declare -a after
-    local major
+    local major cmd
     # check what is needed
     for cmd in "$@"; do
         if ! hash _software_install has "$cmd" && ! command -v "$cmd" >/dev/null; then
