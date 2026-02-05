@@ -20,6 +20,7 @@ trivy clean
 -e, --exclude <dirs>       # additional excludes for `root` command
 -p, --progress             # show progress
 -c, --clean                # immediately clean trivy database after scan
+--no-secrets               # run only vulnerability scanner
 ```
 
 ### Globals

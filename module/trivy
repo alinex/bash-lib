@@ -85,6 +85,7 @@ TRIVY_EXPLOITS_URL=https://www.cisa.gov/sites/default/files/feeds/known_exploite
 #           -e, --exclude <dirs>       # additional excludes for `root` command
 #           -p, --progress             # show progress
 #           -c, --clean                # immediately clean trivy database after scan
+#           --no-secrets               # run only vulnerability scanner
 # GLobal:   - $TRIVY_DEFAULT_TIMEOUT
 #           - $TRIVY_CACHE_SERVER
 #           - $TRIVY_ROOT_EXCLUDE
@@ -110,7 +111,7 @@ trivy() {
         case "$1" in
         -t | --timeout) is duration --name=timeout --die -- "$2" && opt+=" --timeout $timeout" && shift 2 ;;
         -o | --only-os) opt+=" --pkg-types os" && shift ;;
-        --no-secrets) opt+=" --scanners-exclude secret" && shift ;;
+        --no-secrets) opt+=" --scanners vuln" && shift ;;
         -e | --exclude) is set --name=exclude --die --output=exclude -- "$2" && shift 2 ;;
         -p | --progress) progress=1 && shift ;;
         -c | --clean) clean=1 && shift ;;
