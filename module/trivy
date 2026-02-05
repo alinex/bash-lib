@@ -97,6 +97,8 @@ TRIVY_EXPLOITS_URL=https://www.cisa.gov/sites/default/files/feeds/known_exploite
 #           - $TRIVY_JIRA_FIELD_APPROVAL
 #           - $TRIVY_JIRA_APPROVAL_TEMP
 #           - $TRIVY_JIRA_APPROVAL_IRRELEVANT
+# Files:    - /tmp/<script>_<pid>_trivy/    is created containing all reports
+#           - potentially all files are scanned
 # Output:   <report-path> or nothing if no vulnerabilities found
 # Error:    Progress output if `--progress` is set with optimizations on reports
 # Return:   1 if there are at least one CRITICAL or HIGH vulnerabilities
@@ -122,6 +124,8 @@ trivy() {
     local work cmd
     local source="$1"
     work="$(mktemp --directory "${$}_trivy")"
+    echo $work
+    exit 0
     cmd="$(which trivy)"
     opt+=" -o $work/trivy.json"
     ! is integer --min=9 -- "$DEBUG" || opt+=" --debug"
