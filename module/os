@@ -588,6 +588,50 @@ services_info() {
 }
 
 ######################################################################################
+### Timer/Cron
+######################################################################################
+
+timer_info() {
+    printf '%s\t' Type Source User Minute Hour Day Month Weekday Command
+    printf '\n'
+    local user file minute hour day month weekday command
+    # get user crontabs
+    sudo ls /var/spool/cron/crontabs |
+        while read -r user; do
+            sudo awk -v user="$user" '
+        /^[[:space:]]*#/ { next }
+        /^[[:space:]]*$/ { next }
+        /^[A-Za-z_]+=/{ next }
+        {
+            minute=$1; hour=$2; day=$3; month=$4; weekday=$5
+            command=""
+            for (i=6;i<=NF;i++) command = command (i==6?"":" ") $i
+            gsub(/"/, "\\\"", command)
+            printf "cron\t/var/spool/cron/crontabs/%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n", user, user, minute, hour, day, month, weekday, command
+        }
+    ' "/var/spool/cron/crontabs/$user"
+        done
+    # crontab + cron.d
+    sudo grep -v ^# /etc/crontab /etc/cron.d/* |
+        sed '/^$/d;/^[^:]*:$/d;/^[^:]*:[A-Za-z]*=/d;s/:/ /' |
+        while read file minute hour day month weekday user command; do
+            printf "cron\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" "$file" "$user" "$minute" "$hour" "$day" "$month" "$weekday" "$command"
+        done
+    # periodical cron
+    local period
+    for period in hourly daily weekly monthly; do
+        # Extract the schedule line for this period
+        read minute hour day month weekday user _ < <(grep "/etc/cron.$period" /etc/crontab | head -n 1)
+        # Loop over scripts in the directory
+        for file in /etc/cron.$period/*; do
+            file=$(basename "$file")
+            printf "cron\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" "/etc/cron.$period" "$user" "$minute" "$hour" "$day" "$month" "$weekday" "/etc/cron.$period/$file"
+        done
+    done
+    # timer
+}
+
+######################################################################################
 ### LVM
 ######################################################################################
 
