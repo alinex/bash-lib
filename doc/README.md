@@ -416,6 +416,7 @@ Module with operating system specific helper functions.
 | [`user_info`](function/user_info.md) | Get information about user |
 | [`sudo_info`](function/sudo_info.md) | Get sudo information |
 | [`ssh_allowed`](function/ssh_allowed.md) | Get allowed ssh keys |
+| [`services_info`](function/services_info.md) | Show services on VM |
 | [`uses_lvm`](function/uses_lvm.md) | Check if LVM is used |
 
 ### Process Module

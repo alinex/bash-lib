@@ -7,6 +7,7 @@ But on release they will be merged with semantical versioning into the master br
 
 - add [check](doc/function/check.md) as rule validator
 - add [user_info](doc/function/user_info.md), [sudo_info](doc/function/sudo_info.md) and [ssh_allowed](doc/function/ssh_allowed.md)
+- add [services_info](foc/function/services_info.md)
 - add [open_url](doc/function/open_url.md) to open url in browser
 - [tsv](doc/function/tsv.md) now support with/out headers and header remove and has a filter command added
 - argument parser will not remove unknown options

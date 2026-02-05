@@ -3157,6 +3157,32 @@ done <<<"$list"
 done
 done
 }
+services_info(){
+[ -z "$1" ]||is enum -nformat allow="special active" -d -- "$1"
+is integer name=arguments --max=1 -d $#
+printf '%s\t' "$(gettext Unit)" "$(gettext Active)" "$(gettext Sub)" "$(gettext Enabled)" "$(gettext Description)" "$(gettext Config)" "$(gettext Start)" "$(gettext Tasks)" "$(gettext Memory)" "$(gettext CPU)"
+printf '\n'
+LANG=C systemctl list-units --type=service --all --no-legend --no-pager|sed 's/^[* ] //'|awk '{print $1}'|xargs -I{} systemctl show {} --property=Id,ActiveState,SubState,ActiveEnterTimestamp,Description,UnitFileState,FragmentPath,TasksCurrent,MemoryCurrent,CPUUsageNSec|awk -F= '
+        BEGIN { OFS="\t" }
+        /^Id=/ { id=$2 }
+        /^ActiveState=/ { active=$2 }
+        /^SubState=/ { substate=$2 }
+        /^Description=/ { desc=$2 }
+        /^FragmentPath=/ { config=$2 }
+        /^TasksCurrent=/ { tasks=$2 }
+        /^MemoryCurrent=/ { mem=$2 }
+        /^CPUUsageNSec=/ { cpu=$2 }
+        /^ActiveEnterTimestamp=/ { start=$2 }
+        /^TasksCurrent=/ { tasks=$2 }
+        /^MemoryCurrent=/ { mem=$2 }
+        /^CPUUsageNSec=/ { cpu=$2 }
+        /^UnitFileState=/ { enabled=$2; print id, active, substate, enabled, desc, config, start, tasks, mem, cpu }
+  '|(case $1 in
+special)tsv filter string 1 '!~' '^(accounts-daemon|acpid|alsa|anacron|apparmor|apport|apt-|atd|atop|auditd|auth-rpc|auto-cpufreq|avahi|binfmt-|blk-availability|bluetooth|bolt|clamav|cloud-init|connman|colord|console-|cron|cups|dbus|display-manager|dm-event|dmesg|dpkg-|e2scrub|emergency|etckeeper|exim4|f-secure|firewalld|fsbg-|fsma|fstrim|fwupd|getty|greylist|gpu-manager|grub|gssproxy|iio-sensor|ifup|initrd|irqbalance|iscsi|kbd|kerneloops|keyboard-setup|kmod-static|live-tools|ldconfig|lm-sensors|logrotate|lvm2-|man-db|ModemManager|modprobe|motd|netplan-|networkd|NetworkManager|networking.|nfs-|nslcd|oem-config|plocate|polkit|power-profiles|open-vm-tools|plymouth-|postfix|prometheus|quota|rc-local|rescue.|rpc-|rpcbind|rsync|rsyslog|rtkit|secureboot|sddm|setvt|sendmail|smartd|smartmon|snapd|snap.cups|snmp|spamassassin|ssh|ssl-cert|switcheroo|sysstat|system76-|systemd-|thermald|tpm-udev|tuned|ua-|ubuntu-advantage|ubuntu-fan|udisks|ufw|unattended|update|upower|user@|user-runtime-dir|uuidd|vgauth|whoopsie|wpa_supplicant|zabbix|zfs-mount)';;
+active)tsv filter string 2 = active;;
+*)cat
+esac)
+}
 uses_lvm(){
 is integer -narguments --max=0 -d $#
 sudo bash -lc 'command -v vgs' >/dev/null&&sudo vgs --noheadings >/dev/null&&[ -n "$(sudo vgs --noheadings)" ] &>/dev/null
@@ -4050,10 +4076,14 @@ echo "$header"
 input="$(tail -n +2 <<<"$input")"
 fi
 if (($#>=2));then
+is set -ntype -d -- "$2"
+is set -nnum-name -d -- "$3"
+is set -noperator -d -- "$4"
+is set -ncompare -d -- "$5"
 is integer -narguments --min=4 --max=5 -d $#
 IFS=$'\t' read -r -a cols <<<"$header"
 if [[ "$3" =~ ^-?[0-9]+$ ]];then
-idx=$(($2-1))
+idx=$(($3-1))
 else
 [ -n "$header" ]||die "Named columns only possible using --with-header option"
 idx="$(array cols indexof "$3")"||die "Column [$3] not found in table"
@@ -4061,7 +4091,7 @@ fi
 debug "filter $2 cols[$idx] $4 $5"
 while IFS= read -r line;do
 IFS=$'\t' read -r -a cols <<<"$line"
-debug "check $2 \"${cols[idx]}\" \"$4\" \"$5\""
+debug "check $2 $idx:\"${cols[idx]}\" \"$4\" \"$5\""
 check $2 "${cols[idx]}" "$4" "$5"||continue
 echo "$line"
 done <<<"$input"
@@ -4069,7 +4099,10 @@ else
 printf '%s' "$input"
 fi
 ;;
-to)local format=$2
+to)is set -nnum-name -d -- "$2"
+is enum -nformat --allow="csv pprint" -d -- "$3"
+is integer -narguments --max=3 -d $#
+local format=$2
 case $format in
 csv)awk 'BEGIN { FS="\t"; OFS="," }
                 {
@@ -4093,7 +4126,10 @@ echo "$input"
 *)die "Allowed formats are only csv, not [$format]"
 esac
 ;;
-crop)local cols idx
+crop)is set -nnum-name -- "$2"
+is integer -nwidth --min=3 -d -- "$3"
+is integer -narguments --max=4 -d $#
+local cols idx
 IFS=$separator read -r -a cols < <(head -n 1 <<<"$input")
 [[ "$2" =~ ^-?[0-9]+$ ]]&&idx=$(($2-1))||idx="$(array cols indexof "$2")"||die "Column [$2] not found in table"
 local width="$3"
@@ -4106,7 +4142,10 @@ orig="${line[idx]}"
 printf '%s\n' "${line[*]}")
 done <<<"$input"
 ;;
-sort)local cols idx
+sort)is set -nnum-name -- "$2"
+[ -z "$3" ]||is enum -nformat --allow="numeric human" -d -- "$3"
+is integer -narguments --max=4 -d $#
+local cols idx
 IFS=$separator read -r -a cols < <(head -n 1 <<<"$input")
 [[ "$2" =~ ^-?[0-9]+$ ]]&&idx=$(($2-1))||idx="$(array cols indexof "$2")"||die "Column [$2] not found in table"
 local col type
@@ -4125,9 +4164,8 @@ else
 sort -t $'\t' "-k$col,$col$type" <<<"$input"
 fi
 ;;
-reverse)if
-is true -- "$withHeader"
-then
+reverse)is integer -narguments --max=1 -d $#
+if is true -- "$withHeader";then
 head -1 <<<"$input"
 tail -n +2 <<<"$input"|tac
 else

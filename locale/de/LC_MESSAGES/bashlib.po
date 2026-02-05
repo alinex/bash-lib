@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-02-03 21:10+0100\n"
+"POT-Creation-Date: 2026-02-05 11:53+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -340,6 +340,46 @@ msgstr "Kommentar"
 #: module/os:521
 msgid "Key"
 msgstr "Schlüssel"
+
+#: module/os:561
+msgid "Unit"
+msgstr "Einheit"
+
+#: module/os:561
+msgid "Active"
+msgstr "Aktiv"
+
+#: module/os:561
+msgid "Sub"
+msgstr "Sub"
+
+#: module/os:561
+msgid "Enabled"
+msgstr "Aktiviert"
+
+#: module/os:561
+msgid "Description"
+msgstr "Beschreibung"
+
+#: module/os:561
+msgid "Config"
+msgstr "Konfiguration"
+
+#: module/os:561
+msgid "Start"
+msgstr "Start"
+
+#: module/os:561
+msgid "Tasks"
+msgstr "Tasks"
+
+#: module/os:561
+msgid "Memory"
+msgstr "Speicher"
+
+#: module/os:561
+msgid "CPU"
+msgstr "CPU"
 
 #: module/network:56
 msgid "IP\\tInterface"

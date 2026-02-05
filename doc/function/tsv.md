@@ -9,7 +9,7 @@
 <string> | tsv sort <num|name> [numeric/human] [<options>]    # sort by column
 <string> | tsv reverse [<options>]                      # reverse order
 <string> | tsv to {csv|pprint} [<options>]              # convert
-<string> | tsv filter [<type> <num|name> <operator> <comparison>]   # filter some rows
+<string> | tsv filter [<type> <num|name> <operator> <compare>]   # filter some rows
 ```
 
 ### Options
