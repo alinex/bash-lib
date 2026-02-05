@@ -15,6 +15,7 @@ download [<options>] <source> <dest>
 -l, --login <user>
 -h, --host <host>
 -j, --jump <user>@<host>
+-d, --delete            # remove all files not in current upload
 ```
 
 ### Globals

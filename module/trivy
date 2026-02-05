@@ -105,7 +105,7 @@ TRIVY_EXPLOITS_URL=https://www.cisa.gov/sites/default/files/feeds/known_exploite
 trivy() {
     local exclude clean progress opt="--exit-code 0 --no-progress --skip-version-check -f json"
     # parameter parsing
-    eval set -- "$(option_parse $'t timeout +\no only-os -\ne exclude +\np progress -\nc clean -' "$@")"
+    eval set -- "$(option_parse $'t timeout +\no only-os -\ne exclude +\np progress -\nc clean -\n- no-secrets' "$@")"
     while true; do
         case "$1" in
         -t | --timeout) is duration --name=timeout --die -- "$2" && opt+=" --timeout $timeout" && shift 2 ;;
@@ -124,8 +124,6 @@ trivy() {
     local work cmd
     local source="$1"
     work="$(mktemp --directory "${$}_trivy")"
-    echo $work
-    exit 0
     cmd="$(which trivy)"
     opt+=" -o $work/trivy.json"
     ! is integer --min=9 -- "$DEBUG" || opt+=" --debug"

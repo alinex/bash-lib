@@ -37,6 +37,11 @@ trivy clean
 - - `$TRIVY_JIRA_APPROVAL_TEMP`
 - - `$TRIVY_JIRA_APPROVAL_IRRELEVANT`
 
+### Files
+
+- - /tmp/`<script>`_`<pid>`_trivy/    is created containing all reports
+- - potentially all files are scanned
+
 ### Output (stdout)
 
 `<report-path>` or nothing if no vulnerabilities found

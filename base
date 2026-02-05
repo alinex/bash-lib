@@ -180,12 +180,11 @@ long+="$name,"
 fi
 done <<<"$spec"
 shift
-local res rc out
-res="$(LANG=C getopt -o "$permute$short" --long "$long" -n "$0" -- "$@" 2>&1)"
-rc=$?
+local res rc out lines
+res="$(LANG=C getopt -o "$permute$short" --long "$long" -n "$0" -- "$@" 2>&1)"||rc=$?
 if ((rc));then
 out="$(tail -1 <<<"$res")"
-IFS=$'\n' read -d '' -ra lines <<<"$res"
+mapfile -t lines <<<"$res"
 for line in "${lines[@]:0:${#lines[@]}-1}";do
 if [[ $line == *invalid\ option* ]];then
 out+=" -$(sed "s/.*'\(.*\)'.*/\1/" <<<"$line")"

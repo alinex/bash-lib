@@ -180,12 +180,11 @@ long+="$name,"
 fi
 done <<<"$spec"
 shift
-local res rc out
-res="$(LANG=C getopt -o "$permute$short" --long "$long" -n "$0" -- "$@" 2>&1)"
-rc=$?
+local res rc out lines
+res="$(LANG=C getopt -o "$permute$short" --long "$long" -n "$0" -- "$@" 2>&1)"||rc=$?
 if ((rc));then
 out="$(tail -1 <<<"$res")"
-IFS=$'\n' read -d '' -ra lines <<<"$res"
+mapfile -t lines <<<"$res"
 for line in "${lines[@]:0:${#lines[@]}-1}";do
 if [[ $line == *invalid\ option* ]];then
 out+=" -$(sed "s/.*'\(.*\)'.*/\1/" <<<"$line")"
@@ -3736,7 +3735,7 @@ fi
 return "$rc"
 }
 upload(){
-local _login host jump files
+local _login host jump files opt
 eval set -- "$(option_parse $'+l login +\nh host +\nj jump +\nf files +' "$@")"
 while true;do
 case "$1" in
@@ -3744,6 +3743,7 @@ case "$1" in
 -h|--host)is set -nhost -dohost -- "$2"&&shift 2;;
 -j|--jump)is set -njump -dojump -- "$2"&&shift 2;;
 -f|--files)is set -nfiles -dofiles -- "$2"&&shift 2;;
+-d|--delete)opt+=" --delete"&&shift;;
 --)shift&&break;;
 *)die "$(gettext "Unrecognized option"): $1"
 esac
@@ -3758,19 +3758,20 @@ local ssh="$_login@$host"
 local dir=${2:-~}
 debug "rsync -av $1 $ssh:$dir"
 if [ -n "$files" ];then
-rsync -avz --files-from=<(printf '%s\n' "$files") "$1" $ssh:"$dir"
+rsync -avz $opt --files-from=<(printf '%s\n' "$files") "$1" $ssh:"$dir"
 else
-rsync -avz "$1" $ssh:"$dir"
+rsync -avz $opt "$1" $ssh:"$dir"
 fi
 }
 download(){
-local _login host jump
+local _login host jump opt
 eval set -- "$(option_parse $'+l login +\nh host +\nj jump +' "$@")"
 while true;do
 case "$1" in
 -l|--login)is set -nlogin -do_login -- "$2"&&shift 2;;
 -h|--host)is set -nhost -dohost -- "$2"&&shift 2;;
 -j|--jump)is set -njump -dojump -- "$2"&&shift 2;;
+-d|--delete)opt+=" --delete"&&shift;;
 --)shift&&break;;
 *)die "$(gettext "Unrecognized option"): $1"
 esac
@@ -3783,7 +3784,7 @@ host=${host:-$server}
 local ssh="$_login@$host"
 [ -z "$jump" ]||ssh="-J $jump $ssh"
 local dir=${2:-.}
-rsync -avz $ssh:"$1" "$dir"
+rsync -avz $opt $ssh:"$1" "$dir"
 }
 boot_wait(){
 eval set -- "$(option_parse $'q quiet -' "$@")"
@@ -4182,7 +4183,7 @@ TRIVY_JIRA_REMOVE_SOURCE_OLDER_MONTHS=${TRIVY_JIRA_REMOVE_SOURCE_OLDER_MONTHS:-6
 TRIVY_EXPLOITS_URL=https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json
 trivy(){
 local exclude clean progress opt="--exit-code 0 --no-progress --skip-version-check -f json"
-eval set -- "$(option_parse $'t timeout +\no only-os -\ne exclude +\np progress -\nc clean -' "$@")"
+eval set -- "$(option_parse $'t timeout +\no only-os -\ne exclude +\np progress -\nc clean -\n- no-secrets' "$@")"
 while true;do
 case "$1" in
 -t|--timeout)is duration -ntimeout -d -- "$2"&&opt+=" --timeout $timeout"&&shift 2;;

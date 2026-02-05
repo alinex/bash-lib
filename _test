@@ -18,6 +18,9 @@ while true; do
 done
 ################################################################################################
 
+trivy root --progress --no-secrets --clean
+exit
+
 in="$(
     cat <<'EOT'
 col1	col2

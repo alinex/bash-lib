@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-02-05 11:53+0100\n"
+"POT-Creation-Date: 2026-02-05 15:16+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,11 +18,11 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 
 #: core/misc:134 core/validator:74 core/array:129 module/os:235 module/os:347
-#: module/os:421 module/network:24 module/trivy:116 module/compress:44
+#: module/os:421 module/network:24 module/trivy:118 module/compress:44
 #: module/monitoring:166 module/input:31 module/input:88 module/input:198
 #: module/input:452 module/input:651 module/log:63 module/process:359
 #: module/process:407 module/process:490 module/process:637 module/remote:84
-#: module/remote:201 module/remote:241 module/remote:279 module/database:36
+#: module/remote:203 module/remote:245 module/remote:283 module/database:36
 #: module/mattermost:309 module/mattermost:340 module/table:74 module/crypto:41
 #: module/git:23 module/git:61 module/software:224
 msgid "Unrecognized option"
@@ -32,11 +32,11 @@ msgstr "Unbekannte Option"
 msgid "A specification string is needed as first argument"
 msgstr "Ein Text zur Spezifikation ist als erstes ARgument notwendig"
 
-#: core/arguments:118
+#: core/arguments:117
 msgid "Options"
 msgstr "Optionen"
 
-#: core/arguments:163
+#: core/arguments:162
 msgid "argument is not a valid number!"
 msgstr "Argument ist nicht ganzzahlig"
 
@@ -385,37 +385,37 @@ msgstr "CPU"
 msgid "IP\\tInterface"
 msgstr "IP\\tSchnittstelle"
 
-#: module/trivy:131
+#: module/trivy:133
 #, sh-format
 msgid "Start $command scanning with trivy V${version}..."
 msgstr "Starte $command Scanner mit trivy V${version}..."
 
-#: module/trivy:165
+#: module/trivy:167
 msgid "Optimize JSON structure for splitting..."
 msgstr "Optimiere JSON Struktur für das Splitten..."
 
-#: module/trivy:167
+#: module/trivy:169
 msgid "Splitting JSON into single reports..."
 msgstr "Splitte JSON in einzelne Reports..."
 
-#: module/trivy:180
+#: module/trivy:182
 #, sh-format
 msgid "Found $found vulnerabilities."
 msgstr "$found Sicherheitsprobleme gefunden"
 
-#: module/trivy:204
+#: module/trivy:206
 msgid "Build queue to optimize reports..."
 msgstr "Aufbau der Warteschlange für die Report Generierung..."
 
-#: module/trivy:208
+#: module/trivy:210
 msgid "Run queue to optimize reports..."
 msgstr "Start der Warteschlange zur Report Generierung..."
 
-#: module/trivy:212
+#: module/trivy:214
 msgid "Create summaries..."
 msgstr "Erstelle Zusammenfassungen..."
 
-#: module/trivy:322
+#: module/trivy:324
 #, sh-format
 msgid ""
 "Downgrade $severity -> MEDIUM because it was published less than 3 days ago"
@@ -423,7 +423,7 @@ msgstr ""
 "Herunterstufen $severity -> MEDIUM, weil diese Lücke erst in den letzten 3 "
 "Tagen veröffentlicht wurde"
 
-#: module/trivy:331
+#: module/trivy:333
 msgid ""
 "Add information of known exploits and cancel downgrades in case of just "
 "published"
@@ -431,64 +431,64 @@ msgstr ""
 "Füge Informationen zu bekannten Exploits hinzu und streiche mögliche "
 "Herunterstufungen durch kürzliches publizieren"
 
-#: module/trivy:340
+#: module/trivy:342
 #, sh-format
 msgid "Downgrade $severity -> MEDIUM because it is a dev dependency"
 msgstr ""
 "Herunterstufen $severity -> MEDIUM, weil es sich um eine reine "
 "Entwicklungsabhängigkeit handelt"
 
-#: module/trivy:385
+#: module/trivy:387
 #, sh-format
 msgid "Downgrade $severity -> MEDIUM because of Jira status $deploy"
 msgstr "Herunterstufen $severity -> MEDIUM, durch Jira Status $deploy"
 
-#: module/trivy:386 module/trivy:450
+#: module/trivy:388 module/trivy:452
 #, sh-format
 msgid "$id at $target"
 msgstr "$id in $target"
 
-#: module/trivy:449
+#: module/trivy:451
 msgid "Add information from Jira"
 msgstr "Hinzufügen der Jira Informationen"
 
-#: module/trivy:491
+#: module/trivy:493
 #, sh-format
 msgid "Rating: $severity (CVSS rating $value)"
 msgstr "Einstufung: $severity (CVSS Wert $value)"
 
-#: module/trivy:493
+#: module/trivy:495
 #, sh-format
 msgid "Status: Fixed from version $value $fixStatus"
 msgstr "Status: Gelöst in Version $value $fixStatus"
 
-#: module/trivy:497
+#: module/trivy:499
 #, sh-format
 msgid "Date:   Vulnerability known since $human ($value days ago)"
 msgstr "Datum:  Sicherheitslücke bekannt seit $human (vor $value Tagen)"
 
-#: module/trivy:499
+#: module/trivy:501
 #, sh-format
 msgid "Exploit known since $exploitDate at $exploitVendor $exploitProduct"
 msgstr "Exploit bekannt seit $exploitDate bei $exploitVendor $exploitProduct"
 
-#: module/trivy:502
+#: module/trivy:504
 msgid "Responsible"
 msgstr "Zuständig"
 
-#: module/trivy:503
+#: module/trivy:505
 msgid "Deploy"
 msgstr "Deploy"
 
-#: module/trivy:504
+#: module/trivy:506
 msgid "Last comments"
 msgstr "Letzte Kommentare"
 
-#: module/trivy:506
+#: module/trivy:508
 msgid "Sources"
 msgstr "Quellen"
 
-#: module/trivy:513
+#: module/trivy:515
 msgid "Links"
 msgstr "Links"
 
@@ -686,11 +686,11 @@ msgstr "Warten auf $pid ($pcpu% CPU)"
 msgid "Timeout after ${timeout}s"
 msgstr "Abbruch nach ${timeout}s"
 
-#: module/remote:285
+#: module/remote:289
 msgid "Wait till reboot is done"
 msgstr "Warten bis der Reboot fertig ist"
 
-#: module/remote:288
+#: module/remote:292
 #, sh-format
 msgid "Wait until the reboot is complete ($seconds seconds)"
 msgstr "Warten bis der Reboot fertig ist ($seconds Sekunden)"
