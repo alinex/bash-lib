@@ -10,6 +10,7 @@ But on release they will be merged with semantical versioning into the master br
 - add [services_info](foc/function/services_info.md)
 - add [open_url](doc/function/open_url.md) to open url in browser
 - [tsv](doc/function/tsv.md) now support with/out headers and header remove and has a filter command added
+- upload/download now with `--delete` option
 - argument parser will not remove unknown options
 - move environment settings into module with defaults and description
 - Bug Fixes: choice/task, remote bashlib, disk
