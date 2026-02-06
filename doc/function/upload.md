@@ -5,7 +5,7 @@
 ### Usage
 
 ```bash
-upload [<options>] <source> <dest>
+upload [<options>] <source> <dest> [<files>]
 ```
 
 ### Options
@@ -15,7 +15,6 @@ upload [<options>] <source> <dest>
 -l, --login <user>
 -h, --host <host>
 -j, --jump <user>@<host>
--f, --files <list>      # each file in a line, must be relative from <source>
 -d, --delete            # remove all files not in current upload
 ```
 

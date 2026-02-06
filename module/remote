@@ -179,19 +179,18 @@ remote() {
 
 # Upload file
 #
-# Usage:    upload [<options>] <source> <dest>
+# Usage:    upload [<options>] <source> <dest> [<files>]
 # Options:  # following options, only before `<source>`
 #           -l, --login <user>
 #           -h, --host <host>
 #           -j, --jump <user>@<host>
-#           -f, --files <list>      # each file in a line, must be relative from <source>
 #           -d, --delete            # remove all files not in current upload
 # Globals:  $server
 #           $login - default is "operator"
 upload() {
     # parameter parsing
-    local _login host jump files opt
-    eval set -- "$(option_parse $'+l login +\nh host +\nj jump +\nf files +' "$@")"
+    local _login host jump opt
+    eval set -- "$(option_parse $'+l login +\nh host +\nj jump +' "$@")"
     while true; do
         case "$1" in
         -l | --login) is set --name=login --die --output=_login -- "$2" && shift 2 ;;
@@ -203,7 +202,7 @@ upload() {
         *) die "$(gettext "Unrecognized option"): $1" ;;
         esac
     done
-    is integer --name=arguments --max=2 --die -- $#
+    is integer --name=arguments --max=3 --die -- $#
     is set --name=source --die -- "$1"
     is set --name=dest --die -- "$2"
     # processing
@@ -214,8 +213,8 @@ upload() {
     local dir=${2:-~}
     debug "rsync -av $1 $ssh:$dir"
     # shellcheck disable=SC2086
-    if is set -- "$files"; then
-        rsync -avz $opt --files-from=<(printf '%s\n' "$files") "$1" $ssh:"$dir"
+    if is set -- "$3"; then
+        rsync -avz $opt --files-from=<(printf '%s\n' "$3") "$1" $ssh:"$dir"
     else
         rsync -avz $opt "$1" $ssh:"$dir"
     fi

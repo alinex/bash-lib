@@ -3758,8 +3758,8 @@ fi
 return "$rc"
 }
 upload(){
-local _login host jump files opt
-eval set -- "$(option_parse $'+l login +\nh host +\nj jump +\nf files +' "$@")"
+local _login host jump opt
+eval set -- "$(option_parse $'+l login +\nh host +\nj jump +' "$@")"
 while true;do
 case "$1" in
 -l|--login)is set -nlogin -do_login -- "$2"&&shift 2;;
@@ -3771,7 +3771,7 @@ case "$1" in
 *)die "$(gettext "Unrecognized option"): $1"
 esac
 done
-is integer -narguments --max=2 -d $#
+is integer -narguments --max=3 -d $#
 is set -nsource -d -- "$1"
 is set -ndest -d -- "$2"
 _login=${_login:-${login:-$REMOTE_LOGIN_DEFAULT}}
@@ -3780,8 +3780,8 @@ local ssh="$_login@$host"
 [ -z "$jump" ]||ssh="-J $jump $ssh"
 local dir=${2:-~}
 debug "rsync -av $1 $ssh:$dir"
-if [ -n "$files" ];then
-rsync -avz $opt --files-from=<(printf '%s\n' "$files") "$1" $ssh:"$dir"
+if [ -n "$3" ];then
+rsync -avz $opt --files-from=<(printf '%s\n' "$3") "$1" $ssh:"$dir"
 else
 rsync -avz $opt "$1" $ssh:"$dir"
 fi
