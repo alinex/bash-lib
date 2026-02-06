@@ -168,26 +168,32 @@ os_detect() {
 bios() {
     sudo dmidecode -t 1 | awk '
     /Product Name:/ { prod=$0; sub(".*Product Name: *","",prod) }
-    /Serial Number:/ { ser=$0; sub(".*Serial Number: *","",ser); print "System " prod " " ser }'
+    /Serial Number:/ { ser=$0; sub(".*Serial Number: *","",ser); print "System " prod " " ser }
+    '
     sudo dmidecode -t 0 | awk '
     /Vendor:/        { vendor=$0; sub(".*Vendor: *","",vendor) }
     /Version:/       { version=$0; sub(".*Version: *","",version) }
     /Release Date:/  { date=$0; sub(".*Release Date: *","",date) }
-    /Firmware Revision:/  { firmware=$0; sub(".*Firmware Revision: *","",firmware); print "BIOS " vendor " " version " " date " firmware " firmware}'
+    /Firmware Revision:/  { firmware=$0; sub(".*Firmware Revision: *","",firmware); print "BIOS " vendor " " version " " date " firmware " firmware}
+    '
     sudo dmidecode -t 4 | awk '
     /Manufacturer:/ { pm=$0; sub(".*Manufacturer: *","",pm) }
     /Version:/      { pv=$0; sub(".*Version: *","",pv) }
     /Core Count:/   { pc=$0; sub(".*Core Count: *","",pc) }
-    /Thread Count:/ { pt=$0; sub(".*Thread Count: *","",pt); print "Processor " pm " " pv " " pc " cores " pt " threads" }'
+    /Thread Count:/ { pt=$0; sub(".*Thread Count: *","",pt); print "Processor " pm " " pv " " pc " cores " pt " threads" }
+    '
     sudo dmidecode -t 17 | awk '
     /Size:/ { size=$0; sub(".*Size: *","",size) }
     /Type:/ { type=$0; sub(".*Type: *","",type) }
     /Form Factor:/ { ff=$0; sub(".*Form Factor: *","",ff) }
-    /Manufacturer:/ { mm=$0; sub(".*Manufacturer: *","",mm); print "Memory " size " " mm " " type " " ff }'
+    /Manufacturer:/ { mm=$0; sub(".*Manufacturer: *","",mm); print "Memory " size " " mm " " type " " ff }
+    '
     sudo dmidecode -t 8 | awk '
-    /External Reference Designator:/ { des=$0; sub(".*External Reference Designator: *","",des); print "Port " des }'
+    /External Reference Designator:/ { des=$0; sub(".*External Reference Designator: *","",des); print "Port " des }
+    '
     sudo dmidecode -t 9 | awk '
-    section=="slot" && /Designation:/ { des=$0; sub(".*Designation: *","",des); print "system-slot " des }'
+    section=="slot" && /Designation:/ { des=$0; sub(".*Designation: *","",des); print "system-slot " des }
+    '
 }
 
 ######################################################################################

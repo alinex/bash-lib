@@ -182,7 +182,8 @@ alerts() {
     # pre format
     case $format in
     mattermost)
-        list="$(jq -s '.[] | {
+        list="$(jq -s '
+            .[] | {
                 color:  (if .labels.severity == "disaster" then "#ff0000"
                         elif  .labels.severity == "critical" then "#FFA500"
                         elif  .labels.severity == "warning" then "#FFFF00"
@@ -198,7 +199,8 @@ alerts() {
                     | to_entries
                     | map({title: (.key|(.[:1] | ascii_upcase) + .[1:]), value: .value, short:true})
                 )
-            }' <<<"$list" | jq -s .)"
+            }
+            ' <<<"$list" | jq -s .)"
         ;;
     *)
         # shellcheck disable=SC2059

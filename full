@@ -468,11 +468,12 @@ fi
 printf "\033[1m%s:%d (%s)\n" "$src" "$line" "$func"|([ -n "$1" ]&&( ((frame==1))&&warn||notice)||debug 5) >&2
 [ ! "$src" = 'main' ]||src="$0"
 awk -v n="$line" '
-            NR>=n-2 && NR<=n+2 {
-                gsub(/^[ \t]+/, "", $0)  # Remove leading spaces/tabs
-                printf "%4d: %s\n", NR, $0
-                if(NR==n+2) exit
-            }' "$src"|sed "/$line:/s/^/"$'\033[1m'"/;/$line:/s/$/"$'\033[22m'"/"|([ -n "$1" ]&&info||debug 6) >&2
+NR>=n-2 && NR<=n+2 {
+gsub(/^[ \t]+/, "", $0)
+printf "%4d: %s\n", NR, $0
+if(NR==n+2) exit
+}
+' "$src"|sed "/$line:/s/^/"$'\033[1m'"/;/$line:/s/$/"$'\033[22m'"/"|([ -n "$1" ]&&info||debug 6) >&2
 ((frame++))||true
 done
 }
@@ -1219,35 +1220,35 @@ esac
 ;;
 adf_to_md)is set -njson -d -- "$1"&&local json="$1"
 jq -r '
-    def para(p):
-      p.content[]?.text // "";
+def para(p):
+p.content[]?.text // "";
 
-    .content[] |
-    if .type == "paragraph" then
-      para(.) + "\n"
+.content[] |
+if .type == "paragraph" then
+para(.) + "\n"
 
-    elif .type == "bulletList" then
-      (
-        .content
-        | map("- " + para(.content[0]))
-        | join("\n")
-      ) + "\n\n"
+elif .type == "bulletList" then
+(
+.content
+| map("- " + para(.content[0]))
+| join("\n")
+) + "\n\n"
 
-    elif .type == "orderedList" then
-      (
-        .content
-        | to_entries
-        | map("\(.key + 1). " + para(.value.content[0]))
-        | join("\n")
-      ) + "\n\n"
+elif .type == "orderedList" then
+(
+.content
+| to_entries
+| map("\(.key + 1). " + para(.value.content[0]))
+| join("\n")
+) + "\n\n"
 
-    elif .type == "codeBlock" then
-      "```\n" + (.content[0].text) + "\n```\n\n"
+elif .type == "codeBlock" then
+"```\n" + (.content[0].text) + "\n```\n\n"
 
-    else
-      ""
-    end
-  ' <<<"$1"|sed -E '
+else
+""
+end
+' <<<"$1"|sed -E '
     s/<strong>(.+?)<\/strong>/**\1**/g
     s/<em>(.+?)<\/em>/*\1*/g
     s/<code>(.+?)<\/code>/`\1`/g
@@ -1255,250 +1256,228 @@ jq -r '
 ;;
 md_to_adf)is set -ntext -d -- "$1"
 jq -c -n --arg text "$1" '
-    def paragraph(t):
-      { type: "paragraph", content: [{ type: "text", text: t }] };
+def paragraph(t):
+{ type: "paragraph", content: [{ type: "text", text: t }] };
 
-    def bullet(items):
-      {
-        type: "bulletList",
-        content: items | map({
-          type: "listItem",
-          content: [ paragraph(.) ]
-        })
-      };
+def bullet(items):
+{
+type: "bulletList",
+content: items | map({
+type: "listItem",
+content: [ paragraph(.) ]
+})
+};
 
-    def ordered(items):
-      {
-        type: "orderedList",
-        attrs: { order: 1 },
-        content: items | map({
-          type: "listItem",
-          content: [ paragraph(.) ]
-        })
-      };
+def ordered(items):
+{
+type: "orderedList",
+attrs: { order: 1 },
+content: items | map({
+type: "listItem",
+content: [ paragraph(.) ]
+})
+};
 
-    def heading(level; t):
-      {
-        type: "heading",
-        attrs: { level: level },
-        content: [{ type: "text", text: t }]
-      };
+def heading(level; t):
+{
+type: "heading",
+attrs: { level: level },
+content: [{ type: "text", text: t }]
+};
 
-    def codeblock(lang; body):
-      {
-        type: "codeBlock",
-        attrs: { language: lang },
-        content: [{ type: "text", text: body }]
-      };
+def codeblock(lang; body):
+{
+type: "codeBlock",
+attrs: { language: lang },
+content: [{ type: "text", text: body }]
+};
 
-    def rule:
-      { type: "rule" };
+def rule:
+{ type: "rule" };
 
-    def blockquote(paras):
-      {
-        type: "blockquote",
-        content: paras
-      };
+def blockquote(paras):
+{
+type: "blockquote",
+content: paras
+};
 
-    ($text | split("\n")) as $lines
-    | reduce $lines[] as $line (
-        {
-          out: [],
-          mode: null,      # "ul" / "ol" / null
-          buf: [],         # list items buffer
-          pBuf: [],        # paragraph buffer
-          code: false,
-          codeLang: "",
-          codeBuf: [],
-          quoteBuf: []     # paragraphs inside current blockquote
-        };
+($text | split("\n")) as $lines
+| reduce $lines[] as $line (
+{
+out: [],
+mode: null,    
+buf: [],       
+pBuf: [],      
+code: false,
+codeLang: "",
+codeBuf: [],
+quoteBuf: []   
+};
 
-        # fenced code blocks
-        if ($line | test("^```")) then
-          if .code then
-            .out += [ codeblock(.codeLang; (.codeBuf | join("\n"))) ]
-            | .code = false
-            | .codeBuf = []
-            | .codeLang = ""
-          else
-            .code = true
-            | .codeLang = ($line | sub("^```"; ""))
-          end
+if ($line | test("^```")) then
+if .code then
+.out += [ codeblock(.codeLang; (.codeBuf | join("\n"))) ]
+| .code = false
+| .codeBuf = []
+| .codeLang = ""
+else
+.code = true
+| .codeLang = ($line | sub("^```"; ""))
+end
 
-        elif .code then
-          .codeBuf += [ $line ]
+elif .code then
+.codeBuf += [ $line ]
 
-        # horizontal rules
-        elif ($line | test("^(-{3,}|\\*{3,}|_{3,})$")) then
-          # flush paragraph
-          if (.pBuf | length) > 0 then
-            .out += [ paragraph(.pBuf | join("\n")) ]
-            | .pBuf = []
-          else .
-          end
-          # flush quote
-          | if (.quoteBuf | length) > 0 then
-              .out += [ blockquote(.quoteBuf) ]
-              | .quoteBuf = []
-            else .
-            end
-          # flush list
-          | if .mode == "ul" then
-              .out += [ bullet(.buf) ]
-              | .buf = [] | .mode = null
-            elif .mode == "ol" then
-              .out += [ ordered(.buf) ]
-              | .buf = [] | .mode = null
-            else .
-            end
-          | .out += [ rule ]
+elif ($line | test("^(-{3,}|\\*{3,}|_{3,})$")) then
+if (.pBuf | length) > 0 then
+.out += [ paragraph(.pBuf | join("\n")) ]
+| .pBuf = []
+else .
+end
+| if (.quoteBuf | length) > 0 then
+.out += [ blockquote(.quoteBuf) ]
+| .quoteBuf = []
+else .
+end
+| if .mode == "ul" then
+.out += [ bullet(.buf) ]
+| .buf = [] | .mode = null
+elif .mode == "ol" then
+.out += [ ordered(.buf) ]
+| .buf = [] | .mode = null
+else .
+end
+| .out += [ rule ]
 
-        # blockquotes
-        elif ($line | test("^> ")) then
-          # flush list before starting/continuing quote
-          if .mode == "ul" then
-            .out += [ bullet(.buf) ]
-            | .buf = [] | .mode = null
-          elif .mode == "ol" then
-            .out += [ ordered(.buf) ]
-            | .buf = [] | .mode = null
-          else .
-          end
-          # flush paragraph into quote if we were in text
-          | if (.pBuf | length) > 0 then
-              .quoteBuf += [ paragraph(.pBuf | join("\n")) ]
-              | .pBuf = []
-            else .
-            end
-          | ($line | sub("^> "; "")) as $t
-          | .quoteBuf += [ paragraph($t) ]
+elif ($line | test("^> ")) then
+if .mode == "ul" then
+.out += [ bullet(.buf) ]
+| .buf = [] | .mode = null
+elif .mode == "ol" then
+.out += [ ordered(.buf) ]
+| .buf = [] | .mode = null
+else .
+end
+| if (.pBuf | length) > 0 then
+.quoteBuf += [ paragraph(.pBuf | join("\n")) ]
+| .pBuf = []
+else .
+end
+| ($line | sub("^> "; "")) as $t
+| .quoteBuf += [ paragraph($t) ]
 
-        # headings
-        elif ($line | test("^#{1,6} ")) then
-          # flush paragraph
-          if (.pBuf | length) > 0 then
-            .out += [ paragraph(.pBuf | join("\n")) ]
-            | .pBuf = []
-          else .
-          end
-          # flush quote
-          | if (.quoteBuf | length) > 0 then
-              .out += [ blockquote(.quoteBuf) ]
-              | .quoteBuf = []
-            else .
-            end
-          # flush list
-          | if .mode == "ul" then
-              .out += [ bullet(.buf) ]
-              | .buf = [] | .mode = null
-            elif .mode == "ol" then
-              .out += [ ordered(.buf) ]
-              | .buf = [] | .mode = null
-            else .
-            end
-          | ($line | capture("^(?<h>#+) (?<t>.*)")) as $h
-          | .out += [ heading(($h.h | length); $h.t) ]
+elif ($line | test("^#{1,6} ")) then
+if (.pBuf | length) > 0 then
+.out += [ paragraph(.pBuf | join("\n")) ]
+| .pBuf = []
+else .
+end
+| if (.quoteBuf | length) > 0 then
+.out += [ blockquote(.quoteBuf) ]
+| .quoteBuf = []
+else .
+end
+| if .mode == "ul" then
+.out += [ bullet(.buf) ]
+| .buf = [] | .mode = null
+elif .mode == "ol" then
+.out += [ ordered(.buf) ]
+| .buf = [] | .mode = null
+else .
+end
+| ($line | capture("^(?<h>#+) (?<t>.*)")) as $h
+| .out += [ heading(($h.h | length); $h.t) ]
 
-        # bullet list
-        elif ($line | startswith("- ")) then
-          # flush paragraph
-          if (.pBuf | length) > 0 then
-            .out += [ paragraph(.pBuf | join("\n")) ]
-            | .pBuf = []
-          else .
-          end
-          # flush quote
-          | if (.quoteBuf | length) > 0 then
-              .out += [ blockquote(.quoteBuf) ]
-              | .quoteBuf = []
-            else .
-            end
-          | if .mode == "ul" then
-              .buf += [ $line[2:] ]
-            else
-              if .mode == "ol" then
-                .out += [ ordered(.buf) ]
-              else .
-              end
-              | .mode = "ul"
-              | .buf = [ $line[2:] ]
-            end
+elif ($line | startswith("- ")) then
+if (.pBuf | length) > 0 then
+.out += [ paragraph(.pBuf | join("\n")) ]
+| .pBuf = []
+else .
+end
+| if (.quoteBuf | length) > 0 then
+.out += [ blockquote(.quoteBuf) ]
+| .quoteBuf = []
+else .
+end
+| if .mode == "ul" then
+.buf += [ $line[2:] ]
+else
+if .mode == "ol" then
+.out += [ ordered(.buf) ]
+else .
+end
+| .mode = "ul"
+| .buf = [ $line[2:] ]
+end
 
-        # ordered list
-        elif ($line | test("^[0-9]+\\. ")) then
-          # flush paragraph
-          if (.pBuf | length) > 0 then
-            .out += [ paragraph(.pBuf | join("\n")) ]
-            | .pBuf = []
-          else .
-          end
-          # flush quote
-          | if (.quoteBuf | length) > 0 then
-              .out += [ blockquote(.quoteBuf) ]
-              | .quoteBuf = []
-            else .
-            end
-          | if .mode == "ol" then
-              .buf += [ ($line | sub("^[0-9]+\\. "; "")) ]
-            else
-              if .mode == "ul" then
-                .out += [ bullet(.buf) ]
-              else .
-              end
-              | .mode = "ol"
-              | .buf = [ ($line | sub("^[0-9]+\\. "; "")) ]
-            end
+elif ($line | test("^[0-9]+\\. ")) then
+if (.pBuf | length) > 0 then
+.out += [ paragraph(.pBuf | join("\n")) ]
+| .pBuf = []
+else .
+end
+| if (.quoteBuf | length) > 0 then
+.out += [ blockquote(.quoteBuf) ]
+| .quoteBuf = []
+else .
+end
+| if .mode == "ol" then
+.buf += [ ($line | sub("^[0-9]+\\. "; "")) ]
+else
+if .mode == "ul" then
+.out += [ bullet(.buf) ]
+else .
+end
+| .mode = "ol"
+| .buf = [ ($line | sub("^[0-9]+\\. "; "")) ]
+end
 
-        # empty line → flush paragraph / quote / list
-        elif $line == "" then
-          if .mode == "ul" then
-            .out += [ bullet(.buf) ]
-            | .buf = [] | .mode = null
-          elif .mode == "ol" then
-            .out += [ ordered(.buf) ]
-            | .buf = [] | .mode = null
-          else .
-          end
-          | if (.quoteBuf | length) > 0 then
-              .out += [ blockquote(.quoteBuf) ]
-              | .quoteBuf = []
-            else .
-            end
-          | if (.pBuf | length) > 0 then
-              .out += [ paragraph(.pBuf | join("\n")) ]
-              | .pBuf = []
-            else .
-            end
+elif $line == "" then
+if .mode == "ul" then
+.out += [ bullet(.buf) ]
+| .buf = [] | .mode = null
+elif .mode == "ol" then
+.out += [ ordered(.buf) ]
+| .buf = [] | .mode = null
+else .
+end
+| if (.quoteBuf | length) > 0 then
+.out += [ blockquote(.quoteBuf) ]
+| .quoteBuf = []
+else .
+end
+| if (.pBuf | length) > 0 then
+.out += [ paragraph(.pBuf | join("\n")) ]
+| .pBuf = []
+else .
+end
 
-        # normal text → paragraph buffer
-        else
-          # if we were in a list, close it before plain text
-          if .mode == "ul" then
-            .out += [ bullet(.buf) ]
-            | .buf = [] | .mode = null
-          elif .mode == "ol" then
-            .out += [ ordered(.buf) ]
-            | .buf = [] | .mode = null
-          else .
-          end
-          | .pBuf += [ $line ]
-        end
-      )
-    # final flush
-    | (
-        .out
-        + (if .mode == "ul" then [ bullet(.buf) ]
-           elif .mode == "ol" then [ ordered(.buf) ]
-           else [] end)
-        + (if (.quoteBuf | length) > 0 then [ blockquote(.quoteBuf) ] else [] end)
-        + (if (.pBuf | length) > 0 then [ paragraph(.pBuf | join("\n")) ] else [] end)
-      )
-    | {
-        type: "doc",
-        version: 1,
-        content: .
-      }
-  '|sed -E '
+else
+if .mode == "ul" then
+.out += [ bullet(.buf) ]
+| .buf = [] | .mode = null
+elif .mode == "ol" then
+.out += [ ordered(.buf) ]
+| .buf = [] | .mode = null
+else .
+end
+| .pBuf += [ $line ]
+end
+)
+| (
+.out
++ (if .mode == "ul" then [ bullet(.buf) ]
+elif .mode == "ol" then [ ordered(.buf) ]
+else [] end)
++ (if (.quoteBuf | length) > 0 then [ blockquote(.quoteBuf) ] else [] end)
++ (if (.pBuf | length) > 0 then [ paragraph(.pBuf | join("\n")) ] else [] end)
+)
+| {
+type: "doc",
+version: 1,
+content: .
+}
+'|sed -E '
     s/\*\*(.+?)\*\*/<strong>\1<\/strong>/g
     s/\*(.+?)\*/<em>\1<\/em>/g
     s/`([^`]+)`/<code>\1<\/code>/g
@@ -2652,23 +2631,25 @@ local format=${1:-console}
 [ -n "$list" ]||return 0
 [ -z "$quiet" ]||return 1
 case $format in
-mattermost)list="$(jq -s '.[] | {
-                color:  (if .labels.severity == "disaster" then "#ff0000"
-                        elif  .labels.severity == "critical" then "#FFA500"
-                        elif  .labels.severity == "warning" then "#FFFF00"
-                        else "#0000FF" end), 
-                title:  ((.labels.severity|(.[:1] | ascii_upcase) + .[1:]) + ": " + .labels.alertname), 
-                linktitle_link: .generatorURL,
-                text:   ("**" + .annotations.summary + "**\n" + .annotations.description), 
-                footer: "Grafana Alerts",
-                fields: (.labels 
-                    | {
-                        Netz:(.net|ascii_upcase),Instanz:.instance
-                    } 
-                    | to_entries
-                    | map({title: (.key|(.[:1] | ascii_upcase) + .[1:]), value: .value, short:true})
-                )
-            }' <<<"$list"|jq -s .)"
+mattermost)list="$(jq -s '
+.[] | {
+color:  (if .labels.severity == "disaster" then "#ff0000"
+elif  .labels.severity == "critical" then "#FFA500"
+elif  .labels.severity == "warning" then "#FFFF00"
+else "#0000FF" end),
+title:  ((.labels.severity|(.[:1] | ascii_upcase) + .[1:]) + ": " + .labels.alertname),
+linktitle_link: .generatorURL,
+text:   ("**" + .annotations.summary + "**\n" + .annotations.description),
+footer: "Grafana Alerts",
+fields: (.labels
+| {
+Netz:(.net|ascii_upcase),Instanz:.instance
+}
+| to_entries
+| map({title: (.key|(.[:1] | ascii_upcase) + .[1:]), value: .value, short:true})
+)
+}
+' <<<"$list"|jq -s .)"
 ;;
 *)header="$(printf "$(gettext "Severity\tNetwork\tInstance\tSummary\tStart")\n")"
 list="$header"$'\n'"$(jq -r '[.labels.severity, .labels.net, .labels.instance, .annotations.summary, (.startsAt| split(".")[0]| strptime("%Y-%m-%dT%H:%M:%S")| strftime("%Y-%m-%d %H:%M:%S"))] | @tsv' <<<"$list")"
@@ -2913,27 +2894,33 @@ _deprecated "Use os now"
 }
 bios(){
 sudo dmidecode -t 1|awk '
-    /Product Name:/ { prod=$0; sub(".*Product Name: *","",prod) }
-    /Serial Number:/ { ser=$0; sub(".*Serial Number: *","",ser); print "System " prod " " ser }'
+/Product Name:/ { prod=$0; sub(".*Product Name: *","",prod) }
+/Serial Number:/ { ser=$0; sub(".*Serial Number: *","",ser); print "System " prod " " ser }
+'
 sudo dmidecode -t 0|awk '
-    /Vendor:/        { vendor=$0; sub(".*Vendor: *","",vendor) }
-    /Version:/       { version=$0; sub(".*Version: *","",version) }
-    /Release Date:/  { date=$0; sub(".*Release Date: *","",date) }
-    /Firmware Revision:/  { firmware=$0; sub(".*Firmware Revision: *","",firmware); print "BIOS " vendor " " version " " date " firmware " firmware}'
+/Vendor:/        { vendor=$0; sub(".*Vendor: *","",vendor) }
+/Version:/       { version=$0; sub(".*Version: *","",version) }
+/Release Date:/  { date=$0; sub(".*Release Date: *","",date) }
+/Firmware Revision:/  { firmware=$0; sub(".*Firmware Revision: *","",firmware); print "BIOS " vendor " " version " " date " firmware " firmware}
+'
 sudo dmidecode -t 4|awk '
-    /Manufacturer:/ { pm=$0; sub(".*Manufacturer: *","",pm) }
-    /Version:/      { pv=$0; sub(".*Version: *","",pv) }
-    /Core Count:/   { pc=$0; sub(".*Core Count: *","",pc) }
-    /Thread Count:/ { pt=$0; sub(".*Thread Count: *","",pt); print "Processor " pm " " pv " " pc " cores " pt " threads" }'
+/Manufacturer:/ { pm=$0; sub(".*Manufacturer: *","",pm) }
+/Version:/      { pv=$0; sub(".*Version: *","",pv) }
+/Core Count:/   { pc=$0; sub(".*Core Count: *","",pc) }
+/Thread Count:/ { pt=$0; sub(".*Thread Count: *","",pt); print "Processor " pm " " pv " " pc " cores " pt " threads" }
+'
 sudo dmidecode -t 17|awk '
-    /Size:/ { size=$0; sub(".*Size: *","",size) }
-    /Type:/ { type=$0; sub(".*Type: *","",type) }
-    /Form Factor:/ { ff=$0; sub(".*Form Factor: *","",ff) }
-    /Manufacturer:/ { mm=$0; sub(".*Manufacturer: *","",mm); print "Memory " size " " mm " " type " " ff }'
+/Size:/ { size=$0; sub(".*Size: *","",size) }
+/Type:/ { type=$0; sub(".*Type: *","",type) }
+/Form Factor:/ { ff=$0; sub(".*Form Factor: *","",ff) }
+/Manufacturer:/ { mm=$0; sub(".*Manufacturer: *","",mm); print "Memory " size " " mm " " type " " ff }
+'
 sudo dmidecode -t 8|awk '
-    /External Reference Designator:/ { des=$0; sub(".*External Reference Designator: *","",des); print "Port " des }'
+/External Reference Designator:/ { des=$0; sub(".*External Reference Designator: *","",des); print "Port " des }
+'
 sudo dmidecode -t 9|awk '
-    section=="slot" && /Designation:/ { des=$0; sub(".*Designation: *","",des); print "system-slot " des }'
+section=="slot" && /Designation:/ { des=$0; sub(".*Designation: *","",des); print "system-slot " des }
+'
 }
 use config/local
 MOUNT_COLOR_LIMIT="${MOUNT_COLOR_LIMIT:=('.*' 100 90 80 50)}"
@@ -3162,21 +3149,21 @@ is integer name=arguments --max=1 -d $#
 printf '%s\t' "$(gettext Unit)" "$(gettext Active)" "$(gettext Sub)" "$(gettext Enabled)" "$(gettext Description)" "$(gettext Config)" "$(gettext Start)" "$(gettext Tasks)" "$(gettext Memory)" "$(gettext CPU)"
 printf '\n'
 LANG=C systemctl list-units --type=service --all --no-legend --no-pager|sed 's/^[* ] //'|awk '{print $1}'|xargs -I{} systemctl show {} --property=Id,ActiveState,SubState,ActiveEnterTimestamp,Description,UnitFileState,FragmentPath,TasksCurrent,MemoryCurrent,CPUUsageNSec|awk -F= '
-        BEGIN { OFS="\t" }
-        /^Id=/ { id=$2 }
-        /^ActiveState=/ { active=$2 }
-        /^SubState=/ { substate=$2 }
-        /^Description=/ { desc=$2 }
-        /^FragmentPath=/ { config=$2 }
-        /^TasksCurrent=/ { tasks=$2 }
-        /^MemoryCurrent=/ { mem=$2 }
-        /^CPUUsageNSec=/ { cpu=$2 }
-        /^ActiveEnterTimestamp=/ { start=$2 }
-        /^TasksCurrent=/ { tasks=$2 }
-        /^MemoryCurrent=/ { mem=$2 }
-        /^CPUUsageNSec=/ { cpu=$2 }
-        /^UnitFileState=/ { enabled=$2; print id, active, substate, enabled, desc, config, start, tasks, mem, cpu }
-  '|(case $1 in
+BEGIN { OFS="\t" }
+/^Id=/ { id=$2 }
+/^ActiveState=/ { active=$2 }
+/^SubState=/ { substate=$2 }
+/^Description=/ { desc=$2 }
+/^FragmentPath=/ { config=$2 }
+/^TasksCurrent=/ { tasks=$2 }
+/^MemoryCurrent=/ { mem=$2 }
+/^CPUUsageNSec=/ { cpu=$2 }
+/^ActiveEnterTimestamp=/ { start=$2 }
+/^TasksCurrent=/ { tasks=$2 }
+/^MemoryCurrent=/ { mem=$2 }
+/^CPUUsageNSec=/ { cpu=$2 }
+/^UnitFileState=/ { enabled=$2; print id, active, substate, enabled, desc, config, start, tasks, mem, cpu }
+'|(case $1 in
 special)tsv filter string 1 '!~' '^(accounts-daemon|acpid|alsa|anacron|apparmor|apport|apt-|atd|atop|auditd|auth-rpc|auto-cpufreq|avahi|binfmt-|blk-availability|bluetooth|bolt|clamav|cloud-init|connman|colord|console-|cron|cups|dbus|display-manager|dm-event|dmesg|dpkg-|e2scrub|emergency|etckeeper|exim4|f-secure|firewalld|fsbg-|fsma|fstrim|fwupd|getty|greylist|gpu-manager|grub|gssproxy|iio-sensor|ifup|initrd|irqbalance|iscsi|kbd|kerneloops|keyboard-setup|kmod-static|live-tools|ldconfig|lm-sensors|logrotate|lvm2-|man-db|ModemManager|modprobe|motd|netplan-|networkd|NetworkManager|networking.|nfs-|nslcd|oem-config|plocate|polkit|power-profiles|open-vm-tools|plymouth-|postfix|prometheus|quota|rc-local|rescue.|rpc-|rpcbind|rsync|rsyslog|rtkit|secureboot|sddm|setvt|sendmail|smartd|smartmon|snapd|snap.cups|snmp|spamassassin|ssh|ssl-cert|switcheroo|sysstat|system76-|systemd-|thermald|tpm-udev|tuned|ua-|ubuntu-advantage|ubuntu-fan|udisks|ufw|unattended|update|upower|user@|user-runtime-dir|uuidd|vgauth|whoopsie|wpa_supplicant|zabbix|zfs-mount)';;
 active)tsv filter string 2 = active;;
 *)cat
@@ -3188,17 +3175,17 @@ printf '\n'
 local user file minute hour day month weekday command
 sudo ls /var/spool/cron/crontabs|while read -r user;do
 sudo awk -v user="$user" '
-        /^[[:space:]]*#/ { next }
-        /^[[:space:]]*$/ { next }
-        /^[A-Za-z_]+=/{ next }
-        {
-            minute=$1; hour=$2; day=$3; month=$4; weekday=$5
-            command=""
-            for (i=6;i<=NF;i++) command = command (i==6?"":" ") $i
-            gsub(/"/, "\\\"", command)
-            printf "cron\t/var/spool/cron/crontabs/%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n", user, user, minute, hour, day, month, weekday, command
-        }
-    ' "/var/spool/cron/crontabs/$user"
+/^[[:space:]]*#/ { next }
+/^[[:space:]]*$/ { next }
+/^[A-Za-z_]+=/{ next }
+{
+minute=$1; hour=$2; day=$3; month=$4; weekday=$5
+command=""
+for (i=6;i<=NF;i++) command = command (i==6?"":" ") $i
+gsub(/"/, "\\\"", command)
+printf "cron\t/var/spool/cron/crontabs/%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n", user, user, minute, hour, day, month, weekday, command
+}
+' "/var/spool/cron/crontabs/$user"
 done
 sudo grep -v ^# /etc/crontab /etc/cron.d/*|sed '/^$/d;/^[^:]*:$/d;/^[^:]*:[A-Za-z]*=/d;s/:/ /'|while read file minute hour day month weekday user command;do
 printf "cron\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" "$file" "$user" "$minute" "$hour" "$day" "$month" "$weekday" "$command"
@@ -4192,17 +4179,19 @@ to)is enum -nformat --allow="csv pprint" -d -- "$2"
 is integer -narguments --max=2 -d $#
 local format=$2
 case $format in
-csv)awk 'BEGIN { FS="\t"; OFS="," }
-                {
-                    for(i=1; i<=NF; i++) {
-                        if ($i ~ /,|"|\n/) {
-                            gsub(/"/, "\"\"", $i)  # double quotes inside field
-                            $i = "\"" $i "\""
-                        }
-                    }
-                    $1 = $1  # force rebuilding the line with OFS
-                    print
-                }' <<<"$input"
+csv)awk '
+BEGIN { FS="\t"; OFS="," }
+{
+for(i=1; i<=NF; i++) {
+if ($i ~ /,|"|\n/) {
+gsub(/"/, "\"\"", $i)
+$i = "\"" $i "\""
+}
+}
+$1 = $1
+print
+}
+' <<<"$input"
 ;;
 pprint)input="$(column -t -s $'\t' <<<"$input")"
 if is true -- "$withHeader";then

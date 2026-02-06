@@ -161,7 +161,8 @@ tsv() {
         local format=$2
         case $format in
         csv)
-            awk 'BEGIN { FS="\t"; OFS="," }
+            awk '
+                BEGIN { FS="\t"; OFS="," }
                 {
                     for(i=1; i<=NF; i++) {
                         if ($i ~ /,|"|\n/) {
@@ -171,7 +172,8 @@ tsv() {
                     }
                     $1 = $1  # force rebuilding the line with OFS
                     print
-                }' <<<"$input"
+                }
+                ' <<<"$input"
             ;;
         pprint)
             input="$(column -t -s $'\t' <<<"$input")"

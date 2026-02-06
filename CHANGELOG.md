@@ -14,6 +14,8 @@ But on release they will be merged with semantical versioning into the master br
 - argument parser will not remove unknown options
 - move environment settings into module with defaults and description
 - Bug Fixes: choice/task, remote bashlib, disk
+- and some smaller fixes
+- add compression for awk and jq in compressed libs
 - move down deprecated methods
 
 ## 26. January 2026 - v2.4.0
