@@ -463,12 +463,12 @@ _jira() {
   local REST="$2"
   local DATA="$3"
   local api=rest/api/3
-  local res rc=0 num=0 retry=3
+  local res rc=0 num=0 retry=5
   while ((num <= retry)); do
     ((num == 0)) || debug "Retry $num"
     res="$(curl --store $$ --request "$METHOD" --url "$JIRA_HOST/$api/$REST" --user "$ATLASSIAN_USER:$ATLASSIAN_TOKEN" --data "$DATA" -H "Content-Type: application/json")" || rc=$?
     variables restore --clean $$
-    if ((rc == 0)); then
+    if ((rc == 0)) && [[ "$CURL_HTTP_CODE" !~ ^2[0-9]{2}$ ]]; then
       printf '%s' "$res"
       return
     else
