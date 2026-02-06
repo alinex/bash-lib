@@ -46,6 +46,11 @@ _install_qsv() {
     sudo chmod +x /usr/local/bin/qsv
     rm qsv-*.zip
 }
+_install_ebay-tsv-utils() {
+    wget https://github.com/eBay/tsv-utils/releases/download/v2.2.0/tsv-utils-v2.2.0_linux-x86_64_ldc2.tar.gz
+    sudo tar xzf tsv-utils-v2.2.0_linux-x86_64_ldc2.tar.gz -C /usr/local/bin --strip-components=1 --wildcards '*/tsv-*'
+    rm tsv-utils*.tar.gz
+}
 
 # Install software package
 #
@@ -66,8 +71,11 @@ install() {
         if ! hash _software_install has "$cmd" && ! command -v "$cmd" >/dev/null; then
             debug 3 "search how to add $cmd"
             PATH="$PATH:/usr/local/sbin:/usr/sbin:/sbin" which "$cmd" >/dev/null 2>/dev/null ||
+                # common installation
+                if [ "$cmd" = "ebay-tsv-utils" ]; then
+                    after+=(_install_ebay-tsv-utils)
                 # debian
-                if command -v apt-get >/dev/null; then
+                elif command -v apt-get >/dev/null; then
                     case $cmd in
                     mlr) apt+=(miller) ;;
                     mongosh) after+=(_install_mongosh) ;;

@@ -3188,6 +3188,36 @@ active)tsv filter string 2 = active;;
 *)cat
 esac)
 }
+timer_info(){
+printf '%s\t' Type Source User Minute Hour Day Month Weekday Command
+printf '\n'
+local user file minute hour day month weekday command
+sudo ls /var/spool/cron/crontabs|while read -r user;do
+sudo awk -v user="$user" '
+        /^[[:space:]]*#/ { next }
+        /^[[:space:]]*$/ { next }
+        /^[A-Za-z_]+=/{ next }
+        {
+            minute=$1; hour=$2; day=$3; month=$4; weekday=$5
+            command=""
+            for (i=6;i<=NF;i++) command = command (i==6?"":" ") $i
+            gsub(/"/, "\\\"", command)
+            printf "cron\t/var/spool/cron/crontabs/%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n", user, user, minute, hour, day, month, weekday, command
+        }
+    ' "/var/spool/cron/crontabs/$user"
+done
+sudo grep -v ^# /etc/crontab /etc/cron.d/*|sed '/^$/d;/^[^:]*:$/d;/^[^:]*:[A-Za-z]*=/d;s/:/ /'|while read file minute hour day month weekday user command;do
+printf "cron\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" "$file" "$user" "$minute" "$hour" "$day" "$month" "$weekday" "$command"
+done
+local period
+for period in hourly daily weekly monthly;do
+read minute hour day month weekday user _ < <(grep "/etc/cron.$period" /etc/crontab|head -n 1)
+for file in /etc/cron.$period/*;do
+file=$(basename "$file")
+printf "cron\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" "/etc/cron.$period" "$user" "$minute" "$hour" "$day" "$month" "$weekday" "/etc/cron.$period/$file"
+done
+done
+}
 uses_lvm(){
 is integer -narguments --max=0 -d $#
 sudo bash -lc 'command -v vgs' >/dev/null&&sudo vgs --noheadings >/dev/null&&[ -n "$(sudo vgs --noheadings)" ] &>/dev/null
@@ -3820,6 +3850,10 @@ done
 [ -n "$quiet" ]||printf '\n'
 }
 declare -Ag _software_install
+_repo_debian_qsv(){
+wget -O - https://dathere.github.io/qsv-deb-releases/qsv-deb.gpg|sudo gpg --dearmor -o /usr/share/keyrings/qsv-deb.gpg
+echo "deb [signed-by=/usr/share/keyrings/qsv-deb.gpg] https://dathere.github.io/qsv-deb-releases ./"|sudo tee /etc/apt/sources.list.d/qsv.list
+}
 _repo_debian_trivy(){
 sudo apt-get update
 sudo apt-get install -y wget gnupg lsb-release
@@ -3845,6 +3879,17 @@ tar -xzvf mongosh.tgz
 sudo mv mongosh-*/bin/mongosh /usr/bin
 rm -r mongosh-* mongosh.tgz
 }
+_install_qsv(){
+wget https://github.com/dathere/qsv/releases/latest/download/qsv-x86_64-unknown-linux-gnu.zip
+sudo unzip -j qsv-*.zip qsv-x86_64-unknown-linux-gnu/qsv /usr/local/bin/qsv
+sudo chmod +x /usr/local/bin/qsv
+rm qsv-*.zip
+}
+_install_ebay-tsv-utils(){
+wget https://github.com/eBay/tsv-utils/releases/download/v2.2.0/tsv-utils-v2.2.0_linux-x86_64_ldc2.tar.gz
+sudo tar xzf tsv-utils-v2.2.0_linux-x86_64_ldc2.tar.gz -C /usr/local/bin --strip-components=1 --wildcards '*/tsv-*'
+rm tsv-utils*.tar.gz
+}
 install(){
 is set -ncommand -d -- "$1"
 declare -a before
@@ -3854,16 +3899,19 @@ declare -a pacman
 declare -a yay
 declare -a dnf
 declare -a after
-local major
+local major cmd
 for cmd in "$@";do
 if ! hash _software_install has "$cmd"&&! command -v "$cmd" >/dev/null;then
 debug 3 "search how to add $cmd"
-PATH="$PATH:/usr/local/sbin:/usr/sbin:/sbin" which "$cmd" >/dev/null 2>/dev/null||if command -v apt-get >/dev/null;then
+PATH="$PATH:/usr/local/sbin:/usr/sbin:/sbin" which "$cmd" >/dev/null 2>/dev/null||if [ "$cmd" = "ebay-tsv-utils" ];then
+after+=(_install_ebay-tsv-utils)
+elif command -v apt-get >/dev/null;then
 case $cmd in
 mlr)apt+=(miller);;
-yq)after+=(_install_yq);;
 mongosh)after+=(_install_mongosh);;
+qsv)before+=(_repo_debian_qsv)&&apt+=(qsv);;
 trivy)before+=(_repo_debian_trivy)&&apt+=(trivy);;
+yq)after+=(_install_yq);;
 *)apt+=("$cmd")
 esac
 elif command -v apk >/dev/null;then
@@ -3879,12 +3927,15 @@ mongosh)pacman+=(base-devel)
 yay+=(mongosh-bin)
 after+=(_install_mongosh)
 ;;
+qsv)yay+=(qsv);;
 *)pacman+=("$cmd")
 esac
 elif command -v dnf >/dev/null;then
 case $cmd in
 ip)dnf+=(iproute);;
 mlr)before+=(_repo_redhat_epel)&&dnf+=(miller);;
+mongosh)dnf=(mongodb-mongosh);;
+qsv)after+=(_install_qsv);;
 yq)major="$(grep ^VERSION_ID /etc/os-release|sed 's/.*="//;s/\..*//')"
 if ((major<9));then
 after+=(_install_yq)
@@ -3892,7 +3943,6 @@ else
 before+=(_repo_redhat_epel)&&dnf+=(yq)
 fi
 ;;
-mongosh)dnf=(mongodb-mongosh);;
 *)dnf+=("$cmd")
 esac
 fi
@@ -4059,6 +4109,44 @@ for row in reader:
 esac
 esac
 }
+use software
+sv(){
+local opt=() QSV_DEFAULT_DELIMITER
+eval set -- "$(option_parse $'d delimiter +' "$@")"
+while true;do
+case "$1" in
+-d|--delimiter)is set -ndelimiter -d -- "$2"&&QSV_DEFAULT_DELIMITER="$2"&&opt+=(-d "$2")&&shift 2;;
+--no-headers)opt+=(-n)&&shift;;
+--)shift&&break;;
+*)die "$(gettext "Unrecognized option"): $1"
+esac
+done
+is enum -ncommand --allow="headers count select" -docmd -- "$1"
+install qsv
+case $cmd in
+headers)qsv headers "${opt[@]}";;
+count)qsv count "${opt[@]}";;
+select)qsv select "${opt[@]}" 1
+esac
+}
+esv2(){
+local opt=()
+eval set -- "$(option_parse $'d delimiter +' "$@")"
+while true;do
+case "$1" in
+-d|--delimiter)is set -ndelimiter -d -- "$2"&&opt+=(-d "$2")&&shift 2;;
+--no-headers)opt+=(-n)&&shift;;
+--)shift&&break;;
+*)die "$(gettext "Unrecognized option"): $1"
+esac
+done
+is enum -ncommand --allow="headers count" -docmd -- "$1"
+install ebay-tsv-utils
+case $cmd in
+headers)qsv headers "${opt[@]}";;
+count)qsv count "${opt[@]}"
+esac
+}
 tsv(){
 local withHeader removeHeader cmd unique
 eval set -- "$(option_parse $'- with-header -\n- remove-header -' "$@")"
@@ -4106,9 +4194,8 @@ else
 printf '%s' "$input"
 fi
 ;;
-to)is set -nnum-name -d -- "$2"
-is enum -nformat --allow="csv pprint" -d -- "$3"
-is integer -narguments --max=3 -d $#
+to)is enum -nformat --allow="csv pprint" -d -- "$2"
+is integer -narguments --max=2 -d $#
 local format=$2
 case $format in
 csv)awk 'BEGIN { FS="\t"; OFS="," }

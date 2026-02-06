@@ -41,6 +41,50 @@ for row in reader:
 # tsv
 ######################################################################################
 
+use software
+
+sv() {
+    # parameter parsing
+    local opt=() QSV_DEFAULT_DELIMITER
+    eval set -- "$(option_parse $'d delimiter +' "$@")"
+    while true; do
+        case "$1" in
+        -d | --delimiter) is set --name=delimiter --die -- "$2" && QSV_DEFAULT_DELIMITER="$2" && opt+=(-d "$2") && shift 2 ;;
+        --no-headers) opt+=(-n) && shift ;;
+        --) shift && break ;;
+        *) die "$(gettext "Unrecognized option"): $1" ;;
+        esac
+    done
+    is enum --name=command --allow="headers count select" --die --output=cmd -- "$1"
+    # processing
+    install qsv
+    case $cmd in
+    headers) qsv headers "${opt[@]}" ;;
+    count) qsv count "${opt[@]}" ;;
+    select) qsv select "${opt[@]}" 1 ;;
+    esac
+}
+esv2() {
+    # parameter parsing
+    local opt=()
+    eval set -- "$(option_parse $'d delimiter +' "$@")"
+    while true; do
+        case "$1" in
+        -d | --delimiter) is set --name=delimiter --die -- "$2" && opt+=(-d "$2") && shift 2 ;;
+        --no-headers) opt+=(-n) && shift ;;
+        --) shift && break ;;
+        *) die "$(gettext "Unrecognized option"): $1" ;;
+        esac
+    done
+    is enum --name=command --allow="headers count" --die --output=cmd -- "$1"
+    # processing
+    install ebay-tsv-utils
+    case $cmd in
+    headers) qsv headers "${opt[@]}" ;;
+    count) qsv count "${opt[@]}" ;;
+    esac
+}
+
 # Transform tab separated table
 #
 # The main element for tabular data within the BashLib is tab separated values which can easily used in bash.
@@ -112,9 +156,8 @@ tsv() {
         fi
         ;;
     to)
-        is set --name=num-name --die -- "$2"
-        is enum --name=format --allow="csv pprint" --die -- "$3"
-        is integer --name=arguments --max=3 --die -- $#
+        is enum --name=format --allow="csv pprint" --die -- "$2"
+        is integer --name=arguments --max=2 --die -- $#
         local format=$2
         case $format in
         csv)
