@@ -179,6 +179,9 @@ remote() {
 
 # Upload file
 #
+# If a specified list of files/directories should be transferred, add the folder as source and give an additional list of files/directories from this folder to transfer.
+# This list has to be a word list delimited by spaces, no newlines.
+#
 # Usage:    upload [<options>] <source> <dest> [<files>]
 # Options:  # following options, only before `<source>`
 #           -l, --login <user>
@@ -214,7 +217,7 @@ upload() {
     debug "rsync -av $1 $ssh:$dir"
     # shellcheck disable=SC2086
     if is set -- "$3"; then
-        rsync -avz $opt --files-from=<(printf '%s\n' "$3") "$1" $ssh:"$dir"
+        rsync -avz $opt --files-from=<(printf '%s\n' $3) "$1" $ssh:"$dir"
     else
         rsync -avz $opt "$1" $ssh:"$dir"
     fi
