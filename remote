@@ -3758,15 +3758,16 @@ fi
 return "$rc"
 }
 upload(){
-local _login host jump opt
-eval set -- "$(option_parse $'+l login +\nh host +\nj jump +' "$@")"
+local _login host jump opt=() dereference
+eval set -- "$(option_parse $'+l login +\nh host +\nj jump +\nd delete -\nL dereference -' "$@")"
 while true;do
 case "$1" in
 -l|--login)is set -nlogin -do_login -- "$2"&&shift 2;;
 -h|--host)is set -nhost -dohost -- "$2"&&shift 2;;
 -j|--jump)is set -njump -dojump -- "$2"&&shift 2;;
 -f|--files)is set -nfiles -dofiles -- "$2"&&shift 2;;
--d|--delete)opt+=" --delete"&&shift;;
+-d|--delete)opt+=(--delete)&&shift;;
+-L|--dereference)dereference=-L&&shift;;
 --)shift&&break;;
 *)die "$(gettext "Unrecognized option"): $1"
 esac
@@ -3781,9 +3782,9 @@ local ssh="$_login@$host"
 local dir=${2:-~}
 debug "rsync -av $1 $ssh:$dir"
 if [ -n "$3" ];then
-rsync -avz $opt --files-from=<(printf '%s\n' "$3") "$1" $ssh:"$dir"
+rsync -avz $dereference "${opt[@]}" --files-from=<(printf '%s\n' $3) "$1" $ssh:"$dir"
 else
-rsync -avz $opt "$1" $ssh:"$dir"
+rsync -avz $dereference "${opt[@]}" "$1" $ssh:"$dir"
 fi
 }
 download(){
