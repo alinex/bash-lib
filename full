@@ -1499,7 +1499,7 @@ printf '%s' "$res"
 return
 else
 case $CURL_HTTP_CODE in
-400|404)(printf "HTTP Code $CURL_HTTP_CODE: "&&jq .errorMessages[] -r <<<"$res"||printf '%s' "$res")|die
+400|404)(printf "HTTP Code $CURL_HTTP_CODE: ($rc) "&&jq .errorMessages[] -r <<<"$res"||printf '%s' "$res")|die
 esac
 fi
 ((num++))||true

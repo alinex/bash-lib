@@ -475,11 +475,11 @@ _jira() {
       # error code handling without retry
       # shellcheck disable=SC2059
       case $CURL_HTTP_CODE in
-      400 | 404) (printf "HTTP Code $CURL_HTTP_CODE: " && jq .errorMessages[] -r <<<"$res" || printf '%s' "$res") | die ;;
+      400 | 404) (printf "HTTP Code $CURL_HTTP_CODE: ($rc) " && jq .errorMessages[] -r <<<"$res" || printf '%s' "$res") | die ;;
       esac
     fi
     ((num++)) || true
-    sleep $(((num + 1) ** 2))
+    sleep $(((num + 1) ** 2)) # 3 tries 30s; 5 tries 90s; 10 tries 9m
   done
   # shellcheck disable=SC2059
   (printf "HTTP Code $CURL_HTTP_CODE: " && jq .errorMessages[] -r <<<"$res" || printf '%s' "$res") | die
