@@ -167,6 +167,11 @@ use software
 #           --drop                      # drop table before insert to postgres
 # TODO: colorize based on filter maybe with color column at the end
 # TODO: colorize: fixlength + ???
+# TODO: crop column
+### cat data.tsv | qsv apply --new-column truncated \
+###   'lambda x: x[:17] + "…" if len(x) > 20 else x' \
+###   col1 --delimiter $'\t' | \
+### qsv select truncated,col2,col3 --delimiter $'\t'
 sv() {
     # parameter parsing
     local opt=(-d $'\t') QSV_DEFAULT_DELIMITER=$'\t' noHeaders input output sort literal exact invert flag numerical natural reverse ignoreCase unique maxWidth schema table drop
