@@ -8,28 +8,21 @@ USAGE="$(basename "$0") [<options>] <instance>"
 OPTIONS="h help  -       Show Help Page"
 DESCRIPTION=""
 # parse and validate arguments
-eval set -- "$(option_parse "$OPTIONS" "$@")"
-while true; do
-    case "$1" in
-    -h | --help) help "$TITLE" "$USAGE" "$OPTIONS" "$DESCRIPTION" && exit ;;
-    --) shift && break ;;
-    *) die "Unerwartete option: $1" ;;
-    esac
-done
+#eval set -- "$(option_parse "$OPTIONS" "$@")"
+#while true; do
+#    case "$1" in
+#    -h | --help) help "$TITLE" "$USAGE" "$OPTIONS" "$DESCRIPTION" && exit ;;
+#    --) shift && break ;;
+#    *) die "Unerwartete option: $1" ;;
+#    esac
+#done
 ################################################################################################
 
-trivy root --progress --no-secrets --clean
-exit
+#trivy root --progress --no-secrets --clean
+#exit
 
-in="$(
-    cat <<'EOT'
-col1	col2
-4	four
-5	five
-10	ten
-EOT
-)"
-echo "$in" | tsv --with-header filter string col2 '=*' 'f*'
+in=$'Number\tName\n1\tone\n2\ttwo\n10\tten thousand and one hundred fourty five\n'
+echo "$in" | sv "$@"
 
 exit
 

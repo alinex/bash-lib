@@ -43,45 +43,278 @@ for row in reader:
 
 use software
 
+# Transform tab separated table
+#
+# **headers**
+#
+# Prints the column number and name (space separated) of the first row in the data.
+#
+# ```
+# 1   Number
+# 2   Name
+# ```
+#
+# **count**
+#
+# Returns a count of the number of records in the data without the header.
+#
+# **select**
+#
+# Select columns from data efficiently.
+#
+# This command lets you manipulate the columns in data. You can re-order,
+# duplicate, reverse or drop them. Columns can be referenced by index or by
+# name if there is a header row (duplicate column names can be disambiguated with
+# more indexing). Column ranges can also be specified. Finally, columns can be
+# selected using regular expressions.
+#
+# ```bash
+# tsv select 1,4                # Select the first and fourth columns
+# tsv select 1-4                # Select the first 4 columns (by index)
+# tsv select Header1-Header4    # Select the first 4 columns (by name)
+# tsv select 3-                 # Ignore the first 2 columns (by range)
+# tsv select '!1-2'             # Ignore the first 2 columns (by index)
+# tsv select 'Foo[2]'           # Select the third column named 'Foo':
+# tsv select 1,_                # Select the first and last columns, _ is a special character for the last column:
+# tsv select _-1                # Reverse the order of columns:
+# tsv select /^a/               # select columns starting with 'a' (regex)
+# tsv select '/^.*\d.*$/'       # select columns with a digit (regex)
+# tsv select '!/SSN|account_no|password/'   # remove SSN, account_no and password columns (regex)
+# tsv select 1- --sort          # Sort the columns lexicographically (i.e. by their byte values)
+# tsv select 1,4,5-7 --sort     # Select some columns and then sort them
+# tsv select '\"Date - Opening\",\"Date - Actual Closing\"'     # Quote column names that conflict with selector syntax:
+# ```
+#
+# **filter**
+#
+# Filter only rows matching the condition.
+#
+# ```bash
+# tsv filter 'foo.*bar'             # Search for rows where any field contains the regex 'foo.*bar' (case sensitive)
+# tsv filter --ignore-case 'error' message     # Case insensitive search for 'error' in the 'message' column
+
+# tsv filter --exact 'completed' status  # Search for exact matches of 'completed' in the 'status' column
+# tsv filter --literal 'a.b*c'      # Search for literal string 'a.b*c' in all columns
+# tsv filter --invert-match 'test'  # Invert match: select rows that do NOT match the regex 'test'
+# tsv filter --flag=<column> 'pattern' # Flag matched rows in a new column named <column>
+# ```
+#
+# **sort**
+#
+# Sorts data in lexicographical, natural, numerical, reverse, unique or random order.
+#
+# ```bash
+# tsv sort                      # Sort lexicographical 1, 10, 11, ..., 2...
+# tsv sort --numerical          # Sort numerical: 1, 2, 3, .... 10, 11...
+# tsv sort --natural            # Sort natural: file1, file2, .... file10...
+# tsv sort --case-insensitive   # Sort case insensitive
+# tsv sort --unique --reverse   # Sort in reverse order and show only rows unique in the sort columns
+# tsv sort 3,4                  # Sort after column 3 and 4
+# ```
+#
+# **reverse**
+#
+# Reverses rows of CSV data.
+#
+# **print**
+#
+# Outputs data as a visual table with columns in alignment.
+#
+# **to**
+#
+# Convert data to csv, postgres or sqlite table, Excel XLSX, or ODS.
+#
+# ```bash
+# tsv to csv                                                # Convert to CSV
+# tsv to json                                               # Convert to a newline-delimited JSON (JSONL/NDJSON)
+# tsv to xlsx --output=output.xlsx                          # Load data into xlsx file
+# tsv to ods --ouput=output.ods                             # Load data into ODS file
+# tsv to postgres                                           # Print dump to stdout
+# tsv to postgres --output dumpfile.sql                     # Create dump file
+# tsv to postgres 'postgres://testuser:pass@localhost/test' --table=mytable     # Load data to local database `test.mytable`, with user `testuser`, and password `pass`
+# tsv to postgres 'postgres://...' --table=mytable --schema=myschema            # Load data into a new/existing postgres schema
+# tsv to postgres 'postgres://...' --table=mytable --drop                       # Drop tables if they exist before loading
+# tsv to sqlite                                             # Print dump to stdout
+# tsv to sqlite --output dumpfile.sql                       # Create dump file
+# tsv to sqlite test.db --table=mytable                     # Load data to sqlite database `test.db`
+# tsv to sqlite test.db --table=mytable --drop              # Drop tables if they exist before loading
+# ```
+#
+# Usage:    <tsv> | tsv headers [options]
+#           <tsv> | tsv count [options]
+#           <tsv> | tsv select [options] <selection>
+#           <tsv> | tsv filter [options] <regex> <selection>
+#           <tsv> | tsv sort [options] <selection>
+#           <tsv> | tsv reverse [options]
+#           <tsv> | tsv print [options] <selection>
+#           <tsv> | tsv to <format> [<destination>] [options]
+# Options:  --no-headers                # input is without header
+#           -i, --input-file <file>     # file to read from instead of STDIN
+#           -o, --output-file <file>    # file to write result to instead of STDOUT
+#           --sort                      # sort columns in select
+#           --literal                   # Treat the regex as a literal string do not interpret it
+#           --exact                     # Match the ENTIRE field exactly
+#           --invert                    # Filter only rows that did not match
+#           --flag <column>             # Do not filter but add a filter column containing 0 for not matched, else the row number
+#           --numerical                 # sort numerical
+#           --natural                   # sort natural (numbers in strings are treaded numerical)
+#           --reverse                   # sort in reverse order
+#           --ignore-case               # ignore case in filter and sorting
+#           --unique                    # keep only one line per sorted value
+#           --max-col-width <num>       # maximum column width for all columns, will truncate content
+#           --schema <name>             # schema for to postgres export
+#           --table <name>              # table name
+#           --drop                      # drop table before insert to postgres
+# TODO: colorize based on filter maybe with color column at the end
+# TODO: colorize: fixlength + ???
 sv() {
     # parameter parsing
-    local opt=() QSV_DEFAULT_DELIMITER
-    eval set -- "$(option_parse $'d delimiter +' "$@")"
+    local opt=(-d $'\t') QSV_DEFAULT_DELIMITER=$'\t' noHeaders input output sort literal exact invert flag numerical natural reverse ignoreCase unique maxWidth schema table drop
+    eval set -- "$(option_parse $'- no-headers -\ni input-file +\no output-file +\ns sort -\n- max-col-width +\n- schema +\n-table +\n- drop -' "$@")"
     while true; do
         case "$1" in
-        -d | --delimiter) is set --name=delimiter --die -- "$2" && QSV_DEFAULT_DELIMITER="$2" && opt+=(-d "$2") && shift 2 ;;
-        --no-headers) opt+=(-n) && shift ;;
+        --no-headers) noHeaders=1 && shift ;;
+        -i | --input-file) is readable --name=input-file --die --output=input -- "$2" && shift 2 ;;
+        -o | --output-file) is set --name=output-file --die --output=output -- "$2" && shift 2 ;;
+        -s | --sort) sort=1 && shift ;;
+        --max-col-width) is integer --name=max-col-width --min=5 --die --output=maxWidth -- "$2" && shift 2 ;;
+        --literal) literal=1 && shift ;;
+        --exact) exact=1 && shift ;;
+        --invert) invert=1 && shift ;;
+        --flag) is set --name=flag-column --die --output=flag -- "$2" && shift 2 ;;
+        --numeric) numeric=1 && shift ;;
+        --natural) natural=1 && shift ;;
+        --reverse) reverse=1 && shift ;;
+        --ignore-case) ignoreCase=1 && shift ;;
+        --unique) unique=1 && shift ;;
+        --schema) is set --name=schema --die --output=schema -- "$2" && shift 2 ;;
+        --table) is set --name=table --die --output=table -- "$2" && shift 2 ;;
+        --drop) drop=1 && shift ;;
         --) shift && break ;;
         *) die "$(gettext "Unrecognized option"): $1" ;;
         esac
     done
-    is enum --name=command --allow="headers count select" --die --output=cmd -- "$1"
+    is enum --name=command --allow="headers count select filter sort reverse print to" --die --output=cmd -- "$1"
     # processing
     install qsv
     case $cmd in
     headers) qsv headers "${opt[@]}" ;;
-    count) qsv count "${opt[@]}" ;;
-    select) qsv select "${opt[@]}" 1 ;;
-    esac
-}
-esv2() {
-    # parameter parsing
-    local opt=()
-    eval set -- "$(option_parse $'d delimiter +' "$@")"
-    while true; do
-        case "$1" in
-        -d | --delimiter) is set --name=delimiter --die -- "$2" && opt+=(-d "$2") && shift 2 ;;
-        --no-headers) opt+=(-n) && shift ;;
-        --) shift && break ;;
-        *) die "$(gettext "Unrecognized option"): $1" ;;
+    count)
+        is empty -- "$noHeaders" || opt+=(-n)
+        is empty -- "$input" || opt+=("$input")
+        qsv count "${opt[@]}"
+        ;;
+    select)
+        is empty -- "$noHeaders" || opt+=(-n)
+        is empty -- "$output" || opt+=(-o "$output")
+        is empty -- "$sort" || opt+=(-S)
+        is empty -- "$input" || opt+=("$input")
+        is set --name=selection --die -- "$2"
+        qsv select "${opt[@]}" "$2"
+        ;;
+    filter)
+        is empty -- "$noHeaders" || opt+=(-n)
+        is empty -- "$literal" || opt+=(--literal)
+        is empty -- "$exact" || opt+=(--exact)
+        is empty -- "$invert" || opt+=(-v)
+        is empty -- "$flag" || opt+=(-f "$flag")
+        is empty -- "$3" || opt+=(-s "$3")
+        is empty -- "$ignoreCase" || opt+=(-i)
+        is empty -- "$output" || opt+=(-o "$output")
+        is set --name=regex --die -- "$2" && opt+=("$2")
+        is empty -- "$input" || opt+=("$input")
+        qsv search "${opt[@]}" --not-one | qsv fmt -t '\t'
+        ;;
+    sort)
+        is empty -- "$noHeaders" || opt+=(-n)
+        is empty -- "$2" || opt+=(-s "$2")
+        is empty -- "$numeric" || opt+=(-N)
+        is empty -- "$natural" || opt+=(--natural)
+        is empty -- "$reverse" || opt+=(-R)
+        is empty -- "$ignoreCase" || opt+=(-i)
+        is empty -- "$unique" || opt+=(-u)
+        is empty -- "$output" || opt+=(-o "$output")
+        is empty -- "$input" || opt+=("$input")
+        qsv sort "${opt[@]}" | qsv fmt -t '\t'
+        ;;
+    reverse)
+        is empty -- "$noHeaders" || opt+=(-n)
+        is empty -- "$output" || opt+=(-o "$output")
+        is empty -- "$input" || opt+=("$input")
+        qsv reverse "${opt[@]}" | qsv fmt -t '\t'
+        ;;
+    print)
+        is empty -- "$output" || opt+=(-o "$output")
+        is empty -- "$maxWidth" || opt+=(-c $((maxWidth - 3)))
+        is empty -- "$input" || opt+=("$input")
+        qsv color "${opt[@]}"
+        ;;
+    to)
+        is enum --name=format --allow="csv postgres sqlite xslx ods json" --die -- "$2"
+        local temp
+        case $2 in
+        csv)
+            is empty -- "$output" || opt+=(-o "$output")
+            is empty -- "$input" || opt+=("$input")
+            qsv fmt -t ',' "${opt[@]}"
+            ;;
+        json)
+            is empty -- "$output" || opt+=(-o "$output")
+            is empty -- "$input" || opt+=("$input")
+            qsv tojsonl "${opt[@]}"
+            ;;
+        postgres)
+            is set ---name=table --die -- "$table"
+            temp="$(mktemp -d $$)"
+            if is set -- "$input"; then
+                cp "$input" "$temp/$table.tsv"
+            else
+                cat >"$temp/$table.tsv"
+            fi
+            if is set -- "$3"; then
+                is empty -- "$schema" || opt+=(--schema "$schema")
+                is false -- "$drop" || opt+=(--drop)
+                opt+=("$3")
+            elif is set -- "$output"; then
+                opt+=(--dump "$output")
+            else
+                opt+=(--dump -)
+            fi
+            qsv to postgres "${opt[@]}" "$temp/$table.tsv"
+            rm -rf "$temp"
+            ;;
+        sqlite)
+            is set ---name=table --die -- "$table"
+            temp="$(mktemp -d $$)"
+            if is set -- "$input"; then
+                cp "$input" "$temp/$table.tsv"
+            else
+                cat >"$temp/$table.tsv"
+            fi
+            if is set -- "$3"; then
+                is empty -- "$schema" || opt+=(--schema "$schema")
+                is false -- "$drop" || opt+=(--drop)
+                opt+=("$3")
+            elif is set -- "$output"; then
+                opt+=(--dump "$output")
+            else
+                opt+=(--dump -)
+            fi
+            qsv to sqlite "${opt[@]}" "$temp/$table.tsv"
+            rm -rf "$temp"
+            ;;
+        xlsx | ods)
+            is set -- "$input" || opt+=(--pipe)
+            is empty -- "$output" || opt+=("$output")
+            if is set -- "$input"; then
+                opt+=("$input")
+            else
+                opt+=("-")
+            fi
+            qsv to $2 "${opt[@]}"
+            ;;
         esac
-    done
-    is enum --name=command --allow="headers count" --die --output=cmd -- "$1"
-    # processing
-    install ebay-tsv-utils
-    case $cmd in
-    headers) qsv headers "${opt[@]}" ;;
-    count) qsv count "${opt[@]}" ;;
+        ;;
     esac
 }
 
