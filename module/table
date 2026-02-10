@@ -99,6 +99,18 @@ use software
 # tsv filter --flag=<column> 'pattern' # Flag matched rows in a new column named <column>
 # ```
 #
+# **slice**
+#
+# Get only the rows in the range specified.
+#
+# ```bash
+# tsv slice 2               # Slice from the 3rd record to the end
+# tsv slice 0 2             # Slice the first three records
+# tsv slice -1              # Slice the last record
+# tsv slice -10             # Slice the last 10 records
+# tsv slice -10 --invert    # Get everything except the last 10 records
+# ```
+#
 # **sort**
 #
 # Sorts data in lexicographical, natural, numerical, reverse, unique or random order.
@@ -119,6 +131,23 @@ use software
 # **print**
 #
 # Outputs data as a visual table with columns in alignment.
+#
+# **edit**
+#
+# Replace the value of a cell specified by its row and column.
+#
+# ```bash
+# tsv edit 0 0 aaa      # Set first column in the first row to "aaa"
+# ```
+#
+# **crop**
+#
+# Crop the column to maximum length.
+#
+# ```bash
+# tsv crop 1 10         # Crop column 1 to maximum 10 characters
+# tsv crop name 10      # Crop column "name" to maximum 10 characters
+# ```
 #
 # **to**
 #
@@ -144,9 +173,12 @@ use software
 #           <tsv> | tsv count [options]
 #           <tsv> | tsv select [options] <selection>
 #           <tsv> | tsv filter [options] <regex> <selection>
+#           <tsv> | tsv slice [options] <start> <end>
 #           <tsv> | tsv sort [options] <selection>
 #           <tsv> | tsv reverse [options]
-#           <tsv> | tsv print [options] <selection>
+#           <tsv> | tsv edit [options] <col-num> <row-num> <value>
+#           <tsv> | tsv crop <column> <length>
+#           <tsv> | tsv print [options]
 #           <tsv> | tsv to <format> [<destination>] [options]
 # Options:  --no-headers                # input is without header
 #           -i, --input-file <file>     # file to read from instead of STDIN
@@ -154,7 +186,7 @@ use software
 #           --sort                      # sort columns in select
 #           --literal                   # Treat the regex as a literal string do not interpret it
 #           --exact                     # Match the ENTIRE field exactly
-#           --invert                    # Filter only rows that did not match
+#           --invert                    # Filter/slice only rows that did not match
 #           --flag <column>             # Do not filter but add a filter column containing 0 for not matched, else the row number
 #           --numerical                 # sort numerical
 #           --natural                   # sort natural (numbers in strings are treaded numerical)
@@ -165,16 +197,9 @@ use software
 #           --schema <name>             # schema for to postgres export
 #           --table <name>              # table name
 #           --drop                      # drop table before insert to postgres
-# TODO: colorize based on filter maybe with color column at the end
-# TODO: colorize: fixlength + ???
-# TODO: crop column
-### cat data.tsv | qsv apply --new-column truncated \
-###   'lambda x: x[:17] + "…" if len(x) > 20 else x' \
-###   col1 --delimiter $'\t' | \
-### qsv select truncated,col2,col3 --delimiter $'\t'
-sv() {
+tsv() {
     # parameter parsing
-    local opt=(-d $'\t') QSV_DEFAULT_DELIMITER=$'\t' noHeaders input output sort literal exact invert flag numerical natural reverse ignoreCase unique maxWidth schema table drop
+    local opt=(-d $'\t') opt2=() QSV_DEFAULT_DELIMITER=$'\t' noHeaders input output sort literal exact invert flag numerical natural reverse ignoreCase unique maxWidth schema table drop
     eval set -- "$(option_parse $'- no-headers -\ni input-file +\no output-file +\ns sort -\n- max-col-width +\n- schema +\n-table +\n- drop -' "$@")"
     while true; do
         case "$1" in
@@ -199,14 +224,18 @@ sv() {
         *) die "$(gettext "Unrecognized option"): $1" ;;
         esac
     done
-    is enum --name=command --allow="headers count select filter sort reverse print to" --die --output=cmd -- "$1"
+    is enum --name=command --allow="headers count select filter slice sort reverse edit crop print to" --die --output=cmd -- "$1"
     # processing
     install qsv
     case $cmd in
-    headers) qsv headers "${opt[@]}" ;;
+    headers)
+        is integer --name=arguments --max=1 --die -- $#
+        qsv headers "${opt[@]}"
+        ;;
     count)
         is empty -- "$noHeaders" || opt+=(-n)
         is empty -- "$input" || opt+=("$input")
+        is integer --name=arguments --max=1 --die -- $#
         qsv count "${opt[@]}"
         ;;
     select)
@@ -215,6 +244,7 @@ sv() {
         is empty -- "$sort" || opt+=(-S)
         is empty -- "$input" || opt+=("$input")
         is set --name=selection --die -- "$2"
+        is integer --name=arguments --max=2 --die -- $#
         qsv select "${opt[@]}" "$2"
         ;;
     filter)
@@ -225,10 +255,21 @@ sv() {
         is empty -- "$flag" || opt+=(-f "$flag")
         is empty -- "$3" || opt+=(-s "$3")
         is empty -- "$ignoreCase" || opt+=(-i)
-        is empty -- "$output" || opt+=(-o "$output")
         is set --name=regex --die -- "$2" && opt+=("$2")
         is empty -- "$input" || opt+=("$input")
-        qsv search "${opt[@]}" --not-one | qsv fmt -t '\t'
+        is empty -- "$output" || opt2+=(-o "$output")
+        is integer --name=arguments --max=3 --die -- $#
+        qsv search "${opt[@]}" --not-one | qsv fmt "${opt2[@]}" -t '\t'
+        ;;
+    slice)
+        is empty -- "$noHeaders" || opt+=(-n)
+        is empty -- "$invert" || opt+=(--invert)
+        is empty -- "$2" || opt+=(-s "$2")
+        is empty -- "$3" || opt+=(-e "$3")
+        is empty -- "$input" || opt+=("$input")
+        is empty -- "$output" || opt2+=(-o "$output")
+        is integer --name=arguments --max=3 --die -- $#
+        qsv slice "${opt[@]}" | qsv fmt "${opt2[@]}" -t '\t'
         ;;
     sort)
         is empty -- "$noHeaders" || opt+=(-n)
@@ -238,9 +279,10 @@ sv() {
         is empty -- "$reverse" || opt+=(-R)
         is empty -- "$ignoreCase" || opt+=(-i)
         is empty -- "$unique" || opt+=(-u)
-        is empty -- "$output" || opt+=(-o "$output")
         is empty -- "$input" || opt+=("$input")
-        qsv sort "${opt[@]}" | qsv fmt -t '\t'
+        is empty -- "$output" || opt2+=(-o "$output")
+        is integer --name=arguments --max=2 --die -- $#
+        qsv sort "${opt[@]}" | qsv fmt "${opt2[@]}" -t '\t'
         ;;
     reverse)
         is empty -- "$noHeaders" || opt+=(-n)
@@ -248,10 +290,45 @@ sv() {
         is empty -- "$input" || opt+=("$input")
         qsv reverse "${opt[@]}" | qsv fmt -t '\t'
         ;;
+    edit)
+        is empty -- "$noHeaders" || opt+=(-n)
+        is empty -- "$noHeaders" || opt2+=(-n)
+        is integer --name=arguments --min=4 --max=4 --die -- $#
+        qsv fmt "${opt[@]}" | qsv edit "${opt2[@]}" - "$2" "$3" "$4" | qsv fmt -t '\t'
+        ;;
+    crop)
+        is set --name=column --die -- "$2"
+        is integer --name=width --min=3 --die -- "$3"
+        cat "${input:-/dev/stdin}" |
+            if is integer -- "$2"; then
+                awk -F $'\t' -v OFS=$'\t' -v col="$2" -v width="$3" '
+                    BEGIN { col_idx = col + 0 }  # Convert to 0-based index
+                    NR==1 { print; next }        # Pass header unchanged
+                    NF>0 {
+                        if (length($col_idx) > width) {
+                            $col_idx = substr($col_idx, 1, width-1) "…"
+                        }
+                        print
+                    }'
+            else
+                awk -F $'\t' -v OFS=$'\t' -v colname="$2" -v width="$3" '
+                    NR==1 {
+                        for(i=1; i<=NF; i++) if($i == colname) { col_idx=i; break }
+                        print; next
+                    }
+                    NF>0 {                      # ← Skip empty lines
+                        if (length($col_idx) > width) {
+                            $col_idx = substr($col_idx, 1, width-1) "…"
+                        }
+                        print
+                    }'
+            fi >"${output:-/dev/stdout}"
+        ;;
     print)
         is empty -- "$output" || opt+=(-o "$output")
         is empty -- "$maxWidth" || opt+=(-c $((maxWidth - 3)))
         is empty -- "$input" || opt+=("$input")
+        is integer --name=arguments --max=1 --die -- $#
         qsv color "${opt[@]}"
         ;;
     to)
@@ -261,15 +338,18 @@ sv() {
         csv)
             is empty -- "$output" || opt+=(-o "$output")
             is empty -- "$input" || opt+=("$input")
+            is integer --name=arguments --max=2 --die -- $#
             qsv fmt -t ',' "${opt[@]}"
             ;;
         json)
             is empty -- "$output" || opt+=(-o "$output")
             is empty -- "$input" || opt+=("$input")
+            is integer --name=arguments --max=2 --die -- $#
             qsv tojsonl "${opt[@]}"
             ;;
         postgres)
             is set ---name=table --die -- "$table"
+            is integer --name=arguments --max=3 --die -- $#
             temp="$(mktemp -d $$)"
             if is set -- "$input"; then
                 cp "$input" "$temp/$table.tsv"
@@ -290,6 +370,7 @@ sv() {
             ;;
         sqlite)
             is set ---name=table --die -- "$table"
+            is integer --name=arguments --max=3 --die -- $#
             temp="$(mktemp -d $$)"
             if is set -- "$input"; then
                 cp "$input" "$temp/$table.tsv"
@@ -311,6 +392,7 @@ sv() {
         xlsx | ods)
             is set -- "$input" || opt+=(--pipe)
             is empty -- "$output" || opt+=("$output")
+            is integer --name=arguments --max=2 --die -- $#
             if is set -- "$input"; then
                 opt+=("$input")
             else
@@ -320,165 +402,5 @@ sv() {
             ;;
         esac
         ;;
-    esac
-}
-
-# Transform tab separated table
-#
-# The main element for tabular data within the BashLib is tab separated values which can easily used in bash.
-# This command collection help with some common use cases to make them easier to write.
-#
-# To run multiple actions call it multiple times in a pipe.
-#
-# The **filter** command uses @check to do it's work so <type> <operator> <comparison> are all passed through.
-# To combine multiple filters pipe it through the command multiple times to have AND condition.
-# Run the original string a second time through `tsv filter --remove-header...` to habe an OR condition (this may lead to duplicate lines, which you may remove with a sort).
-#
-# Usage:    <string> | tsv crop <num|name> <width>                  # crop column
-#           <string> | tsv sort <num|name> [numeric/human] [<options>]    # sort by column
-#           <string> | tsv reverse [<options>]                      # reverse order
-#           <string> | tsv to {csv|pprint} [<options>]              # convert
-#           <string> | tsv filter [<type> <num|name> <operator> <compare>]   # filter some rows
-# Options:  --with-header              # keep first line as header in `sort`, `reverse`
-#           --remove-header            # remove first (header) line
-#           --unique                   # removes duplicate lines (only in tsv sort)
-# Example:  - `<string> | tsv filter --remove-header`
-tsv() {
-    # parameter parsing
-    local withHeader removeHeader cmd unique
-    eval set -- "$(option_parse $'- with-header -\n- remove-header -' "$@")"
-    while true; do
-        case "$1" in
-        --with-header) withHeader=1 && shift ;;
-        --remove-header) removeHeader=1 && shift ;;
-        --unique) unique=1 && shift ;;
-        --) shift && break ;;
-        *) die "$(gettext "Unrecognized option"): $1" ;;
-        esac
-    done
-    is enum --name=command --allow="crop sort reverse to filter" --die --output=cmd -- "$1"
-    # processing
-    local separator=$'\t' input
-    input=$(cat) # read stdin
-    is false -- "$removeHeader" || removeHeader="${removeHeader#*$'\n'}"
-    case $cmd in
-    filter)
-        local header cols idx line
-        if is true -- "$withHeader"; then
-            header="$(head -1 <<<"$input")"
-            echo "$header"
-            input="$(tail -n +2 <<<"$input")"
-        fi
-        if (($# >= 2)); then
-            is set --name=type --die -- "$2"
-            is set --name=num-name --die -- "$3"
-            is set --name=operator --die -- "$4"
-            is set --name=compare --die -- "$5"
-            is integer --name=arguments --min=4 --max=5 --die -- $#
-            IFS=$'\t' read -r -a cols <<<"$header"
-            if is integer -- "$3"; then
-                idx=$(($3 - 1))
-            else
-                is set -- "$header" || die "Named columns only possible using --with-header option"
-                idx="$(array cols indexof "$3")" || die "Column [$3] not found in table"
-            fi
-            debug "filter $2 cols[$idx] $4 $5"
-            while IFS= read -r line; do
-                IFS=$'\t' read -r -a cols <<<"$line"
-                debug "check $2 $idx:\"${cols[idx]}\" \"$4\" \"$5\""
-                check $2 "${cols[idx]}" "$4" "$5" || continue
-                echo "$line"
-            done <<<"$input"
-        else
-            printf '%s' "$input"
-        fi
-        ;;
-    to)
-        is enum --name=format --allow="csv pprint" --die -- "$2"
-        is integer --name=arguments --max=2 --die -- $#
-        local format=$2
-        case $format in
-        csv)
-            awk '
-                BEGIN { FS="\t"; OFS="," }
-                {
-                    for(i=1; i<=NF; i++) {
-                        if ($i ~ /,|"|\n/) {
-                            gsub(/"/, "\"\"", $i)  # double quotes inside field
-                            $i = "\"" $i "\""
-                        }
-                    }
-                    $1 = $1  # force rebuilding the line with OFS
-                    print
-                }
-                ' <<<"$input"
-            ;;
-        pprint)
-            input="$(column -t -s $'\t' <<<"$input")"
-            if is true -- "$withHeader"; then
-                echo "${CC_INVERS}${input%%$'\n'*}${CC_RESET}"
-                input="${input#*$'\n'}"
-            fi
-            echo "$input"
-            ;;
-        *) die "Allowed formats are only csv, not [$format]" ;;
-        esac
-        ;;
-    crop)
-        is set --name=num-name -- "$2"
-        is integer --name=width --min=3 --die -- "$3"
-        is integer --name=arguments --max=4 --die -- $#
-        local cols idx
-        IFS=$separator read -r -a cols < <(head -n 1 <<<"$input")
-        is integer -- "$2" && idx=$(($2 - 1)) || idx="$(array cols indexof "$2")" || die "Column [$2] not found in table"
-        local width="$3"
-        [[ -n "$idx" && -n "$width" ]] || die "Usage: table crop <column> <width>"
-        local line orig
-        while IFS=$separator read -r -a line; do
-            orig="${line[idx]}"
-            # Crop string to width, adding "…" if truncated
-            ((${#orig} <= width)) || line[idx]="${orig:0:width-1}…"
-            (
-                IFS="$separator"
-                printf '%s\n' "${line[*]}"
-            )
-        done <<<"$input"
-        ;;
-    sort)
-        is set --name=num-name -- "$2"
-        is empty -- "$3" || is enum --name=format --allow="numeric human" --die -- "$3"
-        is integer --name=arguments --max=4 --die -- $#
-        local cols idx
-        IFS=$separator read -r -a cols < <(head -n 1 <<<"$input")
-        is integer -- "$2" && idx=$(($2 - 1)) || idx="$(array cols indexof "$2")" || die "Column [$2] not found in table"
-        local col type
-        col=$((idx + 1))
-        case "$3" in
-        numeric) type=n ;;
-        human) type=h ;;
-        esac
-        is empty -- "$unique" || type+=u
-        [[ -n "$idx" ]] || die "Usage: table sort <column> [numeric/human]"
-        # sort
-        if is true -- "$withHeader"; then
-            (
-                IFS="$separator"
-                printf '%s\n' "${cols[*]}"
-            )
-            tail -n +2 <<<"$input" | sort -t $'\t' "-k${col},${col}${type}"
-        else
-            sort -t $'\t' "-k${col},${col}${type}" <<<"$input"
-        fi
-        ;;
-    reverse)
-        is integer --name=arguments --max=1 --die -- $#
-        if is true -- "$withHeader"; then
-            head -1 <<<"$input"
-            tail -n +2 <<<"$input" | tac
-        else
-            tac <<<"$input"
-        fi
-        ;;
-    *) die "Usage: tsv {to|crop} [<value>]" ;;
     esac
 }

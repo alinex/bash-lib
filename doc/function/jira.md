@@ -21,6 +21,12 @@ jira md_to_adf <json>
 jira adf_to_md <md>
 ```
 
+### Options
+
+```bash
+--no-die                                      # output error, put it into `$JIRA_ERROR` and go on
+```
+
 ### Globals
 
 - - `$JIRA_HOST`
@@ -35,8 +41,9 @@ jira adf_to_md <md>
 
 ### Return (exit code)
 
-- - die on 400, 404 Error
-- - retry on other not 2xx Code
+- - immediate die on 400, 404 Error
+- - retry on other not 2xx Code and later die
+- - 1 if error with --no-die option
 - 
 
 ### Description

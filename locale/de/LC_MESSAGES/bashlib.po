@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-02-06 14:00+0100\n"
+"POT-Creation-Date: 2026-02-10 21:51+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,13 +18,13 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 
 #: core/misc:134 core/validator:74 core/array:129 module/os:241 module/os:353
-#: module/os:427 module/network:24 module/trivy:119 module/compress:44
-#: module/monitoring:166 module/input:31 module/input:88 module/input:198
-#: module/input:452 module/input:651 module/log:63 module/process:359
-#: module/process:407 module/process:490 module/process:637 module/remote:84
-#: module/remote:206 module/remote:248 module/remote:286 module/database:36
-#: module/mattermost:309 module/mattermost:340 module/table:55 module/table:76
-#: module/table:118 module/crypto:41 module/git:23 module/git:61
+#: module/os:427 module/network:24 module/atlassian:101 module/trivy:119
+#: module/compress:44 module/monitoring:166 module/input:31 module/input:88
+#: module/input:198 module/input:452 module/input:651 module/log:63
+#: module/process:359 module/process:407 module/process:490 module/process:637
+#: module/remote:84 module/remote:206 module/remote:248 module/remote:286
+#: module/database:36 module/mattermost:309 module/mattermost:340
+#: module/table:224 module/crypto:41 module/git:23 module/git:61
 #: module/software:245
 msgid "Unrecognized option"
 msgstr "Unbekannte Option"
@@ -404,19 +404,19 @@ msgstr "Splitte JSON in einzelne Reports..."
 msgid "Found $found vulnerabilities."
 msgstr "$found Sicherheitsprobleme gefunden"
 
-#: module/trivy:207
+#: module/trivy:209
 msgid "Build queue to optimize reports..."
 msgstr "Aufbau der Warteschlange für die Report Generierung..."
 
-#: module/trivy:211
+#: module/trivy:213
 msgid "Run queue to optimize reports..."
 msgstr "Start der Warteschlange zur Report Generierung..."
 
-#: module/trivy:215
+#: module/trivy:217
 msgid "Create summaries..."
 msgstr "Erstelle Zusammenfassungen..."
 
-#: module/trivy:325
+#: module/trivy:327
 #, sh-format
 msgid ""
 "Downgrade $severity -> MEDIUM because it was published less than 3 days ago"
@@ -424,7 +424,7 @@ msgstr ""
 "Herunterstufen $severity -> MEDIUM, weil diese Lücke erst in den letzten 3 "
 "Tagen veröffentlicht wurde"
 
-#: module/trivy:334
+#: module/trivy:336
 msgid ""
 "Add information of known exploits and cancel downgrades in case of just "
 "published"
@@ -432,64 +432,64 @@ msgstr ""
 "Füge Informationen zu bekannten Exploits hinzu und streiche mögliche "
 "Herunterstufungen durch kürzliches publizieren"
 
-#: module/trivy:343
+#: module/trivy:345
 #, sh-format
 msgid "Downgrade $severity -> MEDIUM because it is a dev dependency"
 msgstr ""
 "Herunterstufen $severity -> MEDIUM, weil es sich um eine reine "
 "Entwicklungsabhängigkeit handelt"
 
-#: module/trivy:388
+#: module/trivy:390
 #, sh-format
 msgid "Downgrade $severity -> MEDIUM because of Jira status $deploy"
 msgstr "Herunterstufen $severity -> MEDIUM, durch Jira Status $deploy"
 
-#: module/trivy:389 module/trivy:453
+#: module/trivy:391 module/trivy:455
 #, sh-format
 msgid "$id at $target"
 msgstr "$id in $target"
 
-#: module/trivy:452
+#: module/trivy:454
 msgid "Add information from Jira"
 msgstr "Hinzufügen der Jira Informationen"
 
-#: module/trivy:494
+#: module/trivy:496
 #, sh-format
 msgid "Rating: $severity (CVSS rating $value)"
 msgstr "Einstufung: $severity (CVSS Wert $value)"
 
-#: module/trivy:496
+#: module/trivy:498
 #, sh-format
 msgid "Status: Fixed from version $value $fixStatus"
 msgstr "Status: Gelöst in Version $value $fixStatus"
 
-#: module/trivy:500
+#: module/trivy:502
 #, sh-format
 msgid "Date:   Vulnerability known since $human ($value days ago)"
 msgstr "Datum:  Sicherheitslücke bekannt seit $human (vor $value Tagen)"
 
-#: module/trivy:502
+#: module/trivy:504
 #, sh-format
 msgid "Exploit known since $exploitDate at $exploitVendor $exploitProduct"
 msgstr "Exploit bekannt seit $exploitDate bei $exploitVendor $exploitProduct"
 
-#: module/trivy:505
+#: module/trivy:507
 msgid "Responsible"
 msgstr "Zuständig"
 
-#: module/trivy:506
+#: module/trivy:508
 msgid "Deploy"
 msgstr "Deploy"
 
-#: module/trivy:507
+#: module/trivy:509
 msgid "Last comments"
 msgstr "Letzte Kommentare"
 
-#: module/trivy:509
+#: module/trivy:511
 msgid "Sources"
 msgstr "Quellen"
 
-#: module/trivy:516
+#: module/trivy:518
 msgid "Links"
 msgstr "Links"
 

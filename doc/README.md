@@ -270,6 +270,8 @@ This covers Atlassian API for Jira and confluence.
 | ``$ATLASSIAN_TOKEN`` | Atlassian password for API access in confluence and jira |
 | ``$CONFLUENCE_API`` | Atlassian confluence API URL used together with `$ATLASSIAN_USER` and `$ATLASSIAN_TOKEN` and silently disables [`confluence`](functionconfluence.md) functions if not set |
 | ``$JIRA_HOST`` | Atlassian Jira URL this can be https://my-company.atlassian.net used together with `$ATLASSIAN_USER` and `$ATLASSIAN_TOKEN` and silently disables [`jira`](functionjira.md) functions if not set |
+| ``$JIRA_HTTP_CODE`` | Last HTTP return code from jira |
+| ``$JIRA_ERROR`` | This will be set by using `jira --no-die` instead, so you can work arround it and go on in the script flow. |
 | [`confluence`](function/confluence.md) | Get page content from Confluence using API |
 | [`jira`](function/jira.md) | Jira API calls |
 
@@ -474,7 +476,7 @@ Module with modifiers for csv/tsv tables.
 | Variable/Function | Description |
 | --- | --- |
 | [`csv`](function/csv.md) | Transform comma separated table |
-| [`tsv`](function/tsv.md) | Transform tab separated table |
+| [`tsv`](function/tsv.md) | tsv filter --exact 'completed' status  # Search for exact matches of 'completed' in the 'status' column |
 
 ### Trivy Module
 
