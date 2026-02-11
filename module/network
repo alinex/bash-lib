@@ -174,7 +174,12 @@ _ip_extern_ipinfo_co() {
 ### Connectivity
 ######################################################################################
 
+# Check if a server is pingable
+#
+# Usage:    ping_check <name-or-ip>
+# Return:   - 0 if ping succeeded
+#           - 1 if not
 ping_check() {
-    is set --name=dns-or-ip --die -- "$1"
+    is set --name=name-or-ip --die -- "$1"
     ping -c 1 -W 1 "$1" >/dev/null 2>&1
 }

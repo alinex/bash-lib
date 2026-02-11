@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-02-11 18:10+0100\n"
+"POT-Creation-Date: 2026-02-11 19:24+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -21,7 +21,7 @@ msgstr ""
 #: module/os:428 module/network:24 module/atlassian:101 module/trivy:119
 #: module/compress:44 module/monitoring:166 module/input:31 module/input:88
 #: module/input:198 module/input:452 module/input:651 module/log:63
-#: module/process:375 module/process:423 module/process:506 module/process:653
+#: module/process:376 module/process:424 module/process:507 module/process:654
 #: module/remote:84 module/remote:206 module/remote:248 module/remote:286
 #: module/database:36 module/mattermost:309 module/mattermost:340
 #: module/table:223 module/table:437 module/crypto:41 module/git:23
@@ -632,62 +632,63 @@ msgstr "PID Lockfile konnte nicht erstellt werden"
 msgid "Waiting for unlock in $lockfile by PID $pid"
 msgstr "Warten, bis zur Freigabe in $lockfile durch PID $pid"
 
-#: module/process:311
+#: module/process:312
 msgid "Work steps are logged so that you can resume work mid-process"
 msgstr ""
 "Arbeitsschritte werden protokolliert um auch mittendrin wieder aufzusetzen"
 
-#: module/process:314
+#: module/process:315
 #, sh-format
 msgid "Previous run will be resumed, $num steps are already done"
-msgstr "Vorheriger Lauf wird fortgeführt, $num Arbeitsschritte sind schon vollendet"
+msgstr ""
+"Vorheriger Lauf wird fortgeführt, $num Arbeitsschritte sind schon vollendet"
 
-#: module/process:382 module/process:449 module/process:516
+#: module/process:383 module/process:450 module/process:517
 #, sh-format
 msgid "Skip: $name (already done)"
 msgstr "Abbrechen: $name (bereits durchgeführt)"
 
-#: module/process:386 module/process:453 module/process:551
+#: module/process:387 module/process:454 module/process:552
 #, sh-format
 msgid "Start: $name"
 msgstr "Starte: $name"
 
-#: module/process:389 module/process:537
+#: module/process:390 module/process:538
 #, sh-format
 msgid "Finished: $name"
 msgstr "Fertig: $name"
 
-#: module/process:464
+#: module/process:465
 #, sh-format
 msgid "Finished: $check"
 msgstr "Fertig: $check"
 
-#: module/process:520
+#: module/process:521
 #, sh-format
 msgid "Queue: $name"
 msgstr "Warteschlange: $name"
 
-#: module/process:555
+#: module/process:556
 #, sh-format
 msgid "Queued $started/$total jobs"
 msgstr "Warteschlange $started/$total Jobs"
 
-#: module/process:664
+#: module/process:665
 #, sh-format
 msgid "No process with pid $pid"
 msgstr "Kein Prozess mit PID $pid"
 
-#: module/process:672
+#: module/process:673
 #, sh-format
 msgid "No processes found for $search"
 msgstr "Keine Prozesse für $search gefunden"
 
-#: module/process:717
+#: module/process:718
 #, sh-format
 msgid "Waiting for $pid ($pcpu% CPU)"
 msgstr "Warten auf $pid ($pcpu% CPU)"
 
-#: module/process:721
+#: module/process:722
 #, sh-format
 msgid "Timeout after ${timeout}s"
 msgstr "Abbruch nach ${timeout}s"

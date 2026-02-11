@@ -8,6 +8,7 @@ The process looks like:
 
 ```bash
 # define which variables should be hold over steps and be reset on a rerun after that
+# this has to be always be before the @steps[ init] command
 STEPS_VARIABLES="num"
 # initialize step control, without this line everything will work but without resume
 steps init
@@ -41,3 +42,17 @@ echo "num=$num"
 # and if you reach this everything is done and the step control will be finished so the next run is a new run
 steps end
 ```
+
+## Multiple step control
+
+If you want to have multiple parallel step control plans within the same script, set an identifier for each one as additional name on the init call:
+
+```bash
+steps init $specificRun
+```
+
+This will be used for the storage file.
+
+## Async and Queue
+
+This methods also allow step control and can be added/mixed with the sync call.

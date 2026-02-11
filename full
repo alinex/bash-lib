@@ -2824,7 +2824,7 @@ hash _ip_extern_data set org "$(jq .org -r <<<"$json")"
 hash _ip_extern_data set loc "$(jq .loc -r <<<"$json")"
 }
 ping_check(){
-is set -ndns-or-ip -d -- "$1"
+is set -nname-or-ip -d -- "$1"
 ping -c 1 -W 1 "$1" >/dev/null 2>&1
 }
 declare -A _os_detected
