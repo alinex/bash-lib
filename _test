@@ -21,7 +21,7 @@ DESCRIPTION=""
 #trivy root --progress --no-secrets --clean
 #exit
 
-timer_info
+timer_info | qsv table -d $'\t'
 exit
 
 in=$'Number\tName\n1\tone\n2\ttwo\n10\tten thousand and one hundred fourty five\n'

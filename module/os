@@ -359,54 +359,55 @@ disk_free() {
     local firstLine="" percent mount device limit_c limit_e limit_w limit_o
     IFS=$'\n'
     # shellcheck disable=SC2248
-    for line in $(df -h $opt -x tmpfs -x efivarfs -x devtmpfs -x squashfs "$@"); do
-        if [ -z "$firstLine" ]; then
-            firstLine=1
-            printf "${CC_INVERSE}%s${CC_RESET}\n" "$line"
-        else
-            percent=$(echo "$line" | xargs echo | cut -d' ' -f5 | sed 's/%//')
-            bytes=$(echo "$line" | xargs echo | cut -d' ' -f4)
-            mount=$(echo "$line" | xargs echo | cut -d' ' -f6 | sed 's/\r$//')
-            # get color limits
-            device=$(echo "$line" | xargs echo | cut -d' ' -f1)
-            # shellcheck disable=SC2154
-            for ((i = 0; i < ${#MOUNT_COLOR_LIMIT[@]}; i += 5)); do
-                pattern="${MOUNT_COLOR_LIMIT[i]}"
-                if [[ "$device" =~ $pattern ]]; then
-                    limit_c="${MOUNT_COLOR_LIMIT[i + 1]}"
-                    limit_e="${MOUNT_COLOR_LIMIT[i + 2]}"
-                    limit_w="${MOUNT_COLOR_LIMIT[i + 3]}"
-                    limit_o="${MOUNT_COLOR_LIMIT[i + 4]}"
-                    break
-                fi
-            done
-            # display
-            if ((percent == limit_c)); then
-                critical "$line"
-            elif ((percent == limit_e)); then
-                error "$line"
-            elif ((percent == limit_w)); then
-                warn "$line"
-            elif ((percent == limit_o)); then
-                ok "$line"
+    df -h $opt -x tmpfs -x efivarfs -x devtmpfs -x squashfs "$@" |
+        while IFS= read -r line; do
+            if [ -z "$firstLine" ]; then
+                firstLine=1
+                printf "${CC_INVERSE}%s${CC_RESET}\n" "$line"
             else
-                printf '%s\n' "$line"
-            fi
-            # collection limit
-            if declare -p collect >/dev/null; then
-                # shellcheck disable=SC1105
-                if [ -n "$free_operator" ]; then
-                    if [ -n "$free_percent" ] &&
-                        eval "(( 100 - percent $free_operator free_percent ))"; then
-                        collect+="${mount} "
-                    elif [ -n "$free_bytes" ] &&
-                        eval "(( bytes $free_operator free_bytes ))"; then
-                        collect+="${mount} "
+                percent=$(echo "$line" | xargs echo | cut -d' ' -f5 | sed 's/%//')
+                bytes=$(echo "$line" | xargs echo | cut -d' ' -f4)
+                mount=$(echo "$line" | xargs echo | cut -d' ' -f6 | sed 's/\r$//')
+                # get color limits
+                device=$(echo "$line" | xargs echo | cut -d' ' -f1)
+                # shellcheck disable=SC2154
+                for ((i = 0; i < ${#MOUNT_COLOR_LIMIT[@]}; i += 5)); do
+                    pattern="${MOUNT_COLOR_LIMIT[i]}"
+                    if [[ "$device" =~ $pattern ]]; then
+                        limit_c="${MOUNT_COLOR_LIMIT[i + 1]}"
+                        limit_e="${MOUNT_COLOR_LIMIT[i + 2]}"
+                        limit_w="${MOUNT_COLOR_LIMIT[i + 3]}"
+                        limit_o="${MOUNT_COLOR_LIMIT[i + 4]}"
+                        break
+                    fi
+                done
+                # display
+                if ((percent == limit_c)); then
+                    critical "$line"
+                elif ((percent == limit_e)); then
+                    error "$line"
+                elif ((percent == limit_w)); then
+                    warn "$line"
+                elif ((percent == limit_o)); then
+                    ok "$line"
+                else
+                    printf '%s\n' "$line"
+                fi
+                # collection limit
+                if declare -p collect >/dev/null; then
+                    # shellcheck disable=SC1105
+                    if [ -n "$free_operator" ]; then
+                        if [ -n "$free_percent" ] &&
+                            eval "(( 100 - percent $free_operator free_percent ))"; then
+                            collect+="${mount} "
+                        elif [ -n "$free_bytes" ] &&
+                            eval "(( bytes $free_operator free_bytes ))"; then
+                            collect+="${mount} "
+                        fi
                     fi
                 fi
             fi
-        fi
-    done
+        done
     unset IFS
 }
 
@@ -604,18 +605,18 @@ timer_info() {
     # get user crontabs
     while read -r file; do
         sudo awk -v user="$(basename "$file")" '
-        /^[[:space:]]*#/ { next }
-        /^[[:space:]]*$/ { next }
-        /^[A-Za-z_]+=/{ next }
-        {
-            minute=$1; hour=$2; day=$3; month=$4; weekday=$5
-            command=""
-            for (i=6;i<=NF;i++) command = command (i==6?"":" ") $i
-            gsub(/"/, "\\\"", command)
-            printf "cron\t/var/spool/cron/crontabs/%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n", user, user, minute, hour, day, month, weekday, command
-        }
-    ' "$file"
-    done < <(sudo find /var/spool/crontabs /var/spool/cron/crontabs -type f 2>/dev/null)
+            /^[[:space:]]*#/ { next }
+            /^[[:space:]]*$/ { next }
+            /^[A-Za-z_]+=/{ next }
+            {
+                minute=$1; hour=$2; day=$3; month=$4; weekday=$5
+                command=""
+                for (i=6;i<=NF;i++) command = command (i==6?"":" ") $i
+                gsub(/"/, "\\\"", command)
+                printf "cron\t/var/spool/cron/crontabs/%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n", user, user, minute, hour, day, month, weekday, command
+            }
+        ' "$file"
+    done < <(sudo find /var/spool/cron -type f 2>/dev/null || true)
     # crontab + cron.d
     while read file minute hour day month weekday user command; do
         printf "cron\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" "$file" "$user" "$minute" "$hour" "$day" "$month" "$weekday" "$command"

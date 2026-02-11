@@ -48,8 +48,8 @@ repeat() {
     # processing
     ((n > 0)) || return
     shift
-    for n in $(seq "$n"); do
-        debug 3 "call #$n: $*"
+    for ((i = 1; i <= n; i++)); do
+        debug 3 "call #$i: $*"
         "$@"
     done
 }

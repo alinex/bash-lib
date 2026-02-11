@@ -439,10 +439,11 @@ _trivy_report() {
             local labels addLabel=()
             labels="$(jq '.fields.labels[]' -r <<<"$jira")"
             # shellcheck disable=SC2013
-            for label in $(sed 's#.*ekz.de/##;s#/-/.*##;s#[/.]# #g' <<<"$source"); do
-                [[ ! "$labels" =~ $label ]] || continue
-                addLabel+=('{"add": "'"$label"'"}')
-            done
+            sed 's#.*ekz.de/##;s#/-/.*##;s#[/.]# #g' <<<"$source" |
+                while IFS= read -r label; do
+                    [[ ! "$labels" =~ $label ]] || continue
+                    addLabel+=('{"add": "'"$label"'"}')
+                done
             if is set -- "$update"; then
                 update=1
                 if ((${#addLabel[@]} > 0)); then
