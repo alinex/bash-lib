@@ -1,6 +1,6 @@
 # tsv
 
-## tsv filter --exact 'completed' status  # Search for exact matches of 'completed' in the 'status' column
+## Transform tab separated table
 
 ### Usage
 
@@ -42,15 +42,67 @@
 
 ### Description
 
+
+**headers**
+
+Prints the column number and name (space separated) of the first row in the data.
+
+
+```
+1   Number
+2   Name
+```
+
+**count**
+
+Returns a count of the number of records in the data without the header.
+
+**select**
+
+Select columns from data efficiently.
+
+This command lets you manipulate the columns in data. You can re-order,
+duplicate, reverse or drop them. Columns can be referenced by index or by
+name if there is a header row (duplicate column names can be disambiguated with
+more indexing). Column ranges can also be specified. Finally, columns can be
+selected using regular expressions.
+
+
+```bash
+tsv select 1,4                # Select the first and fourth columns
+tsv select 1-4                # Select the first 4 columns (by index)
+tsv select Header1-Header4    # Select the first 4 columns (by name)
+tsv select 3-                 # Ignore the first 2 columns (by range)
+tsv select '!1-2'             # Ignore the first 2 columns (by index)
+tsv select 'Foo[2]'           # Select the third column named 'Foo':
+tsv select 1,_                # Select the first and last columns, _ is a special character for the last column:
+tsv select _-1                # Reverse the order of columns:
+tsv select /^a/               # select columns starting with 'a' (regex)
+tsv select '/^.*\d.*$/'       # select columns with a digit (regex)
+tsv select '!/SSN|account_no|password/'   # remove SSN, account_no and password columns (regex)
+tsv select 1- --sort          # Sort the columns lexicographically (i.e. by their byte values)
+tsv select 1,4,5-7 --sort     # Select some columns and then sort them
+tsv select '\"Date - Opening\",\"Date - Actual Closing\"'     # Quote column names that conflict with selector syntax:
+```
+
+**filter**
+
+Filter only rows matching the condition.
+
+
+```bash
+tsv filter 'foo.*bar'             # Search for rows where any field contains the regex 'foo.*bar' (case sensitive)
+tsv filter --ignore-case 'error' message     # Case insensitive search for 'error' in the 'message' column
+tsv filter --exact 'completed' status  # Search for exact matches of 'completed' in the 'status' column
 tsv filter --literal 'a.b*c'      # Search for literal string 'a.b*c' in all columns
 tsv filter --invert-match 'test'  # Invert match: select rows that do NOT match the regex 'test'
-tsv filter --flag=`<column>` 'pattern' # Flag matched rows in a new column named `<column>`
-
+tsv filter --flag=<column> 'pattern' # Flag matched rows in a new column named <column>
 ```
 
 **slice**
 
 Get only the rows in the range specified.
+
 
 ```bash
 tsv slice 2               # Slice from the 3rd record to the end
@@ -58,12 +110,12 @@ tsv slice 0 2             # Slice the first three records
 tsv slice -1              # Slice the last record
 tsv slice -10             # Slice the last 10 records
 tsv slice -10 --invert    # Get everything except the last 10 records
-
 ```
 
 **sort**
 
 Sorts data in lexicographical, natural, numerical, reverse, unique or random order.
+
 
 ```bash
 tsv sort                      # Sort lexicographical 1, 10, 11, ..., 2...
@@ -72,7 +124,6 @@ tsv sort --natural            # Sort natural: file1, file2, .... file10...
 tsv sort --case-insensitive   # Sort case insensitive
 tsv sort --unique --reverse   # Sort in reverse order and show only rows unique in the sort columns
 tsv sort 3,4                  # Sort after column 3 and 4
-
 ```
 
 **reverse**
@@ -87,24 +138,25 @@ Outputs data as a visual table with columns in alignment.
 
 Replace the value of a cell specified by its row and column.
 
+
 ```bash
 tsv edit 0 0 aaa      # Set first column in the first row to "aaa"
-
 ```
 
 **crop**
 
 Crop the column to maximum length.
 
+
 ```bash
 tsv crop 1 10         # Crop column 1 to maximum 10 characters
 tsv crop name 10      # Crop column "name" to maximum 10 characters
-
 ```
 
 **to**
 
 Convert data to csv, postgres or sqlite table, Excel XLSX, or ODS.
+
 
 ```bash
 tsv to csv                                                # Convert to CSV
@@ -120,7 +172,6 @@ tsv to sqlite                                             # Print dump to stdout
 tsv to sqlite --output dumpfile.sql                       # Create dump file
 tsv to sqlite test.db --table=mytable                     # Load data to sqlite database `test.db`
 tsv to sqlite test.db --table=mytable --drop              # Drop tables if they exist before loading
-
 ```
 
 

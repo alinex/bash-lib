@@ -2684,7 +2684,7 @@ list="$header"$'\n'"$(jq -r '[.labels.severity, .labels.net, .labels.instance, .
 esac
 case $format in
 console)local first=1
-printf '%s\n' "$list"|tsv to pprint|while read -r line;do
+printf '%s\n' "$list"|tsv print|while read -r line;do
 case $line in
 warning*)warn "$line";;
 critical*)error "$line";;
@@ -3019,12 +3019,12 @@ do
 [ -z "$type" ]||printf '%s\n' $target
 done <<<"$list"
 ;;
-data)printf '%s\t' "$(gettext Type)" "$(gettext Source)" "$(gettext Total)" "$(gettext Used)" "$(gettext Avail)" "$(gettext Percent)" "$(gettext I-Total)" "$(gettext I-Used)" "$(gettext I-Avail)" "$(gettext I-Percent)" "$(gettext Mount)"
-printf '\n'
+data)printf '%s\t' "$(gettext Type)" "$(gettext Source)" "$(gettext Total)" "$(gettext Used)" "$(gettext Avail)" "$(gettext Percent)" "$(gettext I-Total)" "$(gettext I-Used)" "$(gettext I-Avail)" "$(gettext I-Percent)"
+printf '%s\n' "$(gettext Mount)"
 while read -r type source size used avail pcent itotal iused iavail ipcent target pval ival level;do
 [ -n "$type" ]||continue
-print '%s\t' $type $source $size $used $avail $pcent $itotal $iused $iavail $ipcent $target
-print '\n'
+print '%s\t' $type $source $size $used $avail $pcent $itotal $iused $iavail $ipcent
+print '%s\n' $target
 done <<<"$list"
 ;;
 console)printf "$CC_INVERSE%-30s %8s %8s %8s %8s %8s$CC_RESET\n" "$(gettext Mount)" "$(gettext Total)" "$(gettext Used)" "$(gettext Avail)" "$(gettext Percent)" "$(gettext Inodes)"
@@ -3174,8 +3174,8 @@ done
 services_info(){
 [ -z "$1" ]||is enum -nformat allow="special active" -d -- "$1"
 is integer name=arguments --max=1 -d $#
-printf '%s\t' "$(gettext Unit)" "$(gettext Active)" "$(gettext Sub)" "$(gettext Enabled)" "$(gettext Description)" "$(gettext Config)" "$(gettext Start)" "$(gettext Tasks)" "$(gettext Memory)" "$(gettext CPU)"
-printf '\n'
+printf '%s\t' "$(gettext Unit)" "$(gettext Active)" "$(gettext Sub)" "$(gettext Enabled)" "$(gettext Description)" "$(gettext Config)" "$(gettext Start)" "$(gettext Tasks)" "$(gettext Memory)"
+printf '%s\n' "$(gettext CPU)"
 LANG=C systemctl list-units --type=service --all --no-legend --no-pager|sed 's/^[* ] //'|awk '{print $1}'|xargs -I{} systemctl show {} --property=Id,ActiveState,SubState,ActiveEnterTimestamp,Description,UnitFileState,FragmentPath,TasksCurrent,MemoryCurrent,CPUUsageNSec|awk -F= '
 BEGIN { OFS="\t" }
 /^Id=/ { id=$2 }
@@ -3198,11 +3198,11 @@ active)tsv filter string 2 = active;;
 esac)
 }
 timer_info(){
-printf '%s\t' Type Source User Minute Hour Day Month Weekday Command
-printf '\n'
+printf '%s\t' Type Source User Minute Hour Day Month Weekday
+printf '%s\n' Command
 local user file minute hour day month weekday command
-sudo ls /var/spool/cron/crontabs|while read -r user;do
-sudo awk -v user="$user" '
+while read -r file;do
+sudo awk -v user="$(basename "$file")" '
 /^[[:space:]]*#/ { next }
 /^[[:space:]]*$/ { next }
 /^[A-Za-z_]+=/{ next }
@@ -3213,11 +3213,11 @@ for (i=6;i<=NF;i++) command = command (i==6?"":" ") $i
 gsub(/"/, "\\\"", command)
 printf "cron\t/var/spool/cron/crontabs/%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n", user, user, minute, hour, day, month, weekday, command
 }
-' "/var/spool/cron/crontabs/$user"
-done
-sudo grep -v ^# /etc/crontab /etc/cron.d/*|sed '/^$/d;/^[^:]*:$/d;/^[^:]*:[A-Za-z]*=/d;s/:/ /'|while read file minute hour day month weekday user command;do
+' "$file"
+done < <(sudo find /var/spool/crontabs /var/spool/cron/crontabs -type f 2>/dev/null)
+while read file minute hour day month weekday user command;do
 printf "cron\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" "$file" "$user" "$minute" "$hour" "$day" "$month" "$weekday" "$command"
-done
+done < <(sudo grep -v ^# /etc/crontab /etc/cron.d/*|sed '/^$/d;/^[^:]*:$/d;/^[^:]*:[A-Za-z]*=/d;s/:/ /')
 local period
 for period in hourly daily weekly monthly;do
 read minute hour day month weekday user _ < <(grep "/etc/cron.$period" /etc/crontab|head -n 1)
@@ -4239,7 +4239,7 @@ print)[ -z "$output" ]||opt+=(-o "$output")
 [ -z "$maxWidth" ]||opt+=(-c $((maxWidth-3)))
 [ -z "$input" ]||opt+=("$input")
 is integer -narguments --max=1 -d $#
-qsv color "${opt[@]}"
+qsv table "${opt[@]}"
 ;;
 to)is enum -nformat --allow="csv postgres sqlite xslx ods json" -d -- "$2"
 local temp
@@ -4304,6 +4304,130 @@ opt+=("-")
 fi
 qsv to $2 "${opt[@]}"
 esac
+esac
+}
+otsv(){
+local withHeader removeHeader cmd unique
+eval set -- "$(option_parse $'- with-header -\n- remove-header -' "$@")"
+while true;do
+case "$1" in
+--with-header)withHeader=1&&shift;;
+--remove-header)removeHeader=1&&shift;;
+--unique)unique=1&&shift;;
+--)shift&&break;;
+*)die "$(gettext "Unrecognized option"): $1"
+esac
+done
+is enum -ncommand --allow="crop sort reverse to filter" -docmd -- "$1"
+local separator=$'\t' input
+input=$(cat)
+is false -- "$removeHeader"||removeHeader="${removeHeader#*$'\n'}"
+case $cmd in
+filter)local header cols idx line
+if is true -- "$withHeader";then
+header="$(head -1 <<<"$input")"
+echo "$header"
+input="$(tail -n +2 <<<"$input")"
+fi
+if (($#>=2));then
+is set -ntype -d -- "$2"
+is set -nnum-name -d -- "$3"
+is set -noperator -d -- "$4"
+is set -ncompare -d -- "$5"
+is integer -narguments --min=4 --max=5 -d $#
+IFS=$'\t' read -r -a cols <<<"$header"
+if [[ "$3" =~ ^-?[0-9]+$ ]];then
+idx=$(($3-1))
+else
+[ -n "$header" ]||die "Named columns only possible using --with-header option"
+idx="$(array cols indexof "$3")"||die "Column [$3] not found in table"
+fi
+debug "filter $2 cols[$idx] $4 $5"
+while IFS= read -r line;do
+IFS=$'\t' read -r -a cols <<<"$line"
+debug "check $2 $idx:\"${cols[idx]}\" \"$4\" \"$5\""
+check $2 "${cols[idx]}" "$4" "$5"||continue
+echo "$line"
+done <<<"$input"
+else
+printf '%s' "$input"
+fi
+;;
+to)is enum -nformat --allow="csv pprint" -d -- "$2"
+is integer -narguments --max=2 -d $#
+local format=$2
+case $format in
+csv)awk '
+BEGIN { FS="\t"; OFS="," }
+{
+for(i=1; i<=NF; i++) {
+if ($i ~ /,|"|\n/) {
+gsub(/"/, "\"\"", $i)
+$i = "\"" $i "\""
+}
+}
+$1 = $1
+print
+}
+' <<<"$input"
+;;
+pprint)input="$(column -t -s $'\t' <<<"$input")"
+if is true -- "$withHeader";then
+echo "$CC_INVERS${input%%$'\n'*}$CC_RESET"
+input="${input#*$'\n'}"
+fi
+echo "$input"
+;;
+*)die "Allowed formats are only csv, not [$format]"
+esac
+;;
+crop)is set -nnum-name -- "$2"
+is integer -nwidth --min=3 -d -- "$3"
+is integer -narguments --max=4 -d $#
+local cols idx
+IFS=$separator read -r -a cols < <(head -n 1 <<<"$input")
+[[ "$2" =~ ^-?[0-9]+$ ]]&&idx=$(($2-1))||idx="$(array cols indexof "$2")"||die "Column [$2] not found in table"
+local width="$3"
+[[ -n $idx && -n $width ]]||die "Usage: table crop <column> <width>"
+local line orig
+while IFS=$separator read -r -a line;do
+orig="${line[idx]}"
+((${#orig}<=width))||line[idx]="${orig:0:width-1}…"
+(IFS="$separator"
+printf '%s\n' "${line[*]}")
+done <<<"$input"
+;;
+sort)is set -nnum-name -- "$2"
+[ -z "$3" ]||is enum -nformat --allow="numeric human" -d -- "$3"
+is integer -narguments --max=4 -d $#
+local cols idx
+IFS=$separator read -r -a cols < <(head -n 1 <<<"$input")
+[[ "$2" =~ ^-?[0-9]+$ ]]&&idx=$(($2-1))||idx="$(array cols indexof "$2")"||die "Column [$2] not found in table"
+local col type
+col=$((idx+1))
+case "$3" in
+numeric)type=n;;
+human)type=h
+esac
+[ -z "$unique" ]||type+=u
+[[ -n $idx ]]||die "Usage: table sort <column> [numeric/human]"
+if is true -- "$withHeader";then
+(IFS="$separator"
+printf '%s\n' "${cols[*]}")
+tail -n +2 <<<"$input"|sort -t $'\t' "-k$col,$col$type"
+else
+sort -t $'\t' "-k$col,$col$type" <<<"$input"
+fi
+;;
+reverse)is integer -narguments --max=1 -d $#
+if is true -- "$withHeader";then
+head -1 <<<"$input"
+tail -n +2 <<<"$input"|tac
+else
+tac <<<"$input"
+fi
+;;
+*)die "Usage: tsv {to|crop} [<value>]"
 esac
 }
 TRIVY_DEFAULT_TIMEOUT=${TRIVY_DEFAULT_TIMEOUT:-60m}

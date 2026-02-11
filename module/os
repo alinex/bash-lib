@@ -295,13 +295,13 @@ disk() {
         done <<<"$list"
         ;;
     data)
-        printf '%s\t' "$(gettext Type)" "$(gettext Source)" "$(gettext Total)" "$(gettext Used)" "$(gettext Avail)" "$(gettext Percent)" "$(gettext I-Total)" "$(gettext I-Used)" "$(gettext I-Avail)" "$(gettext I-Percent)" "$(gettext Mount)"
-        printf '\n'
+        printf '%s\t' "$(gettext Type)" "$(gettext Source)" "$(gettext Total)" "$(gettext Used)" "$(gettext Avail)" "$(gettext Percent)" "$(gettext I-Total)" "$(gettext I-Used)" "$(gettext I-Avail)" "$(gettext I-Percent)"
+        printf '%s\n' "$(gettext Mount)"
         while read -r type source size used avail pcent itotal iused iavail ipcent target pval ival level; do
             is set -- "$type" || continue
             # shellcheck disable=SC2086
-            print '%s\t' $type $source $size $used $avail $pcent $itotal $iused $iavail $ipcent $target
-            print '\n'
+            print '%s\t' $type $source $size $used $avail $pcent $itotal $iused $iavail $ipcent
+            print '%s\n' $target
         done <<<"$list"
         ;;
     console)
@@ -564,8 +564,8 @@ ssh_allowed() {
 services_info() {
     is empty -- "$1" || is enum --name=format allow="special active" --die -- "$1"
     is integer name=arguments --max=1 --die -- $#
-    printf '%s\t' "$(gettext Unit)" "$(gettext Active)" "$(gettext Sub)" "$(gettext Enabled)" "$(gettext Description)" "$(gettext Config)" "$(gettext Start)" "$(gettext Tasks)" "$(gettext Memory)" "$(gettext CPU)"
-    printf '\n'
+    printf '%s\t' "$(gettext Unit)" "$(gettext Active)" "$(gettext Sub)" "$(gettext Enabled)" "$(gettext Description)" "$(gettext Config)" "$(gettext Start)" "$(gettext Tasks)" "$(gettext Memory)"
+    printf '%s\n' "$(gettext CPU)"
     LANG=C systemctl list-units --type=service --all --no-legend --no-pager | sed 's/^[* ] //' |
         awk '{print $1}' |
         xargs -I{} systemctl show {} --property=Id,ActiveState,SubState,ActiveEnterTimestamp,Description,UnitFileState,FragmentPath,TasksCurrent,MemoryCurrent,CPUUsageNSec |
@@ -598,13 +598,12 @@ services_info() {
 ######################################################################################
 
 timer_info() {
-    printf '%s\t' Type Source User Minute Hour Day Month Weekday Command
-    printf '\n'
+    printf '%s\t' Type Source User Minute Hour Day Month Weekday
+    printf '%s\n' Command
     local user file minute hour day month weekday command
     # get user crontabs
-    sudo ls /var/spool/cron/crontabs |
-        while read -r user; do
-            sudo awk -v user="$user" '
+    while read -r file; do
+        sudo awk -v user="$(basename "$file")" '
         /^[[:space:]]*#/ { next }
         /^[[:space:]]*$/ { next }
         /^[A-Za-z_]+=/{ next }
@@ -615,14 +614,12 @@ timer_info() {
             gsub(/"/, "\\\"", command)
             printf "cron\t/var/spool/cron/crontabs/%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n", user, user, minute, hour, day, month, weekday, command
         }
-    ' "/var/spool/cron/crontabs/$user"
-        done
+    ' "$file"
+    done < <(sudo find /var/spool/crontabs /var/spool/cron/crontabs -type f 2>/dev/null)
     # crontab + cron.d
-    sudo grep -v ^# /etc/crontab /etc/cron.d/* |
-        sed '/^$/d;/^[^:]*:$/d;/^[^:]*:[A-Za-z]*=/d;s/:/ /' |
-        while read file minute hour day month weekday user command; do
-            printf "cron\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" "$file" "$user" "$minute" "$hour" "$day" "$month" "$weekday" "$command"
-        done
+    while read file minute hour day month weekday user command; do
+        printf "cron\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" "$file" "$user" "$minute" "$hour" "$day" "$month" "$weekday" "$command"
+    done < <(sudo grep -v ^# /etc/crontab /etc/cron.d/* | sed '/^$/d;/^[^:]*:$/d;/^[^:]*:[A-Za-z]*=/d;s/:/ /')
     # periodical cron
     local period
     for period in hourly daily weekly monthly; do

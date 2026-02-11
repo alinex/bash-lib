@@ -476,7 +476,8 @@ Module with modifiers for csv/tsv tables.
 | Variable/Function | Description |
 | --- | --- |
 | [`csv`](function/csv.md) | Transform comma separated table |
-| [`tsv`](function/tsv.md) | tsv filter --exact 'completed' status  # Search for exact matches of 'completed' in the 'status' column |
+| [`tsv`](function/tsv.md) | Transform tab separated table |
+| [`otsv`](function/otsv.md) | Transform tab separated table |
 
 ### Trivy Module
 

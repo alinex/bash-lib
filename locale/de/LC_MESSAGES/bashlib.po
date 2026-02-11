@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-02-10 21:51+0100\n"
+"POT-Creation-Date: 2026-02-11 07:15+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -24,8 +24,8 @@ msgstr ""
 #: module/process:359 module/process:407 module/process:490 module/process:637
 #: module/remote:84 module/remote:206 module/remote:248 module/remote:286
 #: module/database:36 module/mattermost:309 module/mattermost:340
-#: module/table:224 module/crypto:41 module/git:23 module/git:61
-#: module/software:245
+#: module/table:223 module/table:437 module/crypto:41 module/git:23
+#: module/git:61 module/software:245
 msgid "Unrecognized option"
 msgstr "Unbekannte Option"
 
@@ -290,7 +290,7 @@ msgstr "I-Frei"
 msgid "I-Percent"
 msgstr "I-Proz."
 
-#: module/os:298 module/os:308
+#: module/os:299 module/os:308
 msgid "Mount"
 msgstr "Mount"
 
@@ -378,7 +378,7 @@ msgstr "Tasks"
 msgid "Memory"
 msgstr "Speicher"
 
-#: module/os:567
+#: module/os:568
 msgid "CPU"
 msgstr "CPU"
 
