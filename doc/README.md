@@ -419,6 +419,7 @@ Module with operating system specific helper functions.
 | [`sudo_info`](function/sudo_info.md) | Get sudo information |
 | [`ssh_allowed`](function/ssh_allowed.md) | Get allowed ssh keys |
 | [`services_info`](function/services_info.md) | Show services on VM |
+| [`cron_info`](function/cron_info.md) | List cron jobs. |
 | [`uses_lvm`](function/uses_lvm.md) | Check if LVM is used |
 
 ### Process Module

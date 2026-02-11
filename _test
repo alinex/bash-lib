@@ -21,7 +21,35 @@ DESCRIPTION=""
 #trivy root --progress --no-secrets --clean
 #exit
 
-timer_info | qsv table -d $'\t'
+STEPS_VARIABLES="num"
+steps init
+
+task_1() {
+    sleep 10
+    num=1
+}
+sync task_1
+echo "num=$num"
+
+task_2() {
+    sleep 10
+    num=2
+}
+sync task_2
+echo "num=$num"
+
+task_3() {
+    sleep 10
+    num=3
+}
+sync task_3
+echo "num=$num"
+
+steps end
+
+exit
+
+timer_info #| qsv table -d $'\t'
 exit
 
 in=$'Number\tName\n1\tone\n2\ttwo\n10\tten thousand and one hundred fourty five\n'

@@ -238,22 +238,33 @@ variables() {
     # shellcheck disable=SC2086
     file="$(mktemp $opt --extension=env "$ident")"
     case "$command" in
-    store) declare -p "$@" | sed 's/^declare\b/declare -g/' >"$file" ;;
+    store)
+        debug 9 "Store ($*) to $file:"
+        { declare -p "$@" 2>/dev/null || true; } | sed 's/^declare\b/declare -g/' >"$file"
+        cat "$file" | sed 's/^/- /' | debug 9
+        ;;
     restore)
         [ -s "$file" ] || return 0
         if [[ $# -gt 0 ]]; then
             temp="$(mktemp -me env-sub "${ident}_${BASHPID}")"
             grep -E "$(tr ' ' '|' <<<"$*")" "$file" >"$temp" || true
+            debug 9 "Restore ($*) from $file:"
+            cat "$temp" | sed 's/^/- /' | debug 9
             # shellcheck disable=SC1090
             source "$temp" || true
             rm -r "$temp" || true
         else
             # shellcheck disable=SC1090
+            debug 9 "Restore all from $file:"
+            cat "$file" | sed 's/^/- /' | debug 9
             source "$file" 2>/dev/null || true
         fi
         [ -z "$clean" ] || rm -f "$file" # also directly clean it
         ;;
-    clean) rm -f "$file" ;;
+    clean)
+        debug "Clean store $file"
+        rm -f "$file"
+        ;;
     change)
         is set --name=cmd-line --die -- "$1"
         # processing
@@ -296,7 +307,12 @@ steps() {
         variables restore "steps_${_STEPS_NAME}"
         # shellcheck disable=SC2086
         variables store "steps_${_STEPS_NAME}" _STEPS $STEPS_VARIABLES # initial store
-        printf '%s\n' "$(gettext "Work steps are logged so that you can resume work mid-process")..." >&2
+        if ((${#_STEPS[@]} == 0)); then
+            printf '%s\n' "$(gettext "Work steps are logged so that you can resume work mid-process")..." >&2
+        else
+            local num=${#_STEPS[@]}
+            printf '%s\n' "$(eval_gettext 'Previous run will be resumed, $num steps are already done')..." >&2
+        fi
         ;;
     end)
         is integer --name=arguments --max=1 --die -- $#
@@ -339,7 +355,7 @@ _steps_done() {
 
 # Run the given command with optional step control
 #
-# The command and arguments given will be called like directly run. But if @steps is started it will check if already done.
+# The command and arguments given will be called like directly run. But if @steps[ init] is started it will check if already done.
 # Further in `--verbose` mode a message for start and end will be printed on STDERR with the command or the given `--name`.
 #
 # Usage:    sync [<options>] <command> [<params>...]

@@ -100,7 +100,7 @@ for lang in $LOCALES; do
     echo -n "- $lang"
     mkdir -p locale/"$lang"/LC_MESSAGES
     if [ -e locale/"$lang"/LC_MESSAGES/bashlib.po ]; then
-        msgmerge --update locale/de/LC_MESSAGES/bashlib.po locale/bashlib.pot
+        msgmerge --update locale/$lang/LC_MESSAGES/bashlib.po locale/bashlib.pot
     else
         cp locale/bashlib.pot locale/"$lang"/LC_MESSAGES/bashlib.po
         sed "s/Language: \\n/Language: $lang\\n/" locale/"$lang"/LC_MESSAGES/bashlib.po

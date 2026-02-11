@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-23 19:24+0200\n"
+"POT-Creation-Date: 2026-02-11 18:10+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,67 +17,702 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: core/arguments:57
+#: core/misc:134 core/validator:74 core/array:129 module/os:241 module/os:353
+#: module/os:428 module/network:24 module/atlassian:101 module/trivy:119
+#: module/compress:44 module/monitoring:166 module/input:31 module/input:88
+#: module/input:198 module/input:452 module/input:651 module/log:63
+#: module/process:375 module/process:423 module/process:506 module/process:653
+#: module/remote:84 module/remote:206 module/remote:248 module/remote:286
+#: module/database:36 module/mattermost:309 module/mattermost:340
+#: module/table:223 module/table:437 module/crypto:41 module/git:23
+#: module/git:61 module/software:245
+msgid "Unrecognized option"
+msgstr ""
+
+#: core/arguments:42
+msgid "A specification string is needed as first argument"
+msgstr ""
+
+#: core/arguments:117
 msgid "Options"
 msgstr ""
 
-#: core/arguments:96
-msgid "No <num> argument in call to input_args!"
-msgstr ""
-
-#: core/arguments:97
+#: core/arguments:162
 msgid "argument is not a valid number!"
 msgstr ""
 
-#: core/date:125
+#: core/output:128
+msgid "Help"
+msgstr ""
+
+#: core/date:81
+msgid "+%A, %B %d, %Y at %H:%M:%S"
+msgstr ""
+
+#: core/date:82
+msgid "+%A, %B %d, %Y"
+msgstr ""
+
+#: core/date:175
 msgid "Invalid duration unit"
 msgstr ""
 
-#: module/monitoring:145
-msgid "Unrecognized option in"
+#: core/validator:70 core/validator:71
+msgid "Parameter %s needs number"
 msgstr ""
 
-#: module/monitoring:181
+#: core/validator:72
+msgid "A list of words is needed"
+msgstr ""
+
+#: core/validator:80
+msgid "Incorrect call"
+msgstr ""
+
+#: core/validator:88
+#, sh-format
+msgid "The \"$name\" has to be set with a value"
+msgstr ""
+
+#: core/validator:93
+#, sh-format
+msgid "The \"$name\" has to be empty but has »${val}«"
+msgstr ""
+
+#: core/validator:102
+#, sh-format
+msgid "The value »${val}« for \"$name\" could not be read as true or false"
+msgstr ""
+
+#: core/validator:109
+#, sh-format
+msgid "The value »${val}« for \"$name\" should be true but was »${val}«"
+msgstr ""
+
+#: core/validator:116
+#, sh-format
+msgid "The value »${val}« for \"$name\" should be false but was »${val}«"
+msgstr ""
+
+#: core/validator:124
+#, sh-format
+msgid "The \"$name\" has to be an integer but »${val}« was given"
+msgstr ""
+
+#: core/validator:128 core/validator:153
+#, sh-format
+msgid "The \"$name\" has to be exactly $min but »${val}« was given"
+msgstr ""
+
+#: core/validator:132 core/validator:157
+#, sh-format
+msgid "The \"$name\" has to be between $min and $max but »${val}« was given"
+msgstr ""
+
+#: core/validator:136 core/validator:161
+#, sh-format
+msgid "The \"$name\" has to at least $min but »${val}« was given"
+msgstr ""
+
+#: core/validator:140 core/validator:165
+#, sh-format
+msgid "The \"$name\" has to not be more than $max but »${val}« was given"
+msgstr ""
+
+#: core/validator:149
+#, sh-format
+msgid "The \"$name\" has to be a float but »${val}« was given"
+msgstr ""
+
+#: core/validator:173
+#, sh-format
+msgid ""
+"The length of \"$name\" has to be exactly $min but »${res}« is $val "
+"characters long"
+msgstr ""
+
+#: core/validator:177
+#, sh-format
+msgid ""
+"The length of \"$name\" has to be between $min and $max but »${res}« is $val "
+"characters long"
+msgstr ""
+
+#: core/validator:181
+#, sh-format
+msgid ""
+"The length of \"$name\" has to be at least $min but »${res}« is $val "
+"characters long"
+msgstr ""
+
+#: core/validator:185
+#, sh-format
+msgid ""
+"The length of \"$name\" has to be not more than $max but »${res}« is $val "
+"characters long"
+msgstr ""
+
+#: core/validator:190
+msgid "A list with --allow=<words> is needed for enum check"
+msgstr ""
+
+#: core/validator:192
+#, sh-format
+msgid "\"$name\" is set to \"${val}\" but has to be one of: $allow"
+msgstr ""
+
+#: core/validator:197
+#, sh-format
+msgid "The \"$name\" has to be a parsable date format but »${val}« was given"
+msgstr ""
+
+#: core/validator:203
+#, sh-format
+msgid ""
+"The \"$name\" has to be an integer or human duration but »${val}« was given"
+msgstr ""
+
+#: core/validator:208
+#, sh-format
+msgid "The \"$name\" ${val} has to be an existing path"
+msgstr ""
+
+#: core/validator:213
+#, sh-format
+msgid "The \"$name\" ${val} has to be an existing file"
+msgstr ""
+
+#: core/validator:218
+#, sh-format
+msgid "The \"$name\" ${val} has to be an existing directory"
+msgstr ""
+
+#: core/validator:223
+#, sh-format
+msgid "The \"$name\" ${val} has to be a file readable for user"
+msgstr ""
+
+#: core/validator:228
+#, sh-format
+msgid "The \"$name\" ${val} has to be a file writable for user"
+msgstr ""
+
+#: core/validator:231
+#, sh-format
+msgid "A check named ${check} is not defined"
+msgstr ""
+
+#: module/dns:40 module/dns:64
+msgid "NAME"
+msgstr ""
+
+#: module/dns:40 module/dns:64
+msgid "TYPE"
+msgstr ""
+
+#: module/dns:40 module/dns:64
+msgid "CONTENT"
+msgstr ""
+
+#: module/dns:40 module/dns:64
+msgid "TTL"
+msgstr ""
+
+#: module/dns:98
+#, sh-format
+msgid ""
+"To update $PLUSSERVER_PORTAL/services/nameservers -> download CSV (manually)."
+msgstr ""
+
+#: module/dns:99
+msgid "No local DNS list found, please download it."
+msgstr ""
+
+#: module/dns:100
+#, sh-format
+msgid "Use $list from $time."
+msgstr ""
+
+#: module/os:298 module/os:528
+msgid "Type"
+msgstr ""
+
+#: module/os:298
+msgid "Source"
+msgstr ""
+
+#: module/os:298 module/os:308
+msgid "Total"
+msgstr ""
+
+#: module/os:298 module/os:308
+msgid "Used"
+msgstr ""
+
+#: module/os:298 module/os:308
+msgid "Avail"
+msgstr ""
+
+#: module/os:298 module/os:308
+msgid "Percent"
+msgstr ""
+
+#: module/os:298
+msgid "I-Total"
+msgstr ""
+
+#: module/os:298
+msgid "I-Used"
+msgstr ""
+
+#: module/os:298
+msgid "I-Avail"
+msgstr ""
+
+#: module/os:298
+msgid "I-Percent"
+msgstr ""
+
+#: module/os:299 module/os:308
+msgid "Mount"
+msgstr ""
+
+#: module/os:308
+msgid "Inodes"
+msgstr ""
+
+#: module/os:483 module/os:504 module/os:528
+msgid "User"
+msgstr ""
+
+#: module/os:483 module/os:504
+msgid "UID"
+msgstr ""
+
+#: module/os:483 module/os:504
+msgid "GID"
+msgstr ""
+
+#: module/os:483
+msgid "Home"
+msgstr ""
+
+#: module/os:483
+msgid "SuDo"
+msgstr ""
+
+#: module/os:483
+msgid "Login"
+msgstr ""
+
+#: module/os:483
+msgid "From"
+msgstr ""
+
+#: module/os:483
+msgid "Duration"
+msgstr ""
+
+#: module/os:504
+msgid "Command"
+msgstr ""
+
+#: module/os:528
+msgid "Comment"
+msgstr ""
+
+#: module/os:528
+msgid "Key"
+msgstr ""
+
+#: module/os:568
+msgid "Unit"
+msgstr ""
+
+#: module/os:568
+msgid "Active"
+msgstr ""
+
+#: module/os:568
+msgid "Sub"
+msgstr ""
+
+#: module/os:568
+msgid "Enabled"
+msgstr ""
+
+#: module/os:568
+msgid "Description"
+msgstr ""
+
+#: module/os:568
+msgid "Config"
+msgstr ""
+
+#: module/os:568
+msgid "Start"
+msgstr ""
+
+#: module/os:568
+msgid "Tasks"
+msgstr ""
+
+#: module/os:568
+msgid "Memory"
+msgstr ""
+
+#: module/os:569
+msgid "CPU"
+msgstr ""
+
+#: module/network:56
+msgid "IP\\tInterface"
+msgstr ""
+
+#: module/trivy:134
+#, sh-format
+msgid "Start $command scanning with trivy V${version}..."
+msgstr ""
+
+#: module/trivy:168
+msgid "Optimize JSON structure for splitting..."
+msgstr ""
+
+#: module/trivy:170
+msgid "Splitting JSON into single reports..."
+msgstr ""
+
+#: module/trivy:183
+#, sh-format
+msgid "Found $found vulnerabilities."
+msgstr ""
+
+#: module/trivy:209
+msgid "Build queue to optimize reports..."
+msgstr ""
+
+#: module/trivy:213
+msgid "Run queue to optimize reports..."
+msgstr ""
+
+#: module/trivy:217
+msgid "Create summaries..."
+msgstr ""
+
+#: module/trivy:327
+#, sh-format
+msgid ""
+"Downgrade $severity -> MEDIUM because it was published less than 3 days ago"
+msgstr ""
+
+#: module/trivy:336
+msgid ""
+"Add information of known exploits and cancel downgrades in case of just "
+"published"
+msgstr ""
+
+#: module/trivy:345
+#, sh-format
+msgid "Downgrade $severity -> MEDIUM because it is a dev dependency"
+msgstr ""
+
+#: module/trivy:390
+#, sh-format
+msgid "Downgrade $severity -> MEDIUM because of Jira status $deploy"
+msgstr ""
+
+#: module/trivy:391 module/trivy:456
+#, sh-format
+msgid "$id at $target"
+msgstr ""
+
+#: module/trivy:455
+msgid "Add information from Jira"
+msgstr ""
+
+#: module/trivy:497
+#, sh-format
+msgid "Rating: $severity (CVSS rating $value)"
+msgstr ""
+
+#: module/trivy:499
+#, sh-format
+msgid "Status: Fixed from version $value $fixStatus"
+msgstr ""
+
+#: module/trivy:503
+#, sh-format
+msgid "Date:   Vulnerability known since $human ($value days ago)"
+msgstr ""
+
+#: module/trivy:505
+#, sh-format
+msgid "Exploit known since $exploitDate at $exploitVendor $exploitProduct"
+msgstr ""
+
+#: module/trivy:508
+msgid "Responsible"
+msgstr ""
+
+#: module/trivy:509
+msgid "Deploy"
+msgstr ""
+
+#: module/trivy:510
+msgid "Last comments"
+msgstr ""
+
+#: module/trivy:512
+msgid "Sources"
+msgstr ""
+
+#: module/trivy:519
+msgid "Links"
+msgstr ""
+
+#: module/monitoring:70
+msgid "Could not get exporters from Prometheus!"
+msgstr ""
+
+#: module/monitoring:98
+#, sh-format
+msgid "Could not scrape the Prometheus exporter at $url!"
+msgstr ""
+
+#: module/monitoring:174
+msgid "Could not get alerts from Grafana!"
+msgstr ""
+
+#: module/monitoring:176
+msgid "Parse error in Grafana alerts list with filter"
+msgstr ""
+
+#: module/monitoring:207
 msgid "Severity\\tNetwork\\tInstance\\tSummary\\tStart"
 msgstr ""
 
-#: module/input:41 module/input:66
+#: module/input:39
+msgid "Please wait to go on"
+msgstr ""
+
+#: module/input:39
+msgid "Press any key to continue..."
+msgstr ""
+
+#: module/input:50
+msgid "go on by user"
+msgstr ""
+
+#: module/input:93
+msgid "Should this be done"
+msgstr ""
+
+#: module/input:98 module/input:130 module/input:151
 msgid "No"
 msgstr ""
 
-#: module/input:45 module/input:70
+#: module/input:98 module/input:126 module/input:146
 msgid "Yes"
 msgstr ""
 
-#: module/input:49 module/input:74 module/input:178
-msgid "Disallowed answer"
+#: module/input:135 module/input:327 module/input:572
+msgid "value needed"
 msgstr ""
 
-#: module/input:91
-msgid "default"
+#: module/input:155 module/input:351 module/input:596
+msgid "invalid character"
 msgstr ""
 
-#: module/input:98
-msgid "Using default"
+#: module/input:209
+msgid "Enter integer number"
 msgstr ""
 
-#: module/input:143 module/input:227 module/remote:120 module/remote:276
-#: module/mattermost:288 module/validator:36 module/software:91
-msgid "Unrecognized option: $1"
+#: module/input:218
+msgid "Enter float number"
 msgstr ""
 
-#: module/input:253
+#: module/input:228
+msgid "Enter password"
+msgstr ""
+
+#: module/input:232
+msgid "Enter time"
+msgstr ""
+
+#: module/input:236
+msgid "Enter text (end with empty line)"
+msgstr ""
+
+#: module/input:237
+msgid "Enter text here"
+msgstr ""
+
+#: module/input:238
+msgid "Enter short line"
+msgstr ""
+
+#: module/input:246
+msgid "Input through system editor..."
+msgstr ""
+
+#: module/input:308
+msgid "incomplete"
+msgstr ""
+
+#: module/input:360
+msgid "bad"
+msgstr ""
+
+#: module/input:362
+msgid "weak"
+msgstr ""
+
+#: module/input:364
+msgid "good"
+msgstr ""
+
+#: module/input:366
+msgid "strong"
+msgstr ""
+
+#: module/input:531
+msgid "Select one of the above options"
+msgstr ""
+
+#: module/input:671
+msgid "Could not get task list from command"
+msgstr ""
+
+#: module/input:678
 msgid "No tasks found to be executed."
 msgstr ""
 
-#: module/input:269
+#: module/input:684
 msgid "Exit"
 msgstr ""
 
-#: module/process:90
-msgid "Waiting"
+#: module/input:691
+#, sh-format
+msgid "Got error $error running $task"
 msgstr ""
 
-#: module/process:92
-msgid "seconds"
+#: module/process:97
+msgid "Failed to remove lockfile"
 msgstr ""
+
+#: module/process:116 module/process:152
+msgid "Failed to create PID lockfile"
+msgstr ""
+
+#: module/process:124
+#, sh-format
+msgid "Waiting for unlock in $lockfile by PID $pid"
+msgstr ""
+
+#: module/process:311
+msgid "Work steps are logged so that you can resume work mid-process"
+msgstr ""
+
+#: module/process:314
+#, sh-format
+msgid "Previous run will be resumed, $num steps are already done"
+msgstr ""
+
+#: module/process:382 module/process:449 module/process:516
+#, sh-format
+msgid "Skip: $name (already done)"
+msgstr ""
+
+#: module/process:386 module/process:453 module/process:551
+#, sh-format
+msgid "Start: $name"
+msgstr ""
+
+#: module/process:389 module/process:537
+#, sh-format
+msgid "Finished: $name"
+msgstr ""
+
+#: module/process:464
+#, sh-format
+msgid "Finished: $check"
+msgstr ""
+
+#: module/process:520
+#, sh-format
+msgid "Queue: $name"
+msgstr ""
+
+#: module/process:555
+#, sh-format
+msgid "Queued $started/$total jobs"
+msgstr ""
+
+#: module/process:664
+#, sh-format
+msgid "No process with pid $pid"
+msgstr ""
+
+#: module/process:672
+#, sh-format
+msgid "No processes found for $search"
+msgstr ""
+
+#: module/process:717
+#, sh-format
+msgid "Waiting for $pid ($pcpu% CPU)"
+msgstr ""
+
+#: module/process:721
+#, sh-format
+msgid "Timeout after ${timeout}s"
+msgstr ""
+
+#: module/remote:292
+msgid "Wait till reboot is done"
+msgstr ""
+
+#: module/remote:295
+#, sh-format
+msgid "Wait until the reboot is complete ($seconds seconds)"
+msgstr ""
+
+#: module/software:289
+msgid "are identical versions"
+msgstr ""
+
+#: module/software:293 module/software:312
+#, sh-format
+msgid "is an upgrade of one major version"
+msgid_plural "is an upgrade of $step major versions"
+msgstr[0] ""
+msgstr[1] ""
+
+#: module/software:296 module/software:309
+#, sh-format
+msgid "is an upgrade of one minor version"
+msgid_plural "is an upgrade of $step minor versions"
+msgstr[0] ""
+msgstr[1] ""
+
+#: module/software:299
+#, sh-format
+msgid "is an upgrade of one patch version"
+msgid_plural "is an upgrade of $step patch versions"
+msgstr[0] ""
+msgstr[1] ""
+
+#: module/software:301
+msgid "is a developer upgrade"
+msgstr ""
+
+#: module/software:303
+msgid "is a developer downgrade"
+msgstr ""
+
+#: module/software:306
+#, sh-format
+msgid "is a downgrade of one patch version"
+msgid_plural "is a downgrade of $step patch versions"
+msgstr[0] ""
+msgstr[1] ""

@@ -598,7 +598,23 @@ services_info() {
 ### Timer/Cron
 ######################################################################################
 
-timer_info() {
+# List cron jobs.
+#
+# Usage:    cron_info
+# Output:   <tsv with header>
+#           ```text
+#           Type  Source                         User  Minute   Hour  Day  Month  Weekday  Command
+#           cron  /var/spool/cron/crontabs/alex  alex  0        9     *    *      *        tar -czf /mnt/drive-alinex/backup/$(date +%d)_sec.tgz /mnt/drive-alinex/sec
+#           cron  /etc/crontab                   root  17       *     *    *      *        cd / && run-parts --report /etc/cron.hourly
+#           cron  /etc/crontab                   root  25       6     *    *      *        test -x /usr/sbin/anacron || { cd / && run-parts --report /etc/cron.daily; }
+#           cron  /etc/crontab                   root  47       6     *    *      7        test -x /usr/sbin/anacron || { cd / && run-parts --report /etc/cron.weekly; }
+#           cron  /etc/crontab                   root  52       6     1    *      *        test -x /usr/sbin/anacron || { cd / && run-parts --report /etc/cron.monthly; }
+#           cron  /etc/cron.d/anacron            root  30       7-23  *    *      *        [ -x /etc/init.d/anacron ] && if [ ! -d /run/systemd/system ]; then /usr/sbin/invoke-rc.d anacron start >/dev/null; fi
+#           cron  /etc/cron.daily                root  25       6     *    *      *        /etc/cron.daily/sysstat
+#           cron  /etc/cron.weekly               root  47       6     *    *      7        /etc/cron.weekly/man-db
+#           cron  /etc/cron.monthly              root  52       6     1    *      *        /etc/cron.monthly/0anacron
+#           ```
+cron_info() {
     printf '%s\t' Type Source User Minute Hour Day Month Weekday
     printf '%s\n' Command
     local user file minute hour day month weekday command
@@ -632,7 +648,59 @@ timer_info() {
             printf "cron\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" "/etc/cron.$period" "$user" "$minute" "$hour" "$day" "$month" "$weekday" "/etc/cron.$period/$file"
         done
     done
+}
+
+timer_info() {
+    printf '%s\t' Type Source User Minute Hour Day Month Weekday
+    printf '%s\n' Command
+    local user file minute hour day month weekday command
     # timer
+    sudo systemctl list-unit-files --type=timer --no-legend --state=enabled |
+        while read timer status _; do
+            config=$(sudo systemctl show --value -p FragmentPath $timer)
+            [ -n "$config" ] || continue
+            echo "$config"
+            schedule=''
+            # defined on specific change
+            #value=$(egrep 'OnBootSec' $config | sed 's/^[^=]*=//' || true)
+            #[[ "$value" =~ ^[0-9]+$ ]] && value="${value}s"
+            #[ -z "$value" ] || echo "$value after boot"
+            #[ -n "$value" ] && schedule="$schedule$NL$value after boot"
+            #value=$(egrep 'OnStartupSec' $config | sed 's/^[^=]*=//' || true)
+            #[[ "$value" =~ ^[0-9]+$ ]] && value="${value}s"
+            #[ -n "$value" ] && schedule="$schedule$NL$value after startup"
+            #value=$(egrep 'OnActiveSec' $config | sed 's/^[^=]*=//' || true)
+            #[[ "$value" =~ ^[0-9]+$ ]] && value="${value}s"
+            #[ -n "$value" ] && schedule="$schedule$NL$value after last timer start"
+            #value=$(egrep 'OnUnitActiveSec' $config | sed 's/^[^=]*=//' || true)
+            #[[ "$value" =~ ^[0-9]+$ ]] && value="${value}s"
+            #[ -n "$value" ] && schedule="$schedule$NL$value after last start"
+            #value=$(egrep 'OnUnitInactiveSec' $config | sed 's/^[^=]*=//' || true)
+            #[[ "$value" =~ ^[0-9]+$ ]] && value="${value}s"
+            #[ -n "$value" ] && schedule="$schedule$NL$value after last run"
+            #value=$(egrep 'OnClockChange' $config | sed 's/^[^=]*=//' || true)
+            #[ "$value" = "true" ] && schedule="$schedule${NL}on clock change"
+            #value=$(egrep 'OnTimezoneChange' $config | sed 's/^[^=]*=//' || true)
+            #[ "$value" = "true" ] && schedule="$schedule$((NL))on timezone change"
+            # absolute time
+            #value=$(egrep 'OnCalendar' $config | sed 's/^[^=]*=//' || true)
+            #[ -n "$value" ] && schedule="$schedule$NL$value"
+            ## accuracy
+            #value=$(egrep 'AccuracySec' $config | sed 's/^[^=]*=//' || true)
+            #[[ "$value" =~ ^[0-9]+$ ]] && value="${value}s"
+            #[ "$value" = "true" ] && schedule="$schedule$((NL))$value accuracy"
+            #value=$(egrep 'RandomizedDelaySec' $config | sed 's/^[^=]*=//' || true)
+            #[[ "$value" =~ ^[0-9]+$ ]] && value="${value}s"
+            #[ "$value" = "true" ] && schedule="$schedule$((NL))$value random delay"
+            ## output
+            [ -n "$schedule" ] || continue
+            schedule="$(echo "$schedule" | sed -e :a -e '/./,$!d;/^\n*$/{$d;N;};/\n$/ba' | paste -sd ';' - | sed 's/;/ and /g')"
+            last="$(sudo systemctl show --value -p LastTriggerUSec $timer || true)"
+            next="$(sudo systemctl show --value -p NextElapseUSecRealtime $timer || true)"
+            unit="$(sudo systemctl show --value -p Unit $timer || true)"
+
+            #echo "divibib_timer{source=\"$timer\",status=\"$status\",config=\"$config\",schedule=\"$schedule\",last=\"$last\",next=\"$next\",unit=\"$unit\"} 1"
+        done
 }
 
 ######################################################################################

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-02-11 07:15+0100\n"
+"POT-Creation-Date: 2026-02-11 18:10+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,10 +18,10 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 
 #: core/misc:134 core/validator:74 core/array:129 module/os:241 module/os:353
-#: module/os:427 module/network:24 module/atlassian:101 module/trivy:119
+#: module/os:428 module/network:24 module/atlassian:101 module/trivy:119
 #: module/compress:44 module/monitoring:166 module/input:31 module/input:88
 #: module/input:198 module/input:452 module/input:651 module/log:63
-#: module/process:359 module/process:407 module/process:490 module/process:637
+#: module/process:375 module/process:423 module/process:506 module/process:653
 #: module/remote:84 module/remote:206 module/remote:248 module/remote:286
 #: module/database:36 module/mattermost:309 module/mattermost:340
 #: module/table:223 module/table:437 module/crypto:41 module/git:23
@@ -250,7 +250,7 @@ msgstr "Keine lokale DNS Liste gefunden, bitte herunterladen."
 msgid "Use $list from $time."
 msgstr "Benutze $list vom $time."
 
-#: module/os:298 module/os:527
+#: module/os:298 module/os:528
 msgid "Type"
 msgstr "Typ"
 
@@ -298,87 +298,87 @@ msgstr "Mount"
 msgid "Inodes"
 msgstr "Inodes"
 
-#: module/os:482 module/os:503 module/os:527
+#: module/os:483 module/os:504 module/os:528
 msgid "User"
 msgstr "Nutzer"
 
-#: module/os:482 module/os:503
+#: module/os:483 module/os:504
 msgid "UID"
 msgstr "UID"
 
-#: module/os:482 module/os:503
+#: module/os:483 module/os:504
 msgid "GID"
 msgstr "GID"
 
-#: module/os:482
+#: module/os:483
 msgid "Home"
 msgstr "Home"
 
-#: module/os:482
+#: module/os:483
 msgid "SuDo"
 msgstr "SuDo"
 
-#: module/os:482
+#: module/os:483
 msgid "Login"
 msgstr "Login"
 
-#: module/os:482
+#: module/os:483
 msgid "From"
 msgstr "Von"
 
-#: module/os:482
+#: module/os:483
 msgid "Duration"
 msgstr "Dauer"
 
-#: module/os:503
+#: module/os:504
 msgid "Command"
 msgstr "Befehl"
 
-#: module/os:527
+#: module/os:528
 msgid "Comment"
 msgstr "Kommentar"
 
-#: module/os:527
+#: module/os:528
 msgid "Key"
 msgstr "Schlüssel"
 
-#: module/os:567
+#: module/os:568
 msgid "Unit"
 msgstr "Einheit"
 
-#: module/os:567
+#: module/os:568
 msgid "Active"
 msgstr "Aktiv"
 
-#: module/os:567
+#: module/os:568
 msgid "Sub"
 msgstr "Sub"
 
-#: module/os:567
+#: module/os:568
 msgid "Enabled"
 msgstr "Aktiviert"
 
-#: module/os:567
+#: module/os:568
 msgid "Description"
 msgstr "Beschreibung"
 
-#: module/os:567
+#: module/os:568
 msgid "Config"
 msgstr "Konfiguration"
 
-#: module/os:567
+#: module/os:568
 msgid "Start"
 msgstr "Start"
 
-#: module/os:567
+#: module/os:568
 msgid "Tasks"
 msgstr "Tasks"
 
-#: module/os:567
+#: module/os:568
 msgid "Memory"
 msgstr "Speicher"
 
-#: module/os:568
+#: module/os:569
 msgid "CPU"
 msgstr "CPU"
 
@@ -444,52 +444,52 @@ msgstr ""
 msgid "Downgrade $severity -> MEDIUM because of Jira status $deploy"
 msgstr "Herunterstufen $severity -> MEDIUM, durch Jira Status $deploy"
 
-#: module/trivy:391 module/trivy:455
+#: module/trivy:391 module/trivy:456
 #, sh-format
 msgid "$id at $target"
 msgstr "$id in $target"
 
-#: module/trivy:454
+#: module/trivy:455
 msgid "Add information from Jira"
 msgstr "Hinzufügen der Jira Informationen"
 
-#: module/trivy:496
+#: module/trivy:497
 #, sh-format
 msgid "Rating: $severity (CVSS rating $value)"
 msgstr "Einstufung: $severity (CVSS Wert $value)"
 
-#: module/trivy:498
+#: module/trivy:499
 #, sh-format
 msgid "Status: Fixed from version $value $fixStatus"
 msgstr "Status: Gelöst in Version $value $fixStatus"
 
-#: module/trivy:502
+#: module/trivy:503
 #, sh-format
 msgid "Date:   Vulnerability known since $human ($value days ago)"
 msgstr "Datum:  Sicherheitslücke bekannt seit $human (vor $value Tagen)"
 
-#: module/trivy:504
+#: module/trivy:505
 #, sh-format
 msgid "Exploit known since $exploitDate at $exploitVendor $exploitProduct"
 msgstr "Exploit bekannt seit $exploitDate bei $exploitVendor $exploitProduct"
 
-#: module/trivy:507
+#: module/trivy:508
 msgid "Responsible"
 msgstr "Zuständig"
 
-#: module/trivy:508
+#: module/trivy:509
 msgid "Deploy"
 msgstr "Deploy"
 
-#: module/trivy:509
+#: module/trivy:510
 msgid "Last comments"
 msgstr "Letzte Kommentare"
 
-#: module/trivy:511
+#: module/trivy:512
 msgid "Sources"
 msgstr "Quellen"
 
-#: module/trivy:518
+#: module/trivy:519
 msgid "Links"
 msgstr "Links"
 
@@ -632,57 +632,62 @@ msgstr "PID Lockfile konnte nicht erstellt werden"
 msgid "Waiting for unlock in $lockfile by PID $pid"
 msgstr "Warten, bis zur Freigabe in $lockfile durch PID $pid"
 
-#: module/process:299
+#: module/process:311
 msgid "Work steps are logged so that you can resume work mid-process"
 msgstr ""
 "Arbeitsschritte werden protokolliert um auch mittendrin wieder aufzusetzen"
 
-#: module/process:366 module/process:433 module/process:500
+#: module/process:314
+#, sh-format
+msgid "Previous run will be resumed, $num steps are already done"
+msgstr "Vorheriger Lauf wird fortgeführt, $num Arbeitsschritte sind schon vollendet"
+
+#: module/process:382 module/process:449 module/process:516
 #, sh-format
 msgid "Skip: $name (already done)"
 msgstr "Abbrechen: $name (bereits durchgeführt)"
 
-#: module/process:370 module/process:437 module/process:535
+#: module/process:386 module/process:453 module/process:551
 #, sh-format
 msgid "Start: $name"
 msgstr "Starte: $name"
 
-#: module/process:373 module/process:521
+#: module/process:389 module/process:537
 #, sh-format
 msgid "Finished: $name"
 msgstr "Fertig: $name"
 
-#: module/process:448
+#: module/process:464
 #, sh-format
 msgid "Finished: $check"
 msgstr "Fertig: $check"
 
-#: module/process:504
+#: module/process:520
 #, sh-format
 msgid "Queue: $name"
 msgstr "Warteschlange: $name"
 
-#: module/process:539
+#: module/process:555
 #, sh-format
 msgid "Queued $started/$total jobs"
 msgstr "Warteschlange $started/$total Jobs"
 
-#: module/process:648
+#: module/process:664
 #, sh-format
 msgid "No process with pid $pid"
 msgstr "Kein Prozess mit PID $pid"
 
-#: module/process:656
+#: module/process:672
 #, sh-format
 msgid "No processes found for $search"
 msgstr "Keine Prozesse für $search gefunden"
 
-#: module/process:701
+#: module/process:717
 #, sh-format
 msgid "Waiting for $pid ($pcpu% CPU)"
 msgstr "Warten auf $pid ($pcpu% CPU)"
 
-#: module/process:705
+#: module/process:721
 #, sh-format
 msgid "Timeout after ${timeout}s"
 msgstr "Abbruch nach ${timeout}s"
