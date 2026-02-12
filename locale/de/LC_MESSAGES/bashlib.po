@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-02-11 19:24+0100\n"
+"POT-Creation-Date: 2026-02-12 22:04+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -24,7 +24,7 @@ msgstr ""
 #: module/process:376 module/process:424 module/process:507 module/process:654
 #: module/remote:84 module/remote:206 module/remote:248 module/remote:286
 #: module/database:36 module/mattermost:309 module/mattermost:340
-#: module/table:223 module/table:437 module/crypto:41 module/git:23
+#: module/table:242 module/table:495 module/crypto:41 module/git:23
 #: module/git:61 module/software:245
 msgid "Unrecognized option"
 msgstr "Unbekannte Option"

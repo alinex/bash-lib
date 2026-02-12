@@ -14,6 +14,7 @@
 <tsv> | tsv reverse [options]
 <tsv> | tsv edit [options] <col-num> <row-num> <value>
 <tsv> | tsv crop <column> <length>
+<tsv> | tsv color <color> [options] <regex> <selection>
 <tsv> | tsv print [options]
 <tsv> | tsv to <format> [<destination>] [options]
 ```
@@ -33,8 +34,8 @@
 --natural                   # sort natural (numbers in strings are treaded numerical)
 --reverse                   # sort in reverse order
 --ignore-case               # ignore case in filter and sorting
+--column <num>              # column to colorize
 --unique                    # keep only one line per sorted value
---max-col-width <num>       # maximum column width for all columns, will truncate content
 --schema <name>             # schema for to postgres export
 --table <name>              # table name
 --drop                      # drop table before insert to postgres
@@ -130,10 +131,6 @@ tsv sort 3,4                  # Sort after column 3 and 4
 
 Reverses rows of CSV data.
 
-**print**
-
-Outputs data as a visual table with columns in alignment.
-
 **edit**
 
 Replace the value of a cell specified by its row and column.
@@ -152,6 +149,27 @@ Crop the column to maximum length.
 tsv crop 1 10         # Crop column 1 to maximum 10 characters
 tsv crop name 10      # Crop column "name" to maximum 10 characters
 ```
+
+**color**
+
+Colorize line with ansi colors.
+
+For multiple colors run it multiple times in a pipe. But keep in mind that if a column will match multiple colors the first match will take precedence.
+But if you use different formats like color, background and intensity they both will match.
+
+
+```bash
+tsv color `$CC_RED` 'foo.*bar'                          # Colorize rows where any field contains the regex 'foo.*bar' (case sensitive)
+tsv color `$CC_RED`:`$CC_RESET_FG` --column=1 'foo.*bar'  # Colorize the first column and give the reset code to use
+tsv color `$CC_RED` --ignore-case 'error' message       # Case insensitive colorize for 'error' in the 'message' column
+tsv color `$CC_RED` --exact 'completed' status          # Colorize for exact matches of 'completed' in the 'status' column
+tsv color `$CC_RED` --literal 'a.b*c'                   # Colorize for literal string 'a.b*c' in all columns
+tsv color `$CC_RED` --invert-match 'test'               # Invert match: colorize rows that do NOT match the regex 'test'
+```
+
+**print**
+
+Outputs data as a visual table with columns in alignment.
 
 **to**
 
@@ -173,5 +191,7 @@ tsv to sqlite --output dumpfile.sql                       # Create dump file
 tsv to sqlite test.db --table=mytable                     # Load data to sqlite database `test.db`
 tsv to sqlite test.db --table=mytable --drop              # Drop tables if they exist before loading
 ```
+
+You may concat all this methods together as far as they output tsv further and in the end call `print` or `to`.
 
 

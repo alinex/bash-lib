@@ -127,10 +127,6 @@ use software
 #
 # Reverses rows of CSV data.
 #
-# **print**
-#
-# Outputs data as a visual table with columns in alignment.
-#
 # **edit**
 #
 # Replace the value of a cell specified by its row and column.
@@ -147,6 +143,26 @@ use software
 # tsv crop 1 10         # Crop column 1 to maximum 10 characters
 # tsv crop name 10      # Crop column "name" to maximum 10 characters
 # ```
+#
+# **color**
+#
+# Colorize line with ansi colors.
+#
+# For multiple colors run it multiple times in a pipe. But keep in mind that if a column will match multiple colors the first match will take precedence.
+# But if you use different formats like color, background and intensity they both will match.
+#
+# ```bash
+# tsv color $CC_RED 'foo.*bar'                          # Colorize rows where any field contains the regex 'foo.*bar' (case sensitive)
+# tsv color $CC_RED:$CC_RESET_FG --column=1 'foo.*bar'  # Colorize the first column and give the reset code to use
+# tsv color $CC_RED --ignore-case 'error' message       # Case insensitive colorize for 'error' in the 'message' column
+# tsv color $CC_RED --exact 'completed' status          # Colorize for exact matches of 'completed' in the 'status' column
+# tsv color $CC_RED --literal 'a.b*c'                   # Colorize for literal string 'a.b*c' in all columns
+# tsv color $CC_RED --invert-match 'test'               # Invert match: colorize rows that do NOT match the regex 'test'
+# ```
+#
+# **print**
+#
+# Outputs data as a visual table with columns in alignment.
 #
 # **to**
 #
@@ -168,6 +184,8 @@ use software
 # tsv to sqlite test.db --table=mytable --drop              # Drop tables if they exist before loading
 # ```
 #
+# You may concat all this methods together as far as they output tsv further and in the end call `print` or `to`.
+#
 # Usage:    <tsv> | tsv headers [options]
 #           <tsv> | tsv count [options]
 #           <tsv> | tsv select [options] <selection>
@@ -177,6 +195,7 @@ use software
 #           <tsv> | tsv reverse [options]
 #           <tsv> | tsv edit [options] <col-num> <row-num> <value>
 #           <tsv> | tsv crop <column> <length>
+#           <tsv> | tsv color <color> [options] <regex> <selection>
 #           <tsv> | tsv print [options]
 #           <tsv> | tsv to <format> [<destination>] [options]
 # Options:  --no-headers                # input is without header
@@ -191,22 +210,21 @@ use software
 #           --natural                   # sort natural (numbers in strings are treaded numerical)
 #           --reverse                   # sort in reverse order
 #           --ignore-case               # ignore case in filter and sorting
+#           --column <num>              # column to colorize
 #           --unique                    # keep only one line per sorted value
-#           --max-col-width <num>       # maximum column width for all columns, will truncate content
 #           --schema <name>             # schema for to postgres export
 #           --table <name>              # table name
 #           --drop                      # drop table before insert to postgres
 tsv() {
     # parameter parsing
-    local opt=(-d $'\t') opt2=() QSV_DEFAULT_DELIMITER=$'\t' noHeaders input output sort literal exact invert flag numerical natural reverse ignoreCase unique maxWidth schema table drop
-    eval set -- "$(option_parse $'- no-headers -\ni input-file +\no output-file +\ns sort -\n- max-col-width +\n- schema +\n-table +\n- drop -' "$@")"
+    local opt=(-d $'\t') opt2=() QSV_DEFAULT_DELIMITER=$'\t' noHeaders input output sort literal exact invert flag numerical natural reverse ignoreCase unique column schema table drop
+    eval set -- "$(option_parse $'- no-headers -\ni input-file +\no output-file +\ns sort -\n- column +\n- schema +\n-table +\n- drop -' "$@")"
     while true; do
         case "$1" in
         --no-headers) noHeaders=1 && shift ;;
         -i | --input-file) is readable --name=input-file --die --output=input -- "$2" && shift 2 ;;
         -o | --output-file) is set --name=output-file --die --output=output -- "$2" && shift 2 ;;
         -s | --sort) sort=1 && shift ;;
-        --max-col-width) is integer --name=max-col-width --min=5 --die --output=maxWidth -- "$2" && shift 2 ;;
         --literal) literal=1 && shift ;;
         --exact) exact=1 && shift ;;
         --invert) invert=1 && shift ;;
@@ -216,6 +234,7 @@ tsv() {
         --reverse) reverse=1 && shift ;;
         --ignore-case) ignoreCase=1 && shift ;;
         --unique) unique=1 && shift ;;
+        --column) is integer --name=column --min=1 --die --output=column -- "$2" && shift 2 ;;
         --schema) is set --name=schema --die --output=schema -- "$2" && shift 2 ;;
         --table) is set --name=table --die --output=table -- "$2" && shift 2 ;;
         --drop) drop=1 && shift ;;
@@ -223,7 +242,7 @@ tsv() {
         *) die "$(gettext "Unrecognized option"): $1" ;;
         esac
     done
-    is enum --name=command --allow="headers count select filter slice sort reverse edit crop print to" --die --output=cmd -- "$1"
+    is enum --name=command --allow="headers count select filter slice sort reverse edit crop color print to" --die --output=cmd -- "$1"
     # processing
     install qsv
     case $cmd in
@@ -323,12 +342,51 @@ tsv() {
                     }'
             fi >"${output:-/dev/stdout}"
         ;;
-    print)
-        is empty -- "$output" || opt+=(-o "$output")
-        is empty -- "$maxWidth" || opt+=(-c $((maxWidth - 3)))
+    color)
+        local color reset
+        is set --name=color --die --output=color -- "$2"
+        is empty -- "$noHeaders" || opt+=(-n)
+        is empty -- "$literal" || opt+=(--literal)
+        is empty -- "$exact" || opt+=(--exact)
+        is empty -- "$invert" || opt+=(-v)
+        is empty -- "$flag" || opt+=(-f "$flag")
+        is empty -- "$3" || opt+=(-s "$4")
+        is empty -- "$ignoreCase" || opt+=(-i)
+        is set --name=regex --die -- "$3" && opt+=("$3")
         is empty -- "$input" || opt+=("$input")
-        is integer --name=arguments --max=1 --die -- $#
-        qsv table "${opt[@]}"
+        is empty -- "$output" || opt2+=(-o "$output")
+        is integer --name=arguments --max=4 --die -- $#
+        reset=${color##*:}
+        color=${color%%:*}
+        [[ "$color" != "$reset" ]] || reset=$CC_RESET
+        qsv search "${opt[@]}" --not-one -f C | qsv fmt "${opt2[@]}" -t '\t' |
+            while IFS=$'\t' read -r -a fields; do
+                ((${#fields[@]} == 0)) && continue
+                last="${fields[-1]}"
+                unset 'fields[-1]'
+                if ((last > 0)); then
+                    if [ -n "$column" ]; then
+                        fields[$((column - 1))]="$color${fields[$((column - 1))]}$reset"
+                    else
+                        fields[0]="$color${fields[0]}"
+                        fields[-1]+=$reset
+                    fi
+                fi
+                printf '%s' "${fields[0]}"
+                for ((i = 1; i < ${#fields[@]}; i++)); do
+                    printf '\t%s' "${fields[i]}"
+                done
+                printf '\n'
+            done
+        ;;
+    print)
+        # qsv cannot handle ansi codes
+        #is empty -- "$output" || opt+=(-o "$output")
+        #is empty -- "$input" || opt+=("$input")
+        #is integer --name=arguments --max=1 --die -- $#
+        #qsv table "${opt[@]}"
+        cat "${input:-/dev/stdin}" |
+            column --table --separator $'\t' >"${output:-/dev/stdout}"
         ;;
     to)
         is enum --name=format --allow="csv postgres sqlite xslx ods json" --die -- "$2"

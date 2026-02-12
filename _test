@@ -21,6 +21,19 @@ DESCRIPTION=""
 #trivy root --progress --no-secrets --clean
 #exit
 
+in=$'Number\tName\n1234\tone\n2\ttwo\n10\tten thousand and one hundred fourty five\n'
+echo "$in" | tsv "$@" | tsv print
+exit
+
+dns_list "host.test.grp\sA" 2>/dev/null | tsv sort --natural INHALT | tsv print
+while true; do
+    xip=$(ask string "Welche IP soll geprüft werden" --empty)
+    is set -- "$xip" || break
+    ping_check $xip && error "Unter $xip läuft bereits eine VM!" || ok "Keine Reaktion bei $xip auf Ping."
+done
+
+exit
+
 STEPS_VARIABLES="num"
 steps init
 
@@ -50,10 +63,6 @@ steps end
 exit
 
 timer_info #| qsv table -d $'\t'
-exit
-
-in=$'Number\tName\n1\tone\n2\ttwo\n10\tten thousand and one hundred fourty five\n'
-echo "$in" | tsv "$@"
 exit
 
 ask time

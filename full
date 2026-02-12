@@ -4149,15 +4149,14 @@ esac
 }
 use software
 tsv(){
-local opt=(-d $'\t') opt2=() QSV_DEFAULT_DELIMITER=$'\t' noHeaders input output sort literal exact invert flag numerical natural reverse ignoreCase unique maxWidth schema table drop
-eval set -- "$(option_parse $'- no-headers -\ni input-file +\no output-file +\ns sort -\n- max-col-width +\n- schema +\n-table +\n- drop -' "$@")"
+local opt=(-d $'\t') opt2=() QSV_DEFAULT_DELIMITER=$'\t' noHeaders input output sort literal exact invert flag numerical natural reverse ignoreCase unique column schema table drop
+eval set -- "$(option_parse $'- no-headers -\ni input-file +\no output-file +\ns sort -\n- column +\n- schema +\n-table +\n- drop -' "$@")"
 while true;do
 case "$1" in
 --no-headers)noHeaders=1&&shift;;
 -i|--input-file)is readable -ninput-file -doinput -- "$2"&&shift 2;;
 -o|--output-file)is set -noutput-file -dooutput -- "$2"&&shift 2;;
 -s|--sort)sort=1&&shift;;
---max-col-width)is integer -nmax-col-width --min=5 -domaxWidth -- "$2"&&shift 2;;
 --literal)literal=1&&shift;;
 --exact)exact=1&&shift;;
 --invert)invert=1&&shift;;
@@ -4167,6 +4166,7 @@ case "$1" in
 --reverse)reverse=1&&shift;;
 --ignore-case)ignoreCase=1&&shift;;
 --unique)unique=1&&shift;;
+--column)is integer -ncolumn --min=1 -docolumn -- "$2"&&shift 2;;
 --schema)is set -nschema -doschema -- "$2"&&shift 2;;
 --table)is set -ntable -dotable -- "$2"&&shift 2;;
 --drop)drop=1&&shift;;
@@ -4174,7 +4174,7 @@ case "$1" in
 *)die "$(gettext "Unrecognized option"): $1"
 esac
 done
-is enum -ncommand --allow="headers count select filter slice sort reverse edit crop print to" -docmd -- "$1"
+is enum -ncommand --allow="headers count select filter slice sort reverse edit crop color print to" -docmd -- "$1"
 install qsv
 case $cmd in
 headers)is integer -narguments --max=1 -d $#
@@ -4263,11 +4263,42 @@ awk -F $'\t' -v OFS=$'\t' -v colname="$2" -v width="$3" '
                     }'
 fi >"${output:-/dev/stdout}"
 ;;
-print)[ -z "$output" ]||opt+=(-o "$output")
-[ -z "$maxWidth" ]||opt+=(-c $((maxWidth-3)))
+color)local color reset
+is set -ncolor -docolor -- "$2"
+[ -z "$noHeaders" ]||opt+=(-n)
+[ -z "$literal" ]||opt+=(--literal)
+[ -z "$exact" ]||opt+=(--exact)
+[ -z "$invert" ]||opt+=(-v)
+[ -z "$flag" ]||opt+=(-f "$flag")
+[ -z "$3" ]||opt+=(-s "$4")
+[ -z "$ignoreCase" ]||opt+=(-i)
+is set -nregex -d -- "$3"&&opt+=("$3")
 [ -z "$input" ]||opt+=("$input")
-is integer -narguments --max=1 -d $#
-qsv table "${opt[@]}"
+[ -z "$output" ]||opt2+=(-o "$output")
+is integer -narguments --max=4 -d $#
+reset=${color##*:}
+color=${color%%:*}
+[[ $color != "$reset" ]]||reset=$CC_RESET
+qsv search "${opt[@]}" --not-one -f C|qsv fmt "${opt2[@]}" -t '\t'|while IFS=$'\t' read -r -a fields;do
+((${#fields[@]}==0))&&continue
+last="${fields[-1]}"
+unset 'fields[-1]'
+if ((last>0));then
+if [ -n "$column" ];then
+fields[$((column-1))]="$color${fields[$((column-1))]}$reset"
+else
+fields[0]="$color${fields[0]}"
+fields[-1]+=$reset
+fi
+fi
+printf '%s' "${fields[0]}"
+for ((i=1; i<${#fields[@]}; i++));do
+printf '\t%s' "${fields[i]}"
+done
+printf '\n'
+done
+;;
+print)cat "${input:-/dev/stdin}"|column --table --separator $'\t' >"${output:-/dev/stdout}"
 ;;
 to)is enum -nformat --allow="csv postgres sqlite xslx ods json" -d -- "$2"
 local temp

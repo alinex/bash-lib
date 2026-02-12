@@ -11,7 +11,6 @@ But on release they will be merged with semantical versioning into the master br
 - add [open_url](doc/function/open_url.md) to open url in browser
 - add [ping_check](doc/function/ping_check.md)
 - replace [tsv](doc/function/tsv.md) with a newer version which is more powerful and quicker, powered by rust implementation qsv
-- [tsv](doc/function/tsv.md) now support with/out headers and header remove and has a filter command added
 - upload/download now with `--delete` option
 - argument parser will not remove unknown options
 - move environment settings into module with defaults and description

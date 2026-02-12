@@ -12,7 +12,7 @@ pause <message>
 ### Options
 
 ```bash
--T, --timeout <duration>    # time after which the default will be used
+-T, --timeout <duration>    # time after which it will go on
 -a, --abort                 # let the timeout abort by key press
 ```
 

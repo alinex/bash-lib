@@ -15,7 +15,7 @@ declare -F "color_256" >/dev/null || source "$BASHLIB_HOME"/module/color
 #
 # Usage:    pause <message>
 #           <message> | pause
-# Options:  -T, --timeout <duration>    # time after which the default will be used
+# Options:  -T, --timeout <duration>    # time after which it will go on
 #           -a, --abort                 # let the timeout abort by key press
 # TTY:      <question> <key>
 # Example:  &input#pause shows all possible use cases
