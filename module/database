@@ -15,13 +15,16 @@ use module/software
 # Mongo
 ######################################################################################
 
+# Hash: Mongo Admin User Logins `<host> = <username>:<password>` but use `_` instead of `.` in hostname
+declare -A MONGO_ADMIN_USERPASS="${MONGO_ADMIN_USERPASS:-()}"
+
 # Run command on Mongo DB
 #
 # Usage:    mongo [<options>] "" <command>            # global command
 #           mongo [<options>] <database> <command>    # work in database
-# Options:  h, host <host>          # destination host
-# Global:   $server
-#           $MONGO_ADMIN_USERPASS
+# Options:  -h, --host <host>          # destination host
+# Global:   - $server
+#           - $MONGO_ADMIN_USERPASS
 mongo() {
     # parameter parsing
     local host="$server"

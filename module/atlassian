@@ -8,9 +8,17 @@ source /dev/null
 
 # This covers Atlassian API for Jira and confluence.
 
+# Atlassian user for API access in confluence and jira
+ATLASSIAN_USER=$ATLASSIAN_USER
+# Atlassian password for API access in confluence and jira
+ATLASSIAN_TOKEN=$ATLASSIAN_TOKEN
+
 ######################################################################################
 # Confluence
 ######################################################################################
+
+# Atlassian confluence API URL used together with $ATLASSIAN_USER and $ATLASSIAN_TOKEN and silently disables @confluence functions if not set
+CONFLUENCE_API="$CONFLUENCE_API"
 
 # Get page content from Confluence using API
 #
@@ -34,6 +42,14 @@ confluence() {
 # - https://atlas-doc-parser.readthedocs.io/en/latest/index.html
 
 # https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issues/#api-group-issues
+
+# Atlassian Jira URL this can be https://my-company.atlassian.net used together with $ATLASSIAN_USER and $ATLASSIAN_TOKEN and silently disables @jira functions if not set
+JIRA_HOST="$JIRA_HOST"
+
+# Last HTTP return code from jira
+JIRA_HTTP_CODE=""
+# This will be set by using `jira --no-die` instead, so you can work arround it and go on in the script flow.
+JIRA_ERROR=""
 
 # Jira API calls
 #
@@ -64,15 +80,27 @@ confluence() {
 #           # convert atlassian document format:
 #           jira md_to_adf <json>
 #           jira adf_to_md <md>
-# Global:   $JIRA_HOST
-#           $ATLASSIAN_USER
-#           $ATLASSIAN_TOKEN
+# Options:  --no-die                                      # output error, put it into $JIRA_ERROR and go on
+# Global:   - $JIRA_HOST
+#           - $ATLASSIAN_USER
+#           - $ATLASSIAN_TOKEN
 # Output:   - get: <json>
 #           - search: <issueId> list, each in a separate line
 #           - create: <issueId> which was just created
-# Return:   die on 400, 404 Error
-#           retry on other not 2xx Code
+# Return:   - immediate die on 400, 404 Error
+#           - retry on other not 2xx Code and later die
+#           - 1 if error with --no-die option
 jira() {
+  # parameter parsing
+  local noDie
+  eval set -- "$(option_parse $'- no-die -' "$@")"
+  while true; do
+    case "$1" in
+    --no-die) noDie=1 && shift ;;
+    --) shift && break ;;
+    *) die "$(gettext "Unrecognized option"): $1" ;;
+    esac
+  done
   is set --name=JIRA_HOST --die -- "$JIRA_HOST"
   is set --name=ATLASSIAN_USER --die -- "$ATLASSIAN_USER"
   is set --name=ATLASSIAN_TOKEN --die -- "$ATLASSIAN_TOKEN"
@@ -83,45 +111,45 @@ jira() {
     is set --name=arguments --max=1 --die -- $#
     is set --name=issueId-or-key --die -- "$1"
     debug "GET issue $1"
-    _jira GET "issue/$1"
+    _jira GET "issue/$1" "" $noDie
     ;;
   search)
     is set --name=arguments --max=1 --die -- $#
     is set --name=jql --die -- "$1"
     debug "SEARCH issue $1"
     local res rc=0
-    _jira GET "search/jql?jql=$(urlencode "$1")" | jq .issues[].id -r
+    _jira GET "search/jql?jql=$(urlencode "$1")" "" $noDie | jq .issues[].id -r
     ;;
   create)
     is set --name=arguments --max=1 --die -- $#
     is set --name=json --die -- "$1"
     debug "CREATE issue ${jq-r '.fields.summary' <<<"$1"}"
-    _jira POST issue "$1" | jq .id -r
+    _jira POST issue "$1" $noDie | jq .id -r
     ;;
   update)
     is set --name=arguments --max=2 --die -- $#
     is set --name=issueId-or-key --die -- "$1"
     is set --name=json --die -- "$2"
     debug "UPDATE issue $1"
-    _jira PUT "issue/$1" "$2" >/dev/null
+    _jira PUT "issue/$1" "$2" $noDie >/dev/null
     ;;
   delete)
     is set --name=arguments --max=1 --die -- $#
     is set --name=issueId-or-key --die -- "$1"
     debug "DELETE issue $1"
-    _jira GET "issue/$1"
+    _jira GET "issue/$1" "" $noDie
     ;;
   project)
     is set --name=arguments --max=1 --die -- $#
     is set --name=projectId-or-key --die -- "$1"
     debug "GET project $1"
-    _jira GET "project/$1"
+    _jira GET "project/$1" "" $noDie
     ;;
   fields)
     is set --name=arguments --max=2 --die -- $#
     is set --name=projectId-or-key --die -- "$1"
     is set --name=issueTypeId --die -- "$2"
-    debug "GET fields $1/$2"
+    debug "GET fields $1/$2" "" $noDie
     _jira GET "issue/createmeta/$1/issuetypes/$2"
     ;;
   json)
@@ -446,30 +474,42 @@ jira() {
   esac
 }
 
-# Usage _jira <method> <path> <data>
+# Usage _jira <method> <path> <data> <no-die>
 _jira() {
   local METHOD=$1
   local REST="$2"
   local DATA="$3"
+  local noDie=$4
   local api=rest/api/3
-  local res rc=0 num=0 retry=3
+  local res rc=0 num=0 retry=5
   while ((num <= retry)); do
     ((num == 0)) || debug "Retry $num"
     res="$(curl --store $$ --request "$METHOD" --url "$JIRA_HOST/$api/$REST" --user "$ATLASSIAN_USER:$ATLASSIAN_TOKEN" --data "$DATA" -H "Content-Type: application/json")" || rc=$?
+    JIRA_HTTP_CODE=$CURL_HTTP_CODE
     variables restore --clean $$
-    if ((rc == 0)); then
+    if ((rc == 0)) && [[ ! "$CURL_HTTP_CODE" =~ ^2[0-9]{2}$ ]]; then
       printf '%s' "$res"
       return
     else
+      JIRA_ERROR="$(printf "HTTP Code $CURL_HTTP_CODE: ($rc) " && jq .errorMessages[] -r <<<"$res" || printf '%s' "$res")"
       # error code handling without retry
       # shellcheck disable=SC2059
-      case $CURL_HTTP_CODE in
-      400 | 404) (printf "HTTP Code $CURL_HTTP_CODE: " && jq .errorMessages[] -r <<<"$res" || printf '%s' "$res") | die ;;
-      esac
+      if [ -n "$noDie" ]; then
+        return 1
+      else
+        # codes on which no retry should be done
+        case $CURL_HTTP_CODE in
+        400 | 404) echo "$JIRA_ERROR" | die ;;
+        esac
+      fi
     fi
     ((num++)) || true
-    sleep $(((num + 1) ** 2))
+    sleep $(((num + 1) ** 2)) # 3 tries 30s; 5 tries 90s; 10 tries 9m
   done
   # shellcheck disable=SC2059
-  (printf "HTTP Code $CURL_HTTP_CODE: " && jq .errorMessages[] -r <<<"$res" || printf '%s' "$res") | die
+  if [ -n "$noDie" ]; then
+    return 1
+  else
+    echo "$JIRA_ERROR" | die
+  fi
 }

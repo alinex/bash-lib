@@ -10,6 +10,10 @@
 declare -Ag _software_install
 
 # repositories
+_repo_debian_qsv() {
+    wget -O - https://dathere.github.io/qsv-deb-releases/qsv-deb.gpg | sudo gpg --dearmor -o /usr/share/keyrings/qsv-deb.gpg
+    echo "deb [signed-by=/usr/share/keyrings/qsv-deb.gpg] https://dathere.github.io/qsv-deb-releases ./" | sudo tee /etc/apt/sources.list.d/qsv.list
+}
 _repo_debian_trivy() {
     sudo apt-get update
     sudo apt-get install -y wget gnupg lsb-release
@@ -36,6 +40,17 @@ _install_mongosh() {
     sudo mv mongosh-*/bin/mongosh /usr/bin
     rm -r mongosh-* mongosh.tgz
 }
+_install_qsv() {
+    wget https://github.com/dathere/qsv/releases/latest/download/qsv-x86_64-unknown-linux-gnu.zip
+    sudo unzip -j qsv-*.zip qsv-x86_64-unknown-linux-gnu/qsv /usr/local/bin/qsv
+    sudo chmod +x /usr/local/bin/qsv
+    rm qsv-*.zip
+}
+_install_ebay-tsv-utils() {
+    wget https://github.com/eBay/tsv-utils/releases/download/v2.2.0/tsv-utils-v2.2.0_linux-x86_64_ldc2.tar.gz
+    sudo tar xzf tsv-utils-v2.2.0_linux-x86_64_ldc2.tar.gz -C /usr/local/bin --strip-components=1 --wildcards '*/tsv-*'
+    rm tsv-utils*.tar.gz
+}
 
 # Install software package
 #
@@ -50,19 +65,23 @@ install() {
     declare -a yay
     declare -a dnf
     declare -a after
-    local major
+    local major cmd
     # check what is needed
     for cmd in "$@"; do
         if ! hash _software_install has "$cmd" && ! command -v "$cmd" >/dev/null; then
             debug 3 "search how to add $cmd"
             PATH="$PATH:/usr/local/sbin:/usr/sbin:/sbin" which "$cmd" >/dev/null 2>/dev/null ||
+                # common installation
+                if [ "$cmd" = "ebay-tsv-utils" ]; then
+                    after+=(_install_ebay-tsv-utils)
                 # debian
-                if command -v apt-get >/dev/null; then
+                elif command -v apt-get >/dev/null; then
                     case $cmd in
                     mlr) apt+=(miller) ;;
-                    yq) after+=(_install_yq) ;;
                     mongosh) after+=(_install_mongosh) ;;
+                    qsv) before+=(_repo_debian_qsv) && apt+=(qsv) ;;
                     trivy) before+=(_repo_debian_trivy) && apt+=(trivy) ;;
+                    yq) after+=(_install_yq) ;;
                     *) apt+=("$cmd") ;;
                     esac
                 # alpine
@@ -81,6 +100,7 @@ install() {
                         yay+=(mongosh-bin)
                         after+=(_install_mongosh)
                         ;;
+                    qsv) yay+=(qsv) ;;
                     *) pacman+=("$cmd") ;;
                     esac
                 # redhat
@@ -88,6 +108,8 @@ install() {
                     case $cmd in
                     ip) dnf+=(iproute) ;;
                     mlr) before+=(_repo_redhat_epel) && dnf+=(miller) ;;
+                    mongosh) dnf=(mongodb-mongosh) ;;
+                    qsv) after+=(_install_qsv) ;;
                     yq)
                         major="$(grep ^VERSION_ID /etc/os-release | sed 's/.*="//;s/\..*//')"
                         if ((major < 9)); then
@@ -96,7 +118,6 @@ install() {
                             before+=(_repo_redhat_epel) && dnf+=(yq)
                         fi
                         ;;
-                    mongosh) dnf=(mongodb-mongosh) ;;
                     *) dnf+=("$cmd") ;;
                     esac
                 fi

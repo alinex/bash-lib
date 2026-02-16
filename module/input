@@ -15,8 +15,8 @@ declare -F "color_256" >/dev/null || source "$BASHLIB_HOME"/module/color
 #
 # Usage:    pause <message>
 #           <message> | pause
-# Options:  T, timeout <duration>    # time after which the default will be used
-#           a, abort                 # let the timeout abort by key press
+# Options:  -T, --timeout <duration>    # time after which it will go on
+#           -a, --abort                 # let the timeout abort by key press
 # TTY:      <question> <key>
 # Example:  &input#pause shows all possible use cases
 pause() {
@@ -65,13 +65,15 @@ pause() {
 # The default can be yes or no and if a default is set <return> will use it. Additional to a default a timeout can be set meaning to use default if timeout is reached. If an invalid character is typed, the timeout will restart.
 #
 # Usage:    confirm <question>
-# Options:  t, true                  # default: yes
-#           f, false                 # default: no
-#           T, timeout <duration>    # time after which the default will be used
-# TTY:      <question> [<default>]? <answer>
-#           # read single characters
-# Return:   0 for true/yes
-#           1 for false/no
+# Options:  -t, --true                  # default: yes
+#           -f, --false                 # default: no
+#           -T, --timeout <duration>    # time after which the default will be used
+# TTY:      ```
+#           <question> [<default>]? <answer>
+#           ```
+#           read single characters
+# Return:   -0 for true/yes
+#           -1 for false/no
 # Example:  &input#confirm shows all possible use cases
 confirm() {
     # parameter parsing
@@ -156,24 +158,6 @@ confirm() {
     stty echo </dev/tty
 }
 
-# Deprecated: Ask yes/no question with default to no.
-# Use `confirm --false <question>` instead, see @confirm.
-ask_no() {
-    _deprecated "use confirm --false <question>"
-}
-
-# Deprecated: Ask yes/no question with default to yes.
-# Use `confirm --true <question>` instead, see @confirm.
-ask_yes() {
-    _deprecated "use confirm --true <question>"
-}
-
-# Deprecated: Ask a free question.
-# Use `ask <question>` instead, see @ask.
-ask_input() {
-    _deprecated "use ask string <question>"
-}
-
 # Ask for an input element
 #
 # This will also validate while typing if you select the correct format. So you can only input characters matching the input format.
@@ -190,12 +174,14 @@ ask_input() {
 # If another format is needed, you can fall back to string and validate on your own after you got the response.
 #
 # Usage:    ask <format> <question>
-# Options:  e, empty                 # allow empty value
-#           n, allow-negative        # on number, integer, float
-#           d, default <value>       # set default if none given
-#           T, timeout <duration>    # time till default is used
-# TTY:      <question> <valid characters>...
-#           # input <keys> printed if valid
+# Options:  -e, --empty                 # allow empty value
+#           -n, --allow-negative        # on number, integer, float
+#           -d, --default <value>       # set default if none given
+#           -T, --timeout <duration>    # time till default is used
+# TTY:      ```
+#           <question> <valid characters>...
+#           ```
+#           input <keys> printed if valid
 # Output:   <answer>
 # Example:  &input#ask shows all possible use cases
 ask() {
@@ -244,8 +230,8 @@ ask() {
         ;;
     time)
         prompt="${2:-$(gettext "Enter time")}"
-        pattern="^([0-1]?[0-9]|2[0-3])(:([0-5]?[0-9])?)?$"
-        final="^([0-1][0-9]|2[0-3]):[0-5][0-9]$"
+        pattern="^([0-9]|1?[0-9]|2[0-3])(:([0-5]?[0-9])?)?$"
+        final="^([0-9]|1[0-9]|2[0-3]):[0-5][0-9]$"
         ;;
     text) prompt="${2:-$(gettext "Enter text (end with empty line)")}" ;;
     editor) prompt="${2:-$(gettext "Enter text here")}" ;;
@@ -438,19 +424,20 @@ _password_strength() {
 #
 # Usage:    choose [-t] <entry>...
 #           <list> | choose [-t]
-# Options:  t, title <title>         # display text line above selection
-#           x, exit <string>         # will add an exit option at the end -> return "exit"
-#           d, default <string|int>  # the command or number which will be returned on <enter>
-#           T, timeout <duration>    # timeout till default selection as seconds or duration @duration_format
+# Options:  -t, --title <title>         # display text line above selection
+#           -x, --exit <string>         # will add an exit option at the end -> return "exit"
+#           -d, --default <string|int>  # the command or number which will be returned on <enter>
+#           -T, --timeout <duration>    # timeout till default selection as seconds or duration @duration_format
 # Entry:    <entry> := <string> | <key> "|" <display> # whitespace around values are removed
-# TTY:      [<title>]
+# TTY:      ```
+#           [<title>]
 #           <list>
 #           ...
 #           <question> <key>
+#           ```
 # Output:   selected `<line>`
 # Return:   `exit 0` # if run with `--exit` and this was chosen
 # Example:  &input#choose shows all possible use cases
-# TODO > 10 entries make two columns using
 choose() {
     # parameter parsing
     local end default timeout
@@ -465,27 +452,11 @@ choose() {
         *) die "$(gettext "Unrecognized option"): $1" ;;
         esac
     done
-    #local list max length
-    #list="$()"
-    #list="$(trim "$list" | grep -v ^#)"
-    #max="$(wc -l <<<"$list")"
-    #length="${#max}"
-    ## output list
-    #local line key display num=0 pattern
-    #while read -r line; do
-    #    num=$((num + 1))
-    #    IFS="|" read -r key display <<<"$line"
-    #    if [ -n "$default" ]; then
-    #        [ "$default" = "$(trim "$key")" ] && default="$num" || true
-    #        [ "$default" = "$(trim "$display")" ] && default="$num" || true
-    #    fi
-    #    printf "  %0${length}d) $(trim "${display:-$key}")\n" "$num" >/dev/tty
-    #done <<<"$list"
     # get list
     local width list num entries keys key display
     width=$(tput cols </dev/tty 2>/dev/null || echo 80)
     list="$(input_lines "$@")"
-    list="$(trim "$list" | grep -v ^#)"
+    list="$(trim "$list" | grep -v ^# | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
     while read -r line; do
         num=$((num + 1))
         IFS="|" read -r key display <<<"$line"
@@ -512,16 +483,23 @@ choose() {
     while ((cols > 1 && cols * (length + $max_length + 4) > width)); do
         ((cols--))
     done
-    rows=$(((max + cols - 1) / cols))
-    # Print row-wise
-    local r c idx
-    for ((r = 0; r < rows; r++)); do
-        for ((c = 0; c < cols; c++)); do
-            idx=$((r + c * rows))
-            ((idx > max)) || uprintf "  %*s) %-*s" $max_length $((idx + 1)) "$length" "${entries[idx]}" >/dev/tty
+    if ((cols == 1)); then
+        # Print one column (specially needed for multiline entries)
+        for idx in "${!entries[@]}"; do
+            printf '  %*s) %s\n' $max_length $((idx + 1)) "${entries[idx]}" >/dev/tty
         done
-        printf "\n" >/dev/tty
-    done
+    else
+        # Print row-wise
+        rows=$(((max + cols - 1) / cols))
+        local r c idx
+        for ((r = 0; r < rows; r++)); do
+            for ((c = 0; c < cols; c++)); do
+                idx=$((r + c * rows))
+                ((idx > max)) || uprintf "  %*s) %-*s" $max_length $((idx + 1)) "$length" "${entries[idx]}" >/dev/tty
+            done
+            printf "\n" >/dev/tty
+        done
+    fi
     # add exit entry
     [ -z "$end" ] || printf '  %*s) %s\n' $max_length x "${end}" >/dev/tty
     is empty -- "$default" || is integer -- "$default" || die "Default option $default not recognized."
@@ -628,6 +606,7 @@ choose() {
         fi
     done
     stty echo </dev/tty
+    debug "$list"
     sed -n "${input}p" <<<"$list" | sed 's/\s*|.*//'
 }
 
@@ -645,16 +624,18 @@ choose() {
 #           # <task-line>   := "<task-fn> | <name>"
 #           <task-lines> | tasks            # entries from pipe
 #           tasks <check-fn>                # add entries from function (dynamic)
-# Option    t, title <title>             # display text line above selection
-#           d, default <string|int|variable>  # default command to start
-#           T, timeout <sec>             # timeout till default selection
+# Option    -t, --title <title>             # display text line above selection
+#           -d, --default <string|int|variable>  # default command to start
+#           -T, --timeout <sec>             # timeout till default selection
 # Files:    `/dev/shm/<program>_tasks_<pid>` will be used while dynamically generating the tasks list and removed afterwards
-# TTY:      Nächste Schritte
+# TTY:      ```
+#           Nächste Schritte
 #              1) Analyse einzelner Partitionen
 #              2) Docker aufräumen mit etwa 206MB unter /data
 #              3) Remote Host Console (interaktiv)
 #              x) Beenden
 #           Wähle eine der obigen Optionen: [1]
+#           ```
 # Example:  &tasks different possibilities
 tasks() {
     # parameter parsing
@@ -712,4 +693,17 @@ tasks() {
         printf '\n'
         [ -n "$loop" ] || break
     done
+}
+
+######################################################################################
+# Visual Tools
+######################################################################################
+
+# Open Url in browser
+#
+# This will open the url in the last used or local installed Browser as a new tab.
+#
+# Usage:    open_url <url>
+open_url() {
+    xdg-open "$1" 2>/dev/null || sensible-browser "$1"
 }

@@ -19,10 +19,10 @@ source /dev/null
 #           <message> | debug [<num>]
 #               <num> := [1-9]      # (default 1) higher to only show in more verbose call
 #               <message>           # the message text
-# Globals:  `$DEBUG` - if unset nothing will be printed
-#           `$DEBUG=<num>` - only print messages with same or lower numeric level
-#           `$DEBUG=<func>,...` - only print if the function is matched
-#           `$DEBUG=9` - to output all
+# Globals:  - $DEBUG - if unset nothing will be printed
+#           - `DEBUG=<num>` - only print messages with same or lower numeric level
+#           - `DEBUG=<func>,...` - only print if the function is matched
+#           - `DEBUG=9` - to output all
 # Error:    `> <func>           <message>`      # color: gray
 debug() {
     local level=1 func text sign='>'
@@ -44,6 +44,7 @@ debug() {
         [[ "$func" =~ .*(${DEBUG//,? /|}) ]] || return 0
     fi
     # print each line separately
+    local line
     while IFS= read -r line; do
         is integer --min=9 -- "$DEBUG" &&
             printf "$CC_BLACK%-2s %7d %-20s %s$CC_RESET\n" "$sign" "$BASHPID" "$func" "$line" >&2 ||
@@ -72,6 +73,7 @@ debug() {
 die() {
     is integer --name=arguments --max=1 --die -- $#
     # processing
+    trap - ERR
     local text trap line func src
     text="$(input "$@")"
     [[ "$text" != *"Uncaught exception at"* ]] || trap=1
@@ -420,7 +422,7 @@ spinner_stop() {
 
 # Output Logo with title text
 #
-# You may overwrite this function with one displaying your own logo by loading it from your `extra/my-company-logo` or so.
+# You may overload this function with one displaying your own logo by loading it from your `extra/my-company-logo` or so.
 #
 # Usage:    logo <text>
 # Output:   ASCII art logo including title

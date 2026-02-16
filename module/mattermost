@@ -6,6 +6,16 @@ source /dev/null
 
 # Using the mattermost API to write messages.
 
+# Mattermost API URL used together with $MATTERMOST_TOKEN and silently disables mattermost functions if not set
+MATTERMOST_API="$MATTERMOST_API"
+# Mattermost API Token used in @mattermost @mattermost_repost @mattermost_reaction
+MATTERMOST_TOKEN="$MATTERMOST_TOKEN"
+
+# Array: Channel per pattern (team regex channel) used in @mattermost ("-"" = no selection for team)
+MATTERMOST_CHANNEL_PATTERN="${MATTERMOST_CHANNEL_PATTERN:-(MyTeam ".*" "Town Square")}"
+# Array: Link channel per pattern (team regex channel) used in @mattermost ("-"" = no selection for team)
+MATTERMOST_LINK_PATTERN="${MATTERMOST_LINK_PATTERN:-()}"
+
 ######################################################################################
 # Mattermost Internal
 ######################################################################################
@@ -143,8 +153,8 @@ _mattermost_delete() {
 # Find channels by predefined pattern
 #
 # Usage:    _mattermost_find_channels <name>
-# Output:   `<team-id>/<channel-id>` ... # first main, following links
-#           `<team-id>/<channel-id>` ... # one line per team matching
+# Output:   - `<team-id>/<channel-id>` ... # first main, following links
+#           - `<team-id>/<channel-id>` ... # one line per team matching
 _mattermost_find_channels() {
     id() {
         local val
@@ -245,18 +255,18 @@ mattermost() {
 # Usage:    mattermost_attachment
 #           mattermost_post <channel-id> "" "$(mattermost_attachment --color ...)"
 # Globals:  $MATTERMOST_API + $MATTERMOST_TOKEN to access API
-# Options:  color <hexcode>   # rgb color or names: critical, error, warning, ok, info, default
-#           text <md>         # text content
-#           author <name>     # author name
-#           avatar <url>      # author icon
-#           home <url>        # author link
-#           title <string>    # title
-#           link <url>        # title link
-#           image <url>       # bottom image
-#           thumb <url>       # right image
-#           fields <json>     # array title=<words>, value=<text>, short=false
-#           footer <string>   # footer
-#           logo <url>        # footer image
+# Options:  --color <hexcode>   # rgb color or names: critical, error, warning, ok, info, default
+#           --text <md>         # text content
+#           --author <name>     # author name
+#           --avatar <url>      # author icon
+#           --home <url>        # author link
+#           --title <string>    # title
+#           --link <url>        # title link
+#           --image <url>       # bottom image
+#           --thumb <url>       # right image
+#           --fields <json>     # array title=<words>, value=<text>, short=false
+#           --footer <string>   # footer
+#           --logo <url>        # footer image
 # Output:   <json> for this attachment
 # Returns:  0 without action if no $MATTERMOST_API + $MATTERMOST_TOKEN
 mattermost_attachment() {

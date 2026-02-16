@@ -62,13 +62,15 @@ _stacktrace() {
         # shellcheck disable=SC2015
         # shellcheck disable=SC2119
         printf "\033[1m%s:%d (%s)\n" "$src" "$line" "$func" | ([ -n "$1" ] && ( ((frame == 1)) && warn || notice) || debug 5) >&2
+        [ ! "$src" = 'main' ] || src="$0"
         # shellcheck disable=SC2015
         awk -v n="$line" '
             NR>=n-2 && NR<=n+2 {
                 gsub(/^[ \t]+/, "", $0)  # Remove leading spaces/tabs
                 printf "%4d: %s\n", NR, $0
                 if(NR==n+2) exit
-            }' "$src" | sed "/$line:/s/^/"$'\033[1m'"/;/$line:/s/$/"$'\033[22m'"/" | ([ -n "$1" ] && info || debug 6) >&2
+            }
+            ' "$src" | sed "/$line:/s/^/"$'\033[1m'"/;/$line:/s/$/"$'\033[22m'"/" | ([ -n "$1" ] && info || debug 6) >&2
         ((frame++)) || true
     done
 }

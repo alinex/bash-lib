@@ -148,6 +148,373 @@ setup() {
 }
 
 ######################################################################################
+# check
+######################################################################################
+
+# bats test_tags=check
+@test "check: string = value (true)" {
+    run check string aaa = aaa
+    assert_success
+}
+# bats test_tags=check
+@test "check: string = value (false)" {
+    run check string aaa = bbb
+    assert_failure
+}
+
+# bats test_tags=check
+@test "check: string == value (true)" {
+    run check string aaa == aaa
+    assert_success
+}
+# bats test_tags=check
+@test "check: string == value (false)" {
+    run check string aaa == bbb
+    assert_failure
+}
+
+# bats test_tags=check
+@test "check: string != value (true)" {
+    run check string aaa != bbb
+    assert_success
+}
+# bats test_tags=check
+@test "check: string != value (false)" {
+    run check string aaa != aaa
+    assert_failure
+}
+
+# bats test_tags=check
+@test "check: string =* value (true)" {
+    run check string aaa =\* a\*
+    assert_success
+}
+# bats test_tags=check
+@test "check: string =* value (false)" {
+    run check string aaa =\* b\*
+    assert_failure
+}
+
+# bats test_tags=check
+@test "check: string !* value (true)" {
+    run check string aaa !\* b\*
+    assert_success
+}
+# bats test_tags=check
+@test "check: string !* value (false)" {
+    run check string aaa !\* a\*
+    assert_failure
+}
+
+# bats test_tags=check
+@test "check: string =~ value (true)" {
+    run check string aaa =~ 'a.*'
+    assert_success
+}
+# bats test_tags=check
+@test "check: string =~ value (false)" {
+    run check string aaa =~ 'b.*'
+    assert_failure
+}
+
+# bats test_tags=check
+@test "check: string !~ value (true)" {
+    run check string aaa \!~ 'b.*'
+    assert_success
+}
+# bats test_tags=check
+@test "check: string !~ value (false)" {
+    run check string aaa \!~ 'a.*'
+    assert_failure
+}
+
+# bats test_tags=check
+@test "check: string < value (true)" {
+    run check string a \< b
+    assert_success
+}
+# bats test_tags=check
+@test "check: string < value (false)" {
+    run check string c \< b
+    assert_failure
+}
+
+# bats test_tags=check
+@test "check: string > value (true)" {
+    run check string c \> b
+    assert_success
+}
+# bats test_tags=check
+@test "check: string > value (false)" {
+    run check string a \> b
+    assert_failure
+}
+
+# bats test_tags=check
+@test "check: string empty (true)" {
+    run check string "" empty
+    assert_success
+}
+# bats test_tags=check
+@test "check: string empty (false)" {
+    run check string c empty
+    assert_failure
+}
+
+# bats test_tags=check
+@test "check: string set (true)" {
+    run check string a set
+    assert_success
+}
+# bats test_tags=check
+@test "check: string set (false)" {
+    run check string "" set
+    assert_failure
+}
+
+# bats test_tags=check
+@test "check: integer = value (true)" {
+    run check integer 1 = 1
+    assert_success
+}
+# bats test_tags=check
+@test "check: integer = value (false)" {
+    run check integer 1 = 2
+    assert_failure
+}
+
+# bats test_tags=check
+@test "check: integer < value (true)" {
+    run check integer 1 \< 2
+    assert_success
+}
+# bats test_tags=check
+@test "check: integer < value (false)" {
+    run check integer 3 \< 2
+    assert_failure
+}
+
+# bats test_tags=check
+@test "check: integer > value (true)" {
+    run check integer 3 \> 2
+    assert_success
+}
+# bats test_tags=check
+@test "check: integer > value (false)" {
+    run check integer 1 \> 2
+    assert_failure
+}
+
+# bats test_tags=check
+@test "check: integer <= value (true)" {
+    run check integer 1 \<= 2
+    assert_success
+}
+# bats test_tags=check
+@test "check: integer <= value (false)" {
+    run check integer 3 \<= 2
+    assert_failure
+}
+
+# bats test_tags=check
+@test "check: integer >= value (true)" {
+    run check integer 3 \>= 2
+    assert_success
+}
+# bats test_tags=check
+@test "check: integer >= value (false)" {
+    run check integer 1 \>= 2
+    assert_failure
+}
+
+# bats test_tags=check
+@test "check: integer positiv (true)" {
+    run check integer 3 positiv
+    assert_success
+}
+# bats test_tags=check
+@test "check: integer positiv (false)" {
+    run check integer -1 positiv
+    assert_failure
+}
+
+# bats test_tags=check
+@test "check: integer negativ (true)" {
+    run check integer -3 negativ
+    assert_success
+}
+# bats test_tags=check
+@test "check: integer negativ (false)" {
+    run check integer 1 negativ
+    assert_failure
+}
+
+# bats test_tags=check
+@test "check: integer zero (true)" {
+    run check integer 0 zero
+    assert_success
+}
+# bats test_tags=check
+@test "check: integer zero (false)" {
+    run check integer 1 zero
+    assert_failure
+}
+
+# bats test_tags=check
+@test "check: integer odd (true)" {
+    run check integer 1 odd
+    assert_success
+}
+# bats test_tags=check
+@test "check: integer odd (false)" {
+    run check integer 2 odd
+    assert_failure
+}
+
+# bats test_tags=check
+@test "check: integer even (true)" {
+    run check integer 0 even
+    assert_success
+}
+# bats test_tags=check
+@test "check: integer even (false)" {
+    run check integer 1 even
+    assert_failure
+}
+
+# bats test_tags=check
+@test "check: integer multiple-of (true)" {
+    run check integer 6 multiple-of 2
+    assert_success
+}
+# bats test_tags=check
+@test "check: integer multiple-of (false)" {
+    run check integer 1 multiple-of 2
+    assert_failure
+}
+
+# bats test_tags=check
+@test "check: integer divisible-by (true)" {
+    run check integer 6 divisible-by 2
+    assert_success
+}
+# bats test_tags=check
+@test "check: integer divisible-by (false)" {
+    run check integer 1 divisible-by 2
+    assert_failure
+}
+
+# bats test_tags=check
+@test "check: integer factor-of (true)" {
+    run check integer 2 factor-of 6
+    assert_success
+}
+# bats test_tags=check
+@test "check: integer factor-of (false)" {
+    run check integer 3 factor-of 5
+    assert_failure
+}
+
+# bats test_tags=check
+@test "check: integer prime (true)" {
+    run check integer 11 prime
+    assert_success
+}
+# bats test_tags=check
+@test "check: integer prime (false)" {
+    run check integer 12 prime
+    assert_failure
+}
+
+# bats test_tags=check
+@test "check: integer no-prime (true)" {
+    run check integer 12 no-prime
+    assert_success
+}
+# bats test_tags=check
+@test "check: integer no-prime (false)" {
+    run check integer 11 no-prime
+    assert_failure
+}
+
+# bats test_tags=check
+@test "check: float = value (true)" {
+    run check float 1.3 = 1.3
+    assert_success
+}
+# bats test_tags=check
+@test "check: float = value (false)" {
+    run check float 1.4 = 1.3
+    assert_failure
+}
+
+# bats test_tags=check
+@test "check: float < value (true)" {
+    run check float 1.2 \< 2.4
+    assert_success
+}
+# bats test_tags=check
+@test "check: float < value (false)" {
+    run check float 3.5 \< 2.4
+    assert_failure
+}
+
+# bats test_tags=check
+@test "check: float > value (true)" {
+    run check float 3.5 \> 2.4
+    assert_success
+}
+# bats test_tags=check
+@test "check: float > value (false)" {
+    run check float 1.5 \> 2.4
+    assert_failure
+}
+
+# bats test_tags=check
+@test "check: float <= value (true)" {
+    run check float 1.5 \<= 2.4
+    assert_success
+}
+# bats test_tags=check
+@test "check: float <= value (false)" {
+    run check float 3.5 \<= 2.4
+    assert_failure
+}
+
+# bats test_tags=check
+@test "check: float >= value (true)" {
+    run check float 3.5 \>= 2.4
+    assert_success
+}
+# bats test_tags=check
+@test "check: float >= value (false)" {
+    run check float 1.5 \>= 2.4
+    assert_failure
+}
+
+# bats test_tags=check
+@test "check: float positiv (true)" {
+    run check float 3.5 positiv
+    assert_success
+}
+# bats test_tags=check
+@test "check: float positiv (false)" {
+    run check float -1.5 positiv
+    assert_failure
+}
+
+# bats test_tags=check
+@test "check: float negativ (true)" {
+    run check float -3.5 negativ
+    assert_success
+}
+# bats test_tags=check
+@test "check: float negativ (false)" {
+    run check float 1.5 negativ
+    assert_failure
+}
+
+######################################################################################
 # value_if_variable
 ######################################################################################
 

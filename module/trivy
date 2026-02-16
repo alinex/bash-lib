@@ -6,6 +6,38 @@ source /dev/null
 
 # Run trivy security scan and analyze results.
 
+# Maximum time to generate trivy security report
+TRIVY_DEFAULT_TIMEOUT=${TRIVY_DEFAULT_TIMEOUT:-60m}
+# Optional, use specified trivy server for caching of the internet databases
+TRIVY_CACHE_SERVER=$TRIVY_CACHE_SERVER
+# Specify there trivy should store its cache (about 1.3GB something like $HOME/.cache/trivy)
+TRIVY_CACHE_DIR="$TRIVY_CACHE_DIR"
+# Default timeout if nothing defined for the root scan only
+TRIVY_ROOT_TIMEOUT=${TRIVY_ROOT_TIMEOUT:-60m}
+# Paths to prevent in root scans
+TRIVY_ROOT_EXCLUDE="${TRIVY_ROOT_EXCLUDE:-/mnt /opt/docker **/log/ **/logs/}"
+
+# Security Board key in Jira (if trivy vulnerabilities are managed using Jira)
+TRIVY_JIRA_BOARD="$TRIVY_JIRA_BOARD"
+# Type of issue to use for these (if trivy vulnerabilities are managed using Jira)
+TRIVY_JIRA_ISSUE_TYPE="$TRIVY_JIRA_ISSUE_TYPE"
+# Field name for multiline text of sources (if trivy vulnerabilities are managed using Jira)
+TRIVY_JIRA_FIELD_SOURCES="$TRIVY_JIRA_FIELD_SOURCES"
+# Field name for rating string (if trivy vulnerabilities are managed using Jira)
+TRIVY_JIRA_FIELD_RATING="$TRIVY_JIRA_FIELD_RATING"
+# Field name for fixed version string (if trivy vulnerabilities are managed using Jira)
+TRIVY_JIRA_FIELD_VERSION="$TRIVY_JIRA_FIELD_VERSION"
+# Field name for multiline text with further links (if trivy vulnerabilities are managed using Jira)
+TRIVY_JIRA_FIELD_LINKS="$TRIVY_JIRA_FIELD_LINKS"
+# Field name for approval status (if trivy vulnerabilities are managed using Jira)
+TRIVY_JIRA_FIELD_APPROVAL="$TRIVY_JIRA_FIELD_APPROVAL"
+# Value in approval field for "allowed for 30 days" (if trivy vulnerabilities are managed using Jira)
+TRIVY_JIRA_APPROVAL_TEMP="$TRIVY_JIRA_APPROVAL_TEMP"
+# Value in approval field for irrelevant/always allowed (if trivy vulnerabilities are managed using Jira)
+TRIVY_JIRA_APPROVAL_IRRELEVANT="$TRIVY_JIRA_APPROVAL_IRRELEVANT"
+# On updates remove entries older than (default: 6 months)
+TRIVY_JIRA_REMOVE_SOURCE_OLDER_MONTHS=${TRIVY_JIRA_REMOVE_SOURCE_OLDER_MONTHS:-6}
+
 TRIVY_EXPLOITS_URL=https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json
 
 # Run a trivy security analysis.
@@ -48,35 +80,38 @@ TRIVY_EXPLOITS_URL=https://www.cisa.gov/sites/default/files/feeds/known_exploite
 #           trivy [<options>] docker <file>
 #           trivy [<options>] docker <image>
 #           trivy clean
-# Options:  t, timeout <duration>   # set the timeout for the job in <int>m or <int>h
-#           o, only-os              # let `root` command only scan OS without filesystem traversal
-#           e, exclude <dirs>       # additional excludes for `root` command
-#           p, progress             # show progress
-#           c, clean                # immediately clean trivy database after scan
-# GLobal:   $TRIVY_DEFAULT_TIMEOUT
-#           $TRIVY_CACHE_SERVER
-#           $TRIVY_ROOT_EXCLUDE
-#           $TRIVY_JIRA_BOARD
-#           $TRIVY_JIRA_ISSUE_TYPE
-#           $TRIVY_JIRA_FIELD_SOURCES
-#           $TRIVY_JIRA_FIELD_RATING
-#           $TRIVY_JIRA_FIELD_VERSION
-#           $TRIVY_JIRA_FIELD_LINKS
-#           $TRIVY_JIRA_FIELD_APPROVAL
-#           $TRIVY_JIRA_APPROVAL_TEMP
-#           $TRIVY_JIRA_APPROVAL_IRRELEVANT
+# Options:  -t, --timeout <duration>   # set the timeout for the job in <int>m or <int>h
+#           -o, --only-os              # let `root` command only scan OS without filesystem traversal
+#           -e, --exclude <dirs>       # additional excludes for `root` command
+#           -p, --progress             # show progress
+#           -c, --clean                # immediately clean trivy database after scan
+#           --no-secrets               # run only vulnerability scanner
+# GLobal:   - $TRIVY_DEFAULT_TIMEOUT
+#           - $TRIVY_CACHE_SERVER
+#           - $TRIVY_ROOT_EXCLUDE
+#           - $TRIVY_JIRA_BOARD
+#           - $TRIVY_JIRA_ISSUE_TYPE
+#           - $TRIVY_JIRA_FIELD_SOURCES
+#           - $TRIVY_JIRA_FIELD_RATING
+#           - $TRIVY_JIRA_FIELD_VERSION
+#           - $TRIVY_JIRA_FIELD_LINKS
+#           - $TRIVY_JIRA_FIELD_APPROVAL
+#           - $TRIVY_JIRA_APPROVAL_TEMP
+#           - $TRIVY_JIRA_APPROVAL_IRRELEVANT
+# Files:    - /tmp/<script>_<pid>_trivy/    is created containing all reports
+#           - potentially all files are scanned
 # Output:   <report-path> or nothing if no vulnerabilities found
 # Error:    Progress output if `--progress` is set with optimizations on reports
 # Return:   1 if there are at least one CRITICAL or HIGH vulnerabilities
 trivy() {
     local exclude clean progress opt="--exit-code 0 --no-progress --skip-version-check -f json"
     # parameter parsing
-    eval set -- "$(option_parse $'t timeout +\no only-os -\ne exclude +\np progress -\nc clean -' "$@")"
+    eval set -- "$(option_parse $'t timeout +\no only-os -\ne exclude +\np progress -\nc clean -\n- no-secrets' "$@")"
     while true; do
         case "$1" in
         -t | --timeout) is duration --name=timeout --die -- "$2" && opt+=" --timeout $timeout" && shift 2 ;;
         -o | --only-os) opt+=" --pkg-types os" && shift ;;
-        --no-secrets) opt+=" --scanners-exclude secret" && shift ;;
+        --no-secrets) opt+=" --scanners vuln" && shift ;;
         -e | --exclude) is set --name=exclude --die --output=exclude -- "$2" && shift 2 ;;
         -p | --progress) progress=1 && shift ;;
         -c | --clean) clean=1 && shift ;;
@@ -120,8 +155,7 @@ trivy() {
         $cmd image $opt --input "$1" 2>&1 | sed 's/[^A-Z]*T[^A-Z]*//' >"$work/log" || rc=$?
         ;;
     clean)
-        _deprecated "Use option --clean instead" warn
-        sudo rm -rf /root/.cache/trivy
+        _deprecated "Use option --clean instead"
         return
         ;;
     esac
@@ -153,22 +187,24 @@ trivy() {
     is file -- "$_trivy_cache/exploits.json" || curl -s "$TRIVY_EXPLOITS_URL" -o "$_trivy_cache/exploits.json"
     # initialize jira
     local project
-    project="$(jira project "$TRIVY_JIRA_BOARD")"
-    _trivy_jira[board]="$(jq .id -r <<<"$project")"
-    is set -- "${_trivy_jira[board]}" || die "Could not find JIRA Board ID for $TRIVY_JIRA_BOARD!"
-    _trivy_jira[issueType]="$(jq '.issueTypes[] | select(.name == "'"$TRIVY_JIRA_ISSUE_TYPE"'").id' -r <<<"$project")"
-    is set -- "${_trivy_jira[issueType]}" || die "Could not find JIRA Issue Type ID for $TRIVY_JIRA_BOARD/$TRIVY_JIRA_ISSUE_TYPE!"
-    fields="$(jira fields "${_trivy_jira[board]}" "${_trivy_jira[issueType]}")"
-    _trivy_jira[field_sources]="$(jq '.fields[] | select(.name == "'"$TRIVY_JIRA_FIELD_SOURCES"'").key' -r <<<"$fields")"
-    is set -- "${_trivy_jira[field_sources]}" || die "Could not find JIRA Field \"$TRIVY_JIRA_FIELD_SOURCES\" in $TRIVY_JIRA_BOARD/$TRIVY_JIRA_ISSUE_TYPE!"
-    _trivy_jira[field_rating]="$(jq '.fields[] | select(.name == "'"$TRIVY_JIRA_FIELD_RATING"'").key' -r <<<"$fields")"
-    is set -- "${_trivy_jira[field_rating]}" || die "Could not find JIRA Field \"$TRIVY_JIRA_FIELD_RATING\" in $TRIVY_JIRA_BOARD/$TRIVY_JIRA_ISSUE_TYPE!"
-    _trivy_jira[field_version]="$(jq '.fields[] | select(.name == "'"$TRIVY_JIRA_FIELD_VERSION"'").key' -r <<<"$fields")"
-    is set -- "${_trivy_jira[field_version]}" || die "Could not find JIRA Field \"$TRIVY_JIRA_FIELD_VERSION\" in $TRIVY_JIRA_BOARD/$TRIVY_JIRA_ISSUE_TYPE!"
-    _trivy_jira[field_links]="$(jq '.fields[] | select(.name == "'"$TRIVY_JIRA_FIELD_LINKS"'").key' -r <<<"$fields")"
-    is set -- "${_trivy_jira[field_links]}" || die "Could not find JIRA Field \"$TRIVY_JIRA_FIELD_LINKS\" in $TRIVY_JIRA_BOARD/$TRIVY_JIRA_ISSUE_TYPE!"
-    _trivy_jira[field_approval]="$(jq '.fields[] | select(.name == "'"$TRIVY_JIRA_FIELD_APPROVAL"'").key' -r <<<"$fields")"
-    is set -- "${_trivy_jira[field_approval]}" || die "Could not find JIRA Field \"$TRIVY_JIRA_FIELD_APPROVAL\" in $TRIVY_JIRA_BOARD/$TRIVY_JIRA_ISSUE_TYPE!"
+    if is set -- "$TRIVY_JIRA_BOARD"; then
+        project="$(jira project "$TRIVY_JIRA_BOARD")"
+        _trivy_jira[board]="$(jq .id -r <<<"$project")"
+        is set -- "${_trivy_jira[board]}" || die "Could not find JIRA Board ID for $TRIVY_JIRA_BOARD!"
+        _trivy_jira[issueType]="$(jq '.issueTypes[] | select(.name == "'"$TRIVY_JIRA_ISSUE_TYPE"'").id' -r <<<"$project")"
+        is set -- "${_trivy_jira[issueType]}" || die "Could not find JIRA Issue Type ID for $TRIVY_JIRA_BOARD/$TRIVY_JIRA_ISSUE_TYPE!"
+        fields="$(jira fields "${_trivy_jira[board]}" "${_trivy_jira[issueType]}")"
+        _trivy_jira[field_sources]="$(jq '.fields[] | select(.name == "'"$TRIVY_JIRA_FIELD_SOURCES"'").key' -r <<<"$fields")"
+        is set -- "${_trivy_jira[field_sources]}" || die "Could not find JIRA Field \"$TRIVY_JIRA_FIELD_SOURCES\" in $TRIVY_JIRA_BOARD/$TRIVY_JIRA_ISSUE_TYPE!"
+        _trivy_jira[field_rating]="$(jq '.fields[] | select(.name == "'"$TRIVY_JIRA_FIELD_RATING"'").key' -r <<<"$fields")"
+        is set -- "${_trivy_jira[field_rating]}" || die "Could not find JIRA Field \"$TRIVY_JIRA_FIELD_RATING\" in $TRIVY_JIRA_BOARD/$TRIVY_JIRA_ISSUE_TYPE!"
+        _trivy_jira[field_version]="$(jq '.fields[] | select(.name == "'"$TRIVY_JIRA_FIELD_VERSION"'").key' -r <<<"$fields")"
+        is set -- "${_trivy_jira[field_version]}" || die "Could not find JIRA Field \"$TRIVY_JIRA_FIELD_VERSION\" in $TRIVY_JIRA_BOARD/$TRIVY_JIRA_ISSUE_TYPE!"
+        _trivy_jira[field_links]="$(jq '.fields[] | select(.name == "'"$TRIVY_JIRA_FIELD_LINKS"'").key' -r <<<"$fields")"
+        is set -- "${_trivy_jira[field_links]}" || die "Could not find JIRA Field \"$TRIVY_JIRA_FIELD_LINKS\" in $TRIVY_JIRA_BOARD/$TRIVY_JIRA_ISSUE_TYPE!"
+        _trivy_jira[field_approval]="$(jq '.fields[] | select(.name == "'"$TRIVY_JIRA_FIELD_APPROVAL"'").key' -r <<<"$fields")"
+        is set -- "${_trivy_jira[field_approval]}" || die "Could not find JIRA Field \"$TRIVY_JIRA_FIELD_APPROVAL\" in $TRIVY_JIRA_BOARD/$TRIVY_JIRA_ISSUE_TYPE!"
+    fi
     # Loop over entries and create report
     is empty -- "$progress" || gettext 'Build queue to optimize reports...' | info >&2
     for file in "$work"/split/*; do
@@ -362,7 +398,7 @@ _trivy_report() {
         fi
         # update jira
         if ! is set -- "$created"; then
-            local old new fields update
+            local old new fields update cutoff
             # update description
             old="$(jira json jira get description adf)"
             new="$title"$'\n\n'"$description"
@@ -372,7 +408,8 @@ _trivy_report() {
             fi
             # update sources
             old="$(jira json jira get "${_trivy_jira[field_sources]}" md)"
-            new="$(printf '%s\n%s' "$old" "$(date +%Y-%m) > $sourceLine" | sed -n '/>/p' | sort -t'>' -k1,1r -k2,2)"
+            cutoff=$(date -d "$TRIVY_JIRA_REMOVE_SOURCE_OLDER_MONTHS months ago" +%Y-%m)
+            new="$(printf '%s\n%s' "$old" "$(date +%Y-%m) > $sourceLine" | sed -n '/>/p' | sort -u -t'>' -k1,1r -k2,2 | awk -v cutoff="$cutoff" '$1 >= cutoff {print}')"
             if [[ "$new" != "$old" ]]; then
                 jira json fields set "${_trivy_jira[field_sources]}" adf "$new"
                 update=1
@@ -402,10 +439,11 @@ _trivy_report() {
             local labels addLabel=()
             labels="$(jq '.fields.labels[]' -r <<<"$jira")"
             # shellcheck disable=SC2013
-            for label in $(sed 's#.*ekz.de/##;s#/-/.*##;s#[/.]# #g' <<<"$source"); do
-                [[ ! "$labels" =~ $label ]] || continue
-                addLabel+=('{"add": "'"$label"'"}')
-            done
+            sed 's#.*ekz.de/##;s#/-/.*##;s#[/.]# #g' <<<"$source" |
+                while IFS= read -r label; do
+                    [[ ! "$labels" =~ $label ]] || continue
+                    addLabel+=('{"add": "'"$label"'"}')
+                done
             if is set -- "$update"; then
                 update=1
                 if ((${#addLabel[@]} > 0)); then

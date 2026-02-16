@@ -12,13 +12,18 @@ tasks <entry>...
 # <task-line>   := "<task-fn> | <name>"
 <task-lines> | tasks            # entries from pipe
 tasks <check-fn>                # add entries from function (dynamic)
-d, default <string|int|variable>  # default command to start
-T, timeout <sec>             # timeout till default selection
+-d, --default <string|int|variable>  # default command to start
+-T, --timeout <sec>             # timeout till default selection
 ```
+
+### Files
+
+- `/dev/shm/<program>_tasks_<pid>` will be used while dynamically generating the tasks list and removed afterwards
 
 ### TTY (direct)
 
-```bash
+
+```
 Nächste Schritte
    1) Analyse einzelner Partitionen
    2) Docker aufräumen mit etwa 206MB unter /data
@@ -26,10 +31,6 @@ Nächste Schritte
    x) Beenden
 Wähle eine der obigen Optionen: [1]
 ```
-
-### Files
-
-- `/dev/shm/<program>_tasks_<pid>` will be used while dynamically generating the tasks list and removed afterwards
 
 ### Examples
 
@@ -44,4 +45,4 @@ The '|' character is not possible within the commands. If a pipe is necessary pu
 
 If there are no tasks defined or the dynamic list will return no tasks it will end with a success message.
 
-Option    t, title `<title>`             # display text line above selection
+Option    -t, --title `<title>`             # display text line above selection

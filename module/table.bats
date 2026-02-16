@@ -22,6 +22,51 @@ setup() {
 ######################################################################################
 
 # bats test_tags=tsv
+@test "tsv: remove header" {
+    run bats_pipe echo $'col1\tcol2\n1,2\t3' \| tsv filter --remove-header
+    assert_output -p $'1,2\t3'
+    assert_success
+}
+# bats test_tags=tsv
+@test "tsv: filter string" {
+    in="$(cat <<'EOT'
+col1	col2
+4	four
+5	five
+10	ten
+EOT
+)"
+    out="$(cat <<'EOT'
+col1	col2
+4	four
+5	five
+EOT
+)"
+    run bats_pipe echo "$in" \| tsv --with-header filter string 2 '=*' 'f*'
+    assert_output "$out"
+    assert_success
+}
+# bats test_tags=tsv
+@test "tsv: filter string (named column)" {
+    in="$(cat <<'EOT'
+col1	col2
+4	four
+5	five
+10	ten
+EOT
+)"
+    out="$(cat <<'EOT'
+col1	col2
+4	four
+5	five
+EOT
+)"
+    run bats_pipe echo "$in" \| tsv --with-header filter string col2 '=*' 'f*'
+    assert_output "$out"
+    assert_success
+}
+
+# bats test_tags=tsv
 @test "tsv: to csv" {
     run bats_pipe echo $'col1\tcol2\n1,2\t3' \| tsv to csv
     assert_output -p $'col1,col2\n"1,2",3'
@@ -98,7 +143,7 @@ EOT
     assert_success
 }
 # bats test_tags=tsv
-@test "tsv: sort col1" {
+@test "tsv: sort col1 (with header)" {
     in="$(cat <<'EOT'
 col1	col2
 4	four
@@ -111,6 +156,26 @@ col1	col2
 10	ten
 4	four
 5	five
+EOT
+)"
+    run bats_pipe echo "$in" \| tsv --with-header sort col1
+    assert_output "$out"
+    assert_success
+}
+# bats test_tags=tsv
+@test "tsv: sort col1" {
+    in="$(cat <<'EOT'
+col1	col2
+4	four
+5	five
+10	ten
+EOT
+)"
+    out="$(cat <<'EOT'
+10	ten
+4	four
+5	five
+col1	col2
 EOT
 )"
     run bats_pipe echo "$in" \| tsv sort col1
@@ -148,13 +213,33 @@ col1	col2
 EOT
 )"
     out="$(cat <<'EOT'
+10	ten
+5	five
+4	four
+col1	col2
+EOT
+)"
+    run bats_pipe echo "$in" \| tsv reverse
+    assert_output "$out"
+    assert_success
+}
+# bats test_tags=tsv
+@test "tsv: reverse (with header)" {
+    in="$(cat <<'EOT'
+col1	col2
+4	four
+5	five
+10	ten
+EOT
+)"
+    out="$(cat <<'EOT'
 col1	col2
 10	ten
 5	five
 4	four
 EOT
 )"
-    run bats_pipe echo "$in" \| tsv reverse
+    run bats_pipe echo "$in" \| tsv --with-header reverse
     assert_output "$out"
     assert_success
 }

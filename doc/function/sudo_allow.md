@@ -10,8 +10,8 @@ sudo_allow <command-line>
 
 ### Return (exit code)
 
-- 0 if allowed
-- [`die`](die.md) if not allowed
+- - 0 if allowed
+- - [`die`](die.md) if not allowed
 - 
 
 ### Description

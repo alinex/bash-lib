@@ -12,6 +12,11 @@ source /dev/null
 # DNS
 ######################################################################################
 
+# Base URL for Portal to Provider Plusserver
+PLUSSERVER_PORTAL="$PLUSSERVER_PORTAL"
+# PowerDNS API URL used together with $POWERDNS_TOKEN and silently disables powerdns function if not set
+POWERDNS_API="$POWERDNS_API"
+
 # Query all managed DNS servers to get a complete list of domain names
 #
 # It will output only the header line if no DNS system is available. Possible DNS systems are:
@@ -20,8 +25,8 @@ source /dev/null
 # - @plusserver_dns - the DNS in the Plusserver Cloud https://www.plusserver.com/
 #
 # Usage:    dns_list <pattern>
-# Globals:  $POWERDNS_API + $POWERDNS_TOKEN if powerdns is possible
-#           $PLUSSERVER_PORTAL              if plusserver as provider is used
+# Globals:  - $POWERDNS_API + $POWERDNS_TOKEN if powerdns is possible
+#           - $PLUSSERVER_PORTAL              if plusserver as provider is used
 # Output:   Tab separated <table>:
 #           ```
 #           NAME        TYPE    CONTENT         TTL

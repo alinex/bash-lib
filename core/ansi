@@ -172,15 +172,15 @@ color_table() {
   echo "256 Color palette:"
   local cols=15
   local rows=15
-  for c in $(seq 0 "$cols"); do
-    for r in $(seq 0 "$rows"); do
+  for ((c = 0; c <= cols; c++)); do
+    for ((r = 0; r <= rows; r++)); do
       num=$((r * cols + c))
       printf '%s' "\t$(color_256 "$num")FG $num"
     done
     echo ""
   done
-  for c in $(seq 0 "$cols"); do
-    for r in $(seq 0 "$rows"); do
+  for ((c = 0; c <= cols; c++)); do
+    for ((r = 0; r <= rows; r++)); do
       num=$((r * cols + c))
       printf '%s' "\t$(color_256_bg "$num")BG $num${CC_RESET}"
     done
@@ -297,9 +297,3 @@ CLEAR_LINE=$'\e[2K'
 SCREEN_RESTORE=$'\e[?47l'
 # save screen
 SCREEN_SAVE=$'\e[?47h'
-
-# Deprecated: Remove current line
-# Use $CLEAR_LINE
-erase_line() {
-  _deprecated "Use $CLEAR_LINE"
-}

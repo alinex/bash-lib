@@ -11,7 +11,17 @@ option_help <spec>
 
 ### Output (stdout)
 
-List of options for help output
+Formatted options section for the help page like:
+
+
+```text
+-g <string>, --group <string>            Nur diese Gruppe anzeigen
+--batch                                  Run non-interactive in batch mode
+-n <name>, --net <name>                  Selektion des Netzes
+-i <regexp>, --instance <regexp>         Pattern für Instanz
+-s <regexp>, --summary <regexp>          Pattern für Zusammenfassung
+-h, --help                               Show Help Page
+```
 
 ### Examples
 

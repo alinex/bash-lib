@@ -12,10 +12,8 @@ spinner_start <format> [<time>]
 
 ### TTY (direct)
 
-```bash
-<symbol> with back-space so that cursor is always before it
+`<symbol>` with back-space so that cursor is always before it
 
-```
 
 ### Description
 

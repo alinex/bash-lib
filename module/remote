@@ -12,11 +12,15 @@ source /dev/null
 # Remote SSH
 ######################################################################################
 
+# Default login if no `--login` or `$login` available
+REMOTE_LOGIN_DEFAULT=${REMOTE_LOGIN_DEFAULT:-operator}
+
 _module_resolve() {
     local modules=()
     split "$1" modules ,
     local init=1 module line
     for module in "${modules[@]}"; do
+        debug "$module"
         [[ "$module" =~ ^(full|base|.*/.*)$ ]] || module="module/$module"
         [ -n "$init" ] && init= || printf ,
         printf '%s' "$module"
@@ -51,18 +55,18 @@ _module_resolve() {
 #           remote [<options>] console          # open a remote console to the user
 #           remote [<options>] bashlib <modules> <command>...         # run bashlib command on remote (no need to be installed)
 # Options:  # following options, only before `<command>`
-#           l, login <user>         # username for login
-#           h, host <host>          # destination host
-#           j, jump <user>@<host>   # to use a jump host before
-#           t, terminal             # to use a pseudo terminal
-#           line-based              # line based return for terminal
-#           f, file                 # the command is a file reference which has to be used
-# Globals:  $server
-#           $login - default is "operator"
+#           -l, --login <user>         # username for login
+#           -h, --host <host>          # destination host
+#           -j, --jump <user>@<host>   # to use a jump host before
+#           -t, --terminal             # to use a pseudo terminal
+#           --line-based              # line based return for terminal
+#           -f, --file                 # the command is a file reference which has to be used
+# Globals:  - $server
+#           - $login - default is "operator"
 # Output:   passed through
-# Return:   Error code from remote command
-#           (255) will die because it is a connection problem
-#           (143) will exit because it was from a SIGTERM on the remote
+# Return:   - Error code from remote command
+#           - (255) will die because it is a connection problem
+#           - (143) will exit because it was from a SIGTERM on the remote
 # Example:  &remote shows how to use it
 remote() {
     # parameter parsing
@@ -173,55 +177,36 @@ remote() {
     return "$rc"
 }
 
-# Deprecated: Run remote command with pseudo terminal
-# Use: remote --terminal ...
-remote_term() {
-    _deprecated "Use: remote --terminal ... instead"
-}
-
-# Deprecated: Run remote command with pseudo terminal but line based output (problematic with questions)
-# Use: @remote --terminal --line-based ...
-remote_term_line() {
-    _deprecated "Use: @remote --terminal --line-based ..."
-}
-
-# Deprecated: Run local script on remote
-# Use: remote --file <file>
-remote_file() {
-    _deprecated "se: remote --file <file>"
-}
-
-# Deprecated: Open an interactive console on remote host
-# Use: remote console
-remote_console() {
-    _deprecated "Use: remote console"
-}
-
 # Upload file
 #
-# Usage:    upload [<options>] <source> <dest>
+# If a specified list of files/directories should be transferred, add the folder as source and give an additional list of files/directories from this folder to transfer.
+# This list has to be a word list delimited by spaces, no newlines.
+#
+# Usage:    upload [<options>] <source> <dest> [<files>]
 # Options:  # following options, only before `<source>`
-#           l, login <user>
-#           h, host <host>
-#           j, jump <user>@<host>
-#           f, files <list>     # each file in a line, must be relative from <source>
+#           -l, --login <user>
+#           -h, --host <host>
+#           -j, --jump <user>@<host>
+#           -d, --delete            # remove all files not in current upload
 # Globals:  $server
 #           $login - default is "operator"
 upload() {
     # parameter parsing
-    local _login host jump files
-    eval set -- "$(option_parse $'+l login +\nh host +\nj jump +\nf files +' "$@")"
+    local _login host jump opt=() dereference
+    eval set -- "$(option_parse $'+l login +\nh host +\nj jump +\nd delete -\nL dereference -' "$@")"
     while true; do
         case "$1" in
         -l | --login) is set --name=login --die --output=_login -- "$2" && shift 2 ;;
         -h | --host) is set --name=host --die --output=host -- "$2" && shift 2 ;;
         -j | --jump) is set --name=jump --die --output=jump -- "$2" && shift 2 ;;
         -f | --files) is set --name=files --die --output=files -- "$2" && shift 2 ;;
+        -d | --delete) opt+=(--delete) && shift ;;
+        -L | --dereference) dereference=-L && shift ;;
         --) shift && break ;;
         *) die "$(gettext "Unrecognized option"): $1" ;;
         esac
     done
-    is integer --name=arguments --max=2 --die -- $#
+    is integer --name=arguments --max=3 --die -- $#
     is set --name=source --die -- "$1"
     is set --name=dest --die -- "$2"
     # processing
@@ -232,10 +217,10 @@ upload() {
     local dir=${2:-~}
     debug "rsync -av $1 $ssh:$dir"
     # shellcheck disable=SC2086
-    if is set -- "$files"; then
-        rsync -avz --files-from=<(printf '%s\n' "$files") "$1" $ssh:"$dir"
+    if is set -- "$3"; then
+        rsync -avz $dereference "${opt[@]}" --files-from=<(printf '%s\n' $3) "$1" $ssh:"$dir"
     else
-        rsync -avz "$1" $ssh:"$dir"
+        rsync -avz $dereference "${opt[@]}" "$1" $ssh:"$dir"
     fi
 }
 
@@ -243,20 +228,22 @@ upload() {
 #
 # Usage:    download [<options>] <source> <dest>
 # Options:  # following options, only before `<source>`
-#           l, login <user>
-#           h, host <host>
-#           j, jump <user>@<host>
-# Globals:  $server
-#           $login - default is "operator"
+#           -l, --login <user>
+#           -h, --host <host>
+#           -j, --jump <user>@<host>
+#           -d, --delete            # remove all files not in current upload
+# Globals:  - $server
+#           - $login - default is "operator"
 download() {
     # parameter parsing
-    local _login host jump
+    local _login host jump opt
     eval set -- "$(option_parse $'+l login +\nh host +\nj jump +' "$@")"
     while true; do
         case "$1" in
         -l | --login) is set --name=login --die --output=_login -- "$2" && shift 2 ;;
         -h | --host) is set --name=host --die --output=host -- "$2" && shift 2 ;;
         -j | --jump) is set --name=jump --die --output=jump -- "$2" && shift 2 ;;
+        -d | --delete) opt+=" --delete" && shift ;;
         --) shift && break ;;
         *) die "$(gettext "Unrecognized option"): $1" ;;
         esac
@@ -271,52 +258,22 @@ download() {
     [ -z "$jump" ] || ssh="-J $jump $ssh"
     local dir=${2:-.}
     # shellcheck disable=SC2086
-    rsync -avz $ssh:"$1" "$dir"
+    rsync -avz $opt $ssh:"$1" "$dir"
 }
 
 ######################################################################################
 ### Extended remote commands
 ######################################################################################
 
-# Deprecated: Run bashlib command on remote.
-# Use: remote bashlib <module> <command>
-remote_bashlib() {
-    _deprecated "Use: remote bashlib <module> <command>"
-}
-
-# Deprecated: Remote install package like @install
-# Use `remote_bashlib software install`, see @remote_bashlib.
-remote_install() {
-    _deprecated "use remote_bashlib software install"
-}
-
-# Deprecated: Display the system description (from remote)
-# Use `remote_bashlib os system_info`, see @remote_bashlib.
-remote_system_info() {
-    _deprecated "use remote_bashlib os system_info"
-}
-
-# Deprecated: Remote df with visual display
-# Use `remote_bashlib os disk_free` instead.
-remote_df() {
-    _deprecated "use remote_bashlib os disk_free"
-}
-
-# Deprecated: Remote check if LVM is used
-# Use `remote_bashlib os uses_lvm` instead.
-remote_lvm() {
-    _deprecated "use remote_bashlib os uses_lvm"
-}
-
 # Wait till reboot is finished
 #
 # Usage:    boot_wait [<options>]
-# Options:  l, login <user>
-#           h, host <host>
-#           j, jump <user>@<host>
-#           q, quiet
-# Globals:  $server
-#           $login - default is "operator"
+# Options:  -l, -login <user>
+#           -h, -host <host>
+#           -j, -jump <user>@<host>
+#           -q, -quiet
+# Globals:  - $server
+#           - $login - default is "operator"
 # Error:    <sql-time>
 boot_wait() {
     # parameter parsing

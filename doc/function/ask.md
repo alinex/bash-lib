@@ -11,18 +11,19 @@ ask <format> <question>
 ### Options
 
 ```bash
-e, empty                 # allow empty value
-n, allow-negative        # on number, integer, float
-d, default <value>       # set default if none given
-T, timeout <duration>    # time till default is used
+-e, --empty                 # allow empty value
+-n, --allow-negative        # on number, integer, float
+-d, --default <value>       # set default if none given
+-T, --timeout <duration>    # time till default is used
 ```
 
 ### TTY (direct)
 
-```bash
-<question> <valid characters>...
-# input <keys> printed if valid
+
 ```
+<question> <valid characters>...
+```
+input `<keys>` printed if valid
 
 ### Output (stdout)
 

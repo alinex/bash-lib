@@ -10,8 +10,8 @@ ip_extern <format>
 
 ### Output (stdout)
 
-`<tsv-table>` for data
-`<value>` else
+- `<tsv-table>` for data
+- `<value>` else
 
 
 ### Description

@@ -12,9 +12,9 @@ decompress [<string>]
 ### Options
 
 ```bash
-f, file <path>          # file to read from
-o, output <path>        # file to write to
-t, tool <compression>   # compression: gzip, zip,...
+-f, --file <path>          # file to read from
+-o, --output <path>        # file to write to
+-t, --tool <compression>   # compression: gzip, zip,...
 ```
 
 ### Description

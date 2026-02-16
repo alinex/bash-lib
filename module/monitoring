@@ -9,7 +9,7 @@ source /dev/null
 # Using the Grafana/Prometheus APIs to get Monitoring information.
 
 ######################################################################################
-# Monitoring
+# Prometheus Exporter
 ######################################################################################
 
 # Get exporter list
@@ -71,6 +71,15 @@ exporter() {
     done
 }
 
+######################################################################################
+# Prometheus
+######################################################################################
+
+# Prometheus API URLs as space separated list
+PROMETHEUS_API="$PROMETHEUS_API"
+# Prometheus host names as space separated list
+PROMETHEUS="$PROMETHEUS"
+
 # Scrape Prometheus exporter url now
 #
 # The metrics can be filtered by <pattern> argument.
@@ -78,8 +87,8 @@ exporter() {
 # Usage:    scrape <url> <pattern>
 # Output:   Tab separated list:
 #           `<metric>    [<value>=<text>],...    <value>`
-# Return:   0 if metrics found
-#           1 if no matching metric
+# Return:   - 0 if metrics found
+#           - 1 if no matching metric
 scrape() {
     is integer --name=arguments --max=2 --die -- $#
     is set --name=url --die -- "$1"
@@ -94,25 +103,34 @@ scrape() {
     ((found > 0))
 }
 
+######################################################################################
+# Grafana
+######################################################################################
+
+# Grafana API URL used together with $GRAFANA_TOKEN and silently disables Grafana functions if not set
+GRAFANA_API="$GRAFANA_API"
+# Grafana API Token used in @alerts
+GRAFANA_TOKEN="$GRAFANA_TOKEN"
+
 # Get Grafana alerts
 #
 # The list can be filtered by options and a specific output format can be selected.
 #
 # Usage:    alerts [<format>]                       # tsv, json, console, mattermost
 #           alerts -i "^$server" console || echo "" # will print the alerts with an empty line if there are some
-# Options:  a, alertname <regexp>                # select alert name
-#           n, net <name>                        # select network name (net label)
-#           g, group <name>                      # show only messages for them (group label)
-#           i, instance <regexp>                 # select only matching instances
-#           s, summary <regexp>                  # select by summary text
-#           q, quiet                             # return only status code
+# Options:  -a, --alertname <regexp>                # select alert name
+#           -n, --net <name>                        # select network name (net label)
+#           -g, --group <name>                      # show only messages for them (group label)
+#           -i, --instance <regexp>                 # select only matching instances
+#           -s, --summary <regexp>                  # select by summary text
+#           -q, --quiet                             # return only status code
 # Output:   - `format=json` - directly like in the Grafana API
 #           - `format=mattermost` - json in the format of mattermost attachments
 #           - `format=tsv` - Tab separated table
 #           - `format=console` - like tsv but colorized and fixed column width instead of tabs
-# Return:   0 - no alerts
-#           <num> - at least one alert
-#           0 - without output if no $GRAFANA_API + $GRAFANA_TOKEN
+# Return:   - 0 - no alerts
+#           - <num> - at least one alert
+#           - 0 - without output if no $GRAFANA_API + $GRAFANA_TOKEN
 alerts() {
     if [ -z "$GRAFANA_API" ] || [ -z "$GRAFANA_TOKEN" ]; then
         debug "Disabled because GRAFANA_API and GRAFANA_TOKEN are not both set"
@@ -124,23 +142,23 @@ alerts() {
     while true; do
         case "$1" in
         -g | --group)
-            [ -z "$2" ] || filter="$filter | select(.labels|has(\"group\")) | select(.labels.group|test(\".*$2.*\"; \"i\"))"
+            [ -z "$2" ] || filter+=" | select(.labels|has(\"group\")) | select(.labels.group|test(\".*$2.*\"; \"i\"))"
             shift 2
             ;;
         -i | --instance)
-            [ -z "$2" ] || filter="$filter | select(.labels.instance|test(\"$2\"; \"i\"))"
+            [ -z "$2" ] || filter+=" | select(.labels.instance|test(\"$2\"; \"i\"))"
             shift 2
             ;;
         -a | --alertname)
-            [ -z "$2" ] || filter="$filter | select(.labels.alertname|test(\"$2\"; \"i\"))"
+            [ -z "$2" ] || filter+=" | select(.labels.alertname|test(\"$2\"; \"i\"))"
             shift 2
             ;;
         -s | --summary)
-            [ -z "$2" ] || filter="$filter | select(.annotations.summary? // \"\"|test(\"$2\"; \"i\"))"
+            [ -z "$2" ] || filter+=" | select(.annotations.summary? // \"\"|test(\"$2\"; \"i\"))"
             shift 2
             ;;
         -n | --net)
-            [ -z "$2" ] || filter="$filter | select(.labels.net? // \"\"|test(\"$2\"; \"i\"))"
+            [ -z "$2" ] || filter+=" | select(.labels.net? // \"\"|test(\"$2\"; \"i\"))"
             shift 2
             ;;
         -q | --quiet) quiet=1 && shift ;;
@@ -148,6 +166,7 @@ alerts() {
         *) die "$(gettext "Unrecognized option"): $1" ;;
         esac
     done
+    debug "$filter"
     # processing
     install jq
     local list
@@ -155,7 +174,6 @@ alerts() {
         die "$(gettext "Could not get alerts from Grafana!")"
     echo "$list" >/tmp/alerts.json
     list="$(jq 'sort_by(.startsAt) | .[] '"$filter" <<<"$list")" || die "$(gettext "Parse error in Grafana alerts list with filter"): $filter"
-    debug "-----------"
     local format=${1:-console}
     # empty list
     [ -n "$list" ] || return 0
@@ -164,7 +182,8 @@ alerts() {
     # pre format
     case $format in
     mattermost)
-        list="$(jq -s '.[] | {
+        list="$(jq -s '
+            .[] | {
                 color:  (if .labels.severity == "disaster" then "#ff0000"
                         elif  .labels.severity == "critical" then "#FFA500"
                         elif  .labels.severity == "warning" then "#FFFF00"
@@ -180,7 +199,8 @@ alerts() {
                     | to_entries
                     | map({title: (.key|(.[:1] | ascii_upcase) + .[1:]), value: .value, short:true})
                 )
-            }' <<<"$list" | jq -s .)"
+            }
+            ' <<<"$list" | jq -s .)"
         ;;
     *)
         # shellcheck disable=SC2059
@@ -193,7 +213,7 @@ alerts() {
     console)
         local first=1
         printf '%s\n' "$list" |
-            tsv to pprint |
+            tsv print |
             while read -r line; do
                 case $line in
                 warning*) warn "$line" ;;

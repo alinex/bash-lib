@@ -89,15 +89,15 @@ echo -e "\t${CC_INVERSE}CC_INVERSE$CC_RESET"
 echo "256 Color palette:"
 local cols=15
 local rows=15
-for c in $(seq 0 "$cols");do
-for r in $(seq 0 "$rows");do
+for ((c=0; c<=cols; c++));do
+for ((r=0; r<=rows; r++));do
 num=$((r*cols+c))
 printf '%s' "\t$(color_256 "$num")FG $num"
 done
 echo ""
 done
-for c in $(seq 0 "$cols");do
-for r in $(seq 0 "$rows");do
+for ((c=0; c<=cols; c++));do
+for ((r=0; r<=rows; r++));do
 num=$((r*cols+c))
 printf '%s' "\t$(color_256_bg "$num")BG $num$CC_RESET"
 done
@@ -164,9 +164,6 @@ CLEAR_SOL=$'\e[1K'
 CLEAR_LINE=$'\e[2K'
 SCREEN_RESTORE=$'\e[?47l'
 SCREEN_SAVE=$'\e[?47h'
-erase_line(){
-_deprecated "Use $CLEAR_LINE"
-}
 option_parse(){
 local opt name type desc short="" long="" spec="$1" permute
 [ -n "$spec" ]||die "$(gettext 'A specification string is needed as first argument')"
@@ -189,7 +186,22 @@ long+="$name,"
 fi
 done <<<"$spec"
 shift
-getopt -q -o "$permute$short" --long "$long" -n "$0" -- "$@"||true
+local res rc out lines
+res="$(LANG=C getopt -o "$permute$short" --long "$long" -n "$0" -- "$@" 2>&1)"||rc=$?
+if ((rc));then
+out="$(tail -1 <<<"$res")"
+mapfile -t lines <<<"$res"
+for line in "${lines[@]:0:${#lines[@]}-1}";do
+if [[ $line == *invalid\ option* ]];then
+out+=" -$(sed "s/.*'\(.*\)'.*/\1/" <<<"$line")"
+elif [[ $line == *unrecognized\ option* ]];then
+out=" $(sed "s/.*'\(.*\)'.*/\1/" <<<"$line")$out"
+else
+die "$line"
+fi
+done
+fi
+printf '%s' "${out:-$res}"
 }
 option_help(){
 is set -nspec -d -- "$1"
@@ -267,8 +279,7 @@ printf '%s' "$joined"
 esac
 }
 join(){
-_deprecated "Use array <arr-name> join <separator>" warn
-array "$1" join "$2"
+_deprecated "Use array <arr-name> join <separator>"
 }
 split(){
 is integer -narguments --max=3 -d $#
@@ -446,7 +457,7 @@ esac
 }
 export TEXTDOMAIN=bashlib
 export TEXTDOMAINDIR=$BASHLIB_HOME/locale
-source gettext.sh
+. gettext.sh
 _deprecated(){
 IFS=$' \t\n' read -r line func file <<<"$(caller 1)"
 local message="DEPRECATED: ${FUNCNAME[1]} at $func in $file:$line $1"
@@ -461,12 +472,14 @@ printf "Triggered at %s:%d (%s)\n" "$src" "$line" "$func"|warn >&2
 bestChoice=""
 fi
 printf "\033[1m%s:%d (%s)\n" "$src" "$line" "$func"|([ -n "$1" ]&&( ((frame==1))&&warn||notice)||debug 5) >&2
+[ ! "$src" = 'main' ]||src="$0"
 awk -v n="$line" '
-            NR>=n-2 && NR<=n+2 {
-                gsub(/^[ \t]+/, "", $0)  # Remove leading spaces/tabs
-                printf "%4d: %s\n", NR, $0
-                if(NR==n+2) exit
-            }' "$src"|sed "/$line:/s/^/"$'\033[1m'"/;/$line:/s/$/"$'\033[22m'"/"|([ -n "$1" ]&&info||debug 6) >&2
+NR>=n-2 && NR<=n+2 {
+gsub(/^[ \t]+/, "", $0)
+printf "%4d: %s\n", NR, $0
+if(NR==n+2) exit
+}
+' "$src"|sed "/$line:/s/^/"$'\033[1m'"/;/$line:/s/$/"$'\033[22m'"/"|([ -n "$1" ]&&info||debug 6) >&2
 ((frame++))||true
 done
 }
@@ -479,10 +492,11 @@ local path
 path="$(dirname "$module")"
 case $path in
 core)return 0;;
-module)[[ ! $BASHLIB_LOADER =~ loader|full|remote ]]||return 0
+module)[[ ! $BASHLIB_LOADER =~ loader|full|remote ]]||return 0;;
+config)return 0
 esac
 debug 5 "Loading module $module"
-source "$BASHLIB_HOME/$module"
+. "$BASHLIB_HOME/$module"
 }
 script_path(){
 is integer -narguments --max=0 -d $#
@@ -625,6 +639,7 @@ is integer --min=0 -d -- "$DEBUG"
 else
 [[ $func =~ .*(${DEBUG//,? /|}) ]]||return 0
 fi
+local line
 while IFS= read -r line;do
 is integer --min=9 -- "$DEBUG"&&printf "$CC_BLACK%-2s %7d %-20s %s$CC_RESET\n" "$sign" "$BASHPID" "$func" "$line" >&2||printf "$CC_BLACK%-2s %-20s %s$CC_RESET\n" "$sign" "$func" "$line" >&2
 done <<<"$text"
@@ -634,6 +649,7 @@ done <<<"$text"
 }
 die(){
 is integer -narguments --max=1 -d $#
+trap - ERR
 local text trap line func src
 text="$(input "$@")"
 [[ $text != *"Uncaught exception at"* ]]||trap=1
@@ -1056,6 +1072,63 @@ if [ -n "$output" ];then
 [ "$output" = "-" ]&&printf '%s' "$res"||printf -v "$output" '%s' "$res"
 fi
 }
+check(){
+local type
+is enum -ntype --allow="string integer float" -dotype -- "$1"
+is integer -narguments --min=3 --max=4 -d $#
+case $type in
+string)is enum -noperator --allow="= == != =* !* =~ !~ < > empty set" -d -- "$3"
+case $3 in
+empty)[ -z "$2" ];;
+set)[ -n "$2" ];;
+=|==)[[ $2 == "$4" ]];;
+!=)[[ $2 != "$4" ]];;
+=\*)[[ $2 == $4 ]];;
+!\*)[[ $2 != $4 ]];;
+=~)[[ $2 =~ $4 ]];;
+\!~)[[ ! $2 =~ $4 ]];;
+\<)[[ $2 < $4 ]];;
+\>)[[ $2 > $4 ]]
+esac
+;;
+integer)is enum -noperator --allow="= < > <= >= positiv negativ zero odd even multiple-of divisible-by factor-of prime no-prime" -d -- "$3"
+is integer -nvalue -- "$2"||return 1
+case $3 in
+positiv)(($2>=0));;
+negativ)(($2<0));;
+zero)(($2==0));;
+odd)(($2%2==1));;
+even)(($2%2==0));;
+prime)(($(factor $2|wc -w)==2));;
+no-prime)(($(factor $2|wc -w)>2));;
+*)is integer -ncompare -d -- "$4"
+case $3 in
+=)(($2==$4));;
+\<)(($2<$4));;
+\>)(($2>$4));;
+\<=)(($2<=$4));;
+\>=)(($2>=$4));;
+multiple-of|divisible-by)(($2%$4==0));;
+factor-of)(($4%$2==0))
+esac
+esac
+;;
+float)is enum -noperator --allow="= < > <= >= positiv negativ" -d -- "$3"
+is float -nvalue -- "$2"||return 1
+case $3 in
+positiv)(($(bc -l <<<"$2 >= 0")));;
+negativ)(($(bc -l <<<"$2 < 0")));;
+*)is float -ncompare -d -- "$4"
+case $3 in
+=)(($(bc -l <<<"$2 == $4")));;
+\<)(($(bc -l <<<"$2 < $4")));;
+\>)(($(bc -l <<<"$2 > $4")));;
+\<=)(($(bc -l <<<"$2 <= $4")));;
+\>=)(($(bc -l <<<"$2 >= $4")))
+esac
+esac
+esac
+}
 value_if_variable(){
 is integer -narguments --max=2 -d $#
 local _name="$1"
@@ -1078,7 +1151,18 @@ is set -npage-id -d -- "$1"
 install jq
 curl -H "Content-Type: application/json" -u "$ATLASSIAN_USER:$ATLASSIAN_TOKEN" "$CONFLUENCE_API/content/$1?expand=body.storage"|jq .body.storage.value -r||die "Could not read confluence page!"
 }
+JIRA_HTTP_CODE=""
+JIRA_ERROR=""
 jira(){
+local noDie
+eval set -- "$(option_parse $'- no-die -' "$@")"
+while true;do
+case "$1" in
+--no-die)noDie=1&&shift;;
+--)shift&&break;;
+*)die "$(gettext "Unrecognized option"): $1"
+esac
+done
 is set -nJIRA_HOST -d -- "$JIRA_HOST"
 is set -nATLASSIAN_USER -d -- "$ATLASSIAN_USER"
 is set -nATLASSIAN_TOKEN -d -- "$ATLASSIAN_TOKEN"
@@ -1087,39 +1171,39 @@ case "$command" in
 get)is set -narguments --max=1 -d $#
 is set -nissueId-or-key -d -- "$1"
 debug "GET issue $1"
-_jira GET "issue/$1"
+_jira GET "issue/$1" "" $noDie
 ;;
 search)is set -narguments --max=1 -d $#
 is set -njql -d -- "$1"
 debug "SEARCH issue $1"
 local res rc=0
-_jira GET "search/jql?jql=$(urlencode "$1")"|jq .issues[].id -r
+_jira GET "search/jql?jql=$(urlencode "$1")" "" $noDie|jq .issues[].id -r
 ;;
 create)is set -narguments --max=1 -d $#
 is set -njson -d -- "$1"
 debug "CREATE issue ${jq-r '.fields.summary' <<<"$1"}"
-_jira POST issue "$1"|jq .id -r
+_jira POST issue "$1" $noDie|jq .id -r
 ;;
 update)is set -narguments --max=2 -d $#
 is set -nissueId-or-key -d -- "$1"
 is set -njson -d -- "$2"
 debug "UPDATE issue $1"
-_jira PUT "issue/$1" "$2" >/dev/null
+_jira PUT "issue/$1" "$2" $noDie >/dev/null
 ;;
 delete)is set -narguments --max=1 -d $#
 is set -nissueId-or-key -d -- "$1"
 debug "DELETE issue $1"
-_jira GET "issue/$1"
+_jira GET "issue/$1" "" $noDie
 ;;
 project)is set -narguments --max=1 -d $#
 is set -nprojectId-or-key -d -- "$1"
 debug "GET project $1"
-_jira GET "project/$1"
+_jira GET "project/$1" "" $noDie
 ;;
 fields)is set -narguments --max=2 -d $#
 is set -nprojectId-or-key -d -- "$1"
 is set -nissueTypeId -d -- "$2"
-debug "GET fields $1/$2"
+debug "GET fields $1/$2" "" $noDie
 _jira GET "issue/createmeta/$1/issuetypes/$2"
 ;;
 json)local empty='{"fields":{}}' var="$1"
@@ -1153,35 +1237,35 @@ esac
 ;;
 adf_to_md)is set -njson -d -- "$1"&&local json="$1"
 jq -r '
-    def para(p):
-      p.content[]?.text // "";
+def para(p):
+p.content[]?.text // "";
 
-    .content[] |
-    if .type == "paragraph" then
-      para(.) + "\n"
+.content[] |
+if .type == "paragraph" then
+para(.) + "\n"
 
-    elif .type == "bulletList" then
-      (
-        .content
-        | map("- " + para(.content[0]))
-        | join("\n")
-      ) + "\n\n"
+elif .type == "bulletList" then
+(
+.content
+| map("- " + para(.content[0]))
+| join("\n")
+) + "\n\n"
 
-    elif .type == "orderedList" then
-      (
-        .content
-        | to_entries
-        | map("\(.key + 1). " + para(.value.content[0]))
-        | join("\n")
-      ) + "\n\n"
+elif .type == "orderedList" then
+(
+.content
+| to_entries
+| map("\(.key + 1). " + para(.value.content[0]))
+| join("\n")
+) + "\n\n"
 
-    elif .type == "codeBlock" then
-      "```\n" + (.content[0].text) + "\n```\n\n"
+elif .type == "codeBlock" then
+"```\n" + (.content[0].text) + "\n```\n\n"
 
-    else
-      ""
-    end
-  ' <<<"$1"|sed -E '
+else
+""
+end
+' <<<"$1"|sed -E '
     s/<strong>(.+?)<\/strong>/**\1**/g
     s/<em>(.+?)<\/em>/*\1*/g
     s/<code>(.+?)<\/code>/`\1`/g
@@ -1189,250 +1273,228 @@ jq -r '
 ;;
 md_to_adf)is set -ntext -d -- "$1"
 jq -c -n --arg text "$1" '
-    def paragraph(t):
-      { type: "paragraph", content: [{ type: "text", text: t }] };
+def paragraph(t):
+{ type: "paragraph", content: [{ type: "text", text: t }] };
 
-    def bullet(items):
-      {
-        type: "bulletList",
-        content: items | map({
-          type: "listItem",
-          content: [ paragraph(.) ]
-        })
-      };
+def bullet(items):
+{
+type: "bulletList",
+content: items | map({
+type: "listItem",
+content: [ paragraph(.) ]
+})
+};
 
-    def ordered(items):
-      {
-        type: "orderedList",
-        attrs: { order: 1 },
-        content: items | map({
-          type: "listItem",
-          content: [ paragraph(.) ]
-        })
-      };
+def ordered(items):
+{
+type: "orderedList",
+attrs: { order: 1 },
+content: items | map({
+type: "listItem",
+content: [ paragraph(.) ]
+})
+};
 
-    def heading(level; t):
-      {
-        type: "heading",
-        attrs: { level: level },
-        content: [{ type: "text", text: t }]
-      };
+def heading(level; t):
+{
+type: "heading",
+attrs: { level: level },
+content: [{ type: "text", text: t }]
+};
 
-    def codeblock(lang; body):
-      {
-        type: "codeBlock",
-        attrs: { language: lang },
-        content: [{ type: "text", text: body }]
-      };
+def codeblock(lang; body):
+{
+type: "codeBlock",
+attrs: { language: lang },
+content: [{ type: "text", text: body }]
+};
 
-    def rule:
-      { type: "rule" };
+def rule:
+{ type: "rule" };
 
-    def blockquote(paras):
-      {
-        type: "blockquote",
-        content: paras
-      };
+def blockquote(paras):
+{
+type: "blockquote",
+content: paras
+};
 
-    ($text | split("\n")) as $lines
-    | reduce $lines[] as $line (
-        {
-          out: [],
-          mode: null,      # "ul" / "ol" / null
-          buf: [],         # list items buffer
-          pBuf: [],        # paragraph buffer
-          code: false,
-          codeLang: "",
-          codeBuf: [],
-          quoteBuf: []     # paragraphs inside current blockquote
-        };
+($text | split("\n")) as $lines
+| reduce $lines[] as $line (
+{
+out: [],
+mode: null,    
+buf: [],       
+pBuf: [],      
+code: false,
+codeLang: "",
+codeBuf: [],
+quoteBuf: []   
+};
 
-        # fenced code blocks
-        if ($line | test("^```")) then
-          if .code then
-            .out += [ codeblock(.codeLang; (.codeBuf | join("\n"))) ]
-            | .code = false
-            | .codeBuf = []
-            | .codeLang = ""
-          else
-            .code = true
-            | .codeLang = ($line | sub("^```"; ""))
-          end
+if ($line | test("^```")) then
+if .code then
+.out += [ codeblock(.codeLang; (.codeBuf | join("\n"))) ]
+| .code = false
+| .codeBuf = []
+| .codeLang = ""
+else
+.code = true
+| .codeLang = ($line | sub("^```"; ""))
+end
 
-        elif .code then
-          .codeBuf += [ $line ]
+elif .code then
+.codeBuf += [ $line ]
 
-        # horizontal rules
-        elif ($line | test("^(-{3,}|\\*{3,}|_{3,})$")) then
-          # flush paragraph
-          if (.pBuf | length) > 0 then
-            .out += [ paragraph(.pBuf | join("\n")) ]
-            | .pBuf = []
-          else .
-          end
-          # flush quote
-          | if (.quoteBuf | length) > 0 then
-              .out += [ blockquote(.quoteBuf) ]
-              | .quoteBuf = []
-            else .
-            end
-          # flush list
-          | if .mode == "ul" then
-              .out += [ bullet(.buf) ]
-              | .buf = [] | .mode = null
-            elif .mode == "ol" then
-              .out += [ ordered(.buf) ]
-              | .buf = [] | .mode = null
-            else .
-            end
-          | .out += [ rule ]
+elif ($line | test("^(-{3,}|\\*{3,}|_{3,})$")) then
+if (.pBuf | length) > 0 then
+.out += [ paragraph(.pBuf | join("\n")) ]
+| .pBuf = []
+else .
+end
+| if (.quoteBuf | length) > 0 then
+.out += [ blockquote(.quoteBuf) ]
+| .quoteBuf = []
+else .
+end
+| if .mode == "ul" then
+.out += [ bullet(.buf) ]
+| .buf = [] | .mode = null
+elif .mode == "ol" then
+.out += [ ordered(.buf) ]
+| .buf = [] | .mode = null
+else .
+end
+| .out += [ rule ]
 
-        # blockquotes
-        elif ($line | test("^> ")) then
-          # flush list before starting/continuing quote
-          if .mode == "ul" then
-            .out += [ bullet(.buf) ]
-            | .buf = [] | .mode = null
-          elif .mode == "ol" then
-            .out += [ ordered(.buf) ]
-            | .buf = [] | .mode = null
-          else .
-          end
-          # flush paragraph into quote if we were in text
-          | if (.pBuf | length) > 0 then
-              .quoteBuf += [ paragraph(.pBuf | join("\n")) ]
-              | .pBuf = []
-            else .
-            end
-          | ($line | sub("^> "; "")) as $t
-          | .quoteBuf += [ paragraph($t) ]
+elif ($line | test("^> ")) then
+if .mode == "ul" then
+.out += [ bullet(.buf) ]
+| .buf = [] | .mode = null
+elif .mode == "ol" then
+.out += [ ordered(.buf) ]
+| .buf = [] | .mode = null
+else .
+end
+| if (.pBuf | length) > 0 then
+.quoteBuf += [ paragraph(.pBuf | join("\n")) ]
+| .pBuf = []
+else .
+end
+| ($line | sub("^> "; "")) as $t
+| .quoteBuf += [ paragraph($t) ]
 
-        # headings
-        elif ($line | test("^#{1,6} ")) then
-          # flush paragraph
-          if (.pBuf | length) > 0 then
-            .out += [ paragraph(.pBuf | join("\n")) ]
-            | .pBuf = []
-          else .
-          end
-          # flush quote
-          | if (.quoteBuf | length) > 0 then
-              .out += [ blockquote(.quoteBuf) ]
-              | .quoteBuf = []
-            else .
-            end
-          # flush list
-          | if .mode == "ul" then
-              .out += [ bullet(.buf) ]
-              | .buf = [] | .mode = null
-            elif .mode == "ol" then
-              .out += [ ordered(.buf) ]
-              | .buf = [] | .mode = null
-            else .
-            end
-          | ($line | capture("^(?<h>#+) (?<t>.*)")) as $h
-          | .out += [ heading(($h.h | length); $h.t) ]
+elif ($line | test("^#{1,6} ")) then
+if (.pBuf | length) > 0 then
+.out += [ paragraph(.pBuf | join("\n")) ]
+| .pBuf = []
+else .
+end
+| if (.quoteBuf | length) > 0 then
+.out += [ blockquote(.quoteBuf) ]
+| .quoteBuf = []
+else .
+end
+| if .mode == "ul" then
+.out += [ bullet(.buf) ]
+| .buf = [] | .mode = null
+elif .mode == "ol" then
+.out += [ ordered(.buf) ]
+| .buf = [] | .mode = null
+else .
+end
+| ($line | capture("^(?<h>#+) (?<t>.*)")) as $h
+| .out += [ heading(($h.h | length); $h.t) ]
 
-        # bullet list
-        elif ($line | startswith("- ")) then
-          # flush paragraph
-          if (.pBuf | length) > 0 then
-            .out += [ paragraph(.pBuf | join("\n")) ]
-            | .pBuf = []
-          else .
-          end
-          # flush quote
-          | if (.quoteBuf | length) > 0 then
-              .out += [ blockquote(.quoteBuf) ]
-              | .quoteBuf = []
-            else .
-            end
-          | if .mode == "ul" then
-              .buf += [ $line[2:] ]
-            else
-              if .mode == "ol" then
-                .out += [ ordered(.buf) ]
-              else .
-              end
-              | .mode = "ul"
-              | .buf = [ $line[2:] ]
-            end
+elif ($line | startswith("- ")) then
+if (.pBuf | length) > 0 then
+.out += [ paragraph(.pBuf | join("\n")) ]
+| .pBuf = []
+else .
+end
+| if (.quoteBuf | length) > 0 then
+.out += [ blockquote(.quoteBuf) ]
+| .quoteBuf = []
+else .
+end
+| if .mode == "ul" then
+.buf += [ $line[2:] ]
+else
+if .mode == "ol" then
+.out += [ ordered(.buf) ]
+else .
+end
+| .mode = "ul"
+| .buf = [ $line[2:] ]
+end
 
-        # ordered list
-        elif ($line | test("^[0-9]+\\. ")) then
-          # flush paragraph
-          if (.pBuf | length) > 0 then
-            .out += [ paragraph(.pBuf | join("\n")) ]
-            | .pBuf = []
-          else .
-          end
-          # flush quote
-          | if (.quoteBuf | length) > 0 then
-              .out += [ blockquote(.quoteBuf) ]
-              | .quoteBuf = []
-            else .
-            end
-          | if .mode == "ol" then
-              .buf += [ ($line | sub("^[0-9]+\\. "; "")) ]
-            else
-              if .mode == "ul" then
-                .out += [ bullet(.buf) ]
-              else .
-              end
-              | .mode = "ol"
-              | .buf = [ ($line | sub("^[0-9]+\\. "; "")) ]
-            end
+elif ($line | test("^[0-9]+\\. ")) then
+if (.pBuf | length) > 0 then
+.out += [ paragraph(.pBuf | join("\n")) ]
+| .pBuf = []
+else .
+end
+| if (.quoteBuf | length) > 0 then
+.out += [ blockquote(.quoteBuf) ]
+| .quoteBuf = []
+else .
+end
+| if .mode == "ol" then
+.buf += [ ($line | sub("^[0-9]+\\. "; "")) ]
+else
+if .mode == "ul" then
+.out += [ bullet(.buf) ]
+else .
+end
+| .mode = "ol"
+| .buf = [ ($line | sub("^[0-9]+\\. "; "")) ]
+end
 
-        # empty line → flush paragraph / quote / list
-        elif $line == "" then
-          if .mode == "ul" then
-            .out += [ bullet(.buf) ]
-            | .buf = [] | .mode = null
-          elif .mode == "ol" then
-            .out += [ ordered(.buf) ]
-            | .buf = [] | .mode = null
-          else .
-          end
-          | if (.quoteBuf | length) > 0 then
-              .out += [ blockquote(.quoteBuf) ]
-              | .quoteBuf = []
-            else .
-            end
-          | if (.pBuf | length) > 0 then
-              .out += [ paragraph(.pBuf | join("\n")) ]
-              | .pBuf = []
-            else .
-            end
+elif $line == "" then
+if .mode == "ul" then
+.out += [ bullet(.buf) ]
+| .buf = [] | .mode = null
+elif .mode == "ol" then
+.out += [ ordered(.buf) ]
+| .buf = [] | .mode = null
+else .
+end
+| if (.quoteBuf | length) > 0 then
+.out += [ blockquote(.quoteBuf) ]
+| .quoteBuf = []
+else .
+end
+| if (.pBuf | length) > 0 then
+.out += [ paragraph(.pBuf | join("\n")) ]
+| .pBuf = []
+else .
+end
 
-        # normal text → paragraph buffer
-        else
-          # if we were in a list, close it before plain text
-          if .mode == "ul" then
-            .out += [ bullet(.buf) ]
-            | .buf = [] | .mode = null
-          elif .mode == "ol" then
-            .out += [ ordered(.buf) ]
-            | .buf = [] | .mode = null
-          else .
-          end
-          | .pBuf += [ $line ]
-        end
-      )
-    # final flush
-    | (
-        .out
-        + (if .mode == "ul" then [ bullet(.buf) ]
-           elif .mode == "ol" then [ ordered(.buf) ]
-           else [] end)
-        + (if (.quoteBuf | length) > 0 then [ blockquote(.quoteBuf) ] else [] end)
-        + (if (.pBuf | length) > 0 then [ paragraph(.pBuf | join("\n")) ] else [] end)
-      )
-    | {
-        type: "doc",
-        version: 1,
-        content: .
-      }
-  '|sed -E '
+else
+if .mode == "ul" then
+.out += [ bullet(.buf) ]
+| .buf = [] | .mode = null
+elif .mode == "ol" then
+.out += [ ordered(.buf) ]
+| .buf = [] | .mode = null
+else .
+end
+| .pBuf += [ $line ]
+end
+)
+| (
+.out
++ (if .mode == "ul" then [ bullet(.buf) ]
+elif .mode == "ol" then [ ordered(.buf) ]
+else [] end)
++ (if (.quoteBuf | length) > 0 then [ blockquote(.quoteBuf) ] else [] end)
++ (if (.pBuf | length) > 0 then [ paragraph(.pBuf | join("\n")) ] else [] end)
+)
+| {
+type: "doc",
+version: 1,
+content: .
+}
+'|sed -E '
     s/\*\*(.+?)\*\*/<strong>\1<\/strong>/g
     s/\*(.+?)\*/<em>\1<\/em>/g
     s/`([^`]+)`/<code>\1<\/code>/g
@@ -1443,25 +1505,37 @@ _jira(){
 local METHOD=$1
 local REST="$2"
 local DATA="$3"
+local noDie=$4
 local api=rest/api/3
-local res rc=0 num=0 retry=3
+local res rc=0 num=0 retry=5
 while ((num<=retry));do
 ((num==0))||debug "Retry $num"
 res="$(curl --store $$ --request "$METHOD" --url "$JIRA_HOST/$api/$REST" --user "$ATLASSIAN_USER:$ATLASSIAN_TOKEN" --data "$DATA" -H "Content-Type: application/json")"||rc=$?
+JIRA_HTTP_CODE=$CURL_HTTP_CODE
 variables restore --clean $$
-if ((rc==0));then
+if ((rc==0))&&[[ ! $CURL_HTTP_CODE =~ ^2[0-9]{2}$ ]];then
 printf '%s' "$res"
 return
 else
+JIRA_ERROR="$(printf "HTTP Code $CURL_HTTP_CODE: ($rc) "&&jq .errorMessages[] -r <<<"$res"||printf '%s' "$res")"
+if [ -n "$noDie" ];then
+return 1
+else
 case $CURL_HTTP_CODE in
-400|404)(printf "HTTP Code $CURL_HTTP_CODE: "&&jq .errorMessages[] -r <<<"$res"||printf '%s' "$res")|die
+400|404)echo "$JIRA_ERROR"|die
 esac
+fi
 fi
 ((num++))||true
 sleep $(((num+1)**2))
 done
-(printf "HTTP Code $CURL_HTTP_CODE: "&&jq .errorMessages[] -r <<<"$res"||printf '%s' "$res")|die
+if [ -n "$noDie" ];then
+return 1
+else
+echo "$JIRA_ERROR"|die
+fi
 }
+COMPRESSION_DEFAULT=${COMPRESSION_DEFAULT:-gzip}
 compress(){
 local in out tool="$COMPRESSION_DEFAULT" decompress
 eval set -- "$(option_parse $'i input +\no output +\na algorithm +\nd decompress -' "$@")"
@@ -1499,6 +1573,8 @@ esac
 decompress(){
 compress -d "$@"
 }
+PW_GENERATOR_LENGTH=§{PW_GENERATOR_LENGTH:-6}
+PW_GENERATOR_SYMBOLS="§{PW_GENERATOR_SYMBOLS:-'!@#$%^&*()-_=+[]{}<>?'}"
 pw_generator(){
 local length="$PW_GENERATOR_LENGTH" use_lower=1 use_upper=1 use_digits=1 use_symbols=1 symbols="$PW_GENERATOR_SYMBOLS" custom=''
 eval set -- "$(option_parse $'l length +\n- no-lower -\n- no-upper -\n- no-digits -\n- no-symbols -\nc custom +' "$@")"
@@ -1539,6 +1615,7 @@ done
 fold -w1 <<<"$pw"|shuf|tr -d '\n'
 }
 use module/software
+declare -A MONGO_ADMIN_USERPASS="${MONGO_ADMIN_USERPASS:-()}"
 mongo(){
 local host="$server"
 eval set -- "$(option_parse $'h host +' "$@")"
@@ -1776,15 +1853,6 @@ fi
 done
 stty echo </dev/tty
 }
-ask_no(){
-_deprecated "use confirm --false <question>"
-}
-ask_yes(){
-_deprecated "use confirm --true <question>"
-}
-ask_input(){
-_deprecated "use ask string <question>"
-}
 ask(){
 local default empty negative timeout
 eval set -- "$(option_parse $'e empty -\nd default +\nT timeout +\nn allow-negative -' "$@")"
@@ -1824,8 +1892,8 @@ password)prompt="${2:-$(gettext "Enter password")}"
 mask=1
 ;;
 time)prompt="${2:-$(gettext "Enter time")}"
-pattern="^([0-1]?[0-9]|2[0-3])(:([0-5]?[0-9])?)?$"
-final="^([0-1][0-9]|2[0-3]):[0-5][0-9]$"
+pattern="^([0-9]|1?[0-9]|2[0-3])(:([0-5]?[0-9])?)?$"
+final="^([0-9]|1[0-9]|2[0-3]):[0-5][0-9]$"
 ;;
 text)prompt="${2:-$(gettext "Enter text (end with empty line)")}";;
 editor)prompt="${2:-$(gettext "Enter text here")}";;
@@ -1991,7 +2059,7 @@ done
 local width list num entries keys key display
 width=$(tput cols </dev/tty 2>/dev/null||echo 80)
 list="$(input_lines "$@")"
-list="$(trim "$list"|grep -v ^#)"
+list="$(trim "$list"|grep -v ^#|sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
 while read -r line;do
 num=$((num+1))
 IFS="|" read -r key display <<<"$line"
@@ -2017,6 +2085,11 @@ cols=1
 while ((cols>1&&cols*(length+max_length+4)>width));do
 ((cols--))
 done
+if ((cols==1));then
+for idx in "${!entries[@]}";do
+printf '  %*s) %s\n' $max_length $((idx+1)) "${entries[idx]}" >/dev/tty
+done
+else
 rows=$(((max+cols-1)/cols))
 local r c idx
 for ((r=0; r<rows; r++));do
@@ -2026,6 +2099,7 @@ idx=$((r+c*rows))
 done
 printf "\n" >/dev/tty
 done
+fi
 [ -z "$end" ]||printf '  %*s) %s\n' $max_length x "$end" >/dev/tty
 [ -z "$default" ]||[[ "$default" =~ ^-?[0-9]+$ ]]||die "Default option $default not recognized."
 if ((max_length==1));then
@@ -2108,6 +2182,7 @@ fi
 fi
 done
 stty echo </dev/tty
+debug "$list"
 sed -n "${input}p" <<<"$list"|sed 's/\s*|.*//'
 }
 tasks(){
@@ -2157,6 +2232,9 @@ fi
 printf '\n'
 [ -n "$loop" ]||break
 done
+}
+open_url(){
+xdg-open "$1" 2>/dev/null||sensible-browser "$1"
 }
 declare -ag _log_level=(debug info notice warn error critical)
 declare -Ag _log_rotate_time
@@ -2250,6 +2328,8 @@ done
 }
 _log_manager&
 disown
+MATTERMOST_CHANNEL_PATTERN="${MATTERMOST_CHANNEL_PATTERN:-(MyTeam ".*" "Town Square")}"
+MATTERMOST_LINK_PATTERN="${MATTERMOST_LINK_PATTERN:-()}"
 declare -A _mattermost_cache
 _mattermost_user(){
 if [[ ! -v _mattermost_cache["__u"] ]];then
@@ -2549,19 +2629,19 @@ local filter="" quiet
 eval set -- "$(option_parse $'a alertname +\ng group +\ni instance +\nn net +\ns summary +\nq quiet -' "$@")"
 while true;do
 case "$1" in
--g|--group)[ -z "$2" ]||filter="$filter | select(.labels|has(\"group\")) | select(.labels.group|test(\".*$2.*\"; \"i\"))"
+-g|--group)[ -z "$2" ]||filter+=" | select(.labels|has(\"group\")) | select(.labels.group|test(\".*$2.*\"; \"i\"))"
 shift 2
 ;;
--i|--instance)[ -z "$2" ]||filter="$filter | select(.labels.instance|test(\"$2\"; \"i\"))"
+-i|--instance)[ -z "$2" ]||filter+=" | select(.labels.instance|test(\"$2\"; \"i\"))"
 shift 2
 ;;
--a|--alertname)[ -z "$2" ]||filter="$filter | select(.labels.alertname|test(\"$2\"; \"i\"))"
+-a|--alertname)[ -z "$2" ]||filter+=" | select(.labels.alertname|test(\"$2\"; \"i\"))"
 shift 2
 ;;
--s|--summary)[ -z "$2" ]||filter="$filter | select(.annotations.summary? // \"\"|test(\"$2\"; \"i\"))"
+-s|--summary)[ -z "$2" ]||filter+=" | select(.annotations.summary? // \"\"|test(\"$2\"; \"i\"))"
 shift 2
 ;;
--n|--net)[ -z "$2" ]||filter="$filter | select(.labels.net? // \"\"|test(\"$2\"; \"i\"))"
+-n|--net)[ -z "$2" ]||filter+=" | select(.labels.net? // \"\"|test(\"$2\"; \"i\"))"
 shift 2
 ;;
 -q|--quiet)quiet=1&&shift;;
@@ -2569,40 +2649,42 @@ shift 2
 *)die "$(gettext "Unrecognized option"): $1"
 esac
 done
+debug "$filter"
 install jq
 local list
 list="$(curl -H "Authorization: Bearer $GRAFANA_TOKEN" "$GRAFANA_API/alertmanager/grafana/api/v2/alerts")"||die "$(gettext "Could not get alerts from Grafana!")"
 echo "$list" >/tmp/alerts.json
 list="$(jq 'sort_by(.startsAt) | .[] '"$filter" <<<"$list")"||die "$(gettext "Parse error in Grafana alerts list with filter"): $filter"
-debug "-----------"
 local format=${1:-console}
 [ -n "$list" ]||return 0
 [ -z "$quiet" ]||return 1
 case $format in
-mattermost)list="$(jq -s '.[] | {
-                color:  (if .labels.severity == "disaster" then "#ff0000"
-                        elif  .labels.severity == "critical" then "#FFA500"
-                        elif  .labels.severity == "warning" then "#FFFF00"
-                        else "#0000FF" end), 
-                title:  ((.labels.severity|(.[:1] | ascii_upcase) + .[1:]) + ": " + .labels.alertname), 
-                linktitle_link: .generatorURL,
-                text:   ("**" + .annotations.summary + "**\n" + .annotations.description), 
-                footer: "Grafana Alerts",
-                fields: (.labels 
-                    | {
-                        Netz:(.net|ascii_upcase),Instanz:.instance
-                    } 
-                    | to_entries
-                    | map({title: (.key|(.[:1] | ascii_upcase) + .[1:]), value: .value, short:true})
-                )
-            }' <<<"$list"|jq -s .)"
+mattermost)list="$(jq -s '
+.[] | {
+color:  (if .labels.severity == "disaster" then "#ff0000"
+elif  .labels.severity == "critical" then "#FFA500"
+elif  .labels.severity == "warning" then "#FFFF00"
+else "#0000FF" end),
+title:  ((.labels.severity|(.[:1] | ascii_upcase) + .[1:]) + ": " + .labels.alertname),
+linktitle_link: .generatorURL,
+text:   ("**" + .annotations.summary + "**\n" + .annotations.description),
+footer: "Grafana Alerts",
+fields: (.labels
+| {
+Netz:(.net|ascii_upcase),Instanz:.instance
+}
+| to_entries
+| map({title: (.key|(.[:1] | ascii_upcase) + .[1:]), value: .value, short:true})
+)
+}
+' <<<"$list"|jq -s .)"
 ;;
 *)header="$(printf "$(gettext "Severity\tNetwork\tInstance\tSummary\tStart")\n")"
 list="$header"$'\n'"$(jq -r '[.labels.severity, .labels.net, .labels.instance, .annotations.summary, (.startsAt| split(".")[0]| strptime("%Y-%m-%dT%H:%M:%S")| strftime("%Y-%m-%d %H:%M:%S"))] | @tsv' <<<"$list")"
 esac
 case $format in
 console)local first=1
-printf '%s\n' "$list"|tsv to pprint|while read -r line;do
+printf '%s\n' "$list"|tsv print|while read -r line;do
 case $line in
 warning*)warn "$line";;
 critical*)error "$line";;
@@ -2677,7 +2759,6 @@ fi
 }
 ip_intern(){
 is integer -narguments --max=1 -d $#
-install ip
 case ${1-} in
 data)printf '%s\n' "$(gettext "IP\tInterface")"
 ip -o addr show|awk 'BEGIN { OFS="\t" } $2 != "lo" {print $4, $2}'
@@ -2685,6 +2766,8 @@ ip -o addr show|awk 'BEGIN { OFS="\t" } $2 != "lo" {print $4, $2}'
 *)ip route get 1|awk '{print $7; exit}'
 esac
 }
+IP_PROVIDER_PATTERN="${IP_PROVIDER_PATTERN:-(".*" Unknown)}"
+IP_SEGMENT_PATTERN="${IP_SEGMENT_PATTERN:-(".*" other)}"
 ip_pattern(){
 is integer -narguments --max=2 -d $#
 is enum -ntype --allow="provider segment vmware" -d -- "$1"
@@ -2745,6 +2828,10 @@ hash _ip_extern_data set zip "$(jq .postal -r <<<"$json")"
 hash _ip_extern_data set timezone "$(jq .timezone -r <<<"$json")"
 hash _ip_extern_data set org "$(jq .org -r <<<"$json")"
 hash _ip_extern_data set loc "$(jq .loc -r <<<"$json")"
+}
+ping_check(){
+is set -nname-or-ip -d -- "$1"
+ping -c 1 -W 1 "$1" >/dev/null 2>&1
 }
 declare -A _os_detected
 os(){
@@ -2835,33 +2922,40 @@ fi
 esac
 }
 os_detect(){
-_deprecated "Use os now" warn
-os "$@"
+_deprecated "Use os now"
 }
 bios(){
 sudo dmidecode -t 1|awk '
-    /Product Name:/ { prod=$0; sub(".*Product Name: *","",prod) }
-    /Serial Number:/ { ser=$0; sub(".*Serial Number: *","",ser); print "System " prod " " ser }'
+/Product Name:/ { prod=$0; sub(".*Product Name: *","",prod) }
+/Serial Number:/ { ser=$0; sub(".*Serial Number: *","",ser); print "System " prod " " ser }
+'
 sudo dmidecode -t 0|awk '
-    /Vendor:/        { vendor=$0; sub(".*Vendor: *","",vendor) }
-    /Version:/       { version=$0; sub(".*Version: *","",version) }
-    /Release Date:/  { date=$0; sub(".*Release Date: *","",date) }
-    /Firmware Revision:/  { firmware=$0; sub(".*Firmware Revision: *","",firmware); print "BIOS " vendor " " version " " date " firmware " firmware}'
+/Vendor:/        { vendor=$0; sub(".*Vendor: *","",vendor) }
+/Version:/       { version=$0; sub(".*Version: *","",version) }
+/Release Date:/  { date=$0; sub(".*Release Date: *","",date) }
+/Firmware Revision:/  { firmware=$0; sub(".*Firmware Revision: *","",firmware); print "BIOS " vendor " " version " " date " firmware " firmware}
+'
 sudo dmidecode -t 4|awk '
-    /Manufacturer:/ { pm=$0; sub(".*Manufacturer: *","",pm) }
-    /Version:/      { pv=$0; sub(".*Version: *","",pv) }
-    /Core Count:/   { pc=$0; sub(".*Core Count: *","",pc) }
-    /Thread Count:/ { pt=$0; sub(".*Thread Count: *","",pt); print "Processor " pm " " pv " " pc " cores " pt " threads" }'
+/Manufacturer:/ { pm=$0; sub(".*Manufacturer: *","",pm) }
+/Version:/      { pv=$0; sub(".*Version: *","",pv) }
+/Core Count:/   { pc=$0; sub(".*Core Count: *","",pc) }
+/Thread Count:/ { pt=$0; sub(".*Thread Count: *","",pt); print "Processor " pm " " pv " " pc " cores " pt " threads" }
+'
 sudo dmidecode -t 17|awk '
-    /Size:/ { size=$0; sub(".*Size: *","",size) }
-    /Type:/ { type=$0; sub(".*Type: *","",type) }
-    /Form Factor:/ { ff=$0; sub(".*Form Factor: *","",ff) }
-    /Manufacturer:/ { mm=$0; sub(".*Manufacturer: *","",mm); print "Memory " size " " mm " " type " " ff }'
+/Size:/ { size=$0; sub(".*Size: *","",size) }
+/Type:/ { type=$0; sub(".*Type: *","",type) }
+/Form Factor:/ { ff=$0; sub(".*Form Factor: *","",ff) }
+/Manufacturer:/ { mm=$0; sub(".*Manufacturer: *","",mm); print "Memory " size " " mm " " type " " ff }
+'
 sudo dmidecode -t 8|awk '
-    /External Reference Designator:/ { des=$0; sub(".*External Reference Designator: *","",des); print "Port " des }'
+/External Reference Designator:/ { des=$0; sub(".*External Reference Designator: *","",des); print "Port " des }
+'
 sudo dmidecode -t 9|awk '
-    section=="slot" && /Designation:/ { des=$0; sub(".*Designation: *","",des); print "system-slot " des }'
+section=="slot" && /Designation:/ { des=$0; sub(".*Designation: *","",des); print "system-slot " des }
+'
 }
+use config/local
+MOUNT_COLOR_LIMIT="${MOUNT_COLOR_LIMIT:=('.*' 100 90 80 50)}"
 disk(){
 local opt="" format free_operator free_percent free_bytes
 eval set -- "$(option_parse $'l locale -\nr remote -\nf free +' "$@")"
@@ -2900,17 +2994,18 @@ fi
 done
 percent=$pval
 ((percent>=ival))||percent=$ival
-if ((percent>=limit_c));then
+if ((limit_c>0&&percent>=limit_c));then
 level=critical
-elif ((percent>=limit_e));then
+elif ((limit_e>0&&percent>=limit_e));then
 level=error
-elif ((percent>=limit_w));then
+elif ((limit_w>0&&percent>=limit_w));then
 level=warn
-elif ((percent>=limit_o));then
+elif ((limit_o>0&&percent>=limit_o));then
 level=ok
 else
 level=info
 fi
+debug "$target Limit: $limit_c $limit_e $limit_e $limit_o -> $level"
 if [ -n "$free_operator" ];then
 if [ -n "$free_percent" ]&&eval "(( 100 - ${pcent%%%} $free_operator free_percent ))";then
 list+="$type $source $size $used $avail $pcent $itotal $iused $iavail $ipcent $target $pval $ival $level"$'\n'
@@ -2928,12 +3023,12 @@ do
 [ -z "$type" ]||printf '%s\n' $target
 done <<<"$list"
 ;;
-data)printf '%s\t' "$(gettext Type)" "$(gettext Source)" "$(gettext Total)" "$(gettext Used)" "$(gettext Avail)" "$(gettext Percent)" "$(gettext I-Total)" "$(gettext I-Used)" "$(gettext I-Avail)" "$(gettext I-Percent)" "$(gettext Mount)"
-printf '\n'
+data)printf '%s\t' "$(gettext Type)" "$(gettext Source)" "$(gettext Total)" "$(gettext Used)" "$(gettext Avail)" "$(gettext Percent)" "$(gettext I-Total)" "$(gettext I-Used)" "$(gettext I-Avail)" "$(gettext I-Percent)"
+printf '%s\n' "$(gettext Mount)"
 while read -r type source size used avail pcent itotal iused iavail ipcent target pval ival level;do
 [ -n "$type" ]||continue
-print '%s\t' $type $source $size $used $avail $pcent $itotal $iused $iavail $ipcent $target
-print '\n'
+print '%s\t' $type $source $size $used $avail $pcent $itotal $iused $iavail $ipcent
+print '%s\n' $target
 done <<<"$list"
 ;;
 console)printf "$CC_INVERSE%-30s %8s %8s %8s %8s %8s$CC_RESET\n" "$(gettext Mount)" "$(gettext Total)" "$(gettext Used)" "$(gettext Avail)" "$(gettext Percent)" "$(gettext Inodes)"
@@ -2944,7 +3039,6 @@ esac
 }
 disk_free(){
 _deprecated "Use disk instead" warn
-debug "$*"
 local opt="" free_operator free_percent free_bytes
 eval set -- "$(option_parse $'l locale -\nc collect +\nf free +' "$@")"
 while true;do
@@ -2969,7 +3063,7 @@ debug "$opt"
 ! declare -p collect >/dev/null||debug "collect into $collect ($free_operator $free_percent%/${free_bytes}B)"
 local firstLine="" percent mount device limit_c limit_e limit_w limit_o
 IFS=$'\n'
-for line in $(df -h $opt -x tmpfs -x efivarfs -x devtmpfs -x squashfs "$@");do
+df -h $opt -x tmpfs -x efivarfs -x devtmpfs -x squashfs "$@"|while IFS= read -r line;do
 if [ -z "$firstLine" ];then
 firstLine=1
 printf "$CC_INVERSE%s$CC_RESET\n" "$line"
@@ -3012,7 +3106,7 @@ fi
 done
 unset IFS
 }
-big_files(){
+files(){
 local percent=10
 eval set -- "$(option_parse $'p percent +' "$@")"
 while true;do
@@ -3022,21 +3116,169 @@ case "$1" in
 *)die "$(gettext "Unrecognized option"): $1"
 esac
 done
-is path -npath -dopath -- "$1"
-local max min size
+is enum -ncommand --allow="big interactive" -docommand -- "$1"
+is path -npath -dopath -- "$2"
+case $command in
+big)local max min size
 max=$(df -B1 "$path"|awk 'NR==2 {print $3}')
 min=$((max*percent/100))
 while read -r size path;do
 printf '%s\t%s\n' $(numfmt --to=iec --suffix=B <<<"$size") "$path"
 done < <(sudo du -abx "$path" 2>/dev/null|grep -v 'du: cannot access'|awk '$1 > '"$min"|sort -k2)
+;;
+interactive)install ncdu
+ncdu -xe "$path"
+esac
+}
+user_info(){
+local user home from login logout time uid gid shell sudo info
+getent passwd "$@"|awk -F: '$3 >= 1000 && $3 < 60000 && $1 !~ /^snap_/ && $1 !~ /^(nobody|daemon|www-data|postgres|mysql|redis|git)/ {print $1}'|while IFS= read -r user;do
+IFS=: read -r _ _ uid gid _ home shell < <(getent passwd "$user")
+read -r _ _ from login logout < <(last -dw --time-format=iso -n 1 "$user")
+time="$(sed 's/.*(\|).*//g;s/+0\?/d /;s/:/h /;s/00/0/;s/\([0-9]\)$/\1m/' <<<"$logout")"
+info=$(LANG=C sudo -l -U "$user" 2>/dev/null)
+if grep -q "not allowed\|Sorry" <<<"$info"||[ -z "$info" ];then
+sudo=no
+elif grep -q "(ALL.*ALL)" <<<"$info";then
+sudo=all
+else
+sudo=specified
+fi
+printf '%-20s\t' "$(gettext User)" "$(gettext UID)" "$(gettext GID)" "$(gettext Home)" "$(gettext SuDo)" "$(gettext Login)" "$(gettext From)" "$(gettext Duration)"
+printf '\n'
+printf '%-20s\t' "$user" "$uid" "$gid" "$home" "$sudo" "$login" "$from" "$time"
+printf '\n'
+done
+}
+sudo_info(){
+local user line
+printf '%-20s\t' "$(gettext User)" "$(gettext UID)" "$(gettext GID)" "$(gettext Command)"
+printf '\n'
+getent passwd "$@"|awk -F: '$3 >= 1000 && $3 < 60000 {print $1}'|while IFS= read -r user;do
+LANG=C sudo -lU "$user" 2>/dev/null|sed '1,/User .* may run the following commands/d'|while read -r line;do
+sed 's/(\([A-Z0-9]*\) *:\? *\([A-Z0-9]*\)\?) * \(NOPASSWD:\)\? */'"$user"'\t\1\t\2\t/' <<<"$line"
+done
+done
+}
+ssh_allowed(){
+local user file home
+printf '%-20s\t' "$(gettext User)" "$(gettext Comment)" "$(gettext Type)" "$(gettext Key)"
+printf '\n'
+getent passwd "$@"|awk -F: '$3 >= 1000 && $3 < 60000 {print $1 "\t" $6}'|while IFS=$'\t' read -r user home;do
+for file in authorized_keys authorized_keys2;do
+file="$home/.ssh/$file"
+list="$(sudo sed 's/[[:space:]][[:space:]]*#.*//' $file 2>/dev/null|grep -v '^$')"||continue
+while read -r type key comment;do
+printf '%-20s\t' "$user" "$comment" "$type" "$key"
+printf '\n'
+done <<<"$list"
+done
+done
+}
+services_info(){
+[ -z "$1" ]||is enum -nformat allow="special active" -d -- "$1"
+is integer name=arguments --max=1 -d $#
+printf '%s\t' "$(gettext Unit)" "$(gettext Active)" "$(gettext Sub)" "$(gettext Enabled)" "$(gettext Description)" "$(gettext Config)" "$(gettext Start)" "$(gettext Tasks)" "$(gettext Memory)"
+printf '%s\n' "$(gettext CPU)"
+LANG=C systemctl list-units --type=service --all --no-legend --no-pager|sed 's/^[* ] //'|awk '{print $1}'|xargs -I{} systemctl show {} --property=Id,ActiveState,SubState,ActiveEnterTimestamp,Description,UnitFileState,FragmentPath,TasksCurrent,MemoryCurrent,CPUUsageNSec|awk -F= '
+BEGIN { OFS="\t" }
+/^Id=/ { id=$2 }
+/^ActiveState=/ { active=$2 }
+/^SubState=/ { substate=$2 }
+/^Description=/ { desc=$2 }
+/^FragmentPath=/ { config=$2 }
+/^TasksCurrent=/ { tasks=$2 }
+/^MemoryCurrent=/ { mem=$2 }
+/^CPUUsageNSec=/ { cpu=$2 }
+/^ActiveEnterTimestamp=/ { start=$2 }
+/^TasksCurrent=/ { tasks=$2 }
+/^MemoryCurrent=/ { mem=$2 }
+/^CPUUsageNSec=/ { cpu=$2 }
+/^UnitFileState=/ { enabled=$2; print id, active, substate, enabled, desc, config, start, tasks, mem, cpu }
+'|(case $1 in
+special)tsv filter string 1 '!~' '^(accounts-daemon|acpid|alsa|anacron|apparmor|apport|apt-|atd|atop|auditd|auth-rpc|auto-cpufreq|avahi|binfmt-|blk-availability|bluetooth|bolt|clamav|cloud-init|connman|colord|console-|cron|cups|dbus|display-manager|dm-event|dmesg|dpkg-|e2scrub|emergency|etckeeper|exim4|f-secure|firewalld|fsbg-|fsma|fstrim|fwupd|getty|greylist|gpu-manager|grub|gssproxy|iio-sensor|ifup|initrd|irqbalance|iscsi|kbd|kerneloops|keyboard-setup|kmod-static|live-tools|ldconfig|lm-sensors|logrotate|lvm2-|man-db|ModemManager|modprobe|motd|netplan-|networkd|NetworkManager|networking.|nfs-|nslcd|oem-config|plocate|polkit|power-profiles|open-vm-tools|plymouth-|postfix|prometheus|quota|rc-local|rescue.|rpc-|rpcbind|rsync|rsyslog|rtkit|secureboot|sddm|setvt|sendmail|smartd|smartmon|snapd|snap.cups|snmp|spamassassin|ssh|ssl-cert|switcheroo|sysstat|system76-|systemd-|thermald|tpm-udev|tuned|ua-|ubuntu-advantage|ubuntu-fan|udisks|ufw|unattended|update|upower|user@|user-runtime-dir|uuidd|vgauth|whoopsie|wpa_supplicant|zabbix|zfs-mount)';;
+active)tsv filter string 2 = active;;
+*)cat
+esac)
+}
+cron_info(){
+printf '%s\t' "$(gettext Type)" "$(gettext Source)" "$(gettext User)" "$(gettext Minute)" "$(gettext Hour)" "$(gettext Day)" "$(gettext Month)" "$(gettext Weekday)"
+printf '%s\n' "$(gettext Command)"
+local user file minute hour day month weekday command
+while read -r file;do
+sudo awk -v user="$(basename "$file")" '
+/^[[:space:]]*#/ { next }
+/^[[:space:]]*$/ { next }
+/^[A-Za-z_]+=/{ next }
+{
+minute=$1; hour=$2; day=$3; month=$4; weekday=$5
+command=""
+for (i=6;i<=NF;i++) command = command (i==6?"":" ") $i
+gsub(/"/, "\\\"", command)
+printf "cron\t/var/spool/cron/crontabs/%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n", user, user, minute, hour, day, month, weekday, command
+}
+' "$file"
+done < <(sudo find /var/spool/cron -type f 2>/dev/null||true)
+while read file minute hour day month weekday user command;do
+printf "cron\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" "$file" "$user" "$minute" "$hour" "$day" "$month" "$weekday" "$command"
+done < <(sudo grep -v ^# /etc/crontab /etc/cron.d/*|sed '/^$/d;/^[^:]*:$/d;/^[^:]*:[A-Za-z]*=/d;s/:/ /')
+local period
+for period in hourly daily weekly monthly;do
+read minute hour day month weekday user _ < <(grep "/etc/cron.$period" /etc/crontab|head -n 1)
+for file in /etc/cron.$period/*;do
+file=$(basename "$file")
+printf "cron\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" "/etc/cron.$period" "$user" "$minute" "$hour" "$day" "$month" "$weekday" "/etc/cron.$period/$file"
+done
+done
+}
+timer_info(){
+printf '%s\t' "$(gettext Source)" "$(gettext Status)" "$(gettext Config)" "$(gettext Schedule)" "$(gettext Last)" "$(gettext Next)"
+printf '%s\n' "$(gettext Service)"
+local timer status config schedule last next unit
+sudo systemctl list-unit-files --type=timer --no-legend --state=enabled|while read timer status _;do
+config=$(sudo systemctl show --value -p FragmentPath $timer)
+[ -n "$config" ]||continue
+echo "$config"
+schedule=()
+value=$(egrep 'OnBootSec' $config|sed 's/^[^=]*=//'||true)
+[[ $value =~ ^[0-9]+$ ]]&&value="${value}s"
+[ -z "$value" ]||schedule+=("$value after boot\n")
+value=$(egrep 'OnStartupSec' $config|sed 's/^[^=]*=//'||true)
+[[ $value =~ ^[0-9]+$ ]]&&value="${value}s"
+[ -n "$value" ]&&schedule+=("$value after startup")
+value=$(egrep 'OnActiveSec' $config|sed 's/^[^=]*=//'||true)
+[[ $value =~ ^[0-9]+$ ]]&&value="${value}s"
+[ -n "$value" ]&&schedule+=("$value after last timer start")
+value=$(egrep 'OnUnitActiveSec' $config|sed 's/^[^=]*=//'||true)
+[[ $value =~ ^[0-9]+$ ]]&&value="${value}s"
+[ -n "$value" ]&&schedule+=("$value after last start")
+value=$(egrep 'OnUnitInactiveSec' $config|sed 's/^[^=]*=//'||true)
+[[ $value =~ ^[0-9]+$ ]]&&value="${value}s"
+[ -n "$value" ]&&schedule+=("$value after last run")
+value=$(egrep 'OnClockChange' $config|sed 's/^[^=]*=//'||true)
+[ "$value" = "true" ]&&schedule+=("on clock change")
+value=$(egrep 'OnTimezoneChange' $config|sed 's/^[^=]*=//'||true)
+[ "$value" = "true" ]&&schedule+=("on timezone change")
+value=$(egrep 'OnCalendar' $config|sed 's/^[^=]*=//'||true)
+[ -n "$value" ]&&schedule+=("$value")
+value=$(egrep 'AccuracySec' $config|sed 's/^[^=]*=//'||true)
+[[ $value =~ ^[0-9]+$ ]]&&value="${value}s"
+[ "$value" = "true" ]&&schedule+=("$value accuracy")
+value=$(egrep 'RandomizedDelaySec' $config|sed 's/^[^=]*=//'||true)
+[[ $value =~ ^[0-9]+$ ]]&&value="${value}s"
+[ "$value" = "true" ]&&schedule+=("$value random delay")
+[ -n "$schedule" ]||continue
+schedule="$(echo "$schedule"|sed -e :a -e '/./,$!d;/^\n*$/{$d;N;};/\n$/ba'|paste -sd ';' -|sed 's/;/ and /g')"
+last="$(sudo systemctl show --value -p LastTriggerUSec $timer||true)"
+next="$(sudo systemctl show --value -p NextElapseUSecRealtime $timer||true)"
+unit="$(sudo systemctl show --value -p Unit $timer||true)"
+printf '%s\t' "$timer" "$status" "$config" "$(array schedule join "; ")" "$last" "$next"
+printf '%s\n' "$unit"
+done
 }
 uses_lvm(){
 is integer -narguments --max=0 -d $#
 sudo bash -lc 'command -v vgs' >/dev/null&&sudo vgs --noheadings >/dev/null&&[ -n "$(sudo vgs --noheadings)" ] &>/dev/null
-}
-has_tty(){
-is integer -narguments --max=0 -d $#
-{ : >/dev/tty;} &>/dev/null
 }
 sudo_allow(){
 is integer -narguments --max=1 -d $#
@@ -3057,8 +3299,8 @@ is set -ncommand -d -- "$2"
 local -i n=$1
 ((n>0))||return
 shift
-for n in $(seq "$n");do
-debug 3 "call #$n: $*"
+for ((i=1; i<=n; i++));do
+debug 3 "call #$i: $*"
 "$@"
 done
 }
@@ -3082,7 +3324,7 @@ fi
 done
 return 0
 }
-LOCK_SLEEP=10
+LOCK_SLEEP=${LOCK_SLEEP:-10}
 _lock_remove(){
 pid=$(cat "$lockfile")||true
 ([ -n "$pid" ]&&kill -0 "$pid" 2>/dev/null)||rm -f "$lockfile" "$lockfile.$pid"||die "$(gettext "Failed to remove lockfile"): $lockfile"
@@ -3148,19 +3390,28 @@ shift||true
 local file
 file="$(mktemp $opt --extension=env "$ident")"
 case "$command" in
-store)declare -p "$@"|sed 's/^declare\b/declare -g/' >"$file";;
+store)debug 9 "Store ($*) to $file:"
+{ declare -p "$@" 2>/dev/null||true;}|sed 's/^declare\b/declare -g/' >"$file"
+cat "$file"|sed 's/^/- /'|debug 9
+;;
 restore)[ -s "$file" ]||return 0
 if [[ $# -gt 0 ]];then
 temp="$(mktemp -me env-sub "${ident}_$BASHPID")"
 grep -E "$(tr ' ' '|' <<<"$*")" "$file" >"$temp"||true
-source "$temp"||true
+debug 9 "Restore ($*) from $file:"
+cat "$temp"|sed 's/^/- /'|debug 9
+. "$temp"||true
 rm -r "$temp"||true
 else
-source "$file" 2>/dev/null||true
+debug 9 "Restore all from $file:"
+cat "$file"|sed 's/^/- /'|debug 9
+. "$file" 2>/dev/null||true
 fi
 [ -z "$clean" ]||rm -f "$file"
 ;;
-clean)rm -f "$file";;
+clean)debug "Clean store $file"
+rm -f "$file"
+;;
 change)is set -ncmd-line -d -- "$1"
 local command=$1
 shift||true
@@ -3169,20 +3420,7 @@ eval "$command"
 variables store $self "$ident" "$@"
 esac
 }
-env_store(){
-_deprecated "Use: variables store..."
-}
-env_restore(){
-_deprecated "Use: variables restore..."
-}
-env_clean(){
-_deprecated "Use: variables clean..."
-}
-env_change(){
-_deprecated "Use: variables change..."
-}
 declare -A _async_running
-STEPS_VARIABLES=
 _STEPS_NAME=
 steps(){
 is enum --allow="init end" -d -- "$1"
@@ -3193,7 +3431,12 @@ debug "start step control"
 declare -g -A _STEPS
 variables restore "steps_$_STEPS_NAME"
 variables store "steps_$_STEPS_NAME" _STEPS $STEPS_VARIABLES
+if ((${#_STEPS[@]}==0));then
 printf '%s\n' "$(gettext "Work steps are logged so that you can resume work mid-process")..." >&2
+else
+local num=${#_STEPS[@]}
+printf '%s\n' "$(eval_gettext 'Previous run will be resumed, $num steps are already done')..." >&2
+fi
 ;;
 end)is integer -narguments --max=1 -d $#
 debug "end step control"
@@ -3295,6 +3538,8 @@ hash _async_running unset "$check"
 fi
 done
 }
+QUEUE_MAX_PARALLEL=${QUEUE_MAX_PARALLEL:-10}
+QUEUE_MAX_LOAD=${QUEUE_MAX_LOAD:-75}
 _queue_jobs=()
 declare -A _queue_running
 queue(){
@@ -3500,11 +3745,13 @@ for child in $children;do
 _process_tree "$child" "$2  "
 done
 }
+REMOTE_LOGIN_DEFAULT=${REMOTE_LOGIN_DEFAULT:-operator}
 _module_resolve(){
 local modules=()
 split "$1" modules ,
 local init=1 module line
 for module in "${modules[@]}";do
+debug "$module"
 [[ $module =~ ^(full|base|.*/.*)$ ]]||module="module/$module"
 [ -n "$init" ]&&init=||printf ,
 printf '%s' "$module"
@@ -3595,32 +3842,22 @@ exit 143
 fi
 return "$rc"
 }
-remote_term(){
-_deprecated "Use: remote --terminal ... instead"
-}
-remote_term_line(){
-_deprecated "Use: @remote --terminal --line-based ..."
-}
-remote_file(){
-_deprecated "se: remote --file <file>"
-}
-remote_console(){
-_deprecated "Use: remote console"
-}
 upload(){
-local _login host jump files
-eval set -- "$(option_parse $'+l login +\nh host +\nj jump +\nf files +' "$@")"
+local _login host jump opt=() dereference
+eval set -- "$(option_parse $'+l login +\nh host +\nj jump +\nd delete -\nL dereference -' "$@")"
 while true;do
 case "$1" in
 -l|--login)is set -nlogin -do_login -- "$2"&&shift 2;;
 -h|--host)is set -nhost -dohost -- "$2"&&shift 2;;
 -j|--jump)is set -njump -dojump -- "$2"&&shift 2;;
 -f|--files)is set -nfiles -dofiles -- "$2"&&shift 2;;
+-d|--delete)opt+=(--delete)&&shift;;
+-L|--dereference)dereference=-L&&shift;;
 --)shift&&break;;
 *)die "$(gettext "Unrecognized option"): $1"
 esac
 done
-is integer -narguments --max=2 -d $#
+is integer -narguments --max=3 -d $#
 is set -nsource -d -- "$1"
 is set -ndest -d -- "$2"
 _login=${_login:-${login:-$REMOTE_LOGIN_DEFAULT}}
@@ -3629,20 +3866,21 @@ local ssh="$_login@$host"
 [ -z "$jump" ]||ssh="-J $jump $ssh"
 local dir=${2:-~}
 debug "rsync -av $1 $ssh:$dir"
-if [ -n "$files" ];then
-rsync -avz --files-from=<(printf '%s\n' "$files") "$1" $ssh:"$dir"
+if [ -n "$3" ];then
+rsync -avz $dereference "${opt[@]}" --files-from=<(printf '%s\n' $3) "$1" $ssh:"$dir"
 else
-rsync -avz "$1" $ssh:"$dir"
+rsync -avz $dereference "${opt[@]}" "$1" $ssh:"$dir"
 fi
 }
 download(){
-local _login host jump
+local _login host jump opt
 eval set -- "$(option_parse $'+l login +\nh host +\nj jump +' "$@")"
 while true;do
 case "$1" in
 -l|--login)is set -nlogin -do_login -- "$2"&&shift 2;;
 -h|--host)is set -nhost -dohost -- "$2"&&shift 2;;
 -j|--jump)is set -njump -dojump -- "$2"&&shift 2;;
+-d|--delete)opt+=" --delete"&&shift;;
 --)shift&&break;;
 *)die "$(gettext "Unrecognized option"): $1"
 esac
@@ -3655,22 +3893,7 @@ host=${host:-$server}
 local ssh="$_login@$host"
 [ -z "$jump" ]||ssh="-J $jump $ssh"
 local dir=${2:-.}
-rsync -avz $ssh:"$1" "$dir"
-}
-remote_bashlib(){
-_deprecated "Use: remote bashlib <module> <command>"
-}
-remote_install(){
-_deprecated "use remote_bashlib software install"
-}
-remote_system_info(){
-_deprecated "use remote_bashlib os system_info"
-}
-remote_df(){
-_deprecated "use remote_bashlib os disk_free"
-}
-remote_lvm(){
-_deprecated "use remote_bashlib os uses_lvm"
+rsync -avz $opt $ssh:"$1" "$dir"
 }
 boot_wait(){
 eval set -- "$(option_parse $'q quiet -' "$@")"
@@ -3700,6 +3923,10 @@ done
 [ -n "$quiet" ]||printf '\n'
 }
 declare -Ag _software_install
+_repo_debian_qsv(){
+wget -O - https://dathere.github.io/qsv-deb-releases/qsv-deb.gpg|sudo gpg --dearmor -o /usr/share/keyrings/qsv-deb.gpg
+echo "deb [signed-by=/usr/share/keyrings/qsv-deb.gpg] https://dathere.github.io/qsv-deb-releases ./"|sudo tee /etc/apt/sources.list.d/qsv.list
+}
 _repo_debian_trivy(){
 sudo apt-get update
 sudo apt-get install -y wget gnupg lsb-release
@@ -3725,6 +3952,17 @@ tar -xzvf mongosh.tgz
 sudo mv mongosh-*/bin/mongosh /usr/bin
 rm -r mongosh-* mongosh.tgz
 }
+_install_qsv(){
+wget https://github.com/dathere/qsv/releases/latest/download/qsv-x86_64-unknown-linux-gnu.zip
+sudo unzip -j qsv-*.zip qsv-x86_64-unknown-linux-gnu/qsv /usr/local/bin/qsv
+sudo chmod +x /usr/local/bin/qsv
+rm qsv-*.zip
+}
+_install_ebay-tsv-utils(){
+wget https://github.com/eBay/tsv-utils/releases/download/v2.2.0/tsv-utils-v2.2.0_linux-x86_64_ldc2.tar.gz
+sudo tar xzf tsv-utils-v2.2.0_linux-x86_64_ldc2.tar.gz -C /usr/local/bin --strip-components=1 --wildcards '*/tsv-*'
+rm tsv-utils*.tar.gz
+}
 install(){
 is set -ncommand -d -- "$1"
 declare -a before
@@ -3734,16 +3972,19 @@ declare -a pacman
 declare -a yay
 declare -a dnf
 declare -a after
-local major
+local major cmd
 for cmd in "$@";do
 if ! hash _software_install has "$cmd"&&! command -v "$cmd" >/dev/null;then
 debug 3 "search how to add $cmd"
-PATH="$PATH:/usr/local/sbin:/usr/sbin:/sbin" which "$cmd" >/dev/null 2>/dev/null||if command -v apt-get >/dev/null;then
+PATH="$PATH:/usr/local/sbin:/usr/sbin:/sbin" which "$cmd" >/dev/null 2>/dev/null||if [ "$cmd" = "ebay-tsv-utils" ];then
+after+=(_install_ebay-tsv-utils)
+elif command -v apt-get >/dev/null;then
 case $cmd in
 mlr)apt+=(miller);;
-yq)after+=(_install_yq);;
 mongosh)after+=(_install_mongosh);;
+qsv)before+=(_repo_debian_qsv)&&apt+=(qsv);;
 trivy)before+=(_repo_debian_trivy)&&apt+=(trivy);;
+yq)after+=(_install_yq);;
 *)apt+=("$cmd")
 esac
 elif command -v apk >/dev/null;then
@@ -3759,12 +4000,15 @@ mongosh)pacman+=(base-devel)
 yay+=(mongosh-bin)
 after+=(_install_mongosh)
 ;;
+qsv)yay+=(qsv);;
 *)pacman+=("$cmd")
 esac
 elif command -v dnf >/dev/null;then
 case $cmd in
 ip)dnf+=(iproute);;
 mlr)before+=(_repo_redhat_epel)&&dnf+=(miller);;
+mongosh)dnf=(mongodb-mongosh);;
+qsv)after+=(_install_qsv);;
 yq)major="$(grep ^VERSION_ID /etc/os-release|sed 's/.*="//;s/\..*//')"
 if ((major<9));then
 after+=(_install_yq)
@@ -3772,7 +4016,6 @@ else
 before+=(_repo_redhat_epel)&&dnf+=(yq)
 fi
 ;;
-mongosh)dnf=(mongodb-mongosh);;
 *)dnf+=("$cmd")
 esac
 fi
@@ -3939,32 +4182,303 @@ for row in reader:
 esac
 esac
 }
+use software
 tsv(){
-local separator=$'\t'
-local input
-input=$(cat)
-local cmd="$1"
+local opt=(-d $'\t') opt2=() QSV_DEFAULT_DELIMITER=$'\t' noHeaders input output sort literal exact invert flag numerical natural reverse ignoreCase unique column schema table drop
+eval set -- "$(option_parse $'- no-headers -\ni input-file +\no output-file +\ns sort -\n- column +\n- schema +\n-table +\n- drop -' "$@")"
+while true;do
+case "$1" in
+--no-headers)noHeaders=1&&shift;;
+-i|--input-file)is readable -ninput-file -doinput -- "$2"&&shift 2;;
+-o|--output-file)is set -noutput-file -dooutput -- "$2"&&shift 2;;
+-s|--sort)sort=1&&shift;;
+--literal)literal=1&&shift;;
+--exact)exact=1&&shift;;
+--invert)invert=1&&shift;;
+--flag)is set -nflag-column -doflag -- "$2"&&shift 2;;
+--numeric)numeric=1&&shift;;
+--natural)natural=1&&shift;;
+--reverse)reverse=1&&shift;;
+--ignore-case)ignoreCase=1&&shift;;
+--unique)unique=1&&shift;;
+--column)is integer -ncolumn --min=1 -docolumn -- "$2"&&shift 2;;
+--schema)is set -nschema -doschema -- "$2"&&shift 2;;
+--table)is set -ntable -dotable -- "$2"&&shift 2;;
+--drop)drop=1&&shift;;
+--)shift&&break;;
+*)die "$(gettext "Unrecognized option"): $1"
+esac
+done
+is enum -ncommand --allow="headers count select filter slice sort reverse edit crop color print to" -docmd -- "$1"
+install qsv
 case $cmd in
-to)local format=$2
-case $format in
-csv)awk 'BEGIN { FS="\t"; OFS="," }
-                {
-                    for(i=1; i<=NF; i++) {
-                        if ($i ~ /,|"|\n/) {
-                            gsub(/"/, "\"\"", $i)  # double quotes inside field
-                            $i = "\"" $i "\""
-                        }
-                    }
-                    $1 = $1  # force rebuilding the line with OFS
-                    print
-                }' <<<"$input"
+headers)is integer -narguments --max=1 -d $#
+qsv headers "${opt[@]}"
 ;;
-pprint)column -t -s $'\t' <<<"$input"
+count)[ -z "$noHeaders" ]||opt+=(-n)
+[ -z "$input" ]||opt+=("$input")
+is integer -narguments --max=1 -d $#
+qsv count "${opt[@]}"
+;;
+select)[ -z "$noHeaders" ]||opt+=(-n)
+[ -z "$output" ]||opt+=(-o "$output")
+[ -z "$sort" ]||opt+=(-S)
+[ -z "$input" ]||opt+=("$input")
+is set -nselection -d -- "$2"
+is integer -narguments --max=2 -d $#
+qsv select "${opt[@]}" "$2"
+;;
+filter)[ -z "$noHeaders" ]||opt+=(-n)
+[ -z "$literal" ]||opt+=(--literal)
+[ -z "$exact" ]||opt+=(--exact)
+[ -z "$invert" ]||opt+=(-v)
+[ -z "$flag" ]||opt+=(-f "$flag")
+[ -z "$3" ]||opt+=(-s "$3")
+[ -z "$ignoreCase" ]||opt+=(-i)
+is set -nregex -d -- "$2"&&opt+=("$2")
+[ -z "$input" ]||opt+=("$input")
+[ -z "$output" ]||opt2+=(-o "$output")
+is integer -narguments --max=3 -d $#
+qsv search "${opt[@]}" --not-one|qsv fmt "${opt2[@]}" -t '\t'
+;;
+slice)[ -z "$noHeaders" ]||opt+=(-n)
+[ -z "$invert" ]||opt+=(--invert)
+[ -z "$2" ]||opt+=(-s "$2")
+[ -z "$3" ]||opt+=(-e "$3")
+[ -z "$input" ]||opt+=("$input")
+[ -z "$output" ]||opt2+=(-o "$output")
+is integer -narguments --max=3 -d $#
+qsv slice "${opt[@]}"|qsv fmt "${opt2[@]}" -t '\t'
+;;
+sort)[ -z "$noHeaders" ]||opt+=(-n)
+[ -z "$2" ]||opt+=(-s "$2")
+[ -z "$numeric" ]||opt+=(-N)
+[ -z "$natural" ]||opt+=(--natural)
+[ -z "$reverse" ]||opt+=(-R)
+[ -z "$ignoreCase" ]||opt+=(-i)
+[ -z "$unique" ]||opt+=(-u)
+[ -z "$input" ]||opt+=("$input")
+[ -z "$output" ]||opt2+=(-o "$output")
+is integer -narguments --max=2 -d $#
+qsv sort "${opt[@]}"|qsv fmt "${opt2[@]}" -t '\t'
+;;
+reverse)[ -z "$noHeaders" ]||opt+=(-n)
+[ -z "$output" ]||opt+=(-o "$output")
+[ -z "$input" ]||opt+=("$input")
+qsv reverse "${opt[@]}"|qsv fmt -t '\t'
+;;
+edit)[ -z "$noHeaders" ]||opt+=(-n)
+[ -z "$noHeaders" ]||opt2+=(-n)
+is integer -narguments --min=4 --max=4 -d $#
+qsv fmt "${opt[@]}"|qsv edit "${opt2[@]}" - "$2" "$3" "$4"|qsv fmt -t '\t'
+;;
+crop)is set -ncolumn -d -- "$2"
+is integer -nwidth --min=3 -d -- "$3"
+cat "${input:-/dev/stdin}"|if [[ "$2" =~ ^-?[0-9]+$ ]];then
+awk -F $'\t' -v OFS=$'\t' -v col="$2" -v width="$3" '
+                    BEGIN { col_idx = col + 0 }  # Convert to 0-based index
+                    NR==1 { print; next }        # Pass header unchanged
+                    NF>0 {
+                        if (length($col_idx) > width) {
+                            $col_idx = substr($col_idx, 1, width-1) "…"
+                        }
+                        print
+                    }'
+else
+awk -F $'\t' -v OFS=$'\t' -v colname="$2" -v width="$3" '
+                    NR==1 {
+                        for(i=1; i<=NF; i++) if($i == colname) { col_idx=i; break }
+                        print; next
+                    }
+                    NF>0 {                      # ← Skip empty lines
+                        if (length($col_idx) > width) {
+                            $col_idx = substr($col_idx, 1, width-1) "…"
+                        }
+                        print
+                    }'
+fi >"${output:-/dev/stdout}"
+;;
+color)local color reset
+is set -ncolor -docolor -- "$2"
+[ -z "$noHeaders" ]||opt+=(-n)
+[ -z "$literal" ]||opt+=(--literal)
+[ -z "$exact" ]||opt+=(--exact)
+[ -z "$invert" ]||opt+=(-v)
+[ -z "$flag" ]||opt+=(-f "$flag")
+[ -z "$3" ]||opt+=(-s "$4")
+[ -z "$ignoreCase" ]||opt+=(-i)
+is set -nregex -d -- "$3"&&opt+=("$3")
+[ -z "$input" ]||opt+=("$input")
+[ -z "$output" ]||opt2+=(-o "$output")
+is integer -narguments --max=4 -d $#
+reset=${color##*:}
+color=${color%%:*}
+[[ $color != "$reset" ]]||reset=$CC_RESET
+qsv search "${opt[@]}" --not-one -f C|qsv fmt "${opt2[@]}" -t '\t'|while IFS=$'\t' read -r -a fields;do
+((${#fields[@]}==0))&&continue
+last="${fields[-1]}"
+unset 'fields[-1]'
+if ((last>0));then
+if [ -n "$column" ];then
+fields[$((column-1))]="$color${fields[$((column-1))]}$reset"
+else
+fields[0]="$color${fields[0]}"
+fields[-1]+=$reset
+fi
+fi
+printf '%s' "${fields[0]}"
+for ((i=1; i<${#fields[@]}; i++));do
+printf '\t%s' "${fields[i]}"
+done
+printf '\n'
+done
+;;
+print)cat "${input:-/dev/stdin}"|column --table --separator $'\t' >"${output:-/dev/stdout}"
+;;
+to)is enum -nformat --allow="csv postgres sqlite xslx ods json" -d -- "$2"
+local temp
+case $2 in
+csv)[ -z "$output" ]||opt+=(-o "$output")
+[ -z "$input" ]||opt+=("$input")
+is integer -narguments --max=2 -d $#
+qsv fmt -t ',' "${opt[@]}"
+;;
+json)[ -z "$output" ]||opt+=(-o "$output")
+[ -z "$input" ]||opt+=("$input")
+is integer -narguments --max=2 -d $#
+qsv tojsonl "${opt[@]}"
+;;
+postgres)is set ---name=table -d -- "$table"
+is integer -narguments --max=3 -d $#
+temp="$(mktemp -d $$)"
+if [ -n "$input" ];then
+cp "$input" "$temp/$table.tsv"
+else
+cat >"$temp/$table.tsv"
+fi
+if [ -n "$3" ];then
+[ -z "$schema" ]||opt+=(--schema "$schema")
+is false -- "$drop"||opt+=(--drop)
+opt+=("$3")
+elif [ -n "$output" ];then
+opt+=(--dump "$output")
+else
+opt+=(--dump -)
+fi
+qsv to postgres "${opt[@]}" "$temp/$table.tsv"
+rm -rf "$temp"
+;;
+sqlite)is set ---name=table -d -- "$table"
+is integer -narguments --max=3 -d $#
+temp="$(mktemp -d $$)"
+if [ -n "$input" ];then
+cp "$input" "$temp/$table.tsv"
+else
+cat >"$temp/$table.tsv"
+fi
+if [ -n "$3" ];then
+[ -z "$schema" ]||opt+=(--schema "$schema")
+is false -- "$drop"||opt+=(--drop)
+opt+=("$3")
+elif [ -n "$output" ];then
+opt+=(--dump "$output")
+else
+opt+=(--dump -)
+fi
+qsv to sqlite "${opt[@]}" "$temp/$table.tsv"
+rm -rf "$temp"
+;;
+xlsx|ods)[ -n "$input" ]||opt+=(--pipe)
+[ -z "$output" ]||opt+=("$output")
+is integer -narguments --max=2 -d $#
+if [ -n "$input" ];then
+opt+=("$input")
+else
+opt+=("-")
+fi
+qsv to $2 "${opt[@]}"
+esac
+esac
+}
+otsv(){
+local withHeader removeHeader cmd unique
+eval set -- "$(option_parse $'- with-header -\n- remove-header -' "$@")"
+while true;do
+case "$1" in
+--with-header)withHeader=1&&shift;;
+--remove-header)removeHeader=1&&shift;;
+--unique)unique=1&&shift;;
+--)shift&&break;;
+*)die "$(gettext "Unrecognized option"): $1"
+esac
+done
+is enum -ncommand --allow="crop sort reverse to filter" -docmd -- "$1"
+local separator=$'\t' input
+input=$(cat)
+is false -- "$removeHeader"||removeHeader="${removeHeader#*$'\n'}"
+case $cmd in
+filter)local header cols idx line
+if is true -- "$withHeader";then
+header="$(head -1 <<<"$input")"
+echo "$header"
+input="$(tail -n +2 <<<"$input")"
+fi
+if (($#>=2));then
+is set -ntype -d -- "$2"
+is set -nnum-name -d -- "$3"
+is set -noperator -d -- "$4"
+is set -ncompare -d -- "$5"
+is integer -narguments --min=4 --max=5 -d $#
+IFS=$'\t' read -r -a cols <<<"$header"
+if [[ "$3" =~ ^-?[0-9]+$ ]];then
+idx=$(($3-1))
+else
+[ -n "$header" ]||die "Named columns only possible using --with-header option"
+idx="$(array cols indexof "$3")"||die "Column [$3] not found in table"
+fi
+debug "filter $2 cols[$idx] $4 $5"
+while IFS= read -r line;do
+IFS=$'\t' read -r -a cols <<<"$line"
+debug "check $2 $idx:\"${cols[idx]}\" \"$4\" \"$5\""
+check $2 "${cols[idx]}" "$4" "$5"||continue
+echo "$line"
+done <<<"$input"
+else
+printf '%s' "$input"
+fi
+;;
+to)is enum -nformat --allow="csv pprint" -d -- "$2"
+is integer -narguments --max=2 -d $#
+local format=$2
+case $format in
+csv)awk '
+BEGIN { FS="\t"; OFS="," }
+{
+for(i=1; i<=NF; i++) {
+if ($i ~ /,|"|\n/) {
+gsub(/"/, "\"\"", $i)
+$i = "\"" $i "\""
+}
+}
+$1 = $1
+print
+}
+' <<<"$input"
+;;
+pprint)input="$(column -t -s $'\t' <<<"$input")"
+if is true -- "$withHeader";then
+echo "$CC_INVERS${input%%$'\n'*}$CC_RESET"
+input="${input#*$'\n'}"
+fi
+echo "$input"
 ;;
 *)die "Allowed formats are only csv, not [$format]"
 esac
 ;;
-crop)local cols idx
+crop)is set -nnum-name -- "$2"
+is integer -nwidth --min=3 -d -- "$3"
+is integer -narguments --max=4 -d $#
+local cols idx
 IFS=$separator read -r -a cols < <(head -n 1 <<<"$input")
 [[ "$2" =~ ^-?[0-9]+$ ]]&&idx=$(($2-1))||idx="$(array cols indexof "$2")"||die "Column [$2] not found in table"
 local width="$3"
@@ -3977,32 +4491,52 @@ orig="${line[idx]}"
 printf '%s\n' "${line[*]}")
 done <<<"$input"
 ;;
-sort)local cols idx
+sort)is set -nnum-name -- "$2"
+[ -z "$3" ]||is enum -nformat --allow="numeric human" -d -- "$3"
+is integer -narguments --max=4 -d $#
+local cols idx
 IFS=$separator read -r -a cols < <(head -n 1 <<<"$input")
 [[ "$2" =~ ^-?[0-9]+$ ]]&&idx=$(($2-1))||idx="$(array cols indexof "$2")"||die "Column [$2] not found in table"
 local col type
 col=$((idx+1))
-[ ! "$3" = "numeric" ]||type=n
-[[ -n $idx ]]||die "Usage: table sort <column> [numeric]"
+case "$3" in
+numeric)type=n;;
+human)type=h
+esac
+[ -z "$unique" ]||type+=u
+[[ -n $idx ]]||die "Usage: table sort <column> [numeric/human]"
+if is true -- "$withHeader";then
 (IFS="$separator"
 printf '%s\n' "${cols[*]}")
 tail -n +2 <<<"$input"|sort -t $'\t' "-k$col,$col$type"
+else
+sort -t $'\t' "-k$col,$col$type" <<<"$input"
+fi
 ;;
-reverse)head -1 <<<"$input"
+reverse)is integer -narguments --max=1 -d $#
+if is true -- "$withHeader";then
+head -1 <<<"$input"
 tail -n +2 <<<"$input"|tac
+else
+tac <<<"$input"
+fi
 ;;
 *)die "Usage: tsv {to|crop} [<value>]"
 esac
 }
+TRIVY_DEFAULT_TIMEOUT=${TRIVY_DEFAULT_TIMEOUT:-60m}
+TRIVY_ROOT_TIMEOUT=${TRIVY_ROOT_TIMEOUT:-60m}
+TRIVY_ROOT_EXCLUDE="${TRIVY_ROOT_EXCLUDE:-/mnt /opt/docker **/log/ **/logs/}"
+TRIVY_JIRA_REMOVE_SOURCE_OLDER_MONTHS=${TRIVY_JIRA_REMOVE_SOURCE_OLDER_MONTHS:-6}
 TRIVY_EXPLOITS_URL=https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json
 trivy(){
 local exclude clean progress opt="--exit-code 0 --no-progress --skip-version-check -f json"
-eval set -- "$(option_parse $'t timeout +\no only-os -\ne exclude +\np progress -\nc clean -' "$@")"
+eval set -- "$(option_parse $'t timeout +\no only-os -\ne exclude +\np progress -\nc clean -\n- no-secrets' "$@")"
 while true;do
 case "$1" in
 -t|--timeout)is duration -ntimeout -d -- "$2"&&opt+=" --timeout $timeout"&&shift 2;;
 -o|--only-os)opt+=" --pkg-types os"&&shift;;
---no-secrets)opt+=" --scanners-exclude secret"&&shift;;
+--no-secrets)opt+=" --scanners vuln"&&shift;;
 -e|--exclude)is set -nexclude -doexclude -- "$2"&&shift 2;;
 -p|--progress)progress=1&&shift;;
 -c|--clean)clean=1&&shift;;
@@ -4040,8 +4574,7 @@ $cmd fs $opt "$1" 2>&1|sed 's/[^A-Z]*T[^A-Z]*//' >"$work/log"||rc=$?
 docker)[[ $opt == *"--timeout"* ]]||opt+=" --timeout ${TRIVY_DEFAULT_TIMEOUT:-30m}"
 $cmd image $opt --input "$1" 2>&1|sed 's/[^A-Z]*T[^A-Z]*//' >"$work/log"||rc=$?
 ;;
-clean)_deprecated "Use option --clean instead" warn
-sudo rm -rf /root/.cache/trivy
+clean)_deprecated "Use option --clean instead"
 return
 esac
 cat "$work/log"|debug
@@ -4067,6 +4600,7 @@ mkdir -p "$_trivy_cache/jira"
 ! is file -- "$_trivy_cache/exploits.json"||find "$_trivy_cache/exploits.json" -mmin +1440 -delete
 is file -- "$_trivy_cache/exploits.json"||curl -s "$TRIVY_EXPLOITS_URL" -o "$_trivy_cache/exploits.json"
 local project
+if [ -n "$TRIVY_JIRA_BOARD" ];then
 project="$(jira project "$TRIVY_JIRA_BOARD")"
 _trivy_jira[board]="$(jq .id -r <<<"$project")"
 [ -n "${_trivy_jira[board]}" ]||die "Could not find JIRA Board ID for $TRIVY_JIRA_BOARD!"
@@ -4083,6 +4617,7 @@ _trivy_jira[field_links]="$(jq '.fields[] | select(.name == "'"$TRIVY_JIRA_FIELD
 [ -n "${_trivy_jira[field_links]}" ]||die "Could not find JIRA Field \"$TRIVY_JIRA_FIELD_LINKS\" in $TRIVY_JIRA_BOARD/$TRIVY_JIRA_ISSUE_TYPE!"
 _trivy_jira[field_approval]="$(jq '.fields[] | select(.name == "'"$TRIVY_JIRA_FIELD_APPROVAL"'").key' -r <<<"$fields")"
 [ -n "${_trivy_jira[field_approval]}" ]||die "Could not find JIRA Field \"$TRIVY_JIRA_FIELD_APPROVAL\" in $TRIVY_JIRA_BOARD/$TRIVY_JIRA_ISSUE_TYPE!"
+fi
 [ -z "$progress" ]||gettext 'Build queue to optimize reports...'|info >&2
 for file in "$work"/split/*;do
 queue add _trivy_report "$work" "$file" "$source" "$progress"
@@ -4253,7 +4788,7 @@ expired=1
 fi
 fi
 if ! [ -n "$created" ];then
-local old new fields update
+local old new fields update cutoff
 old="$(jira json jira get description adf)"
 new="$title"$'\n\n'"$description"
 if [[ $new != "$old" ]];then
@@ -4261,7 +4796,8 @@ jira json fields set description adf "$new"
 update=1
 fi
 old="$(jira json jira get "${_trivy_jira[field_sources]}" md)"
-new="$(printf '%s\n%s' "$old" "$(date +%Y-%m) > $sourceLine"|sed -n '/>/p'|sort -t'>' -k1,1r -k2,2)"
+cutoff=$(date -d "$TRIVY_JIRA_REMOVE_SOURCE_OLDER_MONTHS months ago" +%Y-%m)
+new="$(printf '%s\n%s' "$old" "$(date +%Y-%m) > $sourceLine"|sed -n '/>/p'|sort -u -t'>' -k1,1r -k2,2|awk -v cutoff="$cutoff" '$1 >= cutoff {print}')"
 if [[ $new != "$old" ]];then
 jira json fields set "${_trivy_jira[field_sources]}" adf "$new"
 update=1
@@ -4286,7 +4822,7 @@ update=1
 fi
 local labels addLabel=()
 labels="$(jq '.fields.labels[]' -r <<<"$jira")"
-for label in $(sed 's#.*ekz.de/##;s#/-/.*##;s#[/.]# #g' <<<"$source");do
+sed 's#.*ekz.de/##;s#/-/.*##;s#[/.]# #g' <<<"$source"|while IFS= read -r label;do
 [[ ! $labels =~ $label ]]||continue
 addLabel+=('{"add": "'"$label"'"}')
 done
@@ -4372,47 +4908,3 @@ esac
 printf '%s\n' "divibib_trivy_vulnerability{type=\"$type\",target=\"$target\",package=\"$pkgPath\",severity=\"$severity\",cve=\"$id\"} $value" >>"$file"
 fi
 }
-PW_GENERATOR_LENGTH=16
-PW_GENERATOR_SYMBOLS='!@#$%^&*()-_=+[]{}<>?'
-COMPRESSION_DEFAULT=gzip
-QUEUE_MAX_PARALLEL=10
-QUEUE_MAX_LOAD=75
-REMOTE_LOGIN_DEFAULT=operator
-MOUNT_COLOR_LIMIT=(
-".*" 100 90 80 50)
-IP_PROVIDER_PATTERN=(
-".*" Unknown)
-IP_SEGMENT_PATTERN=(
-".*" other)
-MATTERMOST_API=
-MATTERMOST_TOKEN=
-MATTERMOST_CHANNEL_PATTERN=(
-MyTeam ".*" "Town Square")
-MATTERMOST_LINK_PATTERN=()
-GRAFANA_API=
-GRAFANA_TOKEN=
-PROMETHEUS_API=
-PROMETHEUS=
-ATLASSIAN_USER=
-ATLASSIAN_TOKEN=
-JIRA_HOST=https://ekz-gruppe.atlassian.net
-CONFLUENCE_API=
-JIRA_API=
-TRIVY_JIRA_BOARD=
-TRIVY_JIRA_ISSUE_TYPE=
-TRIVY_JIRA_FIELD_SOURCES=
-TRIVY_JIRA_FIELD_RATING=
-TRIVY_JIRA_FIELD_VERSION=
-TRIVY_JIRA_FIELD_LINKS=
-TRIVY_JIRA_FIELD_APPROVAL=
-TRIVY_JIRA_APPROVAL_TEMP=
-TRIVY_JIRA_APPROVAL_IRRELEVANT=
-ABUSEIPDB_TOKEN=
-declare -A MONGO_ADMIN_USERPASS=()
-NETLAS_TOKEN=
-PLUSSERVER_PORTAL=
-POWERDNS_API=
-TRIVY_DEFAULT_TIMEOUT=60m
-TRIVY_CACHE_SERVER=
-TRIVY_ROOT_TIMEOUT=60m
-TRIVY_ROOT_EXCLUDE="/mnt /opt/docker **/log/ **/logs/"

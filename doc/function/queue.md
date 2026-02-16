@@ -12,9 +12,9 @@ queue [--progress] run [<parallel>] [<load-percent>] # run the queue with specif
 ### Options
 
 ```bash
-v, verbose           # display notice/info message
-n, name=<string>     # define name or use command with args
-p, progress          # show progress
+-v, --verbose           # display notice/info message
+-n, --name=<string>     # define name or use command with args
+-p, --progress          # show progress
 - info message for finish (in verbose mode)
 - info with progress of queue
 ```

@@ -83,15 +83,15 @@ echo -e "\t${CC_INVERSE}CC_INVERSE$CC_RESET"
 echo "256 Color palette:"
 local cols=15
 local rows=15
-for c in $(seq 0 "$cols");do
-for r in $(seq 0 "$rows");do
+for ((c=0; c<=cols; c++));do
+for ((r=0; r<=rows; r++));do
 num=$((r*cols+c))
 printf '%s' "\t$(color_256 "$num")FG $num"
 done
 echo ""
 done
-for c in $(seq 0 "$cols");do
-for r in $(seq 0 "$rows");do
+for ((c=0; c<=cols; c++));do
+for ((r=0; r<=rows; r++));do
 num=$((r*cols+c))
 printf '%s' "\t$(color_256_bg "$num")BG $num$CC_RESET"
 done
@@ -158,9 +158,6 @@ CLEAR_SOL=$'\e[1K'
 CLEAR_LINE=$'\e[2K'
 SCREEN_RESTORE=$'\e[?47l'
 SCREEN_SAVE=$'\e[?47h'
-erase_line(){
-_deprecated "Use $CLEAR_LINE"
-}
 option_parse(){
 local opt name type desc short="" long="" spec="$1" permute
 [ -n "$spec" ]||die "$(gettext 'A specification string is needed as first argument')"
@@ -183,7 +180,22 @@ long+="$name,"
 fi
 done <<<"$spec"
 shift
-getopt -q -o "$permute$short" --long "$long" -n "$0" -- "$@"||true
+local res rc out lines
+res="$(LANG=C getopt -o "$permute$short" --long "$long" -n "$0" -- "$@" 2>&1)"||rc=$?
+if ((rc));then
+out="$(tail -1 <<<"$res")"
+mapfile -t lines <<<"$res"
+for line in "${lines[@]:0:${#lines[@]}-1}";do
+if [[ $line == *invalid\ option* ]];then
+out+=" -$(sed "s/.*'\(.*\)'.*/\1/" <<<"$line")"
+elif [[ $line == *unrecognized\ option* ]];then
+out=" $(sed "s/.*'\(.*\)'.*/\1/" <<<"$line")$out"
+else
+die "$line"
+fi
+done
+fi
+printf '%s' "${out:-$res}"
 }
 option_help(){
 is set -nspec -d -- "$1"
@@ -261,8 +273,7 @@ printf '%s' "$joined"
 esac
 }
 join(){
-_deprecated "Use array <arr-name> join <separator>" warn
-array "$1" join "$2"
+_deprecated "Use array <arr-name> join <separator>"
 }
 split(){
 is integer -narguments --max=3 -d $#
@@ -440,7 +451,7 @@ esac
 }
 export TEXTDOMAIN=bashlib
 export TEXTDOMAINDIR=$BASHLIB_HOME/locale
-source gettext.sh
+. gettext.sh
 _deprecated(){
 IFS=$' \t\n' read -r line func file <<<"$(caller 1)"
 local message="DEPRECATED: ${FUNCNAME[1]} at $func in $file:$line $1"
@@ -455,12 +466,14 @@ printf "Triggered at %s:%d (%s)\n" "$src" "$line" "$func"|warn >&2
 bestChoice=""
 fi
 printf "\033[1m%s:%d (%s)\n" "$src" "$line" "$func"|([ -n "$1" ]&&( ((frame==1))&&warn||notice)||debug 5) >&2
+[ ! "$src" = 'main' ]||src="$0"
 awk -v n="$line" '
-            NR>=n-2 && NR<=n+2 {
-                gsub(/^[ \t]+/, "", $0)  # Remove leading spaces/tabs
-                printf "%4d: %s\n", NR, $0
-                if(NR==n+2) exit
-            }' "$src"|sed "/$line:/s/^/"$'\033[1m'"/;/$line:/s/$/"$'\033[22m'"/"|([ -n "$1" ]&&info||debug 6) >&2
+NR>=n-2 && NR<=n+2 {
+gsub(/^[ \t]+/, "", $0)
+printf "%4d: %s\n", NR, $0
+if(NR==n+2) exit
+}
+' "$src"|sed "/$line:/s/^/"$'\033[1m'"/;/$line:/s/$/"$'\033[22m'"/"|([ -n "$1" ]&&info||debug 6) >&2
 ((frame++))||true
 done
 }
@@ -473,10 +486,11 @@ local path
 path="$(dirname "$module")"
 case $path in
 core)return 0;;
-module)[[ ! $BASHLIB_LOADER =~ loader|full|remote ]]||return 0
+module)[[ ! $BASHLIB_LOADER =~ loader|full|remote ]]||return 0;;
+config)return 0
 esac
 debug 5 "Loading module $module"
-source "$BASHLIB_HOME/$module"
+. "$BASHLIB_HOME/$module"
 }
 script_path(){
 is integer -narguments --max=0 -d $#
@@ -619,6 +633,7 @@ is integer --min=0 -d -- "$DEBUG"
 else
 [[ $func =~ .*(${DEBUG//,? /|}) ]]||return 0
 fi
+local line
 while IFS= read -r line;do
 is integer --min=9 -- "$DEBUG"&&printf "$CC_BLACK%-2s %7d %-20s %s$CC_RESET\n" "$sign" "$BASHPID" "$func" "$line" >&2||printf "$CC_BLACK%-2s %-20s %s$CC_RESET\n" "$sign" "$func" "$line" >&2
 done <<<"$text"
@@ -628,6 +643,7 @@ done <<<"$text"
 }
 die(){
 is integer -narguments --max=1 -d $#
+trap - ERR
 local text trap line func src
 text="$(input "$@")"
 [[ $text != *"Uncaught exception at"* ]]||trap=1
@@ -1049,6 +1065,63 @@ esac
 if [ -n "$output" ];then
 [ "$output" = "-" ]&&printf '%s' "$res"||printf -v "$output" '%s' "$res"
 fi
+}
+check(){
+local type
+is enum -ntype --allow="string integer float" -dotype -- "$1"
+is integer -narguments --min=3 --max=4 -d $#
+case $type in
+string)is enum -noperator --allow="= == != =* !* =~ !~ < > empty set" -d -- "$3"
+case $3 in
+empty)[ -z "$2" ];;
+set)[ -n "$2" ];;
+=|==)[[ $2 == "$4" ]];;
+!=)[[ $2 != "$4" ]];;
+=\*)[[ $2 == $4 ]];;
+!\*)[[ $2 != $4 ]];;
+=~)[[ $2 =~ $4 ]];;
+\!~)[[ ! $2 =~ $4 ]];;
+\<)[[ $2 < $4 ]];;
+\>)[[ $2 > $4 ]]
+esac
+;;
+integer)is enum -noperator --allow="= < > <= >= positiv negativ zero odd even multiple-of divisible-by factor-of prime no-prime" -d -- "$3"
+is integer -nvalue -- "$2"||return 1
+case $3 in
+positiv)(($2>=0));;
+negativ)(($2<0));;
+zero)(($2==0));;
+odd)(($2%2==1));;
+even)(($2%2==0));;
+prime)(($(factor $2|wc -w)==2));;
+no-prime)(($(factor $2|wc -w)>2));;
+*)is integer -ncompare -d -- "$4"
+case $3 in
+=)(($2==$4));;
+\<)(($2<$4));;
+\>)(($2>$4));;
+\<=)(($2<=$4));;
+\>=)(($2>=$4));;
+multiple-of|divisible-by)(($2%$4==0));;
+factor-of)(($4%$2==0))
+esac
+esac
+;;
+float)is enum -noperator --allow="= < > <= >= positiv negativ" -d -- "$3"
+is float -nvalue -- "$2"||return 1
+case $3 in
+positiv)(($(bc -l <<<"$2 >= 0")));;
+negativ)(($(bc -l <<<"$2 < 0")));;
+*)is float -ncompare -d -- "$4"
+case $3 in
+=)(($(bc -l <<<"$2 == $4")));;
+\<)(($(bc -l <<<"$2 < $4")));;
+\>)(($(bc -l <<<"$2 > $4")));;
+\<=)(($(bc -l <<<"$2 <= $4")));;
+\>=)(($(bc -l <<<"$2 >= $4")))
+esac
+esac
+esac
 }
 value_if_variable(){
 is integer -narguments --max=2 -d $#

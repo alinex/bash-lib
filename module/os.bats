@@ -115,13 +115,3 @@ setup() {
     run uses_lvm
     lsblk | grep lvm >/dev/null && assert_success || assert_failure
 }
-
-######################################################################################
-# has_tty
-######################################################################################
-
-# bats test_tags=has_tty
-@test "has_tty: should get timestamp" {
-    run has_tty
-    assert_success
-}

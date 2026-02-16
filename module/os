@@ -17,22 +17,24 @@ declare -A _os_detected
 #
 # The following formats are possible:
 #
-# - data - all values with `<name>\t<value>`
-# - info - show human readable paragraph
-# - os - operating system type like Linux, Solaris, Windows
-# - base - base distribution type like Debian, ArchLinux
-# - base_revision_name - (optional)
-# - base_revision_number - (optional)
-# - distribution - real distribution name
-# - revision_number - distribution number
-# - revision_name - version code name
-# - kernel - version number of kernel like 6.8.0-87-generic
-# - architecture - x86_64, i686, i386, armv7l, aarch64...
-# - cpu_model - cpu name
-# - cpu_num - number of cpus
-# - memory - hardware memory in GB
-# - machine_id
-# - virtual_machine - `false` or `true`
+# - `data` - all values with `<name>\t<value>`
+# - `info` - show human readable paragraph
+# - `os` - operating system type like Linux, Solaris, Windows
+# - `base` - base distribution type like Debian, ArchLinux
+# - `base_revision_name` - (optional)
+# - `base_revision_number` - (optional)
+# - `distribution` - real distribution name
+# - `revision_number` - distribution number
+# - `revision_name` - version code name
+# - `kernel` - version number of kernel like 6.8.0-87-generic
+# - `architecture` - x86_64, i686, i386, armv7l, aarch64...
+# - `cpu_model` - cpu name
+# - `cpu_num` - number of cpus
+# - `memory` - hardware memory in GB
+# - `machine_id`
+# - `virtual_machine` - `false` or `true`
+#
+# It uses an internal cache so the analyzation runs only once, also if multiple values are queried one after the other.
 #
 # Usage:    os_detect <format>
 # Output:   - <tsv-table> for data
@@ -134,11 +136,10 @@ os() {
     esac
 }
 
-# Deprecates: OS detection
+# Deprecated: OS detection
 # Renamed to @os
 os_detect() {
-    _deprecated "Use os now" warn
-    os "$@"
+    _deprecated "Use os now"
 }
 
 # Hardware description
@@ -160,48 +161,61 @@ os_detect() {
 # Port SIM card
 # ```
 #
+# It needs `sudo dmidecode *` rights to analyze this information.
+#
 # Usage:    bios
-# Output:   List with type as first word and details (type specific) behind
+# Output:   List with <type> as first word and details (type specific) behind
 bios() {
     sudo dmidecode -t 1 | awk '
     /Product Name:/ { prod=$0; sub(".*Product Name: *","",prod) }
-    /Serial Number:/ { ser=$0; sub(".*Serial Number: *","",ser); print "System " prod " " ser }'
+    /Serial Number:/ { ser=$0; sub(".*Serial Number: *","",ser); print "System " prod " " ser }
+    '
     sudo dmidecode -t 0 | awk '
     /Vendor:/        { vendor=$0; sub(".*Vendor: *","",vendor) }
     /Version:/       { version=$0; sub(".*Version: *","",version) }
     /Release Date:/  { date=$0; sub(".*Release Date: *","",date) }
-    /Firmware Revision:/  { firmware=$0; sub(".*Firmware Revision: *","",firmware); print "BIOS " vendor " " version " " date " firmware " firmware}'
+    /Firmware Revision:/  { firmware=$0; sub(".*Firmware Revision: *","",firmware); print "BIOS " vendor " " version " " date " firmware " firmware}
+    '
     sudo dmidecode -t 4 | awk '
     /Manufacturer:/ { pm=$0; sub(".*Manufacturer: *","",pm) }
     /Version:/      { pv=$0; sub(".*Version: *","",pv) }
     /Core Count:/   { pc=$0; sub(".*Core Count: *","",pc) }
-    /Thread Count:/ { pt=$0; sub(".*Thread Count: *","",pt); print "Processor " pm " " pv " " pc " cores " pt " threads" }'
+    /Thread Count:/ { pt=$0; sub(".*Thread Count: *","",pt); print "Processor " pm " " pv " " pc " cores " pt " threads" }
+    '
     sudo dmidecode -t 17 | awk '
     /Size:/ { size=$0; sub(".*Size: *","",size) }
     /Type:/ { type=$0; sub(".*Type: *","",type) }
     /Form Factor:/ { ff=$0; sub(".*Form Factor: *","",ff) }
-    /Manufacturer:/ { mm=$0; sub(".*Manufacturer: *","",mm); print "Memory " size " " mm " " type " " ff }'
+    /Manufacturer:/ { mm=$0; sub(".*Manufacturer: *","",mm); print "Memory " size " " mm " " type " " ff }
+    '
     sudo dmidecode -t 8 | awk '
-    /External Reference Designator:/ { des=$0; sub(".*External Reference Designator: *","",des); print "Port " des }'
+    /External Reference Designator:/ { des=$0; sub(".*External Reference Designator: *","",des); print "Port " des }
+    '
     sudo dmidecode -t 9 | awk '
-    section=="slot" && /Designation:/ { des=$0; sub(".*Designation: *","",des); print "system-slot " des }'
+    section=="slot" && /Designation:/ { des=$0; sub(".*Designation: *","",des); print "system-slot " des }
+    '
 }
 
 ######################################################################################
 ### Disk
 ######################################################################################
 
+use config/local
+
+# Array: Color limits per mount (regex critical error warn ok) used in @disk
+MOUNT_COLOR_LIMIT="${MOUNT_COLOR_LIMIT:=('.*' 100 90 80 50)}"
+
 # File system analyzation
 #
 # The following formats are defined:
 #
-# - list    only list mounts
-# - data    all data as tsv table
-# - console colored visual output
+# - `list`    only list mounts
+# - `data`    all data as tsv table
+# - `console` colored visual output
 #
 # Usage:    disk [options] <format> [<path>]...
-# Options:  l, local    # show only local file systems
-#           f, free [<operator>]<percent%|bytes>
+# Options:  -l, --local                                 # show only local file systems
+#           -f, --free [<operator>]<percent%|bytes>     # filter only matching file systems
 disk() {
     # parameter parsing
     local opt="" format free_operator free_percent free_bytes
@@ -247,17 +261,18 @@ disk() {
         # display
         percent=$pval
         ((percent >= ival)) || percent=$ival
-        if ((percent >= limit_c)); then
+        if ((limit_c > 0 && percent >= limit_c)); then
             level=critical
-        elif ((percent >= limit_e)); then
+        elif ((limit_e > 0 && percent >= limit_e)); then
             level=error
-        elif ((percent >= limit_w)); then
+        elif ((limit_w > 0 && percent >= limit_w)); then
             level=warn
-        elif ((percent >= limit_o)); then
+        elif ((limit_o > 0 && percent >= limit_o)); then
             level=ok
         else
             level=info
         fi
+        debug "$target Limit: $limit_c $limit_e $limit_e $limit_o -> $level"
         if [ -n "$free_operator" ]; then
             if [ -n "$free_percent" ] &&
                 eval "(( 100 - ${pcent%%%} $free_operator free_percent ))"; then
@@ -280,13 +295,13 @@ disk() {
         done <<<"$list"
         ;;
     data)
-        printf '%s\t' "$(gettext Type)" "$(gettext Source)" "$(gettext Total)" "$(gettext Used)" "$(gettext Avail)" "$(gettext Percent)" "$(gettext I-Total)" "$(gettext I-Used)" "$(gettext I-Avail)" "$(gettext I-Percent)" "$(gettext Mount)"
-        printf '\n'
+        printf '%s\t' "$(gettext Type)" "$(gettext Source)" "$(gettext Total)" "$(gettext Used)" "$(gettext Avail)" "$(gettext Percent)" "$(gettext I-Total)" "$(gettext I-Used)" "$(gettext I-Avail)" "$(gettext I-Percent)"
+        printf '%s\n' "$(gettext Mount)"
         while read -r type source size used avail pcent itotal iused iavail ipcent target pval ival level; do
             is set -- "$type" || continue
             # shellcheck disable=SC2086
-            print '%s\t' $type $source $size $used $avail $pcent $itotal $iused $iavail $ipcent $target
-            print '\n'
+            print '%s\t' $type $source $size $used $avail $pcent $itotal $iused $iavail $ipcent
+            print '%s\n' $target
         done <<<"$list"
         ;;
     console)
@@ -315,7 +330,6 @@ disk() {
 disk_free() {
     _deprecated "Use disk instead" warn
     # parameter parsing
-    debug "$*"
     local opt="" free_operator free_percent free_bytes
     eval set -- "$(option_parse $'l locale -\nc collect +\nf free +' "$@")"
     while true; do
@@ -345,63 +359,65 @@ disk_free() {
     local firstLine="" percent mount device limit_c limit_e limit_w limit_o
     IFS=$'\n'
     # shellcheck disable=SC2248
-    for line in $(df -h $opt -x tmpfs -x efivarfs -x devtmpfs -x squashfs "$@"); do
-        if [ -z "$firstLine" ]; then
-            firstLine=1
-            printf "${CC_INVERSE}%s${CC_RESET}\n" "$line"
-        else
-            percent=$(echo "$line" | xargs echo | cut -d' ' -f5 | sed 's/%//')
-            bytes=$(echo "$line" | xargs echo | cut -d' ' -f4)
-            mount=$(echo "$line" | xargs echo | cut -d' ' -f6 | sed 's/\r$//')
-            # get color limits
-            device=$(echo "$line" | xargs echo | cut -d' ' -f1)
-            # shellcheck disable=SC2154
-            for ((i = 0; i < ${#MOUNT_COLOR_LIMIT[@]}; i += 5)); do
-                pattern="${MOUNT_COLOR_LIMIT[i]}"
-                if [[ "$device" =~ $pattern ]]; then
-                    limit_c="${MOUNT_COLOR_LIMIT[i + 1]}"
-                    limit_e="${MOUNT_COLOR_LIMIT[i + 2]}"
-                    limit_w="${MOUNT_COLOR_LIMIT[i + 3]}"
-                    limit_o="${MOUNT_COLOR_LIMIT[i + 4]}"
-                    break
-                fi
-            done
-            # display
-            if ((percent == limit_c)); then
-                critical "$line"
-            elif ((percent == limit_e)); then
-                error "$line"
-            elif ((percent == limit_w)); then
-                warn "$line"
-            elif ((percent == limit_o)); then
-                ok "$line"
+    df -h $opt -x tmpfs -x efivarfs -x devtmpfs -x squashfs "$@" |
+        while IFS= read -r line; do
+            if [ -z "$firstLine" ]; then
+                firstLine=1
+                printf "${CC_INVERSE}%s${CC_RESET}\n" "$line"
             else
-                printf '%s\n' "$line"
-            fi
-            # collection limit
-            if declare -p collect >/dev/null; then
-                # shellcheck disable=SC1105
-                if [ -n "$free_operator" ]; then
-                    if [ -n "$free_percent" ] &&
-                        eval "(( 100 - percent $free_operator free_percent ))"; then
-                        collect+="${mount} "
-                    elif [ -n "$free_bytes" ] &&
-                        eval "(( bytes $free_operator free_bytes ))"; then
-                        collect+="${mount} "
+                percent=$(echo "$line" | xargs echo | cut -d' ' -f5 | sed 's/%//')
+                bytes=$(echo "$line" | xargs echo | cut -d' ' -f4)
+                mount=$(echo "$line" | xargs echo | cut -d' ' -f6 | sed 's/\r$//')
+                # get color limits
+                device=$(echo "$line" | xargs echo | cut -d' ' -f1)
+                # shellcheck disable=SC2154
+                for ((i = 0; i < ${#MOUNT_COLOR_LIMIT[@]}; i += 5)); do
+                    pattern="${MOUNT_COLOR_LIMIT[i]}"
+                    if [[ "$device" =~ $pattern ]]; then
+                        limit_c="${MOUNT_COLOR_LIMIT[i + 1]}"
+                        limit_e="${MOUNT_COLOR_LIMIT[i + 2]}"
+                        limit_w="${MOUNT_COLOR_LIMIT[i + 3]}"
+                        limit_o="${MOUNT_COLOR_LIMIT[i + 4]}"
+                        break
+                    fi
+                done
+                # display
+                if ((percent == limit_c)); then
+                    critical "$line"
+                elif ((percent == limit_e)); then
+                    error "$line"
+                elif ((percent == limit_w)); then
+                    warn "$line"
+                elif ((percent == limit_o)); then
+                    ok "$line"
+                else
+                    printf '%s\n' "$line"
+                fi
+                # collection limit
+                if declare -p collect >/dev/null; then
+                    # shellcheck disable=SC1105
+                    if [ -n "$free_operator" ]; then
+                        if [ -n "$free_percent" ] &&
+                            eval "(( 100 - percent $free_operator free_percent ))"; then
+                            collect+="${mount} "
+                        elif [ -n "$free_bytes" ] &&
+                            eval "(( bytes $free_operator free_bytes ))"; then
+                            collect+="${mount} "
+                        fi
                     fi
                 fi
             fi
-        fi
-    done
+        done
     unset IFS
 }
 
 # Show big directory and files
 #
-# Usage:    big_files <path>
-# Options:  p, percent <min>
-# Output:   <size human>\t<path>
-big_files() {
+# Usage:    files big <path>
+#           files interactive <path>
+# Options:  -p, --percent <limit>
+# Output:   For `files big`: `<size human>\t<path>`
+files() {
     # parameter parsing
     local percent=10
     eval set -- "$(option_parse $'p percent +' "$@")"
@@ -412,38 +428,304 @@ big_files() {
         *) die "$(gettext "Unrecognized option"): $1" ;;
         esac
     done
-    is path --name=path --die --output=path -- "$1"
+    is enum --name=command --allow="big interactive" --die --output=command -- "$1"
+    is path --name=path --die --output=path -- "$2"
     # processing
-    local max min size
-    max=$(df -B1 "$path" | awk 'NR==2 {print $3}')
-    min=$((max * percent / 100))
-    while read -r size path; do
-        # shellcheck disable=SC2046
-        printf '%s\t%s\n' $(numfmt --to=iec --suffix=B <<<"$size") "$path"
-    done < <(sudo du -abx "$path" 2>/dev/null | grep -v 'du: cannot access' | awk '$1 > '"$min" | sort -k2)
+    case $command in
+    big)
+        local max min size
+        max=$(df -B1 "$path" | awk 'NR==2 {print $3}')
+        min=$((max * percent / 100))
+        while read -r size path; do
+            # shellcheck disable=SC2046
+            printf '%s\t%s\n' $(numfmt --to=iec --suffix=B <<<"$size") "$path"
+        done < <(sudo du -abx "$path" 2>/dev/null | grep -v 'du: cannot access' | awk '$1 > '"$min" | sort -k2)
+        ;;
+    interactive)
+        install ncdu
+        ncdu -xe "$path"
+        ;;
+    esac
 }
+
+######################################################################################
+### Users / SSH
+######################################################################################
+
+# Get information about user
+#
+# The sudo column will show: no, all, specified.
+# Find more about the sudo rights using @sudo_info.
+#
+# Usage:    user_info [<user>]...
+# Output:   <tsv with header>
+#
+#           ```text
+#           User UID  GID  Home       SuDo Login                     From    Duration
+#           alex 1000 1000 /home/alex all  2026-01-13T07:01:09+01:00 0.0.0.0 still logged in
+#           ````
+user_info() {
+    local user home from login logout time uid gid shell sudo info
+    getent passwd "$@" | awk -F: '$3 >= 1000 && $3 < 60000 && $1 !~ /^snap_/ && $1 !~ /^(nobody|daemon|www-data|postgres|mysql|redis|git)/ {print $1}' | while IFS= read -r user; do
+        IFS=: read -r _ _ uid gid _ home shell < <(getent passwd "$user")
+        read -r _ _ from login logout < <(last -dw --time-format=iso -n 1 "$user")
+        time="$(sed 's/.*(\|).*//g;s/+0\?/d /;s/:/h /;s/00/0/;s/\([0-9]\)$/\1m/' <<<"$logout")"
+
+        info=$(LANG=C sudo -l -U "$user" 2>/dev/null)
+        if grep -q "not allowed\|Sorry" <<<"$info" || [ -z "$info" ]; then
+            sudo=no
+        elif grep -q "(ALL.*ALL)" <<<"$info"; then
+            sudo=all
+        else
+            sudo=specified
+        fi
+        # no output: $shell
+        printf '%-20s\t' "$(gettext User)" "$(gettext UID)" "$(gettext GID)" "$(gettext Home)" "$(gettext SuDo)" "$(gettext Login)" "$(gettext From)" "$(gettext Duration)"
+        printf '\n'
+        printf '%-20s\t' "$user" "$uid" "$gid" "$home" "$sudo" "$login" "$from" "$time"
+        printf '\n'
+    done
+}
+
+# Get sudo information
+#
+# This lists all allowed sudo commands for the user.
+#
+# Usage:    sudo_info [<user>]...
+# Output:   <tsv with header>
+#
+#           ```text
+#           User     UID    GID     command
+#           alex     ALL            /usr/bin/openfortivpn
+#           alex     ALL    ALL     ALL
+#           ```
+sudo_info() {
+    local user line
+    printf '%-20s\t' "$(gettext User)" "$(gettext UID)" "$(gettext GID)" "$(gettext Command)"
+    printf '\n'
+    getent passwd "$@" | awk -F: '$3 >= 1000 && $3 < 60000 {print $1}' |
+        while IFS= read -r user; do
+            LANG=C sudo -lU "$user" 2>/dev/null | sed '1,/User .* may run the following commands/d' |
+                while read -r line; do
+                    sed 's/(\([A-Z0-9]*\) *:\? *\([A-Z0-9]*\)\?) * \(NOPASSWD:\)\? */'"$user"'\t\1\t\2\t/' <<<"$line"
+                done
+        done
+}
+
+# Get allowed ssh keys
+#
+# This lists all allowed ssh keys for the users.
+#
+# Usage:    sudo_info [<user>]...
+# Output:   <tsv with header>
+#
+#           ```text
+#           User                	Comment             	            Type      Key
+#           operator            	alexander.schilling@my-company.com	ssh-rsa   AAAAB3NzaC1yc...
+#           ```
+ssh_allowed() {
+    local user file home
+    printf '%-20s\t' "$(gettext User)" "$(gettext Comment)" "$(gettext Type)" "$(gettext Key)"
+    printf '\n'
+    getent passwd "$@" | awk -F: '$3 >= 1000 && $3 < 60000 {print $1 "\t" $6}' |
+        while IFS=$'\t' read -r user home; do
+            for file in authorized_keys authorized_keys2; do
+                file="$home/.ssh/$file"
+                list="$(sudo sed 's/[[:space:]][[:space:]]*#.*//' $file 2>/dev/null | grep -v '^$')" || continue
+                while read -r type key comment; do
+                    printf '%-20s\t' "$user" "$comment" "$type" "$key"
+                    printf '\n'
+                done <<<"$list"
+            done
+        done
+}
+
+######################################################################################
+### Services
+######################################################################################
+
+# Show services on VM
+#
+# This lists all installed services. You may use filters to see specific ones, therefore some predefined filters are available but you may use @tsv[ filter] to use your own.
+#
+# The following filters are build into this routine:
+#
+# - `special` - remove all services which belong to the default management set
+# - `active` - show only active services
+#
+# Usage:    services_info <filter>
+# Output:   <tsv with header>
+#
+#           ```text
+#           Unit                    Active   Sub     Enabled Description                    Config                                              Start                           Tasks     Memory    CPU
+#           accounts-daemon.service active   running enabled Accounts Service               /usr/lib/systemd/system/accounts-daemon.service                                     4         6037504   782021000
+#           alsa-restore.service    active   exited  static  Save/Restore Sound Card State  /usr/lib/systemd/system/alsa-restore.service        Wed 2026-02-04 07:03:11 CET     [not set] [not set] 23323000
+#           alsa-state.service      inactive dead    static  Manage Sound Card State        /usr/lib/systemd/system/alsa-state.service          Wed 2026-02-04 07:03:11 CET     [not set] [not set] [not set]
+#           ```
+services_info() {
+    is empty -- "$1" || is enum --name=format allow="special active" --die -- "$1"
+    is integer name=arguments --max=1 --die -- $#
+    printf '%s\t' "$(gettext Unit)" "$(gettext Active)" "$(gettext Sub)" "$(gettext Enabled)" "$(gettext Description)" "$(gettext Config)" "$(gettext Start)" "$(gettext Tasks)" "$(gettext Memory)"
+    printf '%s\n' "$(gettext CPU)"
+    LANG=C systemctl list-units --type=service --all --no-legend --no-pager | sed 's/^[* ] //' |
+        awk '{print $1}' |
+        xargs -I{} systemctl show {} --property=Id,ActiveState,SubState,ActiveEnterTimestamp,Description,UnitFileState,FragmentPath,TasksCurrent,MemoryCurrent,CPUUsageNSec |
+        awk -F= '
+        BEGIN { OFS="\t" }
+        /^Id=/ { id=$2 }
+        /^ActiveState=/ { active=$2 }
+        /^SubState=/ { substate=$2 }
+        /^Description=/ { desc=$2 }
+        /^FragmentPath=/ { config=$2 }
+        /^TasksCurrent=/ { tasks=$2 }
+        /^MemoryCurrent=/ { mem=$2 }
+        /^CPUUsageNSec=/ { cpu=$2 }
+        /^ActiveEnterTimestamp=/ { start=$2 }
+        /^TasksCurrent=/ { tasks=$2 }
+        /^MemoryCurrent=/ { mem=$2 }
+        /^CPUUsageNSec=/ { cpu=$2 }
+        /^UnitFileState=/ { enabled=$2; print id, active, substate, enabled, desc, config, start, tasks, mem, cpu }
+  ' | (
+        case $1 in
+        special) tsv filter string 1 '!~' '^(accounts-daemon|acpid|alsa|anacron|apparmor|apport|apt-|atd|atop|auditd|auth-rpc|auto-cpufreq|avahi|binfmt-|blk-availability|bluetooth|bolt|clamav|cloud-init|connman|colord|console-|cron|cups|dbus|display-manager|dm-event|dmesg|dpkg-|e2scrub|emergency|etckeeper|exim4|f-secure|firewalld|fsbg-|fsma|fstrim|fwupd|getty|greylist|gpu-manager|grub|gssproxy|iio-sensor|ifup|initrd|irqbalance|iscsi|kbd|kerneloops|keyboard-setup|kmod-static|live-tools|ldconfig|lm-sensors|logrotate|lvm2-|man-db|ModemManager|modprobe|motd|netplan-|networkd|NetworkManager|networking.|nfs-|nslcd|oem-config|plocate|polkit|power-profiles|open-vm-tools|plymouth-|postfix|prometheus|quota|rc-local|rescue.|rpc-|rpcbind|rsync|rsyslog|rtkit|secureboot|sddm|setvt|sendmail|smartd|smartmon|snapd|snap.cups|snmp|spamassassin|ssh|ssl-cert|switcheroo|sysstat|system76-|systemd-|thermald|tpm-udev|tuned|ua-|ubuntu-advantage|ubuntu-fan|udisks|ufw|unattended|update|upower|user@|user-runtime-dir|uuidd|vgauth|whoopsie|wpa_supplicant|zabbix|zfs-mount)' ;;
+        active) tsv filter string 2 = active ;;
+        *) cat ;;
+        esac
+    )
+}
+
+######################################################################################
+### Timer/Cron
+######################################################################################
+
+# List cron jobs.
+#
+# Usage:    cron_info
+# Output:   <tsv with header>
+#           ```text
+#           Type  Source                         User  Minute   Hour  Day  Month  Weekday  Command
+#           cron  /var/spool/cron/crontabs/alex  alex  0        9     *    *      *        tar -czf /mnt/drive-alinex/backup/$(date +%d)_sec.tgz /mnt/drive-alinex/sec
+#           cron  /etc/crontab                   root  17       *     *    *      *        cd / && run-parts --report /etc/cron.hourly
+#           cron  /etc/crontab                   root  25       6     *    *      *        test -x /usr/sbin/anacron || { cd / && run-parts --report /etc/cron.daily; }
+#           cron  /etc/crontab                   root  47       6     *    *      7        test -x /usr/sbin/anacron || { cd / && run-parts --report /etc/cron.weekly; }
+#           cron  /etc/crontab                   root  52       6     1    *      *        test -x /usr/sbin/anacron || { cd / && run-parts --report /etc/cron.monthly; }
+#           cron  /etc/cron.d/anacron            root  30       7-23  *    *      *        [ -x /etc/init.d/anacron ] && if [ ! -d /run/systemd/system ]; then /usr/sbin/invoke-rc.d anacron start >/dev/null; fi
+#           cron  /etc/cron.daily                root  25       6     *    *      *        /etc/cron.daily/sysstat
+#           cron  /etc/cron.weekly               root  47       6     *    *      7        /etc/cron.weekly/man-db
+#           cron  /etc/cron.monthly              root  52       6     1    *      *        /etc/cron.monthly/0anacron
+#           ```
+cron_info() {
+    printf '%s\t' "$(gettext Type)" "$(gettext Source)" "$(gettext User)" "$(gettext Minute)" "$(gettext Hour)" "$(gettext Day)" "$(gettext Month)" "$(gettext Weekday)"
+    printf '%s\n' "$(gettext Command)"
+    local user file minute hour day month weekday command
+    # get user crontabs
+    while read -r file; do
+        sudo awk -v user="$(basename "$file")" '
+            /^[[:space:]]*#/ { next }
+            /^[[:space:]]*$/ { next }
+            /^[A-Za-z_]+=/{ next }
+            {
+                minute=$1; hour=$2; day=$3; month=$4; weekday=$5
+                command=""
+                for (i=6;i<=NF;i++) command = command (i==6?"":" ") $i
+                gsub(/"/, "\\\"", command)
+                printf "cron\t/var/spool/cron/crontabs/%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n", user, user, minute, hour, day, month, weekday, command
+            }
+        ' "$file"
+    done < <(sudo find /var/spool/cron -type f 2>/dev/null || true)
+    # crontab + cron.d
+    while read file minute hour day month weekday user command; do
+        printf "cron\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" "$file" "$user" "$minute" "$hour" "$day" "$month" "$weekday" "$command"
+    done < <(sudo grep -v ^# /etc/crontab /etc/cron.d/* | sed '/^$/d;/^[^:]*:$/d;/^[^:]*:[A-Za-z]*=/d;s/:/ /')
+    # periodical cron
+    local period
+    for period in hourly daily weekly monthly; do
+        # Extract the schedule line for this period
+        read minute hour day month weekday user _ < <(grep "/etc/cron.$period" /etc/crontab | head -n 1)
+        # Loop over scripts in the directory
+        for file in /etc/cron.$period/*; do
+            file=$(basename "$file")
+            printf "cron\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" "/etc/cron.$period" "$user" "$minute" "$hour" "$day" "$month" "$weekday" "/etc/cron.$period/$file"
+        done
+    done
+}
+
+# Systemd Timer
+#
+# Usage:    timer_info
+# Output:   <tsv with header>
+#           ```text
+#           Quelle                  Status  Konfiguration                                  Schedule                                 Last                        Next                        Service
+#           anacron.timer           enabled /usr/lib/systemd/system/anacron.timer           *-*-* 07..23:30                         Mon 2026-02-16 19:32:00 CET Mon 2026-02-16 20:30:21 CET anacron.service
+#           apt-daily-upgrade.timer enabled /usr/lib/systemd/system/apt-daily-upgrade.timer *-*-* 6:00                              Mon 2026-02-16 07:10:12 CET Tue 2026-02-17 06:41:22 CET apt-daily-upgrade.service
+#           apt-daily.timer         enabled /usr/lib/systemd/system/apt-daily.timer         *-*-* 6,18:00                           Mon 2026-02-16 14:19:25 CET Tue 2026-02-17 00:36:52 CET apt-daily.service
+#           ua-timer.timer          enabled /usr/lib/systemd/system/ua-timer.timer          1min after startup; 6h after last start                                                         ua-timer.service
+#           ```
+timer_info() {
+    #echo "divibib_timer{source=\"$timer\",status=\"$status\",config=\"$config\",schedule=\"$schedule\",last=\"$last\",next=\"$next\",unit=\"$unit\"} 1"
+    printf '%s\t' "$(gettext Source)" "$(gettext Status)" "$(gettext Config)" "$(gettext Schedule)" "$(gettext Last)" "$(gettext Next)"
+    printf '%s\n' "$(gettext Service)"
+    local timer status config schedule last next unit
+    # timer
+    sudo systemctl list-unit-files --type=timer --no-legend --state=enabled |
+        while read timer status _; do
+            config=$(sudo systemctl show --value -p FragmentPath $timer)
+            [ -n "$config" ] || continue
+            echo "$config"
+            schedule=()
+            # defined on specific change
+            value=$(egrep 'OnBootSec' $config | sed 's/^[^=]*=//' || true)
+            [[ "$value" =~ ^[0-9]+$ ]] && value="${value}s"
+            [ -z "$value" ] || schedule+=("$value after boot\n")
+            value=$(egrep 'OnStartupSec' $config | sed 's/^[^=]*=//' || true)
+            [[ "$value" =~ ^[0-9]+$ ]] && value="${value}s"
+            [ -n "$value" ] && schedule+=("$value after startup")
+            value=$(egrep 'OnActiveSec' $config | sed 's/^[^=]*=//' || true)
+            [[ "$value" =~ ^[0-9]+$ ]] && value="${value}s"
+            [ -n "$value" ] && schedule+=("$value after last timer start")
+            value=$(egrep 'OnUnitActiveSec' $config | sed 's/^[^=]*=//' || true)
+            [[ "$value" =~ ^[0-9]+$ ]] && value="${value}s"
+            [ -n "$value" ] && schedule+=("$value after last start")
+            value=$(egrep 'OnUnitInactiveSec' $config | sed 's/^[^=]*=//' || true)
+            [[ "$value" =~ ^[0-9]+$ ]] && value="${value}s"
+            [ -n "$value" ] && schedule+=("$value after last run")
+            value=$(egrep 'OnClockChange' $config | sed 's/^[^=]*=//' || true)
+            [ "$value" = "true" ] && schedule+=("on clock change")
+            value=$(egrep 'OnTimezoneChange' $config | sed 's/^[^=]*=//' || true)
+            [ "$value" = "true" ] && schedule+=("on timezone change")
+            # absolute time
+            value=$(egrep 'OnCalendar' $config | sed 's/^[^=]*=//' || true)
+            [ -n "$value" ] && schedule+=("$value")
+            # accuracy
+            value=$(egrep 'AccuracySec' $config | sed 's/^[^=]*=//' || true)
+            [[ "$value" =~ ^[0-9]+$ ]] && value="${value}s"
+            [ "$value" = "true" ] && schedule+=("$value accuracy")
+            value=$(egrep 'RandomizedDelaySec' $config | sed 's/^[^=]*=//' || true)
+            [[ "$value" =~ ^[0-9]+$ ]] && value="${value}s"
+            [ "$value" = "true" ] && schedule+=("$value random delay")
+            ## output
+            [ -n "$schedule" ] || continue
+            schedule="$(echo "$schedule" | sed -e :a -e '/./,$!d;/^\n*$/{$d;N;};/\n$/ba' | paste -sd ';' - | sed 's/;/ and /g')"
+            last="$(sudo systemctl show --value -p LastTriggerUSec $timer || true)"
+            next="$(sudo systemctl show --value -p NextElapseUSecRealtime $timer || true)"
+            unit="$(sudo systemctl show --value -p Unit $timer || true)"
+            printf '%s\t' "$timer" "$status" "$config" "$(array schedule join "; ")" "$last" "$next"
+            printf '%s\n' "$unit"
+        done
+}
+
+######################################################################################
+### LVM
+######################################################################################
 
 # Check if LVM is used
 #
 # Usage:    uses_lvm
-# Return:   0 for uses LVM
-#           1 if not
+# Return:   - 0 if LVM is used
+#           - 1 if not
 uses_lvm() {
     is integer --name=arguments --max=0 --die -- $#
     sudo bash -lc 'command -v vgs' >/dev/null &&      # installed
         sudo vgs --noheadings >/dev/null &&           # vgs returns ok
         [ -n "$(sudo vgs --noheadings)" ] &>/dev/null # vgs returns at least one group
-}
-
-######################################################################################
-### Further Specialties
-######################################################################################
-
-# Has tty present
-#
-# Usage:    has_tty
-# Status:   0 || 1
-has_tty() {
-    is integer --name=arguments --max=0 --die -- $#
-    { : >/dev/tty; } &>/dev/null
 }

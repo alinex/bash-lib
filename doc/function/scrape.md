@@ -15,8 +15,8 @@ Tab separated list:
 
 ### Return (exit code)
 
-- 0 if metrics found
-- 1 if no matching metric
+- - 0 if metrics found
+- - 1 if no matching metric
 - 
 
 ### Description

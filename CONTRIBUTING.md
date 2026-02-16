@@ -26,8 +26,9 @@ This document outlines the process and best practices for contributing to the pr
       - [CI Run in GitLab](#ci-run-in-gitlab)
     - [📝 Linting with Shellcheck](#-linting-with-shellcheck)
     - [🧹 Code Guidelines](#-code-guidelines)
-    - [🏁 Finalize](#-finalize)
     - [🚫 Deprecation](#-deprecation)
+    - [📚 Documentation](#-documentation)
+    - [🏁 Finalize](#-finalize)
   - [❤️ Thank You](#️-thank-you)
 
 ## Users
@@ -48,10 +49,10 @@ Example:
 
 ```text
 **Describe the bug**
-`blib_join` fails when input contains spaces.
+`lib_join` fails when input contains spaces.
 
 **To Reproduce**
-blib_join "," "a b" "c"
+lib_join "," "a b" "c"
 
 **Expected**
 "a b,c"
@@ -131,7 +132,7 @@ To contribute to BashLib is the dame as to any other GitLab repository.
 2. **Clone** your fork locally:
 
    In your terminal:
-   
+
    ```bash
    git clone https://gitlab.com/<your-username>/bash-lib.git
    cd bash-lib
@@ -193,7 +194,7 @@ To contribute to BashLib is the dame as to any other GitLab repository.
    Make sure:
 
    - Source branch: your fork’s feature/my-new-feature
-   - Target branch: the original repo’s develop branch https://gitlab.com/alinex/bash-lib/-/tree/develop
+   - Target branch: the original repo’s develop branch [gitlab.com/alinex/bash-lib/-/tree/develop](https://gitlab.com/alinex/bash-lib/-/tree/develop)
    - Add a title, description, and any reviewers.
    - Submit the MR 🎉
 
@@ -219,11 +220,11 @@ Before making changes, please make sure your environment includes:
 
 You should also install:
 
-- **bats-core** for testing → [https://github.com/bats-core/bats-core](https://github.com/bats-core/bats-core)  
-- **bats-support** for testing → https://github.com/ztombol/bats-support
-- **bats-assert** for testing → https://github.com/ztombol/bats-assert
-- **shellcheck** for linting → [https://www.shellcheck.net/](https://www.shellcheck.net/)
-- **gettext** for localization -> https://www.gnu.org/software/gettext/
+- **bats-core** for testing → [github.com/bats-core/bats-core](https://github.com/bats-core/bats-core)  
+- **bats-support** for testing → [github.com/ztombol/bats-support](https://github.com/ztombol/bats-support)
+- **bats-assert** for testing → [github.com/ztombol/bats-assert](https://github.com/ztombol/bats-assert)
+- **shellcheck** for linting → [www.shellcheck.net/](https://www.shellcheck.net/)
+- **gettext** for localization -> [www.gnu.org/software/gettext/](https://www.gnu.org/software/gettext/)
 
 As IDE we use VS Code with the Extensions:
 
@@ -428,7 +429,7 @@ bats core module
 
 #### CI Run in GitLab
 
-And the last test will be within the build pipeline after submitting something to gitlab.com. Therefor you have to do nothing gitlab-ci.yml will run `./test ci` for that and will write test results which will be shown in the GitLab pipeline under the "Test" tab.
+Sorry, we had to remove this because it takes to much time in the free GitLab plan to run all the tests.
 
 ### 📝 Linting with Shellcheck
 
@@ -505,22 +506,6 @@ pattern="$(echo "$1" | sed 's/ /|/g')"  # bad
 pattern="${1// /|}"                     # better
 ```
 
-### 🏁 Finalize
-
-After updating the code or language files you should rebuild it:
-
-```bash
-./update
-```
-
-This will:
-
-- update the compressed code in `full` and `base`
-- update the translation files (source/and binary)
-- recreate the API Documentation
-
-> If you run in `DEBUG` mode with the loader you don't need to run the update to test the changes.
-
 ### 🚫 Deprecation
 
 As the library progresses, it will change and sometimes older functions are replaced or removed. Therefor we use three steps:
@@ -551,6 +536,100 @@ As the library progresses, it will change and sometimes older functions are repl
 
 We try to always show the deprecation for a longer time and let it work. The step from (1) to (2) should be done on at least a minor version change. The same goes for the change from (2) to (3).\
 The goal is to keep the code clean and short.
+
+### 📚 Documentation
+
+The markdown documentation within [doc](doc) is partly generated automatically from code:
+
+- doc/example contains manually written examples
+- doc/function is completely generated out of code - do not change here
+- doc/README.md has a first manual Part but starting with the modules everything will be aut generated
+
+To write documentation in the code you should:
+
+Add a description of each module file, as first comment part after a newline in the file like:
+
+```text
+#!/usr/bin/env bash
+# shellcheck disable=SC2034
+# shellcheck source=base
+source /dev/null
+# shellcheck source=config/environment
+source /dev/null
+
+# Module with operating system specific helper functions. THIS IS THE MODULE DESCRIPTION
+
+######################################################################################
+### Detect OS / Hardware
+######################################################################################
+
+declare -A _os_detected
+....
+```
+
+Further the short comment directly before a public variable is added in the index:
+
+```text
+# Array: Color limits per mount (regex critical error warn ok) used in @df
+MOUNT_COLOR_LIMIT="${MOUNT_COLOR_LIMIT:=('.*' 100 90 80 50)}"
+```
+
+The same goes for the function, but here you can write a big comment block with all information to generate a separate page for it:
+
+```text
+# Get sudo information
+#
+# This lists all allowed sudo commands for the user.
+#
+# Usage:    sudo_info [<user>]...
+# Output:   <tsv with header>
+#
+#           ```text
+#           User     UID    GID     command
+#           alex     ALL            /usr/bin/openfortivpn
+#           alex     ALL    ALL     ALL
+#           ```
+```
+
+The first line will be used as short description in the index and heading of the page.
+
+Lines starting with a keyword will be used specific description parts and the indention will be removed:
+
+- `Usage` - short usage text, maybe multiple lines -> displayed as **pre formatted** text box
+- `Option(s)` - list of options -> displayed as **pre formatted** text box
+- `Variable(s)` - used external variables -> **markdown** (mostly as list)
+- `Global(s)` - global variables like configuration settings -> **markdown** (mostly as list)
+- `File(s)` - files which were read or written -> **markdown** (mostly as list)
+- `TTY` - input and output -> **markdown**
+- `Output` - through STDOUT -> **markdown**
+- `Error(s)` - through STDERR -> **markdown**
+- `Return(s)` - return value on specific conditions -> **markdown** (mostly as list)
+- `Example(s)` - link to examples using  -> **markdown** (mostly as list)
+
+Everywhere in the markdown you can use:
+
+- `<name>` which are written as monospace symbols
+- `$xxx` which are written as monospace symbols (variables)
+- `@xxx` will link to the help page for the named function
+- `@xxx[ command]` add the text in brackets to the link text
+- `&xxx` will link to `example/xxx.md`
+- `&xxx[ command]` add the text in brackets to the link text
+
+### 🏁 Finalize
+
+After updating the code, documentation or language files you should rebuild it:
+
+```bash
+./update
+```
+
+This will:
+
+- update the compressed code in `full` and `base`
+- update the translation files (source/and binary)
+- recreate the API Documentation
+
+> If you run in `DEBUG` mode with the loader you don't need to run the update to test the changes.
 
 ## ❤️ Thank You
 

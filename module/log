@@ -26,10 +26,10 @@ declare -Ag _log_active
 #           log <level> <message>
 #           <message> | log <level>
 #           log end <destination>
-# Options:  l, level=<level>  with values: debug info notice warn error critical
-#           r, rotate=hourly|daily|weekly|monthly|<bytes> - only for file logging
-#           c, cleanup=<num>|<duration> - only for file logging
-#           z, compress - only for file logging
+# Options:  -l, --level=<level>  with values: debug info notice warn error critical
+#           -r, --rotate=hourly|daily|weekly|monthly|<bytes> - only for file logging
+#           -c, --cleanup=<num>|<duration> - only for file logging
+#           -z, --compress - only for file logging
 # Files:    <destination>[_<pattern>]                  # will contain the logs
 # Example:  ```
 #           # Format: <date> <time> <level> <message>

@@ -3,6 +3,23 @@
 Newest changes will always take part in the development branch. You only may use them if you manually install this.
 But on release they will be merged with semantical versioning into the master branch and will get available to new installs or updates.
 
+## 16. February 2026 - v2.5.0
+
+- add [user_info](doc/function/user_info.md), [sudo_info](doc/function/sudo_info.md) and [ssh_allowed](doc/function/ssh_allowed.md)
+- add [services_info](foc/function/services_info.md)
+- add [cron_info](doc/function/cron_info.md) and [timer_info](doc/function/timer_info.md)
+- add [check](doc/function/check.md) as rule validator
+- add [open_url](doc/function/open_url.md) to open url in browser
+- add [ping_check](doc/function/ping_check.md)
+- replace [tsv](doc/function/tsv.md) with a newer version which is more powerful and quicker, powered by rust implementation qsv
+- upload/download now with `--delete` option
+- argument parser will not remove unknown options
+- move environment settings into module with defaults and description
+- Bug Fixes: choice/task, remote bashlib, disk
+- and some smaller fixes
+- add compression for awk and jq in compressed libs
+- move down deprecated methods
+
 ## 26. January 2026 - v2.4.0
 
 - allow to include BashLib directly from the net in special remote version

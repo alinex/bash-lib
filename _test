@@ -8,15 +8,73 @@ USAGE="$(basename "$0") [<options>] <instance>"
 OPTIONS="h help  -       Show Help Page"
 DESCRIPTION=""
 # parse and validate arguments
-eval set -- "$(option_parse "$OPTIONS" "$@")"
-while true; do
-    case "$1" in
-    -h | --help) help "$TITLE" "$USAGE" "$OPTIONS" "$DESCRIPTION" && exit ;;
-    --) shift && break ;;
-    *) die "Unerwartete option: $1" ;;
-    esac
-done
+#eval set -- "$(option_parse "$OPTIONS" "$@")"
+#while true; do
+#    case "$1" in
+#    -h | --help) help "$TITLE" "$USAGE" "$OPTIONS" "$DESCRIPTION" && exit ;;
+#    --) shift && break ;;
+#    *) die "Unerwartete option: $1" ;;
+#    esac
+#done
 ################################################################################################
+
+#trivy root --progress --no-secrets --clean
+#exit
+
+#in=$'Number\tName\n1234\tone\n2\ttwo\n10\tten thousand and one hundred fourty five\n'
+#echo "$in" | tsv "$@" | tsv print
+timer_info | tsv print
+exit
+
+dns_list "host.test.grp\sA" 2>/dev/null | tsv sort --natural INHALT | tsv print
+while true; do
+    xip=$(ask string "Welche IP soll geprüft werden" --empty)
+    is set -- "$xip" || break
+    ping_check $xip && error "Unter $xip läuft bereits eine VM!" || ok "Keine Reaktion bei $xip auf Ping."
+done
+
+exit
+
+STEPS_VARIABLES="num"
+steps init
+
+task_1() {
+    sleep 10
+    num=1
+}
+sync task_1
+echo "num=$num"
+
+task_2() {
+    sleep 10
+    num=2
+}
+sync task_2
+echo "num=$num"
+
+task_3() {
+    sleep 10
+    num=3
+}
+sync task_3
+echo "num=$num"
+
+steps end
+
+exit
+
+timer_info #| qsv table -d $'\t'
+exit
+
+ask time
+exit
+
+server=grafana.host.cloud.dvb
+remote sudo lvs --noheadings -o lv_name "$vg"
+volume=$(remote sudo lvs --noheadings -o lv_name "$vg" | choose -d 1 -t "Welchem Volume soll der freie Speicher zugeordnet werden?")
+info "Volume $volume vergrößern"
+
+exit
 
 echo "one
 two

@@ -19,9 +19,9 @@
 #               array <array-name> indexof <value>
 #               array <array-name> join [<separator>]
 # Variables:    <array-name> as basis to work on
-# Output:       - `indexof`: <index-num> for found value
-# Return:       0 if entry is found in array
-#               1 if entry not found
+# Output:       `indexof`: <index-num> for found value
+# Return:       - 0 if entry is found in array
+#               - 1 if entry not found
 array() {
     local cmd value
     is set --name=array-name --die -- "$1"
@@ -59,15 +59,8 @@ array() {
 
 # Deprecated: Join array elements by delimiter
 # Use @array <arr> join <separator>
-#
-# Convert all elements in array into a string separated by delimiter (default is `,`).
-#
-# Usage:        join <array-name> [<delimiter>]
-# Variables:    <array-name> to read values to join
-# Output:       <string>
 join() {
-    _deprecated "Use array <arr-name> join <separator>" warn
-    array "$1" join "$2"
+    _deprecated "Use array <arr-name> join <separator>"
 }
 
 ######################################################################################
@@ -117,7 +110,7 @@ split() {
 #               hash <array-name> has <key>
 #               hash <array-name> contains <key>
 #               hash <array-name> to tsv
-# Options:      -k, --key-format={base64|simple} # how to convert key because of special characters
+# Options:      -k, --key-format={base64|simple}    # how to convert key because of special characters
 # Variables:    <array-name> as basis to work on
 # Output:       `get`: <value> if found
 # Error:        `get` / `has`: 1 if not found

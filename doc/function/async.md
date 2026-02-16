@@ -12,8 +12,8 @@ async [<options>] wait [<command> [<params>...]]
 ### Options
 
 ```bash
-v, verbose           # display notice/info message
-n, name=<string>     # define name or use command with args
+-v, --verbose           # display notice/info message
+-n, --name=<string>     # define name or use command with args
 - info message for finish (in verbose mode)
 ```
 

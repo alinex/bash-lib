@@ -13,8 +13,8 @@ source /dev/null
 # This will @die if the user is not allowed to use `sudo`.
 #
 # Usage:    sudo_allow <command-line>
-# Return:   0 if allowed
-#           @die if not allowed
+# Return:   - 0 if allowed
+#           - @die if not allowed
 sudo_allow() {
     is integer --name=arguments --max=1 --die -- $#
     # processing
@@ -48,8 +48,8 @@ repeat() {
     # processing
     ((n > 0)) || return
     shift
-    for n in $(seq "$n"); do
-        debug 3 "call #$n: $*"
+    for ((i = 1; i <= n; i++)); do
+        debug 3 "call #$i: $*"
         "$@"
     done
 }
@@ -86,7 +86,8 @@ retry() {
 # Locking
 ######################################################################################
 
-LOCK_SLEEP=10
+# Default time in seconds to wait till checking again if process is still locked
+LOCK_SLEEP=${LOCK_SLEEP:-10}
 
 _lock_remove() {
     # Remove old locks for non existing processes or the defined pid lock
@@ -103,8 +104,8 @@ _lock_remove() {
 # before going on.
 #
 # Usage:    lock
-# Files:    /tmp/<prog>_lockfile        # hard link to active process
-#           /tmp/<prog>_lockfile.<pid>  # active or waiting process
+# Files:    - /tmp/<prog>_lockfile        # hard link to active process
+#           - /tmp/<prog>_lockfile.<pid>  # active or waiting process
 # Output:   <wait message>
 lock() {
     is integer --name=arguments --max=0 --die -- $#
@@ -140,8 +141,8 @@ lock() {
 # While another program is running with this lock active it will @die.
 #
 # Usage:    lock_exit
-# Files:    /tmp/<prog>-lockfile        # hard link to active process
-#           /tmp/<prog>-lockfile.<pid>  # active or waiting process
+# Files:    - /tmp/<prog>-lockfile        # hard link to active process
+#           - /tmp/<prog>-lockfile.<pid>  # active or waiting process
 lock_exit() {
     is integer --name=arguments --max=0 --die -- $#
     local lockfile logged pid
@@ -201,9 +202,9 @@ unlock() {
 #           variables restore [<ident>] [<variable>]... # restore all or defined variables
 #           variables clean [<ident>]                   # remove the store
 #           variables update <ident> <cmd-line> [<variable>]..   # update some variables by the cmd-line
-# Options:  d, disk                             # store on disk in temporary folder
-#           p, path <base-dir>                  # store on disk in given folder
-#           c, clean                            # remove after restore is done
+# Options:  -d, --disk                             # store on disk in temporary folder
+#           -p, --path <base-dir>                  # store on disk in given folder
+#           -c, --clean                            # remove after restore is done
 # Files:    `/dev/shm/<prog>[-<ident>].env`     # stored environment
 # Files:    `/tmp/<prog>[-<ident>].env`         # if `--disk` was used
 # Example:  ```bash
@@ -237,22 +238,33 @@ variables() {
     # shellcheck disable=SC2086
     file="$(mktemp $opt --extension=env "$ident")"
     case "$command" in
-    store) declare -p "$@" | sed 's/^declare\b/declare -g/' >"$file" ;;
+    store)
+        debug 9 "Store ($*) to $file:"
+        { declare -p "$@" 2>/dev/null || true; } | sed 's/^declare\b/declare -g/' >"$file"
+        cat "$file" | sed 's/^/- /' | debug 9
+        ;;
     restore)
         [ -s "$file" ] || return 0
         if [[ $# -gt 0 ]]; then
             temp="$(mktemp -me env-sub "${ident}_${BASHPID}")"
             grep -E "$(tr ' ' '|' <<<"$*")" "$file" >"$temp" || true
+            debug 9 "Restore ($*) from $file:"
+            cat "$temp" | sed 's/^/- /' | debug 9
             # shellcheck disable=SC1090
             source "$temp" || true
             rm -r "$temp" || true
         else
             # shellcheck disable=SC1090
+            debug 9 "Restore all from $file:"
+            cat "$file" | sed 's/^/- /' | debug 9
             source "$file" 2>/dev/null || true
         fi
         [ -z "$clean" ] || rm -f "$file" # also directly clean it
         ;;
-    clean) rm -f "$file" ;;
+    clean)
+        debug "Clean store $file"
+        rm -f "$file"
+        ;;
     change)
         is set --name=cmd-line --die -- "$1"
         # processing
@@ -267,30 +279,6 @@ variables() {
     esac
 }
 
-# Deprecated: Store environment into shared memory/file
-# Use: variables store...
-env_store() {
-    _deprecated "Use: variables store..."
-}
-
-# Deprecated: Restore environment from shared memory/file
-# Use: variables restore...
-env_restore() {
-    _deprecated "Use: variables restore..."
-}
-
-# Deprecated: Remove stored environment from shared memory/file
-# Use: variables clean...
-env_clean() {
-    _deprecated "Use: variables clean..."
-}
-
-# Deprecated: Change environment in shared memory/file
-# Use: variables change...
-env_change() {
-    _deprecated "Use: variables change..."
-}
-
 ######################################################################################
 # Sync/Async calls with optional step control
 ######################################################################################
@@ -298,12 +286,14 @@ env_change() {
 declare -A _async_running
 
 # Set the variables which should be stored with step control
-STEPS_VARIABLES=
+STEPS_VARIABLES="$STEPS_VARIABLES"
+
 _STEPS_NAME=
 
 # Step control allows jobs to resume on another run.
 #
 # After starting step control this will be used in @sync, @async and @queue.
+# To specify which variables to store set $STEPS_VARIABLES but before the `init` command.
 #
 # Usage:    steps init [<name>]     # to start step control
 #           steps end               # to end step control
@@ -318,7 +308,12 @@ steps() {
         variables restore "steps_${_STEPS_NAME}"
         # shellcheck disable=SC2086
         variables store "steps_${_STEPS_NAME}" _STEPS $STEPS_VARIABLES # initial store
-        printf '%s\n' "$(gettext "Work steps are logged so that you can resume work mid-process")..." >&2
+        if ((${#_STEPS[@]} == 0)); then
+            printf '%s\n' "$(gettext "Work steps are logged so that you can resume work mid-process")..." >&2
+        else
+            local num=${#_STEPS[@]}
+            printf '%s\n' "$(eval_gettext 'Previous run will be resumed, $num steps are already done')..." >&2
+        fi
         ;;
     end)
         is integer --name=arguments --max=1 --die -- $#
@@ -361,12 +356,12 @@ _steps_done() {
 
 # Run the given command with optional step control
 #
-# The command and arguments given will be called like directly run. But if @steps is started it will check if already done.
+# The command and arguments given will be called like directly run. But if @steps[ init] is started it will check if already done.
 # Further in `--verbose` mode a message for start and end will be printed on STDERR with the command or the given `--name`.
 #
 # Usage:    sync [<options>] <command> [<params>...]
-# Options:  v, verbose           # display notice/info message
-#           n, name=<string>     # define name or use command with args
+# Options:  -v, --verbose           # display notice/info message
+#           -n, --name=<string>     # define name or use command with args
 # Stderr:   - notice message for start (in verbose mode)
 #           - info message for finish (in verbose mode)
 sync() {
@@ -406,8 +401,8 @@ sync() {
 #
 # Usage:    async [<options>] <command> [<params>...]
 #           async [<options>] wait [<command> [<params>...]]
-# Options:  v, verbose           # display notice/info message
-#           n, name=<string>     # define name or use command with args
+# Options:  -v, --verbose           # display notice/info message
+#           -n, --name=<string>     # define name or use command with args
 # Stderr:   - notice message for start (in verbose mode)
 #           - info message for finish (in verbose mode)
 # Example:  ```bash
@@ -478,6 +473,11 @@ _async_done() {
 # Job Queue
 ######################################################################################
 
+# Maximum number of parallel tasks for queue
+QUEUE_MAX_PARALLEL=${QUEUE_MAX_PARALLEL:-10}
+# Percentage of 1 Minute Load per CPU (100 with 8Cpu -> 8.0)
+QUEUE_MAX_LOAD=${QUEUE_MAX_LOAD:-75}
+
 _queue_jobs=()
 declare -A _queue_running
 
@@ -489,9 +489,9 @@ declare -A _queue_running
 #
 # Usage:    queue [<options>] add <job> [<args>...]             # add job to queue
 #           queue [--progress] run [<parallel>] [<load-percent>] # run the queue with specified limits
-# Options:  v, verbose           # display notice/info message
-#           n, name=<string>     # define name or use command with args
-#           p, progress          # show progress
+# Options:  -v, --verbose           # display notice/info message
+#           -n, --name=<string>     # define name or use command with args
+#           -p, --progress          # show progress
 # Stderr:   - notice message for start (in verbose mode)
 #           - info message for finish (in verbose mode)
 #           - info with progress of queue
@@ -638,8 +638,8 @@ random() {
 #           process tree <pid>|<string>     # show process trees
 #           process wait [<options>] <pid>|<string>
 #           process kill <pid>|<string> [<signal>]
-# Options:  w, watch        # (for wait) watch health status till done
-#           t, timeout      # (for wait) end with
+# Options:  -w, --watch        # (for wait) watch health status till done
+#           -t, --timeout      # (for wait) end with
 # Output:   - info: human readable line
 #           - list/tree: tsv with header
 process() {
