@@ -5,9 +5,10 @@ But on release they will be merged with semantical versioning into the master br
 
 ## Development - v2.5.0
 
-- add [check](doc/function/check.md) as rule validator
 - add [user_info](doc/function/user_info.md), [sudo_info](doc/function/sudo_info.md) and [ssh_allowed](doc/function/ssh_allowed.md)
 - add [services_info](foc/function/services_info.md)
+- add [cron_info](doc/function/cron_info.md) and [timer_info](doc/function/timer_info.md)
+- add [check](doc/function/check.md) as rule validator
 - add [open_url](doc/function/open_url.md) to open url in browser
 - add [ping_check](doc/function/ping_check.md)
 - replace [tsv](doc/function/tsv.md) with a newer version which is more powerful and quicker, powered by rust implementation qsv

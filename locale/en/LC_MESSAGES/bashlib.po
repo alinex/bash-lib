@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-02-12 22:04+0100\n"
+"POT-Creation-Date: 2026-02-16 20:08+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -233,11 +233,11 @@ msgstr ""
 msgid "Use $list from $time."
 msgstr ""
 
-#: module/os:298 module/os:528
+#: module/os:298 module/os:528 module/os:618
 msgid "Type"
 msgstr ""
 
-#: module/os:298
+#: module/os:298 module/os:618 module/os:666
 msgid "Source"
 msgstr ""
 
@@ -281,7 +281,7 @@ msgstr ""
 msgid "Inodes"
 msgstr ""
 
-#: module/os:483 module/os:504 module/os:528
+#: module/os:483 module/os:504 module/os:528 module/os:618
 msgid "User"
 msgstr ""
 
@@ -313,7 +313,7 @@ msgstr ""
 msgid "Duration"
 msgstr ""
 
-#: module/os:504
+#: module/os:504 module/os:619
 msgid "Command"
 msgstr ""
 
@@ -345,7 +345,7 @@ msgstr ""
 msgid "Description"
 msgstr ""
 
-#: module/os:568
+#: module/os:568 module/os:666
 msgid "Config"
 msgstr ""
 
@@ -363,6 +363,46 @@ msgstr ""
 
 #: module/os:569
 msgid "CPU"
+msgstr ""
+
+#: module/os:618
+msgid "Minute"
+msgstr ""
+
+#: module/os:618
+msgid "Hour"
+msgstr ""
+
+#: module/os:618
+msgid "Day"
+msgstr ""
+
+#: module/os:618
+msgid "Month"
+msgstr ""
+
+#: module/os:618
+msgid "Weekday"
+msgstr ""
+
+#: module/os:666
+msgid "Status"
+msgstr ""
+
+#: module/os:666
+msgid "Schedule"
+msgstr ""
+
+#: module/os:666
+msgid "Last"
+msgstr ""
+
+#: module/os:666
+msgid "Next"
+msgstr ""
+
+#: module/os:667
+msgid "Service"
 msgstr ""
 
 #: module/network:56

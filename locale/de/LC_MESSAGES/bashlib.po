@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-02-12 22:04+0100\n"
+"POT-Creation-Date: 2026-02-16 20:08+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -250,11 +250,11 @@ msgstr "Keine lokale DNS Liste gefunden, bitte herunterladen."
 msgid "Use $list from $time."
 msgstr "Benutze $list vom $time."
 
-#: module/os:298 module/os:528
+#: module/os:298 module/os:528 module/os:618
 msgid "Type"
 msgstr "Typ"
 
-#: module/os:298
+#: module/os:298 module/os:618 module/os:666
 msgid "Source"
 msgstr "Quelle"
 
@@ -298,7 +298,7 @@ msgstr "Mount"
 msgid "Inodes"
 msgstr "Inodes"
 
-#: module/os:483 module/os:504 module/os:528
+#: module/os:483 module/os:504 module/os:528 module/os:618
 msgid "User"
 msgstr "Nutzer"
 
@@ -330,7 +330,7 @@ msgstr "Von"
 msgid "Duration"
 msgstr "Dauer"
 
-#: module/os:504
+#: module/os:504 module/os:619
 msgid "Command"
 msgstr "Befehl"
 
@@ -362,7 +362,7 @@ msgstr "Aktiviert"
 msgid "Description"
 msgstr "Beschreibung"
 
-#: module/os:568
+#: module/os:568 module/os:666
 msgid "Config"
 msgstr "Konfiguration"
 
@@ -381,6 +381,46 @@ msgstr "Speicher"
 #: module/os:569
 msgid "CPU"
 msgstr "CPU"
+
+#: module/os:618
+msgid "Minute"
+msgstr ""
+
+#: module/os:618
+msgid "Hour"
+msgstr ""
+
+#: module/os:618
+msgid "Day"
+msgstr ""
+
+#: module/os:618
+msgid "Month"
+msgstr ""
+
+#: module/os:618
+msgid "Weekday"
+msgstr ""
+
+#: module/os:666
+msgid "Status"
+msgstr ""
+
+#: module/os:666
+msgid "Schedule"
+msgstr ""
+
+#: module/os:666
+msgid "Last"
+msgstr ""
+
+#: module/os:666
+msgid "Next"
+msgstr ""
+
+#: module/os:667
+msgid "Service"
+msgstr ""
 
 #: module/network:56
 msgid "IP\\tInterface"

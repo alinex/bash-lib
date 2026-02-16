@@ -21,8 +21,9 @@ DESCRIPTION=""
 #trivy root --progress --no-secrets --clean
 #exit
 
-in=$'Number\tName\n1234\tone\n2\ttwo\n10\tten thousand and one hundred fourty five\n'
-echo "$in" | tsv "$@" | tsv print
+#in=$'Number\tName\n1234\tone\n2\ttwo\n10\tten thousand and one hundred fourty five\n'
+#echo "$in" | tsv "$@" | tsv print
+timer_info | tsv print
 exit
 
 dns_list "host.test.grp\sA" 2>/dev/null | tsv sort --natural INHALT | tsv print

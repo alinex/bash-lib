@@ -451,7 +451,7 @@ esac
 }
 export TEXTDOMAIN=bashlib
 export TEXTDOMAINDIR=$BASHLIB_HOME/locale
-source gettext.sh
+. gettext.sh
 _deprecated(){
 IFS=$' \t\n' read -r line func file <<<"$(caller 1)"
 local message="DEPRECATED: ${FUNCNAME[1]} at $func in $file:$line $1"
@@ -490,7 +490,7 @@ module)[[ ! $BASHLIB_LOADER =~ loader|full|remote ]]||return 0;;
 config)return 0
 esac
 debug 5 "Loading module $module"
-source "$BASHLIB_HOME/$module"
+. "$BASHLIB_HOME/$module"
 }
 script_path(){
 is integer -narguments --max=0 -d $#

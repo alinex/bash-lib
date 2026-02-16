@@ -451,7 +451,7 @@ esac
 }
 export TEXTDOMAIN=bashlib
 export TEXTDOMAINDIR=$BASHLIB_HOME/locale
-source gettext.sh
+. gettext.sh
 _deprecated(){
 IFS=$' \t\n' read -r line func file <<<"$(caller 1)"
 local message="DEPRECATED: ${FUNCNAME[1]} at $func in $file:$line $1"
@@ -490,7 +490,7 @@ module)[[ ! $BASHLIB_LOADER =~ loader|full|remote ]]||return 0;;
 config)return 0
 esac
 debug 5 "Loading module $module"
-source "$BASHLIB_HOME/$module"
+. "$BASHLIB_HOME/$module"
 }
 script_path(){
 is integer -narguments --max=0 -d $#
@@ -3196,8 +3196,8 @@ active)tsv filter string 2 = active;;
 esac)
 }
 cron_info(){
-printf '%s\t' Type Source User Minute Hour Day Month Weekday
-printf '%s\n' Command
+printf '%s\t' "$(gettext Type)" "$(gettext Source)" "$(gettext User)" "$(gettext Minute)" "$(gettext Hour)" "$(gettext Day)" "$(gettext Month)" "$(gettext Weekday)"
+printf '%s\n' "$(gettext Command)"
 local user file minute hour day month weekday command
 while read -r file;do
 sudo awk -v user="$(basename "$file")" '
@@ -3226,19 +3226,48 @@ done
 done
 }
 timer_info(){
-printf '%s\t' Type Source User Minute Hour Day Month Weekday
-printf '%s\n' Command
-local user file minute hour day month weekday command
+printf '%s\t' "$(gettext Source)" "$(gettext Status)" "$(gettext Config)" "$(gettext Schedule)" "$(gettext Last)" "$(gettext Next)"
+printf '%s\n' "$(gettext Service)"
+local timer status config schedule last next unit
 sudo systemctl list-unit-files --type=timer --no-legend --state=enabled|while read timer status _;do
 config=$(sudo systemctl show --value -p FragmentPath $timer)
 [ -n "$config" ]||continue
 echo "$config"
-schedule=''
+schedule=()
+value=$(egrep 'OnBootSec' $config|sed 's/^[^=]*=//'||true)
+[[ $value =~ ^[0-9]+$ ]]&&value="${value}s"
+[ -z "$value" ]||schedule+=("$value after boot\n")
+value=$(egrep 'OnStartupSec' $config|sed 's/^[^=]*=//'||true)
+[[ $value =~ ^[0-9]+$ ]]&&value="${value}s"
+[ -n "$value" ]&&schedule+=("$value after startup")
+value=$(egrep 'OnActiveSec' $config|sed 's/^[^=]*=//'||true)
+[[ $value =~ ^[0-9]+$ ]]&&value="${value}s"
+[ -n "$value" ]&&schedule+=("$value after last timer start")
+value=$(egrep 'OnUnitActiveSec' $config|sed 's/^[^=]*=//'||true)
+[[ $value =~ ^[0-9]+$ ]]&&value="${value}s"
+[ -n "$value" ]&&schedule+=("$value after last start")
+value=$(egrep 'OnUnitInactiveSec' $config|sed 's/^[^=]*=//'||true)
+[[ $value =~ ^[0-9]+$ ]]&&value="${value}s"
+[ -n "$value" ]&&schedule+=("$value after last run")
+value=$(egrep 'OnClockChange' $config|sed 's/^[^=]*=//'||true)
+[ "$value" = "true" ]&&schedule+=("on clock change")
+value=$(egrep 'OnTimezoneChange' $config|sed 's/^[^=]*=//'||true)
+[ "$value" = "true" ]&&schedule+=("on timezone change")
+value=$(egrep 'OnCalendar' $config|sed 's/^[^=]*=//'||true)
+[ -n "$value" ]&&schedule+=("$value")
+value=$(egrep 'AccuracySec' $config|sed 's/^[^=]*=//'||true)
+[[ $value =~ ^[0-9]+$ ]]&&value="${value}s"
+[ "$value" = "true" ]&&schedule+=("$value accuracy")
+value=$(egrep 'RandomizedDelaySec' $config|sed 's/^[^=]*=//'||true)
+[[ $value =~ ^[0-9]+$ ]]&&value="${value}s"
+[ "$value" = "true" ]&&schedule+=("$value random delay")
 [ -n "$schedule" ]||continue
 schedule="$(echo "$schedule"|sed -e :a -e '/./,$!d;/^\n*$/{$d;N;};/\n$/ba'|paste -sd ';' -|sed 's/;/ and /g')"
 last="$(sudo systemctl show --value -p LastTriggerUSec $timer||true)"
 next="$(sudo systemctl show --value -p NextElapseUSecRealtime $timer||true)"
 unit="$(sudo systemctl show --value -p Unit $timer||true)"
+printf '%s\t' "$timer" "$status" "$config" "$(array schedule join "; ")" "$last" "$next"
+printf '%s\n' "$unit"
 done
 }
 uses_lvm(){
@@ -3365,12 +3394,12 @@ temp="$(mktemp -me env-sub "${ident}_$BASHPID")"
 grep -E "$(tr ' ' '|' <<<"$*")" "$file" >"$temp"||true
 debug 9 "Restore ($*) from $file:"
 cat "$temp"|sed 's/^/- /'|debug 9
-source "$temp"||true
+. "$temp"||true
 rm -r "$temp"||true
 else
 debug 9 "Restore all from $file:"
 cat "$file"|sed 's/^/- /'|debug 9
-source "$file" 2>/dev/null||true
+. "$file" 2>/dev/null||true
 fi
 [ -z "$clean" ]||rm -f "$file"
 ;;

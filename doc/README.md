@@ -425,6 +425,7 @@ Module with operating system specific helper functions.
 | [`ssh_allowed`](function/ssh_allowed.md) | Get allowed ssh keys |
 | [`services_info`](function/services_info.md) | Show services on VM |
 | [`cron_info`](function/cron_info.md) | List cron jobs. |
+| [`timer_info`](function/timer_info.md) | Systemd Timer |
 | [`uses_lvm`](function/uses_lvm.md) | Check if LVM is used |
 
 ### Process Module
