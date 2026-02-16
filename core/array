@@ -57,12 +57,6 @@ array() {
     esac
 }
 
-# Deprecated: Join array elements by delimiter
-# Use @array <arr> join <separator>
-join() {
-    _deprecated "Use array <arr-name> join <separator>"
-}
-
 ######################################################################################
 ### Split array
 ######################################################################################

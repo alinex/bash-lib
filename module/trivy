@@ -119,7 +119,7 @@ trivy() {
         *) die "$(gettext "Unrecognized option"): $1" ;;
         esac
     done
-    is enum --name=command --allow="root files docker clean" --die -- "$1" && local command="$1" && shift
+    is enum --name=command --allow="root files docker" --die -- "$1" && local command="$1" && shift
     # processing
     install trivy
     local work cmd
@@ -153,10 +153,6 @@ trivy() {
     docker)
         [[ "$opt" == *"--timeout"* ]] || opt+=" --timeout ${TRIVY_DEFAULT_TIMEOUT:-30m}"
         $cmd image $opt --input "$1" 2>&1 | sed 's/[^A-Z]*T[^A-Z]*//' >"$work/log" || rc=$?
-        ;;
-    clean)
-        _deprecated "Use option --clean instead"
-        return
         ;;
     esac
     cat "$work/log" | debug
