@@ -321,6 +321,7 @@ disk_free() {
 #           files interactive <path>
 # Options:  -p, --percent <limit>
 # Output:   For `files big`: `<size human>\t<path>`
+# Tools:    ncdu - NCurses Disk Usage
 files() {
     # parameter parsing
     local percent=10

@@ -300,6 +300,7 @@ nocr() {
 # Usage:    urlencode <string>
 #           <string> | urlencode
 # Output:   <string>
+# Tools:    jq - JSON command line parser and formatter
 urlencode() {
     install jq
     input "$@" | jq -sRr @uri | sed 's/%0A$//'

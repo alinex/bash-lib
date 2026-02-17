@@ -603,7 +603,8 @@ Lines starting with a keyword will be used specific description parts and the in
 - `TTY` - input and output -> **markdown**
 - `Output` - through STDOUT -> **markdown**
 - `Error(s)` - through STDERR -> **markdown**
-- `Return(s)` - return value on specific conditions -> **markdown** (mostly as list)
+- `Return(s)` - return value on specific conditions -> **markdown** (list)
+- `Tool(s)` - special tools used which have or will be installed -> **markdown** (list)
 - `Example(s)` - link to examples using  -> **markdown** (mostly as list)
 
 Everywhere in the markdown you can use:

@@ -72,7 +72,8 @@ Some functionalities from the older version will no longer be available like log
 
 What BashLib 2 brings:
 
-- modulare, with natural language to be easy to use
+- natural language to be easy to use
+- powerful and modular methods
 - expandable feature set
 - remote capabilities integrated
 - lots of api integrations
@@ -81,16 +82,17 @@ What BashLib 2 brings:
 - unit tested and linted
 - completely documented with examples
 
-The downside against Version 1 may be:
+The downside may be:
 
-- no backward compatibility - everything is new
-- no automatic conversion from the older versions
+- it is optimized for usability not speed
+- some methods needs additional software which you have to install or will be installed
 - needs bash v4.2 (February 2011)
+- no backward compatibility to version 1 - everything is new
 
 ### Look into the Future
 
-The BashLib itself will grow further through my own usage and needs and maybe some other developers will later take part, too.
-We are not at the end, we are more at the start. There is so much potential that can be added.
+The BashLib itself is growing further each month through my own usage and needs and maybe some other developers will later take part, too.
+We are not at the end, I have tons of ideas. There is so much potential that can be added in the future.
 
 ## Distributions
 

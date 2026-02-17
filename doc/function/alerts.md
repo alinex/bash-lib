@@ -32,6 +32,10 @@ alerts -i "^`$server`" console || echo "" # will print the alerts with an empty 
 - - 0 - no alerts
 - - `<num>` - at least one alert
 - - 0 - without output if no `$GRAFANA_API` + `$GRAFANA_TOKEN`
+
+### Tools used
+
+- jq - JSON command line parser and formatter
 - 
 
 ### Description

@@ -18,6 +18,16 @@ compress [<string>]
 -d, --decompress
 ```
 
+### Tools used
+
+- gzip
+- bzip2
+- xz
+- zstd
+- lz4
+- zip
+- 
+
 ### Description
 
 
@@ -30,5 +40,4 @@ compress [<string>]
 | lz4   | LZ4                     | Ultrafast       | Niedrig           | XXH32           | .lz4        |
 
 Zip is not supported at the moment, because it can not work with streams but files only.
-
 

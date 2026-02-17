@@ -25,6 +25,7 @@ declare -A MONGO_ADMIN_USERPASS="${MONGO_ADMIN_USERPASS:-()}"
 # Options:  -h, --host <host>          # destination host
 # Global:   - $server
 #           - $MONGO_ADMIN_USERPASS
+# Tools:    mongosh - cli for mongo access
 mongo() {
     # parameter parsing
     local host="$server"

@@ -13,6 +13,10 @@ urlencode <string>
 
 `<string>`
 
+### Tools used
+
+- jq - JSON command line parser and formatter
+- 
 
 ### Description
 

@@ -42,6 +42,11 @@
 --drop                      # drop table before insert to postgres
 ```
 
+### Tools used
+
+- qsv - fast, Rust-powered command-line utility to work with different separated values files
+- 
+
 ### Description
 
 
@@ -201,5 +206,4 @@ tsv to sqlite test.db --table=mytable --drop              # Drop tables if they 
 ```
 
 You may concat all this methods together as far as they output tsv further and in the end call `print` or `to`.
-
 

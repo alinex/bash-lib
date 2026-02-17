@@ -24,6 +24,7 @@ CONFLUENCE_API="$CONFLUENCE_API"
 #
 # Usage:    confluence <page_id>
 # Output:   <html>
+# Tools:    jq - JSON command line parser and formatter
 confluence() {
   is integer --name=arguments --max=1 --die -- $#
   is set --name=page-id --die -- "$1"

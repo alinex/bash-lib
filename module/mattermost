@@ -219,6 +219,7 @@ mattermost_post_ids=""
 # Globals:  $MATTERMOST_API + $MATTERMOST_TOKEN to access API
 # Output:   <post-id list>
 # Returns:  0 without action if no $MATTERMOST_API + $MATTERMOST_TOKEN
+# Tools:    jq - JSON command line parser and formatter
 mattermost() {
     is integer --name=arguments --max=3 --die -- $#
     is set --name=channel-name --die -- "$1"
@@ -269,6 +270,7 @@ mattermost() {
 #           --logo <url>        # footer image
 # Output:   <json> for this attachment
 # Returns:  0 without action if no $MATTERMOST_API + $MATTERMOST_TOKEN
+# Tools:    jq - JSON command line parser and formatter
 mattermost_attachment() {
     if [ -z "$MATTERMOST_API" ] || [ -z "$MATTERMOST_TOKEN" ]; then
         debug "Disabled because MATTERMOST_API and MATTERMOST_TOKEN are not both set"

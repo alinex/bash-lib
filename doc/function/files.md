@@ -19,6 +19,10 @@ files interactive <path>
 
 For `files big`: `<size human>	<path>`
 
+### Tools used
+
+- ncdu - NCurses Disk Usage
+- 
 
 ### Description
 

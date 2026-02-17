@@ -54,6 +54,10 @@ Progress output if `--progress` is set with optimizations on reports
 ### Return (exit code)
 
 - 1 if there are at least one CRITICAL or HIGH vulnerabilities
+
+### Tools used
+
+- trivy - Scanner for vulnerabilities in container images, file systems
 - 
 
 ### Description

@@ -46,6 +46,7 @@ ip_resolve() {
 #
 # Usage:    ip_intern <format>
 # Output:   <ip>
+# Tools:    ip - show / manipulate routing, network devices, interfaces and tunnels
 # shellcheck disable=SC2120
 ip_intern() {
     is integer --name=arguments --max=1 --die -- $#

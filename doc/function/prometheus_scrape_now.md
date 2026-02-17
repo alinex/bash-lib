@@ -15,6 +15,10 @@ prometheus_scrape_now <job> [<timeout>]
 ### Return (exit code)
 
 - 0 - without output if no `$PROMETHEUS_HOST`
+
+### Tools used
+
+- yq - YAML command line parser and formatter
 - 
 
 ### Description

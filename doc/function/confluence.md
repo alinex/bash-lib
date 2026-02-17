@@ -12,6 +12,10 @@ confluence <page_id>
 
 `<html>`
 
+### Tools used
+
+- jq - JSON command line parser and formatter
+- 
 
 ### Description
 

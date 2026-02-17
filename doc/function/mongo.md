@@ -19,6 +19,10 @@ mongo [<options>] <database> <command>    # work in database
 
 - - `$server`
 - - `$MONGO_ADMIN_USERPASS`
+
+### Tools used
+
+- mongosh - cli for mongo access
 - 
 
 ### Description

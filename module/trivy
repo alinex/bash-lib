@@ -103,6 +103,7 @@ TRIVY_EXPLOITS_URL=https://www.cisa.gov/sites/default/files/feeds/known_exploite
 # Output:   <report-path> or nothing if no vulnerabilities found
 # Error:    Progress output if `--progress` is set with optimizations on reports
 # Return:   1 if there are at least one CRITICAL or HIGH vulnerabilities
+# Tools:    trivy - Scanner for vulnerabilities in container images, file systems
 trivy() {
     local exclude clean progress opt="--exit-code 0 --no-progress --skip-version-check -f json"
     # parameter parsing

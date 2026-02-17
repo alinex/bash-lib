@@ -206,6 +206,7 @@ for folder in config core module extra; do
                 return=""
                 tty=""
                 files=""
+                tools=""
                 shopt -s nocasematch
                 while IFS= read -r line; do
                     if [ -n "$first" ]; then
@@ -270,6 +271,11 @@ for folder in config core module extra; do
                         line="$(sed 's/^\(returns\?:\)\?\s*//i' <<<"$line")"
                         return+="\n- $line"
                         chapter="return"
+                    elif [[ "$line" =~ ^tool(s)?: ]] || { [ "$chapter" = "tools" ] && [[ "$line" =~ ^[[:space:]] || "$line" =~ ^$ ]]; }; then
+                        # shellcheck disable=SC2001
+                        line="$(sed 's/^\(tools\?:\)\?\s*//i' <<<"$line")"
+                        tools+="\n- $line"
+                        chapter="tools"
                     elif [[ ! "$line" =~ ^shellcheck ]]; then
                         description="$description\n$line"
                     fi
@@ -294,6 +300,7 @@ for folder in config core module extra; do
                     [ -z "$output" ] || echo -e "\n### Output (stdout)\n$output" | md_optimize
                     [ -z "$error" ] || echo -e "\n### Error (stderr)\n$error" | md_optimize
                     [ -z "$return" ] || echo -e "\n### Return (exit code)\n$return" | md_optimize
+                    [ -z "$tools" ] || echo -e "\n### Tools used\n$tools" | md_optimize
                     [ -z "$example" ] || echo -e "\n### Examples\n$example" | md_optimize
                     [ -z "${description//[[:space:]]/}" ] || echo -e "\n### Description\n$description" | md_optimize
                 ) |

@@ -222,6 +222,7 @@ use software
 #           --schema <name>             # schema for to postgres export
 #           --table <name>              # table name
 #           --drop                      # drop table before insert to postgres
+# Tools:    qsv - fast, Rust-powered command-line utility to work with different separated values files
 tsv() {
     # parameter parsing
     local opt=(-d $'\t') opt2=() QSV_DEFAULT_DELIMITER=$'\t' noHeaders remove input output sort literal exact invert flag numerical natural reverse ignoreCase unique column schema table drop

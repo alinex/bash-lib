@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-02-17 22:13+0100\n"
+"POT-Creation-Date: 2026-02-17 22:34+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,14 +17,14 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: core/misc:134 core/validator:74 core/array:123 module/os:235 module/os:332
-#: module/network:24 module/atlassian:101 module/trivy:119 module/compress:44
-#: module/monitoring:170 module/input:31 module/input:88 module/input:198
+#: core/misc:134 core/validator:74 core/array:123 module/os:235 module/os:333
+#: module/network:24 module/atlassian:102 module/trivy:120 module/compress:50
+#: module/monitoring:173 module/input:31 module/input:88 module/input:198
 #: module/input:452 module/input:651 module/log:63 module/process:376
 #: module/process:424 module/process:507 module/process:654 module/remote:84
-#: module/remote:206 module/remote:248 module/remote:286 module/database:36
-#: module/mattermost:309 module/mattermost:340 module/table:250
-#: module/table:503 module/crypto:41 module/git:23 module/git:61
+#: module/remote:206 module/remote:248 module/remote:286 module/database:37
+#: module/mattermost:311 module/mattermost:342 module/table:251
+#: module/table:504 module/crypto:41 module/git:23 module/git:61
 #: module/software:245
 msgid "Unrecognized option"
 msgstr ""
@@ -233,11 +233,11 @@ msgstr ""
 msgid "Use $list from $time."
 msgstr ""
 
-#: module/os:292 module/os:432 module/os:522
+#: module/os:292 module/os:433 module/os:523
 msgid "Type"
 msgstr ""
 
-#: module/os:292 module/os:522 module/os:570
+#: module/os:292 module/os:523 module/os:571
 msgid "Source"
 msgstr ""
 
@@ -281,265 +281,265 @@ msgstr ""
 msgid "Inodes"
 msgstr ""
 
-#: module/os:387 module/os:408 module/os:432 module/os:522
+#: module/os:388 module/os:409 module/os:433 module/os:523
 msgid "User"
 msgstr ""
 
-#: module/os:387 module/os:408
+#: module/os:388 module/os:409
 msgid "UID"
 msgstr ""
 
-#: module/os:387 module/os:408
+#: module/os:388 module/os:409
 msgid "GID"
 msgstr ""
 
-#: module/os:387
+#: module/os:388
 msgid "Home"
 msgstr ""
 
-#: module/os:387
+#: module/os:388
 msgid "SuDo"
 msgstr ""
 
-#: module/os:387
+#: module/os:388
 msgid "Login"
 msgstr ""
 
-#: module/os:387
+#: module/os:388
 msgid "From"
 msgstr ""
 
-#: module/os:387
+#: module/os:388
 msgid "Duration"
 msgstr ""
 
-#: module/os:408 module/os:523
+#: module/os:409 module/os:524
 msgid "Command"
 msgstr ""
 
-#: module/os:432
+#: module/os:433
 msgid "Comment"
 msgstr ""
 
-#: module/os:432
+#: module/os:433
 msgid "Key"
 msgstr ""
 
-#: module/os:472
+#: module/os:473
 msgid "Unit"
 msgstr ""
 
-#: module/os:472
+#: module/os:473
 msgid "Active"
 msgstr ""
 
-#: module/os:472
+#: module/os:473
 msgid "Sub"
 msgstr ""
 
-#: module/os:472
+#: module/os:473
 msgid "Enabled"
 msgstr ""
 
-#: module/os:472
+#: module/os:473
 msgid "Description"
 msgstr ""
 
-#: module/os:472 module/os:570
+#: module/os:473 module/os:571
 msgid "Config"
 msgstr ""
 
-#: module/os:472
+#: module/os:473
 msgid "Start"
 msgstr ""
 
-#: module/os:472
+#: module/os:473
 msgid "Tasks"
 msgstr ""
 
-#: module/os:472
+#: module/os:473
 msgid "Memory"
 msgstr ""
 
-#: module/os:473
+#: module/os:474
 msgid "CPU"
 msgstr ""
 
-#: module/os:522
+#: module/os:523
 msgid "Minute"
 msgstr ""
 
-#: module/os:522
+#: module/os:523
 msgid "Hour"
 msgstr ""
 
-#: module/os:522
+#: module/os:523
 msgid "Day"
 msgstr ""
 
-#: module/os:522
+#: module/os:523
 msgid "Month"
 msgstr ""
 
-#: module/os:522
+#: module/os:523
 msgid "Weekday"
 msgstr ""
 
-#: module/os:570
+#: module/os:571
 msgid "Status"
 msgstr ""
 
-#: module/os:570
+#: module/os:571
 msgid "Schedule"
 msgstr ""
 
-#: module/os:570
+#: module/os:571
 msgid "Last"
 msgstr ""
 
-#: module/os:570
+#: module/os:571
 msgid "Next"
 msgstr ""
 
-#: module/os:571
+#: module/os:572
 msgid "Service"
 msgstr ""
 
-#: module/network:56
+#: module/network:57
 msgid "IP\\tInterface"
 msgstr ""
 
-#: module/trivy:134
+#: module/trivy:135
 #, sh-format
 msgid "Start $command scanning with trivy V${version}..."
 msgstr ""
 
-#: module/trivy:164
+#: module/trivy:165
 msgid "Optimize JSON structure for splitting..."
 msgstr ""
 
-#: module/trivy:166
+#: module/trivy:167
 msgid "Splitting JSON into single reports..."
 msgstr ""
 
-#: module/trivy:179
+#: module/trivy:180
 #, sh-format
 msgid "Found $found vulnerabilities."
 msgstr ""
 
-#: module/trivy:205
+#: module/trivy:206
 msgid "Build queue to optimize reports..."
 msgstr ""
 
-#: module/trivy:209
+#: module/trivy:210
 msgid "Run queue to optimize reports..."
 msgstr ""
 
-#: module/trivy:213
+#: module/trivy:214
 msgid "Create summaries..."
 msgstr ""
 
-#: module/trivy:323
+#: module/trivy:324
 #, sh-format
 msgid ""
 "Downgrade $severity -> MEDIUM because it was published less than 3 days ago"
 msgstr ""
 
-#: module/trivy:332
+#: module/trivy:333
 msgid ""
 "Add information of known exploits and cancel downgrades in case of just "
 "published"
 msgstr ""
 
-#: module/trivy:341
+#: module/trivy:342
 #, sh-format
 msgid "Downgrade $severity -> MEDIUM because it is a dev dependency"
 msgstr ""
 
-#: module/trivy:386
+#: module/trivy:387
 #, sh-format
 msgid "Downgrade $severity -> MEDIUM because of Jira status $deploy"
 msgstr ""
 
-#: module/trivy:387 module/trivy:452
+#: module/trivy:388 module/trivy:453
 #, sh-format
 msgid "$id at $target"
 msgstr ""
 
-#: module/trivy:451
+#: module/trivy:452
 msgid "Add information from Jira"
 msgstr ""
 
-#: module/trivy:493
+#: module/trivy:494
 #, sh-format
 msgid "Rating: $severity (CVSS rating $value)"
 msgstr ""
 
-#: module/trivy:495
+#: module/trivy:496
 #, sh-format
 msgid "Status: Fixed from version $value $fixStatus"
 msgstr ""
 
-#: module/trivy:499
+#: module/trivy:500
 #, sh-format
 msgid "Date:   Vulnerability known since $human ($value days ago)"
 msgstr ""
 
-#: module/trivy:501
+#: module/trivy:502
 #, sh-format
 msgid "Exploit known since $exploitDate at $exploitVendor $exploitProduct"
 msgstr ""
 
-#: module/trivy:504
+#: module/trivy:505
 msgid "Responsible"
 msgstr ""
 
-#: module/trivy:505
+#: module/trivy:506
 msgid "Deploy"
 msgstr ""
 
-#: module/trivy:506
+#: module/trivy:507
 msgid "Last comments"
 msgstr ""
 
-#: module/trivy:508
+#: module/trivy:509
 msgid "Sources"
 msgstr ""
 
-#: module/trivy:515
+#: module/trivy:516
 msgid "Links"
 msgstr ""
 
-#: module/monitoring:33
+#: module/monitoring:35
 msgid "URL"
 msgstr ""
 
-#: module/monitoring:33
+#: module/monitoring:35
 msgid "Job"
 msgstr ""
 
-#: module/monitoring:33
+#: module/monitoring:35
 msgid "Label Values"
 msgstr ""
 
-#: module/monitoring:74
+#: module/monitoring:76
 msgid "Could not get exporters from Prometheus!"
 msgstr ""
 
-#: module/monitoring:102
+#: module/monitoring:104
 #, sh-format
 msgid "Could not scrape the Prometheus exporter at $url!"
 msgstr ""
 
-#: module/monitoring:178
+#: module/monitoring:181
 msgid "Could not get alerts from Grafana!"
 msgstr ""
 
-#: module/monitoring:180
+#: module/monitoring:183
 msgid "Parse error in Grafana alerts list with filter"
 msgstr ""
 
-#: module/monitoring:211
+#: module/monitoring:214
 msgid "Severity\\tNetwork\\tInstance\\tSummary\\tStart"
 msgstr ""
 

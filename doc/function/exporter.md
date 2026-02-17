@@ -24,6 +24,11 @@ URL     Job     Label Values
 ### Return (exit code)
 
 - 0 without output if no `$PROMETHEUS_HOST` + `$PROMETHEUS_API`
+
+### Tools used
+
+- jq - JSON command line parser and formatter
+- yq - YAML command line parser and formatter
 - 
 
 ### Description

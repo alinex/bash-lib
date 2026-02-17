@@ -24,6 +24,8 @@ source /dev/null
 #           <url>   <job>   <label-values>
 #           ```
 # Return:   0 without output if no $PROMETHEUS_HOST + $PROMETHEUS_API
+# Tools:    jq - JSON command line parser and formatter
+# Tools:    yq - YAML command line parser and formatter
 exporter() {
     if [ -z "$PROMETHEUS_HOST" ] || [ -z "$PROMETHEUS_API" ]; then
         debug "Disabled because PROMETHEUS_HOST and PROMETHEUS_API are not both set"
@@ -135,6 +137,7 @@ GRAFANA_TOKEN="$GRAFANA_TOKEN"
 # Return:   - 0 - no alerts
 #           - <num> - at least one alert
 #           - 0 - without output if no $GRAFANA_API + $GRAFANA_TOKEN
+# Tools:    jq - JSON command line parser and formatter
 alerts() {
     if [ -z "$GRAFANA_API" ] || [ -z "$GRAFANA_TOKEN" ]; then
         debug "Disabled because GRAFANA_API and GRAFANA_TOKEN are not both set"
@@ -268,6 +271,7 @@ prometheus() {
 # Usage:    prometheus_scrape_now <job> [<timeout>]
 # Globals:  $PROMETHEUS_HOST to change config temporarily
 # Returns:  0 - without output if no $PROMETHEUS_HOST
+# Tools:    yq - YAML command line parser and formatter
 prometheus_scrape_now() {
     if [ -z "$PROMETHEUS_HOST" ]; then
         debug "Disabled because PROMETHEUS_HOST is not set"

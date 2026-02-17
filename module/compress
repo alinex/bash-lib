@@ -30,6 +30,12 @@ COMPRESSION_DEFAULT=${COMPRESSION_DEFAULT:-gzip}
 #           -o, --output <path>        # file to write to
 #           -t, --tool <compression>   # compression: gzip, zip,...
 #           -d, --decompress
+# Tools:    gzip
+#           bzip2
+#           xz
+#           zstd
+#           lz4
+#           zip
 compress() {
     # parameter parsing
     local in out tool="$COMPRESSION_DEFAULT" decompress

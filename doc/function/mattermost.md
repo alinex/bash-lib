@@ -19,6 +19,10 @@ mattermost <channel-name> <text> [<attachments>]
 ### Return (exit code)
 
 - 0 without action if no `$MATTERMOST_API` + `$MATTERMOST_TOKEN`
+
+### Tools used
+
+- jq - JSON command line parser and formatter
 - 
 
 ### Description
