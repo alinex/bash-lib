@@ -5,6 +5,8 @@ But on release they will be merged with semantical versioning into the master br
 
 ## Development - v2.6.0
 
+- add [tsv headers --remove](doc/function/tsv.md) to easily remove the first (header) line
+
 ## 16. February 2026 - v2.5.0
 
 - add [user_info](doc/function/user_info.md), [sudo_info](doc/function/sudo_info.md) and [ssh_allowed](doc/function/ssh_allowed.md)

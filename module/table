@@ -54,6 +54,12 @@ use software
 # 2   Name
 # ```
 #
+# Or you can remove the header line:
+#
+# ```
+# tsv headers --remove
+# ```
+#
 # **count**
 #
 # Returns a count of the number of records in the data without the header.
@@ -198,9 +204,10 @@ use software
 #           <tsv> | tsv color <color> [options] <regex> <selection>
 #           <tsv> | tsv print [options]
 #           <tsv> | tsv to <format> [<destination>] [options]
-# Options:  --no-headers                # input is without header
-#           -i, --input-file <file>     # file to read from instead of STDIN
+# Options:  -i, --input-file <file>     # file to read from instead of STDIN
 #           -o, --output-file <file>    # file to write result to instead of STDOUT
+#           -n, --no-headers            # input is without header
+#           -r, --remove                # tsv headers --remove the header
 #           --sort                      # sort columns in select
 #           --literal                   # Treat the regex as a literal string do not interpret it
 #           --exact                     # Match the ENTIRE field exactly
@@ -217,11 +224,12 @@ use software
 #           --drop                      # drop table before insert to postgres
 tsv() {
     # parameter parsing
-    local opt=(-d $'\t') opt2=() QSV_DEFAULT_DELIMITER=$'\t' noHeaders input output sort literal exact invert flag numerical natural reverse ignoreCase unique column schema table drop
-    eval set -- "$(option_parse $'- no-headers -\ni input-file +\no output-file +\ns sort -\n- column +\n- schema +\n-table +\n- drop -' "$@")"
+    local opt=(-d $'\t') opt2=() QSV_DEFAULT_DELIMITER=$'\t' noHeaders remove input output sort literal exact invert flag numerical natural reverse ignoreCase unique column schema table drop
+    eval set -- "$(option_parse $'n no-headers -\nr remove -\ni input-file +\no output-file +\ns sort -\n- column +\n- schema +\n-table +\n- drop -' "$@")"
     while true; do
         case "$1" in
-        --no-headers) noHeaders=1 && shift ;;
+        -n | --no-headers) noHeaders=1 && shift ;;
+        -r | --remove) remove=1 && shift ;;
         -i | --input-file) is readable --name=input-file --die --output=input -- "$2" && shift 2 ;;
         -o | --output-file) is set --name=output-file --die --output=output -- "$2" && shift 2 ;;
         -s | --sort) sort=1 && shift ;;
@@ -248,7 +256,7 @@ tsv() {
     case $cmd in
     headers)
         is integer --name=arguments --max=1 --die -- $#
-        qsv headers "${opt[@]}"
+        is true $remove && tail -n +2 || qsv headers "${opt[@]}"
         ;;
     count)
         is empty -- "$noHeaders" || opt+=(-n)
