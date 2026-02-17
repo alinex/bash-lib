@@ -19,7 +19,10 @@ source /dev/null
 # Usage:    exporter [<field>=<value>]...
 # Globals:  $PROMETHEUS_HOST + $PROMETHEUS_API
 # Output:   Tab separated list without header:
-#           `<url>   <job>   <label-values>`
+#           ```
+#           URL     Job     Label Values
+#           <url>   <job>   <label-values>
+#           ```
 # Return:   0 without output if no $PROMETHEUS_HOST + $PROMETHEUS_API
 exporter() {
     if [ -z "$PROMETHEUS_HOST" ] || [ -z "$PROMETHEUS_API" ]; then
@@ -27,6 +30,7 @@ exporter() {
         return 0
     fi
     install jq yq
+    printf '%s\t%s\t%s\t%s\n' "$(gettext URL)" "$(gettext Job)" "$(gettext 'Label Values')"
     local arg name value
     local filter=""
     for arg in "$@"; do

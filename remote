@@ -278,9 +278,6 @@ done
 printf '%s' "$joined"
 esac
 }
-join(){
-_deprecated "Use array <arr-name> join <separator>"
-}
 split(){
 is integer -narguments --max=3 -d $#
 is set -narray-name -d -- "$2"
@@ -2571,6 +2568,7 @@ debug "Disabled because PROMETHEUS_HOST and PROMETHEUS_API are not both set"
 return 0
 fi
 install jq yq
+printf '%s\t%s\t%s\t%s\n' "$(gettext URL)" "$(gettext Job)" "$(gettext 'Label Values')"
 local arg name value
 local filter=""
 for arg in "$@";do
@@ -2921,9 +2919,6 @@ fi
 *)printf '%s\n' "${_os_detected["$1"]}"
 esac
 }
-os_detect(){
-_deprecated "Use os now"
-}
 bios(){
 sudo dmidecode -t 1|awk '
 /Product Name:/ { prod=$0; sub(".*Product Name: *","",prod) }
@@ -3038,73 +3033,7 @@ done <<<"$list"
 esac
 }
 disk_free(){
-_deprecated "Use disk instead" warn
-local opt="" free_operator free_percent free_bytes
-eval set -- "$(option_parse $'l locale -\nc collect +\nf free +' "$@")"
-while true;do
-case "$1" in
--l|--locale)opt="-l"&&shift;;
--f|--free)local text="$2"
-if [[ $text =~ ^([<>]=?|==|!=)?(([0-9]+)[%bB]?)$ ]];then
-read -r _ free_operator val num <<<"${BASH_REMATCH[@]}"
-free_operator="${free_operator:-<}"
-[[ $val =~ ^[0-9]+%$ ]]&&free_percent="$num"||free_bytes="$(numfmt --from=iec <<<"${num^^}")"
-else
-die "Option value --free=$2 not supported!"
-fi
-shift 2
-;;
--c|--collect)declare -n collect="$2"&&shift 2;;
---)shift&&break;;
-*)die "$(gettext "Unrecognized option"): $1"
-esac
-done
-debug "$opt"
-! declare -p collect >/dev/null||debug "collect into $collect ($free_operator $free_percent%/${free_bytes}B)"
-local firstLine="" percent mount device limit_c limit_e limit_w limit_o
-IFS=$'\n'
-df -h $opt -x tmpfs -x efivarfs -x devtmpfs -x squashfs "$@"|while IFS= read -r line;do
-if [ -z "$firstLine" ];then
-firstLine=1
-printf "$CC_INVERSE%s$CC_RESET\n" "$line"
-else
-percent=$(echo "$line"|xargs echo|cut -d' ' -f5|sed 's/%//')
-bytes=$(echo "$line"|xargs echo|cut -d' ' -f4)
-mount=$(echo "$line"|xargs echo|cut -d' ' -f6|sed 's/\r$//')
-device=$(echo "$line"|xargs echo|cut -d' ' -f1)
-for ((i=0; i<${#MOUNT_COLOR_LIMIT[@]}; i+=5));do
-pattern="${MOUNT_COLOR_LIMIT[i]}"
-if [[ $device =~ $pattern ]];then
-limit_c="${MOUNT_COLOR_LIMIT[i+1]}"
-limit_e="${MOUNT_COLOR_LIMIT[i+2]}"
-limit_w="${MOUNT_COLOR_LIMIT[i+3]}"
-limit_o="${MOUNT_COLOR_LIMIT[i+4]}"
-break
-fi
-done
-if ((percent==limit_c));then
-critical "$line"
-elif ((percent==limit_e));then
-error "$line"
-elif ((percent==limit_w));then
-warn "$line"
-elif ((percent==limit_o));then
-ok "$line"
-else
-printf '%s\n' "$line"
-fi
-if declare -p collect >/dev/null;then
-if [ -n "$free_operator" ];then
-if [ -n "$free_percent" ]&&eval "(( 100 - percent $free_operator free_percent ))";then
-collect+="$mount "
-elif [ -n "$free_bytes" ]&&eval "(( bytes $free_operator free_bytes ))";then
-collect+="$mount "
-fi
-fi
-fi
-fi
-done
-unset IFS
+_deprecated "Use disk instead"
 }
 files(){
 local percent=10
@@ -4184,11 +4113,12 @@ esac
 }
 use software
 tsv(){
-local opt=(-d $'\t') opt2=() QSV_DEFAULT_DELIMITER=$'\t' noHeaders input output sort literal exact invert flag numerical natural reverse ignoreCase unique column schema table drop
-eval set -- "$(option_parse $'- no-headers -\ni input-file +\no output-file +\ns sort -\n- column +\n- schema +\n-table +\n- drop -' "$@")"
+local opt=(-d $'\t') opt2=() QSV_DEFAULT_DELIMITER=$'\t' noHeaders remove input output sort literal exact invert flag numerical natural reverse ignoreCase unique column schema table drop
+eval set -- "$(option_parse $'n no-headers -\nr remove -\ni input-file +\no output-file +\ns sort -\n- column +\n- schema +\n-table +\n- drop -' "$@")"
 while true;do
 case "$1" in
---no-headers)noHeaders=1&&shift;;
+-n|--no-headers)noHeaders=1&&shift;;
+-r|--remove)remove=1&&shift;;
 -i|--input-file)is readable -ninput-file -doinput -- "$2"&&shift 2;;
 -o|--output-file)is set -noutput-file -dooutput -- "$2"&&shift 2;;
 -s|--sort)sort=1&&shift;;
@@ -4213,7 +4143,7 @@ is enum -ncommand --allow="headers count select filter slice sort reverse edit c
 install qsv
 case $cmd in
 headers)is integer -narguments --max=1 -d $#
-qsv headers "${opt[@]}"
+is true $remove&&tail -n +2||qsv headers "${opt[@]}"
 ;;
 count)[ -z "$noHeaders" ]||opt+=(-n)
 [ -z "$input" ]||opt+=("$input")
@@ -4544,7 +4474,7 @@ case "$1" in
 *)die "$(gettext "Unrecognized option"): $1"
 esac
 done
-is enum -ncommand --allow="root files docker clean" -d -- "$1"&&local command="$1"&&shift
+is enum -ncommand --allow="root files docker" -d -- "$1"&&local command="$1"&&shift
 install trivy
 local work cmd
 local source="$1"
@@ -4573,9 +4503,6 @@ $cmd fs $opt "$1" 2>&1|sed 's/[^A-Z]*T[^A-Z]*//' >"$work/log"||rc=$?
 ;;
 docker)[[ $opt == *"--timeout"* ]]||opt+=" --timeout ${TRIVY_DEFAULT_TIMEOUT:-30m}"
 $cmd image $opt --input "$1" 2>&1|sed 's/[^A-Z]*T[^A-Z]*//' >"$work/log"||rc=$?
-;;
-clean)_deprecated "Use option --clean instead"
-return
 esac
 cat "$work/log"|debug
 [ -z "$rc" ]||tail "$work/log"|warn

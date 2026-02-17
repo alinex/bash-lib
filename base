@@ -272,9 +272,6 @@ done
 printf '%s' "$joined"
 esac
 }
-join(){
-_deprecated "Use array <arr-name> join <separator>"
-}
 split(){
 is integer -narguments --max=3 -d $#
 is set -narray-name -d -- "$2"

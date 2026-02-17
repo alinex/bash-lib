@@ -22,9 +22,10 @@
 ### Options
 
 ```bash
---no-headers                # input is without header
 -i, --input-file <file>     # file to read from instead of STDIN
 -o, --output-file <file>    # file to write result to instead of STDOUT
+-n, --no-headers            # input is without header
+-r, --remove                # tsv headers --remove the header
 --sort                      # sort columns in select
 --literal                   # Treat the regex as a literal string do not interpret it
 --exact                     # Match the ENTIRE field exactly
@@ -52,6 +53,13 @@ Prints the column number and name (space separated) of the first row in the data
 ```
 1   Number
 2   Name
+```
+
+Or you can remove the header line:
+
+
+```
+tsv headers --remove
 ```
 
 **count**

@@ -15,7 +15,11 @@ exporter [<field>=<value>]...
 ### Output (stdout)
 
 Tab separated list without header:
-`<url>   <job>   <label-values>`
+
+```
+URL     Job     Label Values
+<url>   <job>   <label-values>
+```
 
 ### Return (exit code)
 

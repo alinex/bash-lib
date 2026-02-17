@@ -18,16 +18,16 @@ DESCRIPTION=""
 #done
 ################################################################################################
 
-#dns_list | tsv filter --exact A 2 | tsv filter '^(10|172)\.' 3
-#exporter job=node | tsv select 1 | sed 's#.*://##;s#:.*##'
-#exit
+dns_list | tsv filter --exact A 2 | tsv filter '^(10|172)\.' 3
+exporter job=node | tsv select 1 | sed '1d;s#.*://##;s#:.*##'
+exit
 
 #trivy root --progress --no-secrets --clean
 #exit
 
 in=$'Number\tName\n1234\tone\n2\ttwo\n10\tten thousand and one hundred fourty five\n'
 #echo "$in" | tsv "$@" | tsv print
-timer_info | tsv filter
+timer_info | tsv headers --remove
 exit
 
 dns_list "host.test.grp\sA" 2>/dev/null | tsv sort --natural INHALT | tsv print

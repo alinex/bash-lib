@@ -165,7 +165,6 @@ Helper functions to work with arrays and associative arrays (hashes).
 | Variable/Function | Description |
 | --- | --- |
 | [`array`](function/array.md) | Array analyzation |
-| [`join`](function/join.md) | Deprecated: Join array elements by delimiter |
 | [`split`](function/split.md) | Splits string by delimiter into array |
 | [`hash`](function/hash.md) | Methods to work with assoziative arrays (hashes) |
 
@@ -415,7 +414,6 @@ Module with operating system specific helper functions.
 | --- | --- |
 | ``$MOUNT_COLOR_LIMIT`` | Array: Color limits per mount (regex critical error warn ok) used in [`disk`](functiondisk.md) |
 | [`os`](function/os.md) | Detect OS settings and Hardware |
-| [`os_detect`](function/os_detect.md) | Deprecated: OS detection |
 | [`bios`](function/bios.md) | Hardware description |
 | [`disk`](function/disk.md) | File system analyzation |
 | [`disk_free`](function/disk_free.md) | Deprecated: Disk free with visual display |
