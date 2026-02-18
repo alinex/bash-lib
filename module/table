@@ -50,8 +50,8 @@ use software
 # Prints the column number and name (space separated) of the first row in the data.
 #
 # ```
-# 1   Number
-# 2   Name
+# Number
+# Name
 # ```
 #
 # Or you can remove the header line:
@@ -204,21 +204,28 @@ use software
 #           <tsv> | tsv color <color> [options] <regex> <selection>
 #           <tsv> | tsv print [options]
 #           <tsv> | tsv to <format> [<destination>] [options]
-# Options:  -i, --input-file <file>     # file to read from instead of STDIN
+# Options:  # general options
+#           -i, --input-file <file>     # file to read from instead of STDIN
 #           -o, --output-file <file>    # file to write result to instead of STDOUT
 #           -n, --no-headers            # input is without header
+#           # headers
 #           -r, --remove                # tsv headers --remove the header
+#           # select
 #           --sort                      # sort columns in select
 #           --literal                   # Treat the regex as a literal string do not interpret it
 #           --exact                     # Match the ENTIRE field exactly
+#           # filter/slice
 #           --invert                    # Filter/slice only rows that did not match
 #           --flag <column>             # Do not filter but add a filter column containing 0 for not matched, else the row number
+#           # sort
 #           --numerical                 # sort numerical
 #           --natural                   # sort natural (numbers in strings are treaded numerical)
 #           --reverse                   # sort in reverse order
 #           --ignore-case               # ignore case in filter and sorting
-#           --column <num>              # column to colorize
 #           --unique                    # keep only one line per sorted value
+#           # color
+#           --column <num>              # column to colorize
+#           # to
 #           --schema <name>             # schema for to postgres export
 #           --table <name>              # table name
 #           --drop                      # drop table before insert to postgres
@@ -257,7 +264,7 @@ tsv() {
     case $cmd in
     headers)
         is integer --name=arguments --max=1 --die -- $#
-        is true $remove && tail -n +2 || qsv headers "${opt[@]}"
+        is true $remove && tail -n +2 || qsv headers --just-names "${opt[@]}"
         ;;
     count)
         is empty -- "$noHeaders" || opt+=(-n)
@@ -267,12 +274,12 @@ tsv() {
         ;;
     select)
         is empty -- "$noHeaders" || opt+=(-n)
-        is empty -- "$output" || opt+=(-o "$output")
         is empty -- "$sort" || opt+=(-S)
         is empty -- "$input" || opt+=("$input")
+        is empty -- "$output" || opt2+=(-o "$output")
         is set --name=selection --die -- "$2"
         is integer --name=arguments --max=2 --die -- $#
-        qsv select "${opt[@]}" "$2"
+        qsv select "${opt[@]}" "$2" | qsv fmt "${opt2[@]}" -t '\t'
         ;;
     filter)
         is empty -- "$noHeaders" || opt+=(-n)

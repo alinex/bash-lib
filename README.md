@@ -162,7 +162,7 @@ The BashLib will be installed on the System with it's `BASHLIB_HOME` directory i
 The modules are as far as possible:
 
 - optimized error handling
-- unit tested (using bats)
+- unit tested using bats (over 200 core and 200 module tests)
 - integration tested in different OS using docker
 - CI tested on some OS
 - and analyzed by the shellcheck static analysis and linting

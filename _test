@@ -18,6 +18,9 @@ DESCRIPTION=""
 #done
 ################################################################################################
 
+echo $'col1\tcol2\n1,2\t3' | tsv headers
+exit
+
 server=operations.host.cloud.dvb
 echo "--------"
 remote false || true

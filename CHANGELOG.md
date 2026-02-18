@@ -6,6 +6,7 @@ But on release they will be merged with semantical versioning into the master br
 ## Development - v2.6.0
 
 - add [tsv headers --remove](doc/function/tsv.md) to easily remove the first (header) line
+- smaller bugfixes to stabilize code
 
 ## 16. February 2026 - v2.5.0
 

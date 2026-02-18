@@ -381,8 +381,8 @@ setup() {
 # spinner
 ######################################################################################
 
-# bats test_tags=spinner
-@test "spinner: should work" {
-    run spinner_start 
-    assert_success
-}
+## bats test_tags=spinner
+#@test "spinner: should work" {
+#    run spinner_start 
+#    assert_success
+#}

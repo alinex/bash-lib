@@ -21,12 +21,41 @@ setup() {
 # tsv
 ######################################################################################
 
-# bats test_tags=tsv
+# bats test_tags=tsv,tsv-headers
 @test "tsv: remove header" {
-    run bats_pipe echo $'col1\tcol2\n1,2\t3' \| tsv filter --remove-header
+    run bats_pipe echo $'col1\tcol2\n1,2\t3' \| tsv headers --remove
     assert_output -p $'1,2\t3'
     assert_success
 }
+# bats test_tags=tsv,tsv-headers
+@test "tsv: show header" {
+    run bats_pipe echo $'col1\tcol2\n1,2\t3' \| tsv headers
+    assert_output -p $'col1\ncol2'
+    assert_success
+}
+
+# bats test_tags=tsv,tsv-count
+@test "tsv: count records" {
+    run bats_pipe echo $'col1\tcol2\n1,2\t3' \| tsv count
+    assert_output 1
+    assert_success
+}
+# bats test_tags=tsv,tsv-count
+@test "tsv: count records without headers" {
+    run bats_pipe echo $'col1\tcol2\n1,2\t3' \| tsv count --no-headers
+    assert_output 2
+    assert_success
+}
+
+# bats test_tags=tsv,tsv-select
+@test "tsv: select columns" {
+    run bats_pipe echo $'col1\tcol2\n1,2\t3' \| tsv select 1
+    assert_output -p $'col1\n1,2'
+    assert_success
+}
+
+# ---------------------------------------
+
 # bats test_tags=tsv
 @test "tsv: filter string" {
     in="$(cat <<'EOT'
