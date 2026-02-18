@@ -3741,6 +3741,7 @@ else
 grep -Ev "$pattern" "$BASHLIB_HOME/$module"
 fi
 done
+printf '%s\n' "trap '' ERR"
 (($#==0))||debug "Running: $*"
 (($#==0))||escape_args "$@"
 [ ! -p /dev/stdin ]||debug "Running piped command!"

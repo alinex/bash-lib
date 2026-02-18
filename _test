@@ -18,6 +18,14 @@ DESCRIPTION=""
 #done
 ################################################################################################
 
+server=operations.host.cloud.dvb
+echo "--------"
+remote false || true
+echo 1
+remote bashlib os false || true
+echo 2
+exit
+
 dns_list | tsv filter --exact A 2 | tsv filter '^(10|172)\.' 3
 exporter job=node | tsv select 1 | sed '1d;s#.*://##;s#:.*##'
 exit

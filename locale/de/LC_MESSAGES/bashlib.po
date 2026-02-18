@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-02-17 22:34+0100\n"
+"POT-Creation-Date: 2026-02-18 19:12+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -22,7 +22,7 @@ msgstr ""
 #: module/monitoring:173 module/input:31 module/input:88 module/input:198
 #: module/input:452 module/input:651 module/log:63 module/process:376
 #: module/process:424 module/process:507 module/process:654 module/remote:84
-#: module/remote:206 module/remote:248 module/remote:286 module/database:37
+#: module/remote:207 module/remote:249 module/remote:287 module/database:37
 #: module/mattermost:311 module/mattermost:342 module/table:251
 #: module/table:504 module/crypto:41 module/git:23 module/git:61
 #: module/software:245
@@ -745,11 +745,11 @@ msgstr "Warten auf $pid ($pcpu% CPU)"
 msgid "Timeout after ${timeout}s"
 msgstr "Abbruch nach ${timeout}s"
 
-#: module/remote:292
+#: module/remote:293
 msgid "Wait till reboot is done"
 msgstr "Warten bis der Reboot fertig ist"
 
-#: module/remote:295
+#: module/remote:296
 #, sh-format
 msgid "Wait until the reboot is complete ($seconds seconds)"
 msgstr "Warten bis der Reboot fertig ist ($seconds Sekunden)"
