@@ -48,16 +48,26 @@ setup() {
 }
 
 # bats test_tags=tsv,tsv-select
-@test "tsv: select columns" {
+@test "tsv: select column" {
     run bats_pipe echo $'col1\tcol2\n1,2\t3' \| tsv select 1
     assert_output -p $'col1\n1,2'
     assert_success
 }
+# bats test_tags=tsv,tsv-select
+@test "tsv: select column by name" {
+    run bats_pipe echo $'col1\tcol2\n1,2\t3' \| tsv select col2
+    assert_output -p $'col2\n3'
+    assert_success
+}
+# bats test_tags=tsv,tsv-select
+@test "tsv: negative select with sort" {
+    run bats_pipe echo $'col2\tcol1\tcol3\n1,2\t3\t99' \| tsv select '!col3' --sort
+    assert_output -p $'col1\tcol2\n3\t1,2'
+    assert_success
+}
 
-# ---------------------------------------
-
-# bats test_tags=tsv
-@test "tsv: filter string" {
+# bats test_tags=tsv-filter
+@test "tsv: filter pattern" {
     in="$(cat <<'EOT'
 col1	col2
 4	four
@@ -71,10 +81,70 @@ col1	col2
 5	five
 EOT
 )"
-    run bats_pipe echo "$in" \| tsv --with-header filter string 2 '=*' 'f*'
+    run bats_pipe echo "$in" \| tsv filter 'f.*' 2
     assert_output "$out"
     assert_success
 }
+# bats test_tags=tsv-filter
+@test "tsv: filter exact match" {
+    in="$(cat <<'EOT'
+col1	col2
+4	four
+5	five
+10	ten
+EOT
+)"
+    out="$(cat <<'EOT'
+col1	col2
+4	four
+EOT
+)"
+    run bats_pipe echo "$in" \| tsv filter --exact four
+    assert_output "$out"
+    assert_success
+}
+# bats test_tags=tsv-filter
+@test "tsv: filter invert match" {
+    in="$(cat <<'EOT'
+col1	col2
+4	four
+5	five
+10	ten
+EOT
+)"
+    out="$(cat <<'EOT'
+col1	col2
+5	five
+10	ten
+EOT
+)"
+    run bats_pipe echo "$in" \| tsv filter --exact four --invert
+    assert_output "$out"
+    assert_success
+}
+# bats test_tags=tsv-filter
+@test "tsv: filter flag" {
+    in="$(cat <<'EOT'
+col1	col2
+4	four
+5	five
+10	ten
+EOT
+)"
+    out="$(cat <<'EOT'
+col1	col2	ok
+4	four	1
+5	five	2
+10	ten	0
+EOT
+)"
+    run bats_pipe echo "$in" \| tsv filter --flag=ok 'f.*' 2
+    assert_output "$out"
+    assert_success
+}
+
+# ---------------------------------------
+
 # bats test_tags=tsv
 @test "tsv: filter string (named column)" {
     in="$(cat <<'EOT'

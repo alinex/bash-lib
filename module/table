@@ -96,12 +96,12 @@ use software
 # Filter only rows matching the condition.
 #
 # ```bash
-# tsv filter 'foo.*bar'             # Search for rows where any field contains the regex 'foo.*bar' (case sensitive)
-# tsv filter --ignore-case 'error' message     # Case insensitive search for 'error' in the 'message' column
-# tsv filter --exact 'completed' status  # Search for exact matches of 'completed' in the 'status' column
-# tsv filter --literal 'a.b*c'      # Search for literal string 'a.b*c' in all columns
-# tsv filter --invert-match 'test'  # Invert match: select rows that do NOT match the regex 'test'
-# tsv filter --flag=<column> 'pattern' # Flag matched rows in a new column named <column>
+# tsv filter 'foo.*bar'                     # Search for rows where any field contains the regex 'foo.*bar' (case sensitive)
+# tsv filter --ignore-case 'error' message  # Case insensitive search for 'error' in the 'message' column
+# tsv filter --exact 'completed' status     # Search for exact matches of 'completed' in the 'status' column
+# tsv filter --literal 'a.b*c'              # Search for literal string 'a.b*c' in all columns
+# tsv filter --invert 'test'                # Invert match: select rows that do NOT match the regex 'test'
+# tsv filter --flag=<column> 'pattern'      # Flag matched rows in a new column named <column>
 # ```
 #
 # **slice**
@@ -212,11 +212,12 @@ use software
 #           -r, --remove                # tsv headers --remove the header
 #           # select
 #           --sort                      # sort columns in select
+#           # filter
 #           --literal                   # Treat the regex as a literal string do not interpret it
 #           --exact                     # Match the ENTIRE field exactly
-#           # filter/slice
-#           --invert                    # Filter/slice only rows that did not match
 #           --flag <column>             # Do not filter but add a filter column containing 0 for not matched, else the row number
+#           # filter/slice
+#           --invert                    # Only rows that did not match
 #           # sort
 #           --numerical                 # sort numerical
 #           --natural                   # sort natural (numbers in strings are treaded numerical)
@@ -233,7 +234,7 @@ use software
 tsv() {
     # parameter parsing
     local opt=(-d $'\t') opt2=() QSV_DEFAULT_DELIMITER=$'\t' noHeaders remove input output sort literal exact invert flag numerical natural reverse ignoreCase unique column schema table drop
-    eval set -- "$(option_parse $'n no-headers -\nr remove -\ni input-file +\no output-file +\ns sort -\n- column +\n- schema +\n-table +\n- drop -' "$@")"
+    eval set -- "$(option_parse $'n no-headers -\nr remove -\ni input-file +\no output-file +\ns sort -\n- literal -\n- exact -\n- invert -\n- flag +\n- numeric -\n- natural -\n- reverse  -\n- ignore-case -\n- unique -\n- column +\n- schema +\n-table +\n- drop -' "$@")"
     while true; do
         case "$1" in
         -n | --no-headers) noHeaders=1 && shift ;;
