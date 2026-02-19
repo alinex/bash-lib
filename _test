@@ -18,10 +18,15 @@ DESCRIPTION=""
 #done
 ################################################################################################
 
-install_rust https://github.com/dathere/qsv -- --features "feature_capable,to"
-exit
-
-echo $'col1\tcol2\n1,2\t3' | tsv headers
+in="$(
+    cat <<'EOT'
+col1	col2
+4	four
+5	five
+10	ten
+EOT
+)"
+echo "$in" | tsv to postgres --table=data
 exit
 
 server=operations.host.cloud.dvb

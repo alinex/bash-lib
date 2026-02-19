@@ -36,17 +36,23 @@
 # - `directory` check that value is an existing directory
 # - `readable` check that value is a file readable by user
 # - `writable` check that value is a file writable by user
+# - `url` check that it is a full url
 #
 # Usage:    is <check> [options] -- <value>
-# Options:  d, die              # used in @is to stop with error instead of return state
-#           o, output=[<variable-name>]  # will write the sanitized value into variable or output it to stdout
-#           n, name=<string>    # used in @is to display variable name in `die` message
-#           m, message=<string> # additional message like usage
-#           s, sanitize         # for integer
-#           min=<num>           # for integer
-#           max=<num>           # for integer
-#           allow=<words>       # for enum (space separated)
-# Output:   <value>             # may be sanitized
+# Options:  # general options
+#           -d, --die                       # used in @is to stop with error instead of return state
+#           -o, --output=[<variable-name>]  # will write the sanitized value into variable or output it to stdout
+#           -n, --name=<string>             # used in @is to display variable name in `die` message
+#           -m, --message=<string>          # additional message like usage
+#           # for integer
+#           -s, --sanitize                  # remove invalid characters
+#           --min=<num>
+#           --max=<num>
+#           # enum/url
+#           --allow=<words>                 # space separated (protocol in url)
+#           # url
+#           --exists                        # url is reachable
+# Output:   <value>                         # may be sanitized
 # Exit:     with message if incorrect value
 # Example:  - &is explains some regular use cases
 #           - `is integer --name=arguments --max=2 -- $# >/dev/null` # mostly only check max, if all args are checked separately
@@ -56,8 +62,8 @@
 #           - `if is integer age --min=18 -- "$1"; then`
 is() {
     # parameter parsing
-    eval set -- "$(option_parse $'n name +\nd die -\ns sanitize -\n- min +\n- max +\n- allow +\no output ?\nm message +' "$@")"
-    local name die sanitize min max allow message output
+    eval set -- "$(option_parse $'n name +\nd die -\ns sanitize -\n- min +\n- max +\n- allow +\no output ?\nm message +\n- exists -' "$@")"
+    local name die sanitize min max allow message output exists
     # shellcheck disable=SC2015
     # shellcheck disable=SC2059
     while true; do
@@ -70,6 +76,7 @@ is() {
         --min) [[ "$2" =~ ^[-+]?[0-9]+([.][0-9]+)?$ ]] && min="$2" && shift 2 || die "$(printf "$(gettext "Parameter %s needs number")" min)" ;;
         --max) [[ "$2" =~ ^[-+]?[0-9]+([.][0-9]+)?$ ]] && max="$2" && shift 2 || die "$(printf "$(gettext "Parameter %s needs number")" max)" ;;
         --allow) [ -n "$2" ] && allow="$2" && shift 2 || die "$(gettext "A list of words is needed")" ;;
+        --exists) exists=1 && shift ;;
         --) shift && break ;;
         *) die "$(gettext "Unrecognized option"): $1" ;;
         esac
@@ -190,6 +197,19 @@ is() {
         [ -n "$allow" ] || die "$message$(gettext "A list with --allow=<words> is needed for enum check")"
         if [[ " $allow " != *" $val "* ]]; then
             [ -z "$die" ] && return 1 || die "$message$(eval_gettext '"$name" is set to "${val}" but has to be one of: $allow')"
+        fi
+        ;;
+    url)
+        local proto
+        proto="${val%%://*}"
+        if [ -n "$allow" ]; then
+            if [[ " $allow " != *" $proto "* ]]; then
+                [ -z "$die" ] && return 1 || die "$message$(eval_gettext '"$name" is set to "${val}" but only allowed protocols are: $allow')"
+            fi
+        fi
+        [[ "$val" =~ ^(https?|ftp|file)://[a-zA-Z0-9] ]] || die "$message$(eval_gettext '"$name" is set to "${val}" but this is not a valid URL')"
+        if [ -n "$exists" ]; then
+            curl -s --head --fail "$val" >/dev/null 2>&1 || die "$message$(eval_gettext '"$name" should exist but "${val}" is not reachable')"
         fi
         ;;
     date)

@@ -5,6 +5,7 @@ But on release they will be merged with semantical versioning into the master br
 
 ## Development - v2.6.0
 
+- add [is url](doc/function/is.md) validation
 - add [install_rust](doc/function/install_rust.md) to build rust from source
 - add [tsv headers --remove](doc/function/tsv.md) to easily remove the first (header) line
 - activate [tsv to postgres...](doc/function/tsv.md) with qsv pro integration

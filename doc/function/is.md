@@ -11,19 +11,24 @@ is <check> [options] -- <value>
 ### Options
 
 ```bash
-d, die              # used in [`is`](is.md) to stop with error instead of return state
-o, output=[<variable-name>]  # will write the sanitized value into variable or output it to stdout
-n, name=<string>    # used in [`is`](is.md) to display variable name in `die` message
-m, message=<string> # additional message like usage
-s, sanitize         # for integer
-min=<num>           # for integer
-max=<num>           # for integer
-allow=<words>       # for enum (space separated)
+# general options
+-d, --die                       # used in [`is`](is.md) to stop with error instead of return state
+-o, --output=[<variable-name>]  # will write the sanitized value into variable or output it to stdout
+-n, --name=<string>             # used in [`is`](is.md) to display variable name in `die` message
+-m, --message=<string>          # additional message like usage
+# for integer
+-s, --sanitize                  # remove invalid characters
+--min=<num>
+--max=<num>
+# enum/url
+--allow=<words>                 # space separated (protocol in url)
+# url
+--exists                        # url is reachable
 ```
 
 ### Output (stdout)
 
-`<value>`             # may be sanitized
+`<value>`                         # may be sanitized
 
 ### Examples
 
@@ -66,5 +71,6 @@ The following checks are implemented:
 - `directory` check that value is an existing directory
 - `readable` check that value is a file readable by user
 - `writable` check that value is a file writable by user
+- `url` check that it is a full url
 
 Exit:     with message if incorrect value

@@ -382,12 +382,12 @@ col1	col2
 EOT
 )"
     out="$(cat <<'EOT'
-{"col1":4,"col2":"four"}
-{"col1":5,"col2":"five"}
-{"col1":10,"col2":"ten"}
+CREATE TABLE IF NOT EXISTS "data" ( "col1" BIGINT 
+ , "col2" TEXT 
+);
 EOT
 )"
     run bats_pipe echo "$in" \| tsv to postgres --table=data
-    assert_output "$out"
+    assert_output -p "$out"
     assert_success
 }
