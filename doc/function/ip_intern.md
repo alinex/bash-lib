@@ -12,10 +12,6 @@ ip_intern <format>
 
 `<ip>`
 
-### Tools used
-
-- ip - show / manipulate routing, network devices, interfaces and tunnels
-- 
 
 ### Description
 

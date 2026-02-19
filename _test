@@ -18,6 +18,9 @@ DESCRIPTION=""
 #done
 ################################################################################################
 
+install_rust https://github.com/dathere/qsv -- --features "feature_capable,to"
+exit
+
 echo $'col1\tcol2\n1,2\t3' | tsv headers
 exit
 

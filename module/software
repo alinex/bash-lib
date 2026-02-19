@@ -194,6 +194,54 @@ installed() {
     return 0
 }
 
+# Build and Install Rust Repository
+#
+# This will install/update rust, clone the repo, build the binary and install it.
+#
+# **Attention: It is always better to use pre-build packages because newer code may break something and you may have some problems to get it build correctly again.**
+#
+# Usage:    install_rust [options] <repo> -- <flags>
+# Options:  -n, --nightly   # build on nightly instead stable rust
+install_rust() {
+    # parameter parsing
+    local nightly repo work bin
+    eval set -- "$(option_parse $'n nightly -' "$@")"
+    while true; do
+        case "$1" in
+        -n | --nightly) nightly="+nightly" && shift ;;
+        --) shift && break ;;
+        *) die "$(gettext "Unrecognized option"): $1" ;;
+        esac
+    done
+    is set --name=repo --die --output=repo -- "$1" && shift
+    # install/update rust itself
+    install curl build-essential pkg-config libssl-dev
+    if command -v rustup >/dev/null; then
+        # update
+        rustup update
+    else
+        # install rust
+        curl https://sh.rustup.rs -sSf | sh
+        source ~/.cargo/env
+    fi
+    if is set $nightly; then
+        rustup toolchain install nightly
+    fi
+    # download
+    work="$(mktemp -d --random)"
+    echo "git clone $repo $work"
+    git clone "$repo" "$work"
+    cd $work
+    # build/install
+    cargo $nightly build --release "$@"
+    bin=$(cargo metadata --format-version=1 --no-deps | jq -r '.packages[] | select(.name=="qsv") | .targets[] | select(.kind[]=="bin") | .name' | heade -1)
+    # install
+    sudo cp target/release/$bin /usr/local/bin/
+    sudo chmod 755 /usr/local/bin/$bin
+    cd
+    rm -rf "$work"
+}
+
 ######################################################################################
 ### Semantic Versioning
 ######################################################################################

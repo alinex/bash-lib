@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-02-18 19:12+0100\n"
+"POT-Creation-Date: 2026-02-19 11:46+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -23,9 +23,9 @@ msgstr ""
 #: module/input:452 module/input:651 module/log:63 module/process:376
 #: module/process:424 module/process:507 module/process:654 module/remote:84
 #: module/remote:207 module/remote:249 module/remote:287 module/database:37
-#: module/mattermost:311 module/mattermost:342 module/table:251
-#: module/table:504 module/crypto:41 module/git:23 module/git:61
-#: module/software:245
+#: module/mattermost:311 module/mattermost:342 module/table:259
+#: module/crypto:41 module/git:23 module/git:61 module/software:213
+#: module/software:293
 msgid "Unrecognized option"
 msgstr ""
 
@@ -405,7 +405,7 @@ msgstr ""
 msgid "Service"
 msgstr ""
 
-#: module/network:57
+#: module/network:56
 msgid "IP\\tInterface"
 msgstr ""
 
@@ -729,40 +729,40 @@ msgstr ""
 msgid "Wait until the reboot is complete ($seconds seconds)"
 msgstr ""
 
-#: module/software:289
+#: module/software:337
 msgid "are identical versions"
 msgstr ""
 
-#: module/software:293 module/software:312
+#: module/software:341 module/software:360
 #, sh-format
 msgid "is an upgrade of one major version"
 msgid_plural "is an upgrade of $step major versions"
 msgstr[0] ""
 msgstr[1] ""
 
-#: module/software:296 module/software:309
+#: module/software:344 module/software:357
 #, sh-format
 msgid "is an upgrade of one minor version"
 msgid_plural "is an upgrade of $step minor versions"
 msgstr[0] ""
 msgstr[1] ""
 
-#: module/software:299
+#: module/software:347
 #, sh-format
 msgid "is an upgrade of one patch version"
 msgid_plural "is an upgrade of $step patch versions"
 msgstr[0] ""
 msgstr[1] ""
 
-#: module/software:301
+#: module/software:349
 msgid "is a developer upgrade"
 msgstr ""
 
-#: module/software:303
+#: module/software:351
 msgid "is a developer downgrade"
 msgstr ""
 
-#: module/software:306
+#: module/software:354
 #, sh-format
 msgid "is a downgrade of one patch version"
 msgid_plural "is a downgrade of $step patch versions"

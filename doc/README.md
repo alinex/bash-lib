@@ -471,6 +471,7 @@ Software management functions.
 | --- | --- |
 | [`install`](function/install.md) | Install software package |
 | [`installed`](function/installed.md) | Check for installed commands |
+| [`install_rust`](function/install_rust.md) | Build and Install Rust Repository |
 | [`semver`](function/semver.md) | Parse semantic version number |
 | [`semver_diff`](function/semver_diff.md) | Calculate difference |
 
@@ -482,7 +483,6 @@ Module with modifiers for csv/tsv tables.
 | --- | --- |
 | [`csv`](function/csv.md) | Transform comma separated table |
 | [`tsv`](function/tsv.md) | Transform tab separated table |
-| [`otsv`](function/otsv.md) | Transform tab separated table |
 
 ### Trivy Module
 

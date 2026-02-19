@@ -22,21 +22,29 @@
 ### Options
 
 ```bash
+# general options
 -i, --input-file <file>     # file to read from instead of STDIN
 -o, --output-file <file>    # file to write result to instead of STDOUT
 -n, --no-headers            # input is without header
+# headers
 -r, --remove                # tsv headers --remove the header
+# select
 --sort                      # sort columns in select
+# filter
 --literal                   # Treat the regex as a literal string do not interpret it
 --exact                     # Match the ENTIRE field exactly
---invert                    # Filter/slice only rows that did not match
 --flag <column>             # Do not filter but add a filter column containing 0 for not matched, else the row number
+# filter/slice
+--invert                    # Only rows that did not match
+# sort
 --numerical                 # sort numerical
 --natural                   # sort natural (numbers in strings are treaded numerical)
 --reverse                   # sort in reverse order
 --ignore-case               # ignore case in filter and sorting
---column <num>              # column to colorize
 --unique                    # keep only one line per sorted value
+# color
+--column <num>              # column to colorize
+# to
 --schema <name>             # schema for to postgres export
 --table <name>              # table name
 --drop                      # drop table before insert to postgres
@@ -56,8 +64,8 @@ Prints the column number and name (space separated) of the first row in the data
 
 
 ```
-1   Number
-2   Name
+Number
+Name
 ```
 
 Or you can remove the header line:
@@ -105,12 +113,12 @@ Filter only rows matching the condition.
 
 
 ```bash
-tsv filter 'foo.*bar'             # Search for rows where any field contains the regex 'foo.*bar' (case sensitive)
-tsv filter --ignore-case 'error' message     # Case insensitive search for 'error' in the 'message' column
-tsv filter --exact 'completed' status  # Search for exact matches of 'completed' in the 'status' column
-tsv filter --literal 'a.b*c'      # Search for literal string 'a.b*c' in all columns
-tsv filter --invert-match 'test'  # Invert match: select rows that do NOT match the regex 'test'
-tsv filter --flag=<column> 'pattern' # Flag matched rows in a new column named <column>
+tsv filter 'foo.*bar'                     # Search for rows where any field contains the regex 'foo.*bar' (case sensitive)
+tsv filter --ignore-case 'error' message  # Case insensitive search for 'error' in the 'message' column
+tsv filter --exact 'completed' status     # Search for exact matches of 'completed' in the 'status' column
+tsv filter --literal 'a.b*c'              # Search for literal string 'a.b*c' in all columns
+tsv filter --invert 'test'                # Invert match: select rows that do NOT match the regex 'test'
+tsv filter --flag=<column> 'pattern'      # Flag matched rows in a new column named <column>
 ```
 
 **slice**
@@ -120,7 +128,7 @@ Get only the rows in the range specified.
 
 ```bash
 tsv slice 2               # Slice from the 3rd record to the end
-tsv slice 0 2             # Slice the first three records
+tsv slice 0 2             # Slice the first two records
 tsv slice -1              # Slice the last record
 tsv slice -10             # Slice the last 10 records
 tsv slice -10 --invert    # Get everything except the last 10 records
@@ -133,7 +141,7 @@ Sorts data in lexicographical, natural, numerical, reverse, unique or random ord
 
 ```bash
 tsv sort                      # Sort lexicographical 1, 10, 11, ..., 2...
-tsv sort --numerical          # Sort numerical: 1, 2, 3, .... 10, 11...
+tsv sort --numeric            # Sort numerical: 1, 2, 3, .... 10, 11...
 tsv sort --natural            # Sort natural: file1, file2, .... file10...
 tsv sort --case-insensitive   # Sort case insensitive
 tsv sort --unique --reverse   # Sort in reverse order and show only rows unique in the sort columns

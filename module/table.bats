@@ -143,10 +143,8 @@ EOT
     assert_success
 }
 
-# ---------------------------------------
-
-# bats test_tags=tsv
-@test "tsv: filter string (named column)" {
+# bats test_tags=tsv-slice
+@test "tsv: get slice" {
     in="$(cat <<'EOT'
 col1	col2
 4	four
@@ -160,149 +158,112 @@ col1	col2
 5	five
 EOT
 )"
-    run bats_pipe echo "$in" \| tsv --with-header filter string col2 '=*' 'f*'
+    run bats_pipe echo "$in" \| tsv slice 0 2
+    assert_output "$out"
+    assert_success
+}
+# bats test_tags=tsv-slice
+@test "tsv: invert slice" {
+    in="$(cat <<'EOT'
+col1	col2
+4	four
+5	five
+10	ten
+EOT
+)"
+    out="$(cat <<'EOT'
+col1	col2
+10	ten
+EOT
+)"
+    run bats_pipe echo "$in" \| tsv slice 0 2 --invert
     assert_output "$out"
     assert_success
 }
 
-# bats test_tags=tsv
-@test "tsv: to csv" {
-    run bats_pipe echo $'col1\tcol2\n1,2\t3' \| tsv to csv
-    assert_output -p $'col1,col2\n"1,2",3'
-    assert_success
-}
-# bats test_tags=tsv
-@test "tsv: to pprint" {
+# bats test_tags=tsv-sort
+@test "tsv: sort" {
     in="$(cat <<'EOT'
 col1	col2
-1,2	3
+4	four
+5	five
+10	ten
 EOT
 )"
     out="$(cat <<'EOT'
-col1  col2
-1,2   3
+col1	col2
+10	ten
+4	four
+5	five
 EOT
 )"
-    run bats_pipe echo "$in" \| tsv to pprint
+    run bats_pipe echo "$in" \| tsv sort
+    assert_output "$out"
+    assert_success
+}
+# bats test_tags=tsv-sort
+@test "tsv: sort numeric" {
+    in="$(cat <<'EOT'
+col1	col2
+4	four
+5	five
+10	ten
+EOT
+)"
+    out="$(cat <<'EOT'
+col1	col2
+4	four
+5	five
+10	ten
+EOT
+)"
+    run bats_pipe echo "$in" \| tsv sort --numeric
+    assert_output "$out"
+    assert_success
+}
+# bats test_tags=tsv-sort
+@test "tsv: sort unique" {
+    in="$(cat <<'EOT'
+col1	col2
+4	four
+5	five
+4	vier
+10	ten
+EOT
+)"
+    out="$(cat <<'EOT'
+col1	col2
+4	four
+5	five
+10	ten
+EOT
+)"
+    run bats_pipe echo "$in" \| tsv sort --numeric 1 --unique
+    assert_output "$out"
+    assert_success
+}
+# bats test_tags=tsv-sort
+@test "tsv: reverse sort" {
+    in="$(cat <<'EOT'
+col1	col2
+4	four
+5	five
+10	ten
+EOT
+)"
+    out="$(cat <<'EOT'
+col1	col2
+10	ten
+4	four
+5	five
+EOT
+)"
+    run bats_pipe echo "$in" \| tsv sort --reverse col2
     assert_output "$out"
     assert_success
 }
 
-# bats test_tags=tsv
-@test "tsv: crop 2 10" {
-    in="$(cat <<'EOT'
-col1	col2
-number1	a very long line with text which should be cropped
-EOT
-)"
-    out="$(cat <<'EOT'
-col1	col2
-number1	a very lo…
-EOT
-)"
-    run bats_pipe echo "$in" \| tsv crop 2 10
-    assert_output "$out"
-    assert_success
-}
-# bats test_tags=tsv
-@test "tsv: crop col2 10" {
-    in="$(cat <<'EOT'
-col1	col2
-number1	a very long line with text which should be cropped
-EOT
-)"
-    out="$(cat <<'EOT'
-col1	col2
-number1	a very lo…
-EOT
-)"
-    run bats_pipe echo "$in" \| tsv crop col2 10
-    assert_output "$out"
-    assert_success
-}
-
-# bats test_tags=tsv
-@test "tsv: sort 2" {
-    in="$(cat <<'EOT'
-col1	col2
-4	four
-5	five
-10	ten
-EOT
-)"
-    out="$(cat <<'EOT'
-col1	col2
-5	five
-4	four
-10	ten
-EOT
-)"
-    run bats_pipe echo "$in" \| tsv sort 2
-    assert_output "$out"
-    assert_success
-}
-# bats test_tags=tsv
-@test "tsv: sort col1 (with header)" {
-    in="$(cat <<'EOT'
-col1	col2
-4	four
-5	five
-10	ten
-EOT
-)"
-    out="$(cat <<'EOT'
-col1	col2
-10	ten
-4	four
-5	five
-EOT
-)"
-    run bats_pipe echo "$in" \| tsv --with-header sort col1
-    assert_output "$out"
-    assert_success
-}
-# bats test_tags=tsv
-@test "tsv: sort col1" {
-    in="$(cat <<'EOT'
-col1	col2
-4	four
-5	five
-10	ten
-EOT
-)"
-    out="$(cat <<'EOT'
-10	ten
-4	four
-5	five
-col1	col2
-EOT
-)"
-    run bats_pipe echo "$in" \| tsv sort col1
-    assert_output "$out"
-    assert_success
-}
-# bats test_tags=tsv
-@test "tsv: sort col1 numeric" {
-    in="$(cat <<'EOT'
-col1	col2
-4	four
-5	five
-10	ten
-EOT
-)"
-    out="$(cat <<'EOT'
-col1	col2
-4	four
-5	five
-10	ten
-EOT
-)"
-    run bats_pipe echo "$in" \| tsv sort col1 numeric
-    assert_output "$out"
-    assert_success
-}
-
-# bats test_tags=tsv
+# bats test_tags=tsv-reverse
 @test "tsv: reverse" {
     in="$(cat <<'EOT'
 col1	col2
@@ -312,18 +273,19 @@ col1	col2
 EOT
 )"
     out="$(cat <<'EOT'
+col1	col2
 10	ten
 5	five
 4	four
-col1	col2
 EOT
 )"
     run bats_pipe echo "$in" \| tsv reverse
     assert_output "$out"
     assert_success
 }
-# bats test_tags=tsv
-@test "tsv: reverse (with header)" {
+
+# bats test_tags=tsv-edit
+@test "tsv: edit" {
     in="$(cat <<'EOT'
 col1	col2
 4	four
@@ -333,12 +295,99 @@ EOT
 )"
     out="$(cat <<'EOT'
 col1	col2
-10	ten
+3	four
 5	five
-4	four
+10	ten
 EOT
 )"
-    run bats_pipe echo "$in" \| tsv --with-header reverse
+    run bats_pipe echo "$in" \| tsv edit 0 0 3
+    assert_output "$out"
+    assert_success
+}
+
+# bats test_tags=tsv-crop
+@test "tsv: crop" {
+    in="$(cat <<'EOT'
+col1	col2
+4	fourthousand
+5	five
+10	ten
+EOT
+)"
+    out="$(cat <<'EOT'
+col1	col2
+4	four…
+5	five
+10	ten
+EOT
+)"
+    run bats_pipe echo "$in" \| tsv crop col2 5
+    assert_output "$out"
+    assert_success
+}
+
+# bats test_tags=tsv-print
+@test "tsv: print" {
+    in="$(cat <<'EOT'
+col1	col2
+4	four
+5	five
+10	ten
+EOT
+)"
+    out="$(cat <<'EOT'
+col1  col2
+4     four
+5     five
+10    ten
+EOT
+)"
+    run bats_pipe echo "$in" \| tsv print
+    assert_output "$out"
+    assert_success
+}
+
+# bats test_tags=tsv-to
+@test "tsv: to csv" {
+    run bats_pipe echo $'col1\tcol2\n1,2\t3' \| tsv to csv
+    assert_output -p $'col1,col2\n"1,2",3'
+    assert_success
+}
+# bats test_tags=tsv-to
+@test "tsv: to json" {
+    in="$(cat <<'EOT'
+col1	col2
+4	four
+5	five
+10	ten
+EOT
+)"
+    out="$(cat <<'EOT'
+{"col1":4,"col2":"four"}
+{"col1":5,"col2":"five"}
+{"col1":10,"col2":"ten"}
+EOT
+)"
+    run bats_pipe echo "$in" \| tsv to json
+    assert_output "$out"
+    assert_success
+}
+# bats test_tags=tsv-to
+@test "tsv: to postgres" {
+    in="$(cat <<'EOT'
+col1	col2
+4	four
+5	five
+10	ten
+EOT
+)"
+    out="$(cat <<'EOT'
+{"col1":4,"col2":"four"}
+{"col1":5,"col2":"five"}
+{"col1":10,"col2":"ten"}
+EOT
+)"
+    run bats_pipe echo "$in" \| tsv to postgres --table=data
     assert_output "$out"
     assert_success
 }
