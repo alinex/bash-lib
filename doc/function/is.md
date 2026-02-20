@@ -24,6 +24,7 @@ is <check> [options] -- <value>
 --allow=<words>                 # space separated (protocol in url)
 # url
 --exists                        # url is reachable
+--ok                            # url has code 2xx
 ```
 
 ### Output (stdout)
