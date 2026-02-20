@@ -1683,6 +1683,25 @@ sort -f name then \
 rename name,NAME,record_type,TYPE,record_data,CONTENT,record_ttl,TTL \
 "$list"|awk 'NR == 1 || /'"$1"'/'
 }
+docker_latest_version(){
+is set -nsoftware -d -- "$1"
+case $1 in
+*.elastic.co/*)curl -s https://artifacts-api.elastic.co/v1/versions|jq -r '.versions[]'|grep -E '^[0-9]\.[0-9]+\.?[0-9]*$'|sort -V|tail -1||true
+;;
+neo4j)_docker_registry_tag_latest "$1" '^20[0-9]{2}\.[0-9]+*$'
+;;
+mongo)_docker_registry_tag_latest "$1" '^[0-9]+\.0$'
+;;
+*)_docker_registry_tag_latest "$1" '^[0-9]+\.[0-9]+\.?[0-9]*$'
+esac
+}
+_docker_registry_tag_latest(){
+curl -s "https://registry.hub.docker.com/v2/repositories/library/$1/tags?page_size=200"|jq -r '.results[].name' 2>/dev/null|grep -E "$2"|sort -V|tail -1||true
+}
+docker_cleanup(){
+sudo docker system prune -a -f
+sudo docker volume prune -f
+}
 basename(){
 is integer -narguments --max=1 -d $#
 local path

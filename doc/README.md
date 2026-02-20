@@ -320,6 +320,15 @@ Module with DNS methods.
 | [`powerdns`](function/powerdns.md) | Query PowerDNS to get a list of managed domain names |
 | [`plusserver_dns`](function/plusserver_dns.md) | Query Plusserver DNS to get a list of managed domain names |
 
+### Docker Module
+
+Management of docker.
+
+| Variable/Function | Description |
+| --- | --- |
+| [`docker_latest_version`](function/docker_latest_version.md) | Get the latest version number |
+| [`docker_cleanup`](function/docker_cleanup.md) | Cleanup docker installation |
+
 ### File Module
 
 File and directory helpers.
