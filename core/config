@@ -12,14 +12,3 @@ BASHLIB_HOME=${BASHLIB_HOME:-$HOME/bashlib}
 
 # Set to level 0..9 (higher is more verbose) or specify function patterns as comma separated list
 DEBUG=${DEBUG-}
-
-######################################################################################
-### Colors used in Core
-######################################################################################
-
-# Reset all
-CC_RESET=$'\033[0m'
-# Set color for critical/disaster massages used by @die
-CC_CRITICAL=$'\033[1;45m'
-# Set text color to black
-CC_BLACK=$'\033[30m'
