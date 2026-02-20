@@ -327,9 +327,6 @@ esac
 }
 BASHLIB_HOME=${BASHLIB_HOME:-$HOME/bashlib}
 DEBUG=${DEBUG-}
-CC_RESET=$'\033[0m'
-CC_CRITICAL=$'\033[1;45m'
-CC_BLACK=$'\033[30m'
 now(){
 is integer -narguments --max=0 -d $#
 date +%s
@@ -373,9 +370,11 @@ secs="$(date_diff "$(now)" "$1")"
 ((secs>0))||die "Date has to be in the future for sleep_until"
 sleep "$secs"
 }
+_YEAR_SECONDS=31557600
+_MONTH_SECONDS=2629800
 duration_format(){
 is integer -narguments --max=2 -d $#
-is enum -nformat --allow="seconds minutes hours days human" -d -- "$1"
+is enum -nformat --allow="seconds minutes hours days weeks months years human" -d -- "$1"
 local value
 [[ "$2" =~ ^-?[0-9]+$ ]]&&value="$2"||value="$(_parse_duration "$2")"
 case $1 in
@@ -383,6 +382,9 @@ seconds)printf '%s' "$value";;
 minutes)printf '%s' $((value/60));;
 hours)printf '%s' $((value/3600));;
 days)printf '%s' $((value/86400));;
+weeks)printf '%s' $((value/604800));;
+months)printf '%s' $((value/_MONTH_SECONDS));;
+years)printf '%s' $((value/_YEAR_SECONDS));;
 human)_format_duration "$value"
 esac
 }
@@ -410,6 +412,8 @@ m|min|mins|minute|minutes)total=$((total+v_num*60));;
 h|hr|hrs|hour|hours)total=$((total+v_num*3600));;
 d|day|days)total=$((total+v_num*86400));;
 w|week|weeks)total=$((total+v_num*604800));;
+mo|mon|month|months)total=$((total+v_num*_MONTH_SECONDS));;
+y|yr|year|years)total=$((total+v_num*_YEAR_SECONDS));;
 *)printf "$(gettext 'Invalid duration unit'): %s\n" "$unit" >&2
 return 1
 esac
@@ -423,12 +427,16 @@ if ((total<0));then
 sign="-"
 total=$((-total))
 fi
-local w=$((total/604800))
-local d=$((total/86400))
+local y=$((total/_YEAR_SECONDS))
+local mo=$(((total%_YEAR_SECONDS)/_MONTH_SECONDS))
+local w=$(((total%_MONTH_SECONDS)/604800))
+local d=$(((total%604800)/86400))
 local h=$(((total%86400)/3600))
 local m=$(((total%3600)/60))
 local s=$((total%60))
 local out=""
+((y))&&out+="${x}y "
+((mo))&&out+="${mo}mo "
 ((w))&&out+="${w}w "
 ((d))&&out+="${d}d "
 ((h))&&out+="${h}h "

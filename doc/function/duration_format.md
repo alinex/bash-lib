@@ -16,7 +16,7 @@ duration_format <format> <seconds>|<human>
 ### Description
 
 
-This function can convert into seconds and back into human format as you like. Months or years are not possible because they are not accurately, better use 30d or 365d for that.
+This function can convert into seconds and back into human format as you like.
 
 The following `<format>` specifiers are possible:
 
@@ -24,5 +24,18 @@ The following `<format>` specifiers are possible:
 - `minutes`     - using floor 110s = 1 (minute)
 - `hours`       - using floor
 - `days`        - using floor
-- `human`       - like 1h 30m, 5w, 30s # spaces between different units are optional
+- `weeks`       - using floor
+- `months`      - using floor and using 365.25 / 12 days
+- `years`       - using floor and using 365.12 days
+- `human`       - like 5w, 1h 30m, 30s # spaces between different units are optional
+
+Within the human string you may use the following number parts:
+
+- seconds: `<num>`, s, sec, secs, second, seconds
+- minute: m, min, mins, minute, minutes
+- hour: h, hr, hrs, hour, hours
+- day: d, day, days
+- week: w, week, weeks
+- month: mo, mon, month, months
+- year: y, yr, year, years
 

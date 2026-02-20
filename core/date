@@ -111,9 +111,12 @@ sleep_until() {
 ### Duration intervals
 ######################################################################################
 
+_YEAR_SECONDS=31557600 # 365.25 days
+_MONTH_SECONDS=2629800 # 365.25 / 12 days
+
 # Format duration in different numbers or human readable
 #
-# This function can convert into seconds and back into human format as you like. Months or years are not possible because they are not accurately, better use 30d or 365d for that.
+# This function can convert into seconds and back into human format as you like.
 #
 # The following <format> specifiers are possible:
 #
@@ -121,22 +124,38 @@ sleep_until() {
 # - `minutes`     - using floor 110s = 1 (minute)
 # - `hours`       - using floor
 # - `days`        - using floor
-# - `human`       - like 1h 30m, 5w, 30s # spaces between different units are optional
+# - `weeks`       - using floor
+# - `months`      - using floor and using 365.25 / 12 days
+# - `years`       - using floor and using 365.12 days
+# - `human`       - like 5w, 1h 30m, 30s # spaces between different units are optional
+#
+# Within the human string you may use the following number parts:
+#
+# - seconds: <num>, s, sec, secs, second, seconds
+# - minute: m, min, mins, minute, minutes
+# - hour: h, hr, hrs, hour, hours
+# - day: d, day, days
+# - week: w, week, weeks
+# - month: mo, mon, month, months
+# - year: y, yr, year, years
 #
 # Usage:    duration_format <format> <seconds>|<human>
 # Output:   <duration> in selected format
 duration_format() {
     is integer --name=arguments --max=2 --die -- $#
-    is enum --name=format --allow="seconds minutes hours days human" --die -- "$1"
+    is enum --name=format --allow="seconds minutes hours days weeks months years human" --die -- "$1"
     local value
-    is integer -- "$2" && value="$2" || value="$(_parse_duration "$2")"
+    is integer -- "$2" && value=$2 || value="$(_parse_duration "$2")"
     # processing
     case $1 in
-    seconds) printf '%s' "$value" ;;
+    seconds) printf '%s' $value ;;
     minutes) printf '%s' $((value / 60)) ;;
     hours) printf '%s' $((value / 3600)) ;;
     days) printf '%s' $((value / 86400)) ;;
-    human) _format_duration "$value" ;;
+    weeks) printf '%s' $((value / 604800)) ;;
+    months) printf '%s' $((value / $_MONTH_SECONDS)) ;;
+    years) printf '%s' $((value / $_YEAR_SECONDS)) ;;
+    human) _format_duration $value ;;
     esac
 }
 
@@ -171,6 +190,8 @@ _parse_duration() {
         h | hr | hrs | hour | hours) total=$((total + v_num * 3600)) ;;
         d | day | days) total=$((total + v_num * 86400)) ;;
         w | week | weeks) total=$((total + v_num * 604800)) ;;
+        mo | mon | month | months) total=$((total + v_num * $_MONTH_SECONDS)) ;;
+        y | yr | year | years) total=$((total + v_num * $_YEAR_SECONDS)) ;;
         *)
             printf "$(gettext 'Invalid duration unit'): %s\n" "$unit" >&2
             return 1
@@ -191,13 +212,17 @@ _format_duration() {
         sign="-"
         total=$((-total))
     fi
-    local w=$((total / 604800))
-    local d=$((total / 86400))
+    local y=$((total / $_YEAR_SECONDS))
+    local mo=$(((total % $_YEAR_SECONDS) / $_MONTH_SECONDS))
+    local w=$(((total % $_MONTH_SECONDS) / 604800))
+    local d=$(((total % 604800) / 86400))
     local h=$(((total % 86400) / 3600))
     local m=$(((total % 3600) / 60))
     local s=$((total % 60))
     # Build string
     local out=""
+    ((y)) && out+="${x}y "
+    ((mo)) && out+="${mo}mo "
     ((w)) && out+="${w}w "
     ((d)) && out+="${d}d "
     ((h)) && out+="${h}h "

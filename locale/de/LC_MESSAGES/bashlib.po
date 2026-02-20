@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-02-19 19:27+0100\n"
+"POT-Creation-Date: 2026-02-20 21:43+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -53,7 +53,7 @@ msgstr "+%A, %d. %B %Y um %H:%M:%S"
 msgid "+%A, %B %d, %Y"
 msgstr "+%A, %d. %B %Y"
 
-#: core/date:175
+#: core/date:196
 msgid "Invalid duration unit"
 msgstr "Ungültige Einheit für Zeitdauer"
 
@@ -177,14 +177,12 @@ msgstr ""
 #: core/validator:207
 #, sh-format
 msgid "\"$name\" is set to \"${val}\" but only allowed protocols are: $allow"
-msgstr ""
-"\"$name\" ist \"${val}\" aber erlaubte Protokolle sind nur: $allow"
+msgstr "\"$name\" ist \"${val}\" aber erlaubte Protokolle sind nur: $allow"
 
 #: core/validator:210
 #, sh-format
 msgid "\"$name\" is set to \"${val}\" but this is not a valid URL"
-msgstr ""
-"\"$name\" ist \"${val}\" aber das ist keine gültige URL"
+msgstr "\"$name\" ist \"${val}\" aber das ist keine gültige URL"
 
 #: core/validator:212
 #, sh-format
