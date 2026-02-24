@@ -22,6 +22,8 @@ is <check> [options] -- <value>
 --max=<num>
 # enum/url
 --allow=<words>                 # space separated (protocol in url)
+# domain
+--exists                        # domain is valid
 # url
 --exists                        # url is reachable
 --ok                            # url has code 2xx
@@ -73,6 +75,7 @@ The following checks are implemented:
 - `directory` check that value is an existing directory
 - `readable` check that value is a file readable by user
 - `writable` check that value is a file writable by user
+- `domain` check for a domain name (part of the url)
 - `url` check that it is a full url
 
 Exit:     with message if incorrect value

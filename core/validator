@@ -37,6 +37,7 @@
 # - `directory` check that value is an existing directory
 # - `readable` check that value is a file readable by user
 # - `writable` check that value is a file writable by user
+# - `domain` check for a domain name (part of the url)
 # - `url` check that it is a full url
 #
 # Usage:    is <check> [options] -- <value>
@@ -51,6 +52,8 @@
 #           --max=<num>
 #           # enum/url
 #           --allow=<words>                 # space separated (protocol in url)
+#           # domain
+#           --exists                        # domain is valid
 #           # url
 #           --exists                        # url is reachable
 #           --ok                            # url has code 2xx
@@ -202,8 +205,16 @@ is() {
             [ -z "$die" ] && return 1 || die "$message$(eval_gettext '"$name" is set to "${val}" but has to be one of: $allow')"
         fi
         ;;
+    domain)
+        if [[ ! "$val" =~ ^([A-Za-z0-9](-?[A-Za-z0-9])*\.)+[A-Za-z]{2,}$ ]]; then
+            [ -z "$die" ] && return 1 || die "$message$(eval_gettext '"$name" is set to "${val}" but this is no valid domain name')"
+        fi
+        if [ -n "$exists" ] && [ -z "$(ip_resolve $val)" ]; then
+            [ -z "$die" ] && return 1 || die "$message$(eval_gettext '"$name" is set to "${val}" but this can not be resolved (not existing)')"
+        fi
+        ;;
     url)
-        local proto
+        local proto status
         proto="${val%%://*}"
         if [ -n "$allow" ]; then
             if [[ " $allow " != *" $proto "* ]]; then
@@ -213,9 +224,13 @@ is() {
         [[ "$val" =~ ^(https?|ftp|file)://[a-zA-Z0-9] ]] || die "$message$(eval_gettext '"$name" is set to "${val}" but this is not a valid URL')"
         if [ -n "$ok" ]; then
             status=$(command curl -s --head -w "%{http_code}" "$val" -o /dev/null 2>&1)
-            [[ $status -ge 200 && $status -lt 300 ]] || die "$message$(eval_gettext '"$name" should be accessible but "${val}" returns code $status')"
+            if [[ $status -lt 200 && $status -ge 300 ]]; then
+                [ -z "$die" ] && return 1 || die "$message$(eval_gettext '"$name" should be accessible but "${val}" returns code $status')"
+            fi
         elif [ -n "$exists" ]; then
-            command curl -s --head --fail "$val" >/dev/null 2>&1 || die "$message$(eval_gettext '"$name" should exist but "${val}" is not reachable')"
+            if !ccommand curl -s --head --fail "$val" >/dev/null 2>&1; then
+                [ -z "$die" ] && return 1 || die "$message$(eval_gettext '"$name" should exist but "${val}" is not reachable')"
+            fi
         fi
         ;;
     date)
@@ -224,7 +239,9 @@ is() {
         fi
         ;;
     time)
-        [[ $val =~ ^([0-1]?[0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9])$ ]] || die "$message$(eval_gettext 'The "$name" has to be a parsable time format but »${val}« was given')"
+        if [[ ! $val =~ ^([0-1]?[0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9])$ ]]; then
+            [ -z "$die" ] && return 1 || die "$message$(eval_gettext 'The "$name" has to be a parsable time format but »${val}« was given')"
+        fi
         res="$(printf "%02d:%02d:%02d" "${BASH_REMATCH[1]}" "${BASH_REMATCH[2]}" "${BASH_REMATCH[3]}")"
         ;;
     duration)

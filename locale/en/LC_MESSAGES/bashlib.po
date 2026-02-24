@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-02-20 22:23+0100\n"
+"POT-Creation-Date: 2026-02-24 20:20+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: core/misc:134 core/validator:84 core/array:123 module/os:235 module/os:333
+#: core/misc:134 core/validator:87 core/array:123 module/os:235 module/os:333
 #: module/network:24 module/atlassian:102 module/trivy:120 module/compress:50
 #: module/monitoring:173 module/input:31 module/input:88 module/input:198
 #: module/input:452 module/input:651 module/log:63 module/process:376
@@ -57,172 +57,183 @@ msgstr ""
 msgid "Invalid duration unit"
 msgstr ""
 
-#: core/validator:78 core/validator:79
+#: core/validator:81 core/validator:82
 msgid "Parameter %s needs number"
 msgstr ""
 
-#: core/validator:80
+#: core/validator:83
 msgid "A list of words is needed"
 msgstr ""
 
-#: core/validator:90
+#: core/validator:93
 msgid "Incorrect call"
 msgstr ""
 
-#: core/validator:98
+#: core/validator:101
 #, sh-format
 msgid "The \"$name\" has to be set with a value"
 msgstr ""
 
-#: core/validator:103
+#: core/validator:106
 #, sh-format
 msgid "The \"$name\" has to be empty but has »${val}«"
 msgstr ""
 
-#: core/validator:112
+#: core/validator:115
 #, sh-format
 msgid "The value »${val}« for \"$name\" could not be read as true or false"
 msgstr ""
 
-#: core/validator:119
+#: core/validator:122
 #, sh-format
 msgid "The value »${val}« for \"$name\" should be true but was »${val}«"
 msgstr ""
 
-#: core/validator:126
+#: core/validator:129
 #, sh-format
 msgid "The value »${val}« for \"$name\" should be false but was »${val}«"
 msgstr ""
 
-#: core/validator:134
+#: core/validator:137
 #, sh-format
 msgid "The \"$name\" has to be an integer but »${val}« was given"
 msgstr ""
 
-#: core/validator:138 core/validator:163
+#: core/validator:141 core/validator:166
 #, sh-format
 msgid "The \"$name\" has to be exactly $min but »${val}« was given"
 msgstr ""
 
-#: core/validator:142 core/validator:167
+#: core/validator:145 core/validator:170
 #, sh-format
 msgid "The \"$name\" has to be between $min and $max but »${val}« was given"
 msgstr ""
 
-#: core/validator:146 core/validator:171
+#: core/validator:149 core/validator:174
 #, sh-format
 msgid "The \"$name\" has to at least $min but »${val}« was given"
 msgstr ""
 
-#: core/validator:150 core/validator:175
+#: core/validator:153 core/validator:178
 #, sh-format
 msgid "The \"$name\" has to not be more than $max but »${val}« was given"
 msgstr ""
 
-#: core/validator:159
+#: core/validator:162
 #, sh-format
 msgid "The \"$name\" has to be a float but »${val}« was given"
 msgstr ""
 
-#: core/validator:183
+#: core/validator:186
 #, sh-format
 msgid ""
 "The length of \"$name\" has to be exactly $min but »${res}« is $val "
 "characters long"
 msgstr ""
 
-#: core/validator:187
+#: core/validator:190
 #, sh-format
 msgid ""
 "The length of \"$name\" has to be between $min and $max but »${res}« is $val "
 "characters long"
 msgstr ""
 
-#: core/validator:191
+#: core/validator:194
 #, sh-format
 msgid ""
 "The length of \"$name\" has to be at least $min but »${res}« is $val "
 "characters long"
 msgstr ""
 
-#: core/validator:195
+#: core/validator:198
 #, sh-format
 msgid ""
 "The length of \"$name\" has to be not more than $max but »${res}« is $val "
 "characters long"
 msgstr ""
 
-#: core/validator:200
+#: core/validator:203
 msgid "A list with --allow=<words> is needed for enum check"
 msgstr ""
 
-#: core/validator:202
+#: core/validator:205
 #, sh-format
 msgid "\"$name\" is set to \"${val}\" but has to be one of: $allow"
 msgstr ""
 
 #: core/validator:210
 #, sh-format
-msgid "\"$name\" is set to \"${val}\" but only allowed protocols are: $allow"
+msgid "\"$name\" is set to \"${val}\" but this is no valid domain name"
 msgstr ""
 
 #: core/validator:213
 #, sh-format
+msgid ""
+"\"$name\" is set to \"${val}\" but this can not be resolved (not existing)"
+msgstr ""
+
+#: core/validator:221
+#, sh-format
+msgid "\"$name\" is set to \"${val}\" but only allowed protocols are: $allow"
+msgstr ""
+
+#: core/validator:224
+#, sh-format
 msgid "\"$name\" is set to \"${val}\" but this is not a valid URL"
 msgstr ""
 
-#: core/validator:216
+#: core/validator:228
 #, sh-format
 msgid "\"$name\" should be accessible but \"${val}\" returns code $status"
 msgstr ""
 
-#: core/validator:218
+#: core/validator:232
 #, sh-format
 msgid "\"$name\" should exist but \"${val}\" is not reachable"
 msgstr ""
 
-#: core/validator:223
+#: core/validator:238
 #, sh-format
 msgid "The \"$name\" has to be a parsable date format but »${val}« was given"
 msgstr ""
 
-#: core/validator:227
+#: core/validator:243
 #, sh-format
 msgid "The \"$name\" has to be a parsable time format but »${val}« was given"
 msgstr ""
 
-#: core/validator:233
+#: core/validator:250
 #, sh-format
 msgid ""
 "The \"$name\" has to be an integer or human duration but »${val}« was given"
 msgstr ""
 
-#: core/validator:238
+#: core/validator:255
 #, sh-format
 msgid "The \"$name\" ${val} has to be an existing path"
 msgstr ""
 
-#: core/validator:243
+#: core/validator:260
 #, sh-format
 msgid "The \"$name\" ${val} has to be an existing file"
 msgstr ""
 
-#: core/validator:248
+#: core/validator:265
 #, sh-format
 msgid "The \"$name\" ${val} has to be an existing directory"
 msgstr ""
 
-#: core/validator:253
+#: core/validator:270
 #, sh-format
 msgid "The \"$name\" ${val} has to be a file readable for user"
 msgstr ""
 
-#: core/validator:258
+#: core/validator:275
 #, sh-format
 msgid "The \"$name\" ${val} has to be a file writable for user"
 msgstr ""
 
-#: core/validator:261
+#: core/validator:278
 #, sh-format
 msgid "A check named ${check} is not defined"
 msgstr ""
