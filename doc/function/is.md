@@ -18,12 +18,19 @@ is <check> [options] -- <value>
 -m, --message=<string>          # additional message like usage
 # for integer
 -s, --sanitize                  # remove invalid characters
---min=<num>
---max=<num>
+--min=<num>                     # minimum number allowed
+--max=<num>                     # maximum number allowed
 # enum/url
 --allow=<words>                 # space separated (protocol in url)
 # domain
---exists                        # domain is valid
+--exists                        # domain can be resolved
+# ipv4
+--private                       # only private addresses
+--public                        # only public addresses
+--loopback                      # only local loopback addresses
+--range <network-range>         # ip is within netmask (multiple allowed)
+--ping                          # check that ping is possible
+--no-ping                       # ping should not be possible
 # url
 --exists                        # url is reachable
 --ok                            # url has code 2xx
@@ -76,6 +83,7 @@ The following checks are implemented:
 - `readable` check that value is a file readable by user
 - `writable` check that value is a file writable by user
 - `domain` check for a domain name (part of the url)
+- `ipv4` ip address check
 - `url` check that it is a full url
 
 Exit:     with message if incorrect value

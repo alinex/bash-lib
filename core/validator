@@ -38,6 +38,7 @@
 # - `readable` check that value is a file readable by user
 # - `writable` check that value is a file writable by user
 # - `domain` check for a domain name (part of the url)
+# - `ipv4` ip address check
 # - `url` check that it is a full url
 #
 # Usage:    is <check> [options] -- <value>
@@ -48,12 +49,19 @@
 #           -m, --message=<string>          # additional message like usage
 #           # for integer
 #           -s, --sanitize                  # remove invalid characters
-#           --min=<num>
-#           --max=<num>
+#           --min=<num>                     # minimum number allowed
+#           --max=<num>                     # maximum number allowed
 #           # enum/url
 #           --allow=<words>                 # space separated (protocol in url)
 #           # domain
-#           --exists                        # domain is valid
+#           --exists                        # domain can be resolved
+#           # ipv4
+#           --private                       # only private addresses
+#           --public                        # only public addresses
+#           --loopback                      # only local loopback addresses
+#           --range <network-range>         # ip is within netmask (multiple allowed)
+#           --ping                          # check that ping is possible
+#           --no-ping                       # ping should not be possible
 #           # url
 #           --exists                        # url is reachable
 #           --ok                            # url has code 2xx
@@ -67,8 +75,8 @@
 #           - `if is integer age --min=18 -- "$1"; then`
 is() {
     # parameter parsing
-    eval set -- "$(option_parse $'n name +\nd die -\ns sanitize -\n- min +\n- max +\n- allow +\no output ?\nm message +\n- exists -\n- ok -' "$@")"
-    local name die sanitize min max allow message output exists ok
+    eval set -- "$(option_parse $'n name +\nd die -\ns sanitize -\n- min +\n- max +\n- allow +\no output ?\nm message +\n- exists -\n- ok -\n- private -\n- public -\n- loopback -\n- ping -\n- no-ping -\n- range +' "$@")"
+    local name die sanitize min max allow message output exists ok ping public range
     # shellcheck disable=SC2015
     # shellcheck disable=SC2059
     while true; do
@@ -83,6 +91,12 @@ is() {
         --allow) [ -n "$2" ] && allow="$2" && shift 2 || die "$(gettext "A list of words is needed")" ;;
         --exists) exists=1 && shift ;;
         --ok) ok=1 && shift ;;
+        --range) range+=("$2") && shift 2 ;;
+        --private) range+=(10.0.0.0/8 172.16.0.0/12 192.168.0.0/16) && shift ;;
+        --public) public=1 && shift ;;
+        --loopback) range+=(127.0.0.0/8) && shift ;;
+        --ping) ping=1 && shift 2 ;;
+        --no-ping) ping=0 && shift 2 ;;
         --) shift && break ;;
         *) die "$(gettext "Unrecognized option"): $1" ;;
         esac
@@ -211,6 +225,44 @@ is() {
         fi
         if [ -n "$exists" ] && [ -z "$(ip_resolve $val)" ]; then
             [ -z "$die" ] && return 1 || die "$message$(eval_gettext '"$name" is set to "${val}" but this can not be resolved (not existing)')"
+        fi
+        ;;
+    ipv4)
+        if [[ ! "$val" =~ ^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$ ]]; then
+            [ -z "$die" ] && return 1 || die "$message$(eval_gettext '"$name" is set to "${val}" but this is no valid ip V4 address')"
+        fi
+        if [ -n "$range" ]; then
+            use network
+            local check found
+            for check in "${range[@]}"; do
+                ip_in_netmask $val $check && found=1 || true
+            done
+            if [ -z "$found" ]; then
+                check="${range[*]}"
+                [ -z "$die" ] && return 1 || die "$message$(eval_gettext '"$name" is set to "${val}" but this is not within: $check')"
+            fi
+        fi
+        if [ -n "$public" ]; then
+            use network
+            local check found
+            for check in 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16 100.64.0.0/10 127.0.0.0/8 169.254.0.0/16 224.0.0.0/4 240.0.0.0/4 192.0.2.0/24 198.51.100.0/24 203.0.113.0/24 198.18.0.0/15 192.0.0.0/24 192.88.99.0/24; do
+                ip_in_netmask $val $mask && found=1 || true
+            done
+            if [ -n "$found" ]; then
+                [ -z "$die" ] && return 1 || die "$message$(eval_gettext '"$name" is set to "${val}" but this is no public ip')"
+            fi
+        fi
+        if [ -n "$ping" ]; then
+            use network
+            local found
+            ping_check $val && found=1 || found=0
+            if [ "$ping" != "$found" ]; then
+                if [ "$ping" = "1" ]; then
+                    [ -z "$die" ] && return 1 || die "$message$(eval_gettext '"$name" is set to "${val}" and should be reachable using ping, but is not')"
+                else
+                    [ -z "$die" ] && return 1 || die "$message$(eval_gettext '"$name" is set to "${val}" and should not be reachable using ping, but it is')"
+                fi
+            fi
         fi
         ;;
     url)

@@ -37,6 +37,27 @@ ip_resolve() {
     fi
 }
 
+ip_in_subnet() {
+    is set --name=ip --die -- "$1"
+    is set --name=netmask -- "$2"
+    IFS=. read -r i1 i2 i3 i4 <<<"$1"
+    IFS=. read -r n1 n2 n3 n4 <<<"$(_ip_mask $(cut -d/ -f2 <<<"$2"))"
+    local netmask
+    local network="$((i1 & n1)).$((i2 & n2)).$((i3 & n3)).$((i4 & n4))"
+    [[ "$network" == "$(cut -d/ -f1 <<<"$2")" ]]
+}
+
+_ip_mask() {
+    eval "local mask=\$(( 0xffffffff << (32 - $1) ))" # eval because the syntax highlighter has problems with <<
+    printf "%d.%d.%d.%d\n" \
+        $(((mask >> 24) & 0xff)) $(((mask >> 16) & 0xff)) \
+        $(((mask >> 8) & 0xff)) $((mask & 0xff))
+}
+
+######################################################################################
+### Analyzation
+######################################################################################
+
 # Show the IP addresses
 #
 # The possible response formats are:
