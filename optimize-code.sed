@@ -28,6 +28,7 @@ s/-- \$#/$#/g
 # not working
 #/sed[^']*'$/,/^\s*'\s*/{/sed[^']*'$/b;/^\s*'\s*/b;s/./x/g} # mark inner area for test
 #/sed[^']*'$/,/^\s*'\s*/{s/^\s+//;/sed[^']*'$/b;/^\s*'\s*/b;/^#/d;s/\s#.*$//;s/\s$//}
+/<<'PY'/,/^PY$/{s/#.*$//;/^[[:space:]]*$/d}
 
 # further small optimization
 s/^source /. /

@@ -2901,17 +2901,12 @@ done
 ;;
 *)python3 - "$ip" "$subnet" <<'PY'
 import sys, ipaddress
-
 ip, net = sys.argv[1], sys.argv[2]
-
 try:
     addr = ipaddress.ip_address(ip)
     network = ipaddress.ip_network(net, strict=False)
 except ValueError:
-    # invalid IP or network
     sys.exit(2)
-
-# exit 0 if in subnet, 1 otherwise
 sys.exit(0 if addr in network else 1)
 PY
 esac
