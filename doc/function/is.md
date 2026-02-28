@@ -24,11 +24,8 @@ is <check> [options] -- <value>
 --allow=<words>                 # space separated (protocol in url)
 # domain
 --exists                        # domain can be resolved
-# ipv4
---private                       # only private addresses
---public                        # only public addresses
---loopback                      # only local loopback addresses
---range <network-range>         # ip is within netmask (multiple allowed)
+# ip/ipv4/ipv6
+--range <network-range>         # ip is within CIDR (multiple allowed or private/public/loopback)
 --ping                          # check that ping is possible
 --no-ping                       # ping should not be possible
 # url
@@ -83,7 +80,9 @@ The following checks are implemented:
 - `readable` check that value is a file readable by user
 - `writable` check that value is a file writable by user
 - `domain` check for a domain name (part of the url)
+- `ip` ip address check
 - `ipv4` ip address check
+- `ipv6` ip address check
 - `url` check that it is a full url
 
 Exit:     with message if incorrect value

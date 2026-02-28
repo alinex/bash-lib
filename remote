@@ -894,8 +894,8 @@ lowercase_first(){
 printf '%s' "${1,}"
 }
 is(){
-eval set -- "$(option_parse $'n name +\nd die -\ns sanitize -\n- min +\n- max +\n- allow +\no output ?\nm message +\n- exists -\n- ok -\n- private -\n- public -\n- loopback -\n- ping -\n- no-ping -\n- range +' "$@")"
-local name die sanitize min max allow message output exists ok ping public range
+eval set -- "$(option_parse $'n name +\nd die -\ns sanitize -\n- min +\n- max +\n- allow +\no output ?\nm message +\n- exists -\n- ok -\n- ping -\n- no-ping -\n- range +' "$@")"
+local name die sanitize min max allow message output exists ok ping range
 while true;do
 case "$1" in
 -n|--name)name="$2"&&shift 2;;
@@ -909,9 +909,6 @@ case "$1" in
 --exists)exists=1&&shift;;
 --ok)ok=1&&shift;;
 --range)range+=("$2")&&shift 2;;
---private)range+=(10.0.0.0/8 172.16.0.0/12 192.168.0.0/16)&&shift;;
---public)public=1&&shift;;
---loopback)range+=(127.0.0.0/8)&&shift;;
 --ping)ping=1&&shift 2;;
 --no-ping)ping=0&&shift 2;;
 --)shift&&break;;
@@ -1047,30 +1044,34 @@ if [ -n "$exists" ]&&[ -z "$(ip_resolve $val)" ];then
 [ -z "$die" ]&&return 1||die "$message$(eval_gettext '"$name" is set to "${val}" but this can not be resolved (not existing)')"
 fi
 ;;
+ip|ipv4|ipv6)case $check in
+ip)if
+[[ ! $val =~ ^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$ ]]&&! _is_ipv6 "$val"
+then
+[ -z "$die" ]&&return 1||die "$message$(eval_gettext '"$name" is set to "${val}" but this is no valid ip address')"
+fi
+;;
 ipv4)if
 [[ ! $val =~ ^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$ ]]
 then
 [ -z "$die" ]&&return 1||die "$message$(eval_gettext '"$name" is set to "${val}" but this is no valid ip V4 address')"
 fi
+;;
+ipv6)if
+! _is_ipv6 "$val"
+then
+[ -z "$die" ]&&return 1||die "$message$(eval_gettext '"$name" is set to "${val}" but this is no valid ip V6 address')"
+fi
+esac
 if [ -n "$range" ];then
 use network
 local check found
 for check in "${range[@]}";do
-ip_in_netmask $val $check&&found=1||true
+ip_in_subnet $val $check&&found=1||true
 done
 if [ -z "$found" ];then
 check="${range[*]}"
 [ -z "$die" ]&&return 1||die "$message$(eval_gettext '"$name" is set to "${val}" but this is not within: $check')"
-fi
-fi
-if [ -n "$public" ];then
-use network
-local check found
-for check in 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16 100.64.0.0/10 127.0.0.0/8 169.254.0.0/16 224.0.0.0/4 240.0.0.0/4 192.0.2.0/24 198.51.100.0/24 203.0.113.0/24 198.18.0.0/15 192.0.0.0/24 192.88.99.0/24;do
-ip_in_netmask $val $mask&&found=1||true
-done
-if [ -n "$found" ];then
-[ -z "$die" ]&&return 1||die "$message$(eval_gettext '"$name" is set to "${val}" but this is no public ip')"
 fi
 fi
 if [ -n "$ping" ];then
@@ -1158,6 +1159,16 @@ esac
 if [ -n "$output" ];then
 [ "$output" = "-" ]&&printf '%s' "$res"||printf -v "$output" '%s' "$res"
 fi
+}
+_is_ipv6(){
+python3 - "$1" <<'EOF'
+import sys, ipaddress
+try:
+    ipaddress.IPv6Address(sys.argv[1])
+    sys.exit(0)
+except ValueError:
+    sys.exit(1)
+EOF
 }
 check(){
 local type
@@ -2865,19 +2876,45 @@ getent $query "$1"|awk '{print $1}'|head -n1
 fi
 }
 ip_in_subnet(){
-is set -nip -d -- "$1"
-is set -nnetmask -- "$2"
-IFS=. read -r i1 i2 i3 i4 <<<"$1"
-IFS=. read -r n1 n2 n3 n4 <<<"$(_ip_mask $(cut -d/ -f2 <<<"$2"))"
-local netmask
-local network="$((i1&n1)).$((i2&n2)).$((i3&n3)).$((i4&n4))"
-[[ $network == "$(cut -d/ -f1 <<<"$2")" ]]
-}
-_ip_mask(){
-eval "local mask=\$(( 0xffffffff << (32 - $1) ))"
-printf "%d.%d.%d.%d\n" \
-$(((mask>>24)&0xff)) $(((mask>>16)&0xff)) \
-$(((mask>>8)&0xff)) $((mask&0xff))
+local ip="$1" subnet="$2" check found found6
+case $subnet in
+private)for check in 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16 fc00::/7
+do
+ip_in_subnet $ip $check&&return 0||true
+done
+return 1
+;;
+loopback)for check in 127.0.0.0/8 ::1/128
+do
+ip_in_subnet $ip $check&&return 0||true
+done
+return 1
+;;
+public)for check in 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16 100.64.0.0/10 127.0.0.0/8 169.254.0.0/16 224.0.0.0/4 240.0.0.0/4 192.0.2.0/24 198.51.100.0/24 203.0.113.0/24 198.18.0.0/15 192.0.0.0/24 192.88.99.0/24
+do
+ip_in_subnet $ip $check&&found=1||true
+done
+for check in ::1/128 fc00::/7 fe80::/10 ff00::/8 ::/128 2001:db8::/32;do
+ip_in_subnet $ip $check&&found6=1||true
+done
+[ -n "$found" ]&&[ -n "$found6" ]&&false||true
+;;
+*)python3 - "$ip" "$subnet" <<'PY'
+import sys, ipaddress
+
+ip, net = sys.argv[1], sys.argv[2]
+
+try:
+    addr = ipaddress.ip_address(ip)
+    network = ipaddress.ip_network(net, strict=False)
+except ValueError:
+    # invalid IP or network
+    sys.exit(2)
+
+# exit 0 if in subnet, 1 otherwise
+sys.exit(0 if addr in network else 1)
+PY
+esac
 }
 ip_intern(){
 is integer -narguments --max=1 -d $#

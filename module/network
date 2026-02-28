@@ -37,21 +37,54 @@ ip_resolve() {
     fi
 }
 
+# Check if ip is within a specific subnet.
+#
+# The <subnet> is defined as an ip in CIDR notation with the relevant number of bits. But you can also use `private`, `public` and `loopback`.
+#
+# Usage:    ip_in_subnet <ip> <subnet>
+# Example:  ip_in_subnet 10.10.1.145 10.10.0.0/16 && echo yes || echo false
 ip_in_subnet() {
-    is set --name=ip --die -- "$1"
-    is set --name=netmask -- "$2"
-    IFS=. read -r i1 i2 i3 i4 <<<"$1"
-    IFS=. read -r n1 n2 n3 n4 <<<"$(_ip_mask $(cut -d/ -f2 <<<"$2"))"
-    local netmask
-    local network="$((i1 & n1)).$((i2 & n2)).$((i3 & n3)).$((i4 & n4))"
-    [[ "$network" == "$(cut -d/ -f1 <<<"$2")" ]]
-}
+    local ip="$1" subnet="$2" check found found6
+    case $subnet in
+    private)
+        for check in 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16 fc00::/7; do
+            ip_in_subnet $ip $check && return 0 || true
+        done
+        return 1
+        ;;
+    loopback)
+        for check in 127.0.0.0/8 ::1/128; do
+            ip_in_subnet $ip $check && return 0 || true
+        done
+        return 1
+        ;;
+    public)
+        for check in 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16 100.64.0.0/10 127.0.0.0/8 169.254.0.0/16 224.0.0.0/4 240.0.0.0/4 192.0.2.0/24 198.51.100.0/24 203.0.113.0/24 198.18.0.0/15 192.0.0.0/24 192.88.99.0/24; do
+            ip_in_subnet $ip $check && found=1 || true
+        done
+        for check in ::1/128 fc00::/7 fe80::/10 ff00::/8 ::/128 2001:db8::/32; do
+            ip_in_subnet $ip $check && found6=1 || true
+        done
+        [ -n "$found" ] && [ -n "$found6" ] && false || true
+        ;;
+    *)
+        python3 - "$ip" "$subnet" <<'PY'
+import sys, ipaddress
 
-_ip_mask() {
-    eval "local mask=\$(( 0xffffffff << (32 - $1) ))" # eval because the syntax highlighter has problems with <<
-    printf "%d.%d.%d.%d\n" \
-        $(((mask >> 24) & 0xff)) $(((mask >> 16) & 0xff)) \
-        $(((mask >> 8) & 0xff)) $((mask & 0xff))
+ip, net = sys.argv[1], sys.argv[2]
+
+try:
+    addr = ipaddress.ip_address(ip)
+    network = ipaddress.ip_network(net, strict=False)
+except ValueError:
+    # invalid IP or network
+    sys.exit(2)
+
+# exit 0 if in subnet, 1 otherwise
+sys.exit(0 if addr in network else 1)
+PY
+        ;;
+    esac
 }
 
 ######################################################################################

@@ -407,6 +407,7 @@ Module with network functions.
 | ``$IP_SEGMENT_PATTERN`` | Array: Network segment selection per ip (regex segment) used in [`ip_pattern`](functionip_pattern.md) |
 | ``$IP_VMWARE_PATTERN`` | Array: Network segment selection per ip (regex segment) used in [`ip_pattern`](functionip_pattern.md) |
 | [`ip_resolve`](function/ip_resolve.md) | Get IP of given hostname |
+| [`ip_in_subnet`](function/ip_in_subnet.md) | Check if ip is within a specific subnet. |
 | [`ip_intern`](function/ip_intern.md) | Show the IP addresses |
 | [`ip_pattern`](function/ip_pattern.md) | Find info about IP by configured patterns. |
 | [`ip_extern`](function/ip_extern.md) | Run  os detection and set the constants |

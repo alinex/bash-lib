@@ -6,7 +6,7 @@ But on release they will be merged with semantical versioning into the master br
 ## Development - v2.6.0
 
 - add docker module with [docker_latest_version](doc/function/docker_latest_version.md) and [docker_cleanup](doc/function/docker_cleanup.md)
-- add `is domain`, `is ipv4`, `is url` and `is time` in [is](doc/function/is.md) validation
+- add `is domain`, `is ip`, `is ipv4`, `is ipv6`, `is url` and `is time` in [is](doc/function/is.md) validation
 - add [install_rust](doc/function/install_rust.md) to build rust from source
 - add [tsv headers --remove](doc/function/tsv.md) to easily remove the first (header) line
 - activate [tsv to postgres...](doc/function/tsv.md) with qsv pro integration
