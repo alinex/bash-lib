@@ -44,7 +44,7 @@ exit
 #trivy root --progress --no-secrets --clean
 #exit
 
-in=$'Number\tName\n1234\tone\n2\ttwo\n10\tten thousand and one hundred fourty five\n'
+in=$'Number\tName\n1234\tone\n2\ttwo\n10\tten thousand and one hundred forty five\n'
 #echo "$in" | tsv "$@" | tsv print
 timer_info | tsv headers --remove
 exit

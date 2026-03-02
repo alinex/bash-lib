@@ -11,6 +11,7 @@ But on release they will be merged with semantical versioning into the master br
 - add [tsv headers --remove](doc/function/tsv.md) to easily remove the first (header) line
 - activate [tsv to postgres...](doc/function/tsv.md) with qsv pro integration
 - support also month and year in [duration_format](doc/function/duration_format.md)
+- optimize `die` output
 - smaller bugfixes to stabilize code
 
 ## 16. February 2026 - v2.5.0

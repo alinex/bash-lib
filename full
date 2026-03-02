@@ -648,7 +648,7 @@ done <<<"$text"
 }
 die(){
 is integer -narguments --max=1 -d $#
-trap - ERR
+trap '' ERR
 local text trap line func src
 text="$(input "$@")"
 [[ $text != *"Uncaught exception at"* ]]||trap=1
@@ -662,7 +662,7 @@ if [[ $- == *i* ]];then
 return 143
 else
 sleep 1
-kill -- -$$ 2>/dev/null
+pkill -P $$ 2>/dev/null
 exit 143
 fi
 }

@@ -73,7 +73,7 @@ debug() {
 die() {
     is integer --name=arguments --max=1 --die -- $#
     # processing
-    trap - ERR
+    trap '' ERR
     local text trap line func src
     text="$(input "$@")"
     [[ "$text" != *"Uncaught exception at"* ]] || trap=1
@@ -87,9 +87,8 @@ die() {
     if [[ $- == *i* ]]; then
         return 143
     else
-        sleep 1 # to let output pipes finish
-        # sends SIGTERM to process group → process receives SIGTERM
-        kill -- -$$ 2>/dev/null
+        sleep 1                 # to let output pipes finish
+        pkill -P $$ 2>/dev/null # sends SIGTERM to subprocesses
         exit 143
     fi
 }
