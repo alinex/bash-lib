@@ -786,7 +786,7 @@ full)char="█";;
 *)char="─"
 esac
 local cols
-read -r _ cols < <(stty size)
+cols=$(tput cols 2>/dev/null||echo 80)
 ((cols>60))||cols=60
 printf '%s\n' "$(character repeat "$cols" "$char")"
 }
