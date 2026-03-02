@@ -32,7 +32,7 @@ exporter() {
         return 0
     fi
     install jq yq
-    printf '%s\t%s\t%s\t%s\n' "$(gettext URL)" "$(gettext Job)" "$(gettext 'Label Values')"
+    printf '%s\t%s\t%s\n' "$(gettext URL)" "$(gettext Job)" "$(gettext 'Label Values')"
     local arg name value
     local filter=""
     for arg in "$@"; do
@@ -58,7 +58,7 @@ exporter() {
             | @tsv')"
     done
     for api in $PROMETHEUS_API; do
-        curl "$api"/targets | jq '.data.activeTargets[] | '"$filter"' [.scrapeUrl, .labels.job, (.labels | join(", ")), .discoveredLabels.__address__] | @tsv' -r |
+        curl "$api"/targets | jq '.data.activeTargets[] | '"$filter"' [.scrapeUrl, .labels.job, (.labels | join("; ")), .discoveredLabels.__address__] | @tsv' -r |
             while read -r line; do
                 local login user pass
                 login="$(printf '%s' "$auth" | grep "$(cut -f2 <<<"$line")" | grep "$(cut -f4 <<<"$line")")"

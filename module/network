@@ -30,7 +30,7 @@ ip_resolve() {
     if command -v dig >/dev/null; then
         [ "$type" = 4 ] && query="A" || true
         [ "$type" = 6 ] && query="AAAA" || true
-        dig +short $query "$1"
+        dig +short $query "$1" | tail -1
     else
         is set -- "$type" && query="ahostsv$type" || query=hosts
         getent $query "$1" | awk '{print $1}' | head -n1

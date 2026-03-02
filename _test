@@ -18,6 +18,9 @@ DESCRIPTION=""
 #done
 ################################################################################################
 
+ip_resolve access-old-1.host.user.dvb
+exit
+
 in="$(
     cat <<'EOT'
 col1	col2
