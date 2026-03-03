@@ -47,6 +47,8 @@ Possible formats are:
 - `float` - allow number [0-9]+.[0-9]+ (alternative , is allowed as decimal separator)
 - `password` - will show only `*` characters to hide input
 - `time` - a time with hour and minute can be given
+- `ipv4` - an ip V4 address
+- `ipv6` - an ip V4 address
 
 If another format is needed, you can fall back to string and validate on your own after you got the response.
 

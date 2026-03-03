@@ -1978,7 +1978,7 @@ case "$1" in
 esac
 done
 is integer -narguments --max=2 -d $#
-[ -z "$1" ]||is enum -nformat --allow="string integer number float password time text editor" -d -- "$1"
+[ -z "$1" ]||is enum -nformat --allow="string integer number float password time text editor ipv4 ipv6" -d -- "$1"
 local prompt pattern mask
 local format="$1"
 case $format in
@@ -2003,8 +2003,16 @@ password)prompt="${2:-$(gettext "Enter password")}"
 mask=1
 ;;
 time)prompt="${2:-$(gettext "Enter time")}"
-pattern="^([0-9]|1?[0-9]|2[0-3])(:([0-5]?[0-9])?)?$"
-final="^([0-9]|1[0-9]|2[0-3]):[0-5][0-9]$"
+pattern="^([01]?[0-9]|2[0-3])(:[0-5]?|:[0-5][0-9]){0,2]$"
+final="^([01]?[0-9]|2[0-3])(:[0-5][0-9]){1,2}$"
+;;
+ipv4)prompt="${2:-$(gettext "Enter IP V4 address")}"
+pattern="^([01]?[0-9]?[0-9]|2[0-4]?[0-9]|25[0-5])(\.([01]?[0-9]?[0-9]|2[0-4]?[0-9]|25[0-5])?){0,3}$"
+final="^(([01]?[0-9]?[0-9]|2[0-4]?[0-9]|25[0-5])\.){3}([01]?[0-9]?[0-9]|2[0-4]?[0-9]|25[0-5])$"
+;;
+ipv6)prompt="${2:-$(gettext "Enter IP V6 address")}"
+pattern="^([0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|(::?|[0-9a-fA-F]{1,4}:?){1,7}[0-9a-fA-F]{0,4})$"
+final="^(([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|(::?|[0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{1,4})$"
 ;;
 text)prompt="${2:-$(gettext "Enter text (end with empty line)")}";;
 editor)prompt="${2:-$(gettext "Enter text here")}";;
@@ -2744,7 +2752,7 @@ case "$1" in
 -g|--group)[ -z "$2" ]||filter+=" | select(.labels|has(\"group\")) | select(.labels.group|test(\".*$2.*\"; \"i\"))"
 shift 2
 ;;
--i|--instance)[ -z "$2" ]||filter+=" | select(.labels.instance|test(\"$2\"; \"i\"))"
+-i|--instance)[ -z "$2" ]||filter+=" | select(.labels.instance|type == \"string\" and (.|test(\"$2\"; \"i\")))"
 shift 2
 ;;
 -a|--alertname)[ -z "$2" ]||filter+=" | select(.labels.alertname|test(\"$2\"; \"i\"))"

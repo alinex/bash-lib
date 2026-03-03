@@ -9,6 +9,7 @@ But on release they will be merged with semantical versioning into the master br
 - add `is domain`, `is ip`, `is ipv4`, `is ipv6`, `is url` and `is time` in [is](doc/function/is.md) validation
 - add [install_rust](doc/function/install_rust.md) to build rust from source
 - add [tsv headers --remove](doc/function/tsv.md) to easily remove the first (header) line
+- [ask](doc/function/ask.md) now with `time`, `ipv4` and `ipv6` format
 - activate [tsv to postgres...](doc/function/tsv.md) with qsv pro integration
 - support also month and year in [duration_format](doc/function/duration_format.md)
 - optimize `die` output
