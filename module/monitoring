@@ -153,7 +153,7 @@ alerts() {
             shift 2
             ;;
         -i | --instance)
-            [ -z "$2" ] || filter+=" | select(.labels.instance|test(\"$2\"; \"i\"))"
+            [ -z "$2" ] || filter+=" | select(.labels.instance|type == \"string\" and (.|test(\"$2\"; \"i\")))"
             shift 2
             ;;
         -a | --alertname)
