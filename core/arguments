@@ -66,7 +66,7 @@ option_parse() {
     res="$(LANG=C getopt -o "$permute$short" --long "$long" -n "$0" -- "$@" 2>&1)" || rc=$?
     if ((rc)); then
         out="$(tail -1 <<<"$res")"
-        echo ">>> parse-out $out <<<" >&2
+        debug "argument failure: $* => try to auto fix"
         mapfile -t lines <<<"$res"                     # Split to array
         for line in "${lines[@]:0:${#lines[@]}-1}"; do # Skip last
             if [[ "$line" == *invalid\ option* ]]; then

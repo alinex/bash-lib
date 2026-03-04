@@ -166,7 +166,7 @@ jira() {
         printf -v "$var" '%s' "$(jq -c --argjson v "$3" ".fields.$field = \$v" <<<"$json")"
       elif [ "$2" = "adf" ] && [ -n "$3" ]; then
         local val
-        [[ "$3" =~ ^\{ ]] && val="$3" || val="$(jira md_to_adf "$3")"
+        [[ "$3" =~ ^\{ ]] && val="$3" || val="$(jira md_to_adf -- "$3")"
         printf -v "$var" '%s' "$(jq -c --argjson v "$val" ".fields.$field = \$v" <<<"$json")"
       elif is integer -- "$2"; then
         printf -v "$var" '%s' "$(jq -c ".fields.$field = $2" <<<"$json")"

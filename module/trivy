@@ -206,7 +206,6 @@ trivy() {
     is empty -- "$progress" || gettext 'Build queue to optimize reports...' | info >&2
     for file in "$work"/split/*; do
         queue add _trivy_report "$work" "$file" "$source" "$progress"
-        #_trivy_report "$work" "$file" "$source" "$progress"
     done
     queue run
     is empty -- "$progress" || gettext 'Run queue to optimize reports...' | info >&2
@@ -256,11 +255,14 @@ trivy_test() {
     is set -- "${_trivy_jira[field_links]}" || die "Could not find JIRA Field \"$TRIVY_JIRA_FIELD_LINKS\" in $TRIVY_JIRA_BOARD/$TRIVY_JIRA_ISSUE_TYPE!"
     _trivy_jira[field_approval]="$(jq '.fields[] | select(.name == "'"$TRIVY_JIRA_FIELD_APPROVAL"'").key' -r <<<"$fields")"
     is set -- "${_trivy_jira[field_approval]}" || die "Could not find JIRA Field \"$TRIVY_JIRA_FIELD_APPROVAL\" in $TRIVY_JIRA_BOARD/$TRIVY_JIRA_ISSUE_TYPE!"
+    _trivy_report "/tmp/trivy-scan_3443579_trivy" "/tmp/trivy-scan_3443579_trivy/split/000257" "operations.host.office.grp"
+    exit
     # Loop over entries
     for file in "$work"/split/*; do
-        queue add _trivy_report "$work" "$file" "$source"
+        #queue add
+        _trivy_report "$work" "$file" "$source"
     done
-    queue run
+    #queue run
     #    rm -r "$work"/split
     # Finalize reports
     while read -r folder; do
@@ -362,10 +364,10 @@ _trivy_report() {
             jira json fields set issuetype json "{\"id\":${_trivy_jira[issueType]}}"
             jira json fields set priority json "{\"name\":\"$priority\"}"
             jira json fields set summary "$id"
-            jira json fields set description adf "$title"$'\n\n'"$description"
+            jira json fields set description adf -- "$title"$'\n\n'"$description"
             jira json fields set "${_trivy_jira[field_rating]}" adf "$severity (CVSS rating ${cvss:--})"
             jira json fields set "${_trivy_jira[field_version]}" adf "Gefixt ab Version ${fixed:--} $fixStatus"
-            jira json fields set "${_trivy_jira[field_links]}" adf "$links"
+            jira json fields set "${_trivy_jira[field_links]}" adf -- "$links"
             jira json fields set "${_trivy_jira[field_sources]}" adf "$(date +%Y-%m) > $sourceLine"
             jira json fields set labels json "[\"cve\", \"$(sed 's#.*ekz.de/##;s#/-/.*##;s#[/.]#", "#g' <<<"$source")\"]"
             issue="$(jira create "$fields")"
@@ -401,7 +403,7 @@ _trivy_report() {
             old="$(jira json jira get description adf)"
             new="$title"$'\n\n'"$description"
             if [[ "$new" != "$old" ]]; then
-                jira json fields set description adf "$new"
+                jira json fields set description adf -- "$new"
                 update=1
             fi
             # update sources
@@ -409,28 +411,28 @@ _trivy_report() {
             cutoff=$(date -d "$TRIVY_JIRA_REMOVE_SOURCE_OLDER_MONTHS months ago" +%Y-%m)
             new="$(printf '%s\n%s' "$old" "$(date +%Y-%m) > $sourceLine" | sed -n '/>/p' | sort -u -t'>' -k1,1r -k2,2 | awk -v cutoff="$cutoff" '$1 >= cutoff {print}')"
             if [[ "$new" != "$old" ]]; then
-                jira json fields set "${_trivy_jira[field_sources]}" adf "$new"
+                jira json fields set "${_trivy_jira[field_sources]}" adf -- "$new"
                 update=1
             fi
             # update rating
             old="$(jira json jira get "${_trivy_jira[field_rating]}" md)"
             new="$severity (CVSS Rating ${cvss:--})"
             if [[ "$new" != "$old" ]]; then
-                jira json fields set "${_trivy_jira[field_rating]}" adf "$new"
+                jira json fields set "${_trivy_jira[field_rating]}" adf -- "$new"
                 update=1
             fi
             # update version
             old="$(jira json jira get "${_trivy_jira[field_version]}" md)"
             new="Gefixt ab Version ${fixed:--} $fixStatus"
             if [[ "$new" != "$old" ]]; then
-                jira json fields set "${_trivy_jira[field_version]}" adf "$new"
+                jira json fields set "${_trivy_jira[field_version]}" adf -- "$new"
                 update=1
             fi
             # update links
             old="$(jira json jira get "${_trivy_jira[field_links]}" md)"
             new="$links"
             if [[ "$new" != "$old" ]]; then
-                jira json fields set "${_trivy_jira[field_links]}" adf "$new"
+                jira json fields set "${_trivy_jira[field_links]}" adf -- "$new"
                 update=1
             fi
             # update labels
