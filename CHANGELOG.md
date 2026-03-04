@@ -12,6 +12,7 @@ But on release they will be merged with semantical versioning into the master br
 - [ask](doc/function/ask.md) now with `time`, `ipv4` and `ipv6` format
 - activate [tsv to postgres...](doc/function/tsv.md) with qsv pro integration
 - support also month and year in [duration_format](doc/function/duration_format.md)
+- speedup `queue add`
 - optimize `die` output
 - smaller bugfixes to stabilize code
 

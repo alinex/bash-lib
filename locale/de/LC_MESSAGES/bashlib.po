@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-04 17:59+0100\n"
+"POT-Creation-Date: 2026-03-04 20:31+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -21,7 +21,7 @@ msgstr ""
 #: module/network:24 module/atlassian:102 module/trivy:120 module/compress:50
 #: module/monitoring:173 module/input:31 module/input:88 module/input:200
 #: module/input:464 module/input:663 module/log:63 module/process:376
-#: module/process:424 module/process:507 module/process:654 module/remote:84
+#: module/process:424 module/process:507 module/process:655 module/remote:84
 #: module/remote:207 module/remote:249 module/remote:287 module/database:37
 #: module/mattermost:311 module/mattermost:342 module/table:259
 #: module/crypto:41 module/git:23 module/git:61 module/software:213
@@ -521,15 +521,15 @@ msgstr "$found Sicherheitsprobleme gefunden"
 msgid "Build queue to optimize reports..."
 msgstr "Aufbau der Warteschlange für die Report Generierung..."
 
-#: module/trivy:212
+#: module/trivy:211
 msgid "Run queue to optimize reports..."
 msgstr "Start der Warteschlange zur Report Generierung..."
 
-#: module/trivy:215
+#: module/trivy:214
 msgid "Create summaries..."
 msgstr "Erstelle Zusammenfassungen..."
 
-#: module/trivy:325
+#: module/trivy:327
 #, sh-format
 msgid ""
 "Downgrade $severity -> MEDIUM because it was published less than 3 days ago"
@@ -537,7 +537,7 @@ msgstr ""
 "Herunterstufen $severity -> MEDIUM, weil diese Lücke erst in den letzten 3 "
 "Tagen veröffentlicht wurde"
 
-#: module/trivy:334
+#: module/trivy:336
 msgid ""
 "Add information of known exploits and cancel downgrades in case of just "
 "published"
@@ -545,64 +545,64 @@ msgstr ""
 "Füge Informationen zu bekannten Exploits hinzu und streiche mögliche "
 "Herunterstufungen durch kürzliches publizieren"
 
-#: module/trivy:343
+#: module/trivy:345
 #, sh-format
 msgid "Downgrade $severity -> MEDIUM because it is a dev dependency"
 msgstr ""
 "Herunterstufen $severity -> MEDIUM, weil es sich um eine reine "
 "Entwicklungsabhängigkeit handelt"
 
-#: module/trivy:388
+#: module/trivy:390
 #, sh-format
 msgid "Downgrade $severity -> MEDIUM because of Jira status $deploy"
 msgstr "Herunterstufen $severity -> MEDIUM, durch Jira Status $deploy"
 
-#: module/trivy:389 module/trivy:454
+#: module/trivy:391 module/trivy:456
 #, sh-format
 msgid "$id at $target"
 msgstr "$id in $target"
 
-#: module/trivy:453
+#: module/trivy:455
 msgid "Add information from Jira"
 msgstr "Hinzufügen der Jira Informationen"
 
-#: module/trivy:495
+#: module/trivy:497
 #, sh-format
 msgid "Rating: $severity (CVSS rating $value)"
 msgstr "Einstufung: $severity (CVSS Wert $value)"
 
-#: module/trivy:497
+#: module/trivy:499
 #, sh-format
 msgid "Status: Fixed from version $value $fixStatus"
 msgstr "Status: Gelöst in Version $value $fixStatus"
 
-#: module/trivy:501
+#: module/trivy:503
 #, sh-format
 msgid "Date:   Vulnerability known since $human ($value days ago)"
 msgstr "Datum:  Sicherheitslücke bekannt seit $human (vor $value Tagen)"
 
-#: module/trivy:503
+#: module/trivy:505
 #, sh-format
 msgid "Exploit known since $exploitDate at $exploitVendor $exploitProduct"
 msgstr "Exploit bekannt seit $exploitDate bei $exploitVendor $exploitProduct"
 
-#: module/trivy:506
+#: module/trivy:508
 msgid "Responsible"
 msgstr "Zuständig"
 
-#: module/trivy:507
+#: module/trivy:509
 msgid "Deploy"
 msgstr "Deploy"
 
-#: module/trivy:508
+#: module/trivy:510
 msgid "Last comments"
 msgstr "Letzte Kommentare"
 
-#: module/trivy:510
+#: module/trivy:512
 msgid "Sources"
 msgstr "Quellen"
 
-#: module/trivy:517
+#: module/trivy:519
 msgid "Links"
 msgstr "Links"
 
@@ -805,22 +805,22 @@ msgstr "Warteschlange"
 msgid "Queued $started/$total jobs"
 msgstr "Warteschlange $started/$total Jobs"
 
-#: module/process:665
+#: module/process:666
 #, sh-format
 msgid "No process with pid $pid"
 msgstr "Kein Prozess mit PID $pid"
 
-#: module/process:673
+#: module/process:674
 #, sh-format
 msgid "No processes found for $search"
 msgstr "Keine Prozesse für $search gefunden"
 
-#: module/process:718
+#: module/process:719
 #, sh-format
 msgid "Waiting for $pid ($pcpu% CPU)"
 msgstr "Warten auf $pid ($pcpu% CPU)"
 
-#: module/process:722
+#: module/process:723
 #, sh-format
 msgid "Timeout after ${timeout}s"
 msgstr "Abbruch nach ${timeout}s"

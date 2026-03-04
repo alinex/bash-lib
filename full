@@ -184,7 +184,7 @@ local res rc out lines
 res="$(LANG=C getopt -o "$permute$short" --long "$long" -n "$0" -- "$@" 2>&1)"||rc=$?
 if ((rc));then
 out="$(tail -1 <<<"$res")"
-echo ">>> parse-out $out <<<" >&2
+debug "argument failure: $* => try to auto fix"
 mapfile -t lines <<<"$res"
 for line in "${lines[@]:0:${#lines[@]}-1}";do
 if [[ $line == *invalid\ option* ]];then
@@ -1312,7 +1312,7 @@ elif [ "$2" = "json" ]&&[ -n "$3" ];then
 printf -v "$var" '%s' "$(jq -c --argjson v "$3" ".fields.$field = \$v" <<<"$json")"
 elif [ "$2" = "adf" ]&&[ -n "$3" ];then
 local val
-[[ $3 =~ ^\{ ]]&&val="$3"||val="$(jira md_to_adf "$3")"
+[[ $3 =~ ^\{ ]]&&val="$3"||val="$(jira md_to_adf -- "$3")"
 printf -v "$var" '%s' "$(jq -c --argjson v "$val" ".fields.$field = \$v" <<<"$json")"
 elif [[ "$2" =~ ^-?[0-9]+$ ]];then
 printf -v "$var" '%s' "$(jq -c ".fields.$field = $2" <<<"$json")"
@@ -3635,14 +3635,14 @@ eval set -- "$(option_parse $'+n name +\nv verbose -' "$@")"
 local name verbose=0 message progress
 while true;do
 case "$1" in
--n|--name)is set -nname -doname -- "$2"&&shift 2;;
+-n|--name)name="$2"&&shift 2;;
 --verbose)verbose=1&&shift;;
 --progress)progress=1&&shift;;
 --)shift&&break;;
 *)die "$(gettext "Unrecognized option"): $1"
 esac
 done
-is enum -ncommand --allow="add run" -d -- "$1"&&local command="$1"&&shift
+local command="$1"&&shift
 [ -n "$name" ]||name="$*"
 case $command in
 add)is set -njob -d -- "$1"
@@ -3691,6 +3691,8 @@ debug "Limit reached: Running ${#_queue_running[@]} (max), Load: $(($(cut -d' ' 
 sleep 1
 fi
 done
+;;
+*)die "Unknown command $command: Only add and run are valid"
 esac
 }
 random(){
@@ -4625,8 +4627,9 @@ _trivy_jira[field_approval]="$(jq '.fields[] | select(.name == "'"$TRIVY_JIRA_FI
 fi
 [ -z "$progress" ]||gettext 'Build queue to optimize reports...'|info >&2
 for file in "$work"/split/*;do
-_trivy_report "$work" "$file" "$source" "$progress"
+queue add _trivy_report "$work" "$file" "$source" "$progress"
 done
+queue run
 [ -z "$progress" ]||gettext 'Run queue to optimize reports...'|info >&2
 rm -r "$work"/split
 [ -z "$progress" ]||gettext 'Create summaries...'|info >&2
@@ -4671,10 +4674,11 @@ _trivy_jira[field_links]="$(jq '.fields[] | select(.name == "'"$TRIVY_JIRA_FIELD
 [ -n "${_trivy_jira[field_links]}" ]||die "Could not find JIRA Field \"$TRIVY_JIRA_FIELD_LINKS\" in $TRIVY_JIRA_BOARD/$TRIVY_JIRA_ISSUE_TYPE!"
 _trivy_jira[field_approval]="$(jq '.fields[] | select(.name == "'"$TRIVY_JIRA_FIELD_APPROVAL"'").key' -r <<<"$fields")"
 [ -n "${_trivy_jira[field_approval]}" ]||die "Could not find JIRA Field \"$TRIVY_JIRA_FIELD_APPROVAL\" in $TRIVY_JIRA_BOARD/$TRIVY_JIRA_ISSUE_TYPE!"
+_trivy_report "/tmp/trivy-scan_3443579_trivy" "/tmp/trivy-scan_3443579_trivy/split/000257" "operations.host.office.grp"
+exit
 for file in "$work"/split/*;do
-queue add _trivy_report "$work" "$file" "$source"
+_trivy_report "$work" "$file" "$source"
 done
-queue run
 while read -r folder;do
 cat "$folder/header.txt" "$folder/sources.txt" "$folder/footer.txt" >"$folder/report.txt"
 rm "$folder/header.txt" "$folder/sources.txt" "$folder/footer.txt"
@@ -4760,10 +4764,10 @@ jira json fields set project json "{\"id\":${_trivy_jira[board]}}"
 jira json fields set issuetype json "{\"id\":${_trivy_jira[issueType]}}"
 jira json fields set priority json "{\"name\":\"$priority\"}"
 jira json fields set summary "$id"
-jira json fields set description adf "$title"$'\n\n'"$description"
+jira json fields set description adf -- "$title"$'\n\n'"$description"
 jira json fields set "${_trivy_jira[field_rating]}" adf "$severity (CVSS rating ${cvss:--})"
 jira json fields set "${_trivy_jira[field_version]}" adf "Gefixt ab Version ${fixed:--} $fixStatus"
-jira json fields set "${_trivy_jira[field_links]}" adf "$links"
+jira json fields set "${_trivy_jira[field_links]}" adf -- "$links"
 jira json fields set "${_trivy_jira[field_sources]}" adf "$(date +%Y-%m) > $sourceLine"
 jira json fields set labels json "[\"cve\", \"$(sed 's#.*ekz.de/##;s#/-/.*##;s#[/.]#", "#g' <<<"$source")\"]"
 issue="$(jira create "$fields")"
@@ -4796,32 +4800,32 @@ local old new fields update cutoff
 old="$(jira json jira get description adf)"
 new="$title"$'\n\n'"$description"
 if [[ $new != "$old" ]];then
-jira json fields set description adf "$new"
+jira json fields set description adf -- "$new"
 update=1
 fi
 old="$(jira json jira get "${_trivy_jira[field_sources]}" md)"
 cutoff=$(date -d "$TRIVY_JIRA_REMOVE_SOURCE_OLDER_MONTHS months ago" +%Y-%m)
 new="$(printf '%s\n%s' "$old" "$(date +%Y-%m) > $sourceLine"|sed -n '/>/p'|sort -u -t'>' -k1,1r -k2,2|awk -v cutoff="$cutoff" '$1 >= cutoff {print}')"
 if [[ $new != "$old" ]];then
-jira json fields set "${_trivy_jira[field_sources]}" adf "$new"
+jira json fields set "${_trivy_jira[field_sources]}" adf -- "$new"
 update=1
 fi
 old="$(jira json jira get "${_trivy_jira[field_rating]}" md)"
 new="$severity (CVSS Rating ${cvss:--})"
 if [[ $new != "$old" ]];then
-jira json fields set "${_trivy_jira[field_rating]}" adf "$new"
+jira json fields set "${_trivy_jira[field_rating]}" adf -- "$new"
 update=1
 fi
 old="$(jira json jira get "${_trivy_jira[field_version]}" md)"
 new="Gefixt ab Version ${fixed:--} $fixStatus"
 if [[ $new != "$old" ]];then
-jira json fields set "${_trivy_jira[field_version]}" adf "$new"
+jira json fields set "${_trivy_jira[field_version]}" adf -- "$new"
 update=1
 fi
 old="$(jira json jira get "${_trivy_jira[field_links]}" md)"
 new="$links"
 if [[ $new != "$old" ]];then
-jira json fields set "${_trivy_jira[field_links]}" adf "$new"
+jira json fields set "${_trivy_jira[field_links]}" adf -- "$new"
 update=1
 fi
 local labels addLabel=()

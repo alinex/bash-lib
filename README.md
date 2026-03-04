@@ -85,14 +85,16 @@ What BashLib 2 brings:
 The downside may be:
 
 - it is optimized for usability not speed
-- some methods needs additional software which you have to install or will be installed
+- some methods needs additional software which you have to install or will be installed on demand
 - needs bash v4.2 (February 2011)
 - no backward compatibility to version 1 - everything is new
 
 ### Look into the Future
 
-The BashLib itself is growing further each month through my own usage and needs and maybe some other developers will later take part, too.
-We are not at the end, I have tons of ideas. There is so much potential that can be added in the future.
+The BashLib is already used in a lot of scripts to remote control servers and in different helper tools running on the hosts.
+Slowly I will build all my Bash and NodeJS tools using BashLib2 over the year.
+As this is done the BashLib will further increase in functionality and also in stability. As more it is used as better it will get.
+Further on I have a lot more ideas, there is so much potential that can be added in the future.
 
 ## Distributions
 
@@ -285,6 +287,13 @@ But to fully work it will store a footprint of about 25kB within your temp folde
 ```bash
 #!/usr/bin/env bash
 source <(curl -s https://gitlab.com/alinex/bash-lib/-/raw/master/remote)
+```
+
+Or use the more advanced syntax, which will automatically use the installed bashlib or the remote version:
+
+```bash
+#!/usr/bin/env bash
+[ -n "$BASHLIB_HOME" ] && source "$BASHLIB_HOME"/full || source <(curl -s https://gitlab.com/alinex/bash-lib/-/raw/develop/remote)
 ```
 
 Now you have to include your specific configuration like API and secrets directly in the code to fully use it.
