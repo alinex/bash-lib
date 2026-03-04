@@ -206,9 +206,10 @@ trivy() {
     is empty -- "$progress" || gettext 'Build queue to optimize reports...' | info >&2
     for file in "$work"/split/*; do
         queue add _trivy_report "$work" "$file" "$source" "$progress"
+        #_trivy_report "$work" "$file" "$source" "$progress"
     done
-    is empty -- "$progress" || gettext 'Run queue to optimize reports...' | info >&2
     queue run
+    is empty -- "$progress" || gettext 'Run queue to optimize reports...' | info >&2
     rm -r "$work"/split
     # Finalize reports
     is empty -- "$progress" || gettext 'Create summaries...' | info >&2

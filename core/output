@@ -50,7 +50,7 @@ debug() {
             printf "$CC_BLACK%-2s %7d %-20s %s$CC_RESET\n" "$sign" "$BASHPID" "$func" "$line" >&2 ||
             printf "$CC_BLACK%-2s %-20s %s$CC_RESET\n" "$sign" "$func" "$line" >&2
     done <<<"$text"
-    ! command -v log >/dev/null || while IFS= read -r line; do
+    [[ ! "${_log_active+x}" || ${#_log_active[@]} -eq 0 ]] || ! command -v log >/dev/null || while IFS= read -r line; do
         log debug "$func: $line"
     done <<<"$text"
 }

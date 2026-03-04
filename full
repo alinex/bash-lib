@@ -184,6 +184,7 @@ local res rc out lines
 res="$(LANG=C getopt -o "$permute$short" --long "$long" -n "$0" -- "$@" 2>&1)"||rc=$?
 if ((rc));then
 out="$(tail -1 <<<"$res")"
+echo ">>> parse-out $out <<<" >&2
 mapfile -t lines <<<"$res"
 for line in "${lines[@]:0:${#lines[@]}-1}";do
 if [[ $line == *invalid\ option* ]];then
@@ -642,7 +643,7 @@ local line
 while IFS= read -r line;do
 is integer --min=9 -- "$DEBUG"&&printf "$CC_BLACK%-2s %7d %-20s %s$CC_RESET\n" "$sign" "$BASHPID" "$func" "$line" >&2||printf "$CC_BLACK%-2s %-20s %s$CC_RESET\n" "$sign" "$func" "$line" >&2
 done <<<"$text"
-! command -v log >/dev/null||while IFS= read -r line;do
+[[ ! ${_log_active+x} || ${#_log_active[@]} -eq 0 ]]||! command -v log >/dev/null||while IFS= read -r line;do
 log debug "$func: $line"
 done <<<"$text"
 }
@@ -3647,11 +3648,11 @@ case $command in
 add)is set -njob -d -- "$1"
 if [ -n "$_STEPS_NAME" ]&&_steps_check "$name";then
 message="$(eval_gettext 'Skip: $name (already done)')"
-[ -n "$verbose" ]&&warn "$message" >&2||debug "$message"
+((verbose))&&warn "$message" >&2||debug "$message"
 return
 fi
 message="$(gettext 'Queue'): $name"
-is true -- "$verbose"&&info "$message" >&2||debug "$message"
+((verbose))&&info "$message" >&2||debug "$message"
 _queue_jobs+=("$(printf '%s\t%s\t%s' "$name" "$verbose" "$*")")
 ;;
 run)[ -z "$1" ]||is integer -nparallel --min 1 -d "$1"
@@ -3666,7 +3667,7 @@ if [[ ! -d /proc/$pid ]];then
 IFS=$'\t' read -r name verbose <<<"${_queue_running[$pid]}"
 _steps_done "$name"
 message="$(eval_gettext 'Finished: $name')"
-is true -- "$verbose"&&info "$message" >&2||debug "$message"
+((verbose))&&info "$message" >&2||debug "$message"
 unset "_queue_running[$pid]"
 fi
 done
@@ -3675,10 +3676,10 @@ if ((${#_queue_jobs[@]}>0));then
 IFS=$'\t' read -r name verbose job <<<"${_queue_jobs[0]}"
 _queue_jobs=("${_queue_jobs[@]:1}")
 message="$(eval_gettext 'Start: $name')"
-is true -- "$verbose"&&notice "$message" >&2||debug "$message"
+((verbose))&&notice "$message" >&2||debug "$message"
 eval "$job"&
 ((started++))||true
-[ -z "$progress" ]||info "$(eval_gettext 'Queued $started/$total jobs')"
+((progress==0))||info "$(eval_gettext 'Queued $started/$total jobs')"
 _queue_running[$!]="$name"$'\t'"$verbose"
 elif ((${#_queue_running[@]}==0));then
 break
@@ -4624,10 +4625,9 @@ _trivy_jira[field_approval]="$(jq '.fields[] | select(.name == "'"$TRIVY_JIRA_FI
 fi
 [ -z "$progress" ]||gettext 'Build queue to optimize reports...'|info >&2
 for file in "$work"/split/*;do
-queue add _trivy_report "$work" "$file" "$source" "$progress"
+_trivy_report "$work" "$file" "$source" "$progress"
 done
 [ -z "$progress" ]||gettext 'Run queue to optimize reports...'|info >&2
-queue run
 rm -r "$work"/split
 [ -z "$progress" ]||gettext 'Create summaries...'|info >&2
 while read -r folder;do

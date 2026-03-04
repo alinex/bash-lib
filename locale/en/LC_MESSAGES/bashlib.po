@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-04 14:21+0100\n"
+"POT-Creation-Date: 2026-03-04 17:59+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -33,11 +33,11 @@ msgstr ""
 msgid "A specification string is needed as first argument"
 msgstr ""
 
-#: core/arguments:117
+#: core/arguments:118
 msgid "Options"
 msgstr ""
 
-#: core/arguments:162
+#: core/arguments:163
 msgid "argument is not a valid number!"
 msgstr ""
 
@@ -500,82 +500,82 @@ msgstr ""
 msgid "Build queue to optimize reports..."
 msgstr ""
 
-#: module/trivy:210
+#: module/trivy:212
 msgid "Run queue to optimize reports..."
 msgstr ""
 
-#: module/trivy:214
+#: module/trivy:215
 msgid "Create summaries..."
 msgstr ""
 
-#: module/trivy:324
+#: module/trivy:325
 #, sh-format
 msgid ""
 "Downgrade $severity -> MEDIUM because it was published less than 3 days ago"
 msgstr ""
 
-#: module/trivy:333
+#: module/trivy:334
 msgid ""
 "Add information of known exploits and cancel downgrades in case of just "
 "published"
 msgstr ""
 
-#: module/trivy:342
+#: module/trivy:343
 #, sh-format
 msgid "Downgrade $severity -> MEDIUM because it is a dev dependency"
 msgstr ""
 
-#: module/trivy:387
+#: module/trivy:388
 #, sh-format
 msgid "Downgrade $severity -> MEDIUM because of Jira status $deploy"
 msgstr ""
 
-#: module/trivy:388 module/trivy:453
+#: module/trivy:389 module/trivy:454
 #, sh-format
 msgid "$id at $target"
 msgstr ""
 
-#: module/trivy:452
+#: module/trivy:453
 msgid "Add information from Jira"
 msgstr ""
 
-#: module/trivy:494
+#: module/trivy:495
 #, sh-format
 msgid "Rating: $severity (CVSS rating $value)"
 msgstr ""
 
-#: module/trivy:496
+#: module/trivy:497
 #, sh-format
 msgid "Status: Fixed from version $value $fixStatus"
 msgstr ""
 
-#: module/trivy:500
+#: module/trivy:501
 #, sh-format
 msgid "Date:   Vulnerability known since $human ($value days ago)"
 msgstr ""
 
-#: module/trivy:502
+#: module/trivy:503
 #, sh-format
 msgid "Exploit known since $exploitDate at $exploitVendor $exploitProduct"
 msgstr ""
 
-#: module/trivy:505
+#: module/trivy:506
 msgid "Responsible"
 msgstr ""
 
-#: module/trivy:506
+#: module/trivy:507
 msgid "Deploy"
 msgstr ""
 
-#: module/trivy:507
+#: module/trivy:508
 msgid "Last comments"
 msgstr ""
 
-#: module/trivy:509
+#: module/trivy:510
 msgid "Sources"
 msgstr ""
 
-#: module/trivy:516
+#: module/trivy:517
 msgid "Links"
 msgstr ""
 

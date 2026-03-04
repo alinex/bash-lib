@@ -500,14 +500,14 @@ queue() {
     local name verbose=0 message progress
     while true; do
         case "$1" in
-        -n | --name) is set --name=name --die --output=name -- "$2" && shift 2 ;;
+        -n | --name) name="$2" && shift 2 ;;
         --verbose) verbose=1 && shift ;;
         --progress) progress=1 && shift ;;
         --) shift && break ;;
         *) die "$(gettext "Unrecognized option"): $1" ;;
         esac
     done
-    is enum --name=command --allow="add run" --die -- "$1" && local command="$1" && shift
+    local command="$1" && shift
     [ -n "$name" ] || name="$*"
     # processing
     case $command in
@@ -515,11 +515,11 @@ queue() {
         is set --name=job --die -- "$1"
         if [ -n "$_STEPS_NAME" ] && _steps_check "$name"; then
             message="$(eval_gettext 'Skip: $name (already done)')"
-            is set -- "$verbose" && warn "$message" >&2 || debug "$message"
+            ((verbose)) && warn "$message" >&2 || debug "$message"
             return
         fi
         message="$(gettext 'Queue'): $name"
-        is true -- "$verbose" && info "$message" >&2 || debug "$message"
+        ((verbose)) && info "$message" >&2 || debug "$message"
         _queue_jobs+=("$(printf '%s\t%s\t%s' "$name" "$verbose" "$*")")
         ;;
     run)
@@ -536,7 +536,7 @@ queue() {
                     IFS=$'\t' read -r name verbose <<<"${_queue_running[$pid]}"
                     _steps_done "$name"
                     message="$(eval_gettext 'Finished: $name')"
-                    is true -- "$verbose" && info "$message" >&2 || debug "$message"
+                    ((verbose)) && info "$message" >&2 || debug "$message"
                     unset "_queue_running[$pid]"
                 fi
             done
@@ -550,10 +550,10 @@ queue() {
                     _queue_jobs=("${_queue_jobs[@]:1}") # remove first
                     # run job
                     message="$(eval_gettext 'Start: $name')"
-                    is true -- "$verbose" && notice "$message" >&2 || debug "$message"
+                    ((verbose)) && notice "$message" >&2 || debug "$message"
                     eval "$job" &
                     ((started++)) || true
-                    is empty -- "$progress" || info "$(eval_gettext 'Queued $started/$total jobs')"
+                    ((progress == 0)) || info "$(eval_gettext 'Queued $started/$total jobs')"
                     _queue_running[$!]="$name"$'\t'"$verbose"
                 # end if no new jobs and nothing running
                 elif ((${#_queue_running[@]} == 0)); then
@@ -567,6 +567,7 @@ queue() {
             fi
         done
         ;;
+    *) die "Unknown command $command: Only add and run are valid" ;;
     esac
 }
 
