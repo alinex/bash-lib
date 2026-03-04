@@ -1605,7 +1605,7 @@ while ((num<=retry));do
 res="$(curl --store $$ --request "$METHOD" --url "$JIRA_HOST/$api/$REST" --user "$ATLASSIAN_USER:$ATLASSIAN_TOKEN" --data "$DATA" -H "Content-Type: application/json")"||rc=$?
 JIRA_HTTP_CODE=$CURL_HTTP_CODE
 variables restore --clean $$
-if ((rc==0))&&[[ ! $CURL_HTTP_CODE =~ ^2[0-9]{2}$ ]];then
+if ((rc==0))&&[[ $CURL_HTTP_CODE =~ ^2[0-9]{2}$ ]];then
 printf '%s' "$res"
 return
 else
@@ -3645,12 +3645,12 @@ is enum -ncommand --allow="add run" -d -- "$1"&&local command="$1"&&shift
 [ -n "$name" ]||name="$*"
 case $command in
 add)is set -njob -d -- "$1"
-if _steps_check "$name";then
+if [ -n "$_STEPS_NAME" ]&&_steps_check "$name";then
 message="$(eval_gettext 'Skip: $name (already done)')"
 [ -n "$verbose" ]&&warn "$message" >&2||debug "$message"
 return
 fi
-message="$(eval_gettext 'Queue: $name')"
+message="$(gettext 'Queue'): $name"
 is true -- "$verbose"&&info "$message" >&2||debug "$message"
 _queue_jobs+=("$(printf '%s\t%s\t%s' "$name" "$verbose" "$*")")
 ;;

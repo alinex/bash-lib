@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-03 21:15+0100\n"
+"POT-Creation-Date: 2026-03-04 14:21+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -797,9 +797,8 @@ msgid "Finished: $check"
 msgstr "Fertig: $check"
 
 #: module/process:521
-#, sh-format
-msgid "Queue: $name"
-msgstr "Warteschlange: $name"
+msgid "Queue"
+msgstr "Warteschlange"
 
 #: module/process:556
 #, sh-format
@@ -874,6 +873,10 @@ msgid "is a downgrade of one patch version"
 msgid_plural "is a downgrade of $step patch versions"
 msgstr[0] "ist ein Downgrade von einer Patchversion"
 msgstr[1] "ist ein Downgrade von $step Patchversionen"
+
+#, sh-format
+#~ msgid "Queue: $name"
+#~ msgstr "Warteschlange: $name"
 
 #, sh-format
 #~ msgid "\"$name\" is set to \"${val}\" but this is no public ip"

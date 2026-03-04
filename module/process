@@ -513,12 +513,12 @@ queue() {
     case $command in
     add)
         is set --name=job --die -- "$1"
-        if _steps_check "$name"; then
+        if [ -n "$_STEPS_NAME" ] && _steps_check "$name"; then
             message="$(eval_gettext 'Skip: $name (already done)')"
             is set -- "$verbose" && warn "$message" >&2 || debug "$message"
             return
         fi
-        message="$(eval_gettext 'Queue: $name')"
+        message="$(gettext 'Queue'): $name"
         is true -- "$verbose" && info "$message" >&2 || debug "$message"
         _queue_jobs+=("$(printf '%s\t%s\t%s' "$name" "$verbose" "$*")")
         ;;
