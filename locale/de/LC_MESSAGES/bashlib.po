@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-05 13:32+0100\n"
+"POT-Creation-Date: 2026-03-05 21:26+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -529,7 +529,7 @@ msgstr "Start der Warteschlange zur Report Generierung..."
 msgid "Create summaries..."
 msgstr "Erstelle Zusammenfassungen..."
 
-#: module/trivy:329
+#: module/trivy:328
 #, sh-format
 msgid ""
 "Downgrade $severity -> MEDIUM because it was published less than 3 days ago"
@@ -537,7 +537,7 @@ msgstr ""
 "Herunterstufen $severity -> MEDIUM, weil diese Lücke erst in den letzten 3 "
 "Tagen veröffentlicht wurde"
 
-#: module/trivy:338
+#: module/trivy:337
 msgid ""
 "Add information of known exploits and cancel downgrades in case of just "
 "published"
@@ -545,64 +545,64 @@ msgstr ""
 "Füge Informationen zu bekannten Exploits hinzu und streiche mögliche "
 "Herunterstufungen durch kürzliches publizieren"
 
-#: module/trivy:347
+#: module/trivy:346
 #, sh-format
 msgid "Downgrade $severity -> MEDIUM because it is a dev dependency"
 msgstr ""
 "Herunterstufen $severity -> MEDIUM, weil es sich um eine reine "
 "Entwicklungsabhängigkeit handelt"
 
-#: module/trivy:392
+#: module/trivy:391
 #, sh-format
 msgid "Downgrade $severity -> MEDIUM because of Jira status $deploy"
 msgstr "Herunterstufen $severity -> MEDIUM, durch Jira Status $deploy"
 
-#: module/trivy:393 module/trivy:461
+#: module/trivy:392 module/trivy:460
 #, sh-format
 msgid "$id at $target"
 msgstr "$id in $target"
 
-#: module/trivy:460
+#: module/trivy:459
 msgid "Add information from Jira"
 msgstr "Hinzufügen der Jira Informationen"
 
-#: module/trivy:502
+#: module/trivy:501
 #, sh-format
 msgid "Rating: $severity (CVSS rating $value)"
 msgstr "Einstufung: $severity (CVSS Wert $value)"
 
-#: module/trivy:504
+#: module/trivy:503
 #, sh-format
 msgid "Status: Fixed from version $value $fixStatus"
 msgstr "Status: Gelöst in Version $value $fixStatus"
 
-#: module/trivy:508
+#: module/trivy:507
 #, sh-format
 msgid "Date:   Vulnerability known since $human ($value days ago)"
 msgstr "Datum:  Sicherheitslücke bekannt seit $human (vor $value Tagen)"
 
-#: module/trivy:510
+#: module/trivy:509
 #, sh-format
 msgid "Exploit known since $exploitDate at $exploitVendor $exploitProduct"
 msgstr "Exploit bekannt seit $exploitDate bei $exploitVendor $exploitProduct"
 
-#: module/trivy:513
+#: module/trivy:512
 msgid "Responsible"
 msgstr "Zuständig"
 
-#: module/trivy:514
+#: module/trivy:513
 msgid "Deploy"
 msgstr "Deploy"
 
-#: module/trivy:515
+#: module/trivy:514
 msgid "Last comments"
 msgstr "Letzte Kommentare"
 
-#: module/trivy:517
+#: module/trivy:516
 msgid "Sources"
 msgstr "Quellen"
 
-#: module/trivy:524
+#: module/trivy:523
 msgid "Links"
 msgstr "Links"
 
@@ -776,7 +776,7 @@ msgid "Previous run will be resumed, $num steps are already done"
 msgstr ""
 "Vorheriger Lauf wird fortgeführt, $num Arbeitsschritte sind schon vollendet"
 
-#: module/process:383 module/process:450 module/process:517
+#: module/process:383 module/process:450 module/process:547
 #, sh-format
 msgid "Skip: $name (already done)"
 msgstr "Abbrechen: $name (bereits durchgeführt)"
@@ -786,7 +786,7 @@ msgstr "Abbrechen: $name (bereits durchgeführt)"
 msgid "Start: $name"
 msgstr "Starte: $name"
 
-#: module/process:390 module/process:538
+#: module/process:390 module/process:533
 #, sh-format
 msgid "Finished: $name"
 msgstr "Fertig: $name"
@@ -796,7 +796,11 @@ msgstr "Fertig: $name"
 msgid "Finished: $check"
 msgstr "Fertig: $check"
 
-#: module/process:521
+#: module/process:515
+msgid "No command given to execute in queue add"
+msgstr "Kein Befehl angegeben, um ihn mit queue add auszuführen"
+
+#: module/process:516
 msgid "Queue"
 msgstr "Warteschlange"
 

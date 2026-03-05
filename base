@@ -625,12 +625,12 @@ done
 return 1
 }
 debug(){
+[ -n "$DEBUG" ]||return 0
 local level=1 func text sign='>'
 is integer -narguments --max=2 -d $#
 is integer --min 1 -- "$1"&&level="$1"&&shift||true
 IFS=$' \t\n' read -r _ func _ <<<"$(caller 0||true)"
 func="${func:-(main)}"
-[ -n "$DEBUG" ]||return 0
 text="$(input "$@")"
 [[ $BASHLIB_LOADER != "remote" ]]||sign='>>'
 if [[ "$DEBUG" =~ ^-?[0-9]+$ ]];then

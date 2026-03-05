@@ -631,12 +631,12 @@ done
 return 1
 }
 debug(){
+[ -n "$DEBUG" ]||return 0
 local level=1 func text sign='>'
 is integer -narguments --max=2 -d $#
 is integer --min 1 -- "$1"&&level="$1"&&shift||true
 IFS=$' \t\n' read -r _ func _ <<<"$(caller 0||true)"
 func="${func:-(main)}"
-[ -n "$DEBUG" ]||return 0
 text="$(input "$@")"
 [[ $BASHLIB_LOADER != "remote" ]]||sign='>>'
 if [[ "$DEBUG" =~ ^-?[0-9]+$ ]];then
@@ -3651,15 +3651,10 @@ done
 local command="$1"&&shift
 [ -n "$name" ]||name="$*"
 case $command in
-add)is set -njob -d -- "$1"
-if [ -n "$_STEPS_NAME" ]&&_steps_check "$name";then
-message="$(eval_gettext 'Skip: $name (already done)')"
-((verbose))&&warn "$message" >&2||debug "$message"
-return
-fi
+add)[ -n "$1" ]||die "$(gettext "No command given to execute in queue add")"
 message="$(gettext 'Queue'): $name"
 ((verbose))&&info "$message" >&2||debug "$message"
-_queue_jobs+=("$(printf '%s\t%s\t%s' "$name" "$verbose" "$*")")
+_queue_jobs+=("$(printf '%s\t%s\t%s' "$name" "$verbose" "$(printf '%q ' "$@")")")
 ;;
 run)[ -z "$1" ]||is integer -nparallel --min 1 -d "$1"
 [ -z "$2" ]||is integer -nload-percent --min 1 -d "$2"
@@ -3681,6 +3676,11 @@ if ((${#_queue_running[@]}==0))||( ((${#_queue_running[@]}<max))&&(($(cut -d' ' 
 if ((${#_queue_jobs[@]}>0));then
 IFS=$'\t' read -r name verbose job <<<"${_queue_jobs[0]}"
 _queue_jobs=("${_queue_jobs[@]:1}")
+if [ -n "$_STEPS_NAME" ]&&_steps_check "$name";then
+message="$(eval_gettext 'Skip: $name (already done)')"
+((verbose))&&warn "$message" >&2||debug "$message"
+continue
+fi
 message="$(eval_gettext 'Start: $name')"
 ((verbose))&&notice "$message" >&2||debug "$message"
 eval "$job"&
@@ -4684,8 +4684,9 @@ _trivy_jira[field_approval]="$(jq '.fields[] | select(.name == "'"$TRIVY_JIRA_FI
 _trivy_report "/tmp/trivy-scan_3443579_trivy" "/tmp/trivy-scan_3443579_trivy/split/000257" "operations.host.office.grp"
 exit
 for file in "$work"/split/*;do
-_trivy_report "$work" "$file" "$source"
+queue add _trivy_report "$work" "$file" "$source"
 done
+queue run
 while read -r folder;do
 cat "$folder/header.txt" "$folder/sources.txt" "$folder/footer.txt" >"$folder/report.txt"
 rm "$folder/header.txt" "$folder/sources.txt" "$folder/footer.txt"

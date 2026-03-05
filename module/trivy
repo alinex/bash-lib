@@ -261,10 +261,9 @@ trivy_test() {
     exit
     # Loop over entries
     for file in "$work"/split/*; do
-        #queue add
-        _trivy_report "$work" "$file" "$source"
+        queue add _trivy_report "$work" "$file" "$source"
     done
-    #queue run
+    queue run
     #    rm -r "$work"/split
     # Finalize reports
     while read -r folder; do
