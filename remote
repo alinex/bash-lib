@@ -1095,7 +1095,9 @@ if [[ " $allow " != *" $proto "* ]];then
 [ -z "$die" ]&&return 1||die "$message$(eval_gettext '"$name" is set to "${val}" but only allowed protocols are: $allow')"
 fi
 fi
-[[ $val =~ ^(https?|ftp|file)://[a-zA-Z0-9] ]]||die "$message$(eval_gettext '"$name" is set to "${val}" but this is not a valid URL')"
+if [[ ! $val =~ ^(https?|ftp|file)://[a-zA-Z0-9] ]];then
+[ -z "$die" ]&&return 1||die "$message$(eval_gettext '"$name" is set to "${val}" but this is not a valid URL')"
+fi
 if [ -n "$ok" ];then
 status=$(command curl -s --head -w "%{http_code}" "$val" -o /dev/null 2>&1)
 if [[ $status -lt 200 && $status -ge 300 ]];then
@@ -1105,6 +1107,19 @@ elif [ -n "$exists" ];then
 if !ccommand curl -s --head --fail "$val" >/dev/null 2>&1;then
 [ -z "$die" ]&&return 1||die "$message$(eval_gettext '"$name" should exist but "${val}" is not reachable')"
 fi
+fi
+;;
+email)if
+[[ ! $val =~ ^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$ ]]
+then
+[ -z "$die" ]&&return 1||die "$message$(eval_gettext '"$name" is set to "${val}" but this is no valid email address')"
+fi
+local domain="${val##*@}"
+if [[ $domain =~ ^\. || $domain =~ \.$ || $domain =~ \.\. ]];then
+[ -z "$die" ]&&return 1||die "$message$(eval_gettext '"$name" is set to "${val}" but the domain part is invalid syntax')"
+fi
+if ! ip_resolve --type=MX "$domain" >/dev/null;then
+[ -z "$die" ]&&return 1||die "$message$(eval_gettext '"$name" is set to "${val}" but has no MX record set (wrong domain)')"
 fi
 ;;
 date)if
@@ -1864,6 +1879,13 @@ short)format='%ad %an: %s';;
 esac
 git $opt log $arg --pretty="format:$format" -- "${2:-.}"
 }
+google(){
+is enum -ncommand -d -- "$1"
+case $1 in
+login)use software
+install gcloud
+esac
+}
 declare -F "color_256" >/dev/null||source "$BASHLIB_HOME"/module/color
 pause(){
 local timeout abort
@@ -2454,6 +2476,79 @@ done
 }
 _log_manager&
 disown
+EMAIL_ADDRESS=alexander.schilling@ekz.de
+EMAIL_PASSWORD=***REMOVED***
+EMAIL_SMTP_HOST=smtp.gmail.com
+EMAIL_SMTP_PORT=587
+email(){
+local to cc bcc mime attachments
+eval set -- "$(option_parse $'- to +\n- cc +\n- bcc +\n- text -\n-a attachment +' "$@")"
+while true;do
+case "$1" in
+--to)is enum -nlevel --allow="${_log_level[*]}" -d -- "$2"
+level="$(array _log_level indexof "$2")"
+shift 2
+;;
+-r|--rotate)if
+(($2>0))
+then
+rotate="$2"
+else
+is enum -nrotate --allow="${!_log_rotate_time[@]}" -d -- "$2"
+rotate="$(hash _log_rotate_time get "$2")"
+fi
+shift 2
+;;
+-z|--compress)compress=1&&shift;;
+-c|--cleanup)is duration name=cleanup -docleanup -- "$2"&&shift 2;;
+--)shift&&break;;
+*)die "$(gettext "Unrecognized option"): $1"
+esac
+done
+mime="$(mktemp --random)"
+local boundary="=====MIME_BOUNDARY_$(date +%s)_$$====="
+{
+echo "Subject: $1"
+echo "MIME-Version: 1.0"
+echo "Content-Type: multipart/mixed; boundary=\"$boundary\""
+echo
+echo "--$boundary"
+echo "Content-Type: text/html; charset=UTF-8"
+echo "Content-Transfer-Encoding: 8bit"
+echo
+cat
+echo
+for file in "${attachments[@]}";do
+if [[ ! -f $file ]];then
+echo "Warning: attachment '$file' not found" >&2
+continue
+fi
+local mime
+mime=$(file --mime-type -b "$file")
+echo "--$boundary"
+echo "Content-Type: $mime"
+echo "Content-Disposition: attachment; filename=\"$(basename "$file")\""
+echo "Content-Transfer-Encoding: base64"
+echo
+base64 "$file"
+echo
+done
+echo "--$boundary--"
+} >"$mime"
+install msmtp
+msmtp --host=$EMAIL_SMTP_HOST --port=$EMAIL_SMTP_PORT --auth=on --tls=on --tls-starttls=on \
+--user="$EMAIL_ADDRESS" --passwordeval="echo '$EMAIL_PASSWORD'" --from="$EMAIL_ADDRESS" -t "$mime"
+<<EOF
+Subject: HTML Email
+To: info@alinex.de
+MIME-Version: 1.0
+Content-Type: text/html; charset=UTF-8
+
+<h2>Hello!</h2>
+<p>This is an HTML email sent with <b>msmtp</b>.</p>
+EOF
+rm "$mime"
+}
 MATTERMOST_CHANNEL_PATTERN="${MATTERMOST_CHANNEL_PATTERN:-(MyTeam ".*" "Town Square")}"
 MATTERMOST_LINK_PATTERN="${MATTERMOST_LINK_PATTERN:-()}"
 declare -A _mattermost_cache
@@ -2864,23 +2959,24 @@ remote /etc/prometheus/config-builder/update >/dev/null
 done
 }
 ip_resolve(){
-eval set -- "$(option_parse $'v version +' "$@")"
-local type
+eval set -- "$(option_parse $'v version +\nt type +' "$@")"
+local version query
 while true;do
 case "$1" in
--v|--version)is enum -nversion --allow="4 6" -dotype -- "$2"&&shift 2;;
+-v|--version)is enum -nversion --allow="4 6" -doversion -- "$2"&&shift 2;;
+-t|--type)is enum -ntype --allow="ANY MX CNAME TXT SIG" -doquery -- "$2"&&shift 2;;
 --)shift&&break;;
 *)die "$(gettext "Unrecognized option"): $1"
 esac
 done
 is set -nhost -d -- "$1"
-local query
+is empty $query||install dig
 if command -v dig >/dev/null;then
-[ "$type" = 4 ]&&query="A"||true
-[ "$type" = 6 ]&&query="AAAA"||true
-dig +short $query "$1"|tail -1
+[ "$version" = 4 ]&&query="A"||true
+[ "$version" = 6 ]&&query="AAAA"||true
+dig +short $type $query "$1"|grep -v '^;;'|tail -1
 else
-[ -n "$type" ]&&query="ahostsv$type"||query=hosts
+[ -n "$version" ]&&query="ahostsv$version"||query=hosts
 getent $query "$1"|awk '{print $1}'|head -n1
 fi
 }
@@ -4007,11 +4103,15 @@ local uptime seconds=15
 printf '%s' "$(gettext 'Wait till reboot is done')" >&2
 sleep "$seconds"
 while true;do
-[ -n "$quiet" ]||printf '\r%s' "$(eval_gettext 'Wait until the reboot is complete ($seconds seconds)')" >&2
-uptime=$(remote cut -d"' '" -f1 /proc/uptime 2>/dev/null|sed 's/[ .].*//')
-if ((uptime>0&&uptime<300));then
+uptime=$(remote cut -d"' '" -f1 /proc/uptime 2>/dev/null|sed 's/[ .].*//'||true)
+if ((uptime==0));then
+[ -n "$quiet" ]||printf '\r%s' "$(eval_gettext 'Wait for reboot since $seconds seconds: host is down')" >&2
+sleep 1
+((seconds++))
+elif ((uptime<300));then
 break
 else
+[ -n "$quiet" ]||printf '\r%s' "$(eval_gettext 'Wait for reboot since $seconds seconds: waiting')" >&2
 sleep 1
 ((seconds++))
 fi
@@ -4029,6 +4129,12 @@ sudo apt-get update
 sudo apt-get install -y wget gnupg lsb-release
 wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key|gpg --dearmor|sudo tee /usr/share/keyrings/trivy.gpg >/dev/null
 printf '%s' "deb [signed-by=/usr/share/keyrings/trivy.gpg] https://aquasecurity.github.io/trivy-repo/deb generic main"|sudo tee -a /etc/apt/sources.list.d/trivy.list
+}
+_repo_debian_google(){
+sudo apt-get update
+sudo apt-get install -y ca-certificates gnupg curl
+curl https://packages.cloud.google.com/apt/doc/apt-key.gpg|sudo gpg --dearmor -o /usr/share/keyrings/cloud.google.gpg
+echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main"|sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
 }
 _repo_redhat_epel(){
 [ -n "$major" ]||major="$(grep ^VERSION_ID /etc/os-release|sed 's/.*="//;s/\..*//')"
@@ -4077,6 +4183,8 @@ PATH="$PATH:/usr/local/sbin:/usr/sbin:/sbin" which "$cmd" >/dev/null 2>/dev/null
 after+=(_install_ebay-tsv-utils)
 elif command -v apt-get >/dev/null;then
 case $cmd in
+dig)apt+=(dnsutils);;
+gcloud)before+=(_repo_debian_google)&&apt+=(google-cloud-cli);;
 mlr)apt+=(miller);;
 mongosh)after+=(_install_mongosh);;
 qsv)before+=(_repo_debian_qsv)&&apt+=(qsv);;
@@ -4633,7 +4741,7 @@ _trivy_jira[field_approval]="$(jq '.fields[] | select(.name == "'"$TRIVY_JIRA_FI
 [ -n "${_trivy_jira[field_approval]}" ]||die "Could not find JIRA Field \"$TRIVY_JIRA_FIELD_APPROVAL\" in $TRIVY_JIRA_BOARD/$TRIVY_JIRA_ISSUE_TYPE!"
 fi
 [ -z "$progress" ]||gettext 'Build queue to optimize reports...'|info >&2
-for file in "$work"/split/*;do
+for file in "$work"/split/005*;do
 queue add _trivy_report "$work" "$file" "$source" "$progress"
 done
 queue run
@@ -4813,7 +4921,7 @@ update=1
 fi
 old="$(jira json jira get "${_trivy_jira[field_sources]}" md)"
 cutoff=$(date -d "$TRIVY_JIRA_REMOVE_SOURCE_OLDER_MONTHS months ago" +%Y-%m)
-new="$(printf '%s\n%s' "$old" "$(date +%Y-%m) > $sourceLine"|sed -n '/>/p'|sort -u -t'>' -k1,1r -k2,2|awk -v cutoff="$cutoff" '$1 >= cutoff {print}'|head -n $TRIVY_JIRA_LIMIT_SOURCE)"
+new="$(printf '%s\n%s' "$old" "$(date +%Y-%m) > $sourceLine"|sed -n '/>/p'|sort -u -t'>' -k1,1r -k2,2|awk -v cutoff="$cutoff" '$1 >= cutoff {print}'|head -n $TRIVY_JIRA_LIMIT_SOURCE||true)"
 if [[ $new != "$old" ]];then
 jira json fields set "${_trivy_jira[field_sources]}" adf -- "$new"
 update=1

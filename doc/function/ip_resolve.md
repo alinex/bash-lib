@@ -12,6 +12,7 @@ ip_resolve [<option>] host.de
 
 ```bash
 -v, --version=<int>    # ip version 4 or 6
+-t, --type=<A|MX|CNAME|TXT>
 ```
 
 ### Output (stdout)

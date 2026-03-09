@@ -13,26 +13,28 @@
 #
 # Usage:    ip_resolve [<option>] host.de
 # Options:  -v, --version=<int>    # ip version 4 or 6
+#           -t, --type=<A|MX|CNAME|TXT>
 # Output:   one ip address
 ip_resolve() {
-    eval set -- "$(option_parse $'v version +' "$@")"
-    local type
+    eval set -- "$(option_parse $'v version +\nt type +' "$@")"
+    local version query
     while true; do
         case "$1" in
-        -v | --version) is enum --name=version --allow="4 6" --die --output=type -- "$2" && shift 2 ;;
+        -v | --version) is enum --name=version --allow="4 6" --die --output=version -- "$2" && shift 2 ;;
+        -t | --type) is enum --name=type --allow="ANY MX CNAME TXT SIG" --die --output=query -- "$2" && shift 2 ;;
         --) shift && break ;;
         *) die "$(gettext "Unrecognized option"): $1" ;;
         esac
     done
     is set --name=host --die -- "$1"
     # processing
-    local query
+    is empty $query || install dig
     if command -v dig >/dev/null; then
-        [ "$type" = 4 ] && query="A" || true
-        [ "$type" = 6 ] && query="AAAA" || true
-        dig +short $query "$1" | tail -1
+        [ "$version" = 4 ] && query="A" || true
+        [ "$version" = 6 ] && query="AAAA" || true
+        dig +short $type $query "$1" | grep -v '^;;' | tail -1
     else
-        is set -- "$type" && query="ahostsv$type" || query=hosts
+        is set -- "$version" && query="ahostsv$version" || query=hosts
         getent $query "$1" | awk '{print $1}' | head -n1
     fi
 }

@@ -206,7 +206,7 @@ trivy() {
     fi
     # Loop over entries and create report
     is empty -- "$progress" || gettext 'Build queue to optimize reports...' | info >&2
-    for file in "$work"/split/*; do
+    for file in "$work"/split/005*; do ### TODO remove tweak to report only part
         queue add _trivy_report "$work" "$file" "$source" "$progress"
     done
     queue run
@@ -413,7 +413,7 @@ _trivy_report() {
             new="$(printf '%s\n%s' "$old" "$(date +%Y-%m) > $sourceLine" | sed -n '/>/p' |
                 sort -u -t'>' -k1,1r -k2,2 |
                 awk -v cutoff="$cutoff" '$1 >= cutoff {print}' |
-                head -n $TRIVY_JIRA_LIMIT_SOURCE)"
+                head -n $TRIVY_JIRA_LIMIT_SOURCE || true)"
             if [[ "$new" != "$old" ]]; then
                 jira json fields set "${_trivy_jira[field_sources]}" adf -- "$new"
                 update=1

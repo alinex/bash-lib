@@ -20,6 +20,12 @@ _repo_debian_trivy() {
     wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | gpg --dearmor | sudo tee /usr/share/keyrings/trivy.gpg >/dev/null
     printf '%s' "deb [signed-by=/usr/share/keyrings/trivy.gpg] https://aquasecurity.github.io/trivy-repo/deb generic main" | sudo tee -a /etc/apt/sources.list.d/trivy.list
 }
+_repo_debian_google() {
+    sudo apt-get update
+    sudo apt-get install -y ca-certificates gnupg curl
+    curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo gpg --dearmor -o /usr/share/keyrings/cloud.google.gpg
+    echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
+}
 _repo_redhat_epel() {
     is set -- "$major" || major="$(grep ^VERSION_ID /etc/os-release | sed 's/.*="//;s/\..*//')"
     if ! dnf repolist | grep -q epel; then
@@ -77,6 +83,8 @@ install() {
                 # debian
                 elif command -v apt-get >/dev/null; then
                     case $cmd in
+                    dig) apt+=(dnsutils) ;;
+                    gcloud) before+=(_repo_debian_google) && apt+=(google-cloud-cli) ;;
                     mlr) apt+=(miller) ;;
                     mongosh) after+=(_install_mongosh) ;;
                     qsv) before+=(_repo_debian_qsv) && apt+=(qsv) ;;

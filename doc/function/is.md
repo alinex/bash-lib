@@ -84,5 +84,6 @@ The following checks are implemented:
 - `ipv4` ip address check
 - `ipv6` ip address check
 - `url` check that it is a full url
+- `email` check for an email address
 
 Exit:     with message if incorrect value

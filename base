@@ -1089,7 +1089,9 @@ if [[ " $allow " != *" $proto "* ]];then
 [ -z "$die" ]&&return 1||die "$message$(eval_gettext '"$name" is set to "${val}" but only allowed protocols are: $allow')"
 fi
 fi
-[[ $val =~ ^(https?|ftp|file)://[a-zA-Z0-9] ]]||die "$message$(eval_gettext '"$name" is set to "${val}" but this is not a valid URL')"
+if [[ ! $val =~ ^(https?|ftp|file)://[a-zA-Z0-9] ]];then
+[ -z "$die" ]&&return 1||die "$message$(eval_gettext '"$name" is set to "${val}" but this is not a valid URL')"
+fi
 if [ -n "$ok" ];then
 status=$(command curl -s --head -w "%{http_code}" "$val" -o /dev/null 2>&1)
 if [[ $status -lt 200 && $status -ge 300 ]];then
@@ -1099,6 +1101,19 @@ elif [ -n "$exists" ];then
 if !ccommand curl -s --head --fail "$val" >/dev/null 2>&1;then
 [ -z "$die" ]&&return 1||die "$message$(eval_gettext '"$name" should exist but "${val}" is not reachable')"
 fi
+fi
+;;
+email)if
+[[ ! $val =~ ^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$ ]]
+then
+[ -z "$die" ]&&return 1||die "$message$(eval_gettext '"$name" is set to "${val}" but this is no valid email address')"
+fi
+local domain="${val##*@}"
+if [[ $domain =~ ^\. || $domain =~ \.$ || $domain =~ \.\. ]];then
+[ -z "$die" ]&&return 1||die "$message$(eval_gettext '"$name" is set to "${val}" but the domain part is invalid syntax')"
+fi
+if ! ip_resolve --type=MX "$domain" >/dev/null;then
+[ -z "$die" ]&&return 1||die "$message$(eval_gettext '"$name" is set to "${val}" but has no MX record set (wrong domain)')"
 fi
 ;;
 date)if

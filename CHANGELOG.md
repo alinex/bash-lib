@@ -5,15 +5,17 @@ But on release they will be merged with semantical versioning into the master br
 
 ## Development - v2.6.0
 
+- add `is email`
 - add docker module with [docker_latest_version](doc/function/docker_latest_version.md) and [docker_cleanup](doc/function/docker_cleanup.md)
 - add `is domain`, `is ip`, `is ipv4`, `is ipv6`, `is url` and `is time` in [is](doc/function/is.md) validation
 - add [install_rust](doc/function/install_rust.md) to build rust from source
 - add [tsv headers --remove](doc/function/tsv.md) to easily remove the first (header) line
 - [ask](doc/function/ask.md) now with `time`, `ipv4` and `ipv6` format
+- [boot_wait](doc/function/boot_wait.md) now without crash and display then host is down
 - activate [tsv to postgres...](doc/function/tsv.md) with qsv pro integration
 - support also month and year in [duration_format](doc/function/duration_format.md)
 - speedup `queue add`
-- optimize `die` output
+- optimize `die` output and speed if not used
 - smaller bugfixes to stabilize code
 
 ## 16. February 2026 - v2.5.0

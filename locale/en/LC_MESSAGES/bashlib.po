@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-05 21:26+0100\n"
+"POT-Creation-Date: 2026-03-09 21:25+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,15 +17,15 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: core/misc:134 core/validator:97 core/array:123 module/os:235 module/os:333
-#: module/network:24 module/atlassian:102 module/trivy:122 module/compress:50
+#: core/misc:134 core/validator:98 core/array:123 module/os:235 module/os:333
+#: module/network:26 module/atlassian:102 module/trivy:122 module/compress:50
 #: module/monitoring:173 module/input:31 module/input:88 module/input:200
 #: module/input:464 module/input:663 module/log:63 module/process:376
 #: module/process:424 module/process:507 module/process:655 module/remote:84
 #: module/remote:207 module/remote:249 module/remote:287 module/database:37
-#: module/mattermost:311 module/mattermost:342 module/table:259
-#: module/crypto:41 module/git:23 module/git:61 module/software:213
-#: module/software:293
+#: module/mail:52 module/mattermost:311 module/mattermost:342 module/table:259
+#: module/crypto:41 module/git:23 module/git:61 module/software:221
+#: module/software:301
 msgid "Unrecognized option"
 msgstr ""
 
@@ -57,216 +57,231 @@ msgstr ""
 msgid "Invalid duration unit"
 msgstr ""
 
-#: core/validator:88 core/validator:89
+#: core/validator:89 core/validator:90
 msgid "Parameter %s needs number"
 msgstr ""
 
-#: core/validator:90
+#: core/validator:91
 msgid "A list of words is needed"
 msgstr ""
 
-#: core/validator:103
+#: core/validator:104
 msgid "Incorrect call"
 msgstr ""
 
-#: core/validator:111
+#: core/validator:112
 #, sh-format
 msgid "The \"$name\" has to be set with a value"
 msgstr ""
 
-#: core/validator:116
+#: core/validator:117
 #, sh-format
 msgid "The \"$name\" has to be empty but has »${val}«"
 msgstr ""
 
-#: core/validator:125
+#: core/validator:126
 #, sh-format
 msgid "The value »${val}« for \"$name\" could not be read as true or false"
 msgstr ""
 
-#: core/validator:132
+#: core/validator:133
 #, sh-format
 msgid "The value »${val}« for \"$name\" should be true but was »${val}«"
 msgstr ""
 
-#: core/validator:139
+#: core/validator:140
 #, sh-format
 msgid "The value »${val}« for \"$name\" should be false but was »${val}«"
 msgstr ""
 
-#: core/validator:147
+#: core/validator:148
 #, sh-format
 msgid "The \"$name\" has to be an integer but »${val}« was given"
 msgstr ""
 
-#: core/validator:151 core/validator:176
+#: core/validator:152 core/validator:177
 #, sh-format
 msgid "The \"$name\" has to be exactly $min but »${val}« was given"
 msgstr ""
 
-#: core/validator:155 core/validator:180
+#: core/validator:156 core/validator:181
 #, sh-format
 msgid "The \"$name\" has to be between $min and $max but »${val}« was given"
 msgstr ""
 
-#: core/validator:159 core/validator:184
+#: core/validator:160 core/validator:185
 #, sh-format
 msgid "The \"$name\" has to at least $min but »${val}« was given"
 msgstr ""
 
-#: core/validator:163 core/validator:188
+#: core/validator:164 core/validator:189
 #, sh-format
 msgid "The \"$name\" has to not be more than $max but »${val}« was given"
 msgstr ""
 
-#: core/validator:172
+#: core/validator:173
 #, sh-format
 msgid "The \"$name\" has to be a float but »${val}« was given"
 msgstr ""
 
-#: core/validator:196
+#: core/validator:197
 #, sh-format
 msgid ""
 "The length of \"$name\" has to be exactly $min but »${res}« is $val "
 "characters long"
 msgstr ""
 
-#: core/validator:200
+#: core/validator:201
 #, sh-format
 msgid ""
 "The length of \"$name\" has to be between $min and $max but »${res}« is $val "
 "characters long"
 msgstr ""
 
-#: core/validator:204
+#: core/validator:205
 #, sh-format
 msgid ""
 "The length of \"$name\" has to be at least $min but »${res}« is $val "
 "characters long"
 msgstr ""
 
-#: core/validator:208
+#: core/validator:209
 #, sh-format
 msgid ""
 "The length of \"$name\" has to be not more than $max but »${res}« is $val "
 "characters long"
 msgstr ""
 
-#: core/validator:213
+#: core/validator:214
 msgid "A list with --allow=<words> is needed for enum check"
 msgstr ""
 
-#: core/validator:215
+#: core/validator:216
 #, sh-format
 msgid "\"$name\" is set to \"${val}\" but has to be one of: $allow"
 msgstr ""
 
-#: core/validator:220
+#: core/validator:221
 #, sh-format
 msgid "\"$name\" is set to \"${val}\" but this is no valid domain name"
 msgstr ""
 
-#: core/validator:223
+#: core/validator:224
 #, sh-format
 msgid ""
 "\"$name\" is set to \"${val}\" but this can not be resolved (not existing)"
 msgstr ""
 
-#: core/validator:230
+#: core/validator:231
 #, sh-format
 msgid "\"$name\" is set to \"${val}\" but this is no valid ip address"
 msgstr ""
 
-#: core/validator:235
+#: core/validator:236
 #, sh-format
 msgid "\"$name\" is set to \"${val}\" but this is no valid ip V4 address"
 msgstr ""
 
-#: core/validator:240
+#: core/validator:241
 #, sh-format
 msgid "\"$name\" is set to \"${val}\" but this is no valid ip V6 address"
 msgstr ""
 
-#: core/validator:252
+#: core/validator:253
 #, sh-format
 msgid "\"$name\" is set to \"${val}\" but this is not within: $check"
 msgstr ""
 
-#: core/validator:261
+#: core/validator:262
 #, sh-format
 msgid ""
 "\"$name\" is set to \"${val}\" and should be reachable using ping, but is not"
 msgstr ""
 
-#: core/validator:263
+#: core/validator:264
 #, sh-format
 msgid ""
 "\"$name\" is set to \"${val}\" and should not be reachable using ping, but "
 "it is"
 msgstr ""
 
-#: core/validator:273
+#: core/validator:274
 #, sh-format
 msgid "\"$name\" is set to \"${val}\" but only allowed protocols are: $allow"
 msgstr ""
 
-#: core/validator:276
+#: core/validator:278
 #, sh-format
 msgid "\"$name\" is set to \"${val}\" but this is not a valid URL"
 msgstr ""
 
-#: core/validator:280
+#: core/validator:283
 #, sh-format
 msgid "\"$name\" should be accessible but \"${val}\" returns code $status"
 msgstr ""
 
-#: core/validator:284
+#: core/validator:287
 #, sh-format
 msgid "\"$name\" should exist but \"${val}\" is not reachable"
 msgstr ""
 
-#: core/validator:290
+#: core/validator:293
+#, sh-format
+msgid "\"$name\" is set to \"${val}\" but this is no valid email address"
+msgstr ""
+
+#: core/validator:298
+#, sh-format
+msgid "\"$name\" is set to \"${val}\" but the domain part is invalid syntax"
+msgstr ""
+
+#: core/validator:302
+#, sh-format
+msgid "\"$name\" is set to \"${val}\" but has no MX record set (wrong domain)"
+msgstr ""
+
+#: core/validator:307
 #, sh-format
 msgid "The \"$name\" has to be a parsable date format but »${val}« was given"
 msgstr ""
 
-#: core/validator:295
+#: core/validator:312
 #, sh-format
 msgid "The \"$name\" has to be a parsable time format but »${val}« was given"
 msgstr ""
 
-#: core/validator:302
+#: core/validator:319
 #, sh-format
 msgid ""
 "The \"$name\" has to be an integer or human duration but »${val}« was given"
 msgstr ""
 
-#: core/validator:307
+#: core/validator:324
 #, sh-format
 msgid "The \"$name\" ${val} has to be an existing path"
 msgstr ""
 
-#: core/validator:312
+#: core/validator:329
 #, sh-format
 msgid "The \"$name\" ${val} has to be an existing file"
 msgstr ""
 
-#: core/validator:317
+#: core/validator:334
 #, sh-format
 msgid "The \"$name\" ${val} has to be an existing directory"
 msgstr ""
 
-#: core/validator:322
+#: core/validator:339
 #, sh-format
 msgid "The \"$name\" ${val} has to be a file readable for user"
 msgstr ""
 
-#: core/validator:327
+#: core/validator:344
 #, sh-format
 msgid "The \"$name\" ${val} has to be a file writable for user"
 msgstr ""
 
-#: core/validator:330
+#: core/validator:347
 #, sh-format
 msgid "A check named ${check} is not defined"
 msgstr ""
@@ -474,7 +489,7 @@ msgstr ""
 msgid "Service"
 msgstr ""
 
-#: module/network:110
+#: module/network:112
 msgid "IP\\tInterface"
 msgstr ""
 
@@ -804,45 +819,50 @@ msgstr ""
 msgid "Wait till reboot is done"
 msgstr ""
 
-#: module/remote:296
+#: module/remote:298
 #, sh-format
-msgid "Wait until the reboot is complete ($seconds seconds)"
+msgid "Wait for reboot since $seconds seconds: host is down"
 msgstr ""
 
-#: module/software:337
+#: module/remote:304
+#, sh-format
+msgid "Wait for reboot since $seconds seconds: waiting"
+msgstr ""
+
+#: module/software:345
 msgid "are identical versions"
 msgstr ""
 
-#: module/software:341 module/software:360
+#: module/software:349 module/software:368
 #, sh-format
 msgid "is an upgrade of one major version"
 msgid_plural "is an upgrade of $step major versions"
 msgstr[0] ""
 msgstr[1] ""
 
-#: module/software:344 module/software:357
+#: module/software:352 module/software:365
 #, sh-format
 msgid "is an upgrade of one minor version"
 msgid_plural "is an upgrade of $step minor versions"
 msgstr[0] ""
 msgstr[1] ""
 
-#: module/software:347
+#: module/software:355
 #, sh-format
 msgid "is an upgrade of one patch version"
 msgid_plural "is an upgrade of $step patch versions"
 msgstr[0] ""
 msgstr[1] ""
 
-#: module/software:349
+#: module/software:357
 msgid "is a developer upgrade"
 msgstr ""
 
-#: module/software:351
+#: module/software:359
 msgid "is a developer downgrade"
 msgstr ""
 
-#: module/software:354
+#: module/software:362
 #, sh-format
 msgid "is a downgrade of one patch version"
 msgid_plural "is a downgrade of $step patch versions"

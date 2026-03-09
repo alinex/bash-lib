@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# shellcheck source=base
+source /dev/null
+
+# Google Cloud API.
+
+######################################################################################
+# Authorization
+######################################################################################
+
+google() {
+    is enum --name=command --die -- "$1"
+    case $1 in
+    login)
+        use software
+        install gcloud
+        ;;
+    esac
+}

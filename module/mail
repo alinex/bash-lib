@@ -1,0 +1,110 @@
+#!/usr/bin/env bash
+# shellcheck source=base
+source /dev/null
+
+# Sending mails through an user account like Google, GMX or other.
+
+# The email address over which you send the emails
+EMAIL_ADDRESS=alexander.schilling@ekz.de
+# For Google: Account -> Security -> Search: "app password" -> give it a name -> copy App Password without spaces
+EMAIL_PASSWORD=***REMOVED***
+# The SMTP server to send the mail to. The argument may be a host name or a network address.
+EMAIL_SMTP_HOST=smtp.gmail.com
+# The port that the SMTP server listens on. The default is 25 ("smtp"), unless TLS without STARTTLS is used, in which case it is 465 ("smtps").
+EMAIL_SMTP_PORT=587
+
+######################################################################################
+# Authorization
+######################################################################################
+
+# Send an email.
+#
+# Usage:    echo <body> | email [options] <subject>
+# Options:  --to <address>              # send to (multiple)
+#           --cc <address>              # send copy to (multiple)
+#           --bcc <address>             # send blind copy to (multiple)
+#           --text                      # stdin should be send as text/plain (default html)
+#           -a, --attachment <file>    # attache the file
+email() {
+    # parameter parsing
+    local to cc bcc mime attachments
+    eval set -- "$(option_parse $'- to +\n- cc +\n- bcc +\n- text -\n-a attachment +' "$@")"
+    while true; do
+        case "$1" in
+        --to)
+            is enum --name=level --allow="${_log_level[*]}" --die -- "$2"
+            level="$(array _log_level indexof "$2")"
+            shift 2
+            ;;
+        -r | --rotate)
+            if (($2 > 0)); then
+                rotate="$2"
+            else
+                # shellcheck disable=SC2145
+                is enum --name=rotate --allow="${!_log_rotate_time[@]}" --die -- "$2"
+                rotate="$(hash _log_rotate_time get "$2")"
+            fi
+            shift 2
+            ;;
+        -z | --compress) compress=1 && shift ;;
+        -c | --cleanup) is duration name=cleanup --die --output=cleanup -- "$2" && shift 2 ;;
+        --) shift && break ;;
+        *) die "$(gettext "Unrecognized option"): $1" ;;
+        esac
+    done
+
+    # generate mime in temporary file
+    mime="$(mktemp --random)"
+    local boundary="=====MIME_BOUNDARY_$(date +%s)_$$====="
+    {
+        echo "Subject: $1"
+        echo "MIME-Version: 1.0"
+        echo "Content-Type: multipart/mixed; boundary=\"$boundary\""
+        echo
+
+        # Body part
+        echo "--$boundary"
+        echo "Content-Type: text/html; charset=UTF-8"
+        echo "Content-Transfer-Encoding: 8bit"
+        echo
+        cat # add stdin
+        echo
+
+        # Attachments
+        for file in "${attachments[@]}"; do
+            if [[ ! -f "$file" ]]; then
+                echo "Warning: attachment '$file' not found" >&2
+                continue
+            fi
+
+            local mime
+            mime=$(file --mime-type -b "$file")
+
+            echo "--$boundary"
+            echo "Content-Type: $mime"
+            echo "Content-Disposition: attachment; filename=\"$(basename "$file")\""
+            echo "Content-Transfer-Encoding: base64"
+            echo
+            base64 "$file"
+            echo
+        done
+
+        echo "--$boundary--"
+    } >"$mime"
+
+    # send email
+    install msmtp
+    msmtp --host=$EMAIL_SMTP_HOST --port=$EMAIL_SMTP_PORT --auth=on --tls=on --tls-starttls=on \
+        --user="$EMAIL_ADDRESS" --passwordeval="echo '$EMAIL_PASSWORD'" --from="$EMAIL_ADDRESS" -t "$mime"
+    <<EOF
+Subject: HTML Email
+To: info@alinex.de
+MIME-Version: 1.0
+Content-Type: text/html; charset=UTF-8
+
+<h2>Hello!</h2>
+<p>This is an HTML email sent with <b>msmtp</b>.</p>
+EOF
+    # remove temporary file
+    rm "$mime"
+}

@@ -345,6 +345,13 @@ Git command helpers
 | [`git_info`](function/git_info.md) | Get git information |
 | [`git_log`](function/git_log.md) | Get log information from git for specific path. |
 
+### Google Module
+
+Google Cloud API.
+
+| Variable/Function | Description |
+| --- | --- |
+
 ### Input Module
 
 Module with user interaction helpers.
@@ -365,6 +372,18 @@ Logging addition for output module.
 | Variable/Function | Description |
 | --- | --- |
 | [`log`](function/log.md) | Additional logging (at the moment only into files) |
+
+### Mail Module
+
+Sending mails through an user account like Google, GMX or other.
+
+| Variable/Function | Description |
+| --- | --- |
+| ``$EMAIL_ADDRESS`` | The email address over which you send the emails |
+| ``$EMAIL_PASSWORD`` | For Google: Account -> Security -> Search: "app password" -> give it a name -> copy App Password without spaces |
+| ``$EMAIL_SMTP_HOST`` | The SMTP server to send the mail to. The argument may be a host name or a network address. |
+| ``$EMAIL_SMTP_PORT`` | The port that the SMTP server listens on. The default is 25 ("smtp"), unless TLS without STARTTLS is used, in which case it is 465 ("smtps"). |
+| [`email`](function/email.md) | Send an email. |
 
 ### Mattermost Module
 
