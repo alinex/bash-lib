@@ -172,6 +172,7 @@ confirm() {
 # - `time` - a time with hour and minute can be given
 # - `ipv4` - an ip V4 address
 # - `ipv6` - an ip V4 address
+# - `email` - get an email address
 #
 # If another format is needed, you can fall back to string and validate on your own after you got the response.
 #
@@ -201,7 +202,7 @@ ask() {
         esac
     done
     is integer --name=arguments --max=2 --die -- $#
-    is empty -- "$1" || is enum --name=format --allow="string integer number float password time text editor ipv4 ipv6" --die -- "$1"
+    is empty -- "$1" || is enum --name=format --allow="string integer number float password time text editor ipv4 ipv6 email" --die -- "$1"
     local prompt pattern mask
     local format="$1"
     # processing
@@ -244,6 +245,11 @@ ask() {
         prompt="${2:-$(gettext "Enter IP V6 address")}"
         pattern="^([0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|(::?|[0-9a-fA-F]{1,4}:?){1,7}[0-9a-fA-F]{0,4})$"
         final="^(([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|(::?|[0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{1,4})$"
+        ;;
+    email)
+        prompt="${2:-$(gettext "Enter email address")}"
+        pattern="^[A-Za-z0-9._%+-]+(@[A-Za-z0-9.-]*(\.[A-Za-z]*)?)?$"
+        final="^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$"
         ;;
     text) prompt="${2:-$(gettext "Enter text (end with empty line)")}" ;;
     editor) prompt="${2:-$(gettext "Enter text here")}" ;;

@@ -5,7 +5,7 @@ But on release they will be merged with semantical versioning into the master br
 
 ## Development - v2.6.0
 
-- add `is email`
+- add `is email`, `ask email`
 - add docker module with [docker_latest_version](doc/function/docker_latest_version.md) and [docker_cleanup](doc/function/docker_cleanup.md)
 - add `is domain`, `is ip`, `is ipv4`, `is ipv6`, `is url` and `is time` in [is](doc/function/is.md) validation
 - add [install_rust](doc/function/install_rust.md) to build rust from source
