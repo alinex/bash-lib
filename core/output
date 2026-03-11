@@ -25,7 +25,7 @@ source /dev/null
 #           - `DEBUG=9` - to output all
 # Error:    `> <func>           <message>`      # color: gray
 debug() {
-    is set -- "$DEBUG" || return 0
+    is set -- "$DEBUG" || cat </dev/null && return 0
     local level=1 func text sign='>'
     is integer --name=arguments --max=2 --die -- $#
     is integer --min 1 -- "$1" && level="$1" && shift || true

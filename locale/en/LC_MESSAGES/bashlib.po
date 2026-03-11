@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-09 21:25+0100\n"
+"POT-Creation-Date: 2026-03-11 10:41+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -19,8 +19,8 @@ msgstr ""
 
 #: core/misc:134 core/validator:98 core/array:123 module/os:235 module/os:333
 #: module/network:26 module/atlassian:102 module/trivy:122 module/compress:50
-#: module/monitoring:173 module/input:31 module/input:88 module/input:200
-#: module/input:464 module/input:663 module/log:63 module/process:376
+#: module/monitoring:173 module/input:31 module/input:88 module/input:201
+#: module/input:470 module/input:669 module/log:63 module/process:376
 #: module/process:424 module/process:507 module/process:655 module/remote:84
 #: module/remote:207 module/remote:249 module/remote:287 module/database:37
 #: module/mail:52 module/mattermost:311 module/mattermost:342 module/table:259
@@ -225,63 +225,63 @@ msgstr ""
 msgid "\"$name\" should exist but \"${val}\" is not reachable"
 msgstr ""
 
-#: core/validator:293
+#: core/validator:295
 #, sh-format
 msgid "\"$name\" is set to \"${val}\" but this is no valid email address"
 msgstr ""
 
-#: core/validator:298
+#: core/validator:300
 #, sh-format
 msgid "\"$name\" is set to \"${val}\" but the domain part is invalid syntax"
 msgstr ""
 
-#: core/validator:302
+#: core/validator:304
 #, sh-format
 msgid "\"$name\" is set to \"${val}\" but has no MX record set (wrong domain)"
 msgstr ""
 
-#: core/validator:307
+#: core/validator:309
 #, sh-format
 msgid "The \"$name\" has to be a parsable date format but »${val}« was given"
 msgstr ""
 
-#: core/validator:312
+#: core/validator:314
 #, sh-format
 msgid "The \"$name\" has to be a parsable time format but »${val}« was given"
 msgstr ""
 
-#: core/validator:319
+#: core/validator:321
 #, sh-format
 msgid ""
 "The \"$name\" has to be an integer or human duration but »${val}« was given"
 msgstr ""
 
-#: core/validator:324
+#: core/validator:326
 #, sh-format
 msgid "The \"$name\" ${val} has to be an existing path"
 msgstr ""
 
-#: core/validator:329
+#: core/validator:331
 #, sh-format
 msgid "The \"$name\" ${val} has to be an existing file"
 msgstr ""
 
-#: core/validator:334
+#: core/validator:336
 #, sh-format
 msgid "The \"$name\" ${val} has to be an existing directory"
 msgstr ""
 
-#: core/validator:339
+#: core/validator:341
 #, sh-format
 msgid "The \"$name\" ${val} has to be a file readable for user"
 msgstr ""
 
-#: core/validator:344
+#: core/validator:346
 #, sh-format
 msgid "The \"$name\" ${val} has to be a file writable for user"
 msgstr ""
 
-#: core/validator:347
+#: core/validator:349
 #, sh-format
 msgid "A check named ${check} is not defined"
 msgstr ""
@@ -523,74 +523,74 @@ msgstr ""
 msgid "Create summaries..."
 msgstr ""
 
-#: module/trivy:328
+#: module/trivy:333
 #, sh-format
 msgid ""
 "Downgrade $severity -> MEDIUM because it was published less than 3 days ago"
 msgstr ""
 
-#: module/trivy:337
+#: module/trivy:342
 msgid ""
 "Add information of known exploits and cancel downgrades in case of just "
 "published"
 msgstr ""
 
-#: module/trivy:346
+#: module/trivy:351
 #, sh-format
 msgid "Downgrade $severity -> MEDIUM because it is a dev dependency"
 msgstr ""
 
-#: module/trivy:391
+#: module/trivy:396
 #, sh-format
 msgid "Downgrade $severity -> MEDIUM because of Jira status $deploy"
 msgstr ""
 
-#: module/trivy:392 module/trivy:460
+#: module/trivy:397 module/trivy:465
 #, sh-format
 msgid "$id at $target"
 msgstr ""
 
-#: module/trivy:459
+#: module/trivy:464
 msgid "Add information from Jira"
 msgstr ""
 
-#: module/trivy:501
+#: module/trivy:506
 #, sh-format
 msgid "Rating: $severity (CVSS rating $value)"
 msgstr ""
 
-#: module/trivy:503
+#: module/trivy:508
 #, sh-format
 msgid "Status: Fixed from version $value $fixStatus"
 msgstr ""
 
-#: module/trivy:507
+#: module/trivy:512
 #, sh-format
 msgid "Date:   Vulnerability known since $human ($value days ago)"
 msgstr ""
 
-#: module/trivy:509
+#: module/trivy:514
 #, sh-format
 msgid "Exploit known since $exploitDate at $exploitVendor $exploitProduct"
 msgstr ""
 
-#: module/trivy:512
+#: module/trivy:517
 msgid "Responsible"
 msgstr ""
 
-#: module/trivy:513
+#: module/trivy:518
 msgid "Deploy"
 msgstr ""
 
-#: module/trivy:514
+#: module/trivy:519
 msgid "Last comments"
 msgstr ""
 
-#: module/trivy:516
+#: module/trivy:521
 msgid "Sources"
 msgstr ""
 
-#: module/trivy:523
+#: module/trivy:528
 msgid "Links"
 msgstr ""
 
@@ -651,91 +651,95 @@ msgstr ""
 msgid "Yes"
 msgstr ""
 
-#: module/input:135 module/input:339 module/input:584
+#: module/input:135 module/input:345 module/input:590
 msgid "value needed"
 msgstr ""
 
-#: module/input:155 module/input:363 module/input:608
+#: module/input:155 module/input:369 module/input:614
 msgid "invalid character"
 msgstr ""
 
-#: module/input:211
+#: module/input:212
 msgid "Enter integer number"
 msgstr ""
 
-#: module/input:220
+#: module/input:221
 msgid "Enter float number"
 msgstr ""
 
-#: module/input:230
+#: module/input:231
 msgid "Enter password"
 msgstr ""
 
-#: module/input:234
+#: module/input:235
 msgid "Enter time"
 msgstr ""
 
-#: module/input:239
+#: module/input:240
 msgid "Enter IP V4 address"
 msgstr ""
 
-#: module/input:244
+#: module/input:245
 msgid "Enter IP V6 address"
 msgstr ""
 
-#: module/input:248
+#: module/input:250
+msgid "Enter email address"
+msgstr ""
+
+#: module/input:254
 msgid "Enter text (end with empty line)"
 msgstr ""
 
-#: module/input:249
+#: module/input:255
 msgid "Enter text here"
 msgstr ""
 
-#: module/input:250
+#: module/input:256
 msgid "Enter short line"
 msgstr ""
 
-#: module/input:258
+#: module/input:264
 msgid "Input through system editor..."
 msgstr ""
 
-#: module/input:320
+#: module/input:326
 msgid "incomplete"
 msgstr ""
 
-#: module/input:372
+#: module/input:378
 msgid "bad"
 msgstr ""
 
-#: module/input:374
+#: module/input:380
 msgid "weak"
 msgstr ""
 
-#: module/input:376
+#: module/input:382
 msgid "good"
 msgstr ""
 
-#: module/input:378
+#: module/input:384
 msgid "strong"
 msgstr ""
 
-#: module/input:543
+#: module/input:549
 msgid "Select one of the above options"
 msgstr ""
 
-#: module/input:683
+#: module/input:689
 msgid "Could not get task list from command"
 msgstr ""
 
-#: module/input:690
+#: module/input:696
 msgid "No tasks found to be executed."
 msgstr ""
 
-#: module/input:696
+#: module/input:702
 msgid "Exit"
 msgstr ""
 
-#: module/input:703
+#: module/input:709
 #, sh-format
 msgid "Got error $error running $task"
 msgstr ""

@@ -2007,7 +2007,7 @@ case "$1" in
 esac
 done
 is integer -narguments --max=2 -d $#
-[ -z "$1" ]||is enum -nformat --allow="string integer number float password time text editor ipv4 ipv6" -d -- "$1"
+[ -z "$1" ]||is enum -nformat --allow="string integer number float password time text editor ipv4 ipv6 email" -d -- "$1"
 local prompt pattern mask
 local format="$1"
 case $format in
@@ -2042,6 +2042,10 @@ final="^(([01]?[0-9]?[0-9]|2[0-4]?[0-9]|25[0-5])\.){3}([01]?[0-9]?[0-9]|2[0-4]?[
 ipv6)prompt="${2:-$(gettext "Enter IP V6 address")}"
 pattern="^([0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{0,4}|(::?|[0-9a-fA-F]{1,4}:?){1,7}[0-9a-fA-F]{0,4})$"
 final="^(([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|(::?|[0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{1,4})$"
+;;
+email)prompt="${2:-$(gettext "Enter email address")}"
+pattern="^[A-Za-z0-9._%+-]+(@[A-Za-z0-9.-]*(\.[A-Za-z]*)?)?$"
+final="^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$"
 ;;
 text)prompt="${2:-$(gettext "Enter text (end with empty line)")}";;
 editor)prompt="${2:-$(gettext "Enter text here")}";;
@@ -4751,14 +4755,14 @@ rm -r "$work"/split
 while read -r folder;do
 cat "$folder/header.txt" "$folder/sources.txt" "$folder/footer.txt" >"$folder/report.txt"
 rm "$folder/header.txt" "$folder/sources.txt" "$folder/footer.txt"
-cat "$folder/report.tsv" >>"$work"/list.tsv
+cat "$folder/report.tsv" >>"$work"/list-all.tsv
 rm "$folder/report.tsv"
 if is file -- "$folder/expired.tsv";then
-cat "$folder/expired.tsv" >>"$work"/expired.tsv
+cat "$folder/expired.tsv" >>"$work"/expired-all.tsv
 rm "$folder/expired.tsv"
 fi
 if is file -- "$folder/blocked.tsv";then
-cat "$folder/blocked.tsv" >>"$work"/blocked.tsv
+cat "$folder/blocked.tsv" >>"$work"/blocked-all.tsv
 rm "$folder/blocked.tsv"
 fi
 if is file -- "$folder/prom.txt";then
@@ -4766,6 +4770,10 @@ cat "$folder/prom.txt" >>"$work"/prom.txt
 rm "$folder/prom.txt"
 fi
 done < <(find "$work" -mindepth 3 -type d)
+tsv --input="$folder/list-all.tsv" --no-headers sort --unique --output="$folder/list.tsv"
+tsv --input="$folder/expired-all.tsv" --no-headers sort --unique --output="$folder/expired.tsv"
+tsv --input="$folder/blocked-all.tsv" --no-headers sort --unique --output="$folder/blocked.tsv"
+rm "$folder"/*-all.tsv
 printf '%s' "$work"
 }
 trivy_test(){

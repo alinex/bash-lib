@@ -49,6 +49,7 @@ Possible formats are:
 - `time` - a time with hour and minute can be given
 - `ipv4` - an ip V4 address
 - `ipv6` - an ip V4 address
+- `email` - get an email address
 
 If another format is needed, you can fall back to string and validate on your own after you got the response.
 
