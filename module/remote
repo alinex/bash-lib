@@ -293,7 +293,7 @@ boot_wait() {
     printf '%s' "$(gettext 'Wait till reboot is done')" >&2
     sleep "$seconds"
     while true; do
-        uptime=$(remote cut -d"' '" -f1 /proc/uptime 2>/dev/null | sed 's/[ .].*//' || true)
+        uptime=$(remote cut -d"' '" -f1 /proc/uptime 2>/dev/null || true | sed 's/[ .].*//')
         if ((uptime == 0)); then
             [ -n "$quiet" ] || printf '\r%s' "$(eval_gettext 'Wait for reboot since $seconds seconds: host is down')" >&2
             sleep 1
