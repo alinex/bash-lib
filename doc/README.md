@@ -533,6 +533,7 @@ Run trivy security scan and analyze results.
 | ``$TRIVY_JIRA_REMOVE_SOURCE_OLDER_MONTHS`` | On updates remove entries older than (default: 6 months) |
 | ``$TRIVY_JIRA_LIMIT_SOURCE`` | On updates store up to (default: 100) of the last findings |
 | [`trivy`](function/trivy.md) | Run a trivy security analysis. |
+| [`trivy_report`](function/trivy_report.md) | Optimize the result of a trivy scan. |
 
 ## Extra
 

@@ -536,7 +536,7 @@ while true;do
 case "$1" in
 -d|--directory)dir=1&&shift;;
 -e|--extension)is set -nextension -d -- "$2"&&ext=".$2"&&shift 2;;
--m|--memory)path="/dev/shm"&&shift;;
+-m|--memory)shift;;
 -p|--path)is set -npath -dopath -- "$2"&&shift 2;;
 -r|--random)rand=$RANDOM&&shift;;
 -T|--ttl)is duration -nttl -dottl -- "$2"&&shift 2;;
@@ -625,13 +625,13 @@ done
 return 1
 }
 debug(){
-[ -n "$DEBUG" ]||return 0
 local level=1 func text sign='>'
 is integer -narguments --max=2 -d $#
 is integer --min 1 -- "$1"&&level="$1"&&shift||true
+text="$(input "$@")"
+[ -n "$DEBUG" ]||return 0
 IFS=$' \t\n' read -r _ func _ <<<"$(caller 0||true)"
 func="${func:-(main)}"
-text="$(input "$@")"
 [[ $BASHLIB_LOADER != "remote" ]]||sign='>>'
 if [[ "$DEBUG" =~ ^-?[0-9]+$ ]];then
 is integer --min=0 -d -- "$DEBUG"
@@ -641,7 +641,7 @@ else
 fi
 local line
 while IFS= read -r line;do
-is integer --min=9 -- "$DEBUG"&&printf "$CC_BLACK%-2s %7d %-20s %s$CC_RESET\n" "$sign" "$BASHPID" "$func" "$line" >&2||printf "$CC_BLACK%-2s %-20s %s$CC_RESET\n" "$sign" "$func" "$line" >&2
+is integer --min=1 -- "$DEBUG"&&printf "$CC_BLACK%-2s %7d %-20s %s$CC_RESET\n" "$sign" "$BASHPID" "$func" "$line" >&2||printf "$CC_BLACK%-2s %-20s %s$CC_RESET\n" "$sign" "$func" "$line" >&2
 done <<<"$text"
 [[ ! ${_log_active+x} || ${#_log_active[@]} -eq 0 ]]||! command -v log >/dev/null||while IFS= read -r line;do
 log debug "$func: $line"

@@ -536,7 +536,7 @@ while true;do
 case "$1" in
 -d|--directory)dir=1&&shift;;
 -e|--extension)is set -nextension -d -- "$2"&&ext=".$2"&&shift 2;;
--m|--memory)path="/dev/shm"&&shift;;
+-m|--memory)shift;;
 -p|--path)is set -npath -dopath -- "$2"&&shift 2;;
 -r|--random)rand=$RANDOM&&shift;;
 -T|--ttl)is duration -nttl -dottl -- "$2"&&shift 2;;
@@ -625,13 +625,13 @@ done
 return 1
 }
 debug(){
-[ -n "$DEBUG" ]||return 0
 local level=1 func text sign='>'
 is integer -narguments --max=2 -d $#
 is integer --min 1 -- "$1"&&level="$1"&&shift||true
+text="$(input "$@")"
+[ -n "$DEBUG" ]||return 0
 IFS=$' \t\n' read -r _ func _ <<<"$(caller 0||true)"
 func="${func:-(main)}"
-text="$(input "$@")"
 [[ $BASHLIB_LOADER != "remote" ]]||sign='>>'
 if [[ "$DEBUG" =~ ^-?[0-9]+$ ]];then
 is integer --min=0 -d -- "$DEBUG"
@@ -641,7 +641,7 @@ else
 fi
 local line
 while IFS= read -r line;do
-is integer --min=9 -- "$DEBUG"&&printf "$CC_BLACK%-2s %7d %-20s %s$CC_RESET\n" "$sign" "$BASHPID" "$func" "$line" >&2||printf "$CC_BLACK%-2s %-20s %s$CC_RESET\n" "$sign" "$func" "$line" >&2
+is integer --min=1 -- "$DEBUG"&&printf "$CC_BLACK%-2s %7d %-20s %s$CC_RESET\n" "$sign" "$BASHPID" "$func" "$line" >&2||printf "$CC_BLACK%-2s %-20s %s$CC_RESET\n" "$sign" "$func" "$line" >&2
 done <<<"$text"
 [[ ! ${_log_active+x} || ${#_log_active[@]} -eq 0 ]]||! command -v log >/dev/null||while IFS= read -r line;do
 log debug "$func: $line"
@@ -4653,15 +4653,14 @@ TRIVY_JIRA_REMOVE_SOURCE_OLDER_MONTHS=${TRIVY_JIRA_REMOVE_SOURCE_OLDER_MONTHS:-6
 TRIVY_JIRA_LIMIT_SOURCE=${TRIVY_JIRA_LIMIT_SOURCE:-100}
 TRIVY_EXPLOITS_URL=https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json
 trivy(){
-local exclude clean progress opt="--exit-code 0 --no-progress --skip-version-check -f json"
-eval set -- "$(option_parse $'t timeout +\no only-os -\ne exclude +\np progress -\nc clean -\n- no-secrets' "$@")"
+local exclude opt="--exit-code 0 --no-progress --skip-version-check -f json"
+eval set -- "$(option_parse $'t timeout +\no only-os -\ne exclude +\n- no-secrets\nc clean -' "$@")"
 while true;do
 case "$1" in
 -t|--timeout)is duration -ntimeout -d -- "$2"&&opt+=" --timeout $timeout"&&shift 2;;
 -o|--only-os)opt+=" --pkg-types os"&&shift;;
 --no-secrets)opt+=" --scanners vuln"&&shift;;
 -e|--exclude)is set -nexclude -doexclude -- "$2"&&shift 2;;
--p|--progress)progress=1&&shift;;
 -c|--clean)clean=1&&shift;;
 --)shift&&break;;
 *)die "$(gettext "Unrecognized option"): $1"
@@ -4678,7 +4677,7 @@ opt+=" -o $work/trivy.json"
 [ -z "$TRIVY_CACHE_SERVER" ]||opt+=" --server $TRIVY_CACHE_SERVER"
 local version
 version="$(command "$cmd" -v|head -1|cut -d' ' -f2)"
-[ -z "$progress" ]||eval_gettext 'Start $command scanning with trivy V${version}...'|info >&2
+eval_gettext 'Start $command scanning with trivy V${version}...'|debug >&2
 local rc
 case $command in
 root)[[ $opt == *"--timeout"* ]]||opt+=" --timeout ${TRIVY_ROOT_TIMEOUT:-${TRIVY_DEFAULT_TIMEOUT:-30m}}"
@@ -4702,12 +4701,27 @@ cat "$work/log"|debug
 [ -z "$rc" ]||die "Failed trivy scan!"
 rm "$work/log"
 is false -- "$clean"||sudo rm -rf /root/.cache/trivy
+printf '%s' "$work"
+}
+trivy_report(){
+local clean progress work
+eval set -- "$(option_parse $'p progress -' "$@")"
+while true;do
+case "$1" in
+-p|--progress)progress=1&&shift;;
+--)shift&&break;;
+*)die "$(gettext "Unrecognized option"): $1"
+esac
+done
+is set -nwork-dir -dowork -- "$1"&&shift
+if ! is directory "$work"/split&&! is file "$work/list-all.tsv"&&! is file "$work/list.tsv";then
 [ -z "$progress" ]||gettext 'Optimize JSON structure for splitting...'|info >&2
 jq '.Results[]?|. as $g|.Vulnerabilities[]?|{Class: $g.Class, Target: $g.Target, Type: $g.Type}*.' "$work"/trivy.json >"$work"/split.json
 [ -z "$progress" ]||gettext 'Splitting JSON into single reports...'|info >&2
 mkdir "$work"/split
 csplit -f "$work"/split/ -b '%06d' -zs "$work"/split.json '/^{/' "{*}"
 rm "$work"/split.json
+fi
 local found
 found="$(ls -1 "$work"/split/|wc -l)"
 if ((found==0));then
@@ -4738,15 +4752,16 @@ _trivy_jira[field_links]="$(jq '.fields[] | select(.name == "'"$TRIVY_JIRA_FIELD
 _trivy_jira[field_approval]="$(jq '.fields[] | select(.name == "'"$TRIVY_JIRA_FIELD_APPROVAL"'").key' -r <<<"$fields")"
 [ -n "${_trivy_jira[field_approval]}" ]||die "Could not find JIRA Field \"$TRIVY_JIRA_FIELD_APPROVAL\" in $TRIVY_JIRA_BOARD/$TRIVY_JIRA_ISSUE_TYPE!"
 fi
-[ -z "$progress" ]||gettext 'Build queue to optimize reports...'|info >&2
-for file in "$work"/split/005*;do
-queue add _trivy_report "$work" "$file" "$source" "$progress"
+if is directory "$work"/split;then
+[ -z "$progress" ]||gettext 'Optimize reports...'|info >&2
+for file in "$work"/split/*;do
+_trivy_report "$work" "$file" "$source" "$progress"
 done
-queue run
-[ -z "$progress" ]||gettext 'Run queue to optimize reports...'|info >&2
 rm -r "$work"/split
+fi
 [ -z "$progress" ]||gettext 'Create summaries...'|info >&2
 while read -r folder;do
+if is file $folder/header.txt;then
 cat "$folder/header.txt" "$folder/sources.txt" "$folder/footer.txt" >"$folder/report.txt"
 rm "$folder/header.txt" "$folder/sources.txt" "$folder/footer.txt"
 cat "$folder/report.tsv" >>"$work"/list-all.tsv
@@ -4763,58 +4778,14 @@ if is file -- "$folder/prom.txt";then
 cat "$folder/prom.txt" >>"$work"/prom.txt
 rm "$folder/prom.txt"
 fi
-done < <(find "$work" -mindepth 3 -type d)
-tsv --input="$folder/list-all.tsv" --no-headers sort --unique --output="$folder/list.tsv"
-tsv --input="$folder/expired-all.tsv" --no-headers sort --unique --output="$folder/expired.tsv"
-tsv --input="$folder/blocked-all.tsv" --no-headers sort --unique --output="$folder/blocked.tsv"
-rm "$folder"/*-all.tsv
-printf '%s' "$work"
-}
-trivy_test(){
-work="$1"
-source="test"
-rm -r "$work"/split/critical "$work"/split/high "$work"/split/medium "$work"/split/low 2>/dev/null||true
-local project
-project="$(jira project "$TRIVY_JIRA_BOARD")"
-_trivy_jira[board]="$(jq .id -r <<<"$project")"
-[ -n "${_trivy_jira[board]}" ]||die "Could not find JIRA Board ID for $TRIVY_JIRA_BOARD!"
-_trivy_jira[issueType]="$(jq '.issueTypes[] | select(.name == "'"$TRIVY_JIRA_ISSUE_TYPE"'").id' -r <<<"$project")"
-[ -n "${_trivy_jira[issueType]}" ]||die "Could not find JIRA Issue Type ID for $TRIVY_JIRA_BOARD/$TRIVY_JIRA_ISSUE_TYPE!"
-fields="$(jira fields "${_trivy_jira[board]}" "${_trivy_jira[issueType]}")"
-_trivy_jira[field_sources]="$(jq '.fields[] | select(.name == "'"$TRIVY_JIRA_FIELD_SOURCES"'").key' -r <<<"$fields")"
-[ -n "${_trivy_jira[field_sources]}" ]||die "Could not find JIRA Field \"$TRIVY_JIRA_FIELD_SOURCES\" in $TRIVY_JIRA_BOARD/$TRIVY_JIRA_ISSUE_TYPE!"
-_trivy_jira[field_rating]="$(jq '.fields[] | select(.name == "'"$TRIVY_JIRA_FIELD_RATING"'").key' -r <<<"$fields")"
-[ -n "${_trivy_jira[field_rating]}" ]||die "Could not find JIRA Field \"$TRIVY_JIRA_FIELD_RATING\" in $TRIVY_JIRA_BOARD/$TRIVY_JIRA_ISSUE_TYPE!"
-_trivy_jira[field_version]="$(jq '.fields[] | select(.name == "'"$TRIVY_JIRA_FIELD_VERSION"'").key' -r <<<"$fields")"
-[ -n "${_trivy_jira[field_version]}" ]||die "Could not find JIRA Field \"$TRIVY_JIRA_FIELD_VERSION\" in $TRIVY_JIRA_BOARD/$TRIVY_JIRA_ISSUE_TYPE!"
-_trivy_jira[field_links]="$(jq '.fields[] | select(.name == "'"$TRIVY_JIRA_FIELD_LINKS"'").key' -r <<<"$fields")"
-[ -n "${_trivy_jira[field_links]}" ]||die "Could not find JIRA Field \"$TRIVY_JIRA_FIELD_LINKS\" in $TRIVY_JIRA_BOARD/$TRIVY_JIRA_ISSUE_TYPE!"
-_trivy_jira[field_approval]="$(jq '.fields[] | select(.name == "'"$TRIVY_JIRA_FIELD_APPROVAL"'").key' -r <<<"$fields")"
-[ -n "${_trivy_jira[field_approval]}" ]||die "Could not find JIRA Field \"$TRIVY_JIRA_FIELD_APPROVAL\" in $TRIVY_JIRA_BOARD/$TRIVY_JIRA_ISSUE_TYPE!"
-_trivy_report "/tmp/trivy-scan_3443579_trivy" "/tmp/trivy-scan_3443579_trivy/split/000257" "operations.host.office.grp"
-exit
-for file in "$work"/split/*;do
-queue add _trivy_report "$work" "$file" "$source"
-done
-queue run
-while read -r folder;do
-cat "$folder/header.txt" "$folder/sources.txt" "$folder/footer.txt" >"$folder/report.txt"
-rm "$folder/header.txt" "$folder/sources.txt" "$folder/footer.txt"
-cat "$folder/report.tsv" >>"$work"/list.tsv
-rm "$folder/report.tsv"
-if is file -- "$folder/expired.tsv";then
-cat "$folder/expired.tsv" >>"$work"/expired.tsv
-rm "$folder/expired.tsv"
-fi
-if is file -- "$folder/blocked.tsv";then
-cat "$folder/blocked.tsv" >>"$work"/blocked.tsv
-rm "$folder/blocked.tsv"
-fi
-if is file -- "$folder/prom.txt";then
-cat "$folder/prom.txt" >>"$work"/prom.txt
-rm "$folder/prom.txt"
 fi
 done < <(find "$work" -mindepth 3 -type d)
+if is file "$work/list-all.tsv";then
+sort -Vu "$work/list-all.tsv" >"$work/list.tsv"
+sort -Vu "$work/expired-all.tsv" >"$work/expired.tsv"
+sort -Vu "$work/blocked-all.tsv" >"$work/blocked.tsv"
+rm "$work"/*-all.tsv
+fi
 }
 _trivy_cache=/tmp/trivy-cache
 declare -A _trivy_jira
@@ -4980,8 +4951,9 @@ if [ -n "$exploitDate" ];then
 exploitVendor="$(jq .Exploited.vendorProject -r <<<"$json")"
 exploitProduct="$(jq .Exploited.product -r <<<"$json")"
 fi
-file="$folder/header.txt"
-if ! is file -- "$file";then
+local out
+out="$folder/header.txt"
+if ! is file -- "$out";then
 {
 case $severity in
 CRITICAL)printf "$CC_CRITICAL";;
@@ -5010,19 +4982,19 @@ printf '%s\n' "            $(gettext 'Deploy'): ${approval:-Undefiniert}"
 printf '%s\n' "$(gettext 'Last comments'):\n$(array comments join $'\n'|sed 's/^/             /')"
 fi
 printf '%s:\n' "$(gettext 'Sources')"
-} >>"$file"
+} >>"$out"
 fi
-file="$folder/sources.txt"
-printf '%s\n' "- $sourceLine" >>"$file"
-file="$folder/footer.txt"
-if ! is file -- "$file";then
-printf "%s$CC_RESET\n" "$(gettext 'Links'):\n$links" >>"$file"
+out="$folder/sources.txt"
+printf '%s\n' "- $sourceLine" >>"$out"
+out="$folder/footer.txt"
+if ! is file -- "$out";then
+printf "%s$CC_RESET\n" "$(gettext 'Links'):\n$links" >>"$out"
 fi
-file="$folder/report.tsv"
-printf '%s\t%s\t%s\t%s\n' "$severity" "$type" "$id" "$title" >>"$file"
-[ -z "$expired" ]||cat "$file" >"$folder/expired.tsv"
-[[ $severity == "LOW" || $severity == "MEDIUM" ]]||cat "$file" >"$folder/blocked.tsv"
-file="$folder/prom.txt"
+out="$folder/report.tsv"
+printf '%s\t%s\t%s\t%s\n' "$severity" "$type" "$id" "$title" >>"$out"
+[ -z "$expired" ]||cat "$out" >"$folder/expired.tsv"
+[[ $severity == "LOW" || $severity == "MEDIUM" ]]||cat "$out" >"$folder/blocked.tsv"
+out="$folder/prom.txt"
 if [[ $severity == "HIGH" || $severity == "CRITICAL" ]];then
 case $severity in
 LOW)value=1;;
@@ -5031,7 +5003,8 @@ HIGH)value=100;;
 CRITICAL)value=1000;;
 *)value=0
 esac
-printf '%s\n' "divibib_trivy_vulnerability{type=\"$type\",target=\"$target\",package=\"$pkgPath\",severity=\"$severity\",cve=\"$id\"} $value" >>"$file"
+printf '%s\n' "divibib_trivy_vulnerability{type=\"$type\",target=\"$target\",package=\"$pkgPath\",severity=\"$severity\",cve=\"$id\"} $value" >>"$out"
 fi
+rm "$file"
 }
 source $BASHLIB_HOME/configs

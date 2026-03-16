@@ -18,7 +18,8 @@ DESCRIPTION=""
 #done
 ################################################################################################
 
-cat README.md | debug
+cat README.md | sed 's/a/b/' | debug 9
+info done
 exit
 
 in="$(
