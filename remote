@@ -4762,7 +4762,7 @@ _trivy_jira[field_approval]="$(jq '.fields[] | select(.name == "'"$TRIVY_JIRA_FI
 fi
 if is directory "$work"/split;then
 [ -z "$progress" ]||gettext 'Optimize reports...'|info >&2
-for file in "$work"/split/005*;do
+for file in "$work"/split/*;do
 _trivy_report "$work" "$file" "$source" "$progress"
 done
 rm -r "$work"/split

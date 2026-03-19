@@ -239,7 +239,7 @@ trivy_report() {
     if is directory "$work"/split; then
         is empty -- "$progress" || gettext 'Optimize reports...' | info >&2
         # BUG: queue is disabled because it makes problem because of the different processes
-        for file in "$work"/split/005*; do
+        for file in "$work"/split/*; do
             #if is set $DEBUG; then
             _trivy_report "$work" "$file" "$source" "$progress"
             #else
