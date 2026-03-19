@@ -8,13 +8,9 @@
 
 # Validate and sanitize values.
 #
-# This validation is possible using the `check` and @is function.
-# - `check` should be used for sanitize because it will output the value
-# - @is should be used for checking only validity or stop processing on problem because no value is output
-#
 # Every parameter should be checked to prevent failure later in the code.
 # For such checks you run it with the `--die` option to stop processing if wrong.
-# But you can also use it in the program flow without that and use it's return status to check if it 0=ok or 1=failed.
+# But you can also use it in the program flow without that and use it's return status to check if it is 0=ok or 1=failed.
 #
 # Because the values may start with an dash you should always put it at the end after '--' to prevent parsing it as option.
 #
@@ -65,6 +61,8 @@
 #           # url
 #           --exists                        # url is reachable
 #           --ok                            # url has code 2xx
+#           # email
+#           -s, --sanitize                  # extract email from complexer formats like "name <email>" or "mailto:<email>"
 # Output:   <value>                         # may be sanitized
 # Exit:     with message if incorrect value
 # Example:  - &is explains some regular use cases
@@ -289,13 +287,23 @@ is() {
         fi
         ;;
     email)
-        # "name" <email> -> $email
-        # sanitize: res=$email
-        if [[ ! "$val" =~ ^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$ ]]; then
+        # sanitize
+        if [ -n "$sanitize" ]; then
+            res="${res#mailto:}"
+            res="${res#MAILTO:}"
+            if [[ "$res" =~ \<([^\>]+)\> ]]; then
+                res="${BASH_REMATCH[1]}"
+            fi
+            if [[ "$res" =~ ([A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}) ]]; then
+                res="${BASH_REMATCH[1]}"
+            fi
+        fi
+        # check
+        if [[ ! "$res" =~ ^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$ ]]; then
             [ -z "$die" ] && return 1 || die "$message$(eval_gettext '"$name" is set to "${val}" but this is no valid email address')"
         fi
         # No leading/trailing dot, no double dots
-        local domain="${val##*@}"
+        local domain="${res##*@}"
         if [[ "$domain" =~ ^\. || "$domain" =~ \.$ || "$domain" =~ \.\. ]]; then
             [ -z "$die" ] && return 1 || die "$message$(eval_gettext '"$name" is set to "${val}" but the domain part is invalid syntax')"
         fi

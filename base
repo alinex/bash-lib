@@ -1104,11 +1104,21 @@ fi
 fi
 ;;
 email)if
-[[ ! $val =~ ^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$ ]]
+[ -n "$sanitize" ]
 then
+res="${res#mailto:}"
+res="${res#MAILTO:}"
+if [[ $res =~ \<([^\>]+)\> ]];then
+res="${BASH_REMATCH[1]}"
+fi
+if [[ $res =~ ([A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}) ]];then
+res="${BASH_REMATCH[1]}"
+fi
+fi
+if [[ ! $res =~ ^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$ ]];then
 [ -z "$die" ]&&return 1||die "$message$(eval_gettext '"$name" is set to "${val}" but this is no valid email address')"
 fi
-local domain="${val##*@}"
+local domain="${res##*@}"
 if [[ $domain =~ ^\. || $domain =~ \.$ || $domain =~ \.\. ]];then
 [ -z "$die" ]&&return 1||die "$message$(eval_gettext '"$name" is set to "${val}" but the domain part is invalid syntax')"
 fi

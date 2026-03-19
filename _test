@@ -18,6 +18,13 @@ DESCRIPTION=""
 #done
 ################################################################################################
 
+is email "alex@linux.org" && echo OK || echo fail
+is email --sanitize "mailto:alex@linux.org" && echo OK || echo fail
+is email --sanitize "alex <alex@linux.org>" && echo OK || echo fail
+is email --sanitize "alex@linux.org (alex)" && echo OK || echo fail
+
+exit
+
 server=operations.host.office.grp
 remote cut -d"' '" -f1 /proc/uptime 2>/dev/null || true
 echo 111

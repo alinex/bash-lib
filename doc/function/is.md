@@ -31,6 +31,8 @@ is <check> [options] -- <value>
 # url
 --exists                        # url is reachable
 --ok                            # url has code 2xx
+# email
+-s, --sanitize                  # extract email from complexer formats like "name <email>" or "mailto:<email>"
 ```
 
 ### Output (stdout)
@@ -50,13 +52,9 @@ is <check> [options] -- <value>
 ### Description
 
 
-This validation is possible using the `check` and [`is`](is.md) function.
-- `check` should be used for sanitize because it will output the value
-- [`is`](is.md) should be used for checking only validity or stop processing on problem because no value is output
-
 Every parameter should be checked to prevent failure later in the code.
 For such checks you run it with the `--die` option to stop processing if wrong.
-But you can also use it in the program flow without that and use it's return status to check if it 0=ok or 1=failed.
+But you can also use it in the program flow without that and use it's return status to check if it is 0=ok or 1=failed.
 
 Because the values may start with an dash you should always put it at the end after '--' to prevent parsing it as option.
 
