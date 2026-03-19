@@ -536,7 +536,7 @@ while true;do
 case "$1" in
 -d|--directory)dir=1&&shift;;
 -e|--extension)is set -nextension -d -- "$2"&&ext=".$2"&&shift 2;;
--m|--memory)shift;;
+-m|--memory)path="/dev/shm"&&shift;;
 -p|--path)is set -npath -dopath -- "$2"&&shift 2;;
 -r|--random)rand=$RANDOM&&shift;;
 -T|--ttl)is duration -nttl -dottl -- "$2"&&shift 2;;
@@ -4101,7 +4101,7 @@ local uptime seconds=15
 printf '%s' "$(gettext 'Wait till reboot is done')" >&2
 sleep "$seconds"
 while true;do
-uptime=$(remote cut -d"' '" -f1 /proc/uptime 2>/dev/null|sed 's/[ .].*//'||true)
+uptime=$({ remote cut -d"' '" -f1 /proc/uptime 2>/dev/null||true;}|sed 's/[ .].*//')||true
 if ((uptime==0));then
 [ -n "$quiet" ]||printf '\r%s' "$(eval_gettext 'Wait for reboot since $seconds seconds: host is down')" >&2
 sleep 1
@@ -4754,7 +4754,7 @@ _trivy_jira[field_approval]="$(jq '.fields[] | select(.name == "'"$TRIVY_JIRA_FI
 fi
 if is directory "$work"/split;then
 [ -z "$progress" ]||gettext 'Optimize reports...'|info >&2
-for file in "$work"/split/*;do
+for file in "$work"/split/005*;do
 _trivy_report "$work" "$file" "$source" "$progress"
 done
 rm -r "$work"/split
@@ -4978,8 +4978,8 @@ printf '%s\n' "    "
 if [ -n "$issue" ];then
 printf '%s\n' "Jira Issue: https://ekz-gruppe.atlassian.net/browse/$issue"
 printf '%s\n' "            $jiraStatus    $(gettext 'Responsible'): $assignee"
-printf '%s\n' "            $(gettext 'Deploy'): ${approval:-Undefiniert}"
-printf '%s\n' "$(gettext 'Last comments'):\n$(array comments join $'\n'|sed 's/^/             /')"
+printf '%s\n\n' "            $(gettext 'Deploy'): ${approval:-Undefiniert}"
+echo -e "$(gettext 'Last comments'):\n$(array comments join $'\n'|sed 's/^/             /')\n"
 fi
 printf '%s:\n' "$(gettext 'Sources')"
 } >>"$out"
@@ -4988,7 +4988,8 @@ out="$folder/sources.txt"
 printf '%s\n' "- $sourceLine" >>"$out"
 out="$folder/footer.txt"
 if ! is file -- "$out";then
-printf "%s$CC_RESET\n" "$(gettext 'Links'):\n$links" >>"$out"
+printf '\n%s\n' "$(gettext 'Links'):" >>"$out"
+printf "%s\n$CC_RESET" "$links" >>"$out"
 fi
 out="$folder/report.tsv"
 printf '%s\t%s\t%s\t%s\n' "$severity" "$type" "$id" "$title" >>"$out"

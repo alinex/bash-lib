@@ -536,7 +536,7 @@ while true;do
 case "$1" in
 -d|--directory)dir=1&&shift;;
 -e|--extension)is set -nextension -d -- "$2"&&ext=".$2"&&shift 2;;
--m|--memory)shift;;
+-m|--memory)path="/dev/shm"&&shift;;
 -p|--path)is set -npath -dopath -- "$2"&&shift 2;;
 -r|--random)rand=$RANDOM&&shift;;
 -T|--ttl)is duration -nttl -dottl -- "$2"&&shift 2;;
