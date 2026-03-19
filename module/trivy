@@ -272,15 +272,13 @@ trivy_report() {
         fi
     done < <(find "$work" -mindepth 3 -type d)
     # remove duplicate lines
-    if is file "$work/list-all.tsv"; then
-        sort -Vu "$work/list-all.tsv" >"$work/list.tsv"
-        sort -Vu "$work/expired-all.tsv" >"$work/expired.tsv"
-        sort -Vu "$work/blocked-all.tsv" >"$work/blocked.tsv"
-        # tsv --input="$work/list-all.tsv" --no-headers sort --unique --output="$work/list.tsv"
-        # tsv --input="$work/expired-all.tsv" --no-headers sort --unique --output="$work/expired.tsv"
-        # tsv --input="$work/blocked-all.tsv" --no-headers sort --unique --output="$work/blocked.tsv"
-        rm "$work"/*-all.tsv
-    fi
+    [ ! -e "$work/list-all.tsv" ] || sort -Vu "$work/list-all.tsv" >"$work/list.tsv"
+    [ ! -e "$work/expired-all.tsv" ] || sort -Vu "$work/expired-all.tsv" >"$work/expired.tsv"
+    [ ! -e "$work/blocked-all.tsv" ] || sort -Vu "$work/blocked-all.tsv" >"$work/blocked.tsv"
+    # tsv --input="$work/list-all.tsv" --no-headers sort --unique --output="$work/list.tsv"
+    # tsv --input="$work/expired-all.tsv" --no-headers sort --unique --output="$work/expired.tsv"
+    # tsv --input="$work/blocked-all.tsv" --no-headers sort --unique --output="$work/blocked.tsv"
+    rm "$work"/*-all.tsv
 }
 
 _trivy_cache=/tmp/trivy-cache

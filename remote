@@ -4788,12 +4788,10 @@ rm "$folder/prom.txt"
 fi
 fi
 done < <(find "$work" -mindepth 3 -type d)
-if is file "$work/list-all.tsv";then
-sort -Vu "$work/list-all.tsv" >"$work/list.tsv"
-sort -Vu "$work/expired-all.tsv" >"$work/expired.tsv"
-sort -Vu "$work/blocked-all.tsv" >"$work/blocked.tsv"
+[ ! -e "$work/list-all.tsv" ]||sort -Vu "$work/list-all.tsv" >"$work/list.tsv"
+[ ! -e "$work/expired-all.tsv" ]||sort -Vu "$work/expired-all.tsv" >"$work/expired.tsv"
+[ ! -e "$work/blocked-all.tsv" ]||sort -Vu "$work/blocked-all.tsv" >"$work/blocked.tsv"
 rm "$work"/*-all.tsv
-fi
 }
 _trivy_cache=/tmp/trivy-cache
 declare -A _trivy_jira

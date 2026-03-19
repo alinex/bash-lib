@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-19 13:20+0100\n"
+"POT-Creation-Date: 2026-03-19 15:21+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -519,74 +519,74 @@ msgstr ""
 msgid "Create summaries..."
 msgstr ""
 
-#: module/trivy:325
+#: module/trivy:323
 #, sh-format
 msgid ""
 "Downgrade $severity -> MEDIUM because it was published less than 3 days ago"
 msgstr ""
 
-#: module/trivy:334
+#: module/trivy:332
 msgid ""
 "Add information of known exploits and cancel downgrades in case of just "
 "published"
 msgstr ""
 
-#: module/trivy:343
+#: module/trivy:341
 #, sh-format
 msgid "Downgrade $severity -> MEDIUM because it is a dev dependency"
 msgstr ""
 
-#: module/trivy:388
+#: module/trivy:386
 #, sh-format
 msgid "Downgrade $severity -> MEDIUM because of Jira status $deploy"
 msgstr ""
 
-#: module/trivy:389 module/trivy:457
+#: module/trivy:387 module/trivy:455
 #, sh-format
 msgid "$id at $target"
 msgstr ""
 
-#: module/trivy:456
+#: module/trivy:454
 msgid "Add information from Jira"
 msgstr ""
 
-#: module/trivy:499
+#: module/trivy:497
 #, sh-format
 msgid "Rating: $severity (CVSS rating $value)"
 msgstr ""
 
-#: module/trivy:501
+#: module/trivy:499
 #, sh-format
 msgid "Status: Fixed from version $value $fixStatus"
 msgstr ""
 
-#: module/trivy:505
+#: module/trivy:503
 #, sh-format
 msgid "Date:   Vulnerability known since $human ($value days ago)"
 msgstr ""
 
-#: module/trivy:507
+#: module/trivy:505
 #, sh-format
 msgid "Exploit known since $exploitDate at $exploitVendor $exploitProduct"
 msgstr ""
 
-#: module/trivy:510
+#: module/trivy:508
 msgid "Responsible"
 msgstr ""
 
-#: module/trivy:511
+#: module/trivy:509
 msgid "Deploy"
 msgstr ""
 
-#: module/trivy:512
+#: module/trivy:510
 msgid "Last comments"
 msgstr ""
 
-#: module/trivy:514
+#: module/trivy:512
 msgid "Sources"
 msgstr ""
 
-#: module/trivy:521
+#: module/trivy:519
 msgid "Links"
 msgstr ""
 
