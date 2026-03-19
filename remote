@@ -4841,7 +4841,7 @@ action="$(gettext 'Add information of known exploits and cancel downgrades in ca
 changes+=("{\"Exploited\": $exploited, \"Severity\": \"$severity\"}")
 rules+=("{\"Title\": \"Exploited\",\"Description\": \"$action.\"}")
 fi
-if [ "$type" = "npm" ]&&[[ $severity == "HIGH" || $severity == "CRITICAL" ]]&&is file -- "$target"&&[ "$(jq '.packages|with_entries(select(.key|contains("'"$pkgName"'")))|.[]|select(has("dev"))|[.dev]|any' "$target"/package-lock.json)" = "true" ];then
+if [ "$type" = "npm" ]&&[[ $severity == "HIGH" || $severity == "CRITICAL" ]]&&is file -- "$target"&&[ "$(jq '.packages|with_entries(select(.key|contains("'"$pkgName"'")))|.[]|select(has("dev"))|[.dev]|any' "$target")" = "true" ];then
 action="$(eval_gettext 'Downgrade $severity -> MEDIUM because it is a dev dependency')"
 [ -z "$progress" ]||info "$id at $target: $action" >&2
 changes+=("{\"Severity\": \"MEDIUM\",\"OriginalSeverity\": \"$severity\"}")
