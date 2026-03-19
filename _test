@@ -18,6 +18,34 @@ DESCRIPTION=""
 #done
 ################################################################################################
 
+server=operations.host.office.grp
+remote cut -d"' '" -f1 /proc/uptime 2>/dev/null || true
+echo 111
+exit
+
+seconds=15
+printf '%s' "$(gettext 'Wait till reboot is done')" >&2
+while true; do
+    uptime=$({ remote cut -d"' '" -f1 /proc/uptime 2>/dev/null || true; } | sed 's/[ .].*//') || true
+    if ((uptime == 0)); then
+        echo "### == 0"
+        [ -n "$quiet" ] || printf "$CURSOR_POS1$CLEAR_LINE%s" "$(eval_gettext 'Wait for reboot since $seconds seconds: host is down')" >&2
+        sleep 1
+        ((seconds++))
+    elif ((uptime < 300)); then
+        printf "$CURSOR_POS1$CLEAR_LINE%s" "$(eval_gettext 'Reboot succeeded')" >&2
+        echo "### <300"
+        sleep 1
+        break
+    else
+        echo "### else"
+        [ -n "$quiet" ] || printf "$CURSOR_POS1$CLEAR_LINE%s" "$(eval_gettext 'Wait for reboot since $seconds seconds: waiting')" >&2
+        sleep 1
+        ((seconds++))
+    fi
+done
+exit
+
 cat README.md | sed 's/a/b/' | debug 9
 info done
 exit

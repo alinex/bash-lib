@@ -4032,7 +4032,7 @@ ssh $ssh "$@" 2> >(grep -v '^Connection to .* closed\.' >&2||true) >&2|nocr||rc=
 fi
 fi
 if ((rc==255));then
-die "SSH Connection to $ssh not possible"
+error "SSH Connection to $ssh not possible" >&2
 elif ((rc==143));then
 kill -- -$$ 2>/dev/null
 exit 143
@@ -4103,19 +4103,21 @@ case "$1" in
 esac
 done
 is integer -narguments --max=0 -d $#
-local uptime seconds=15
+local uptime seconds=15 status
 printf '%s' "$(gettext 'Wait till reboot is done')" >&2
 sleep "$seconds"
 while true;do
-uptime=$({ remote cut -d"' '" -f1 /proc/uptime 2>/dev/null||true;}|sed 's/[ .].*//')||true
+uptime=$(remote cut -d"' '" -f1 /proc/uptime 2>/dev/null|sed 's/[ .].*//')||true
 if ((uptime==0));then
-[ -n "$quiet" ]||printf '\r%s' "$(eval_gettext 'Wait for reboot since $seconds seconds: host is down')" >&2
+[ "$status" = "gone" ]||status=gone&&seconds=0
+[ -n "$quiet" ]||printf "$CURSOR_POS1$CLEAR_LINE%s" "$(eval_gettext 'No connection to host since $seconds seconds')" >&2
 sleep 1
 ((seconds++))
 elif ((uptime<300));then
+printf "$CURSOR_POS1$CLEAR_LINE%s" "$(eval 'Reboot succeeded')" >&2
 break
 else
-[ -n "$quiet" ]||printf '\r%s' "$(eval_gettext 'Wait for reboot since $seconds seconds: waiting')" >&2
+[ -n "$quiet" ]||printf "$CURSOR_POS1$CLEAR_LINE%s" "$(eval_gettext 'Wait for reboot since $seconds seconds')" >&2
 sleep 1
 ((seconds++))
 fi

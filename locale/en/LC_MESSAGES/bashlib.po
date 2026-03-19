@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-12 12:47+0100\n"
+"POT-Creation-Date: 2026-03-19 13:20+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -22,7 +22,7 @@ msgstr ""
 #: module/compress:50 module/monitoring:173 module/input:31 module/input:88
 #: module/input:201 module/input:470 module/input:669 module/log:63
 #: module/process:376 module/process:424 module/process:507 module/process:655
-#: module/remote:84 module/remote:207 module/remote:249 module/remote:287
+#: module/remote:84 module/remote:208 module/remote:250 module/remote:288
 #: module/database:37 module/mail:52 module/mattermost:311
 #: module/mattermost:342 module/table:259 module/crypto:41 module/git:23
 #: module/git:61 module/software:221 module/software:301
@@ -815,18 +815,18 @@ msgstr ""
 msgid "Timeout after ${timeout}s"
 msgstr ""
 
-#: module/remote:293
+#: module/remote:294
 msgid "Wait till reboot is done"
 msgstr ""
 
-#: module/remote:298
+#: module/remote:300
 #, sh-format
-msgid "Wait for reboot since $seconds seconds: host is down"
+msgid "No connection to host since $seconds seconds"
 msgstr ""
 
-#: module/remote:304
+#: module/remote:307
 #, sh-format
-msgid "Wait for reboot since $seconds seconds: waiting"
+msgid "Wait for reboot since $seconds seconds"
 msgstr ""
 
 #: module/software:345
