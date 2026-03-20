@@ -4122,14 +4122,14 @@ if ((uptime==0));then
 [ "$status" = "gone" ]||status=gone&&seconds=0
 [ -n "$quiet" ]||printf "$CURSOR_POS1$CLEAR_LINE%s" "$(eval_gettext 'No connection to host since $seconds seconds')" >&2
 sleep 1
-((seconds++))
+((++seconds))
 elif ((uptime<300));then
 printf "$CURSOR_POS1$CLEAR_LINE%s" "$(eval 'Reboot succeeded')" >&2
 break
 else
 [ -n "$quiet" ]||printf "$CURSOR_POS1$CLEAR_LINE%s" "$(eval_gettext 'Wait for reboot since $seconds seconds')" >&2
 sleep 1
-((seconds++))
+((++seconds))
 fi
 done
 [ -n "$quiet" ]||remote uptime --since

@@ -18,8 +18,14 @@ DESCRIPTION=""
 #done
 ################################################################################################
 
-server=operations.host.office.grp
-remote bashlib os os data
+echo -e "Provider\tNet\tGroup\tHostname\tOS\tVersion\tCPU\tMemory GB\t HDD GB"
+for server in middleware-office-1.host.stage.dvb opencms.host.office.dvb; do
+    prometheus "node_cpu_seconds_total{instance=\"$server\"}" | jq '.data.result[].metric'
+    echo -n "$(prometheus "last_over_time(divibib_os_info{instance=\"$server\"}[6h])" | jq '.data.result[].metric | [(if has("monitor") == false then "PS" else .monitor end),.net,.group,.instance,.name,.version_id] | @tsv' -r)"
+    echo -ne "\t$(prometheus "node_cpu_seconds_total{instance=\"$server\"}" | jq '.data.result | group_by(.metric.cpu) | length' -r 2>/dev/null || echo "0")"
+    echo -ne "\t$(prometheus "node_memory_MemTotal_bytes{instance=\"$server\"}" | jq '.data.result[].value[1] | tonumber / (1024*1024*1024) | ceil' -r 2>/dev/null || echo "0")"
+    echo -e "\t$(prometheus "node_filesystem_size_bytes{instance=\"$server\"}" | jq '.data.result | map(select(.metric.fstype | startswith("ext")) | .value[1] | tonumber) | add / (1024*1024*1024) | ceil' -r 2>/dev/null || echo "0")"
+done
 exit
 
 is email "alex@linux.org" && echo OK || echo fail
