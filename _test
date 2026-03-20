@@ -18,6 +18,10 @@ DESCRIPTION=""
 #done
 ################################################################################################
 
+server=operations.host.office.grp
+remote bashlib os os data
+exit
+
 is email "alex@linux.org" && echo OK || echo fail
 is email --sanitize "mailto:alex@linux.org" && echo OK || echo fail
 is email --sanitize "alex <alex@linux.org>" && echo OK || echo fail

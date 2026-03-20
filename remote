@@ -3181,7 +3181,7 @@ fi
 case ${1-} in
 data)for key in "${!_os_detected[@]}"
 do
-printf '%s\n' "$key\t${_os_detected[$key]}"
+printf '%s\t%s\n' "$key" "${_os_detected[$key]}"
 done
 ;;
 info)printf '%s' "${_os_detected[os]} system with kernel ${_os_detected[kernel]} on ${_os_detected[architecture]} (${_os_detected[cpu_num]}x ${_os_detected[cpu_model]})"

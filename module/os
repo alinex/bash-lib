@@ -121,7 +121,7 @@ os() {
     case ${1-} in
     data)
         for key in "${!_os_detected[@]}"; do
-            printf '%s\n' "$key\t${_os_detected[$key]}"
+            printf '%s\t%s\n' "$key" "${_os_detected[$key]}"
         done
         ;;
     info)
