@@ -4,15 +4,6 @@ source /dev/null
 
 # Sending mails through an user account like Google, GMX or other.
 
-# The email address over which you send the emails
-EMAIL_ADDRESS=alexander.schilling@ekz.de
-# For Google: Account -> Security -> Search: "app password" -> give it a name -> copy App Password without spaces
-EMAIL_PASSWORD=***REMOVED***
-# The SMTP server to send the mail to. The argument may be a host name or a network address.
-EMAIL_SMTP_HOST=smtp.gmail.com
-# The port that the SMTP server listens on. The default is 25 ("smtp"), unless TLS without STARTTLS is used, in which case it is 465 ("smtps").
-EMAIL_SMTP_PORT=587
-
 ######################################################################################
 # Authorization
 ######################################################################################
@@ -26,6 +17,10 @@ EMAIL_SMTP_PORT=587
 #           --text                      # stdin should be send as text/plain (default html)
 #           -a, --attachment <file>    # attache the file
 email() {
+    if [ -z "$EMAIL_ADDRESS" ] || [ -z "$EMAIL_PASSWORD" ] || [ -z "$EMAIL_SMTP_HOST" ] || [ -z "$EMAIL_SMTP_PORT" ]; then
+        debug "Disabled because EMAIL_ADDRESS, EMAIL_PASSWORD, EMAIL_SMTP_HOST and EMAIL_SMTP_PORT are not all set"
+        return 0
+    fi
     # parameter parsing
     local to cc bcc mime attachments
     eval set -- "$(option_parse $'- to +\n- cc +\n- bcc +\n- text -\n-a attachment +' "$@")"

@@ -310,6 +310,8 @@ The configuration is under `config/` folder and will be loaded in alphabetically
 
 The configuration is the same for the whole host. To make program specific configuration overwrite it in your program after loading the bashlib. And you may also run the same program with different configuration by defining an additional configuration file to load using environment, see below.
 
+Keep in mind that some modules will do nothing, if no configuration is found like mattermost or email.
+
 ### Environment
 
 There is a build in `DEBUG=1` flag, which you can set to do some specific debugging steps within the code. This is aimed to be used for development and bug fixing.

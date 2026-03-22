@@ -2484,11 +2484,11 @@ done
 }
 _log_manager&
 disown
-EMAIL_ADDRESS=alexander.schilling@ekz.de
-EMAIL_PASSWORD=***REMOVED***
-EMAIL_SMTP_HOST=smtp.gmail.com
-EMAIL_SMTP_PORT=587
 email(){
+if [ -z "$EMAIL_ADDRESS" ]||[ -z "$EMAIL_PASSWORD" ]||[ -z "$EMAIL_SMTP_HOST" ]||[ -z "$EMAIL_SMTP_PORT" ];then
+debug "Disabled because EMAIL_ADDRESS, EMAIL_PASSWORD, EMAIL_SMTP_HOST and EMAIL_SMTP_PORT are not all set"
+return 0
+fi
 local to cc bcc mime attachments
 eval set -- "$(option_parse $'- to +\n- cc +\n- bcc +\n- text -\n-a attachment +' "$@")"
 while true;do
